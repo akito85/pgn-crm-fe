@@ -4,21 +4,17 @@ import { useSelector, useDispatch } from "react-redux";
 import moment from 'moment'
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import DetailText from "../../../../../../../components/DetailText";
 import ServiceAgreementDetailCompoment from "./ServiceAgreementDetailCompoment";
 import Warranty from "./Warranty";
 import TosSubmission from "./TosSubmission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import HeaderDetail from "../../../HeaderDetail";
 import { approveOrRejectInactiveServiceAgreement, approveOrRejectServiceAgreement, getDetailServiceAgreement, getDetailServiceAgreementDraft } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import { Spin, Form } from "antd";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalErrorApproveOrRejectServiceAgreement from "./Modal/ModalErrorApproveOrRejectServiceAgreement";
 import { dateFormatting } from "../../../../../../../utils";
-import DraftComponent from "./ServiceAgreementDetailCompoment/DraftComponent";
 import { usePrevLocContext } from "../../../../../../../utils/usePrevLoc";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
@@ -26,6 +22,7 @@ import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import Attachment from "./Attachment";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import ServiceAgreementHistoryLogInformation from "../shared/HistoryLogInformation";
 
 const DetailServiceAgreement = () => {
   const { path } = usePrevLocContext();
@@ -186,10 +183,6 @@ const DetailServiceAgreement = () => {
     setModalApproveOrReject(false);
   };
 
-
-  function convertToNormalcase(inputText) {
-    return inputText.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  }
 
   // SA Information content
   const renderSaInformation = () => (
@@ -354,9 +347,9 @@ const DetailServiceAgreement = () => {
             {data_detail?.approvalDetail !== null && data_detail?.isApprover === true && (
               <NxCardContainer
                 header={
-                  data_detail?.approvalDetail.type == 'inactive' ?
+                  data_detail?.approvalDetail.type === 'inactive' ?
                     'INACTIVE REQUEST INFORMATION' :
-                    data_detail?.approvalDetail.type == 'create' ?
+                    data_detail?.approvalDetail.type === 'create' ?
                       'CREATE REQUEST INFORMATION' :
                       'UPDATE REQUEST INFORMATION'
                 }
@@ -364,7 +357,7 @@ const DetailServiceAgreement = () => {
                 <div className="w-full grid grid-cols-4 gap-3">
                   <NxDetailText label={"Requested Date"}>{data_detail?.approvalDetail?.requestedDate ? moment(data_detail?.approvalDetail?.requestedDate).format(dateFormatting.dateTime) : ''}</NxDetailText>
                   <NxDetailText label={"Requested By"}>{data_detail?.approvalDetail?.requestedBy}</NxDetailText>
-                  {data_detail?.approvalDetail.type == 'inactive' && (
+                  {data_detail?.approvalDetail.type === 'inactive' && (
                     <NxDetailText label={"Remarks"}>{data_detail?.approvalDetail?.remarks}</NxDetailText>
                   )}
                 </div>
@@ -380,31 +373,25 @@ const DetailServiceAgreement = () => {
               />
             </NxCardContainer>
 
-            <NxCardContainer border header={"HISTORY LOG INFORMATION"}>
-              <NxBaseContainer border>
-                <div className="w-full grid grid-cols-5 gap-4">
-                  <NxDetailText label={"Record ID"}>
-                  {data_detail?.saHistory?.saId}
-                </NxDetailText>
-                <NxDetailText label={"Created Date"}>
-                  {data_detail?.saHistory?.createdDate ? moment(data_detail?.saHistory?.createdDate).format(dateFormatting.dateTime) : ''}
-                </NxDetailText>
-                <NxDetailText label={"Created By"}>
-                {data_detail?.saHistory?.createdBy}
-                </NxDetailText>
-                <NxDetailText label={"Updated Date"}>
-                  {data_detail?.saHistory?.updateDate ? moment(data_detail?.saHistory?.updateDate).format(dateFormatting.dateTime) : ''}
-                </NxDetailText>
-                <NxDetailText label={"Updated By"}>
-                {data_detail?.saHistory?.updatedBy}
-                </NxDetailText>
-              </div>
-              </NxBaseContainer>
-            </NxCardContainer>
+            <ServiceAgreementHistoryLogInformation
+              showRecordId
+              historyData={{
+                recordId: data_detail?.saHistory?.saId,
+                createdDate: data_detail?.saHistory?.createdDate
+                  ? moment(data_detail?.saHistory?.createdDate).format(dateFormatting.dateTime)
+                  : "",
+                createdBy: data_detail?.saHistory?.createdBy,
+                updatedDate: data_detail?.saHistory?.updateDate
+                  ? moment(data_detail?.saHistory?.updateDate).format(dateFormatting.dateTime)
+                  : "",
+                updatedBy: data_detail?.saHistory?.updatedBy,
+              }}
+            />
 
-            <>
+            <NxBaseContainer border>
               <ButtonComponent
                 type={"menu"}
+                className="!w-fit"
                 onClick={() => navigate(-1)}
               >
                 Back
@@ -431,7 +418,7 @@ const DetailServiceAgreement = () => {
                   </ButtonComponent>
                 </div>
               ) : null}
-            </>
+            </NxBaseContainer>
           </div>
         </Spin>
 

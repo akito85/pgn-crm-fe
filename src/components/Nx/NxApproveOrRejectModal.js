@@ -1,7 +1,6 @@
-import { Alert, Form } from "antd";
+import { Alert, Button, Form } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { requiredMessage } from "../../utils";
-import ButtonComponent from "../ButtonComponent";
 import InputComponent from "../InputComponent";
 import NxModal from "./NxModal";
 
@@ -36,21 +35,21 @@ const NxApproveOrRejectModal = ({
     <NxModal
       isOpen={isOpen}
       handleCancel={handleCancelModalFinal}
-      header={`${header} information`}
+      title={`${header} INFORMATION`}
       width={width}
       type={"confirmation"}
       footer={
-        <div className="w-full flex justify-end gap-x-4">
-          <ButtonComponent onClick={handleCancelModalFinal} type="default">
+        <div className="w-full flex justify-end">
+          <Button onClick={handleCancelModalFinal} type="menu">
             Cancel
-          </ButtonComponent>
-          <ButtonComponent
+          </Button>
+          <Button
             form="formApproveReject"
             type="submit"
             htmlType="submit"
           >
             Confirm
-          </ButtonComponent>
+          </Button>
         </div>
       }
     >

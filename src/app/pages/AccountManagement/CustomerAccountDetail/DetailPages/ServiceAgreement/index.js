@@ -14,7 +14,7 @@ import {
 } from "../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import ModalDeleteDraft from "./Modal/ModalDeleteDraft";
-import ModalHistory from "../../../../../../components/Modal/ModalHistory";
+import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ServiceAgreementTable from "./ServiceAgreementTable";
 import ServiceAgreementApprovalModal from "./ServiceAgreementApprovalModal";
@@ -23,6 +23,7 @@ import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccoun
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
 const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
   const id = idAccount;
@@ -284,7 +285,9 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     const historyData = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(historyData);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
 
@@ -369,35 +372,33 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
   return (
     <>
       <Spin spinning={loading}>
-        <NxCardContainer
-          header="SERVICE AGREEMENT LIST"
-          actionElement={
-            <div className="flex gap-[20px]">
+        <NxCardContainer header="SERVICE AGREEMENT LIST">
+          <NxBaseContainer border>
+            <div className="flex gap-4">
               <ToolbarAccount items={toolbarActions} advancedAccess={filteredArray} />
             </div>
-          }
-        >
-          <ServiceAgreementTable
-            data={dataSourceWithKeys}
-            idAccount={id}
-            idCustomer={idCustomer}
-            type={type}
-            totalElement={totalElements}
-            page={page}
-            onSort={onSort}
-            handleOpenDeleteDraft={handleOpenDeleteDraft}
-            handleOpenInactivate={handleOpenInactivate}
-            handleApprovalHistory={handleApprovalHistory}
-            handleLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            searchText={searchText}
-            search={search}
-            searchedColumn={searchedColumn}
-            searchInput={searchInput}
-            handleSearch={handleSearch}
-            loading={loading}
-            filteredArray={filteredArray}
-          />
+            <ServiceAgreementTable
+              data={dataSourceWithKeys}
+              idAccount={id}
+              idCustomer={idCustomer}
+              type={type}
+              totalElement={totalElements}
+              page={page}
+              onSort={onSort}
+              handleOpenDeleteDraft={handleOpenDeleteDraft}
+              handleOpenInactivate={handleOpenInactivate}
+              handleApprovalHistory={handleApprovalHistory}
+              handleLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              searchText={searchText}
+              search={search}
+              searchedColumn={searchedColumn}
+              searchInput={searchInput}
+              handleSearch={handleSearch}
+              loading={loading}
+              filteredArray={filteredArray}
+            />
+          </NxBaseContainer>
         </NxCardContainer>
       </Spin>
 
@@ -422,11 +423,10 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
       />
 
       {/* Modal Approval History */}
-      <ModalHistory
+      <NxHistoryModal
         isOpen={openModalHistory && dataApprovalHistoryFix}
         handleClose={() => setOpenModalHistory(false)}
         header="Approval History"
-        width={850}
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}

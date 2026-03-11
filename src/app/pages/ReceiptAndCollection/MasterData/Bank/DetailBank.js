@@ -1,11 +1,5 @@
 import { MoreOutlined } from "@ant-design/icons";
-import {
-  Checkbox,
-  Popover,
-  Space,
-  Spin,
-  Tooltip,
-} from "antd";
+import { Checkbox, Popover, Space, Spin, Tooltip } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
@@ -18,17 +12,15 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import TablePagination from "../../../../../components/TablePagination";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
-import {
-  dateFormatting,
-} from "../../../../../utils";
+import { dateFormatting } from "../../../../../utils";
 import {
   approveOrRejectBankAccount,
   approveOrRejectInactiveBankAccount,
   getAccountInformationPaging,
-  getAllApprovalList,
   getApprovalHistoryBankAccount,
   getDetailAccountInformation,
   getListApprovalById,
+  getAllApprovalList,
   inactiveBankAccount,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -53,19 +45,24 @@ const DetailBank = ({
   filterData,
   dataSource,
   totalData,
-  // dataAccountInfoPaging,
   data_req,
   detailId,
   setSelectedLocationType,
   selectedLocationType,
   navigateToCreatePage = () => {},
+  
+  // --- PROPS BARU UNTUK GL ACCOUNT ---
+  data_glAccount = [] 
+  // -----------------------------------
 }) => {
   const {
     data_modal,
     dataAccountInfoPaging,
     loading,
     dataApprovalHistoryBankAccount,
+    dataGLType // Tarik dataGLType dari redux untuk mapping nama GL
   } = useSelector((state) => state.bank);
+  
   const dispatch = useDispatch();
   const [page, setPage] = useState([1]);
   const [pageSize, setPageSize] = useState([10]);
@@ -102,7 +99,6 @@ const DetailBank = ({
 
   useEffect(() => {
     if (id && data_modal?.accountBankDto?.id) {
-      // Data Criteria Select
       const criteriaSelect = data_modal?.accountBankDto?.criteriaDtoList?.map(
         (item) => {
           return {
@@ -137,7 +133,6 @@ const DetailBank = ({
           accountCategory: item.accountCategory,
           customer: item.customer,
           key: index + 1,
-          // type: "exist",
         };
       });
       setListDataCriteria(dataCriteriaList);
@@ -221,7 +216,6 @@ const DetailBank = ({
     }
   };
 
-  //modla approver
   useEffect(() => {
     if (
       dataApprovalHistoryBankAccount &&
@@ -314,31 +308,6 @@ const DetailBank = ({
         searchText,
         handleSearch
       ),
-      // render: (text) =>
-      //   searchedColumn === "jobId" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={
-      //         text
-      //           ? data_job &&
-      //             data_job.filter((a) => a.id === text)?.find((b) => b.name)
-      //               ?.name
-      //           : ""
-      //       }
-      //     />
-      //   ) : text ? (
-      //     <span>
-      //       {data_job &&
-      //         data_job.filter((a) => a.id === text)?.find((b) => b.name)?.name}
-      //     </span>
-      //   ) : (
-      //     ""
-      //   ),
     },
     {
       title: "POSITION",
@@ -352,35 +321,39 @@ const DetailBank = ({
         searchText,
         handleSearch
       ),
-      // render: (text) =>
-      //   searchedColumn === "positionId" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={
-      //         text
-      //           ? data_position &&
-      //             data_position
-      //               .filter((a) => a.id === text)
-      //               ?.find((b) => b.name)?.name
-      //           : ""
-      //       }
-      //     />
-      //   ) : text ? (
-      //     <span>
-      //       {data_position &&
-      //         data_position.filter((a) => a.id === text)?.find((b) => b.name)
-      //           ?.name}
-      //     </span>
-      //   ) : (
-      //     ""
-      //   ),
     },
   ];
+
+  // --- KOLOM UNTUK TABEL GL ACCOUNT ---
+  const columnsGLAccount = [
+    {
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: "GL TYPE",
+      dataIndex: "glType",
+      align: "center",
+      render: (text) => {
+        // Translate ID GL Type jadi Nama
+        const typeName = dataGLType?.find((item) => String(item.id) === String(text))?.name;
+        return typeName || text; 
+      }
+    },
+    {
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      align: "center",
+    },
+    {
+      title: "ACCOUNT DESCRIPTION",
+      dataIndex: "accountDes",
+      align: "left",
+    }
+  ];
+  // ------------------------------------
 
   const expandedRowRender = (record) => {
     const dataExpanded = record?.contactDetails;
@@ -402,58 +375,6 @@ const DetailBank = ({
       {
         title: "VALUE",
         dataIndex: "fullValue",
-        //   render: (_, record) => {
-        //     if (record.fullValue) {
-        //       return <span>{record.fullValue}</span>;
-        //     }
-        //     if (record.type === 741) {
-        //       if (record.inputType === 748) {
-        //         return (
-        //           <span>{`${getCountryCodeName(
-        //             record?.prefix1
-        //           )} ${getCountryZoneName(record?.prefix2)} - ${record.value}
-        //           ${
-        //             record.suffix ? "Ext " + record.suffix : ""
-        //             // suffix[`${record.row}~${record.key}`] ? suffix[`${record.row}~${record.key}`] : ""
-        //           }
-        //           `}</span>
-        //         );
-        //       } else {
-        //         return (
-        //           <span>{`${getCountryCodeName(record?.prefix1)} - ${
-        //             record.value
-        //           }`}</span>
-        //         );
-        //       }
-        //     }
-        //     if (record.type === 746) {
-        //       return (
-        //         <span>{`${getCountryCodeName(record?.prefix1)} - ${
-        //           record.value
-        //         }`}</span>
-        //       );
-        //     }
-        //     if (record.type === 747) {
-        //       return (
-        //         <span>{`${getCountryCodeName(record?.prefix1)} - ${
-        //           record.value
-        //         }`}</span>
-        //       );
-        //     }
-        //     if (record.type === 745) {
-        //       return (
-        //         <span>
-        //           {`${getCountryCodeName(record?.prefix1)} ${getCountryZoneName(
-        //             record?.prefix2
-        //           )} - ${record.value} ${
-        //             record.suffix ? "Ext" + record.suffix : ""
-        //           }`}
-        //         </span>
-        //       );
-        //     } else {
-        //       return <span>{record.value}</span>;
-        //     }
-        //   },
       },
     ];
 
@@ -492,7 +413,6 @@ const DetailBank = ({
     );
   }, [id, pageBank, pageSizeBank, sortBank, searchBank, dispatch]);
 
-  //search
   const handleSearchBank = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchTextBank(selectedKeys[0]);
@@ -518,9 +438,8 @@ const DetailBank = ({
   const handleSubmitModalInactivate = (res, handleClear) => {
     const body = {
       id: idVA,
-      appHierId: res.approvalHierarchy, // Anda dapat menghapus ini jika tidak perlu
-      remark: res.remark, // Anda dapat menghapus ini jika tidak perlu
-      // status: statusBank === "Inactive" ? "Active" : "Inactive",
+      appHierId: res.approvalHierarchy, 
+      remark: res.remark, 
     };
     dispatch(inactiveBankAccount({ body }))
       .unwrap()
@@ -583,18 +502,13 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "accountNumber" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
@@ -615,18 +529,13 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "accountName" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
@@ -647,18 +556,13 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "currency" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
@@ -679,18 +583,13 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "entityName" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
@@ -711,18 +610,13 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "type" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
@@ -743,18 +637,13 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "totalDigit" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
@@ -776,14 +665,9 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "startDate" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[
-              searchText
-                ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-                : "",
+              searchText ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY") : "",
             ]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -811,14 +695,9 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "endDate" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[
-              searchText
-                ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-                : "",
+              searchText ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY") : "",
             ]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
@@ -845,23 +724,17 @@ const DetailBank = ({
       render: (text) =>
         searchedColumn === "staticCode" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
     },
-
     {
       title: "DESCRIPTION",
       dataIndex: "description",
@@ -875,24 +748,17 @@ const DetailBank = ({
         handleSearchBank,
         true
       ),
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (text) =>
         searchedColumn === "description" ? (
           <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
         ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
         ) : (
           ""
         ),
@@ -959,27 +825,15 @@ const DetailBank = ({
                   r?.status !== "Inactive" ? (
                     <Link
                       className="w-full"
-                      to={
-                        RECEIPT_AND_COLLECTION_ROUTES.UPDATE_ACCOUNT_INFORMATION
-                      }
+                      to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_ACCOUNT_INFORMATION}
                       state={{ id: r?.id }}
                     >
                       <ButtonComponent
                         className="gap-5 w-full"
-                        icon={
-                          <SVGIcon
-                            name="IconEdit"
-                            width={24}
-                            color={"#0075BF"}
-                          />
-                        }
+                        icon={<SVGIcon name="IconEdit" width={24} color={"#0075BF"} />}
                         border={false}
                       >
-                        <span
-                          className={
-                            "text-black gap-2 text-xl text-center w-full"
-                          }
-                        >
+                        <span className={"text-black gap-2 text-xl text-center w-full"}>
                           Update
                         </span>
                       </ButtonComponent>
@@ -987,23 +841,16 @@ const DetailBank = ({
                   ) : (
                     <ButtonComponent
                       className="gap-5 w-full"
-                      icon={
-                        <SVGIcon name="IconEdit" width={24} color={"#d3d3d3"} />
-                      }
+                      icon={<SVGIcon name="IconEdit" width={24} color={"#d3d3d3"} />}
                       border={false}
                       disabled={true}
                     >
-                      <span
-                        className={
-                          "text-black gap-2 text-xl text-center w-full"
-                        }
-                      >
+                      <span className={"text-black gap-2 text-xl text-center w-full"}>
                         Update
                       </span>
                     </ButtonComponent>
                   )}
                   {
-                    // r?.status === "ACTIVE" &&
                     r?.statusApproval !== "Waiting Approval" &&
                     r?.status !== "Inactive" ? (
                       <ButtonComponent
@@ -1015,13 +862,8 @@ const DetailBank = ({
                           setStatusBank(r?.status);
                         }}
                       >
-                        <Checkbox
-                          checked={r?.status === "Active" ? true : false}
-                          className="gap-7"
-                        />
-                        <span
-                          className={"text-black gap-2 text-xl text-center"}
-                        >
+                        <Checkbox checked={r?.status === "Active" ? true : false} className="gap-7" />
+                        <span className={"text-black gap-2 text-xl text-center"}>
                           {r?.status === "ACTIVE" ? "Inactivate" : "Activate"}
                         </span>
                       </ButtonComponent>
@@ -1029,17 +871,11 @@ const DetailBank = ({
                       <ButtonComponent border={false} disabled={true}>
                         <Checkbox
                           checked={
-                            r?.status === "Active"
-                              ? true
-                              : false || r?.status === "Draft"
-                              ? true
-                              : null
+                            r?.status === "Active" ? true : false || r?.status === "Draft" ? true : null
                           }
                           className="gap-7"
                         />
-                        <span
-                          className={"text-black gap-2 text-xl text-center"}
-                        >
+                        <span className={"text-black gap-2 text-xl text-center"}>
                           {r?.status === "Active" ? "Inactivate" : "Activate"}
                         </span>
                       </ButtonComponent>
@@ -1047,13 +883,7 @@ const DetailBank = ({
                   }
                   <ButtonComponent
                     className="gap-5"
-                    icon={
-                      <SVGIcon
-                        name="IconLogHistory"
-                        color={"#0075bf"}
-                        width={24}
-                      />
-                    }
+                    icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
                     border={false}
                     onClick={() => handleApprovalHistory(r)}
                   >
@@ -1131,7 +961,7 @@ const DetailBank = ({
       };
     }) || [];
 
-  const mappingCriteria = criteriaSelect.map((a) => a.criteriaName || ""); // Adding a default value for criteriaName
+  const mappingCriteria = criteriaSelect.map((a) => a.criteriaName || ""); 
   const criteria = mappingCriteria.reduce(
     (current, next) => current + (next ? `, ${next}` : ""),
     ""
@@ -1234,7 +1064,7 @@ const DetailBank = ({
           </BaseContainer>
         ) : null}
         <BaseContainer header={"BANK DATA INFORMATION"}>
-          <div className="w-full grid grid-cols-4 gap-3">
+          <div className="w-full grid grid-cols-5 gap-3">
             <DetailText label="Branch Name">
               {data_detail?.branchName}
             </DetailText>
@@ -1243,14 +1073,14 @@ const DetailBank = ({
             <DetailText label="Bank Short Name">
               {data_detail?.bankShortName}
             </DetailText>
-          </div>
-          <div className="w-full grid grid-cols-4 gap-3">
             <DetailText label="Is Branch">
               {data_detail?.isBranch
                 ? data_detail?.isBranch.charAt(0).toUpperCase() +
                   data_detail?.isBranch.slice(1).toLowerCase()
                 : data_detail?.isBranch}
             </DetailText>
+          </div>
+          <div className="w-full grid grid-cols-5 gap-3">
             <DetailText label="Tax Identification Number (NPWP)">
               {intToNPWP(data_detail?.npwp)}
             </DetailText>
@@ -1267,6 +1097,18 @@ const DetailBank = ({
             <DetailText label="Address">{data_detail?.address}</DetailText>
           </div>
         </BaseContainer>
+
+        {/* --- TAMBAHAN SECTION GL ACCOUNT DI SINI --- */}
+        <BaseContainer header={"GL ACCOUNT INFORMATION"}>
+          <TablePagination
+            useSelect={false}
+            usePagination={false}
+            dataSource={data_glAccount} 
+            columns={columnsGLAccount}
+            tableScrolled={{ x: "max-content" }}
+          />
+        </BaseContainer>
+        {/* ------------------------------------------- */}
 
         {data_detail?.statusApproval === "Approved" ? (
           <BaseContainer header={"BANK ACCOUNT INFORMATION"}>

@@ -5,7 +5,6 @@ import { useState } from "react";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const InvoiceRelationDetailTabs = ({
-  subjectAccountNumber,
   idIr = 0,
   dataDetail = {},
   dispatch = () => {},
@@ -17,7 +16,6 @@ const InvoiceRelationDetailTabs = ({
       label: "Invoice Relation Information",
       children: (
         <InvoiceRelationDetailInfo
-          subjectAccountNumber={subjectAccountNumber}
           dataDetail={dataDetail}
         />
       )

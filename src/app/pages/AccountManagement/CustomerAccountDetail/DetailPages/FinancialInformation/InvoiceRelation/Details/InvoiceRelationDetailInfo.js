@@ -4,14 +4,11 @@ import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../../components/StatusComponent";
 
 const InvoiceRelationDetailInfo = ({
-  subjectAccountNumber,
   dataDetail = {},
 }) => {
   const {
     accountNumber,
     accountName,
-    relatedAccountNumber,
-    relatedAccountName,
     startDate,
     endDate,
     status,
@@ -23,8 +20,8 @@ const InvoiceRelationDetailInfo = ({
       <div className="flex flex-col gap-y-4">
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Invoice Relation Information */}
-          <NxDetailText label="Account Number">{subjectAccountNumber === accountNumber ? relatedAccountNumber : accountNumber}</NxDetailText>
-          <NxDetailText label="Account Name">{subjectAccountNumber === accountNumber ? relatedAccountName : accountName}</NxDetailText>
+          <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
+          <NxDetailText label="Account Name">{accountName}</NxDetailText>
           <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
           <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
           <NxDetailText label="Status">

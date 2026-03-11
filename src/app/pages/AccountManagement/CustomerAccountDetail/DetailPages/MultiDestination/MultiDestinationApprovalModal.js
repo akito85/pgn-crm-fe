@@ -324,7 +324,7 @@ const MultiDestinationApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Multi Destination Information"
+        title="APPROVAL MULTI DESTINATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -333,8 +333,7 @@ const MultiDestinationApprovalModal = ({
             <Button type={"menu"} onClick={handleCancelForm}>
               Cancel
             </Button>
-
-            <div className="flex gap-x-2">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();
@@ -419,7 +418,6 @@ const MultiDestinationApprovalModal = ({
                       pagination_multiDestinationApproval?.totalElements || 0
                     }
                     tableScrolled={{
-                      y: 400,
                       x: dataSourceWithKeys.length ? "max-content" : 5000
                     }}
                     onSort={onSort}
@@ -466,7 +464,6 @@ const MultiDestinationApprovalModal = ({
                     pagination_multiDestinationApproval?.totalElements || 0
                   }
                   tableScrolled={{
-                    y: 400,
                     x: selectedRows.length ? "max-content" : 5000
                   }}
                   onSort={onSort}

@@ -1645,6 +1645,13 @@ const CreateServiceAgreement = ({ saType }) => {
     ];
   }
 
+  if (segment === "KI") {
+    saInformationFields = [
+      ...saInformationFields,
+      'commitmentDate',
+    ];
+  }
+
 
   const functionCheckSaInformation = () => {
     form
@@ -1884,10 +1891,14 @@ const CreateServiceAgreement = ({ saType }) => {
             saDetailObj.productVersionId !== undefined
               ? saDetailObj.productVersionId
               : null,
-          // Add SA Child Type to payload
-          saChildType: saInfoObj?.serviceAgreementTypeValue === "ADDON"
-            ? saDetailObj?.productId : saInfoObj?.serviceAgreementTypeValue === "OTHERS"
-              ? saDetailObj?.serviceAgreementChildType : null,
+          // Include saChildType only for non-main SA (isMain === "N")
+          ...(isMain !== true && {
+            saChildType: saInfoObj?.serviceAgreementTypeValue === "ADDON"
+              ? saDetailObj?.productId
+              : saInfoObj?.serviceAgreementTypeValue === "OTHERS"
+                ? saDetailObj?.serviceAgreementChildType
+                : null,
+          }),
           isCustom: saDetailObj.createFrom === 1 ? "Y" : "N",
           productDetail: tempArrayProduct.map((item) => {
             return {
@@ -2021,10 +2032,10 @@ const CreateServiceAgreement = ({ saType }) => {
       },
     };
 
+    setLoadingForm(true);
     dispatch(createServiceAgreement({ body: body }))
       .unwrap()
       .then(async (data) => {
-        setLoadingForm(true);
         const idServiceagreement = data.saId;
         for (let icon = 0; icon < listDataAttachment.length; icon++) {
           const element = listDataAttachment[icon];
@@ -2052,6 +2063,7 @@ const CreateServiceAgreement = ({ saType }) => {
           setBodyError({ message });
           setModalError(true);
         }
+        setLoadingForm(false);
         setModalConfirm(false);
       });
     dispatch(resetDataDetail());
@@ -2261,6 +2273,7 @@ const CreateServiceAgreement = ({ saType }) => {
             setModalConfirm={setModalConfirm}
             dataFinal={dataFinal}
             handleConfirm={handleConfirm}
+            loadingSubmit={loadingForm}
             listDataAttachment={listDataAttachment}
             saInfoObj={saInfoObj}
             saDetailObj={saDetailObj}

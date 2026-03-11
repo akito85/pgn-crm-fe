@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 
 import { Form, Select, Button, Tooltip, Spin, Tag, Input } from "antd"; // Added Input import
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
@@ -13,6 +13,7 @@ import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
 import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
+import accountManagementService from "../../../../../../../../../redux/services/account_management/accountManagementService";
 
 import moment from "moment";
 
@@ -35,6 +36,14 @@ export default function InfoServiceRequest({
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedRowKey, setSelectedRowKey] = useState(null);
   const [serviceRequestRef, setServiceRequestRef] = useState("");
+
+  // Infinite scroll state for service request reference modal
+  const PAGE_SIZE_REF = 10;
+  const [srRefData, setSrRefData] = useState([]);
+  const [srRefPage, setSrRefPage] = useState(1);
+  const [srRefHasMore, setSrRefHasMore] = useState(true);
+  const [srRefLoading, setSrRefLoading] = useState(false);
+  const srRefLoadingRef = useRef(false);
   // Debug: Log form values when they change
   useEffect(() => {
     const values = form?.getFieldsValue();
@@ -358,46 +367,48 @@ export default function InfoServiceRequest({
     },
   ];
 
-  const ServiceRequestData = [
-    {
-      "key": 1,
-      "serviceRequestNumber": "SR-2023-001",
-      "serviceRequestReference": "REF-2023-001",
-      "type": "Installation",
-      "category": "Hardware",
-      "subCategory": "Server",
-      "channel": "Email",
-      "requestSource": "Customer",
-      "requestDate": "2023-10-15T10:30:00",
-      "openDate": "2023-10-15T11:00:00",
-      "resolvedDate": "2023-10-16T15:45:00",
-      "closedDate": "2023-10-17T09:20:00",
-      "age": 48,
-      "description": "Install new server rack in data center",
-      "statusApproval": "approved",
-      "statusPrerequisite": "completed",
-      "status": "closed"
-    },
-    {
-      "key": 2,
-      "serviceRequestNumber": "SR-2023-002",
-      "serviceRequestReference": "REF-2023-002",
-      "type": "Maintenance",
-      "category": "Software",
-      "subCategory": "Application",
-      "channel": "Phone",
-      "requestSource": "Internal",
-      "requestDate": "2023-10-16T09:15:00",
-      "openDate": "2023-10-16T09:30:00",
-      "resolvedDate": "2023-10-16T14:20:00",
-      "closedDate": "2023-10-16T16:00:00",
-      "age": 24,
-      "description": "Update application to latest version",
-      "statusApproval": "approved",
-      "statusPrerequisite": "completed",
-      "status": "closed"
+  const accountId = account?.accountInformation?.accountId;
+
+  const fetchServiceRequestRefs = useCallback(async (page) => {
+    const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/list?page=${page}&size=${PAGE_SIZE_REF}`;
+    const response = await accountManagementService.getAll(url);
+    // API may return { content, totalElements } or { result, totalElement } — handle both
+    const items = (response?.content ?? response?.result ?? []).map((item, idx) => ({
+      ...item,
+      key: item.id ?? `${page}-${idx}`,
+    }));
+    const totalElements = response?.totalElements ?? response?.totalElement ?? 0;
+    const hasMore = page * PAGE_SIZE_REF < totalElements;
+    return { items, hasMore };
+  }, [accountId]);
+
+  // Load first page when modal opens, reset on close
+  useEffect(() => {
+    if (isOpen) {
+      setSrRefData([]);
+      setSrRefPage(1);
+      setSrRefHasMore(true);
+      setSrRefLoading(true);
+      srRefLoadingRef.current = false;
+      fetchServiceRequestRefs(1).then(({ items, hasMore }) => {
+        setSrRefData(items);
+        setSrRefHasMore(hasMore);
+        setSrRefLoading(false);
+      });
     }
-  ];
+  }, [isOpen]);
+
+  const handleLoadMoreSrRef = useCallback(() => {
+    if (srRefLoadingRef.current || !srRefHasMore) return Promise.resolve();
+    srRefLoadingRef.current = true;
+    const nextPage = srRefPage + 1;
+    return fetchServiceRequestRefs(nextPage).then(({ items, hasMore }) => {
+      setSrRefData((prev) => [...prev, ...items]);
+      setSrRefPage(nextPage);
+      setSrRefHasMore(hasMore);
+      srRefLoadingRef.current = false;
+    });
+  }, [srRefPage, srRefHasMore, fetchServiceRequestRefs]);
 
   // Handle row click — auto select & close modal (like PaymentRelation pattern)
   const handleRowClick = (record) => {
@@ -427,13 +438,13 @@ export default function InfoServiceRequest({
 
   return(
     <Fragment>
-      <NxCardContainer header={"SERVICE INFORMATION"}>
+      <NxCardContainer header={"SERVICE REQUEST INFORMATION"}>
         <NxBaseContainer border>
         {/* Remove the wrapper Form component since form is passed as prop */}
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Left Column */}
           <div className="space-y-4">
-            <div class="w-full gap-4 flex flex-row items-end">
+            <div className="w-full gap-4 flex flex-row items-end">
               <Form.Item
                 key="serviceRequestReference"
                 name="srr"
@@ -619,6 +630,7 @@ export default function InfoServiceRequest({
             key="description"
             name="description"
             label="Description"
+            rules={[{ message: requiredMessage("Description"), required: true }]}
             className="no-margin-form"
           >
             <InputComponent
@@ -636,7 +648,7 @@ export default function InfoServiceRequest({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        header={"CHOOSE SERVICE REQUEST REFERENCE"}
+        title={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
         footer={[
           <Button key="close" onClick={handleClose}>
@@ -647,24 +659,19 @@ export default function InfoServiceRequest({
         <div className="p-4">
           <NxBaseContainer border>
             <NxTable
-              className="border-[0.5px] border-[#c8cdd4] border-solid"
-              usePagination={true}
+              idTable="sr-ref-table"
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMoreSrRef}
+              hasMore={srRefHasMore}
               useSelect={true}
-              dataMain={ServiceRequestData}
+              dataMain={srRefData}
               columnMain={columnMain}
               tablePadding="small"
               fontSize="small"
-              tableScrolled={{ x: "max-content" }}
+              loading={srRefLoading}
+              tableScrolled={{ x: "max-content", y: 400 }}
               onRowClicked={handleTableRowClick}
-              // rowSelection={{
-              //   type: 'radio',
-              //   selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
-              //   onChange: (selectedRowKeys, selectedRows) => {
-              //     if (selectedRows.length > 0) {
-              //       handleRowClick(selectedRows[0]);
-              //     }
-              //   },
-              // }}
             />
           </NxBaseContainer>
         </div>

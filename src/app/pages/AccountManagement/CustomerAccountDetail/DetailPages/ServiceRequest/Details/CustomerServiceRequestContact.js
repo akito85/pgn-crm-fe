@@ -406,7 +406,6 @@ const CustomerServiceRequestContact = ({
         isOpen={isModalOpen}
         handleCancel={handleCloseModal}
         handleOk={handleSaveContact}
-        header={"CREATE CONTACT"}
         width={800}
         title={"CREATE CONTACT"}
         footer={[

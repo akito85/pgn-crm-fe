@@ -51,6 +51,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const { data_accountDetail } = useSelector(
     (state) => state.accountManagement
   );
+  
+  const accountId = data_accountDetail?.accountInformation?.accountId;
 
   const {
     loading_listIrApprovalOption,
@@ -120,21 +122,19 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   useEffect(() => {
     if (isUpdate && data_irApprovalHierarchy.length) {
       const {
-        subjectId,
-        objectId,
+        accountId,
+        accountNumber,
+        accountName,
         startDate,
         endDate,
         description,
         appHierId,
-        relatedAccountNumber,
-        relatedAccountName
       } = detail;
 
       form.setFieldsValue({
-        subjectId,
-        objectId,
-        accountName: relatedAccountName,
-        accountNumber: relatedAccountNumber,
+        accountId,
+        accountName,
+        accountNumber,
         startDate,
         endDate,
         description,
@@ -218,7 +218,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           await form.validateFields(formFields[current]);
 
           const {
-            objectId,
+            accountId : relatedAccountId,
             description,
             startDate,
             endDate,
@@ -230,11 +230,11 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
             type: formType.toUpperCase(),
             id: idIr,
             data : {
-              subjectId: data_accountDetail?.accountInformation?.accountId, 
-              objectId,
+              accountId, 
+              relatedAccountId,
               description, 
-              startDate: NxDate.formatForAPI(startDate, false),
-              endDate: NxDate.formatForAPI(endDate, false),
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
           }
@@ -252,16 +252,16 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         return;
       }
 
-      const { objectId, description, startDate, endDate, appHierId } =
+      const { accountId: relatedAccountId, description, startDate, endDate, appHierId } =
         form.getFieldsValue(true);
 
       const body = {
-        id: isUpdate ? idIr : undefined,
-        subjectId: data_accountDetail?.accountInformation?.accountId,
-        objectId,
+        id: idIr,
+        accountId,
+        relatedAccountId,
         description,
-        startDate: NxDate.formatForAPI(startDate, false),
-        endDate: NxDate.formatForAPI(endDate, false),
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
@@ -297,8 +297,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     }
   }, [dispatch, idAccount, idCustomer, accountType]);
 
-  const setAccount = (objectId, accountNumber, accountName) => {
-    form.setFieldValue("objectId", objectId);
+  const setAccount = (accountId, accountNumber, accountName) => {
+    form.setFieldValue("accountId", accountId);
     form.setFieldValue("accountNumber", accountNumber);
     form.setFieldValue("accountName", accountName);
   };
@@ -398,7 +398,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         await form.validateFields(formFields[current]);
 
         const {
-          objectId,
+          accountId: relatedAccountId,
           description,
           startDate,
           endDate,
@@ -410,11 +410,11 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           type: formType.toUpperCase(),
           id: idIr,
           data : {
-            subjectId: data_accountDetail?.accountInformation?.accountId, 
-            objectId,
+            accountId, 
+            relatedAccountId,
             description, 
-            startDate: NxDate.formatForAPI(startDate, false),
-            endDate: NxDate.formatForAPI(endDate, false),
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
           }
         }
@@ -456,7 +456,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           await form.validateFields(formFields[i]);
 
           const {
-            objectId,
+            accountId: relatedAccountId,
             description,
             startDate,
             endDate,
@@ -468,11 +468,11 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
             type: formType.toUpperCase(),
             id: idIr,
             data : {
-              subjectId: data_accountDetail?.accountInformation?.accountId, 
-              objectId,
+              accountId, 
+              relatedAccountId,
               description, 
-              startDate: NxDate.formatForAPI(startDate, false),
-              endDate: NxDate.formatForAPI(endDate, false),
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
               appHierId,
             }
           }
@@ -513,7 +513,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   const handleSubmitForm = () => {
     const {
-      objectId,
+      accountId: relatedAccountId,
       description,
       startDate,
       endDate,
@@ -523,11 +523,11 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
     const body = {
       id: idIr,
-      subjectId: data_accountDetail?.accountInformation?.accountId,
-      objectId,
+      accountId,
+      relatedAccountId,
       description,
-      startDate: NxDate.formatForAPI(startDate, false),
-      endDate: NxDate.formatForAPI(endDate, false),
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark
@@ -588,8 +588,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     } else if (isUpdate) {
       if (data_irApprovalHierarchy?.length) {
         const {
-          subjectId,
-          objectId,
+          accountId: relatedAccountId,
           startDate,
           endDate,
           description,
@@ -599,12 +598,11 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         } = detail;
 
         form.setFieldsValue({
-          subjectId,
-          objectId,
+          relatedAccountId,
           accountName: relatedAccountName,
           accountNumber: relatedAccountNumber,
-          startDate: NxDate.formatForAPI(startDate, false),
-          endDate: NxDate.formatForAPI(endDate, false),
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           description,
           appHierId
         });

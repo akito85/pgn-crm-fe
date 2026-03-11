@@ -43,6 +43,8 @@ const InvoiceRelationApprovalModal = ({
   const [selectedRows, setSelectedRows] = useState([]);
 
   const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
@@ -53,17 +55,18 @@ const InvoiceRelationApprovalModal = ({
   useEffect(() => {
     if (isOpen) {
       const body = {
-        inputFields: tempFilters,
+        page: 0,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
       }
 
       dispatch(
         getInvoiceRelationApproval({
           id,
           body,
-          page,
-          size: loadMoreSize,
-          sort,
-          searchs: JSON.stringify(search),
           isLoadMore: false,
         })
       );
@@ -95,17 +98,18 @@ const InvoiceRelationApprovalModal = ({
     // Check if there's more data to load
     if (nextPage <= totalPages) {
       const body = {
-        inputFields: tempFilters,
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
       }
 
       dispatch(
         getInvoiceRelationApproval({
           id,
           body,
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          searchs: JSON.stringify(search),
           isLoadMore: true,
         })
       );
@@ -317,7 +321,7 @@ const InvoiceRelationApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Invoice Relation Information"
+        title="APPROVAL INVOICE RELATTION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -327,7 +331,7 @@ const InvoiceRelationApprovalModal = ({
               Cancel
             </Button>
 
-            <div className="flex gap-x-4">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();
@@ -409,7 +413,7 @@ const InvoiceRelationApprovalModal = ({
                     dataSource={dataSourceWithKeys}
                     columns={processedColumns}
                     totalData={pagination_invoiceRelationApproval?.totalElements || 0}
-                    tableScrolled={{ y: 400, x: "max-content" }}
+                    tableScrolled={{ x: "max-content" }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
@@ -457,7 +461,7 @@ const InvoiceRelationApprovalModal = ({
                   dataSource={selectedRows}
                   columns={processedColumns}
                   totalData={pagination_invoiceRelationApproval?.totalElements || 0}
-                  tableScrolled={{ y: 400, x: "max-content" }}
+                  tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}

@@ -255,12 +255,8 @@ NxDate.formatForAPI = (dateInput, includeTime = true) => {
     const day = String(date.getDate()).padStart(2, "0");
     
     if (includeTime) {
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-      const seconds = String(date.getSeconds()).padStart(2, "0");
-      
       // Oracle TIMESTAMP format: YYYY-MM-DD HH:mm:ss
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return date.toISOString().split('.')[0];
     } else {
       // Oracle DATE format: YYYY-MM-DD
       return `${year}-${month}-${day}`;

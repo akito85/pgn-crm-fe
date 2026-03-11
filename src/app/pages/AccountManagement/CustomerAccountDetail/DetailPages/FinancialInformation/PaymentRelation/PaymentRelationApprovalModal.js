@@ -317,7 +317,7 @@ const PaymentRelationApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Payment Relation Information"
+        title="APPROVAL PAYMENT RELATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -327,7 +327,7 @@ const PaymentRelationApprovalModal = ({
               Cancel
             </Button>
 
-            <div className="flex gap-x-4">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();
@@ -409,7 +409,7 @@ const PaymentRelationApprovalModal = ({
                     dataSource={dataSourceWithKeys}
                     columns={processedColumns}
                     totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                    tableScrolled={{ y: 400, x: "max-content" }}
+                    tableScrolled={{ x: "max-content" }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
@@ -457,7 +457,7 @@ const PaymentRelationApprovalModal = ({
                   dataSource={selectedRows}
                   columns={processedColumns}
                   totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                  tableScrolled={{ y: 400, x: "max-content" }}
+                  tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}

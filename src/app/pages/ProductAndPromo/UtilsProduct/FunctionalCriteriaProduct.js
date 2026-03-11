@@ -1005,7 +1005,7 @@ const FunctionalCriteriaProduct = ({
             handleCancel={() => {
               setModalHistory(false);
             }}
-            header="DETAIL INFORMATION"
+            title="DETAIL INFORMATION"
             width={1000}
             footer={
               <div className="flex justify-end">

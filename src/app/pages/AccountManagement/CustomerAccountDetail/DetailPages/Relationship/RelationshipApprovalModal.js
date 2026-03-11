@@ -413,7 +413,7 @@ const RelationshipApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Relationship Information"
+        title="APPROVAL RELATIONSHIP INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -423,7 +423,7 @@ const RelationshipApprovalModal = ({
               Cancel
             </Button>
 
-            <div className="flex gap-x-4">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();
@@ -498,7 +498,6 @@ const RelationshipApprovalModal = ({
                     columns={processedColumns}
                     totalData={pagination_relationship?.totalElements || 0}
                     tableScrolled={{
-                      y: 400,
                       x: dataSourceWithKeys.length ? "max-content" : 2000,
                     }}
                     onSort={onSort}
@@ -547,7 +546,6 @@ const RelationshipApprovalModal = ({
                   columns={processedColumns}
                   totalData={selectedRows.length}
                   tableScrolled={{
-                    y: 400,
                     x: selectedRows.length ? "max-content" : 2000,
                   }}
                   onSort={onSort}

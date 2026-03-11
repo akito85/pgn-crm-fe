@@ -149,10 +149,8 @@ const PosForm = ({ type }) => {
   const [valuePage, setValuePage] = useState("Point of Sales");
   const [rangeDisableDate, setRangeDisableDate] = useState({});
 
-  // ✅ Debounce timer untuk materai - menunggu 600ms setelah item terakhir ditambah
   const materaiDebounceTimer = useRef(null);
-  // ✅ Flag untuk mencegah re-trigger saat setData dipanggil dari response materai
-  // Tanpa ini: setData di .then() → useEffect → debounce → dispatch → loop tak terbatas
+
   const isUpdatingFromMaterai = useRef(false);
 
   const getCustomerTypeNumber = (type) => {
@@ -685,29 +683,13 @@ const PosForm = ({ type }) => {
     }
   }, [data_rate, data_rate_tax]);
 
-  // ============================================================
-  // ✅ MAIN EFFECT: Calculate totals + trigger materai endpoint
-  //
-  // SOLUSI INFINITE LOOP:
-  // Pisahkan useEffect menjadi 2:
-  //   1. useEffect([data]) → hanya hitung totals + set prevDataRef
-  //   2. useEffect([invoiceDate, accountNumber, customerType]) → tidak ada
-  // Dispatch materai dipanggil dari useEffect([data]) TAPI menggunakan
-  // debounce + skipMateraiUpdate ref untuk mencegah loop dari setData di .then()
-  // ============================================================
-
-  // ✅ Ref menyimpan snapshot data sebelumnya untuk deteksi perubahan real
   const prevNonMateraiRef = useRef([]);
 
   useEffect(() => {
     if (!data) return;
-
-    // ✅ Pisahkan item materai dan non-materai
     const filteredData = data.filter(
       (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
     );
-
-    // ✅ Hitung totals dari item non-materai
     const newDataDynamic = filteredData.reduce(
       (sums, item) => {
         let tempSum = { ...sums };
@@ -751,7 +733,6 @@ const PosForm = ({ type }) => {
       },
     );
 
-    // ✅ Selalu update totals (sinkron)
     setDataDynamic((prev) => ({
       ...prev,
       totalAmountIdr: newDataDynamic.totalAmountIdr,
@@ -771,7 +752,6 @@ const PosForm = ({ type }) => {
       totalEqvUsd: newDataDynamic.totalEqvUsd,
     }));
 
-    // ✅ Tidak ada item → hapus materai jika ada
     if (filteredData.length === 0) {
       setData((prev) => {
         const hasMaterai = prev.some(
@@ -789,24 +769,14 @@ const PosForm = ({ type }) => {
       return;
     }
 
-    // ✅ Cek apakah non-materai items benar-benar berubah
-    // (bukan hanya karena materai ditambahkan ke list)
     const prevIds = prevNonMateraiRef.current.map((i) => i.itemId + "_" + i.total).join(",");
     const currIds = filteredData.map((i) => i.itemId + "_" + i.total).join(",");
 
     if (prevIds === currIds) {
-      // Tidak ada perubahan pada item non-materai → skip dispatch
-      // Ini terjadi saat setData dari .then() menambahkan materai ke list
       return;
     }
-
-    // ✅ Update snapshot
     prevNonMateraiRef.current = filteredData;
-
-    // ✅ Skip jika invoiceDate belum ada
     if (!invoiceDate) return;
-
-    // ✅ Build payload per item (bukan digabung per currency)
     const buildMateraiPayload = () => {
       const totalAmounts = filteredData
         .filter(
@@ -827,8 +797,6 @@ const PosForm = ({ type }) => {
         totalAmounts,
       };
     };
-
-    // ✅ Debounce 600ms - pastikan semua item (termasuk Tax auto-generate) sudah masuk
     if (materaiDebounceTimer.current) {
       clearTimeout(materaiDebounceTimer.current);
     }
@@ -838,7 +806,6 @@ const PosForm = ({ type }) => {
         .unwrap()
         .then((dataRes) => {
           if (!dataRes || !dataRes?.item) {
-            // BE: tidak perlu materai → hapus jika sudah ada
             isUpdatingFromMaterai.current = true;
             setData((prev) => {
               const hasMaterai = prev.some(
@@ -852,7 +819,6 @@ const PosForm = ({ type }) => {
             return;
           }
 
-          // BE: perlu materai → tambah atau replace
           const newMaterai = {
             typeId: dataRes?.type,
             type: dataRes?.typeName,
@@ -877,8 +843,6 @@ const PosForm = ({ type }) => {
             totalEqvIdr: dataRes?.totalEqvIdr || 0,
             remark: dataRes?.remark || "",
           };
-
-          // ✅ Set flag SEBELUM setData agar useEffect langsung skip di run berikutnya
           isUpdatingFromMaterai.current = true;
           setData((prev) => {
             const baseData = prev.some(
@@ -895,7 +859,6 @@ const PosForm = ({ type }) => {
           });
         })
         .catch(() => {
-          // Error → tidak ada perubahan, totals sudah diupdate di atas
         });
     }, 600);
 
@@ -1167,7 +1130,7 @@ const PosForm = ({ type }) => {
         accountNumber: "",
         email: e?.email || "",
         phoneNumber: e?.phoneNumber || "",
-        address: e?.address || "",
+        address: null,
         customerNumber: null,
       }),
 
@@ -1244,7 +1207,7 @@ const PosForm = ({ type }) => {
         posNumber: item?.posNumber,
         lineNumber: item?.lineNumber || 0,
         type: item?.typeId,
-        item: item?.itemId,
+        item: String(item?.itemId),
         price: item?.price || 0,
         reference: item?.reference || null,
         quantity: item?.quantity,

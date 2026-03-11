@@ -23,10 +23,10 @@ const PaymentWarrantyPartnerForm = (props) => {
   }, [dispatch, dataType, form]);
 
   useEffect(() => {
-    if (partnerCode && !form.getFieldValue("partnerCode")) {
+    if (dataType === "create" && partnerCode) {
       form.setFieldsValue({ partnerCode });
     }
-  }, [partnerCode, form]);
+  }, [partnerCode, form, dataType]);
 
   const disabledEndDate = (current) => {
     const startDate = form.getFieldValue("startDate");

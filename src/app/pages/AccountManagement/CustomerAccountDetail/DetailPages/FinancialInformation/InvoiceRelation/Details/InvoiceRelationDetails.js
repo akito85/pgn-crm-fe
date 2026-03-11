@@ -33,10 +33,6 @@ const InvoiceRelationDetails = ({
   const { loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
   );
-
-  const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
-  );
   
   const isLoading = loading || loadingAccount;
 
@@ -229,7 +225,6 @@ const InvoiceRelationDetails = ({
 
           <InvoiceRelationDetailTabs
             dataDetail={detail}
-            subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
             dispatch={dispatch}
             idIr={idIr}
           />

@@ -530,7 +530,7 @@ const TablePricing = ({
 	return (
 		<div>
 			{isCustomTiering ? (
-				<div className="w-full flex justify-end mb-[30px]">
+				<div className="w-full flex justify-end pb-4">
 					<ButtonComponent
 						type={"submit"}
 						onClick={() => {

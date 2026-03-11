@@ -149,7 +149,7 @@ const ModalChooseRelated = ({
   return (
     <NxModal
       isOpen={isOpen}
-      header={modalHeader}
+      title={modalHeader}
       handleCancel={() => handleCancel()}
       width={1100}
       footer={
@@ -168,7 +168,7 @@ const ModalChooseRelated = ({
             dataSource={dataSourceWithKeys}
             totalData={pagination_relatedObject?.totalElements || 0}
             current={page}
-            tableScrolled={{ y: 525, x: tableScrolledX }}
+            tableScrolled={{ x: tableScrolledX }}
             onSort={onSort}
             columns={allColumns}
             usePagination={false}
