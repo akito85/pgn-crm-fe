@@ -39,11 +39,22 @@ const ModalAttachment = ({
         return `.${current}${index !== 0 ? ", " : ""}${prev}`;
       }, "");
     const tempSize = parseInt(valueGuard?.size || "0") * 1000000;
-    setDataGuard({
+    const nextGuard = {
       fileExt: tempFileExt === "." ? ExtensionFile : tempFileExt,
       size: tempSize || MAX_FILE_SIZE,
+    };
+
+    setDataGuard((prevState) => {
+      if (
+        prevState?.fileExt === nextGuard.fileExt &&
+        prevState?.size === nextGuard.size
+      ) {
+        return prevState;
+      }
+
+      return nextGuard;
     });
-  }, [valueGuard]);
+  }, [valueGuard?.fileExt, valueGuard?.size]);
 
   const handleClose = () => {
     setFileList([]);
