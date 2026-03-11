@@ -74,9 +74,9 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       dispatch(getDetailWarrantyMutation({ id, page: 1, pageSize: 999 }));
       
       // Fetch specific transaction details if present
-      if (isHold) dispatch(getHoldDetailList({ id }));
-      if (isRelease) dispatch(getReleaseDetailList({ id }));
-      if (isRefund) dispatch(getRefundDetailList({ id }));
+      if (isHold) dispatch(getHoldDetailList({ id, page: 1, pageSize: 999 }));
+      if (isRelease) dispatch(getReleaseDetailList({ id, page: 1, pageSize: 999 }));
+      if (isRefund) dispatch(getRefundDetailList({ id, page: 1, pageSize: 999 }));
     }
     dispatch(getAllApprovalList());
   }, [id, dispatch, isHold, isRelease, isRefund]);
@@ -111,7 +111,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                     ? dataList.map((a, index) => ({
                       ...a,
                       key: index + 1,
-                      employeeDetail: a.employeeDetail.map((b, index) => ({
+                      employeeDetail: (a.employeeDetail || []).map((b, index) => ({
                         ...b,
                         key: index + 1,
                       })),
@@ -183,7 +183,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       children: <div className="w-full p-5">
                   <Spin spinning={loadingMutation}>
                     <TableRBI
-                      dataSource={dataHoldDetailList.map((item, index) => ({ ...item, key: index + 1 }))}
+                      dataSource={(dataHoldDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
                       columns={processedColumnsHold}
                       fixedColumns={{ left: ["no"], right: ["holdAmount", "status", "approvalStatus"] }}
                       current={page}
@@ -207,7 +207,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       children: <div className="w-full p-5">
                   <Spin spinning={loadingMutation}>
                     <TableRBI
-                      dataSource={dataReleaseDetailList.map((item, index) => ({ ...item, key: index + 1 }))}
+                      dataSource={(dataReleaseDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
                       columns={processedColumnsRelease}
                       fixedColumns={{ left: ["no"], right: ["releaseAmount", "status", "approvalStatus"] }}
                       current={page}
@@ -231,7 +231,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       children: <div className="w-full p-5">
                   <Spin spinning={loadingMutation}>
                     <TableRBI
-                      dataSource={dataRefundDetailList.map((item, index) => ({ ...item, key: index + 1 }))}
+                      dataSource={(dataRefundDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
                       columns={processedColumnsRefund}
                       fixedColumns={{ left: ["no"], right: ["date", "refundAmount", "status", "approvalStatus"] }}
                       current={page}

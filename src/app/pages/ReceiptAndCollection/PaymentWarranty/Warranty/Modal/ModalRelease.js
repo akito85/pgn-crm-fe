@@ -56,7 +56,7 @@ const ModalRelease = ({
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
-    loading,
+    loadingReleaseList,
   } = useSelector((state) => state.warranty);
 
   // Declaration
@@ -165,12 +165,6 @@ const ModalRelease = ({
       if (!remarkReleaseInformation) {
         return message.warning("Please input your Remark!");
       }
-      const isTableIncomplete = dataSourceReleaseInfoWithKeys.some(
-        (item) => !releaseAmountData[item.key]
-      );
-      if (isTableIncomplete) {
-        return message.warning("Please input Release Amount for all items!");
-      }
     }
     if (current === 2 && !selectedHierarchy) {
       return message.warning("Please select Approval Hierarchy!");
@@ -236,8 +230,6 @@ const ModalRelease = ({
       setCurrent(0);
     }
 
-    setReleaseAmountData({});
-    setReleaseDateData({});
     setRemarkReleaseInformation("");
     setListDataAttachment([]);
     setSelectedHierarchy(null);
@@ -298,9 +290,9 @@ const ModalRelease = ({
       const submitBody = {
         type: WARRANTY_TRANSACTION_NAMES.RELEASE,
         appHierId: selectedHierarchy,
-        items: dataWarrantyInfoSelect.map((item, index) => ({
+        items: dataWarrantyInfoSelect.map((item) => ({
           payWarrantyId: item.id,
-          amount: releaseAmountData[dataSourceReleaseInfoWithKeys[index]?.key] || 0,
+          amount: item.currencyBalance || 0,
           currency: item.currency || "IDR",
         })),
         remark: remarkReleaseInformation,
@@ -518,15 +510,6 @@ const ModalRelease = ({
   };
 
   // Release Information Step
-  const [releaseAmountData, setReleaseAmountData] = useState({});
-  const handleReleaseAmountChange = (value, recordKey) => {
-    setReleaseAmountData(prev => ({ ...prev, [recordKey]: value }));
-  };
-
-  const [releaseDateData, setReleaseDateData] = useState({});
-  const handleReleaseDateChange = (value, recordKey) => {
-    setReleaseDateData(prev => ({ ...prev, [recordKey]: value }));
-  }; 
 
   const [remarkReleaseInformation, setRemarkReleaseInformation] = useState("");
 
@@ -552,14 +535,9 @@ const ModalRelease = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        releaseAmountData,
-        handleReleaseAmountChange,
-        releaseDateData,
-        handleReleaseDateChange,
-        false
+        handleSearch
       ),
-    [searchedColumn, searchText, releaseAmountData, releaseDateData]
+    [searchedColumn, searchText]
   );
 
   const baseColumnsReleaseInfoConfirmation = useMemo(
@@ -570,14 +548,9 @@ const ModalRelease = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        releaseAmountData,
-        handleReleaseAmountChange,
-        releaseDateData,
-        handleReleaseDateChange,
-        true
+        handleSearch
       ),
-    [searchedColumn, searchText, releaseAmountData, releaseDateData]
+    [searchedColumn, searchText]
   );
 
   const processedColumnsReleaseInfoConfirmation = useMemo(() => {
@@ -729,7 +702,7 @@ const ModalRelease = ({
                 columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingReleaseList}
                 showExport={false}
                 rowSelection={rowSelectionWarrantyInfo}
               />
@@ -756,7 +729,7 @@ const ModalRelease = ({
                 columnDefinitions={columnDefinitionsReleaseInfo}
                 fixedColumns={fixedReleaseColumns}
                 setFixedColumns={setFixedReleaseColumns}
-                loading={loading}
+                loading={loadingReleaseList}
                 showExport={false}
               />
               

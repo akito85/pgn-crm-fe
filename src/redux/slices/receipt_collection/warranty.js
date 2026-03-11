@@ -1042,13 +1042,13 @@ const warrantySlice = createSlice({
 
     // Get Hold/Release/Refund Detail List
     [getHoldDetailList.fulfilled]: (state, action) => {
-      state.dataHoldDetailList = action.payload?.data?.result || [];
+      state.dataHoldDetailList = action.payload?.result || action.payload?.data?.result || [];
     },
     [getReleaseDetailList.fulfilled]: (state, action) => {
-      state.dataReleaseDetailList = action.payload?.data?.result || [];
+      state.dataReleaseDetailList = action.payload?.result || action.payload?.data?.result || [];
     },
     [getRefundDetailList.fulfilled]: (state, action) => {
-      state.dataRefundDetailList = action.payload?.data?.result || [];
+      state.dataRefundDetailList = action.payload?.result || action.payload?.data?.result || [];
     },
     [getMutationApprovalHistory.fulfilled]: (state, action) => {
       state.loadingApproval = false;
