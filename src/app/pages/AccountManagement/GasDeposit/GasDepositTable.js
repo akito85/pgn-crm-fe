@@ -40,13 +40,10 @@ const GasDepositTable = ({
   const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
     handleApproval,
     handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
     handleInactivate: handleInactivateModal,
-    idKey: "idGd",
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
