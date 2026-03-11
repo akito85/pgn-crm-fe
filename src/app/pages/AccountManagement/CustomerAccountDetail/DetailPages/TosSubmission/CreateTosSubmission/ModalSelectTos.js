@@ -269,9 +269,11 @@ const ModalSelectTos = ({
       header="CHOOSE TERM OF SERVICE"
       width={1000}
       footer={
-        <ButtonComponent type={"default"} onClick={handleCancel}>
-          Back
-        </ButtonComponent>
+        <div className="w-full flex justify-start">
+          <ButtonComponent type={"default"} size="small" onClick={handleCancel}>
+            Back
+          </ButtonComponent>
+        </div>
       }
     >
       <NxTable
