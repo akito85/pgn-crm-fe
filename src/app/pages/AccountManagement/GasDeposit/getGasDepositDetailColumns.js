@@ -125,40 +125,6 @@ const getGasDepositDetailColumns = (
     ),
   },
   includeStatus && {
-    key: "statusApproval",
-    title: "STATUS APPROVAL",
-    dataIndex: "statusApproval",
-    width: 170,
-    align: "center",
-    sorter: (a, b) => sorterFunction("statusApproval", a, b),
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (status) => {
-      const displayText = {
-        "approved": "Approved",
-        "waitingApproval": "Waiting Approval",
-        "pending": "Pending",
-        "rejected": "Rejected",
-        "WAITING_APPROVAL": "Waiting Approval",
-        "WAITING_FOR_APPROVAL": "Waiting Approval",
-      };
-      return (
-        <div className="flex justify-center">
-          <StatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      );
-    },
-  },
-  includeStatus && {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
