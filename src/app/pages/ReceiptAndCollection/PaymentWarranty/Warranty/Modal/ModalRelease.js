@@ -31,11 +31,12 @@ import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllWarrantyInfoPaginate,
+  getReleaseListPaginate,
+  getReleaseDetailList,
+  submitRelease,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-  submitWarrantyRequest,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -51,9 +52,7 @@ const ModalRelease = ({
 }) => {
   // Selector
   const {
-    data_customer_info,
-    data_warranty_info,
-    data_release_info,
+    dataReleaseList,
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
@@ -65,9 +64,9 @@ const ModalRelease = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceReleaseInfo = data_release_info?.result || [];
+  const dataSourceCustomerInfo = []; 
+  const dataSourceWarrantyInfo = dataReleaseList?.result || [];
+  const dataSourceReleaseInfo = []; 
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -307,8 +306,8 @@ const ModalRelease = ({
         remark: remarkReleaseInformation,
       };
 
-      // 2. Dispatch the unified thunk
-      const submitRes = await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitRelease(submitBody)).unwrap();
       const transIds = submitRes?.data?.transIds || [];
 
       // 3. Upload new attachments per transId
@@ -363,12 +362,11 @@ const ModalRelease = ({
         : "";
 
       dispatch(
-        getAllWarrantyInfoPaginate({
+        getReleaseListPaginate({
           search: finalSearch,
           page,
           pageSize,
           sort,
-          transTypeName: "RELEASE",
         })
       );
     }
@@ -725,7 +723,7 @@ const ModalRelease = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={selectedRow ? 1 : (data_warranty_info?.page?.totalElements || 0)}
+                totalData={selectedRow ? 1 : (dataReleaseList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}

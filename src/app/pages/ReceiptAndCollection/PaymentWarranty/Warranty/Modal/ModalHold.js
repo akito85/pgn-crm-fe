@@ -31,13 +31,12 @@ import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 import { configApp, API_ENDPOINTS } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllCustomerInfoPaginate,
-  getAllWarrantyInfoPaginate,
-  getAllHoldInfoPaginate,
+  getHoldListPaginate,
+  getHoldDetailList,
+  submitHold,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-  submitWarrantyRequest,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -53,9 +52,7 @@ const ModalHold = ({
 }) => {
   // Selector
   const {
-    data_customer_info,
-    data_warranty_info,
-    data_hold_info,
+    dataHoldList,
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
@@ -67,9 +64,9 @@ const ModalHold = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceHoldInfo = data_hold_info?.result || [];
+  const dataSourceCustomerInfo = []; // Not used anymore in this modal logic
+  const dataSourceWarrantyInfo = dataHoldList?.result || [];
+  const dataSourceHoldInfo = []; // Derived from selection
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -309,8 +306,8 @@ const ModalHold = ({
         remark: remarkHoldInformation,
       };
 
-      // 2. Dispatch the unified thunk
-      const submitRes = await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitHold(submitBody)).unwrap();
       const transIds = submitRes?.data?.transIds || [];
 
       // 3. Upload new attachments per transId
@@ -365,12 +362,11 @@ const ModalHold = ({
         : "";
 
       dispatch(
-        getAllWarrantyInfoPaginate({
+        getHoldListPaginate({
           search: finalSearch,
           page,
           pageSize,
           sort,
-          transTypeName: "HOLD",
         })
       );
     }
@@ -727,7 +723,7 @@ const ModalHold = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={selectedRow ? 1 : (data_warranty_info?.page?.totalElements || 0)}
+                totalData={selectedRow ? 1 : (dataHoldList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}

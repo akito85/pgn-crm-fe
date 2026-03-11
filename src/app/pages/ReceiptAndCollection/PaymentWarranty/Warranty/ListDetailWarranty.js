@@ -10,6 +10,9 @@ import {
   getListApprovalById,
   getAllApprovalList,
   submitApproval,
+  getHoldDetailList,
+  getReleaseDetailList,
+  getRefundDetailList,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 import DetailWarranty from "./DetailWarranty";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -49,6 +52,9 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
     dataListAppHierId,
     dataListAppHierDetail,
     dataMutation,
+    dataHoldDetailList,
+    dataReleaseDetailList,
+    dataRefundDetailList,
     loadingDetail,
     loadingApproval,
     loadingMutation,
@@ -66,9 +72,14 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
     if (id) {
       dispatch(getDetailWarranty({ id }));
       dispatch(getDetailWarrantyMutation({ id, page: 1, pageSize: 999 }));
+      
+      // Fetch specific transaction details if present
+      if (isHold) dispatch(getHoldDetailList({ id }));
+      if (isRelease) dispatch(getReleaseDetailList({ id }));
+      if (isRefund) dispatch(getRefundDetailList({ id }));
     }
     dispatch(getAllApprovalList());
-  }, [id, dispatch]);
+  }, [id, dispatch, isHold, isRelease, isRefund]);
 
   useEffect(() => {
     if (activeTab === "approval") {
@@ -172,7 +183,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       children: <div className="w-full p-5">
                   <Spin spinning={loadingMutation}>
                     <TableRBI
-                      dataSource={transactionHoldItems.map((item, index) => ({ ...item, key: index + 1 }))}
+                      dataSource={dataHoldDetailList.map((item, index) => ({ ...item, key: index + 1 }))}
                       columns={processedColumnsHold}
                       fixedColumns={{ left: ["no"], right: ["holdAmount", "status", "approvalStatus"] }}
                       current={page}
@@ -196,7 +207,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       children: <div className="w-full p-5">
                   <Spin spinning={loadingMutation}>
                     <TableRBI
-                      dataSource={transactionReleaseItems.map((item, index) => ({ ...item, key: index + 1 }))}
+                      dataSource={dataReleaseDetailList.map((item, index) => ({ ...item, key: index + 1 }))}
                       columns={processedColumnsRelease}
                       fixedColumns={{ left: ["no"], right: ["releaseAmount", "status", "approvalStatus"] }}
                       current={page}
@@ -220,7 +231,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       children: <div className="w-full p-5">
                   <Spin spinning={loadingMutation}>
                     <TableRBI
-                      dataSource={transactionRefundItems.map((item, index) => ({ ...item, key: index + 1 }))}
+                      dataSource={dataRefundDetailList.map((item, index) => ({ ...item, key: index + 1 }))}
                       columns={processedColumnsRefund}
                       fixedColumns={{ left: ["no"], right: ["date", "refundAmount", "status", "approvalStatus"] }}
                       current={page}
