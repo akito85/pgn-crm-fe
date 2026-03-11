@@ -394,7 +394,7 @@ const ViewInvoice = () => {
               <span className="text-black ml-3">Detail</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Detail">
+            <Tooltip title="Detail" placement="left">
               <div
                 onClick={() => {
                   handleDetail(record);
@@ -434,7 +434,7 @@ const ViewInvoice = () => {
               <span className="text-black ml-3">Re-Generate</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Re-Generate">
+            <Tooltip title="Re-Generate" placement="left">
               <div
                 onClick={() => handleReGenerate(record)}
                 style={{
@@ -486,6 +486,7 @@ const ViewInvoice = () => {
                   ? "Download"
                   : "Download (only available when status is Completed)"
               }
+              placement="left"
             >
               <div
                 onClick={() => isCompleted && handlePreviewFile(record)}
