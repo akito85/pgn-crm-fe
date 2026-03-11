@@ -1,56 +1,30 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
-import { useEffect, useMemo, useState } from "react";
-import { getGasDepositColumns } from "./getGasDepositColumns";
+import { useMemo, useRef, useState } from "react";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
-import GasDepositDetailTable from "./GasDepositDetailTable";
+import { getGasDepositDetailColumns } from "./getGasDepositDetailColumns";
 
-const GasDepositTable = ({
-  moduleType,
+const GasDepositDetailTable = ({
   data = [],
-  idAccount = 0,
-  idCustomer = 0,
-  totalElement = 0,
-  page = 0,
-  onSort = () => {},
-  handleInactivateModal = () => {},
-  handleApprovalHistoryModal = () => {},
-  handleApproval = () => {},
-  handleDownload = () => {},
-  handleLoadMore = () => {},
-  hasMore = false,
-  searchText = "",
-  search = "",
-  searchedColumn = {},
-  searchInput = "",
-  handleSearch = () => {},
-  loading = false,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isStandAlone = moduleType = "sa";
-  const isUnderAccount = moduleType = "ua"
-
-  const isStandard = location.pathname.includes("account-standard");
-  const isOneTime = location.pathname.includes("account-onetime");
-
+  const searchInput = useRef(null);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
-    handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
-    handleDownload,
-    handleInactivate: handleInactivateModal,
     idKey: "idGd",
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status"],
+    right: ["statusApproval", "status", "action"],
     left: [],
   }));
 
@@ -62,8 +36,25 @@ const GasDepositTable = ({
     })
   );
 
+  /**
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0]
+      };
+    });
+  };
+
   const baseColumns = useMemo(() =>
-    getGasDepositColumns(
+    getGasDepositDetailColumns(
       search,
       searchInput,
       searchedColumn,
@@ -91,38 +82,35 @@ const GasDepositTable = ({
     }));
   }, [allColumns]);
 
-  const expandedRowRender = (record) => {
-    return (
-      <GasDepositDetailTable
-        data={record.details}
-      />
-    );
+  /**
+   * @param {*} _
+   * @param {*} __
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
   };
 
   return (
     <div className="flex flex-col gap-y-4">
-      <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="gas-deposit-table"
         dataSource={data}
-        totalData={totalElement}
-        current={page}
+        totalData={data.length}
         tableScrolled={{ x: data.length ? "max-content" : 4000 }}
         onSort={onSort}
         columns={processedColumns}
         usePagination={false}
-        useInfiniteScroll={true}
-        hasMore={hasMore}
-        onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
-        loading={loading}
-        expandable={{ expandedRowRender }}
       />
     </div>
   );
 };
 
-export default GasDepositTable;
+export default GasDepositDetailTable;
