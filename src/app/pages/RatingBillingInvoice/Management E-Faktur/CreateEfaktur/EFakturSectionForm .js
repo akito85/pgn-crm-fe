@@ -205,7 +205,7 @@ const EFakturSectionForm = ({
             ]}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent placeholder={"Customer Name"} />
+            <InputComponent placeholder={"Customer Name..."} />
           </Form.Item>
 
           <Form.Item
@@ -247,29 +247,29 @@ const EFakturSectionForm = ({
               },
             ]}
           >
-            <InputComponent placeholder={"Tax Identification Number"}  maxLength={16}/>
+            <InputComponent placeholder={"Tax Identification Number..."}  maxLength={16}/>
           </Form.Item>
 
           <Form.Item
             label={"NITKU"}
-            name={"npwp"}
+            name={"nitku"}
             style={{ marginBottom: 0 }}
             rules={[
               {
                 required: true,
-                message: "Please input NPWP!",
+                message: "Please input NITKU!",
               },
               {
-                min: 16,
-                message: "NITKU must be at least 16 characters!",
+                min: 22,
+                message: "NITKU must be at least 22 characters!",
               },
               {
-                max: 16,
-                message: "NITKU must not exceed 16 characters!",
+                max: 22,
+                message: "NITKU must not exceed 22 characters!",
               },
             ]}
           >
-            <InputComponent placeholder={"NPWP"}  maxLength={16}/>
+            <InputComponent placeholder={"NITKU..."}  maxLength={22}/>
           </Form.Item>
 
           <div className="col-span-4">

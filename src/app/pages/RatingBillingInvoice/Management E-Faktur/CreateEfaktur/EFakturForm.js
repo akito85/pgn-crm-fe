@@ -3,7 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin, Form } from "antd";
 import moment from "moment";
-import { LeftOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
+import {
+  LeftOutlined,
+  RightOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../../routes/invoice/invoice_routes";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -12,12 +16,16 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import EFakturSectionForm from "./EFakturSectionForm ";
 import ConfirmationLayout from "./ConfirmationLayout";
 import { dateFormatting } from "../../../../../utils";
-import { ModalError, ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
+import {
+  ModalError,
+  ModalConfirm,
+} from "../../../../../components/Modal/ModalPopUp";
+import ModalCustom from "../../../../../components/Modal/ModalCustom"; // ✅ DITAMBAHKAN
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import CardContainer from "../../../../../components/CardContainer";
-import { FormStepper } from "../../../../../components/FormStepNavigation"; 
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 import {
   createEFakturManual,
   getAllApprovalList,
@@ -29,11 +37,9 @@ import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlic
 
 const EFakturForm = ({ type }) => {
   // Selector
-  const {
-    loading,
-    data_approval_list,
-    data_approval,
-  } = useSelector((state) => state.efaktur);
+  const { loading, data_approval_list, data_approval } = useSelector(
+    (state) => state.efaktur,
+  );
 
   // Declaration
   const navigate = useNavigate();
@@ -64,7 +70,7 @@ const EFakturForm = ({ type }) => {
         "customerName",
         "email",
         "taxIdentificationNumber",
-        "npwp",
+        "nitku",
         "customerAddress",
         "downPayment",
       ],
@@ -74,7 +80,7 @@ const EFakturForm = ({ type }) => {
   ]);
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
-  const [modalConfirm, setModalConfirm] = useState(false);
+  const [modalConfirm, setModalConfirm] = useState(false); // ✅ ini yang dipakai untuk ModalCustom
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
@@ -187,15 +193,17 @@ const EFakturForm = ({ type }) => {
   };
 
   const handleRetry = () => {
-    handleConfirm();
     setModalError(false);
     setBodyError({});
+    if (bodyData && Object.keys(bodyData).length > 0) {
+      handleConfirm();
+    }
   };
 
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -206,11 +214,11 @@ const EFakturForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -222,13 +230,13 @@ const EFakturForm = ({ type }) => {
   };
 
   // Handle Save Form
-  const handleSave = (formValue) => {    
+  const handleSave = (formValue) => {
     let errorBody = {};
-    
+
     if (listDataAttachment.length === 0) {
       errorBody = {
         title: "Failed",
-        description: "Attachment is mandatory. Please upload at least one file.",
+        message: "Attachment is mandatory. Please upload at least one file.",
       };
       setBodyError(errorBody);
       setModalError(true);
@@ -236,11 +244,10 @@ const EFakturForm = ({ type }) => {
       return;
     }
 
-    //  Validate detail transactions
     if (listDataDetail.length === 0) {
       errorBody = {
         title: "Failed",
-        description: "Detail Transaction is mandatory. Please insert data.",
+        message: "Detail Transaction is mandatory. Please insert data.",
       };
       setBodyError(errorBody);
       setModalError(true);
@@ -248,16 +255,16 @@ const EFakturForm = ({ type }) => {
       return;
     }
 
-    // Validate each detail item has required fields
     const invalidItems = listDataDetail.filter((item) => {
-      const isValid = item.type && item.productCode && item.productName && item.uom;
+      const isValid =
+        item.type && item.productCode && item.productName && item.uom;
       return !isValid;
     });
 
     if (invalidItems.length > 0) {
       errorBody = {
         title: "Failed",
-        description: `${invalidItems.length} detail transaction(s) have missing required fields. Please complete all fields.`,
+        message: `${invalidItems.length} detail transaction(s) have missing required fields. Please complete all fields.`,
       };
       setBodyError(errorBody);
       setModalError(true);
@@ -267,9 +274,8 @@ const EFakturForm = ({ type }) => {
     setBodyData({
       ...formValue,
     });
-    setModalConfirm(true);
-    
-    // Reset error badges
+    setModalConfirm(true); // ✅ buka ModalCustom confirmation
+
     setTabPages([
       {
         value: "Create-Faktur",
@@ -284,7 +290,7 @@ const EFakturForm = ({ type }) => {
           "customerName",
           "email",
           "taxIdentificationNumber",
-          "npwp",
+          "nitku",
           "customerAddress",
           "downPayment",
         ],
@@ -294,22 +300,19 @@ const EFakturForm = ({ type }) => {
     ]);
   };
 
-  //Handle Confirm
+  // Handle Confirm
   const handleConfirm = () => {
-    
     setModalConfirm(false);
 
-    // Validate listDataDetail before transforming
     if (!listDataDetail || listDataDetail.length === 0) {
       setBodyError({
         title: "Failed",
-        description: "Detail Transaction is required",
+        message: "Detail Transaction is required",
       });
       setModalError(true);
       return;
     }
 
-    // Transform detail items 
     const detailsItems = listDataDetail.map((item) => {
       const transformed = {
         type: item.type || "",
@@ -324,7 +327,6 @@ const EFakturForm = ({ type }) => {
       return transformed;
     });
 
-    // Build request body
     const body = {
       apphierId: String(bodyData.apphierId),
       fakturType: bodyData.fakturType,
@@ -337,9 +339,10 @@ const EFakturForm = ({ type }) => {
       customerName: bodyData.customerName,
       customerEmail: bodyData.email,
       customerTin: bodyData.taxIdentificationNumber,
-      customerNitku: bodyData.npwp,
+      customerNitku: bodyData.nitku,
       customerAddress: bodyData.customerAddress,
       downPaymentAmount: String(bodyData.downPayment || 0),
+      isDraft: !typeSubmit,
       detailsItems: detailsItems,
     };
 
@@ -347,16 +350,16 @@ const EFakturForm = ({ type }) => {
       .unwrap()
       .then(async (dataForm) => {
         const efakturId = dataForm.created_id;
-        
+
         if (efakturId && listDataAttachment.length > 0) {
           setLoadingForm(true);
-          
+
           let uploadSuccess = 0;
           let uploadFailed = 0;
-          
+
           for (let i = 0; i < listDataAttachment.length; i++) {
             const element = listDataAttachment[i];
-            
+
             try {
               const formData = new FormData();
               formData.append("files", element.file);
@@ -365,35 +368,38 @@ const EFakturForm = ({ type }) => {
 
               const response = await ratingBillingHttpService.uploadAttachment(
                 `/v1/dbs/api/rbi/e-invoice/upload-attachment`,
-                formData
+                formData,
               );
-              
+
               if (response.success) {
                 uploadSuccess++;
               } else {
                 uploadFailed++;
               }
             } catch (uploadError) {
-              console.error(`Error uploading attachment ${i + 1}:`, uploadError);
+              console.error(
+                `Error uploading attachment ${i + 1}:`,
+                uploadError,
+              );
               uploadFailed++;
             }
           }
-          
+
           setLoadingForm(false);
         }
-        
+
         setModalConfirm(false);
         handleClear();
         navigate(INVOICE_ROUTES.EFAKTUR_VIEW);
       })
       .catch((error) => {
         setLoadingForm(false);
-        
+
         const message =
           error.response?.data?.message || error.message || error.toString();
-        setBodyError({ 
+        setBodyError({
           title: "Failed",
-          message 
+          message,
         });
         setModalError(true);
       });
@@ -408,7 +414,7 @@ const EFakturForm = ({ type }) => {
     <LayoutMenu>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        
+
         <FormStepper
           steps={steps}
           current={current}
@@ -476,7 +482,7 @@ const EFakturForm = ({ type }) => {
             </CardContainer>
           </div>
 
-          {/* Footer Buttons - Tetap menggunakan custom footer */}
+          {/* Footer Buttons */}
           <div className="w-full flex justify-between mt-10">
             <div className="flex">
               <ButtonComponent
@@ -489,7 +495,6 @@ const EFakturForm = ({ type }) => {
             </div>
 
             <div className="flex gap-5">
-              {/* Previous Button - tampil jika bukan step pertama */}
               {current > 0 && (
                 <ButtonComponent
                   onClick={prev}
@@ -509,7 +514,13 @@ const EFakturForm = ({ type }) => {
 
               <Form.Item>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconButtonClear" width={24} color={"#FFFFFF"} />}
+                  icon={
+                    <SVGIcon
+                      name="IconButtonClear"
+                      width={24}
+                      color={"#FFFFFF"}
+                    />
+                  }
                   type="submit"
                   onClick={handleClear}
                 >
@@ -517,7 +528,6 @@ const EFakturForm = ({ type }) => {
                 </ButtonComponent>
               </Form.Item>
 
-              {/* Next Button - tampil jika bukan step terakhir */}
               {current < steps.length - 1 && (
                 <ButtonComponent
                   onClick={next}
@@ -530,7 +540,6 @@ const EFakturForm = ({ type }) => {
                 </ButtonComponent>
               )}
 
-              {/* Save Buttons - tampil jika step terakhir */}
               {current === steps.length - 1 && (
                 <>
                   <Form.Item>
@@ -557,19 +566,42 @@ const EFakturForm = ({ type }) => {
           </div>
         </Form>
 
-        {/* Modal Confirmation */}
-        <ConfirmationLayout
+        {/* ✅ Modal Confirmation — menggunakan ModalCustom seperti prabilling */}
+        <ModalCustom
           isOpen={modalConfirm}
           handleCancel={() => setModalConfirm(false)}
-          handleConfirm={handleConfirm}
-          data={bodyData}
-          listDataAppHierDetail={appHierDataDetail}
-          apiApproval={data_approval}
-          listDataAttachment={listDataAttachment}
-          listDataDetail={listDataDetail}
-          selectedHierarchy={selectedHierarchy}
-          dataOption={appHierOptions}
-        />
+          header={"CONFIRMATION"}
+          width={900}
+          type={"confirmation"}
+          loading={isLoading}
+          footer={
+            <div className={"flex w-full justify-end gap-2 mb-5"}>
+              <ButtonComponent
+                onClick={() => setModalConfirm(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                type={"submit"}
+                onClick={handleConfirm}
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                Confirm
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <ConfirmationLayout
+            data={bodyData}                          // ✅ bodyData = data form yang sudah diisi
+            listDataAppHierDetail={appHierDataDetail} // ✅ state yang sudah ada
+            listDataAttachment={listDataAttachment}   // ✅ state yang sudah ada
+            listDataDetail={listDataDetail}           // ✅ state yang sudah ada
+            selectedHierarchy={selectedHierarchy}     // ✅ state yang sudah ada
+            dataOption={appHierOptions}               // ✅ state yang sudah ada
+          />
+        </ModalCustom>
 
         {/* Modal Back */}
         <ModalConfirm
@@ -586,7 +618,7 @@ const EFakturForm = ({ type }) => {
           </div>
         </ModalConfirm>
 
-        {/* Modal Retry */}
+        {/* Modal Error */}
         <ModalError
           isOpen={modalError}
           handleOk={handleRetry}
