@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Button, message, Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 
 import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
@@ -66,6 +66,8 @@ import {
   getServiceRequestPrerequisites,
   createCompleteServiceRequest,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 
 const CreateCustomerServiceRequest = (props) => {
   const location = useLocation();
@@ -168,6 +170,7 @@ const CreateCustomerServiceRequest = (props) => {
   const [modalSuccess, setModalSuccess] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [confirmationType, setConfirmationType] = useState("submit");
   const [dataConfirm, setDataConfirm] = useState({});
   const [btnConfirm, setBtnConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
@@ -534,74 +537,135 @@ const CreateCustomerServiceRequest = (props) => {
   ];
 
   const navigate = useNavigate();
+  const stepFieldMap = [
+    ["category", "priority", "requestSource", "type", "channel", "requestDate"],
+    [],
+    [],
+    ["appHierId"],
+    [],
+  ];
+
+  const stepValidationTypes = [
+    "DATA",
+    "CONTACT",
+    "PREREQUISITE",
+    "APPROVAL",
+    "ATTACHMENT",
+  ];
+
   const next = () => {
-    setCurrent(current + 1);
+    setCurrent((prevCurrent) => prevCurrent + 1);
   };
   const prev = () => {
     setCurrent(current - 1);
   };
 
-  const handleButtonNext = async () => {
-    if (current === 0) {
-      await formCreate
-        .validateFields()
-        .then(() => {
-          next();
-        })
-        .catch((info) => {
-          console.log("Validate Failed:", info);
-        });
-
-        const values = formCreate.getFieldsValue();
-        console.log("Form Values at Step 1:", values);
-    } else {
-      next();
-    }
-  };
-
-  const handleSubmitForm = () => {
+  const buildPayload = (action = "SUBMIT", validationType = null) => {
     const values = formCreate.getFieldsValue(true);
+    const isDraft = action === "DRAFT";
 
-    const payload = {
-      // requestNumber: null → backend auto-generate dari DB id (SR00001, SR00002, ...)
-      requestType:        values.type        ? parseInt(values.type)        : null,
-      requestCategory:    values.category    ? parseInt(values.category)    : null,
+    return {
+      requestType: values.type ? parseInt(values.type) : null,
+      requestCategory: values.category ? parseInt(values.category) : null,
       requestSubCategory: values.subCategory ? parseInt(values.subCategory) : null,
-      priority:           values.priority    ? parseInt(values.priority)    : null,
-      description:        values.description || "",
-      requestedDate:      values.requestDate
-        ? (values.requestDate.toDate ? values.requestDate.toDate() : new Date(values.requestDate))
-        : new Date(),
-      reference: values.srr    || null,
+      priority: values.priority ? parseInt(values.priority) : null,
+      description: values.description || null,
+      requestedDate: values.requestDate
+        ? (values.requestDate.toDate
+          ? values.requestDate.toDate()
+          : new Date(values.requestDate))
+        : null,
+      reference: values.srr || null,
       apphierId: values.appHierId ? parseInt(values.appHierId) : null,
-      channel:   values.channel      ? parseInt(values.channel)      : null,
-      source:    values.requestSource ? parseInt(values.requestSource) : null,
+      channel: values.channel ? parseInt(values.channel) : null,
+      source: values.requestSource ? parseInt(values.requestSource) : null,
       costCenter: values.srFormAccountCostCenterId
         ? parseInt(values.srFormAccountCostCenterId)
         : null,
-
+      action,
+      isDraft,
+      validationType,
+      stepNumber: validationType
+        ? stepValidationTypes.indexOf(validationType) + 1
+        : steps.length,
       dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
-        requirementType:  dr.typeId ? parseInt(dr.typeId) : null,
-        requirementValue: dr.value  || null,
-        requirementDesc:  null,
+        requirementType: dr.typeId ? parseInt(dr.typeId) : null,
+        requirementValue: dr.value || null,
+        requirementDesc: null,
       })),
-
-      prerequisites: [],
-
+      prerequisites: values.srFormPreRequisites || [],
       attachments: attachmentsData.map((att) => ({
-        category:       "SERVICE_REQUEST",
-        fileName:       att.fileName        || null,
-        type:           att.type            || null,
-        fileSize:       att.size            || 0,
-        fileCategoryId: att.fileCategoryId  ? parseInt(att.fileCategoryId) : null,
-        base64Content:  att.base64          || null,
-        isDraft:        false,
-        isDeleted:      false,
+        category: "SERVICE_REQUEST",
+        fileName: att.fileName || null,
+        type: att.type || null,
+        fileSize: att.size || 0,
+        fileCategoryId: att.fileCategoryId ? parseInt(att.fileCategoryId) : null,
+        description: att.description || null,
+        base64Content: att.base64 || null,
+        isDraft,
+        isDeleted: false,
       })),
     };
+  };
 
-    setDataSend(payload);
-    setModalConfirm(true);
+  const validateStep = async (stepIndex) => {
+    const fields = stepFieldMap[stepIndex] || [];
+
+    if (fields.length > 0) {
+      await formCreate.validateFields(fields);
+    }
+
+    const validationType = stepValidationTypes[stepIndex];
+    if (!validationType || !idAccount) {
+      return;
+    }
+
+    const payload = buildPayload("SUBMIT", validationType);
+    await dispatch(
+      validateCreateUpdate({
+        body: payload,
+        services: accountManagementService,
+        endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-step`,
+        type: "create",
+      }),
+    ).unwrap();
+  };
+
+  const handleButtonNext = async () => {
+    try {
+      await validateStep(current);
+      next();
+    } catch (error) {
+      return;
+    }
+  };
+
+  const handleOpenConfirmation = async (submitType) => {
+    try {
+      if (current < steps.length - 1) {
+        await validateStep(current);
+      } else {
+        await validateStep(3);
+      }
+
+      const action = submitType === "draft" ? "DRAFT" : "SUBMIT";
+      const payload = buildPayload(action);
+
+      await dispatch(
+        validateCreateUpdate({
+          body: payload,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-create`,
+          type: "create",
+        }),
+      ).unwrap();
+
+      setDataSend(payload);
+      setConfirmationType(submitType);
+      setModalConfirm(true);
+    } catch (error) {
+      return;
+    }
   };
 
   const handleConfirmSubmit = async () => {
@@ -658,7 +722,11 @@ const CreateCustomerServiceRequest = (props) => {
         id="accountForm"
         form={formCreate}
         layout={"vertical"}
-        onFinish={handleSubmitForm}
+        onFinish={() => {
+          if (current === steps.length - 1) {
+            handleOpenConfirmation("submit");
+          }
+        }}
         // onFinishFailed={handleErrorSubmit}
         scrollToFirstError={true}
       >
@@ -701,7 +769,7 @@ const CreateCustomerServiceRequest = (props) => {
                 {isUpdate ? "Reset" : "Clear"}
               </Button>
               <Button
-                onClick={() => message.success("Save as Draft")}
+                onClick={() => handleOpenConfirmation("draft")}
                 type={"secondary"}
                 disabled={current !== steps.length - 1}
               >
@@ -725,8 +793,8 @@ const CreateCustomerServiceRequest = (props) => {
               )}
               {current === steps.length - 1 && (
                 <Button
+                  onClick={() => handleOpenConfirmation("submit")}
                   type={"submit"}
-                  htmlType={"submit"}
                   loading={loadingForm}
                 >
                   Save & Submit
@@ -747,7 +815,9 @@ const CreateCustomerServiceRequest = (props) => {
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#0075bf" }} />
           <p className="text-[18px] font-bold">
-            Are you sure you want to submit this Service Request?
+            {confirmationType === "draft"
+              ? "Are you sure you want to save this Service Request as draft?"
+              : "Are you sure you want to submit this Service Request?"}
           </p>
         </div>
       </ModalConfirm>

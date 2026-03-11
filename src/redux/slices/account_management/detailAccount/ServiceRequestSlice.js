@@ -136,20 +136,26 @@ export const createCompleteServiceRequest = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/composite`;
       const response = await accountManagementService.createData(url, body);
+      const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
       const successBody = {
         title: "Successful",
-        description: "Service Request has been submitted.",
+        description: isDraft
+          ? "Service Request draft has been saved."
+          : "Service Request has been submitted.",
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
+      const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
       const message =
         (error.response && error.response.data && error.response.data.message) ||
         error.message ||
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Service Request was not submitted. ${message}. Please try again.`,
+        description: isDraft
+          ? `Service Request draft was not saved. ${message}. Please try again.`
+          : `Service Request was not submitted. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
