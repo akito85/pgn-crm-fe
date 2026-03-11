@@ -49,10 +49,11 @@ const ViewInvoice = () => {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [bodyError, setBodyError] = useState({});
 
-  const [pageDetail, setPageDetail] = useState(false);
+  const [pageDetail, setPageDetail] = useState(false); // eslint-disable-line
+  const [modalDetail, setModalDetail] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [modalReGenerate, setModalReGenerate] = useState(false);
-  const [modalGenerate, setModalGenerate] = useState(false);
+  const [modalGenerate, setModalGenerate] = useState(false); // eslint-disable-line
 
   // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
@@ -201,9 +202,9 @@ const ViewInvoice = () => {
 
   // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
     dispatch(getDetailInvoice(record?.invoiceNumber));
     setInvoiceNumber(record?.invoiceNumber);
+    setModalDetail(true);
   };
 
   // Handle Re Generate
@@ -379,34 +380,14 @@ const ViewInvoice = () => {
             <ButtonComponent
               icon={<SVGIcon name="IconDetail" width={20} />}
               border={false}
-              onClick={() => {
-                handleDetail(record);
-                setTimeout(
-                  () =>
-                    window.scrollTo({
-                      top: document.body.scrollHeight,
-                      behavior: "smooth",
-                    }),
-                  100,
-                );
-              }}
+              onClick={() => handleDetail(record)}
             >
               <span className="text-black ml-3">Detail</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Detail" placement="left">
               <div
-                onClick={() => {
-                  handleDetail(record);
-                  setTimeout(
-                    () =>
-                      window.scrollTo({
-                        top: document.body.scrollHeight,
-                        behavior: "smooth",
-                      }),
-                    100,
-                  );
-                }}
+                onClick={() => handleDetail(record)}
                 style={{
                   cursor: "pointer",
                   display: "inline-block",
@@ -638,13 +619,12 @@ const ViewInvoice = () => {
         </div>
       </CardContainer>
 
-      {/* Invoice Log */}
-      {pageDetail === true && data_detail ? (
-        <DetailInvoice
-          detail={data_detail?.logs}
-          invoiceNumber={invoiceNumber}
-        />
-      ) : null}
+      {/* Modal Detail */}
+      <DetailInvoice
+        isOpen={modalDetail}
+        onClose={() => setModalDetail(false)}
+        detail={data_detail}
+      />
 
       {/* Modal Re-Generate */}
       <ModalApproveOrReject
