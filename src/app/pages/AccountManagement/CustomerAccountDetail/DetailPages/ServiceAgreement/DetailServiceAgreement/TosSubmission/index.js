@@ -8,7 +8,7 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../ut
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { Link, NavLink } from "react-router-dom";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
-import ModalHistory from "../../../../../../../../components/Modal/ModalHistory";
+import NxHistoryModal from "../../../../../../../../components/Nx/NxHistoryModal";
 import ModalInactivateWithHierarchy from "../../../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import {
   ModalConfirm,
@@ -657,7 +657,9 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
   const handleSubmitModalInactivate = (res, handleClear) => {
@@ -735,11 +737,10 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
             </div>
           )}
         />
-        <ModalHistory
+        <NxHistoryModal
           isOpen={openModalHistory && dataApprovalHistoryFix}
           handleClose={() => setOpenModalHistory(false)}
           header={"Approval History"}
-          width={850}
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
