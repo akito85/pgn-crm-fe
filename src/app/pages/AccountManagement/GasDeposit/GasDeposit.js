@@ -17,13 +17,14 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 
 /**
- * Gas deposit list table page/module
+ * Gas deposit list table module
  * @param {{ moduleType: "sa" | "ua"; id?: number; idCustomer?: number }} props 
  * @returns 
  */
-const GasDeposit = ({ moduleType, id = 0, idCustomer = 0 }) => {
+const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -312,67 +313,96 @@ const GasDeposit = ({ moduleType, id = 0, idCustomer = 0 }) => {
   }, [data_gdApprovalHistory]);
 
   return (
-    <NxCardContainer header={"GAS DEPOSIT"}>
-      <NxBaseContainer border>
-        <GasDepositTable
-          data={dataSourceWithKeys}
-          idAccount={id}
-          idCustomer={idCustomer}
-          totalElement={pagination_gasDeposit.totalElements}
-          page={page}
-          onSort={onSort}
-          handleInactivateModal={handleInactivateModal}
-          handleApprovalHistoryModal={handleApprovalHistoryModal}
-          handleApproval={setShowApprovalModal}
-          handleDownload={handleDownload}
-          filters={filters}
-          handleLoadMore={handleLoadMore}
-          hasMore={hasMore}
-          searchText={searchText}
-          search={search}
-          searchedColumn={searchedColumn}
-          searchInput={searchInput}
-          handleSearch={handleSearch}
-          loading={loading_listGd}
-        />
+    <>
+      <NxCardContainer header={"GAS DEPOSIT"}>
+        <NxBaseContainer border>
+          <GasDepositTable
+            data={dataSourceWithKeys}
+            idAccount={id}
+            idCustomer={idCustomer}
+            totalElement={pagination_gasDeposit.totalElements}
+            page={page}
+            onSort={onSort}
+            handleInactivateModal={handleInactivateModal}
+            handleApprovalHistoryModal={handleApprovalHistoryModal}
+            handleApproval={setShowApprovalModal}
+            handleDownload={handleDownload}
+            filters={filters}
+            handleLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            searchText={searchText}
+            search={search}
+            searchedColumn={searchedColumn}
+            searchInput={searchInput}
+            handleSearch={handleSearch}
+            loading={loading_listGd}
+          />
+        </NxBaseContainer>
+      </NxCardContainer>
 
-        <GasDepositApprovalModal
-          id={id}
-          isOpen={showApprovalModal}
-          handleCancel={() => setShowApprovalModal(false)}
-          afterFinish={handleRefresh}
-        />
+      <GasDepositApprovalModal
+        id={id}
+        isOpen={showApprovalModal}
+        handleCancel={() => setShowApprovalModal(false)}
+        afterFinish={handleRefresh}
+      />
 
-        {/* Inactivate Modal */}
-        <NxInactivateModal
-          isOpen={showInactiveModal}
-          header={"INACTIVATE"}
-          handleCloseModal={() => handleInactivateModal(false)}
-          customMessage={`Are you sure you want to inactivate gas deposit - ${inactivateGdAccountNumber}?`}
-          onFinish={({ remark, appHierId }, handleClear) =>
-            handleInactivateGd({ remark, appHierId }, handleClear)
-          }
-          named={inactivateGdAccountNumber}
-          menu="gas deposit"
-          sliceName="gasDeposit"
-          approvalOptionsStateName="data_gdApprovalHierarchy"
-          approvalHierarchtDetailsStateName="detail_gdApprovalHierarchy"
-          getApprovalOptions={getGdApprovalHierarchy}
-          getApprovalHierarchyDetails={getDetailGdApprovalHierarchy}
-        />
+      {/* Inactivate Modal */}
+      <NxInactivateModal
+        isOpen={showInactiveModal}
+        header={"INACTIVATE"}
+        handleCloseModal={() => handleInactivateModal(false)}
+        customMessage={`Are you sure you want to inactivate gas deposit - ${inactivateGdAccountNumber}?`}
+        onFinish={({ remark, appHierId }, handleClear) =>
+          handleInactivateGd({ remark, appHierId }, handleClear)
+        }
+        named={inactivateGdAccountNumber}
+        menu="gas deposit"
+        sliceName="gasDeposit"
+        approvalOptionsStateName="data_gdApprovalHierarchy"
+        approvalHierarchtDetailsStateName="detail_gdApprovalHierarchy"
+        getApprovalOptions={getGdApprovalHierarchy}
+        getApprovalHierarchyDetails={getDetailGdApprovalHierarchy}
+      />
 
-        {/* Approval History Modal */}
-        <NxHistoryModal
-          isOpen={showApprovalHistoryModal}
-          handleClose={() => handleApprovalHistoryModal(false)}
-          header={"Approval History"}
-          tabOptions={handleApprovalHistoryOptions()}
-          dataApprover={dataApprovalHistoryFix?.dataApprover}
-          dataHistory={dataApprovalHistoryFix?.dataHistory}
-        />
-      </NxBaseContainer>
-    </NxCardContainer>
+      {/* Approval History Modal */}
+      <NxHistoryModal
+        isOpen={showApprovalHistoryModal}
+        handleClose={() => handleApprovalHistoryModal(false)}
+        header={"Approval History"}
+        tabOptions={handleApprovalHistoryOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
+    </>
   );
+}
+
+/**
+ * Gas deposit list table page/module
+ * @param {{ moduleType: "sa" | "ua"; id?: number; idCustomer?: number }} props 
+ * @returns 
+ */
+const GasDeposit = ({ moduleType, id = 0, idCustomer = 0 }) => {
+  if (moduleType === "sa")
+    return (
+      <LayoutMenu>
+        <GasDepositModule
+          moduleType={moduleType}
+          id={id}
+          idCustomer={idCustomer}
+        />
+      </LayoutMenu>
+    )
+  else if (moduleType === "ua")
+    return (
+      <GasDepositModule
+        moduleType={moduleType}
+        id={id}
+        idCustomer={idCustomer}
+      />
+    )
+  return null
 };
 
 export default memo(GasDeposit);
