@@ -42,7 +42,8 @@ const InvoiceRelation = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const currentData = useMemo(() => list_invoiceRelation, [list_invoiceRelation]);
 
@@ -60,17 +61,18 @@ const InvoiceRelation = ({
 
   const handleRefresh = () => {
     const body = {
-      inputFields: tempFilters,
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
     }
 
     dispatch(
       getInvoiceRelation({
         id,
         body,
-        page: 1,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
         isLoadMore: false,
       })
     );
@@ -112,10 +114,19 @@ const InvoiceRelation = ({
     .unwrap()
     .then(() => {
       const body = {
-        inputFields: tempFilters,
+        page: 0,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
       }
 
-      dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body, isLoadMore: false }));
+      dispatch(getInvoiceRelation({
+        id,
+        body,
+        isLoadMore: false
+      }));
       setShowInactiveModal(false);
       handleClear();
     })
@@ -167,10 +178,13 @@ const InvoiceRelation = ({
 
   const handleDownload = () => {
     const body = {
-      inputFields: tempFilters,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
     }
 
-    dispatch(downloadInvoiceRelation({ page, size: loadMoreSize, sort, searchs: search, body, id }));
+    dispatch(downloadInvoiceRelation({ body, id }));
   };
 
   /**
@@ -191,31 +205,41 @@ const InvoiceRelation = ({
 
     if (nextPage <= totalPages) {
       const body = {
-        inputFields: tempFilters,
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
       }
 
       await dispatch(
         getInvoiceRelation({
           id,
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          searchs: JSON.stringify(search),
           body,
           isLoadMore: true,
         })
-      );
+      ).unwrap();
     }
     setPage(nextPage);
   };
 
   useEffect(() => {
     const body = {
-      inputFields: tempFilters,
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
     }
 
-    dispatch(getInvoiceRelation({ id, page, size: loadMoreSize, sort, searchs: JSON.stringify(search), body, isLoadMore: false }));
-  }, [sort, search, tempFilters]);
+    dispatch(getInvoiceRelation({
+      id,
+      body,
+      isLoadMore: false
+    }));
+  }, [sort, search]);
 
   useEffect(() => {
     if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
@@ -249,7 +273,6 @@ const InvoiceRelation = ({
         handleApprovalHistoryModal={handleApprovalHistoryModal}
         handleApproval={setShowApprovalModal}
         handleDownload={handleDownload}
-        tempFilters={tempFilters}
         handleLoadMore={handleLoadMore}
         hasMore={hasMore}
         searchText={searchText}

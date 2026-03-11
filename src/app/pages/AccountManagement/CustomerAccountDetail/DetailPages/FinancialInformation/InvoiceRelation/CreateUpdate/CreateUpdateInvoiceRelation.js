@@ -123,18 +123,18 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     if (isUpdate && data_irApprovalHierarchy.length) {
       const {
         accountId,
+        accountNumber,
+        accountName,
         startDate,
         endDate,
         description,
         appHierId,
-        relatedAccountNumber,
-        relatedAccountName
       } = detail;
 
       form.setFieldsValue({
         accountId,
-        accountName: relatedAccountName,
-        accountNumber: relatedAccountNumber,
+        accountName,
+        accountNumber,
         startDate,
         endDate,
         description,
@@ -512,7 +512,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   const handleSubmitForm = () => {
     const {
-      relatedAccountId,
+      accountId: relatedAccountId,
       description,
       startDate,
       endDate,
