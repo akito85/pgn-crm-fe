@@ -20,7 +20,6 @@ import {
   getAllBillingRequestPaginate,
   getApprovalHistory,
   setBillingFilters,
-  resetBillingData,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBilling } from "./Table/TableViewBilling";
 import BillingDetail from "./Detail/BillingDetail";
@@ -41,9 +40,6 @@ const BillingPage = () => {
   const searchInput = useRef(null);
   const dataSource = data?.result;
   const detailRef = useRef(null);
-
-  // fetchId: counter unik per-fetch untuk deteksi fetch yang sudah kadaluarsa
-  const fetchIdRef = useRef(0);
 
   const [page, setPage] = useState(filters?.page || 1);
   const [loadMoreSize] = useState(20);
@@ -75,6 +71,13 @@ const BillingPage = () => {
     dispatch(setBillingFilters({ search, sort, page }));
   }, [search, sort, page, dispatch]);
 
+  // Reset filters saat unmount (pindah halaman) agar kembali ke semula
+  useEffect(() => {
+    return () => {
+      dispatch(setBillingFilters({ search: {}, sort: "", page: 1 }));
+    };
+  }, [dispatch]);
+
   // Scroll ke detail saat row dipilih
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
@@ -88,27 +91,17 @@ const BillingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  // Fetch utama dengan triple-protection (debounce + fetchId + Redux requestId)
   useEffect(() => {
-    dispatch(resetBillingData());
-    const currentFetchId = ++fetchIdRef.current;
-
-    const timer = setTimeout(() => {
-      if (currentFetchId !== fetchIdRef.current) return;
-
-      dispatch(
-        getAllBillingPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: 100,
-          sort,
-          isLoadMore: false,
-        }),
-      );
-      setPage(1);
-    }, 400);
-
-    return () => clearTimeout(timer);
+    dispatch(
+      getAllBillingPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+    setPage(1);
   }, [dispatch, search, sort]);
 
   useEffect(() => {
