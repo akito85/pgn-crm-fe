@@ -1,4 +1,8 @@
-import { WarningOutlined } from "@ant-design/icons";
+import {
+  LeftOutlined,
+  RightOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -9,26 +13,29 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
-  createPartner,
-  createValidasiPartner,
-  getAllApprovalList,
-  getDetailPartner,
-  getListApprovalById,
-  getListCategory,
-  updatePartner,
-  saveDraftPartner,
-  getDetailDraftPartner,
-} from "../../../../../redux/slices/receipt_collection/partner";
+  createCaCiMapping,
+  createValidasiCaCiMapping,
+  getAllApprovalListCaCiMapping,
+  getDetailCaCiMapping,
+  getDetailDraftCaCiMapping,
+  getListApprovalByIdCaCiMapping,
+  updateCaCiMapping,
+  saveDraftCaCiMapping,
+  getTypeDDLCaCiMapping,
+  getListPartnerDDL,
+  getListCollectingAgentDDL,
+  getListDeliveryChannelDDL,
+  getListCategoryCaCiMapping,
+} from "../../../../../redux/slices/receipt_collection/caCiMapping";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
-import PartnerForm from "./PartnerForm";
-import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
+import CaCiMappingForm from "./CaCiMappingForm";
+import ContentModalConfirmCaCiMapping from "./ContentModalConfirmCaCiMapping";
 import CardContainer from "../../../../../components/CardContainer";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import ContentModalConfirm from "./ContentModalConfirm";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import {
-  showModalError,
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import { bytesConverter } from "../../../../../utils/bytesConverter";
@@ -36,22 +43,19 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
-const steps = [
-  { title: "CREATE", value: "Partner" },
-  { title: "APPROVAL", value: "Approval" },
-  { title: "ATTACHMENT", value: "Attachment" },
-];
-
-const ListFormPartner = (props) => {
+const ListFormCaCiMapping = (props) => {
   const { type } = props;
   const {
     data_detail,
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
-  } = useSelector((state) => state.partner);
+    dataType,
+    dataPartnerList,
+    dataCollectingAgentList,
+    dataDeliveryChannelList,
+  } = useSelector((state) => state.caCiMapping);
 
-  // Declaration
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
@@ -67,27 +71,46 @@ const ListFormPartner = (props) => {
   const [loadingForm, setLoadingForm] = useState(loading);
   const [loadingSave, setLoadingSave] = useState(false);
   const [current, setCurrent] = useState(0);
+  const [sendBody, setSendBody] = useState();
 
+  const steps = [
+    { title: "PAYMENT CHANNEL CA CI MAPPING", value: "CaCiMapping" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
 
+  const [tabData, setTabData] = useState([
+    {
+      value: "CaCiMapping",
+      paramValue: ["partnerId", "collectingAgentId", "deliveryChannelId", "name", "type", "effStartDate", "effEndDate"],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
 
+  const [valuePage, setValuePage] = useState(steps[0].value);
 
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  useEffect(() => {
+    dispatch(getAllApprovalListCaCiMapping());
+    dispatch(getTypeDDLCaCiMapping());
+    dispatch(getListPartnerDDL());
+    dispatch(getListCollectingAgentDDL());
+    dispatch(getListDeliveryChannelDDL());
+  }, [dispatch]);
 
   useEffect(() => {
     if (id && type === "update") {
       if (status === "Draft") {
-        dispatch(getDetailDraftPartner(id));
+        dispatch(getDetailDraftCaCiMapping(id));
       } else {
-        dispatch(getDetailPartner(id));
+        dispatch(getDetailCaCiMapping(id));
       }
     }
   }, [dispatch, id, type, status]);
-
-
-
-
-  useEffect(() => {
-    dispatch(getAllApprovalList());
-  }, [dispatch]);
 
   useEffect(() => {
     if (dataListAppHierId && dataListAppHierId.length > 0) {
@@ -101,7 +124,7 @@ const ListFormPartner = (props) => {
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getListApprovalById({ id: selectedHierarchy }));
+      dispatch(getListApprovalByIdCaCiMapping({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
@@ -122,39 +145,20 @@ const ListFormPartner = (props) => {
   }, [dataListAppHierDetail]);
 
   useEffect(() => {
-    if (
-      formValue.approvalHierarchy &&
-      !appHierOptions
-        .map((item) => item.value)
-        .includes(formValue.approvalHierarchy)
-    ) {
-      form.setFieldsValue({ approvalHierarchy: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
-
-  useEffect(() => {
     if (id && data_detail) {
-
+      const entity = data_detail?.caCiMapping;
       form.setFieldsValue({
-        id: data_detail?.partner.id,
-        partnerCode: data_detail?.partner?.partnerCode,
-        partnerName: data_detail?.partner?.partnerName,
-        effStartDate:
-          data_detail?.partner?.effStartDate === null
-            ? moment()
-            : moment(data_detail?.partner?.effStartDate).clone(),
-        effEndDate:
-          data_detail?.partner?.effEndDate === null
-            ? ""
-            : moment(data_detail?.partner?.effEndDate).clone(),
-        tokenExpirationTime: data_detail?.partner?.tokenExpirationTime,
-        secKeySignature: data_detail?.partner?.secKeySignature,
-        apphierId: data_detail?.partner?.appHierId,
+        id: entity?.id,
+        partnerId: entity?.partnerId,
+        collectingAgentId: entity?.collectingAgentId,
+        deliveryChannelId: entity?.deliveryChannelId,
+        name: entity?.name,
+        type: entity?.type,
+        effStartDate: entity?.effStartDate ? moment(entity?.effStartDate).clone() : null,
+        effEndDate: entity?.effEndDate ? moment(entity?.effEndDate).clone() : null,
+        apphierId: entity?.appHierId,
       });
-
-      setSelectedHierarchy(data_detail?.partner?.appHierId);
-
+      setSelectedHierarchy(entity?.appHierId);
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
           ...attachData,
@@ -163,30 +167,7 @@ const ListFormPartner = (props) => {
         }))
       );
     }
-  }, [data_detail, id, form]);
-
-  // Define tabData before using it in useState
-
-  const [tabData, setTabData] = useState([
-    {
-      value: "Partner", paramValue: ["partnerCode",
-        "partnerName",
-        "effStartDate",
-        "effEndDate",
-        "tokenExpirationTime",
-        "secKeySignature",
-      ]
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
-
-  const [valuePage, setValuePage] = useState(steps[0].value);
-  const [sendBody, setSendBody] = useState();
-
-  useEffect(() => {
-    setValuePage(steps[current].value);
-  }, [current]);
+  }, [data_detail, id]);
 
   const next = () => {
     const fieldsToValidate = tabData[current]?.paramValue;
@@ -194,42 +175,27 @@ const ListFormPartner = (props) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
-          if (current < steps.length - 1) {
-            setCurrent(current + 1);
-          }
+          if (current < steps.length - 1) setCurrent(current + 1);
         })
         .catch((error) => {
           console.log("Validation failed:", error);
         });
     } else {
-      if (current < steps.length - 1) {
-        setCurrent(current + 1);
-      }
+      if (current < steps.length - 1) setCurrent(current + 1);
     }
   };
 
   const prev = () => {
-    if (current > 0) {
-      setCurrent(current - 1);
-    }
+    if (current > 0) setCurrent(current - 1);
   };
 
-  useEffect(() => {
-    if (
-      formValue.apphierId &&
-      !appHierOptions.map((item) => item.value).includes(formValue.apphierId)
-    ) {
-      form.setFieldsValue({ apphierId: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
   const handleSubmitForm = (formValue) => {
     const dataValue = {
-      // partnerId: id,
-      partnerCode: formValue.partnerCode,
-      partnerName: formValue.partnerName,
-      tokenExpirationTime: formValue.tokenExpirationTime,
-      seckeySignature: formValue.secKeySignature,
+      partnerId: formValue.partnerId,
+      collectingAgentId: formValue.collectingAgentId,
+      deliveryChannelId: formValue.deliveryChannelId,
+      name: formValue.name,
+      type: formValue.type,
       effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
       effEndDate: formValue.effEndDate
         ? moment(formValue.effEndDate).format(dateFormatting.date)
@@ -238,61 +204,55 @@ const ListFormPartner = (props) => {
     };
 
     setSendBody(dataValue);
-    const bodyValidasiUpdate = {
-      ...dataValue,
-      id: data_detail?.partner?.id,
-    };
+    const bodyValidasiUpdate = { ...dataValue, id: data_detail?.caCiMapping?.id };
+
     if (type !== "update") {
-      dispatch(createValidasiPartner(dataValue))
+      dispatch(createValidasiCaCiMapping(dataValue))
         .unwrap()
-        .then(async (data) => {
-          const sukses = data?.success;
-          if (sukses === false) {
-            setModalConfirm(false);
-          }
-          setModalConfirm(true);
+        .then((data) => {
+          if (data?.success !== false) setModalConfirm(true);
         });
     } else {
-      dispatch(createValidasiPartner(bodyValidasiUpdate))
+      dispatch(createValidasiCaCiMapping(bodyValidasiUpdate))
         .unwrap()
-        .then(async (data) => {
-          const sukses = data?.success;
-          if (sukses === false) {
-            setModalConfirm(false);
+        .then((data) => {
+          if (data?.success !== false) {
+            setModalConfirm(true);
+            setSendBody(bodyValidasiUpdate);
           }
-          setModalConfirm(true);
-          setSendBody(bodyValidasiUpdate)
         });
     }
-
   };
 
   const handleSaveDraft = () => {
     const values = form.getFieldsValue();
     const dataValue = {
-      id: id,
-      partnerCode: values.partnerCode,
-      partnerName: values.partnerName,
-      tokenExpirationTime: values.tokenExpirationTime,
-      seckeySignature: values.secKeySignature,
-      effStartDate: values.effStartDate ? moment(values.effStartDate).format(dateFormatting.date) : null,
-      effEndDate: values.effEndDate ? moment(values.effEndDate).format(dateFormatting.date) : null,
+      id,
+      partnerId: values.partnerId,
+      collectingAgentId: values.collectingAgentId,
+      deliveryChannelId: values.deliveryChannelId,
+      name: values.name,
+      type: values.type,
+      effStartDate: values.effStartDate
+        ? moment(values.effStartDate).format(dateFormatting.date)
+        : null,
+      effEndDate: values.effEndDate
+        ? moment(values.effEndDate).format(dateFormatting.date)
+        : null,
       apphierId: values.apphierId,
     };
 
-    dispatch(saveDraftPartner(dataValue))
+    dispatch(saveDraftCaCiMapping(dataValue))
       .unwrap()
       .then(() => {
-        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER);
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_CI_MAPPING);
       });
   };
-
 
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
 
-  // Validation Button Back
   const handleBack = () => {
     if (
       form.getFieldValue() === null ||
@@ -310,85 +270,45 @@ const ListFormPartner = (props) => {
       setSelectedHierarchy("");
       setListDataAttachment([]);
     } else {
-      dispatch(getDetailPartner(id));
+      dispatch(getDetailCaCiMapping(id));
     }
   };
 
-  //handle Error
-  const handleError = ({ values, errorFields, outOfDate }) => {
+  const handleError = ({ errorFields }) => {
     setTabData((prevState) => {
-      const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length < 0) {
-          return {
-            value: item.value,
-            paramValue: item.paramValue,
-          };
-        }
+      return prevState.map((item) => {
+        if (!item.paramValue || item.paramValue.length < 0) return item;
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
           0
         );
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
+        return { ...item, errorBadge };
       });
-      return res;
     });
   };
 
-  // Breadcrumbs
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
-    {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER,
-      breadcrumbName: "Partner",
-    },
-    {
-      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
-    },
-  ];
-
-
-  //kriim bodyy
   const handleSave = async () => {
     setLoadingSave(true);
-    const successMessageCreate = {
+    const successMessage = {
       title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
-    };
-
-    const successMessageUpdate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
+      description: "Your data has been submitted",
       return: true,
     };
 
     if (type === "update") {
-      dispatch(updatePartner(sendBody))
+      dispatch(updateCaCiMapping(sendBody))
         .unwrap()
         .then(async () => {
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
           );
-          for (let icon = 0; icon < filterDataAttach.length; icon++) {
-            const element = filterDataAttach[icon];
+          for (const element of filterDataAttach) {
             const body = {
-              referensiId: data_detail?.partner?.id,
+              referensiId: data_detail?.caCiMapping?.id,
               files: element.file,
-              category: "PARTNER",
+              category: "PAYMENT_CHANNEL_CA_CI_MAPPING",
               fileCategoryId: element.fileCategoryId,
             };
             await receiptCollectionHttpService.uploadImage(
@@ -401,37 +321,25 @@ const ListFormPartner = (props) => {
           form.resetFields();
           setSelectedHierarchy("");
           setListDataAttachment([]);
-          dispatch(showModalSuccess(successMessageUpdate));
+          dispatch(showModalSuccess(successMessage));
           handleClear();
           setLoadingSave(false);
         })
-        .catch((error) => {
+        .catch(() => {
           setLoadingSave(false);
           setModalConfirm(false);
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
         });
     } else {
-      dispatch(createPartner(sendBody))
+      dispatch(createCaCiMapping(sendBody))
         .unwrap()
         .then(async (data) => {
-          let id = data.id;
           setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
-            const element = listDataAttachment[icon];
-
+          for (const element of listDataAttachment) {
             const body = {
               files: element.file,
               fileCategoryId: element.fileCategoryId,
-              referensiId: id,
-              category: "PARTNER",
+              referensiId: data.id,
+              category: "PAYMENT_CHANNEL_CA_CI_MAPPING",
             };
             await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
@@ -441,56 +349,53 @@ const ListFormPartner = (props) => {
           setLoadingForm(false);
           handleCancelModalConfirm();
           handleClear();
-          dispatch(showModalSuccess(successMessageCreate));
+          dispatch(showModalSuccess(successMessage));
           setLoadingSave(false);
         })
-        .catch((error) => {
+        .catch(() => {
           setLoadingSave(false);
           setModalConfirm(false);
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
         });
     }
   };
+
+  const routes = [
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_CA_CI_MAPPING,
+      breadcrumbName: "Payment Channel CA CI Mapping",
+    },
+    {
+      path: type === "create"
+        ? RECEIPT_AND_COLLECTION_ROUTES.CREATE_CA_CI_MAPPING
+        : RECEIPT_AND_COLLECTION_ROUTES.UPDATE_CA_CI_MAPPING,
+      breadcrumbName: type === "create" ? "Create" : "Update",
+    },
+  ];
 
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading || loadingForm}>
-        <FormStepper
-          steps={steps}
-          current={current}
-          onPrev={prev}
-          onNext={next}
-        />
+        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         <Form
           layout="vertical"
           form={form}
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
         >
-          <div
-            style={{
-              display: valuePage !== tabData[0].value ? "none" : undefined,
-            }}
-          >
-            <PartnerForm
+          <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
+            <CaCiMappingForm
               form={form}
+              dataPartnerList={dataPartnerList}
+              dataCollectingAgentList={dataCollectingAgentList}
+              dataDeliveryChannelList={dataDeliveryChannelList}
+              dataType={dataType}
             />
           </div>
-          <div
-            style={{
-              display: valuePage !== tabData[1].value ? "none" : undefined,
-            }}
-          >
-            <CardContainer header={"APPROVAL INFORMATION"}>
+          <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
+            <CardContainer header="APPROVAL INFORMATION">
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
@@ -499,22 +404,19 @@ const ListFormPartner = (props) => {
               />
             </CardContainer>
           </div>
-          <div
-            style={{
-              display: valuePage !== tabData[2].value ? "none" : undefined,
-            }}
-          >
-            <CardContainer header={"ATTACHMENT INFORMATION"}>
+          <div style={{ display: valuePage !== tabData[2].value ? "none" : undefined }}>
+            <CardContainer header="ATTACHMENT INFORMATION">
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                typeSelector="partner"
+                typeSelector="caCiMapping"
                 dispatch={dispatch}
-                getAPICategory={getListCategory}
+                getAPICategory={getListCategoryCaCiMapping}
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
-                typeRBI={"data"}
+                typeRBI="data"
+                mandatory
               />
             </CardContainer>
           </div>
@@ -531,12 +433,13 @@ const ListFormPartner = (props) => {
           />
         </Form>
       </Spin>
+
       <ModalCustom
         isOpen={modalConfirm}
         handleCancel={handleCancelModalConfirm}
-        header={"Confirmation"}
+        header="Confirmation"
         width={1000}
-        type={"confirmation"}
+        type="confirmation"
         footer={
           <div className="w-full flex justify-between gap-5 p-4">
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
@@ -553,17 +456,19 @@ const ListFormPartner = (props) => {
           </div>
         }
       >
-        <ContentModalConfirm
+        <ContentModalConfirmCaCiMapping
           data={sendBody}
           tabData={tabData}
           listDataAttachment={listDataAttachment}
           listDataAppHierDetail={appHierDataDetail}
           dataOption={appHierOptions}
           selectedHierarchy={selectedHierarchy}
+          dataPartnerList={dataPartnerList}
+          dataCollectingAgentList={dataCollectingAgentList}
+          dataDeliveryChannelList={dataDeliveryChannelList}
         />
       </ModalCustom>
 
-      {/* Modal Back*/}
       <ModalConfirm
         isOpen={modalBack}
         handleCancel={() => setModalBack(false)}
@@ -572,13 +477,11 @@ const ListFormPartner = (props) => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
-            Are you sure you want to back?
-          </p>
+          <p className="text-[18px] font-bold">Are you sure you want to go back?</p>
         </div>
       </ModalConfirm>
     </LayoutMenu>
   );
 };
 
-export default ListFormPartner;
+export default ListFormCaCiMapping;
