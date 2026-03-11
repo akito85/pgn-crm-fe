@@ -1712,10 +1712,10 @@ const UpdateServiceAgreement = ({ saType }) => {
 		}
 		// console.log(body, ' body');
 
+		setLoadingForm(true);
 		dispatch(updateServiceAgreement({ body: saRecordData.status === "ACTIVE" ? bodyIsActive : body }))
 			.unwrap()
 			.then(async (data) => {
-				setLoadingForm(true);
 				const idServiceagreement = data.saId;
 				const filterDataAttach = listDataAttachment.filter(
 					(item) => item.dataType !== "exist"
@@ -1746,6 +1746,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					setBodyError({ message });
 					setModalError(true);
 				}
+				setLoadingForm(false);
 				setModalConfirm(false);
 			});
 		dispatch(resetDataDetail());
@@ -1912,6 +1913,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 				setModalConfirm={setModalConfirm}
 				dataFinal={dataFinal}
 				handleConfirm={handleConfirm}
+				loadingSubmit={loadingForm}
 				listDataAttachment={listDataAttachment}
 				saInfoObj={saInfoObj}
 				saDetailObj={saDetailObj}

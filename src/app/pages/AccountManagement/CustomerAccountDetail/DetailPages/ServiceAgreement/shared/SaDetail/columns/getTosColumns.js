@@ -1,8 +1,15 @@
 import React from 'react';
 import { Tooltip } from 'antd';
 import SVGIcon from '../../../../../../../../../assets/Icon/index';
+import { hasValue, renderColumn } from '../../../../../../../../../utils';
+import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../../utils/getColumnSearchProps';
 
 export const getTosColumns = ({
+    search,
+    searchInput,
+    searchedColumn = "",
+    searchText = "",
+    handleSearch = () => { },
     isProduct,
     openModalFormTos,
     setdataUpdate,
@@ -23,6 +30,27 @@ export const getTosColumns = ({
             dataIndex: "tosName",
             sorter: true,
             width: 300,
+            filteredValue: search?.tosName ? [search.tosName] : null,
+            ...getColumnSearchPropsUseFilteredValueFE(
+                search,
+                "tosName",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true,
+                "input"
+            ),
+            render: (text) =>
+                renderColumn(
+                    "tosName",
+                    hasValue(search?.tosName),
+                    searchText,
+                    text,
+                    false,
+                    "input",
+                    search
+                ),
         },
         {
             title: "DESCRIPTION",
@@ -30,6 +58,27 @@ export const getTosColumns = ({
             dataIndex: "description",
             sorter: true,
             width: 400,
+            filteredValue: search?.description ? [search.description] : null,
+            ...getColumnSearchPropsUseFilteredValueFE(
+                search,
+                "description",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                true,
+                "input"
+            ),
+            render: (text) =>
+                renderColumn(
+                    "description",
+                    hasValue(search?.description),
+                    searchText,
+                    text,
+                    false,
+                    "input",
+                    search
+                ),
         },
         {
             title: "ACTION",

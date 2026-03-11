@@ -14,6 +14,7 @@ const TableLateCharge = ({
   const [orderSort, setOrderSort] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState({});
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: [],
     left: [],
@@ -27,7 +28,7 @@ const TableLateCharge = ({
     if (searchedColumn) {
       const fixSearchText = searchText.toLowerCase();
       result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
+        return item[searchedColumn]?.toString()?.toLowerCase().includes(fixSearchText);
       });
     }
 
@@ -80,22 +81,27 @@ const TableLateCharge = ({
     setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
     // Reset to first page when searching
-    setLoadedCount(10);
-  };
+    setLoadedCount(20);
+  }, []);
 
   const columns = useMemo(() => {
     return getLateChargeColumns({
+      search,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
     });
-  }, [searchedColumn, searchText]);
+  }, [search, searchedColumn, searchText, handleSearch]);
 
   const columnDefinitions = useMemo(() => {
     return columns.map((col) => ({
