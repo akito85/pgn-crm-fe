@@ -394,7 +394,7 @@ const ViewInvoice = () => {
               <span className="text-black ml-3">Detail</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Detail">
+            <Tooltip title="Detail" placement="left">
               <div
                 onClick={() => {
                   handleDetail(record);
@@ -434,7 +434,7 @@ const ViewInvoice = () => {
               <span className="text-black ml-3">Re-Generate</span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Re-Generate">
+            <Tooltip title="Re-Generate" placement="left">
               <div
                 onClick={() => handleReGenerate(record)}
                 style={{
@@ -486,17 +486,18 @@ const ViewInvoice = () => {
                   ? "Download"
                   : "Download (only available when status is Completed)"
               }
+              placement="left"
             >
               <div
                 onClick={() => isCompleted && handlePreviewFile(record)}
                 style={{
-                  cursor: isCompleted ? "pointer" : "not-allowed",
                   display: "inline-block",
                   lineHeight: 0,
+                  cursor: isCompleted ? "pointer" : "not-allowed",
                   opacity: isCompleted ? 1 : 0.4,
                 }}
               >
-                <SVGIcon name="IconDownload" width={20} />
+                <SVGIcon name="IconEye" width={20} />
               </div>
             </Tooltip>
           );

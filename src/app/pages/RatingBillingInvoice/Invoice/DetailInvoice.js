@@ -197,7 +197,7 @@ export const columns = (
             border={false}
             icon={
               <SVGIcon
-                name="IconDownload"
+                name="IconEye"
                 width={20}
                 color={isSuccess ? undefined : "#d9d9d9"}
               />

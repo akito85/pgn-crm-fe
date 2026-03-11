@@ -24,7 +24,13 @@ const WarrantyForm = ({
   warrantyType,
   headerCurrency,
   isPartialEdit,
-  isApprover
+  isWaitingApproval,
+  isApprover,
+  mutationTotalData,
+  mutationPage,
+  mutationPageSize,
+  onMutationPageChange,
+  loadingMutation,
 }) => {
   return (
     <div className="flex flex-col gap-8 mt-8 pb-4">
@@ -57,7 +63,13 @@ const WarrantyForm = ({
         handleDelete={handleMutationDelete}
         isCreate={isCreate}
         disabled={isPartialEdit}
+        isWaitingApproval={isWaitingApproval}
         isApprover={isApprover}
+        mutationTotalData={mutationTotalData}
+        mutationPage={mutationPage}
+        mutationPageSize={mutationPageSize}
+        onMutationPageChange={onMutationPageChange}
+        loadingMutation={loadingMutation}
       />
     </div>
   );
