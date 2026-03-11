@@ -16,7 +16,6 @@ import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
-  getTypeDDL,
   createPartner,
   createValidasiPartner,
   getAllApprovalList,
@@ -32,7 +31,7 @@ import { dateFormatting } from "../../../../../utils";
 import PartnerForm from "./PartnerForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ContentModalConfirm from "./ContentModalConfirm";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -52,7 +51,6 @@ const ListFormPartner = (props) => {
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
-    dataType,
   } = useSelector((state) => state.partner);
 
   // Declaration
@@ -99,7 +97,6 @@ const ListFormPartner = (props) => {
 
   useEffect(() => {
     dispatch(getAllApprovalList());
-    dispatch(getTypeDDL());
   }, [dispatch]);
 
   useEffect(() => {
@@ -163,7 +160,6 @@ const ListFormPartner = (props) => {
             : moment(data_detail?.partner?.effEndDate).clone(),
         tokenExpirationTime: data_detail?.partner?.tokenExpirationTime,
         secKeySignature: data_detail?.partner?.secKeySignature,
-        type: data_detail?.partner?.type,
         apphierId: data_detail?.partner?.appHierId,
       });
 
@@ -189,7 +185,6 @@ const ListFormPartner = (props) => {
         "effEndDate",
         "tokenExpirationTime",
         "secKeySignature",
-        "type"
       ]
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -247,7 +242,6 @@ const ListFormPartner = (props) => {
       // partnerId: id,
       partnerCode: formValue.partnerCode,
       partnerName: formValue.partnerName,
-      type: formValue.type,
       tokenExpirationTime: formValue.tokenExpirationTime,
       seckeySignature: formValue.secKeySignature,
       effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
@@ -293,7 +287,6 @@ const ListFormPartner = (props) => {
       id: id,
       partnerCode: values.partnerCode,
       partnerName: values.partnerName,
-      type: values.type,
       tokenExpirationTime: values.tokenExpirationTime,
       seckeySignature: values.secKeySignature,
       effStartDate: values.effStartDate ? moment(values.effStartDate).format(dateFormatting.date) : null,
@@ -504,7 +497,6 @@ const ListFormPartner = (props) => {
             }}
           >
             <PartnerForm
-              dataType={dataType}
               form={form}
             />
           </div>
@@ -513,21 +505,21 @@ const ListFormPartner = (props) => {
               display: valuePage !== tabData[1].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+            <CardContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
           <div
             style={{
               display: valuePage !== tabData[2].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+            <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -539,7 +531,7 @@ const ListFormPartner = (props) => {
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
           <FormFooter
             current={current}
