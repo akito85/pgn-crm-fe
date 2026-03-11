@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Table, Input, InputNumber, Select } from "antd";
 
 const { Option } = Select;
@@ -61,6 +61,23 @@ const NxTableInlineEdit = ({
 }) => {
   const [editingKey, setEditingKey] = useState(null);
   const [editingValues, setEditingValues] = useState({});
+  const [isNewRow, setIsNewRow] = useState(false);
+  const prevLengthRef = useRef(dataSource.length);
+
+  // Auto-enter edit mode when a new row is appended (e.g. via "Add" button)
+  useEffect(() => {
+    const prevLength = prevLengthRef.current;
+    prevLengthRef.current = dataSource.length;
+
+    if (dataSource.length > prevLength) {
+      const newRow = dataSource[dataSource.length - 1];
+      if (newRow) {
+        setEditingKey(newRow[rowKey]);
+        setEditingValues({ ...newRow });
+        setIsNewRow(true);
+      }
+    }
+  }, [dataSource, rowKey]);
 
   const isEditing = (record) => record[rowKey] === editingKey;
 
@@ -68,14 +85,21 @@ const NxTableInlineEdit = ({
     (record) => {
       setEditingKey(record[rowKey]);
       setEditingValues({ ...record });
+      setIsNewRow(false);
     },
     [rowKey]
   );
 
   const handleEditCancel = useCallback(() => {
+    if (isNewRow) {
+      // New unsaved row — remove it entirely
+      const newData = dataSource.filter((row) => row[rowKey] !== editingKey);
+      onDataChange?.(newData);
+    }
     setEditingKey(null);
     setEditingValues({});
-  }, []);
+    setIsNewRow(false);
+  }, [isNewRow, dataSource, editingKey, onDataChange, rowKey]);
 
   const handleEditSave = useCallback(() => {
     const newData = dataSource.map((row) =>
