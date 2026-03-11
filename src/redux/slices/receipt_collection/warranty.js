@@ -347,7 +347,7 @@ export const submitHold = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-warranty/hold/submit`;
-      const response = await receiptCollectionHttpService.create(url, data);
+      const response = await receiptCollectionHttpService.createData(url, data);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(setBodyError(error));
@@ -361,7 +361,7 @@ export const submitRelease = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-warranty/release/submit`;
-      const response = await receiptCollectionHttpService.create(url, data);
+      const response = await receiptCollectionHttpService.createData(url, data);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(setBodyError(error));
@@ -375,7 +375,7 @@ export const submitRefund = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-warranty/refund/submit`;
-      const response = await receiptCollectionHttpService.create(url, data);
+      const response = await receiptCollectionHttpService.createData(url, data);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(setBodyError(error));
@@ -1004,6 +1004,43 @@ const warrantySlice = createSlice({
       state.loadingApproval = true;
       state.dataApprovalHistory = null;
     },
+    // Get Hold List Paginate
+    [getHoldListPaginate.pending]: (state) => {
+      state.loadingHoldList = true;
+    },
+    [getHoldListPaginate.fulfilled]: (state, action) => {
+      state.loadingHoldList = false;
+      state.dataHoldList = action.payload || null;
+    },
+    [getHoldListPaginate.rejected]: (state) => {
+      state.loadingHoldList = false;
+    },
+
+    // Get Release List Paginate
+    [getReleaseListPaginate.pending]: (state) => {
+      state.loadingReleaseList = true;
+    },
+    [getReleaseListPaginate.fulfilled]: (state, action) => {
+      state.loadingReleaseList = false;
+      state.dataReleaseList = action.payload || null;
+    },
+    [getReleaseListPaginate.rejected]: (state) => {
+      state.loadingReleaseList = false;
+    },
+
+    // Get Refund List Paginate
+    [getRefundListPaginate.pending]: (state) => {
+      state.loadingRefundList = true;
+    },
+    [getRefundListPaginate.fulfilled]: (state, action) => {
+      state.loadingRefundList = false;
+      state.dataRefundList = action.payload || null;
+    },
+    [getRefundListPaginate.rejected]: (state) => {
+      state.loadingRefundList = false;
+    },
+
+    // Get Hold/Release/Refund Detail List
     [getHoldDetailList.fulfilled]: (state, action) => {
       state.dataHoldDetailList = action.payload?.data?.result || [];
     },

@@ -56,8 +56,9 @@ const ModalHold = ({
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
-    loading,
+    loadingHoldList,
   } = useSelector((state) => state.warranty);
+
 
   // Declaration
   const containerRef = useRef(null);
@@ -166,12 +167,6 @@ const ModalHold = ({
       if (!remarkHoldInformation) {
         return message.warning("Please input your Remark!");
       }
-      const isTableIncomplete = dataSourceHoldInfoWithKeys.some(
-        (item) => !holdAmountData[item.key]
-      );
-      if (isTableIncomplete) {
-        return message.warning("Please input Hold Amount for all items!");
-      }
     }
     if (current === 2 && !selectedHierarchy) {
       return message.warning("Please select Approval Hierarchy!");
@@ -237,8 +232,6 @@ const ModalHold = ({
       setCurrent(0);
     }
 
-    setHoldAmountData({});
-    setHoldDateData({});
     setRemarkHoldInformation("");
     setListDataAttachment([]);
     setSelectedHierarchy(null);
@@ -298,9 +291,9 @@ const ModalHold = ({
       const submitBody = {
         type: WARRANTY_TRANSACTION_NAMES.HOLD,
         appHierId: selectedHierarchy,
-        items: dataWarrantyInfoSelect.map((item, index) => ({
+        items: dataWarrantyInfoSelect.map((item) => ({
           payWarrantyId: item.id,
-          amount: holdAmountData[dataSourceHoldInfoWithKeys[index]?.key] || 0,
+          amount: item.currencyBalance || 0,
           currency: item.currency || "IDR",
         })),
         remark: remarkHoldInformation,
@@ -518,15 +511,6 @@ const ModalHold = ({
   };
 
   // Hold Information Step
-  const [holdAmountData, setHoldAmountData] = useState({});
-  const handleHoldAmountChange = (value, recordKey) => {
-    setHoldAmountData(prev => ({ ...prev, [recordKey]: value }));
-  };
-
-  const [holdDateData, setHoldDateData] = useState({});
-  const handleHoldDateChange = (value, recordKey) => {
-    setHoldDateData(prev => ({ ...prev, [recordKey]: value }));
-  }; 
 
   const [remarkHoldInformation, setRemarkHoldInformation] = useState("");
 
@@ -552,14 +536,9 @@ const ModalHold = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        holdAmountData,
-        handleHoldAmountChange,
-        holdDateData,
-        handleHoldDateChange,
-        false
+        handleSearch
       ),
-    [searchedColumn, searchText, holdAmountData, holdDateData]
+    [searchedColumn, searchText]
   );
 
   const baseColumnsHoldInfoConfirmation = useMemo(
@@ -570,14 +549,9 @@ const ModalHold = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        holdAmountData,
-        handleHoldAmountChange,
-        holdDateData,
-        handleHoldDateChange,
-        true
+        handleSearch
       ),
-    [searchedColumn, searchText, holdAmountData, holdDateData]
+    [searchedColumn, searchText]
   );
 
   const processedColumnsHoldInfoConfirmation = useMemo(() => {
@@ -729,7 +703,7 @@ const ModalHold = ({
                 columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingHoldList}
                 showExport={false}
                 rowSelection={rowSelectionWarrantyInfo}
               />
@@ -756,7 +730,7 @@ const ModalHold = ({
                 columnDefinitions={columnDefinitionsHoldInfo}
                 fixedColumns={fixedHoldColumns}
                 setFixedColumns={setFixedHoldColumns}
-                loading={loading}
+                loading={loadingHoldList}
                 showExport={false}
               />
               
