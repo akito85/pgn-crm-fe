@@ -119,6 +119,18 @@ tr:nth-child(odd) > td.ant-table-cell,
   background-color: #fffbea !important;
 }
 
+/* Expand icon column: fixed width, prevent shrinking on resize */
+.ant-table-row-expand-icon-cell {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+}
+
+/* Expanded row content padding */
+.ant-table-expanded-row > td {
+  padding: 8px 16px !important;
+}
+
 .ant-tag {
   border-radius: 4px !important;
   font-weight: 600;
