@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import {
   showModalError,
@@ -7,9 +7,14 @@ import {
   validateError,
 } from "../general_slice";
 
+const warrantyAdapter = createEntityAdapter({
+  selectId: (warranty) => warranty.id,
+  sortComparer: (a, b) => b.createdAt - a.createdAt
+});
 
-const initialState = {
-  data: [],
+
+const initialState = warrantyAdapter.getInitialState({
+  data: null,
   data_detail: {},
   data_customer_info: [],
   data_warranty_info: [],
@@ -23,7 +28,7 @@ const initialState = {
   dataListCategory: [],
   dataApprovalHistory: null,
 
-  dataMutationInfo: null,
+  dataMutation: null,
   dataDetailMutation: null,
   loadingMutation: false,
   loadingDetailMutation: false,
@@ -45,7 +50,7 @@ const initialState = {
   isFailed: false,
   isSuccess: false,
   message: "",
-};
+});
 
 export const getPaymentWarrantyPartnerList = createAsyncThunk(
   "GET_PAYMENT_WARRANTY_PARTNER_LIST",
@@ -474,11 +479,18 @@ export const createMutation = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Submission failed. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        if (message?.toLowerCase()?.includes('duplicate')) {
+          thunkAPI.dispatch(showModalError({ 
+            title: "Failed", 
+            description: "Mutation Number sudah digunakan, silakan gunakan nomor lain" 
+          }));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Submission failed. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
       }
       return thunkAPI.rejectWithValue(error.response);
     }
@@ -748,6 +760,7 @@ const warrantySlice = createSlice({
     [getAllWarrantyListPaginate.fulfilled]: (state, action) => {
       state.loadingList = false;
       state.data = action.payload;
+      warrantyAdapter.setAll(state, action.payload?.result || []);
     },
     [getAllWarrantyListPaginate.rejected]: (state) => {
       state.loadingList = false;
@@ -780,15 +793,15 @@ const warrantySlice = createSlice({
     // Get Mutation GET_DETAIL_WARRANTY_MUTATION
     [getDetailWarrantyMutation.pending]: (state) => {
       state.loadingMutation = true;
-      state.dataMutationInfo = null;
+      state.dataMutation = null;
     },
     [getDetailWarrantyMutation.fulfilled]: (state, action) => {
       state.loadingMutation = false;
-      state.dataMutationInfo = action.payload;
+      state.dataMutation = action.payload;
     },
     [getDetailWarrantyMutation.rejected]: (state) => {
       state.loadingMutation = false;
-      state.dataMutationInfo = null;
+      state.dataMutation = null;
     },
 
     // Get All GET_ALL_WARRANTY_INFO_PAGINATE Pagination
@@ -1050,5 +1063,13 @@ const warrantySlice = createSlice({
 });
 
 const { reducer } = warrantySlice;
+
+export const {
+  selectAll: selectAllWarranties,
+  selectById: selectWarrantyById,
+  selectIds: selectWarrantyIds,
+  selectEntities: selectWarrantyEntities
+} = warrantyAdapter.getSelectors(state => state.warranty);
+
 export default reducer;
 
