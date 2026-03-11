@@ -490,13 +490,13 @@ const ViewInvoice = () => {
               <div
                 onClick={() => isCompleted && handlePreviewFile(record)}
                 style={{
-                  cursor: isCompleted ? "pointer" : "not-allowed",
                   display: "inline-block",
                   lineHeight: 0,
+                  cursor: isCompleted ? "pointer" : "not-allowed",
                   opacity: isCompleted ? 1 : 0.4,
                 }}
               >
-                <SVGIcon name="IconDownload" width={20} />
+                <SVGIcon name="IconEye" width={20} />
               </div>
             </Tooltip>
           );
