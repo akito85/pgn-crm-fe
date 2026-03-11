@@ -23,5 +23,6 @@ export const WARRANTY_APPROVAL_STATUS = {
     APPROVED: 'Approved',
     REJECTED: 'Rejected',
     WAITING_APPROVAL: 'Waiting Approval',
+    DRAFT: 'Draft',
 };
 

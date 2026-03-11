@@ -83,7 +83,7 @@ const ModalRequestApproval = ({
           page,
           pageSize,
           sort,
-        })
+        }),
       );
     }
   }, [dispatch, isOpen, search, page, pageSize, sort]);
@@ -271,9 +271,9 @@ const ModalRequestApproval = ({
         searchText,
         handleSearch,
         // PERUBAHAN: Tambahkan search sebagai argumen ke-7 (sesuai signature terbaru)
-        search
+        search,
       ),
-    [page, pageSize, searchedColumn, searchText, search]
+    [page, pageSize, searchedColumn, searchText, search],
   );
 
   const allColumns = useMemo(() => {
@@ -312,50 +312,48 @@ const ModalRequestApproval = ({
         handleCancel={handleCancelForm}
         width={1000}
         footer={
-          <div className="flex w-full justify-end gap-x-5">
-            {current < steps.length - 1 && (
-              <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                Cancel
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              >
-                Previous
-              </ButtonComponent>
-            )}
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={handleButtonNext}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
+          <div className="flex w-full justify-between items-center">
+            {/* Kiri: Tombol Cancel */}
+            <div>
+              {current < steps.length - 1 && (
+                <ButtonComponent type={"default"} onClick={handleCancelForm}>
+                  Cancel
+                </ButtonComponent>
+              )}
+            </div>
+
+            {/* Kanan: Tombol Previous, Next, Confirm */}
+            <div className="flex gap-x-3">
+              {current > 0 && (
+                <ButtonComponent
+                  onClick={() => {
+                    prev();
+                    scrollLeftHandler();
                   }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                form={"formRequest"}
-              >
-                Confirm
-              </ButtonComponent>
-            )}
+                  type={"default"}
+                >
+                  Previous
+                </ButtonComponent>
+              )}
+              {current < steps.length - 1 && (
+                <ButtonComponent
+                  onClick={handleButtonNext}
+                  type={"submit"}
+                  disabled={steps[current].disabled}
+                >
+                  Next
+                </ButtonComponent>
+              )}
+              {current === steps.length - 1 && (
+                <ButtonComponent
+                  type={"submit"}
+                  htmlType={"submit"}
+                  form={"formRequest"}
+                >
+                  Confirm
+                </ButtonComponent>
+              )}
+            </div>
           </div>
         }
       >
@@ -448,116 +446,86 @@ const ModalRequestApproval = ({
               <p className="text-primary uppercase font-bold mb-4">
                 Approval Information
               </p>
-              <Form.Item
-                name="apphierId"
-                hidden
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Approval Hierarchy!",
-                  },
-                ]}
-              >
-                <input type="hidden" />
-              </Form.Item>
-              <TableRBI
-                dataSource={dataTable}
-                columns={columnsApproval(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
-                expandable={{
-                  expandedRowRender: (record) => (
-                    <div>
-                      <p className="text-primary text-xs font-bold uppercase pt-4">
-                        EMPLOYEE INFORMATION
-                      </p>
-                      <TableRBI
-                        dataSource={record?.employeeDetail || []}
-                        columns={columnsExpandApproval(
-                          page,
-                          pageSize,
-                          searchInput,
-                          searchedColumn,
-                          searchText,
-                          handleSearch
-                        )}
-                        className={"mb-4"}
-                        useSelect={false}
-                        usePagination={false}
-                      />
-                    </div>
-                  ),
-                }}
-                usePagination={false}
-                loading={loading}
-                customHeaderLeft={
-                  <div style={{ position: "relative" }}>
-                    <style>{`
-                      .approval-hierarchy-select .ant-select-selector {
-                        display: flex !important;
-                        align-items: center !important;
-                        gap: 8px !important;
-                        border: 1px solid #BDBDBD !important;
-                        height: 40px !important;
-                        color: black !important;
-                        border-radius: 6px !important;
-                        font-size: 14px !important;
-                        font-weight: 500 !important;
-                        padding: 0 11px !important;
-                        background: white !important;
-                      }
-                      .approval-hierarchy-select .ant-select-selection-placeholder {
-                        color: rgba(0, 0, 0, 0.25) !important;
-                        line-height: 40px !important;
-                        font-size: 14px !important;
-                        font-weight: 500 !important;
-                      }
-                      .approval-hierarchy-select .ant-select-selection-item {
-                        line-height: 40px !important;
-                        font-size: 14px !important;
-                        font-weight: 500 !important;
-                        color: black !important;
-                      }
-                      .approval-hierarchy-select .ant-select-arrow {
-                        color: black !important;
-                        font-size: 12px !important;
-                      }
-                      .approval-hierarchy-select:not(.ant-select-disabled):hover .ant-select-selector {
-                        border-color: #BDBDBD !important;
-                      }
-                      .approval-hierarchy-select.ant-select-focused .ant-select-selector {
-                        border-color: #40a9ff !important;
-                        box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
-                      }
-                    `}</style>
-                    <Select
-                      value={form.getFieldValue("apphierId")}
-                      onChange={(value) => {
-                        form.setFieldsValue({ apphierId: value });
-                        handleSelect(value);
-                      }}
-                      placeholder="Approval Hierarchy"
-                      suffixIcon={<DownOutlined style={{ fontSize: "12px" }} />}
-                      style={{ minWidth: 200 }}
-                      className="approval-hierarchy-select"
-                    >
-                      {data_approval?.map((data, index) => (
-                        <Select.Option value={data.appHierId} key={index}>
-                          {data.approvalName}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </div>
-                }
-              />
+
+              {/* Dropdown Approval Hierarchy sebagai Form.Item */}
+              <div className="w-1/3 mb-6">
+                <Form.Item
+                  label="Approval Hierarchy"
+                  name="apphierId"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select Approval Hierarchy!",
+                    },
+                  ]}
+                >
+                  <Select
+                    onChange={(value) => {
+                      handleSelect(value);
+                    }}
+                    placeholder="Select approval hierarchy"
+                    loading={loading}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.children ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                  >
+                    {data_approval?.map((data) => (
+                      <Select.Option
+                        value={data.appHierId}
+                        key={data.appHierId}
+                      >
+                        {data.approvalName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
+
+              {/* Tabel Approval muncul setelah hierarchy dipilih */}
+              {boolean && dataTable.length > 0 && (
+                <TableRBI
+                  dataSource={dataTable}
+                  columns={columnsApproval(
+                    page,
+                    pageSize,
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                  )}
+                  expandable={{
+                    expandedRowRender: (record) => (
+                      <div>
+                        <p className="text-primary text-xs font-bold uppercase pt-4">
+                          EMPLOYEE INFORMATION
+                        </p>
+                        <TableRBI
+                          dataSource={record?.employeeDetail || []}
+                          columns={columnsExpandApproval(
+                            page,
+                            pageSize,
+                            searchInput,
+                            searchedColumn,
+                            searchText,
+                            handleSearch,
+                          )}
+                          className={"mb-4"}
+                          useSelect={false}
+                          usePagination={false}
+                        />
+                      </div>
+                    ),
+                  }}
+                  useSelect={false}
+                  usePagination={false}
+                  loading={loading}
+                />
+              )}
             </div>
           </div>
-
           {/* STEP 3: CONFIRMATION */}
           <div
             className={`steps-content my-[30px] ${current !== 2 ? "hidden" : ""}`}
@@ -601,7 +569,7 @@ const ModalRequestApproval = ({
                     {
                       data_approval
                         ?.filter(
-                          (a) => a.appHierId === form.getFieldValue().apphierId
+                          (a) => a.appHierId === form.getFieldValue().apphierId,
                         )
                         ?.find((b) => b.approvalName)?.approvalName
                     }
@@ -623,7 +591,7 @@ const ModalRequestApproval = ({
                       searchInput,
                       searchedColumn,
                       searchText,
-                      handleSearch
+                      handleSearch,
                     )}
                     expandable={{
                       expandedRowRender: (record) => (
@@ -642,7 +610,7 @@ const ModalRequestApproval = ({
                               searchInput,
                               searchedColumn,
                               searchText,
-                              handleSearch
+                              handleSearch,
                             )}
                             className={"mb-4"}
                           />
