@@ -4,7 +4,10 @@ import { Steps, Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { approveOrRejectAllInvoiceRelation, getInvoiceRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import {
+  approveOrRejectAllInvoiceRelation,
+  getInvoiceRelationApproval
+} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
@@ -15,12 +18,15 @@ const InvoiceRelationApprovalModal = ({
   id = 0,
   isOpen,
   handleCancel = () => {},
-  afterFinish = () => {},
+  afterFinish = () => {}
 }) => {
   // Selector
-  const { list_invoiceRelationApproval: invoiceRelationApprovals, pagination_invoiceRelationApproval: pagination, loading_listIrApproval, loading_approveRejectIr } = useSelector(
-    (state) => state.financialInformation
-  );
+  const {
+    list_invoiceRelationApproval: invoiceRelationApprovals,
+    pagination_invoiceRelationApproval: pagination,
+    loading_listIrApproval,
+    loading_approveRejectIr
+  } = useSelector((state) => state.financialInformation);
 
   // Declaration
   const containerRef = useRef(null);
@@ -59,14 +65,14 @@ const InvoiceRelationApprovalModal = ({
         sort,
         searchs: search,
         filters,
-        filterRules,
-      }
+        filterRules
+      };
 
       dispatch(
         getInvoiceRelationApproval({
           id,
           body,
-          isLoadMore: false,
+          isLoadMore: false
         })
       );
       setPage(1);
@@ -84,7 +90,7 @@ const InvoiceRelationApprovalModal = ({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
@@ -102,14 +108,14 @@ const InvoiceRelationApprovalModal = ({
         sort,
         searchs: search,
         filters,
-        filterRules,
-      }
+        filterRules
+      };
 
       dispatch(
         getInvoiceRelationApproval({
           id,
           body,
-          isLoadMore: true,
+          isLoadMore: true
         })
       );
       setPage(nextPage);
@@ -133,26 +139,24 @@ const InvoiceRelationApprovalModal = ({
     selectedRowKeys,
     onChange: (newSelectedRowKeys, newSelectedRows) => {
       setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
+      setSelectedRows(
+        newSelectedRows.map((newSelectedRow) => ({ ...newSelectedRow }))
+      );
     },
-    preserveSelectedRowKeys: true,
+    preserveSelectedRowKeys: true
   };
 
   // Step
   const steps = [
     {
-      title: "INVOICE RELATION",
+      title: "INVOICE RELATION"
     },
     {
-      title: "CONFIRMATION",
-    },
+      title: "CONFIRMATION"
+    }
   ];
 
-  const formFields = [
-    [
-      "remark",
-    ],
-  ];
+  const formFields = [["remark"]];
 
   // Button Next
   const next = async () => {
@@ -161,26 +165,24 @@ const InvoiceRelationApprovalModal = ({
         if (!selectedRowKeys.length) {
           const errorBody = {
             title: "Failed",
-            description: `Please select at least one record`,
+            description: `Please select at least one record`
           };
           dispatch(showModalError(errorBody));
 
           throw new Error("No record was selected");
         } else {
           await form.validateFields([formFields[current]]);
-          setCurrent(prev => prev + 1);
+          setCurrent((prev) => prev + 1);
         }
       } else {
-        form.validateFields([formFields[current]])
+        form.validateFields([formFields[current]]);
       }
-    } catch {
-
-    }
+    } catch {}
   };
 
   // Button Previous
   const prev = () => {
-    setCurrent(prev => prev - 1);
+    setCurrent((prev) => prev - 1);
   };
 
   // Scroll Left Handler
@@ -213,7 +215,7 @@ const InvoiceRelationApprovalModal = ({
   // Mapping Step
   const items = steps.map((item) => ({
     key: item.title,
-    title: item.title,
+    title: item.title
   }));
 
   // Handle Cancel Form
@@ -230,50 +232,51 @@ const InvoiceRelationApprovalModal = ({
     form.resetFields();
   };
 
-  
   const handleSave = async (action) => {
     try {
       const values = await form.validateFields();
-      
-      const body = selectedRows.filter(row => row.approvalType === "INVOICE_RELATION").map((row) => ({
-        id: row.id,
-        approvalId: row.tappId,
-        action,
-        description: values.remark,
-      }));
-  
-      const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_INVOICE_RELATION").map((row) => ({
-        id: row.id,
-        approvalId: row.tappId,
-        action,
-        description: values.remark,
-      }))
+
+      const body = selectedRows
+        .filter((row) => row.approvalType === "INVOICE_RELATION")
+        .map((row) => ({
+          id: row.id,
+          approvalId: row.tappId,
+          action,
+          description: values.remark
+        }));
+
+      const inactiveBody = selectedRows
+        .filter((row) => row.approvalType === "INACTIVE_INVOICE_RELATION")
+        .map((row) => ({
+          id: row.id,
+          approvalId: row.tappId,
+          action,
+          description: values.remark
+        }));
 
       dispatch(
         approveOrRejectAllInvoiceRelation({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected",
+          action: action === "APPROVE" ? "approved" : "rejected"
         })
       )
-      .unwrap()
-      .then(() => {
-        afterFinish();
-        setCurrent(0);
-        form.resetFields();
-        handleCancel();
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
-        setSearch({});
-        setPage(1);
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-      })
-      .catch((error) => {})
-    } catch {
-
-    }
+        .unwrap()
+        .then(() => {
+          afterFinish();
+          setCurrent(0);
+          form.resetFields();
+          handleCancel();
+          setSelectedRowKeys([]);
+          setSelectedRows([]);
+          setSearch({});
+          setPage(1);
+          setSort("");
+          setSearchText("");
+          setSearchedColumn("");
+        })
+        .catch((error) => {});
+    } catch {}
   };
 
   const columnDefinitions = useMemo(
@@ -284,7 +287,7 @@ const InvoiceRelationApprovalModal = ({
         searchedColumn,
         searchText,
         handleSearch,
-        false,
+        false
       ),
     [page, loadMoreSize, searchedColumn, searchText]
   );
@@ -320,11 +323,13 @@ const InvoiceRelationApprovalModal = ({
                 Previous
               </Button>
 
-              { current < steps.length - 1 && (
+              {current < steps.length - 1 && (
                 <Button
                   onClick={() => handleButtonNext()}
                   type={"submit"}
-                  disabled={current > steps.length - 1 || steps[current].disabled}
+                  disabled={
+                    current > steps.length - 1 || steps[current].disabled
+                  }
                 >
                   Next
                 </Button>
@@ -355,7 +360,7 @@ const InvoiceRelationApprovalModal = ({
           border={{
             top: false,
             right: false,
-            left: false,
+            left: false
           }}
           rounded={false}
         >
@@ -365,21 +370,19 @@ const InvoiceRelationApprovalModal = ({
               ref={containerRef}
               className="overflow-x-scroll scrollStepsCstm"
             >
-              <Steps current={current} items={items} labelPlacement="vertical" />
+              <Steps
+                current={current}
+                items={items}
+                labelPlacement="vertical"
+              />
             </div>
           </div>
         </NxBaseContainer>
 
         <div className="p-4">
           {/* STEP 1: INVOICE RELATION INFORMATION */}
-          <div
-            className={`steps-content ${current !== 0 ? "hidden" : ""}`}
-          >
-            <Form
-              layout="vertical"
-              form={form}
-              id={"formApprove"}
-            >
+          <div className={`steps-content ${current !== 0 ? "hidden" : ""}`}>
+            <Form layout="vertical" form={form} id={"formApprove"}>
               <div className="w-full grid grid-cols-1 gap-x-4">
                 <NxBaseContainer
                   border
@@ -409,7 +412,7 @@ const InvoiceRelationApprovalModal = ({
                     label={"Remark"}
                     name={"remark"}
                     rules={[
-                      { required: true, message: "Please input your Remark!" },
+                      { required: true, message: "Please input your Remark!" }
                     ]}
                     className="no-margin-form"
                   >
@@ -425,15 +428,9 @@ const InvoiceRelationApprovalModal = ({
           </div>
 
           {/* STEP 2: CONFIRMATION */}
-          <div
-            className={`steps-content ${current !== 1 ? "hidden" : ""}`}
-          >
-            <NxBaseContainer
-              border
-              header={"Confirmation"}
-            >
+          <div className={`steps-content ${current !== 1 ? "hidden" : ""}`}>
+            <NxBaseContainer border header={"Confirmation"}>
               <div className="flex flex-col gap-y-4">
-
                 <NxTable
                   dataSource={selectedRows}
                   columns={columns}
