@@ -7,7 +7,8 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
+import { LeftOutlined, PlusOutlined } from "@ant-design/icons";
+import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { createJob } from "../../../../redux/slices/job_management/jobSlice";
 
@@ -35,6 +36,33 @@ const CreateJobPage = () => {
     },
   ];
 
+  const [parameters, setParameters] = useState([
+    { key: 1, name: 'Customer ID', code: 'CUST_ID', type: 'String', length: 50, description: 'Unique customer identifier' },
+    { key: 2, name: 'Invoice Date', code: 'INV_DATE', type: 'Date', length: 10, description: 'Date of invoice generation' },
+    { key: 3, name: 'Amount', code: 'AMOUNT', type: 'Number', length: 15, description: 'Invoice amount in IDR' },
+  ]);
+
+  const handleAddParameter = () => {
+    const newKey = parameters.length > 0 ? Math.max(...parameters.map(p => p.key)) + 1 : 1;
+    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', length: null, description: '' }]);
+  };
+
+  const parameterColumns = [
+    { title: 'Name',        dataIndex: 'name',        editable: true, inputType: 'text',   placeholder: 'Parameter name', width: 180 },
+    { title: 'Code',        dataIndex: 'code',        editable: true, inputType: 'text',   placeholder: 'Parameter code', width: 150 },
+    {
+      title: 'Type', dataIndex: 'type', editable: true, inputType: 'select', width: 140,
+      selectOptions: [
+        { value: 'String',  label: 'String' },
+        { value: 'Number',  label: 'Number' },
+        { value: 'Date',    label: 'Date' },
+        { value: 'Boolean', label: 'Boolean' },
+      ],
+    },
+    { title: 'Length',      dataIndex: 'length',      editable: true, inputType: 'number', placeholder: 'Length',         width: 110, min: 0 },
+    { title: 'Description', dataIndex: 'description', editable: true, inputType: 'text',   placeholder: 'Description' },
+  ];
+
   const handleDescriptionChange = (e) => {
     const value = e.target.value;
     setDescriptionLength(value.length);
@@ -54,6 +82,7 @@ const CreateJobPage = () => {
         type: values.type,
         module: values.module,
         accessGroup: values.accessGroup,
+        parameters: parameters.filter(p => p.name || p.code),
       };
 
       const result = await dispatch(createJob(jobData)).unwrap();
@@ -332,6 +361,32 @@ const CreateJobPage = () => {
               </Form.Item>
             </div>
           </NxBaseContainer>
+          
+          {/* Parameter inline edit table */}
+          <div className="mt-4">
+            <NxBaseContainer
+              border
+              header="PARAMETERS"
+              headerActions={
+                <ButtonComponent
+                  type="primary"
+                  htmlType="button"
+                  onClick={handleAddParameter}
+                  icon={<PlusOutlined />}
+                >
+                  Add
+                </ButtonComponent>
+              }
+            >
+              <NxTableInlineEdit
+                idTable="job-parameters-table"
+                dataSource={parameters}
+                onDataChange={setParameters}
+                columns={parameterColumns}
+                emptyText='No parameters. Click "Add" to create one.'
+              />
+            </NxBaseContainer>
+          </div>
         </NxCardContainer>
       </Form>
     </LayoutMenu>

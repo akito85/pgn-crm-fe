@@ -751,7 +751,7 @@ const NxTable = ({
 
             #${idTable} .ant-table-thead > tr > th {
               padding: 4px 8px !important;
-              min-height: 30px;
+              height: 30px !important;
               border: 0.5px solid #C8CDD4 !important;
             }
 

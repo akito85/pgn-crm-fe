@@ -388,7 +388,7 @@ const DetailServiceAgreement = () => {
               }}
             />
 
-            <>
+            <NxBaseContainer border>
               <ButtonComponent
                 type={"menu"}
                 className="!w-fit"
@@ -418,7 +418,7 @@ const DetailServiceAgreement = () => {
                   </ButtonComponent>
                 </div>
               ) : null}
-            </>
+            </NxBaseContainer>
           </div>
         </Spin>
 
