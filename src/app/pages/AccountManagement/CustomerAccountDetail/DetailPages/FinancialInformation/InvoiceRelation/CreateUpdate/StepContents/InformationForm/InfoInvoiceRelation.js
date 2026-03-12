@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Form, Button, Input } from "antd";
 import InputComponent from "../../../../../../../../../../components/InputComponent";
-import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
+import {
+  dateFormatting,
+  requiredMessage
+} from "../../../../../../../../../../utils";
 import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
@@ -18,7 +21,7 @@ export default function InfoInvoiceRelation({
   isUpdate,
   isDraft,
   form,
-  formView = true,
+  formView = true
 }) {
   const dispatch = useDispatch();
 
@@ -35,7 +38,7 @@ export default function InfoInvoiceRelation({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
-                                                                                                                                                                                                                                                                                                                                      
+
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -44,18 +47,19 @@ export default function InfoInvoiceRelation({
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  
-  const { list_irAccountStandard, pagination_irAccountStandard } = useSelector(
-    (state) => state.invoiceRelation
-  );
+
+  const {
+    list_irAccountStandard: irAccountStandards,
+    pagination_irAccountStandard: pagination
+  } = useSelector((state) => state.invoiceRelation);
 
   const handleCancel = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleClose = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -67,90 +71,85 @@ export default function InfoInvoiceRelation({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_irAccountStandard?.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
+      const body = {
+        searchs: search,
+        page: nextPage,
+        size: loadMoreSize,
+        sort
+      };
+
       await dispatch(
         getIrAccountStandard({
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
+          body,
           isLoadMore: true,
-          id: accountId,
+          id: accountId
         })
-      );
+      ).unwrap();
+
+      setPage(nextPage);
     }
-    setPage(nextPage);
   };
 
   useEffect(() => {
-    if (formView)
-      dispatch(getIrAccountStandard({
+    if (formView) {
+      const body = {
         page,
         size: loadMoreSize,
         sort,
-        searchs: JSON.stringify(search),
-        id: accountId,
-        isLoadMore: false,
-      }));
-  }, [ sort, search ]);
+        searchs: search
+      };
 
-  const baseColumns = useMemo(() =>
-    getAccountStandardColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      setAccount,
-      setIsOpen
-    ),
-  [search, searchText, searchedColumn]);
+      dispatch(
+        getIrAccountStandard({
+          body,
+          id: accountId,
+          isLoadMore: false
+        })
+      );
+    }
+  }, [sort, search]);
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
+  const columnDefinitions = useMemo(
+    () =>
+      getAccountStandardColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        setAccount,
+        setIsOpen
+      ),
+    [search, searchInput, searchText, searchedColumn]
+  );
 
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
-  
-  const currentData = useMemo(() => list_irAccountStandard, [list_irAccountStandard]);
-  
-  const hasMore = currentData.length < (pagination_irAccountStandard?.totalElements || 0);
+  const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
 
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
+  const totalElement = pagination.totalElement;
+  const hasMore = irAccountStandards.length < totalElement;
 
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
-  
   if (!formView) {
     return (
       <div className="w-full flex flex-col gap-4">
         <div className="w-full grid grid-cols-3 gap-4">
           <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
           <NxDetailText label="Account Name">{accountName}</NxDetailText>
-          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
-          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Start Date">
+            {NxDate.formatDate(startDate, "DD MMM YYYY")}
+          </NxDetailText>
+          <NxDetailText label="End Date">
+            {NxDate.formatDate(endDate, "DD MMM YYYY")}
+          </NxDetailText>
         </div>
         <div className="w-full">
           <NxDetailText label="Description">{description}</NxDetailText>
@@ -159,7 +158,7 @@ export default function InfoInvoiceRelation({
     );
   }
 
-  return(
+  return (
     <div className="flex flex-col gap-y-4">
       <div className="w-full grid grid-cols-3 gap-4">
         <div className="flex gap-2 items-end">
@@ -175,7 +174,7 @@ export default function InfoInvoiceRelation({
                 rules={[
                   {
                     message: requiredMessage("Account Number"),
-                    required: true,
+                    required: true
                   }
                 ]}
                 noStyle
@@ -186,7 +185,7 @@ export default function InfoInvoiceRelation({
                 type="submit"
                 className="w-[120px]"
                 onClick={() => {
-                  setIsOpen(true)
+                  setIsOpen(true);
                 }}
                 disabled={!isDraft && isUpdate}
               >
@@ -212,10 +211,12 @@ export default function InfoInvoiceRelation({
           rules={[
             {
               message: requiredMessage("Start Date"),
-              required: true,
-            },
+              required: true
+            }
           ]}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
+          getValueProps={(value) => ({
+            value: value && moment(value, dateFormatting.dateFormal)
+          })}
           className="no-margin-form"
         >
           <NxDate disabled={!isDraft && isUpdate} />
@@ -225,7 +226,9 @@ export default function InfoInvoiceRelation({
           key="endDate"
           name={"endDate"}
           label={"End Date"}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
+          getValueProps={(value) => ({
+            value: value && moment(value, dateFormatting.dateFormal)
+          })}
           className="no-margin-form"
         >
           <NxDate />
@@ -257,19 +260,19 @@ export default function InfoInvoiceRelation({
         footer={[
           <Button key="close" onClick={handleClose}>
             Close
-          </Button>,
+          </Button>
         ]}
       >
         <div className="p-4">
           <NxBaseContainer border>
             <NxTable
               idTable="invoice-relation-account-standard"
-              dataSource={dataSourceWithKeys}
-              totalData={pagination_irAccountStandard.totalElements || 0}
+              dataSource={irAccountStandards}
+              totalData={totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
               onSort={onSort}
-              columns={allColumns}
+              columns={columns}
               usePagination={false}
               useInfiniteScroll
               hasMore={hasMore}
@@ -281,5 +284,5 @@ export default function InfoInvoiceRelation({
         </div>
       </NxModal>
     </div>
-  )
+  );
 }
