@@ -668,6 +668,7 @@ const CreateCustomerServiceRequest = (props) => {
           idAccount={idAccount}
           idCustomer={idCustomer}
           type={accountType}
+          collapsible={true}
         />
 
         <div className="my-4">

@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { Spin } from "antd";
 import ServiceRequestTable from "./ServiceRequestTable";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
-import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequest";
+import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NotFound from "../../../../../NotFound";
@@ -14,7 +14,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const location = useLocation();
   const searchInput = useRef(null);
 
-  const { serviceRequests, pagination, loading } = useSelector(
+  const { serviceRequests, pagination, loadingList } = useSelector(
     (state) => state.serviceRequest
   );
   const { access_account } = useSelector((state) => state.accountManagement);
@@ -118,7 +118,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
         page: nextPage,
         size: loadMoreSize,
         sort,
-        searchs: JSON.stringify(search),
+        searchs: search,
         inputFields: tempFilters,
       };
 
@@ -160,7 +160,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
               searchedColumn={searchedColumn}
               searchInput={searchInput}
               handleSearch={handleSearch}
-              loading={loading}
+              loading={loadingList}
             />
           </NxBaseContainer>
         </NxCardContainer>

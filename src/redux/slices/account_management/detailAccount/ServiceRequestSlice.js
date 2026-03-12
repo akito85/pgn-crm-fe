@@ -3,6 +3,11 @@ import { showModalError, showModalSuccess } from "../../general_slice";
 import accountManagementService from "../../../services/account_management/accountManagementService";
 
 const initialState = {
+  // List page state
+  serviceRequests: [],
+  pagination: null,
+  loadingList: false,
+  // Detail / Create state
   data: [],
   data_detail: null,
   data_prerequisites: [],
@@ -50,21 +55,23 @@ const initialState = {
 // SERVICE REQUEST - MAIN CRUD
 // =====================================================
 
-// Get Filtered Service Requests with Dynamic Search
+// Get Filtered Service Requests by Account (list page — infinite scroll)
 export const getFilteredServiceRequests = createAsyncThunk(
   "GET_FILTERED_SERVICE_REQUESTS",
-  async ({ page = 1, size = 10, sort, search, filters = {} }, thunkAPI) => {
+  async ({ idAccount, body = {}, isLoadMore = false }, thunkAPI) => {
     try {
-      let url = `/v1/dbs/api/servicerequests/lists?page=${page}&size=${size}`;
+      const { page = 1, size = 10, sort, searchs } = body;
+      let url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list?page=${page}&size=${size}`;
       if (sort) url += `&sort=${sort}`;
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      Object.keys(filters).forEach((key) => {
-        if (filters[key] !== undefined && filters[key] !== null) {
-          url += `&${key}=${encodeURIComponent(filters[key])}`;
-        }
-      });
+      if (searchs && typeof searchs === "object") {
+        Object.keys(searchs).forEach((key) => {
+          if (searchs[key] !== undefined && searchs[key] !== null && searchs[key] !== "") {
+            url += `&${key}=${encodeURIComponent(searchs[key])}`;
+          }
+        });
+      }
       const response = await accountManagementService.getAll(url);
-      return response.data;
+      return { data: response, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -747,16 +754,39 @@ const serviceRequestSlice = createSlice({
     // SERVICE REQUEST LIST
     // =====================================================
     [getFilteredServiceRequests.pending]: (state) => {
-      state.loading = true;
+      state.loadingList = true;
       state.isFailed = false;
-      state.isSuccess = false;
     },
     [getFilteredServiceRequests.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
+      state.loadingList = false;
+      const { data: response, isLoadMore } = action.payload;
+      // Unwrap outer envelope: { success, code, message, data: { result, page } }
+      const responseData = response?.data ?? response;
+      const rawItems = responseData?.result ?? responseData?.content ?? [];
+      const pageInfo = responseData?.page;
+      const totalElements = pageInfo?.totalElements ?? responseData?.totalElements ?? responseData?.totalElement ?? 0;
+      const totalPages = pageInfo?.totalPages ?? Math.ceil(totalElements / (pageInfo?.size ?? 10));
+      state.pagination = { totalElements, totalPages };
+      // Normalize field names to match column dataIndex
+      const items = rawItems.map((item) => ({
+        ...item,
+        serviceRequestNumber: item.requestNumber,
+        serviceRequestReference: item.reference,
+        type: item.requestType,
+        category: item.requestCategory,
+        subCategory: item.requestSubCategory,
+        requestSource: item.source,
+        statusApproval: item.approval,
+        statusPrerequisite: item.prerequisiteStatus ?? null,
+      }));
+      if (isLoadMore) {
+        state.serviceRequests = [...(state.serviceRequests || []), ...items];
+      } else {
+        state.serviceRequests = items;
+      }
     },
-    [getFilteredServiceRequests.rejected]: (state, action) => {
-      state.loading = false;
+    [getFilteredServiceRequests.rejected]: (state) => {
+      state.loadingList = false;
       state.isFailed = true;
     },
 
