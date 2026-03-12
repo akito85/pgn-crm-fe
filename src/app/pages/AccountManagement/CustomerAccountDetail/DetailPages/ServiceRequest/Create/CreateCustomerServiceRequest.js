@@ -21,6 +21,7 @@ import {
   ModalError,
   ModalSuccess,
 } from "../../../../../../../components/Modal/ModalPopUp";
+import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 
@@ -698,10 +699,15 @@ const CreateCustomerServiceRequest = (props) => {
     setLoadingForm(true);
     try {
       await dispatch(
-        createCompleteServiceRequest({ accountId: idAccount, body: dataSend })
+        createCompleteServiceRequest({
+          accountId: idAccount,
+          body: dataSend,
+          successBodyExtra: { return: false },
+        })
       ).unwrap();
-      // thunk sudah dispatch showModalSuccess — langsung navigate
-      navigate(-1);
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+        state: { idAccount, idCustomer, type: accountType, section: "Service Request" },
+      });
     } catch (error) {
       // thunk sudah dispatch showModalError
     } finally {
@@ -831,22 +837,18 @@ const CreateCustomerServiceRequest = (props) => {
         </NxBaseContainer>
       </Form>
 
-      {/* Modal Submit Confirm */}
-      <ModalConfirm
+      {/* Confirmation Modal */}
+      <ConfirmationModal
         isOpen={modalConfirm}
         handleCancel={() => setModalConfirm(false)}
-        handleOk={handleConfirmSubmit}
-        width={400}
-      >
-        <div className="flex justify-center mt-5 gap-[20px]">
-          <WarningOutlined style={{ fontSize: "24px", color: "#0075bf" }} />
-          <p className="text-[18px] font-bold">
-            {confirmationType === "draft"
-              ? "Are you sure you want to save this Service Request as draft?"
-              : "Are you sure you want to submit this Service Request?"}
-          </p>
-        </div>
-      </ModalConfirm>
+        handleConfirm={handleConfirmSubmit}
+        form={formCreate}
+        dropdowns={dropdowns}
+        approvalTableData={approvalTableData}
+        attachmentsData={attachmentsData}
+        type={confirmationType}
+        loading={loadingForm}
+      />
 
       {/* Modal Back */}
       <ModalConfirm
