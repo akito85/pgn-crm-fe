@@ -31,14 +31,14 @@ const getSafeErrorMessage = (error) => {
 
 export const getPaginatePeriod = createAsyncThunk(
     "GET_ALL_PAYMENT_PERIOD",
-    async ({ search, page, pageSize, sort }, thunkAPI) => {
+    async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
         try {
             const searchParams = sanitizeSearchInput(search === undefined ? "" : search);
             const sortParams =
                 sort === undefined || sort === "" ? "createdDate~desc" : sort;
             const url = `/v1/dbs/api/payment-period/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
-            return response.data;
+            return { ...response.data, isLoadMore: !!isLoadMore };
         } catch (error) {
             if (!error.success) {
                 return thunkAPI.rejectWithValue(error);
@@ -319,8 +319,15 @@ const paymentPeriodSlice = createSlice({
                 state.loading = true;
             })
             .addCase(getPaginatePeriod.fulfilled, (state, action) => {
+                const { isLoadMore, ...rest } = action.payload || {};
+                if (isLoadMore && state.data?.result) {
+                    const existingIds = new Set(state.data.result.map((item) => item.idPaymentPeriod));
+                    const newItems = (rest.result || []).filter((item) => !existingIds.has(item.idPaymentPeriod));
+                    state.data = { ...rest, result: [...state.data.result, ...newItems] };
+                } else {
+                    state.data = rest;
+                }
                 state.loading = false;
-                state.data = action.payload;
             })
             .addCase(getPaginatePeriod.rejected, (state) => {
                 state.loading = false;

@@ -7,20 +7,18 @@ import { useNavigate, useLocation } from "react-router-dom";
 import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import CardContainer from "../../../../../components/CardContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import FooterDetail from "../../../../../components/FooterDetail";
 import {
     getDetailPaymentCycle,
     approveOrRejectPaymentCycle,
-    getListApprovalById,
-    getAllApprovalList
 } from "../../../../../redux/slices/receipt_collection/paymentCycle";
 import { dateFormatting } from "../../../../../utils";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
-import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
 import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
 
 const getStatusColor = (status) => {
@@ -45,69 +43,30 @@ const ViewPaymentCycle = () => {
     const location = useLocation();
     const id = location.state?.id;
     const items = [
-        { label: "Detail", key: "Payment Cycle" },
-        { label: "Approval", key: "Approval" },
+        { label: "Payment Cycle", key: "Payment Cycle" },
         { label: "Attachment", key: "Attachment" }
     ];
 
     const {
         loading,
         data_detail,
-        dataListAppHierDetail,
-        dataListAppHierId
     } = useSelector((state) => state.paymentCycle);
 
     const showButtonApproval = !!data_detail?.tApprovalDto?.isApprover;
 
-    const [setActiveTab] = useState("Payment Cycle");
+    const [activeTab, setActiveTab] = useState("Payment Cycle");
     const [modalAction, setModalAction] = useState({ open: false, type: "" });
-    const [appHierDataDetail, setAppHierDataDetail] = useState([]);
-    const [approvalName, setApprovalName] = useState("");
+    const [loadingConfirm, setLoadingConfirm] = useState(false);
 
     // Initial Fetch
     useEffect(() => {
         if (id) {
             dispatch(getDetailPaymentCycle(id));
-            dispatch(getAllApprovalList());
         }
     }, [dispatch, id]);
 
     const detail = data_detail?.paymentCycleDetail || {};
     const attachments = data_detail?.attachmentList || [];
-
-    // Fetch Approval Hierarchy Detail
-    useEffect(() => {
-        if (detail.appHierId) {
-            dispatch(getListApprovalById({ id: detail.appHierId }));
-        }
-    }, [dispatch, detail.appHierId]);
-
-    // Format Approval Data
-    useEffect(() => {
-        if (dataListAppHierDetail?.length > 0) {
-            const mappedDetail = dataListAppHierDetail.map((a, index) => ({
-                ...a,
-                key: index + 1,
-                employeeDetail: a.employeeDetail.map((b, idx) => ({
-                    ...b,
-                    key: idx + 1,
-                })),
-            }));
-            setAppHierDataDetail(mappedDetail);
-        } else {
-            setAppHierDataDetail([]);
-        }
-    }, [dataListAppHierDetail]);
-
-    // Get Approval Name
-    useEffect(() => {
-        if (dataListAppHierId?.length > 0 && detail.appHierId) {
-            const found = dataListAppHierId.find(item => item.appHierId === detail.appHierId);
-            if (found) {
-                setApprovalName(found.approvalName);
-            }
-        }
-    }, [dataListAppHierId, detail.appHierId]);
 
 
     // Breadcrumbs
@@ -143,6 +102,7 @@ const ViewPaymentCycle = () => {
     const handleCloseModal = () => setModalAction({ ...modalAction, open: false });
 
     const handleSubmitDecision = (values, handleClear) => {
+        setLoadingConfirm(true);
         const body = {
             id: id,
             action: modalAction.type.toUpperCase(),
@@ -155,6 +115,7 @@ const ViewPaymentCycle = () => {
             .then(() => {
                 handleClear();
                 handleCloseModal();
+                setLoadingConfirm(false);
                 dispatch(showModalSuccess({
                     title: "Success",
                     description: `Payment Cycle ${modalAction.type}d successfully`
@@ -163,6 +124,7 @@ const ViewPaymentCycle = () => {
             })
             .catch((err) => {
                 handleCloseModal();
+                setLoadingConfirm(false);
                 dispatch(showModalError({ title: "Failed", description: err.message || "An error occurred" }));
             });
     };
@@ -226,20 +188,8 @@ const ViewPaymentCycle = () => {
         </div>
     );
 
-    const renderApprovalInfo = () => (
-        <DetailSection header={"APPROVAL INFORMATION"}>
-            <ApprovalComponentGeneral
-                dataTable={appHierDataDetail}
-                selectedHierarchy={detail.appHierId}
-                showSelect={false}
-                disableSelect={true}
-                approvalName={approvalName}
-            />
-        </DetailSection>
-    );
-
     const renderAttachmentInfo = () => (
-        <DetailSection header={"ATTACHMENT INFORMATION"}>
+        <CardContainer header={"ATTACHMENT INFORMATION"}>
             <AttachmentComponent
                 type={"detail"}
                 data={attachments}
@@ -248,15 +198,13 @@ const ViewPaymentCycle = () => {
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
             />
-        </DetailSection>
+        </CardContainer>
     );
 
     const renderSection = (key) => {
         switch (key) {
             case "Payment Cycle":
                 return renderPaymentCycleInfo();
-            case "Approval":
-                return renderApprovalInfo();
             case "Attachment":
                 return renderAttachmentInfo();
             default:
@@ -268,51 +216,22 @@ const ViewPaymentCycle = () => {
         <LayoutMenu>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
-                <div>
-                    <Tabs
-                        defaultActiveKey="Payment Cycle"
-                        onChange={handleTabChange}
-                        items={items.map(item => ({
-                            label: item.label,
-                            key: item.key,
-                            children: renderSection(item.key)
-                        }))}
-                    />
-                </div>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={handleTabChange}
+                    items={items.map(item => ({
+                        label: item.label,
+                        key: item.key,
+                        children: renderSection(item.key)
+                    }))}
+                />
 
-                <div className="bg-white p-4 rounded-lg mt-4">
-                    {showButtonApproval ? (
-                        <div className="flex justify-between">
-                            <ButtonComponent
-                                type="default"
-                                onClick={handleBack}
-                            >
-                                Cancel
-                            </ButtonComponent>
-                            <div className="flex gap-4">
-                                <ButtonComponent
-                                    className="!bg-[#d32f2f] !border-[#d32f2f] hover:!bg-[#b71c1c] !text-white"
-                                    onClick={handleReject}
-                                >
-                                    Reject
-                                </ButtonComponent>
-                                <ButtonComponent
-                                    className="!bg-[#388e3c] !border-[#388e3c] hover:!bg-[#2e7d32] !text-white"
-                                    onClick={handleApprove}
-                                >
-                                    Approve
-                                </ButtonComponent>
-                            </div>
-                        </div>
-                    ) : (
-                        <ButtonComponent
-                            type="default"
-                            onClick={handleBack}
-                        >
-                            Cancel
-                        </ButtonComponent>
-                    )}
-                </div>
+                <FooterDetail
+                    onCancel={handleBack}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    showApproval={showButtonApproval}
+                />
 
                 <ModalApproveOrReject
                     isOpen={modalAction.open}
@@ -322,6 +241,7 @@ const ViewPaymentCycle = () => {
                     header={modalAction.type}
                     menu="Payment Cycle"
                     named={detail.periodName}
+                    loading={loadingConfirm}
                 />
             </Spin>
         </LayoutMenu>

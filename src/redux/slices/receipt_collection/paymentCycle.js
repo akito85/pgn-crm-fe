@@ -33,14 +33,14 @@ export const getTimeUnit = createAsyncThunk(
 
 export const getPaginateCycle = createAsyncThunk(
     "GET_ALL_PAYMENT_CYCLE",
-    async ({ search, page, pageSize, sort }, thunkAPI) => {
+    async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
         try {
             const searchParams = search === undefined ? "" : search;
             const sortParams =
                 sort === undefined || sort === "" ? "createdDate~desc" : sort;
             const url = `/v1/dbs/api/payment-cycle/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
-            return response.data;
+            return { ...response.data, isLoadMore: !!isLoadMore };
         } catch (error) {
             if (!error.success) {
                 return thunkAPI.rejectWithValue(error);
@@ -329,8 +329,15 @@ const paymentCycleSlice = createSlice({
                 state.loading = true;
             })
             .addCase(getPaginateCycle.fulfilled, (state, action) => {
+                const { isLoadMore, ...rest } = action.payload || {};
+                if (isLoadMore && state.data?.result) {
+                    const existingIds = new Set(state.data.result.map((item) => item.idPaymentCycle));
+                    const newItems = (rest.result || []).filter((item) => !existingIds.has(item.idPaymentCycle));
+                    state.data = { ...rest, result: [...state.data.result, ...newItems] };
+                } else {
+                    state.data = rest;
+                }
                 state.loading = false;
-                state.data = action.payload;
             })
             .addCase(getPaginateCycle.rejected, (state) => {
                 state.loading = false;
