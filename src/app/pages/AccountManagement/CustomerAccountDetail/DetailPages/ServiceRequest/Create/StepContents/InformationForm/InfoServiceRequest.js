@@ -630,7 +630,6 @@ export default function InfoServiceRequest({
             key="description"
             name="description"
             label="Description"
-            rules={[{ message: requiredMessage("Description"), required: true }]}
             className="no-margin-form"
           >
             <InputComponent
