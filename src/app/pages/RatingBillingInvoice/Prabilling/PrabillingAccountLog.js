@@ -149,7 +149,7 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         ),
         render: (text) => {
           const formattedDate = text
-            ? moment(text).format("DD MMM YYYY")
+           ? moment(text).format("DD MMM YYYY HH:mm:ss")
             : "-";
           return renderDateColumn(
             "createdDate",
