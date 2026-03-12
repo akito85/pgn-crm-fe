@@ -31,36 +31,15 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const [search, setSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
-  const currentPagination = useMemo(
-    () => ({
-      number: serviceRequestListResponse?.number ?? 0,
-      size: serviceRequestListResponse?.size ?? loadMoreSize,
-      totalPages: serviceRequestListResponse?.totalPages ?? 0,
-      totalElements: serviceRequestListResponse?.totalElements ?? 0,
-    }),
-    [serviceRequestListResponse, loadMoreSize]
-  );
-
   const currentData = useMemo(() => {
-    const content = serviceRequestListResponse?.content;
-    if (!Array.isArray(content)) return [];
-
-    return content.map((item, index) => ({
+    if (!Array.isArray(serviceRequests)) return [];
+    return serviceRequests.map((item, index) => ({
       ...item,
       key: `${item.id ?? "sr"}-${index}`,
-      serviceRequestNumber: item.requestNumber ?? "-",
-      serviceRequestReference: item.reference ?? "-",
-      type: item.requestType ?? "-",
-      category: item.requestCategory ?? "-",
-      subCategory: item.requestSubCategory ?? "-",
-      requestSource: item.source ?? "-",
-      statusApproval: item.statusApproval ?? item.approval ?? "-",
-      statusPrerequisite: item.statusPrerequisite ?? "-",
-      age: item.duration ?? 0,
     }));
-  }, [serviceRequestListResponse]);
+  }, [serviceRequests]);
 
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+  const hasMore = currentData.length < (pagination?.totalElements || 0);
 
   const isAccessGranted = access_account?.isGranted === true;
 
@@ -82,17 +61,14 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
     if (isAccessGranted) {
       dispatch(
         getFilteredServiceRequests({
-          page,
-          size: loadMoreSize,
-          sort,
-          filters: {
-            accountId: idAccount,
-            ...search,
-          },
+          idAccount,
+          body: { page: 1, size: loadMoreSize, sort, searchs: search },
+          isLoadMore: false,
         })
       );
+      setPage(1);
     }
-  }, [dispatch, page, loadMoreSize, sort, search, idAccount, isAccessGranted]);
+  }, [sort, search, isAccessGranted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -123,26 +99,13 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = currentPagination?.totalPages || 0;
+    const totalPages = pagination?.totalPages || 0;
 
     if (nextPage <= totalPages) {
-      const body = {
-        page: nextPage,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        inputFields: tempFilters,
-      };
-
       await dispatch(
         getFilteredServiceRequests({
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          filters: {
-            accountId: idAccount,
-            ...search,
-          },
+          idAccount,
+          body: { page: nextPage, size: loadMoreSize, sort, searchs: search },
           isLoadMore: true,
         })
       );
@@ -165,7 +128,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
               data={currentData}
               idAccount={idAccount}
               idCustomer={idCustomer}
-              totalElement={currentPagination?.totalElements || 0}
+              totalElement={pagination?.totalElements || 0}
               page={page}
               onSort={onSort}
               handleApproval={setShowApprovalModal}
