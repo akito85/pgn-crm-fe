@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 
-import BaseContainer from "../../../../../../../../components/BaseContainer";
-import TablePagination from "../../../../../../../../components/TablePagination";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../utils/getColumnSearchProps";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { Link, NavLink } from "react-router-dom";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
-import ModalHistory from "../../../../../../../../components/Modal/ModalHistory";
+import NxHistoryModal from "../../../../../../../../components/Nx/NxHistoryModal";
 import ModalInactivateWithHierarchy from "../../../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import {
   ModalConfirm,
@@ -29,6 +29,7 @@ import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/ac
 import ToolbarAccount from "../../../../../ComponentAccount/ToolbarAccount";
 import { useColumnActionPermissionAccount } from "../../../../../ComponentAccount/ColumnActionPermissionAccount";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../../utils";
+import { nxApplyFixedColumns } from "../../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   const saMainStartDate = dataDetailSA?.saInfo?.saMainStartDate
@@ -37,8 +38,13 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   const searchInput = useRef(null);
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [totalElements, setTotalElement] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [fixedColumns, setFixedColumns] = useState({
+    right: ["statusApproval", "status", "action"],
+    left: [],
+  });
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -84,32 +90,65 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     }
   }, [dataApprovalHistory]);
 
+  const encodedSearch = useMemo(
+    () => encodeURIComponent(JSON.stringify(search)),
+    [search]
+  );
+
+  const refreshCurrentList = useCallback(
+    (targetPage = 1) => {
+      dispatch(
+        getListTosSubmissionPaging({
+          id: idSA,
+          page: targetPage,
+          pageSize,
+          search: encodedSearch,
+          sort,
+        })
+      );
+    },
+    [dispatch, encodedSearch, idSA, sort]
+  );
+
   useEffect(() => {
-    if (data?.result) {
-      setDataTable(data?.result || []);
-      setTotalElement(data?.page?.totalElements || 0);
+    refreshCurrentList(page);
+  }, [page, refreshCurrentList]);
+
+  useEffect(() => {
+    if (!data?.result) {
+      return;
     }
-  }, [data]);
 
-  useEffect(() => {
-    dispatch(
-      getListTosSubmissionPaging({
-        id: idSA,
-        page,
-        pageSize,
-        search: encodeURIComponent(JSON.stringify(search)),
-        sort,
-      })
-    );
-  }, [dispatch, idSA, page, pageSize, search, sort]);
+    const incomingData = data.result || [];
+    const totalData = data?.page?.totalElements || 0;
+    setTotalElement(totalData);
 
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
+    setDataTable((prevData) => {
+      const mergedData =
+        page === 1
+          ? incomingData
+          : [
+              ...prevData,
+              ...incomingData.filter(
+                (item) => !prevData.some((prevItem) => prevItem.id === item.id)
+              ),
+            ];
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      setHasMore(mergedData.length < totalData);
+      return mergedData;
+    });
+  }, [data, page]);
+
+  const handleLoadMore = useCallback(() => {
+    if (loading || !hasMore) {
+      return Promise.resolve();
+    }
+
+    setPage((prevPage) => prevPage + 1);
+    return Promise.resolve();
+  }, [hasMore, loading]);
+
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
@@ -122,12 +161,13 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         [dataIndex]: selectedKeys[0],
       };
     });
-  };
+  }, []);
 
   const onSort = (_, __, sort) => {
     const dataOrder = sort.order === "ascend" ? "asc" : "desc";
     const dataSort = sort.order ? `${sort.field}~${dataOrder}` : "";
     setSort(dataSort);
+    setPage(1);
   };
 
   const handleApprovalHistory = (data) => {
@@ -155,25 +195,9 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       .unwrap()
       .then(() => {
         handleCloseModalDelete();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getListTosSubmissionPaging({
-            id: idSA,
-            page,
-            pageSize,
-            search: tempSearch,
-            sort,
-          })
-        );
+        setPage(1);
+        setDataTable([]);
+        refreshCurrentList(1);
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -185,12 +209,12 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       });
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "TERM OF SERVICE NAME",
@@ -207,25 +231,6 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         true
       ),
       render: (text) => renderColumn('tosName', hasValue(search['tosName']), searchText, text, false, 'input', search)
-    },
-    {
-      title: "REMARK",
-      dataIndex: "remark",
-      width: 240,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "remark",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (text) => renderColumn('remark', hasValue(search['remark']), searchText, text, true, 'input', search)
     },
     {
       title: "START DATE",
@@ -282,6 +287,26 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       render: (text) => renderDateColumn('appliedDate', hasValue(search['appliedDate']), searchText, text, 'date', search)
     },
     {
+      title: "DESCRIPTION",
+      dataIndex: "remark",
+      width: 240,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "remark",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (text) => renderColumn('remark', hasValue(search['remark']), searchText, text, true, 'input', search)
+    },
+    
+    {
       title: "STATUS",
       width: 160,
       sorter: true,
@@ -317,7 +342,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       ),
       render: (text) => renderColumn('statusApproval', hasValue(search['statusApproval']), searchText, text, false, 'status', search)
     },
-  ];
+  ], [handleSearch, search, searchText, searchedColumn]);
 
 
   const itemActions = [
@@ -603,11 +628,38 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     }
   ]
 
+  const actionColumns = useColumnActionPermissionAccount(
+    ["Delete", "Activate", "View", "Update", "History"],
+    itemActions,
+    filteredArray,
+    "Delete"
+  );
+
+  const allColumns = useMemo(() => {
+    const mergedColumns = [...columns, ...actionColumns].map((column) => ({
+      ...column,
+      key: column.key || column.dataIndex || column.title,
+    }));
+
+    return nxApplyFixedColumns(mergedColumns, fixedColumns);
+  }, [actionColumns, columns, fixedColumns]);
+
+  const columnDefinitions = useMemo(
+    () =>
+      allColumns.map((column) => ({
+        key: column.key,
+        title: column.title,
+      })),
+    [allColumns]
+  );
+
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
+      key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
   const handleSubmitModalInactivate = (res, handleClear) => {
@@ -621,34 +673,17 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       .then(() => {
         handleClear();
         handleCancelModalInactivate();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getListTosSubmissionPaging({
-            id: idSA,
-            page,
-            pageSize,
-            search: tempSearch,
-            sort,
-          })
-        );
+        setPage(1);
+        setDataTable([]);
+        refreshCurrentList(1);
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
           const message =
             error?.response?.data?.message || error.message || error.toString();
-          console.log(error);
           setBodyError({
             body: { ...res },
-            type: "INACTIVE",
+            type: "inactive",
             handleClear,
             message,
           });
@@ -673,47 +708,39 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   return (
     <div>
       <Spin spinning={loading}>
-        <BaseContainer header={"TERM OF SERVICE SUBMISSION INFORMATION"}>
-          <div className={"flex flex-col w-full gap-4"}>
-            <div className="flex w-full justify-end">
-              <ToolbarAccount items={itemActions} advancedAccess={filteredArray} />
-              {/* <NavLink
-                to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_TOS_SUBMISSION}
-                state={{ idAccount, idCustomer, type, idSA, saMainStartDate, saMainEndDate }}
-              >
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                  type="submit"
-                >
-                  Create
-                </ButtonComponent>
-              </NavLink> */}
+        <NxCardContainer
+          type="profile"
+          hideChildren
+          element={(
+            <div className="flex flex-col w-full gap-4">
+              <div className="flex w-full justify-end">
+                <ToolbarAccount items={itemActions} advancedAccess={filteredArray} />
+              </div>
+              <NxTable
+                idTable="tos-submission-table"
+                dataSource={dataTable}
+                totalData={totalElements}
+                current={page}
+                loading={loading}
+                tableScrolled={{ y: 300, x: "max-content" }}
+                onSort={onSort}
+                columns={allColumns}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                usePagination={false}
+                useInfiniteScroll={true}
+                hasMore={hasMore}
+                onLoadMore={handleLoadMore}
+                loadMoreThreshold={2}
+              />
             </div>
-            <TablePagination
-              dataSource={dataTable}
-              totalData={totalElements}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangeSize}
-              tableScrolled={{ y: 300, x: 1500 }}
-              columns={[
-                ...columns,
-                ...useColumnActionPermissionAccount(
-                  ["Delete", "Activate", "View", "Update", "History"],
-                  itemActions,
-                  filteredArray,
-                  "Delete"
-                ),
-              ]}
-              onSort={onSort}
-            />
-          </div>
-        </BaseContainer>
-        <ModalHistory
+          )}
+        />
+        <NxHistoryModal
           isOpen={openModalHistory && dataApprovalHistoryFix}
           handleClose={() => setOpenModalHistory(false)}
           header={"Approval History"}
-          width={850}
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
