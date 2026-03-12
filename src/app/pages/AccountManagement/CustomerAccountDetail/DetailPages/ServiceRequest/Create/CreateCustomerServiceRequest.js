@@ -419,6 +419,23 @@ const CreateCustomerServiceRequest = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  // Restore wizard form data from sessionStorage when returning from prerequisite create page
+  useEffect(() => {
+    if (location?.state?.returnToStep !== undefined) {
+      try {
+        const saved = sessionStorage.getItem("srWizardFormData");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.requestDate) {
+            parsed.requestDate = moment(parsed.requestDate);
+          }
+          formCreate.setFieldsValue(parsed);
+          sessionStorage.removeItem("srWizardFormData");
+        }
+      } catch (_) {}
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Populate form with Account Standard/OneTime information
   useEffect(() => {
     if (data_accountDetail?.accountInformation) {
@@ -593,7 +610,15 @@ const CreateCustomerServiceRequest = (props) => {
         requirementValue: dr.value || null,
         requirementDesc: null,
       })),
-      prerequisites: values.srFormPreRequisites || [],
+      prerequisites: (values.srFormPreRequisites || []).map((pr) => ({
+        prerequisiteId: pr.prerequisiteId,
+        prerequisiteName: pr.prerequisiteName,
+        prerequisiteComments: pr.prerequisiteComments || null,
+        ...(pr.prerequisiteStatus && { prerequisiteStatus: pr.prerequisiteStatus }),
+        ...(pr.prerequisiteValue && { prerequisiteValue: pr.prerequisiteValue }),
+        ...(pr.prerequisiteDueDate && { prerequisiteDueDate: pr.prerequisiteDueDate }),
+        ...(pr.prerequisiteAssignedTo && { prerequisiteAssignedTo: pr.prerequisiteAssignedTo }),
+      })),
       attachments: attachmentsData.map((att) => ({
         category: "SERVICE_REQUEST",
         fileName: att.fileName || null,
