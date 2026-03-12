@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo } from "react";
-import { Modal, Tooltip } from "antd";
+import { Modal, Tooltip, Spin } from "antd";
 import axios from "axios";
 import SVGIcon from "../../../../assets/Icon/index";
 
@@ -145,8 +145,8 @@ export const columns = (
       handleSearch,
       true,
     ),
-    render: (text) =>
-      renderColumn(
+    render: (text, record) => {
+      const cell = renderColumn(
         "status",
         hasValue(search["status"]),
         searchText,
@@ -154,7 +154,16 @@ export const columns = (
         false,
         "status",
         search,
-      ),
+      );
+      if (text?.toUpperCase() === "FAILED" && record?.message) {
+        return (
+          <Tooltip title={record.message} placement="top">
+            {cell}
+          </Tooltip>
+        );
+      }
+      return cell;
+    },
   },
   {
     title: "REMARK",
@@ -211,7 +220,7 @@ export const columns = (
   },
 ];
 
-const DetailInvoice = ({ isOpen, onClose, detail }) => {
+const DetailInvoice = ({ isOpen, onClose, detail, loading = false }) => {
   const logs = useMemo(() => detail?.logs ?? [], [detail?.logs]);
   const searchInput = useRef(null);
 
@@ -330,43 +339,45 @@ const DetailInvoice = ({ isOpen, onClose, detail }) => {
         body: { maxHeight: "75vh", overflowY: "auto", padding: "16px" },
       }}
     >
-      <BaseContainer border>
-        <div className="grid grid-cols-5 gap-x-4 gap-y-4 p-3">
-          {infoItems.map(({ label, value, isStatus }) => (
-            <div key={label} className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500">{label}</span>
-              {isStatus ? (
-                <StatusComponent colour={value} size="small">
-                  {value || ""}
-                </StatusComponent>
-              ) : (
-                <span className="text-sm font-semibold">{value ?? "-"}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </BaseContainer>
-
-      <div className="mt-4">
-        <BaseContainer border header="INVOICE LOG">
-          <div className="mt-3">
-            <TableRBI
-              dataSource={displayedData}
-              columns={finalColumns}
-              totalData={filteredData.length}
-              tableScrolled={{ y: 350, x: "max-content" }}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-            />
+      <Spin spinning={loading}>
+        <BaseContainer border>
+          <div className="grid grid-cols-5 gap-x-4 gap-y-4 p-3">
+            {infoItems.map(({ label, value, isStatus }) => (
+              <div key={label} className="flex flex-col gap-1">
+                <span className="text-xs text-gray-500">{label}</span>
+                {isStatus ? (
+                  <StatusComponent colour={value} size="small">
+                    {value || ""}
+                  </StatusComponent>
+                ) : (
+                  <span className="text-sm font-semibold">{value ?? "-"}</span>
+                )}
+              </div>
+            ))}
           </div>
         </BaseContainer>
-      </div>
+
+        <div className="mt-4">
+          <BaseContainer border header="INVOICE LOG">
+            <div className="mt-3">
+              <TableRBI
+                dataSource={displayedData}
+                columns={finalColumns}
+                totalData={filteredData.length}
+                tableScrolled={{ y: 350, x: "max-content" }}
+                columnDefinitions={columnDefinitions}
+                fixedColumns={fixedColumns}
+                setFixedColumns={setFixedColumns}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
+              />
+            </div>
+          </BaseContainer>
+        </div>
+      </Spin>
     </Modal>
   );
 };

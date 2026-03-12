@@ -113,8 +113,9 @@ const GenerateInvoicePage = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  // eslint-disable-next-line no-unused-vars
+  const [sort, setSort] = useState("");
   const [dataTable, setDataTable] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [filterRowSelected, setFilterRowSelected] = useState([]);
