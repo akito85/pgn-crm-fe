@@ -159,7 +159,7 @@ const NxTable = ({
     else
       return resolvedDataSource.map((item) => ({
         ...item,
-        id: item.id || crypto.randomUUID()
+        id: item.id || (crypto?.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2))
       }))
   }, [resolvedDataSource]);
 
