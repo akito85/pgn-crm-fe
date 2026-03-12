@@ -1,8 +1,4 @@
-import {
-  LeftOutlined,
-  RightOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -43,6 +39,12 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
+const steps = [
+  { title: "PAYMENT CHANNEL CA CI MAPPING", value: "CaCiMapping" },
+  { title: "APPROVAL", value: "Approval" },
+  { title: "ATTACHMENT", value: "Attachment" },
+];
+
 const ListFormCaCiMapping = (props) => {
   const { type } = props;
   const {
@@ -59,7 +61,6 @@ const ListFormCaCiMapping = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
   const location = useLocation();
   const { id, status } = location?.state || {};
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -73,11 +74,7 @@ const ListFormCaCiMapping = (props) => {
   const [current, setCurrent] = useState(0);
   const [sendBody, setSendBody] = useState();
 
-  const steps = [
-    { title: "PAYMENT CHANNEL CA CI MAPPING", value: "CaCiMapping" },
-    { title: "APPROVAL", value: "Approval" },
-    { title: "ATTACHMENT", value: "Attachment" },
-  ];
+
 
   const [tabData, setTabData] = useState([
     {
@@ -92,7 +89,7 @@ const ListFormCaCiMapping = (props) => {
 
   useEffect(() => {
     setValuePage(steps[current].value);
-  }, [current]);
+  }, [current, steps]);
 
   useEffect(() => {
     dispatch(getAllApprovalListCaCiMapping());
@@ -167,7 +164,7 @@ const ListFormCaCiMapping = (props) => {
         }))
       );
     }
-  }, [data_detail, id]);
+  }, [data_detail, id, form]);
 
   const next = () => {
     const fieldsToValidate = tabData[current]?.paramValue;
@@ -296,66 +293,62 @@ const ListFormCaCiMapping = (props) => {
       return: true,
     };
 
-    if (type === "update") {
-      dispatch(updateCaCiMapping(sendBody))
-        .unwrap()
-        .then(async () => {
-          setLoadingForm(true);
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+    try {
+      if (type === "update") {
+        await dispatch(updateCaCiMapping(sendBody)).unwrap();
+        setLoadingForm(true);
+        const filterDataAttach = listDataAttachment.filter(
+          (item) => item.dataType !== "exist"
+        );
+        const uploadedFiles = [];
+        for (const element of filterDataAttach) {
+          const body = {
+            referensiId: data_detail?.caCiMapping?.id,
+            files: element.file,
+            category: "PAYMENT_CHANNEL_CA_CI_MAPPING",
+            fileCategoryId: element.fileCategoryId,
+          };
+          await receiptCollectionHttpService.uploadImage(
+            `/v1/dbs/api/attachment/upload/v1`,
+            body
           );
-          for (const element of filterDataAttach) {
-            const body = {
-              referensiId: data_detail?.caCiMapping?.id,
-              files: element.file,
-              category: "PAYMENT_CHANNEL_CA_CI_MAPPING",
-              fileCategoryId: element.fileCategoryId,
-            };
-            await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          form.resetFields();
-          setSelectedHierarchy("");
-          setListDataAttachment([]);
-          dispatch(showModalSuccess(successMessage));
-          handleClear();
-          setLoadingSave(false);
-        })
-        .catch(() => {
-          setLoadingSave(false);
-          setModalConfirm(false);
-        });
-    } else {
-      dispatch(createCaCiMapping(sendBody))
-        .unwrap()
-        .then(async (data) => {
-          setLoadingForm(true);
-          for (const element of listDataAttachment) {
-            const body = {
-              files: element.file,
-              fileCategoryId: element.fileCategoryId,
-              referensiId: data.id,
-              category: "PAYMENT_CHANNEL_CA_CI_MAPPING",
-            };
-            await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          handleClear();
-          dispatch(showModalSuccess(successMessage));
-          setLoadingSave(false);
-        })
-        .catch(() => {
-          setLoadingSave(false);
-          setModalConfirm(false);
-        });
+          uploadedFiles.push(element);
+        }
+        setLoadingForm(false);
+        handleCancelModalConfirm();
+        form.resetFields();
+        setSelectedHierarchy("");
+        setListDataAttachment([]);
+        dispatch(showModalSuccess(successMessage));
+        handleClear();
+      } else {
+        const data = await dispatch(createCaCiMapping(sendBody)).unwrap();
+        setLoadingForm(true);
+        const uploadedFiles = [];
+        for (const element of listDataAttachment) {
+          const body = {
+            files: element.file,
+            fileCategoryId: element.fileCategoryId,
+            referensiId: data.id,
+            category: "PAYMENT_CHANNEL_CA_CI_MAPPING",
+          };
+          await receiptCollectionHttpService.uploadImage(
+            `/v1/dbs/api/attachment/upload/v1`,
+            body
+          );
+          uploadedFiles.push(element);
+        }
+        setLoadingForm(false);
+        handleCancelModalConfirm();
+        handleClear();
+        dispatch(showModalSuccess(successMessage));
+      }
+    } catch (error) {
+      console.error("Upload failed, uploaded files:", error);
+      setLoadingForm(false);
+      setModalConfirm(false);
+    } finally {
+      setLoadingSave(false);
     }
   };
 
@@ -449,7 +442,8 @@ const ListFormCaCiMapping = (props) => {
               className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
               isPrimary
               onClick={handleSave}
-              loading={loadingSave}
+              loading={loadingSave || loadingForm}
+              disabled={loadingSave || loadingForm}
             >
               Confirm
             </ButtonComponent>

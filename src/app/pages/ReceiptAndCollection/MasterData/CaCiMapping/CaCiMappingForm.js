@@ -9,15 +9,13 @@ import DateComponent from "../../../../../components/DateComponent";
 const CaCiMappingForm = (props) => {
   const { form, dataPartnerList, dataCollectingAgentList, dataDeliveryChannelList, dataType } = props;
 
-  const disabledDate = (current) => {
-    if (
-      form.getFieldValue("effStartDate") === undefined ||
-      form.getFieldValue("effStartDate") === null
-    ) {
+  const disabledEndDate = (current) => {
+    const startDate = form.getFieldValue("effStartDate");
+    if (!startDate) {
       return current && current < moment().add(-1, "days");
-    } else {
-      return current && current < moment(form.getFieldValue("effStartDate"));
     }
+    const maxDate = moment(startDate).add(10, "years");
+    return current && (current < moment(startDate) || current > maxDate);
   };
 
   const handleStartDate = (date) => {
@@ -35,7 +33,11 @@ const CaCiMappingForm = (props) => {
             name="partnerId"
             rules={formMessageRequired("Partner")}
           >
-            <SelectComponent placeholder="Select Partner">
+            <SelectComponent
+              placeholder="Select Partner"
+              aria-label="Select partner for CA CI mapping"
+              aria-required="true"
+            >
               {(dataPartnerList?.data || []).map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.partnerCode} - {item.partnerName}
@@ -49,7 +51,11 @@ const CaCiMappingForm = (props) => {
             name="collectingAgentId"
             rules={formMessageRequired("Collecting Agent")}
           >
-            <SelectComponent placeholder="Select Collecting Agent">
+            <SelectComponent
+              placeholder="Select Collecting Agent"
+              aria-label="Select collecting agent for CA CI mapping"
+              aria-required="true"
+            >
               {(dataCollectingAgentList?.data || []).map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.caCode} - {item.name}
@@ -63,7 +69,11 @@ const CaCiMappingForm = (props) => {
             name="deliveryChannelId"
             rules={formMessageRequired("Delivery Channel")}
           >
-            <SelectComponent placeholder="Select Delivery Channel">
+            <SelectComponent
+              placeholder="Select Delivery Channel"
+              aria-label="Select delivery channel for CA CI mapping"
+              aria-required="true"
+            >
               {(dataDeliveryChannelList?.data || []).map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.code} - {item.name}
@@ -77,7 +87,13 @@ const CaCiMappingForm = (props) => {
             name="name"
             rules={formMessageRequired("Name")}
           >
-            <InputComponent allowClear maxLength={100} placeholder="Input Name" />
+            <InputComponent
+              allowClear
+              maxLength={100}
+              placeholder="Input Name"
+              aria-label="Input name for CA CI mapping"
+              aria-required="true"
+            />
           </Form.Item>
 
           <Form.Item
@@ -85,7 +101,11 @@ const CaCiMappingForm = (props) => {
             name="type"
             rules={formMessageRequired("Type")}
           >
-            <SelectComponent placeholder="Select Type">
+            <SelectComponent
+              placeholder="Select Type"
+              aria-label="Select type for CA CI mapping"
+              aria-required="true"
+            >
               {(dataType?.data || []).map((item) => (
                 <Select.Option key={item.name} value={item.name}>
                   {item.name}
@@ -103,14 +123,29 @@ const CaCiMappingForm = (props) => {
             <DateComponent
               placeholder="Select Eff Start Date"
               onChange={handleStartDate}
+              dateDisable={() => false}
             />
           </Form.Item>
           <Form.Item
             label="Eff End Date"
             name="effEndDate"
-            rules={formMessageRequired("Eff End Date")}
+            rules={[
+              { required: true, message: "Please input Eff End Date!" },
+              {
+                validator: (_, value) => {
+                  const startDate = form.getFieldValue("effStartDate");
+                  if (value && startDate) {
+                    const diffYears = moment(value).diff(moment(startDate), 'years');
+                    if (diffYears > 10) {
+                      return Promise.reject(new Error("Eff End Date cannot exceed 10 years from Eff Start Date"));
+                    }
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
           >
-            <DateComponent placeholder="Select Eff End Date" dateDisable={disabledDate} />
+            <DateComponent placeholder="Select Eff End Date" dateDisable={disabledEndDate} />
           </Form.Item>
         </div>
       </CardContainer>

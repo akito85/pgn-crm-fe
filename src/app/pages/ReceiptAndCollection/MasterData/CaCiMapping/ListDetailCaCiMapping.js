@@ -1,4 +1,3 @@
-import { CheckSquareOutlined, CloseSquareOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,10 +30,20 @@ const ListDetailCaCiMapping = () => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [segmentedPage, setSegmentedPage] = useState("CaCiMapping");
 
-  const { loading, data_detail } = useSelector((state) => state.caCiMapping);
+  const { data_detail } = useSelector((state) => state.caCiMapping);
 
   useEffect(() => {
-    dispatch(getDetailCaCiMapping(id));
+    const fetchDetail = async () => {
+      try {
+        await dispatch(getDetailCaCiMapping(id)).unwrap();
+      } catch (error) {
+        console.error("Failed to fetch CA CI Mapping detail:", error);
+      }
+    };
+
+    if (id) {
+      fetchDetail();
+    }
   }, [dispatch, id]);
 
   useEffect(() => {

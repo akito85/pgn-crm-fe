@@ -1,4 +1,5 @@
 import { Checkbox, Tooltip } from "antd";
+import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import CardContainer from "../../../../../components/CardContainer";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
@@ -32,6 +33,18 @@ import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 
+const COLUMN_WIDTH = {
+  PARTNER: 180,
+  COLLECTING_AGENT: 200,
+  DELIVERY_CHANNEL: 200,
+  NAME: 180,
+  DATE: 150,
+  STATUS: 110,
+  STATUS_APPROVAL: 160,
+  ACTION: 60,
+  NO: 60,
+};
+
 const ViewCaCiMapping = () => {
   const { loading, data, dataApprovalHistory } = useSelector(
     (state) => state.caCiMapping
@@ -62,16 +75,34 @@ const ViewCaCiMapping = () => {
   const initialPageSize = 100;
 
   useEffect(() => {
-    dispatch(
-      getPaginateCaCiMapping({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: initialPageSize,
-        sort,
-        isLoadMore: false,
-      })
-    );
-    setPage(1);
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        await dispatch(
+          getPaginateCaCiMapping({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+            isLoadMore: false,
+          })
+        );
+        if (isMounted) {
+          setPage(1);
+        }
+      } catch (error) {
+        if (isMounted) {
+          // Handle error silently - error sudah di-handle di slice
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [dispatch, search, sort]);
 
   const hasMore = (data?.result?.length || 0) < (data?.page?.totalElements || 0);
@@ -122,12 +153,15 @@ const ViewCaCiMapping = () => {
     }));
   };
 
-  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
-  }, []);
+  const handleSearch = useMemo(
+    () => debounce((selectedKeys, confirm, dataIndex) => {
+      confirm();
+      setSearchText(selectedKeys[0]);
+      setSearchedColumn(dataIndex);
+      setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
+    }, 500),
+    []
+  );
 
   const handleReset = useCallback((clearFilters, dataIndex) => {
     clearFilters();
@@ -172,7 +206,7 @@ const ViewCaCiMapping = () => {
         key: "partnerName",
         title: "PARTNER",
         dataIndex: "partnerName",
-        width: 180,
+        width: COLUMN_WIDTH.PARTNER,
         sorter: true,
         isClassification: true,
         filteredValue: search?.partnerName !== undefined ? [search.partnerName] : null,
@@ -187,7 +221,7 @@ const ViewCaCiMapping = () => {
         key: "collectingAgentName",
         title: "COLLECTING AGENT",
         dataIndex: "collectingAgentName",
-        width: 200,
+        width: COLUMN_WIDTH.COLLECTING_AGENT,
         sorter: true,
         isClassification: true,
         filteredValue: search?.collectingAgentName !== undefined ? [search.collectingAgentName] : null,
@@ -202,7 +236,7 @@ const ViewCaCiMapping = () => {
         key: "deliveryChannelName",
         title: "DELIVERY CHANNEL",
         dataIndex: "deliveryChannelName",
-        width: 200,
+        width: COLUMN_WIDTH.DELIVERY_CHANNEL,
         sorter: true,
         isClassification: true,
         filteredValue: search?.deliveryChannelName !== undefined ? [search.deliveryChannelName] : null,
@@ -217,7 +251,7 @@ const ViewCaCiMapping = () => {
         key: "name",
         title: "NAME",
         dataIndex: "name",
-        width: 180,
+        width: COLUMN_WIDTH.NAME,
         sorter: true,
         isClassification: true,
         filteredValue: search?.name !== undefined ? [search.name] : null,
@@ -231,7 +265,7 @@ const ViewCaCiMapping = () => {
         key: "effStartDate",
         title: "EFF START DATE",
         dataIndex: "effStartDate",
-        width: 150,
+        width: COLUMN_WIDTH.DATE,
         sorter: true,
         isClassification: true,
         align: "center",
@@ -246,7 +280,7 @@ const ViewCaCiMapping = () => {
         key: "effEndDate",
         title: "EFF END DATE",
         dataIndex: "effEndDate",
-        width: 150,
+        width: COLUMN_WIDTH.DATE,
         sorter: true,
         isClassification: true,
         align: "center",
@@ -261,7 +295,7 @@ const ViewCaCiMapping = () => {
         key: "status",
         title: "STATUS",
         dataIndex: "status",
-        width: 110,
+        width: COLUMN_WIDTH.STATUS,
         sorter: true,
         isClassification: true,
         fixed: "right",
@@ -276,7 +310,7 @@ const ViewCaCiMapping = () => {
         key: "statusApproval",
         title: "STATUS APPROVAL",
         dataIndex: "statusApproval",
-        width: 160,
+        width: COLUMN_WIDTH.STATUS_APPROVAL,
         sorter: true,
         isClassification: true,
         fixed: "right",
@@ -509,7 +543,7 @@ const ViewCaCiMapping = () => {
       actionColsRaw.map((col) => ({
         ...col,
         key: col.action,
-        width: 60,
+        width: COLUMN_WIDTH.ACTION,
         align: "center",
       })),
     [actionColsRaw]
@@ -573,7 +607,7 @@ const ViewCaCiMapping = () => {
       {
         key: "no",
         title: "NO",
-        width: 60,
+        width: COLUMN_WIDTH.NO,
         align: "center",
         isClassification: true,
         render: (text, object, index) => index + 1,
@@ -613,6 +647,8 @@ const ViewCaCiMapping = () => {
           columnDefinitions={columnDefinitions}
           handleDownload={handleDownload}
           showExport={false}
+          showPaginationInfo={true}
+          paginationInfoRenderer={(total, loaded) => `Showing ${loaded} of ${total} records`}
           usePagination={false}
           showRefresh={true}
           onRefresh={handleRefresh}
