@@ -30,21 +30,37 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [tempFilters, setTempFilters] = useState([]);
 
-  // Derived states
-  const currentData = useMemo(() => serviceRequests || [], [serviceRequests]);
-  const currentPagination = pagination;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+  const currentPagination = useMemo(
+    () => ({
+      number: serviceRequestListResponse?.number ?? 0,
+      size: serviceRequestListResponse?.size ?? loadMoreSize,
+      totalPages: serviceRequestListResponse?.totalPages ?? 0,
+      totalElements: serviceRequestListResponse?.totalElements ?? 0,
+    }),
+    [serviceRequestListResponse, loadMoreSize]
+  );
 
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
+  const currentData = useMemo(() => {
+    const content = serviceRequestListResponse?.content;
+    if (!Array.isArray(content)) return [];
 
-    return currentData.map((item, index) => ({
+    return content.map((item, index) => ({
       ...item,
-      key: `${item.id}-${index}`,
+      key: `${item.id ?? "sr"}-${index}`,
+      serviceRequestNumber: item.requestNumber ?? "-",
+      serviceRequestReference: item.reference ?? "-",
+      type: item.requestType ?? "-",
+      category: item.requestCategory ?? "-",
+      subCategory: item.requestSubCategory ?? "-",
+      requestSource: item.source ?? "-",
+      statusApproval: item.statusApproval ?? item.approval ?? "-",
+      statusPrerequisite: item.statusPrerequisite ?? "-",
+      age: item.duration ?? 0,
     }));
-  }, [currentData]);
+  }, [serviceRequestListResponse]);
+
+  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
 
   const isAccessGranted = access_account?.isGranted === true;
 
@@ -64,23 +80,19 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   // Fetch data when filters change
   useEffect(() => {
     if (isAccessGranted) {
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        inputFields: tempFilters,
-      };
-
       dispatch(
         getFilteredServiceRequests({
-          idAccount,
-          body,
-          isLoadMore: false,
+          page,
+          size: loadMoreSize,
+          sort,
+          filters: {
+            accountId: idAccount,
+            ...search,
+          },
         })
       );
     }
-  }, [sort, search, tempFilters, isAccessGranted]);
+  }, [dispatch, page, loadMoreSize, sort, search, idAccount, isAccessGranted]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -124,13 +136,18 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
 
       await dispatch(
         getFilteredServiceRequests({
-          idAccount,
-          body,
+          page: nextPage,
+          size: loadMoreSize,
+          sort,
+          filters: {
+            accountId: idAccount,
+            ...search,
+          },
           isLoadMore: true,
         })
       );
+      setPage(nextPage);
     }
-    setPage(nextPage);
   };
 
   return (
@@ -145,7 +162,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
         <NxCardContainer header={"SERVICE REQUEST"}>
           <NxBaseContainer border>
             <ServiceRequestTable
-              data={dataSourceWithKeys}
+              data={currentData}
               idAccount={idAccount}
               idCustomer={idCustomer}
               totalElement={currentPagination?.totalElements || 0}

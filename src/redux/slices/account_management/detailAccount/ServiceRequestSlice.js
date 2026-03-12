@@ -136,27 +136,33 @@ export const createServiceRequestForAccount = createAsyncThunk(
   }
 );
 
-// Create Complete Service Request (Composite)
+// Create Service Request with nested data
 export const createCompleteServiceRequest = createAsyncThunk(
   "CREATE_COMPLETE_SERVICE_REQUEST",
   async ({ accountId, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/composite`;
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/create`;
       const response = await accountManagementService.createData(url, body);
+      const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
       const successBody = {
         title: "Successful",
-        description: "Service Request has been submitted.",
+        description: isDraft
+          ? "Service Request draft has been saved."
+          : "Service Request has been submitted.",
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
+      const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
       const message =
         (error.response && error.response.data && error.response.data.message) ||
         error.message ||
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Service Request was not submitted. ${message}. Please try again.`,
+        description: isDraft
+          ? `Service Request draft was not saved. ${message}. Please try again.`
+          : `Service Request was not submitted. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
