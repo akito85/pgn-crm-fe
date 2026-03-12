@@ -1,10 +1,13 @@
 import moment from "moment";
+import { Form, Tooltip } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxTable from "../../../../../../../../components/Nx/NxTable";
 import ApprovalForm from "../StepContents/ApprovalForm";
 import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
+import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -83,7 +86,7 @@ const SrInfoTab = ({ form, dropdowns }) => {
 // Tab: Contact
 // ---------------------------------------------------------------------------
 const ContactTab = ({ form }) => {
-  const contacts = form?.getFieldValue("srFormContacts") || [];
+  const contacts = Form.useWatch("srFormContacts", form) || [];
 
   const columns = [
     { title: "NO", key: "no", render: (_, __, idx) => idx + 1, width: 60, align: "center" },
@@ -141,13 +144,27 @@ const PreRequisiteTab = ({ form }) => {
 const AttachmentTab = ({ attachmentsData }) => {
   const columns = [
     { title: "NO", key: "no", render: (_, __, idx) => idx + 1, width: 60, align: "center" },
-    { title: "CATEGORY", dataIndex: "type", key: "type" },
+    { title: "CATEGORY", dataIndex: "fileCategoryName", key: "fileCategoryName" },
     { title: "FILE NAME", dataIndex: "fileName", key: "fileName" },
     {
       title: "FILE SIZE",
       dataIndex: "size",
       key: "size",
       render: (size) => (size ? bytesConverter(size) : "-"),
+    },
+    {
+      title: "ACTION",
+      key: "action",
+      align: "center",
+      width: 80,
+      render: (_, record) => (
+        <Tooltip title="Preview">
+          <EyeOutlined
+            style={{ fontSize: "20px", color: "#0075bf", cursor: "pointer" }}
+            onClick={() => previewFileAttachment(record.base64)}
+          />
+        </Tooltip>
+      ),
     },
   ];
 

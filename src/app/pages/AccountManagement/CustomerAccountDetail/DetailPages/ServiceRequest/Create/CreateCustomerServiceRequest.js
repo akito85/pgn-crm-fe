@@ -699,10 +699,15 @@ const CreateCustomerServiceRequest = (props) => {
     setLoadingForm(true);
     try {
       await dispatch(
-        createCompleteServiceRequest({ accountId: idAccount, body: dataSend })
+        createCompleteServiceRequest({
+          accountId: idAccount,
+          body: dataSend,
+          successBodyExtra: { return: false },
+        })
       ).unwrap();
-      // thunk sudah dispatch showModalSuccess — langsung navigate
-      navigate(-1);
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+        state: { idAccount, idCustomer, type: accountType, section: "Service Request" },
+      });
     } catch (error) {
       // thunk sudah dispatch showModalError
     } finally {
