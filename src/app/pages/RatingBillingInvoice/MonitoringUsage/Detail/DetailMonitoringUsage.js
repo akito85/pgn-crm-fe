@@ -604,19 +604,10 @@ const DetailMonitoringUsage = () => {
 
           {/* Action Buttons */}
           <div className="w-full flex mt-5">
-            <div className="flex-1 justify-start">
+            <div className="w-fit">
               <ButtonComponent
                 htmlType="button"
                 type={"submit"}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 16,
-                      justifyItems: "left",
-                    }}
-                  />
-                }
                 onClick={handleBack}
               >
                 Back

@@ -2,30 +2,6 @@ import { SYSTEM_SETUP_ELEMENTS } from "./setup_elements";
 import { SYSTEM_SETUP_ROUTES } from "./setup_routes";
 
 export const system_setup = [
-  //logging
-  {
-    path: SYSTEM_SETUP_ROUTES.LOGGING_VIEW_MENU,
-    element: SYSTEM_SETUP_ELEMENTS.VIEW_LOGGING_PAGE,
-  },
-
-  //job mangement
-  {
-    path: SYSTEM_SETUP_ROUTES.JOB_VIEW_MENU,
-    element: SYSTEM_SETUP_ELEMENTS.VIEW_JOBM_PAGE,
-  },
-  {
-    path: SYSTEM_SETUP_ROUTES.JOB_CREATE_MENU,
-    element: SYSTEM_SETUP_ELEMENTS.CREATE_JOBM_PAGE,
-  },
-  {
-    path: SYSTEM_SETUP_ROUTES.JOB_DETAIL_MENU,
-    element: SYSTEM_SETUP_ELEMENTS.DETAIL_JOBM_PAGE,
-  },
-  //job control
-  {
-    path: SYSTEM_SETUP_ROUTES.JOB_CONTROL_VIEW_MENU,
-    element: SYSTEM_SETUP_ELEMENTS.VIEW_JOB_CONTROL_PAGE,
-  },
   // ACTION
   {
     path: SYSTEM_SETUP_ROUTES.VIEW_ACTION,
