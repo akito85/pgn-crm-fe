@@ -18,6 +18,7 @@ import { getGrantedAccessAccount } from "../../../../redux/slices/account_manage
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
 
 /**
  * Gas deposit list table module
@@ -28,8 +29,8 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const isStandAlone = moduleType = "sa";
-  const isUnderAccount = moduleType = "ua";
+  const isStandAlone = moduleType === "sa";
+  const isUnderAccount = moduleType === "ua";
 
   const isStandard = isUnderAccount && location.pathname.includes("account-standard");
   const isOneTime = isUnderAccount && location.pathname.includes("account-onetime");
@@ -62,6 +63,8 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
+
+  const [selectedDetailId, setSelectedDetailId] = useState();
 
   const currentData = useMemo(
     () => list_gasDeposit,
@@ -339,6 +342,16 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
           />
         </NxBaseContainer>
       </NxCardContainer>
+
+      {selectedDetailId && (
+        <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
+          <NxBaseContainer border>
+            <GasDepositDetailMutationTable
+              detailId={selectedDetailId}
+            />
+          </NxBaseContainer>
+        </NxCardContainer>
+      )}
 
       <GasDepositApprovalModal
         id={id}

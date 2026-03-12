@@ -97,7 +97,7 @@ const GasDepositDetailTable = ({
   return (
     <div className="flex flex-col gap-y-4">
       <NxTable
-        idTable="gas-deposit-table"
+        idTable="gas-deposit-detail-table"
         dataSource={data}
         totalData={data.length}
         tableScrolled={{ x: data.length ? "max-content" : 4000 }}

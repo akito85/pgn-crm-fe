@@ -3,7 +3,7 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { getGasDepositColumns } from "./getGasDepositColumns";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
@@ -12,8 +12,6 @@ import GasDepositDetailTable from "./GasDepositDetailTable";
 const GasDepositTable = ({
   moduleType,
   data = [],
-  idAccount = 0,
-  idCustomer = 0,
   totalElement = 0,
   page = 0,
   onSort = () => {},
