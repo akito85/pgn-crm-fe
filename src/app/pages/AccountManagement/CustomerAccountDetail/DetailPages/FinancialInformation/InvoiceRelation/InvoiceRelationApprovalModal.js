@@ -18,7 +18,7 @@ const InvoiceRelationApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_invoiceRelationApproval, pagination_invoiceRelationApproval, loading_listIrApproval, loading_approveRejectIr } = useSelector(
+  const { list_invoiceRelationApproval: invoiceRelationApprovals, pagination_invoiceRelationApproval: pagination, loading_listIrApproval, loading_approveRejectIr } = useSelector(
     (state) => state.financialInformation
   );
 
@@ -27,7 +27,6 @@ const InvoiceRelationApprovalModal = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = list_invoiceRelationApproval;
 
   // State
   const [current, setCurrent] = useState(0);
@@ -93,10 +92,10 @@ const InvoiceRelationApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_invoiceRelationApproval?.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
 
     // Check if there's more data to load
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
         page,
         size: loadMoreSize,
@@ -117,8 +116,8 @@ const InvoiceRelationApprovalModal = ({
     }
   };
 
-  const hasMore =
-    dataSource.length < (pagination_invoiceRelationApproval?.totalElements || 0);
+  const totalElement = pagination.totalElement;
+  const hasMore = invoiceRelationApprovals.length < totalElement;
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -277,7 +276,7 @@ const InvoiceRelationApprovalModal = ({
     }
   };
 
-  const baseColumns = useMemo(
+  const columnDefinitions = useMemo(
     () =>
       getInvoiceRelationColumns(
         search,
@@ -290,31 +289,9 @@ const InvoiceRelationApprovalModal = ({
     [page, loadMoreSize, searchedColumn, searchText]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
-
-  const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
-      ...item,
-      key: index + 1,
-    }));
-  }, [dataSource]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
     <Fragment>
@@ -410,9 +387,9 @@ const InvoiceRelationApprovalModal = ({
                 >
                   <NxTable
                     className={"[&_.ant-checkbox]:scale-90"}
-                    dataSource={dataSourceWithKeys}
-                    columns={processedColumns}
-                    totalData={pagination_invoiceRelationApproval?.totalElements || 0}
+                    dataSource={invoiceRelationApprovals}
+                    columns={columns}
+                    totalData={totalElement}
                     tableScrolled={{ x: "max-content" }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
@@ -459,8 +436,8 @@ const InvoiceRelationApprovalModal = ({
 
                 <NxTable
                   dataSource={selectedRows}
-                  columns={processedColumns}
-                  totalData={pagination_invoiceRelationApproval?.totalElements || 0}
+                  columns={columns}
+                  totalData={totalElement}
                   tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}

@@ -12,17 +12,12 @@ import { getInvoiceRelationAttachment } from "../../../../../../../../redux/slic
 import { useSelector } from "react-redux";
 import { nxApplyFixedColumns } from "../../../../../../../../utils/Nx/nxApplyFixedColumns";
 
-const InvoiceRelationDetailAttch = ({
-  idIr = 0,
-  dispatch = () => {},
-}) => {
+const InvoiceRelationDetailAttch = ({ idIr = 0, dispatch = () => {} }) => {
   const {
-    list_irDetailAttachment,
-    pagination_irDetailAttachment,
-    loading,
-  } = useSelector(
-    (state) => state.invoiceRelation
-  );
+    list_irDetailAttachment: detailAttachments,
+    pagination_irDetailAttachment: pagination,
+    loading_detailIrDetailAttachment: loading
+  } = useSelector((state) => state.invoiceRelation);
 
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
@@ -37,35 +32,27 @@ const InvoiceRelationDetailAttch = ({
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["action"],
-    left: [],
+    left: []
   }));
 
   const searchInput = useRef(null);
 
-  const currentData = useMemo(() => list_irDetailAttachment, [list_irDetailAttachment]);
-  
-  const currentPagination = pagination_irDetailAttachment;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+  const totalElement = pagination.totalElement;
+  const hasMore = detailAttachments.length < totalElement;
 
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
-  
   const handleShow = async (r) => {
     if ((r.fileType || r.type).includes("application/vnd")) {
       accountManagementService.downloadData(r.urlFile1);
     } else {
       setLoadingDownload(true);
       try {
-        const response = await axios.get(configApp.ACCOUNT_SERVICE + r.urlFile1, {
-          headers: tokenHeader(),
-          responseType: "blob",
-        });
+        const response = await axios.get(
+          configApp.ACCOUNT_SERVICE + r.urlFile1,
+          {
+            headers: tokenHeader(),
+            responseType: "blob"
+          }
+        );
         const base64 = await getBase64(response.data);
         previewFileAttachment(base64);
       } catch (error) {
@@ -77,9 +64,9 @@ const InvoiceRelationDetailAttch = ({
   };
 
   /**
-   * @param {string[]} selectedKeys 
-   * @param {() => {}} confirm 
-   * @param {string} dataIndex 
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
    */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -91,27 +78,28 @@ const InvoiceRelationDetailAttch = ({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
 
-  const baseColumns = useMemo(() =>
-    getDetailAttachmentColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      handleShow,
-    ),
+  const baseColumns = useMemo(
+    () =>
+      getDetailAttachmentColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleShow
+      ),
     [search, searchText, searchedColumn]
   );
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns].map((col) => ({
       ...col,
-      key: col.key || col.dataIndex || col.title,
+      key: col.key || col.dataIndex || col.title
     }));
     return columnsWithKeys;
   }, [baseColumns]);
@@ -123,13 +111,13 @@ const InvoiceRelationDetailAttch = ({
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
-      title: col.title,
+      title: col.title
     }));
   }, [allColumns]);
 
   /**
-   * @param {*} _ 
-   * @param {*} __ 
+   * @param {*} _
+   * @param {*} __
    * @param {import("antd/lib/table/interface").SorterResult} sort
    */
   const onSort = (_, __, sort) => {
@@ -141,9 +129,9 @@ const InvoiceRelationDetailAttch = ({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_irDetailAttachment?.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       await dispatch(
         getInvoiceRelationAttachment({
           id: idIr,
@@ -151,7 +139,7 @@ const InvoiceRelationDetailAttch = ({
           page: nextPage,
           size: loadMoreSize,
           sort,
-          isLoadMore: true,
+          isLoadMore: true
         })
       );
     }
@@ -160,23 +148,24 @@ const InvoiceRelationDetailAttch = ({
 
   useEffect(() => {
     if (idIr)
-      dispatch(getInvoiceRelationAttachment({
-        id: idIr,
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        isLoadMore: false
-      }));
+      dispatch(
+        getInvoiceRelationAttachment({
+          id: idIr,
+          page,
+          size: loadMoreSize,
+          sort,
+          searchs: JSON.stringify(search),
+          isLoadMore: false
+        })
+      );
   }, [sort, search, tempFilters]);
-
 
   return (
     <Spin spinning={loadingDownload}>
       <NxTable
         idTable="invoice-relation-detail-attachment-table"
-        dataSource={dataSourceWithKeys}
-        totalData={pagination_irDetailAttachment.totalElements}
+        dataSource={detailAttachments}
+        totalData={totalElement}
         current={page}
         tableScrolled={{ x: "max-content" }}
         onSort={onSort}

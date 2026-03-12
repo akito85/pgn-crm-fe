@@ -3,26 +3,29 @@ import { useState } from "react";
 import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import {
+  downloadInvoiceRelation,
+  getInvoiceRelation,
+  getIrApprovalHistory,
+  inactivateInvoiceRelation
+} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
-import { getIrApprovalHierarchy, getDetailIrApprovalHierarchy } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
+import {
+  getIrApprovalHierarchy,
+  getDetailIrApprovalHierarchy
+} from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
-const InvoiceRelation = ({
-  id = 0,
-  idCustomer = 0,
-}) => {
+const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   const dispatch = useDispatch();
 
   const {
-    list_invoiceRelation,
-    pagination_invoiceRelation,
+    list_invoiceRelation: invoiceRelations,
+    pagination_invoiceRelation: pagination,
     data_irApprovalHistory,
-    loading_listIr,
-  } = useSelector(
-    (state) => state.financialInformation
-  );
+    loading_listIr
+  } = useSelector((state) => state.financialInformation);
 
   //declare
   const searchInput = useRef(null);
@@ -40,24 +43,14 @@ const InvoiceRelation = ({
   const [inactivateIrId, setInactivateIrId] = useState(0);
   const [inactivateIrAccountNumber, setInactivateIrAccountNumber] = useState(0);
 
-  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] =
+    useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const currentData = useMemo(() => list_invoiceRelation, [list_invoiceRelation]);
-
-  const currentPagination = pagination_invoiceRelation;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
+  const totalElement = pagination.totalElement;
+  const hasMore = invoiceRelations.length < (totalElement || 0);
 
   const handleRefresh = () => {
     const body = {
@@ -66,14 +59,14 @@ const InvoiceRelation = ({
       sort,
       searchs: search,
       filters,
-      filterRules,
-    }
+      filterRules
+    };
 
     dispatch(
       getInvoiceRelation({
         id,
         body,
-        isLoadMore: false,
+        isLoadMore: false
       })
     );
     setPage(1);
@@ -85,7 +78,11 @@ const InvoiceRelation = ({
    * @param {number} irId
    * @param {number} irAppHierId
    */
-  const handleInactivateModal = (show, newIrId = 0, newIrAccountNumber = "") => {
+  const handleInactivateModal = (
+    show,
+    newIrId = 0,
+    newIrAccountNumber = ""
+  ) => {
     if (show) {
       setInactivateIrId(newIrId);
       setInactivateIrAccountNumber(newIrAccountNumber);
@@ -95,7 +92,7 @@ const InvoiceRelation = ({
       setInactivateIrAccountNumber("");
       setShowInactiveModal(false);
     }
-  }
+  };
 
   /**
    * @param {string} remark
@@ -105,33 +102,37 @@ const InvoiceRelation = ({
     const body = {
       id: inactivateIrId,
       appHierId,
-      remark,
-    }
+      remark
+    };
 
-    dispatch(inactivateInvoiceRelation({
-      body,
-    }))
-    .unwrap()
-    .then(() => {
-      const body = {
-        page: 0,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        filters,
-        filterRules,
-      }
+    dispatch(
+      inactivateInvoiceRelation({
+        body
+      })
+    )
+      .unwrap()
+      .then(() => {
+        const body = {
+          page: 0,
+          size: loadMoreSize,
+          sort,
+          searchs: search,
+          filters,
+          filterRules
+        };
 
-      dispatch(getInvoiceRelation({
-        id,
-        body,
-        isLoadMore: false
-      }));
-      setShowInactiveModal(false);
-      handleClear();
-    })
-    .catch(() => {})
-  }
+        dispatch(
+          getInvoiceRelation({
+            id,
+            body,
+            isLoadMore: false
+          })
+        );
+        setShowInactiveModal(false);
+        handleClear();
+      })
+      .catch(() => {});
+  };
 
   /**
    * @param {string[]} selectedKeys
@@ -148,7 +149,7 @@ const InvoiceRelation = ({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
@@ -159,7 +160,7 @@ const InvoiceRelation = ({
     return keyData.map((item) => ({
       key: item,
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
     }));
   };
 
@@ -174,15 +175,15 @@ const InvoiceRelation = ({
     } else {
       setShowApprovalHistoryModal(false);
     }
-  }
+  };
 
   const handleDownload = () => {
     const body = {
       sort,
       searchs: search,
       filters,
-      filterRules,
-    }
+      filterRules
+    };
 
     dispatch(downloadInvoiceRelation({ body, id }));
   };
@@ -201,23 +202,23 @@ const InvoiceRelation = ({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_invoiceRelation?.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
         page,
         size: loadMoreSize,
         sort,
         searchs: search,
         filters,
-        filterRules,
-      }
+        filterRules
+      };
 
       await dispatch(
         getInvoiceRelation({
           id,
           body,
-          isLoadMore: true,
+          isLoadMore: true
         })
       ).unwrap();
     }
@@ -231,14 +232,16 @@ const InvoiceRelation = ({
       sort,
       searchs: search,
       filters,
-      filterRules,
-    }
+      filterRules
+    };
 
-    dispatch(getInvoiceRelation({
-      id,
-      body,
-      isLoadMore: false
-    }));
+    dispatch(
+      getInvoiceRelation({
+        id,
+        body,
+        isLoadMore: false
+      })
+    );
   }, [sort, search]);
 
   useEffect(() => {
@@ -246,12 +249,15 @@ const InvoiceRelation = ({
       const temp = {
         dataApprover: {
           create: data_irApprovalHistory?.dataApprover?.INVOICE_RELATION || [],
-          inactive: data_irApprovalHistory?.dataApprover?.INACTIVE_INVOICE_RELATION || [],
+          inactive:
+            data_irApprovalHistory?.dataApprover?.INACTIVE_INVOICE_RELATION ||
+            []
         },
         dataHistory: {
           create: data_irApprovalHistory?.dataHistory?.INVOICE_RELATION || [],
-          inactive: data_irApprovalHistory?.dataHistory?.INACTIVE_INVOICE_RELATION || [],
-        },
+          inactive:
+            data_irApprovalHistory?.dataHistory?.INACTIVE_INVOICE_RELATION || []
+        }
       };
 
       setDataApprovalHistoryFix(temp);
@@ -263,10 +269,10 @@ const InvoiceRelation = ({
   return (
     <Fragment>
       <InvoiceRelationTable
-        data={dataSourceWithKeys}
+        data={invoiceRelations}
         idAccount={id}
         idCustomer={idCustomer}
-        totalElement={pagination_invoiceRelation.totalElements}
+        totalElement={totalElement}
         page={page}
         onSort={onSort}
         handleInactivateModal={handleInactivateModal}

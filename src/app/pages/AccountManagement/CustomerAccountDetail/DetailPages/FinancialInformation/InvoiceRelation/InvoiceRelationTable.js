@@ -26,7 +26,7 @@ const InvoiceRelationTable = ({
   searchedColumn = {},
   searchInput = "",
   handleSearch = () => {},
-  loading = false,
+  loading = false
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,85 +34,92 @@ const InvoiceRelationTable = ({
   const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    handleView: (id) => navigate(
-      isStandard ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION :
-      isOneTime  ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION_ONETIME : "",
-      {
-        state: {
-          idAccount,
-          idCustomer,
-          id,
+    handleView: (id) =>
+      navigate(
+        isStandard
+          ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION
+          : isOneTime
+            ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION_ONETIME
+            : "",
+        {
+          state: {
+            idAccount,
+            idCustomer,
+            id
+          }
         }
-      }
-    ),
-    handleCreate: () => navigate(
-      isStandard ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION :
-      isOneTime  ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION_ONETIME : "",
-      {
-        state: {
-          idAccount,
-          idCustomer,
+      ),
+    handleCreate: () =>
+      navigate(
+        isStandard
+          ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION
+          : isOneTime
+            ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_INVOICE_RELATION_ONETIME
+            : "",
+        {
+          state: {
+            idAccount,
+            idCustomer
+          }
         }
-      }
-    ),
-    handleUpdate: (id) => navigate(
-      isStandard ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION :
-      isOneTime  ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION_ONETIME : "",
-      {
-        state: {
-          idAccount,
-          idCustomer,
-          id,
+      ),
+    handleUpdate: (id) =>
+      navigate(
+        isStandard
+          ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION
+          : isOneTime
+            ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION_ONETIME
+            : "",
+        {
+          state: {
+            idAccount,
+            idCustomer,
+            id
+          }
         }
-      }
-    ),
+      ),
     handleApproval,
     handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal,
+    handleInactivate: handleInactivateModal
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["statusApproval", "status", "action"],
-    left: [],
+    left: []
   }));
 
-  const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History"], itemActions, "View", "table").map(
-    (col) => ({
-      ...col,
-      width: 70,
-      align: "center",
-    })
+  const actionCols = useColumnActionPermission(
+    ["Inactivate", "View", "Update", "History"],
+    itemActions,
+    "View",
+    "table"
+  ).map((col) => ({
+    ...col,
+    width: 70,
+    align: "center"
+  }));
+
+  const baseColumns = useMemo(
+    () =>
+      getInvoiceRelationColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [search, searchInput, searchText, searchedColumn]
   );
 
-  const baseColumns = useMemo(() =>
-    getInvoiceRelationColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  [search, searchText, searchedColumn]);
+  const columnDefinitions = useMemo(
+    () => [...baseColumns, ...actionCols],
+    [baseColumns, actionCols]
+  );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns, actionCols]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -124,7 +131,7 @@ const InvoiceRelationTable = ({
         current={page}
         tableScrolled={{ x: "max-content" }}
         onSort={onSort}
-        columns={processedColumns}
+        columns={columns}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
