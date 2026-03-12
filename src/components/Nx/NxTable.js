@@ -107,6 +107,7 @@ const ResizableTitle = (props) => {
 const NxTable = ({
   idTable,
   dataSource,
+  rowKey = (record) => record.id,
   dataMain, // Alias for dataSource (backward compatibility)
   columns = [],
   columnMain, // Alias for columns (backward compatibility)
@@ -151,6 +152,16 @@ const NxTable = ({
   const resolvedDataSource = dataSource || dataMain || [];
   const resolvedColumns = columns.length > 0 ? columns : (columnMain || []);
   const resolvedTotalData = totalData || resolvedDataSource.length || 0;
+
+  const resolvedDataSourceWithKeys = useMemo(() => {
+    if (!Array.isArray(resolvedDataSource))
+      return [];
+    else
+      return resolvedDataSource.map((item) => ({
+        ...item,
+        id: item.id || crypto.randomUUID()
+      }))
+  }, [resolvedDataSource]);
 
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -850,7 +861,8 @@ const NxTable = ({
 
       <div style={{ position: "relative" }}>
         <Table
-          dataSource={resolvedDataSource}
+          dataSource={resolvedDataSourceWithKeys}
+          rowKey={rowKey}
           columns={displayedColumns}
           components={components}
           scroll={tableScrolled.y === undefined ? {...tableScrolled, y: 380} : tableScrolled}
