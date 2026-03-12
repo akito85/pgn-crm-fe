@@ -2,11 +2,11 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
-import axios from "axios";
 
 const initialState = {
   data: [],
   loading: false,
+  loading_detail: false,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -289,14 +289,14 @@ const invoiceSlice = createSlice({
     },
     // get detail
     [getDetailInvoice.pending]: (state) => {
-      state.loading = true;
+      state.loading_detail = true;
     },
     [getDetailInvoice.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_detail = false;
       state.data_detail = action.payload;
     },
     [getDetailInvoice.rejected]: (state) => {
-      state.loading = false;
+      state.loading_detail = false;
     },
     // get format type
     [getFormatType.pending]: (state) => {
