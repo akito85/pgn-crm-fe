@@ -54,7 +54,7 @@ const GasDepositDetailMutationTable = ({
     left: [],
   }));
 
-  const baseColumns = useMemo(() =>
+  const columnDefinitions = useMemo(() =>
     getGasDepositDetailMutationColumns(
       search,
       searchInput,
@@ -64,9 +64,9 @@ const GasDepositDetailMutationTable = ({
     ),
   [search, searchInput, searchText, searchedColumn]);
 
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(baseColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
@@ -147,7 +147,7 @@ const GasDepositDetailMutationTable = ({
         current={page}
         tableScrolled={{ x: gasDepositDetailMutations.length ? "max-content" : 4000 }}
         onSort={onSort}
-        columns={processedColumns}
+        columns={columns}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
@@ -156,6 +156,7 @@ const GasDepositDetailMutationTable = ({
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         loading={loadingList}
+        columnDefinitions={columnDefinitions}
       />
     </div>
   );

@@ -6,24 +6,24 @@ const initialState = {
   loading_listGd: false,
   list_gasDeposit: [],
   pagination_gasDeposit: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
   loading_listGdApproval: false,
   list_gasDepositApproval: [],
   pagination_gasDepositApproval: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
   loading_listGdDetailMutation: false,
   list_gasDepositDetailMutation: [],
   pagination_gasDepositDetailMutation: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
@@ -36,8 +36,8 @@ const initialState = {
   loading_listGdAccountStandard: false,
   list_gdAccountStandard: [],
   pagination_gdAccountStandard: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
@@ -48,8 +48,8 @@ const initialState = {
   loading_detailGdDetailAttachment: false,
   list_gdDetailAttachment: [],
   pagination_gdDetailAttachment: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
@@ -466,8 +466,8 @@ const gasDepositSlice = createSlice({
       }
 
       state.pagination_gasDeposit = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -478,8 +478,8 @@ const gasDepositSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_gasDeposit = [];
         state.pagination_gasDeposit = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -511,8 +511,8 @@ const gasDepositSlice = createSlice({
       }
 
       state.pagination_gasDepositApproval = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -523,8 +523,8 @@ const gasDepositSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_gasDepositApproval = [];
         state.pagination_gasDepositApproval = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -556,8 +556,8 @@ const gasDepositSlice = createSlice({
       }
 
       state.pagination_gasDepositDetailMutation = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -568,8 +568,8 @@ const gasDepositSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_gasDepositDetailMutation = [];
         state.pagination_gasDepositDetailMutation = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -670,8 +670,8 @@ const gasDepositSlice = createSlice({
       }
 
       state.pagination_gdAccountStandard = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -682,8 +682,8 @@ const gasDepositSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_gdAccountStandard = [];
         state.pagination_gdAccountStandard = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -715,8 +715,8 @@ const gasDepositSlice = createSlice({
       }
 
       state.pagination_gdDetailAttachment = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -727,8 +727,8 @@ const gasDepositSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_gdDetailAttachment = [];
         state.pagination_gdDetailAttachment = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }

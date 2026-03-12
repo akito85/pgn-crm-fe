@@ -47,7 +47,6 @@ const InvoiceRelationApprovalModal = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const [tempFilters, setTempFilters] = useState([]);
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 

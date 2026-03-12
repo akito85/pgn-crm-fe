@@ -63,24 +63,11 @@ const GasDepositDetailTable = ({
     ),
   [search, searchText, searchedColumn]);
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns, actionCols]);
+  const columnDefinitions = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
 
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   /**
    * @param {*} _
@@ -102,7 +89,7 @@ const GasDepositDetailTable = ({
         totalData={data.length}
         tableScrolled={{ x: data.length ? "max-content" : 4000 }}
         onSort={onSort}
-        columns={processedColumns}
+        columns={columns}
         usePagination={false}
         loadMoreThreshold={20}
         fixedColumns={fixedColumns}

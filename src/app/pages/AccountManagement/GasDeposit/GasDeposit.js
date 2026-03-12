@@ -36,8 +36,8 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   const isOneTime = isUnderAccount && location.pathname.includes("account-onetime");
 
   const {
-    list_gasDeposit,
-    pagination_gasDeposit,
+    list_gasDeposit: gasDeposits,
+    pagination_gasDeposit: pagination,
     data_gdApprovalHistory,
     loading_listGd
   } = useSelector((state) => state.gasDeposit);
@@ -66,22 +66,8 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
 
   const [selectedDetailId, setSelectedDetailId] = useState();
 
-  const currentData = useMemo(
-    () => list_gasDeposit,
-    [list_gasDeposit]
-  );
-
-  const currentPagination = pagination_gasDeposit;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`
-    }));
-  }, [currentData]);
+  const totalElement = pagination.totalElement;
+  const hasMore = gasDeposits.length < totalElement;
 
   const handleRefresh = () => {
     const body = {
@@ -229,9 +215,9 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_gasDeposit?.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
         page: nextPage,
         size: loadMoreSize,
@@ -320,10 +306,10 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
       <NxCardContainer header={"GAS DEPOSIT"}>
         <NxBaseContainer border>
           <GasDepositTable
-            data={dataSourceWithKeys}
+            data={gasDeposits}
             idAccount={id}
             idCustomer={idCustomer}
-            totalElement={pagination_gasDeposit.totalElements}
+            totalElement={totalElement}
             page={page}
             onSort={onSort}
             handleInactivateModal={handleInactivateModal}

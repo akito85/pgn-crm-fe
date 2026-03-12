@@ -22,18 +22,17 @@ const GasDepositApprovalModal = ({
 }) => {
   // Selector
   const {
-    list_multiDestinationApproval,
-    pagination_multiDestinationApproval,
-    loading_listMdApproval,
-    loading_approveRejectMd
-  } = useSelector((state) => state.multiDestination);
+    list_gasDepositApproval: gasDepositApprovals,
+    pagination_gasDepositApproval: pagination,
+    loading_listGdApproval,
+    loading_approveRejectGd
+  } = useSelector((state) => state.gasDeposit);
 
   // Declaration
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = list_multiDestinationApproval;
 
   // State
   const [current, setCurrent] = useState(0);
@@ -98,10 +97,10 @@ const GasDepositApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_multiDestinationApproval?.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
 
     // Check if there's more data to load
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
         page: nextPage,
         size: loadMoreSize,
@@ -122,9 +121,9 @@ const GasDepositApprovalModal = ({
     }
   };
 
+  const totalElement = pagination.totalElement;
   const hasMore =
-    dataSource.length <
-    (pagination_multiDestinationApproval?.totalElements || 0);
+    gasDepositApprovals.length < totalElement;
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -150,7 +149,7 @@ const GasDepositApprovalModal = ({
   // Step
   const steps = [
     {
-      title: "MULTI DESTINATION"
+      title: "GAS DEPOSIT"
     },
     {
       title: "CONFIRMATION"
@@ -238,7 +237,7 @@ const GasDepositApprovalModal = ({
       const values = await form.validateFields();
 
       const body = selectedRows
-        .filter((row) => row.approvalType === "MULTI_DESTINATION")
+        .filter((row) => row.approvalType === "GAS_DEPOSIT")
         .map((row) => ({
           id: row.id,
           approvalId: row.tappId,
@@ -247,7 +246,7 @@ const GasDepositApprovalModal = ({
         }));
 
       const inactiveBody = selectedRows
-        .filter((row) => row.approvalType === "INACTIVE_MULTI_DESTINATION")
+        .filter((row) => row.approvalType === "INACTIVE_GAS_DEPOSIT")
         .map((row) => ({
           id: row.id,
           approvalId: row.tappId,
@@ -280,7 +279,7 @@ const GasDepositApprovalModal = ({
     } catch {}
   };
 
-  const baseColumns = useMemo(
+  const columnDefinitions = useMemo(
     () =>
       getGasDepositColumns(
         search,
@@ -290,41 +289,19 @@ const GasDepositApprovalModal = ({
         handleSearch,
         false
       ),
-    [page, loadMoreSize, searchedColumn, searchText]
+    [search, searchInput, searchedColumn, searchText]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title
-    }));
-  }, [allColumns]);
-
-  const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
-      ...item,
-      key: index + 1
-    }));
-  }, [dataSource]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
     <Fragment>
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        title="APPROVAL MULTI DESTINATION INFORMATION"
+        title="APPROVAL GAS DEPOSIT INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -362,14 +339,14 @@ const GasDepositApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading_approveRejectMd}
+                    loading={loading_approveRejectGd}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading_approveRejectMd}
+                    loading={loading_approveRejectGd}
                   >
                     Approve
                   </Button>
@@ -403,29 +380,27 @@ const GasDepositApprovalModal = ({
         </NxBaseContainer>
 
         <div className="p-4">
-          {/* STEP 1: MULTI DESTINATION INFORMATION */}
+          {/* STEP 1: GAS DEPOSIT INFORMATION */}
           <div className={`steps-content ${current !== 0 ? "hidden" : ""}`}>
             <Form layout="vertical" form={form} id={"formApprove"}>
               <div className="w-full grid grid-cols-1 gap-x-4">
                 <NxBaseContainer
                   border
-                  header={"Multi Destination List - Ready to Approve"}
+                  header={"Gas Deposit List - Ready to Approve"}
                 >
                   <NxTable
                     className={"[&_.ant-checkbox]:scale-90"}
-                    dataSource={dataSourceWithKeys}
-                    columns={processedColumns}
-                    totalData={
-                      pagination_multiDestinationApproval?.totalElements || 0
-                    }
+                    dataSource={gasDepositApprovals}
+                    columns={columns}
+                    totalData={totalElement}
                     tableScrolled={{
-                      x: dataSourceWithKeys.length ? "max-content" : 5000
+                      x: gasDepositApprovals.length ? "max-content" : 5000
                     }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading_listMdApproval}
+                    loading={loading_listGdApproval}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}
@@ -460,10 +435,7 @@ const GasDepositApprovalModal = ({
               <div className="flex flex-col gap-y-4">
                 <NxTable
                   dataSource={selectedRows}
-                  columns={processedColumns}
-                  totalData={
-                    pagination_multiDestinationApproval?.totalElements || 0
-                  }
+                  columns={columns}
                   tableScrolled={{
                     x: selectedRows.length ? "max-content" : 5000
                   }}
