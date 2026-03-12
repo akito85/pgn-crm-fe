@@ -30,7 +30,9 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const ViewInvoice = () => {
   // Selector
-  const { data, loading, data_detail } = useSelector((state) => state.invoice);
+  const { data, loading, data_detail, loading_detail } = useSelector(
+    (state) => state.invoice,
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -332,29 +334,6 @@ const ViewInvoice = () => {
     setPage(1);
   };
 
-  const refreshTable = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      getAllInvoicePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: 100,
-        sort,
-        isLoadMore: false,
-      }),
-    );
-    setPage(1);
-  };
-
   // ✅ Get base columns with key property including action column
   const baseColumns = useMemo(() => {
     return columnsInvoice(
@@ -624,6 +603,7 @@ const ViewInvoice = () => {
         isOpen={modalDetail}
         onClose={() => setModalDetail(false)}
         detail={data_detail}
+        loading={loading_detail}
       />
 
       {/* Modal Re-Generate */}

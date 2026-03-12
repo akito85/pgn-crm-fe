@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -26,7 +26,6 @@ const ViewTaxExemption = () => {
 
   // Declaration
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const searchInput = useRef(null);
 
   const dataSource = data?.result || [];
