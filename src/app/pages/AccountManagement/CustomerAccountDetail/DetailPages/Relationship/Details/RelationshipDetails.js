@@ -27,10 +27,10 @@ import HeaderDetail from "../../../HeaderDetail";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
-const RelationshipDetails = ({ type = "standard" }) => {
+const RelationshipDetails = ({ accountType = "standard" }) => {
   const dispatch = useDispatch();
 
-  const { data_relationshipDetail, detailDraft_relationshipDetail, loadingDetail } = useSelector(
+  const { data_relationshipDetail, detailDraft_relationshipDetail, loading_detailRelationship } = useSelector(
     (state) => state.relationship
   );
 
@@ -40,7 +40,7 @@ const RelationshipDetails = ({ type = "standard" }) => {
 
   const { data_accountDetail } = useSelector((state) => state.accountManagement);
 
-  const isLoading = loadingDetail || loadingCustomer || loadingAccount;
+  const isLoading = loading_detailRelationship || loadingCustomer || loadingAccount;
 
   // declare
   const navigate = useNavigate();
@@ -58,6 +58,9 @@ const RelationshipDetails = ({ type = "standard" }) => {
   const detail = (activeKey === originalKey ? data_relationshipDetail : detailDraft_relationshipDetail) || {};
 
   const handleSetActiveKey = (newActiveKey) => setActiveKey(newActiveKey);
+
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
 
   const {
     id,
@@ -86,14 +89,25 @@ const RelationshipDetails = ({ type = "standard" }) => {
     },
     {
       path:
-        type === "standard"
-          ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-          : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
+          "",
       breadcrumbName:
-        type === "standard" ? "Account - Standard" : "Account - One Time",
+        isStandard ?
+          "Account - Standard" :
+        isOneTime ?
+          "Account - One Time" :
+          "",
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP,
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
+          "",
       breadcrumbName: "Detail Account",
     },
     {
@@ -208,7 +222,7 @@ const RelationshipDetails = ({ type = "standard" }) => {
             dispatch={dispatch}
             idAccount={idAccount}
             idCustomer={idCustomer}
-            type={type}
+            type={accountType}
           />
 
           {draftExist && (

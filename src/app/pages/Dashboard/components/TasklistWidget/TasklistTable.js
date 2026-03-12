@@ -20,6 +20,7 @@ const TasklistTable = ({
   search = {},
   searchedColumn = "",
   searchInput = null,
+  onRefresh = null,
 }) => {
   const navigate = useNavigate();
   const [loadingId, setLoadingId] = useState(null);
@@ -126,6 +127,8 @@ const TasklistTable = ({
       setFixedColumns={setFixedColumns}
       columnDefinitions={columnDefinitions}
       loading={loading}
+      showRefresh={true}
+      onRefresh={onRefresh}
     />
   );
 };

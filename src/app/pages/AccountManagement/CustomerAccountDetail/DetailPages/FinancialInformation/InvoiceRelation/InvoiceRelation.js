@@ -5,7 +5,8 @@ import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadInvoiceRelation, getInvoiceRelation, getIrApprovalHistory, inactivateInvoiceRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
-import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
+import { getIrApprovalHierarchy, getDetailIrApprovalHierarchy } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 const InvoiceRelation = ({
@@ -18,7 +19,7 @@ const InvoiceRelation = ({
     list_invoiceRelation,
     pagination_invoiceRelation,
     data_irApprovalHistory,
-    loading,
+    loading_listIr,
   } = useSelector(
     (state) => state.financialInformation
   );
@@ -37,7 +38,6 @@ const InvoiceRelation = ({
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateIrId, setInactivateIrId] = useState(0);
-  const [inactivateIrAppHierId, setInactivateIrAppHierId] = useState(0);
   const [inactivateIrAccountNumber, setInactivateIrAccountNumber] = useState(0);
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
@@ -83,15 +83,13 @@ const InvoiceRelation = ({
    * @param {number} irId
    * @param {number} irAppHierId
    */
-  const handleInactivateModal = (show, newIrId = 0, newIrAppHierId = 0, newIrAccountNumber = "") => {
+  const handleInactivateModal = (show, newIrId = 0, newIrAccountNumber = "") => {
     if (show) {
       setInactivateIrId(newIrId);
-      setInactivateIrAppHierId(newIrAppHierId);
-      setInactivateIrAccountNumber(newIrAccountNumber)
+      setInactivateIrAccountNumber(newIrAccountNumber);
       setShowInactiveModal(true);
     } else {
       setInactivateIrId(0);
-      setInactivateIrAppHierId(0);
       setInactivateIrAccountNumber("");
       setShowInactiveModal(false);
     }
@@ -101,10 +99,10 @@ const InvoiceRelation = ({
    * @param {string} remark
    * @param {() => {}} handleClear
    */
-  const handleInactivateIr = (remark, handleClear) => {
+  const handleInactivateIr = ({ remark, appHierId }, handleClear) => {
     const body = {
       id: inactivateIrId,
-      appHierId: inactivateIrAppHierId,
+      appHierId,
       remark,
     }
 
@@ -259,7 +257,7 @@ const InvoiceRelation = ({
         searchedColumn={searchedColumn}
         searchInput={searchInput}
         handleSearch={handleSearch}
-        loading={loading}
+        loading={loading_listIr}
       />
 
       <InvoiceRelationApprovalModal
@@ -270,12 +268,21 @@ const InvoiceRelation = ({
       />
 
       {/* Inactivate Modal */}
-      <NxApproveOrRejectModal
+      <NxInactivateModal
         isOpen={showInactiveModal}
         header={"INACTIVATE"}
         handleCloseModal={() => handleInactivateModal(false)}
         customMessage={`Are you sure you want to inactivate invoice relation - ${inactivateIrAccountNumber}?`}
-        onFinish={({ remark }, handleClear) => handleInactivateIr(remark, handleClear)}
+        onFinish={({ remark, appHierId }, handleClear) =>
+          handleInactivateIr({ remark, appHierId }, handleClear)
+        }
+        named={inactivateIrAccountNumber}
+        menu="invoice relation"
+        sliceName="invoiceRelation"
+        approvalOptionsStateName="data_irApprovalHierarchy"
+        approvalHierarchtDetailsStateName="detail_irApprovalHierarchy"
+        getApprovalOptions={getIrApprovalHierarchy}
+        getApprovalHierarchyDetails={getDetailIrApprovalHierarchy}
       />
 
       {/* Approval History Modal */}

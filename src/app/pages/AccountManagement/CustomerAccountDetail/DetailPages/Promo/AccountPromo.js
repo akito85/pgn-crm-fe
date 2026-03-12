@@ -264,12 +264,6 @@ const AccountPromo = ({ id }) => {
                   </Col>
                   <Col span={8}>
                     <RenderLabelValue
-                      label="Category"
-                      value={detailPromoData?.categoryName}
-                    />
-                  </Col>
-                  <Col span={8}>
-                    <RenderLabelValue
                       label="Criteria"
                       value={detailPromoData?.criterias}
                     />
@@ -344,6 +338,7 @@ const AccountPromo = ({ id }) => {
                   selectedTab={selectedTabCriteriaAndCondition}
                   setSelectedTab={setSelectedTabCriteriaAndCondition}
                   promoId={detailPromoData?.id}
+                  accountId={id}
                   onRegisterDownload={(handler) =>
                     (downloadRef.current = handler)
                   }

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Spin, Tooltip, Button } from "antd";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachmentPaymentRelation";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { previewFileAttachment } from "../../../../../../../../../../utils/previewFileAttachment";
 import { getColumnSearchPropsPaging } from "../../../../../../../../../../utils/getColumnSearchProps";
 import productPromoHttpService from "../../../../../../../../../../redux/services/productPromoHttpService";
@@ -211,13 +211,14 @@ const AttachmentSectionForm = ({
   data = [],
   updateData = () => { },
   type,
-  dispatch = () => { },
   getAPICategory = () => { },
   service = productPromoHttpService,
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
 }) => {
+  const dispatch = useDispatch();
+
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -313,7 +314,7 @@ const AttachmentSectionForm = ({
           <NxTable
             dataSource={data}
             totalData={data.length}
-            tableScrolled={{ y: 300, x: 1500 }}
+            tableScrolled={{ x: 1500 }}
             columns={columnAttachmentData(
               searchInput,
               searchedColumn,

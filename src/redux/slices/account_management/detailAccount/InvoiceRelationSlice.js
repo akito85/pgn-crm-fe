@@ -4,6 +4,14 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
+  loading_detailIr: false,
+  loading_detailDraftIr: false,
+  loading_createUpdateIr: false,
+  loading_listIrAccountStandard: false,
+  loading_detailIrDetailAttachment: false,
+  loading_approveRejectIr: false,
+  loading_listIrApprovalOption: false,
+  loading_detailIrApprovalHierarchyDetails: false,
   list_irDetailAttachment: [],
   pagination_irDetailAttachment: {
     totalPages: 0,
@@ -199,7 +207,7 @@ export const getIrApprovalHierarchy = createAsyncThunk(
 
 export const getDetailIrApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_IR_APPROVAL_HIERARCHY",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
@@ -416,76 +424,76 @@ const invoiceRelationSlice = createSlice({
   extraReducers: {
     /** Get Detail Invoice Relation */
     [getDetailInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_detailIr = true;
     },
     [getDetailInvoiceRelation.fulfilled]: (state, action) => {
       state.detail_invoiceRelation = action.payload?.result || {};
-      state.loading = false;
+      state.loading_detailIr = false;
     },
     [getDetailInvoiceRelation.rejected]: (state, action) => {
       state.detail_invoiceRelation = {};
-      state.loading = false;
+      state.loading_detailIr = false;
     },
 
     /** Get Detail Draft Invoice Relation */
     [getDetailDraftInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_detailDraftIr = true;
     },
     [getDetailDraftInvoiceRelation.fulfilled]: (state, action) => {
       state.detailDraft_invoiceRelation = action.payload?.result || {};
-      state.loading = false;
+      state.loading_detailDraftIr = false;
     },
     [getDetailDraftInvoiceRelation.rejected]: (state) => {
       state.detailDraft_invoiceRelation = {};
-      state.loading = false;
+      state.loading_detailDraftIr = false;
     },
 
     /** Create Invoice Relation */
     [createInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateIr = true;
     },
     [createInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateIr = false;
     },
-    [createInvoiceRelation.pending]: (state) => {
-      state.loading = false;
+    [createInvoiceRelation.rejected]: (state) => {
+      state.loading_createUpdateIr = false;
     },
 
     /** Update Invoice Relation */
     [updateInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateIr = true;
     },
     [updateInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateIr = false;
     },
-    [updateInvoiceRelation.pending]: (state) => {
-      state.loading = false;
+    [updateInvoiceRelation.rejected]: (state) => {
+      state.loading_createUpdateIr = false;
     },
 
     /** Get Invoice Relation Approval Hierarchy */
     [getIrApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+      state.loading_listIrApprovalOption = true;
     },
     [getIrApprovalHierarchy.fulfilled]: (state, action) => {
       state.data_irApprovalHierarchy = action.payload;
-      state.loading = false;
+      state.loading_listIrApprovalOption = false;
     },
     [getIrApprovalHierarchy.rejected]: (state) => {
       state.data_irApprovalHierarchy = [];
-      state.loading = false;
+      state.loading_listIrApprovalOption = false;
     },
 
     /** Get Invoice Relation Detail Approval Hierarchy */
     [getDetailIrApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+      state.loading_detailIrApprovalHierarchyDetails = true;
     },
     [getDetailIrApprovalHierarchy.fulfilled]: (state, action) => {
       state.detail_irApprovalHierarchy = action.payload;
-      state.loading = false;
+      state.loading_detailIrApprovalHierarchyDetails = false;
     },
     [getDetailIrApprovalHierarchy.rejected]: (state) => {
       state.detail_irApprovalHierarchy = [];
-      state.loading = false;
+      state.loading_detailIrApprovalHierarchyDetails = false;
     },
 
     /** Get Invoice Relation Attachment Category */
@@ -504,11 +512,11 @@ const invoiceRelationSlice = createSlice({
     /** Get Invoice Relation Account Standard */
     [getIrAccountStandard.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listIrAccountStandard = true;
       }
     },
     [getIrAccountStandard.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listIrAccountStandard = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -533,7 +541,7 @@ const invoiceRelationSlice = createSlice({
       }
     },
     [getIrAccountStandard.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listIrAccountStandard = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_irAccountStandard = [];
@@ -549,20 +557,20 @@ const invoiceRelationSlice = createSlice({
     /** Get Invoice Relation Attachment */
     [getInvoiceRelationAttachment.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_detailIrDetailAttachment = true;
       }
     },
     [getInvoiceRelationAttachment.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_detailIrDetailAttachment = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_invoiceRelation.map((item) => item.id));
+          const currentIds = new Set(state.list_irDetailAttachment.map((item) => item.id));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
-          
+
           state.list_irDetailAttachment = [
-            ...state.list_invoiceRelation,
+            ...state.list_irDetailAttachment,
             ...filteredResult,
           ];
         }
@@ -578,7 +586,7 @@ const invoiceRelationSlice = createSlice({
       }
     },
     [getInvoiceRelationAttachment.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_detailIrDetailAttachment = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_irDetailAttachment = [];
@@ -593,24 +601,24 @@ const invoiceRelationSlice = createSlice({
 
     /** Approve or Reject Invoice Relation */
     [approveOrRejectInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Approve or Reject Inactive Invoice Relation */
     [approveOrRejectInactiveInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectInactiveInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectInactiveInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Inactivate Invoice Relation Attachment */

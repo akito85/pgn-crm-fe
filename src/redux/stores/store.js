@@ -90,10 +90,7 @@ import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
-import { tasklistSlice } from "../slices/tasklist/tasklistSlice";
-import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog";
-import jobSlice from "../slices/system_setup/jobSlice";
-import loggingReducer from "../slices/system_setup/logging";
+import { tasklistSlice } from "../slices/tasklist/tasklistSlice";   
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
 import taxExemptionReducer from "../slices/rating_billing_invoice/taxExemption";
 import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
@@ -142,10 +139,14 @@ import serviceRequestReducer from "../slices/account_management/detailAccount/Se
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
+import jobManagementReducer from "../slices/job_management/jobSlice";
+import jobGroupReducer from "../slices/job_management/jobGroupSlice";
+import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 
 const reducer = combineReducers({
-  job: jobSlice,
-  logging: loggingReducer,
+  jobManagement: jobManagementReducer,
+  jobGroup: jobGroupReducer,
+  jobExecution: jobExecutionReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -226,7 +227,6 @@ const reducer = combineReducers({
   globalProp: globalPropReducer,
 
   // RBI reducer
-  prabillingLog: prabillingLogReducer,
   rbi_calculation: calculationReducer,
   rbi_prabilling: prabillingReducer,
   monitoring: monitoringReducer,

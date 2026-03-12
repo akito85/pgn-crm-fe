@@ -813,8 +813,8 @@ const SaDetail = ({
                           key: "pricing",
                           label: <BadgeLabel label="Pricing" count={getBadgeCount("Pricing")} />,
                           children: (
-                            <NxBaseContainer border header={"Pricing Information"}>
-                              <div className={"grid grid-cols-2 w-full gap-x-6"}>
+                            <NxBaseContainer border>
+                              <div className={"grid grid-cols-3 w-full gap-x-6"}>
                                 {/* DDL PRICE CODE */}
                                 <div>
                                   <Form.Item
@@ -866,12 +866,8 @@ const SaDetail = ({
                                     <InputComponent disabled={true} />
                                   </Form.Item>
                                 </div>
-                              </div>
 
-                              <div className={"grid grid-cols-1 w-full gap-x-6"}>
-                                {/* DDL PRICE RULE */}
                                 <div>
-
                                   <Form.Item
                                     name={"pricingRule"}
                                     label={"Pricing Rule"}
@@ -901,7 +897,6 @@ const SaDetail = ({
                                   </Form.Item>
                                 </div>
                               </div>
-
                               <TablePricing
                                 setData={setDataPricing}
                                 data={dataPricing}
@@ -921,7 +916,7 @@ const SaDetail = ({
                           key: "calculationRule",
                           label: <BadgeLabel label="Calculation Rule" count={getBadgeCount("Calculation Rule")} />,
                           children: (
-                            <NxBaseContainer border header={"Calculation Rule"}>
+                            <NxBaseContainer border>
                               <TableCalcRule
                                 dispatch={dispatch}
                                 dataTable={dataTableCalcRule}
@@ -938,7 +933,7 @@ const SaDetail = ({
                           key: "termOfService",
                           label: <BadgeLabel label="Term of Service" count={getBadgeCount("Term of Service")} />,
                           children: (
-                            <NxBaseContainer border header={"Term of Service"}>
+                            <NxBaseContainer border>
                               <TableTos
                                 isProduct={saDetailObj?.createFrom}
                                 dataTermOfService={dataTermOfService}
@@ -955,7 +950,7 @@ const SaDetail = ({
                           key: "lateCharge",
                           label: <BadgeLabel label="Late Charge" count={getBadgeCount("Late Charge")} />,
                           children: (
-                            <NxBaseContainer border header={"Late Charge"}>
+                            <NxBaseContainer border>
                               <TableLateCharge
                                 dataTableLateCharge={dataTableLateCharge}
                                 setDataTableLateCharge={setDataTableLateCharge}
@@ -967,7 +962,7 @@ const SaDetail = ({
                           key: "taxImplication",
                           label: <BadgeLabel label="Tax Implication" count={getBadgeCount("Tax Implication")} />,
                           children: (
-                            <NxBaseContainer border header={"Tax Implication"}>
+                            <NxBaseContainer border>
                               <TableTaxImplication
                                 dataTaxImplication={dataTaxImplication}
                                 setDataTaxImplication={setDataTaxImplication}

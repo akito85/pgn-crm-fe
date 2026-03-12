@@ -1,8 +1,9 @@
-import ConfirmationModalInfo from "./ConfirmationModalInfo";
-import ConfirmationModalApproval from "./ConfirmationModalApproval";
-import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import AttachmentSectionForm from "../StepContents/AttachmentForm/AttachmentPaymentRelation";
+import ApprovalSectionForm from "../StepContents/ApprovalForm/ApprovalPaymentRelation";
+import InfoPaymentRelation from "../StepContents/InformationForm/InfoPaymentRelation";
 
 const ConfirmationModalTabs = ({
   form,
@@ -13,40 +14,49 @@ const ConfirmationModalTabs = ({
   configApplication,
   activeTab = 0,
   setActiveTab = () => {},
+  disabled = false,
 }) => {
   const tabOptions = [
     {
       key: 0,
       label: "Payment Relation Information",
-      children: <ConfirmationModalInfo form={form} />
+      disabled,
+      children: <InfoPaymentRelation form={form} formView={false} />
     },
     {
       key: 1,
       label: "Approval",
+      disabled,
       children: (
-        <ConfirmationModalApproval
-          dataTable={approvalData}
-          form={form}
-        />
+        <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />
       )
     },
     {
       key: 2,
       label: "Attachment",
+      disabled,
       children: (
-        <ConfirmationModalAttachment
+        <AttachmentSectionForm
           data={dataAttachment}
           service={service}
           configApplication={configApplication}
+          type={"confirmation"}
         />
       )
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark />
+      disabled,
+      children: <ConfirmationModalRemark disabled={disabled} />
     },
-  ].filter(Boolean);
+  ].filter(Boolean).map((tabOption) => ({
+    ...tabOption,
+    children:
+      <NxBaseContainer border header={tabOption.label}>
+        {tabOption.children}
+      </NxBaseContainer>
+  }));
 
   return (
     <NxTabs

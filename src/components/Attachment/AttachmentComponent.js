@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { Spin, Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
-import moment from "moment";
+import { Spin, Tooltip, Button } from "antd";
 import axios from "axios";
 import FileSaver from "file-saver";
 import Highlighter from "react-highlight-words";
 import ModalAttachment from "./ModalAttachment";
 import SVGIcon from "../../assets/Icon/index";
-import ButtonComponent from "../ButtonComponent";
-import TablePagination from "../TablePagination";
+import NxTable from "../Nx/NxTable";
+import NxDate from "../Nx/NxDatePicker";
 import { previewFileAttachment } from "../../utils/previewFileAttachment";
 import { getColumnSearchPropsPaging } from "../../utils/getColumnSearchProps";
 import { getBase64 } from "../../utils/getBase64";
@@ -22,23 +20,20 @@ const onFilter = (dataIndex, value, record) => {
   switch (dataIndex) {
     case "startDate":
     case "endDate":
-      const date = record[dataIndex]
-        ? moment(record[dataIndex]).format("DD MMM YYYY")
-        : "";
+      const date = NxDate.formatDate(record[dataIndex], "DD MMM YYYY") || "";
       return date.toString().toLowerCase().includes(search);
     case "fileSize":
-      const tempFileSize = record[dataIndex] || 0;
-      return tempFileSize.toString().toLowerCase().includes(search);
+      return record.size?.toString().toLowerCase().includes(search);
     default:
       return record[dataIndex]?.toLowerCase().includes(search);
   }
 };
 
-const extraSize = (fileSize) => {
-  if (fileSize.includes("KB")) {
-    return parseFloat(fileSize.replace(" KB", "")) * 1024;
-  } else if (fileSize.includes("MB")) {
-    return parseFloat(fileSize.replace(" KB", "")) * 1024 * 1024;
+const extractSize = (fileSize) => {
+  if (fileSize.includes('KB')) {
+    return parseFloat(fileSize.replace(' KB', '')) * 1024;
+  } else if (fileSize.includes('MB')) {
+    return parseFloat(fileSize.replace(' MB', '')) * 1024 * 1024;
   }
   return parseFloat(fileSize);
 };
@@ -48,16 +43,10 @@ const sorter = (fieldSort, a, b) => {
     switch (fieldSort) {
       case "startDate":
       case "endDate":
-        const date = obj[fieldSort]
-          ? moment(obj[fieldSort]).format("DD MMM YYYY")
-          : "";
+        const date = NxDate.formatDate(obj[fieldSort], "DD MMM YYYY") || "";
         return date.toString().toLowerCase();
-      // case "fileSize":
-      //   const tempFileSize = obj[fieldSort];
-      //   return tempFileSize.toString().toLowerCase();
       case "fileSize":
-        return extraSize(obj[fieldSort]);
-
+        return extractSize(obj[fieldSort]);
       default:
         return obj[fieldSort].toString().toLowerCase();
     }
@@ -72,8 +61,6 @@ const sorter = (fieldSort, a, b) => {
 };
 
 const columnAttachmentData = (
-  page,
-  pageSize,
   searchInput,
   searchedColumn,
   searchText,
@@ -85,13 +72,13 @@ const columnAttachmentData = (
   const res = [
     {
       title: "NO",
-      width: 60,
+      width: 30,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "CATEGORY",
-      width: 240,
+      width: 75,
       dataIndex: "fileCategoryName",
       align: "center",
       onFilter: (value, record) => onFilter("fileCategoryName", value, record),
@@ -106,7 +93,7 @@ const columnAttachmentData = (
     },
     {
       title: "FILE NAME",
-      width: 240,
+      width: 200,
       dataIndex: "fileName",
       ellipsis: {
         showTitle: false,
@@ -141,7 +128,7 @@ const columnAttachmentData = (
     },
     {
       title: "UPLOADED BY",
-      width: 240,
+      width: 100,
       dataIndex: "createdBy",
       onFilter: (value, record) => onFilter("createdBy", value, record),
       sorter: (a, b) => sorter("createdBy", a, b),
@@ -156,7 +143,7 @@ const columnAttachmentData = (
     {
       title: "UPLOADED DATE",
       align: "center",
-      width: 240,
+      width: 100,
       dataIndex: "createdDate",
       onFilter: (value, record) => onFilter("createdDate", value, record),
       sorter: (a, b) => sorter("createdDate", a, b),
@@ -171,7 +158,7 @@ const columnAttachmentData = (
     {
       title: "FILE SIZE",
       align: "center",
-      width: 240,
+      width: 100,
       dataIndex: "fileSize",
       onFilter: (value, record) => onFilter("fileSize", value, record),
       sorter: (a, b) => sorter("fileSize", a, b),
@@ -191,30 +178,29 @@ const columnAttachmentData = (
     {
       title: "ACTION",
       align: "center",
-      width: 70,
+      width: 75,
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex justify-center align-middle gap-2">
+          <div className="flex justify-center align-middle gap-2 py-1">
             <Tooltip title="Preview">
-              <span className="flex justify-center">
-                <EyeOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                  onClick={() => handleShow(r)}
-                />
-              </span>
+              <Button
+                type="table-action"
+                disabled={!r.dataType === "exist"}
+                onClick={() => handleShow(r)}
+              >
+                <SVGIcon name="IconEye" width={20} />
+              </Button>
             </Tooltip>
-            {type !== "detail" &&
-            !(type === "update" && r.dataType === "exist") ? (
+            {type !== "detail" && type !== "confirmation" ? (
               <Tooltip title="Delete">
-                <span className="flex justify-center">
-                  <SVGIcon
-                    name="IconDelete"
-                    color="#D90000"
-                    width={24}
-                    onClick={() => handleDelete(r)}
-                  />
-                </span>
+                <Button
+                  type="table-action"
+                  disabled={!r.dataType === "exist"}
+                  onClick={() => handleDelete(r)}
+                >
+                  <SVGIcon name="IconDelete" width={20} />
+                </Button>
               </Tooltip>
             ) : null}
           </div>
@@ -247,7 +233,7 @@ const AttachmentComponent = ({
   dispatch = () => {},
   getAPICategory = () => {},
   service,
-  configApplication,
+  configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard,
   typeRBI,
   mandatory = false,
@@ -265,12 +251,8 @@ const AttachmentComponent = ({
   const searchInput = useRef(null);
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
@@ -296,24 +278,9 @@ const AttachmentComponent = ({
     confirm();
     setSearchText(selectedKeys[0]);
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
     setSearchedColumn(tempSearchColumn);
   };
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
-  };
+
   const handleDelete = (record) => {
     updateData((prevState) => {
       const temp = prevState.filter((detail) => detail.key !== record.key);
@@ -324,46 +291,6 @@ const AttachmentComponent = ({
   const handleOpenModal = () => {
     setModalUpload(true);
     dispatch(getAPICategory());
-  };
-
-  const filterDataByPage = (typeData = "data") => {
-    let result = [...data];
-    if (searchedColumn) {
-      result = result.filter((item) => {
-        return item[searchedColumn]
-          ?.toLowerCase()
-          .includes(searchText.toLowerCase());
-      });
-    }
-    const handleDataSort = (obj) => {
-      switch (fieldSort) {
-        case "startDate":
-        case "endDate":
-          const date = obj[fieldSort]
-            ? moment(obj[fieldSort]).format("DD MMM YYYY")
-            : "";
-          return date.toString().toLowerCase();
-        case "fileSize":
-          return obj.size;
-        default:
-          return obj[fieldSort].toString().toLowerCase();
-      }
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    const fix = result.slice((page - 1) * pageSize, page * pageSize);
-    return typeData === "data" ? fix : result.length;
   };
 
   const handleShow = async (r) => {
@@ -378,13 +305,18 @@ const AttachmentComponent = ({
         dispatch(service.downloadData(r.urlFile1));
       } else {
         setLoadingDownload(true);
-        const response = await axios.get(configApplication + r.urlFile1, {
-          headers: tokenHeader(),
-          responseType: "blob",
-        });
-        const base64 = await getBase64(response.data);
-        setLoadingDownload(false);
-        previewFileAttachment(base64);
+        try {
+          const response = await axios.get(configApplication + r.urlFile1, {
+            headers: tokenHeader(),
+            responseType: "blob",
+          });
+          const base64 = await getBase64(response.data);
+          previewFileAttachment(base64);
+        } catch (error) {
+          console.error("Failed to download file", error);
+        } finally {
+          setLoadingDownload(false);
+        }
       }
     }
   };
@@ -409,42 +341,32 @@ const AttachmentComponent = ({
 
   return (
     <Spin spinning={loadingDownload}>
-      <div className="flex flex-col w-full gap-3">
-        {type !== "detail" && type !== "preview" ? (
-          <div className="flex flex-col w-full gap-2">
-            <p className="text-[13px] mb-0 text-dg-grey-dark">
+      <div className="flex flex-col gap-y-4">
+        {type !== "detail" && type !== "preview" && type !== "confirmation" ? (
+          <div className="flex flex-col gap-y-2">
+            <span className="text-sm">
               Attach File:
               {mandatory ? (
                 <span className={"pl-1"} style={{ color: "red" }}>
                   *
                 </span>
               ) : null}
-            </p>
-            <div className="flex flex-row gap-2 items-center">
-              <ButtonComponent
-                fontSizeClassname="text-[11px]"
-                size="small"
-                type="default"
-                onClick={handleOpenModal}
-              >
+            </span>
+            <div className="flex gap-x-2 items-center">
+              <Button type="menu" onClick={handleOpenModal}>
                 Choose File
-              </ButtonComponent>
-              <p className="text-[11px] text-dg-grey-dark mb-0">
-                No file choosen
-              </p>
+              </Button>
+              {!data.length && (
+                <span className="text-sm text-dg-grey-dark">No file choosen</span>
+              )}
             </div>
           </div>
         ) : null}
-        <TablePagination
-          dataSource={filterDataByPage("data")}
-          totalData={filterDataByPage("length")}
-          current={page}
-          pageSize={pageSize}
+        <NxTable
+          dataSource={data}
+          totalData={data.length}
           tableScrolled={{ y: 300, x: 1500 }}
-          onChange={handleChangeSize}
           columns={columnAttachmentData(
-            page,
-            pageSize,
             searchInput,
             searchedColumn,
             searchText,
@@ -453,7 +375,7 @@ const AttachmentComponent = ({
             type,
             handleShow
           )}
-          onSort={onSort}
+          usePagination={false}
         />
         <ModalAttachment
           openUpload={modalUpload}

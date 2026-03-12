@@ -4,6 +4,7 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
+  loading_listMd: false,
   list_multiDestination: [],
   pagination_multiDestination: {
     totalPages: 0,
@@ -11,6 +12,7 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  loading_listMdApproval: false,
   list_multiDestinationApproval: [],
   pagination_multiDestinationApproval: {
     totalPages: 0,
@@ -18,9 +20,12 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
-  data_mdApprovalHierarchy: [],
-  detail_mdApprovalHierarchy: [],
+  loading_listMdApprovalOption: false,
+  list_mdApprovalOptions: [],
+  loading_listMdApprovalHierarchyDetail: false,
+  list_mdApprovalHierarchyDetail: [],
   data_mdAttachmentCategory: [],
+  loading_listMdAccountStandard: false,
   list_mdAccountStandard: [],
   pagination_mdAccountStandard: {
     totalPages: 0,
@@ -28,7 +33,11 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  loading_detailMd: false,
   detail_multiDestination: {},
+  loading_detailDraftMd: false,
+  detailDraft_multiDestination: {},
+  loading_detailMdDetailAttachment: false,
   list_mdDetailAttachment: [],
   pagination_mdDetailAttachment: {
     totalPages: 0,
@@ -37,6 +46,8 @@ const initialState = {
     pageSize: 10,
   },
   data_mdApprovalHistory: {},
+  loading_approveRejectMd: false,
+  loading_createUpdateMd: false,
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
   data_globalTypeColumn: [],
@@ -206,9 +217,44 @@ export const updateMultiDestination = createAsyncThunk(
 
 export const getDetailMultiDestination = createAsyncThunk(
   "GET_DETAIL_MULTI_DESTINATION",
-  async (id, thunkAPI) => {
+  async ({ id, subjectId, objectId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/multi-destination/${id}`;
+      const queryParams = new URLSearchParams;
+
+      if (subjectId)
+        queryParams.append("subjectId", subjectId);
+      if (objectId)
+        queryParams.append("objectId", objectId);
+
+      let url = `/v1/dbs/api/multi-destination/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDetailDraftMultiDestination = createAsyncThunk(
+  "GET_DETAIL_DRAFT_MULTI_DESTINATION",
+  async ({ id, subjectId, objectId }, thunkAPI) => {
+    try {
+      const queryParams = new URLSearchParams;
+
+      if (subjectId)
+        queryParams.append("subjectId", subjectId);
+      if (objectId)
+        queryParams.append("objectId", objectId);
+
+      let url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
+
+      if (queryParams.toString().length)
+        url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -232,7 +278,7 @@ export const getMdApprovalHierarchy = createAsyncThunk(
 
 export const getDetailMdApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_MD_APPROVAL_HIERARCHY",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
@@ -258,26 +304,11 @@ export const getMdAttachmentCategory = createAsyncThunk(
 
 export const getMdAccountStandard = createAsyncThunk(
   "GET_MD_ACCOUNT_STANDARD",
-  async ({ page, size, sort, searchs, id, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
-
-      if (page)
-        queryParams.append("page", page);
-      if (size)
-        queryParams.append("size", size);
-      if (sort)
-        queryParams.append("sort", sort);
-      if (searchs)
-        queryParams.append("searchs", searchs);
-
-      let url = `/v1/dbs/api/multi-destination/list-account/${id}`;
-
+      const url = `/v1/dbs/api/multi-destination/list-account/${id}`;
       
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
-
-      const response = await accountManagementService.getPagination(url);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         isLoadMore,
@@ -531,11 +562,11 @@ const multiDestinationSlice = createSlice({
     /** Get Multi Destination */
     [getMultiDestination.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMd = true;
       }
     },
     [getMultiDestination.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listMd = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -560,7 +591,7 @@ const multiDestinationSlice = createSlice({
       }
     },
     [getMultiDestination.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listMd = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestination = [];
@@ -576,11 +607,11 @@ const multiDestinationSlice = createSlice({
     /** Get Multi Destination Approval */
     [getMultiDestinationApproval.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMdApproval = true;
       }
     },
     [getMultiDestinationApproval.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listMdApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -605,7 +636,7 @@ const multiDestinationSlice = createSlice({
       }
     },
     [getMultiDestinationApproval.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listMdApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestinationApproval = [];
@@ -619,65 +650,81 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Detail Multi Destination */
-    [getDetailMultiDestination.pending]: (state, action) => {
-      state.detail_multiDestination = action.payload;
-      state.loading = true;
+    [getDetailMultiDestination.pending]: (state) => {
+      state.detail_multiDestination = {};
+      state.loading_detailMd = true;
     },
     [getDetailMultiDestination.fulfilled]: (state, action) => {
-      state.detail_multiDestination = action.payload;
-      state.loading = false;
+      state.detail_multiDestination = action.payload || {};
+      state.loading_detailMd = false;
     },
-    [getDetailMultiDestination.rejected]: (state, action) => {
-      state.detail_multiDestination = action.payload;
-      state.loading = false;
+    [getDetailMultiDestination.rejected]: (state) => {
+      state.detail_multiDestination = {};
+      state.loading_detailMd = false;
+    },
+
+    /** Get Detail Draft Multi Destination */
+    [getDetailDraftMultiDestination.pending]: (state) => {
+      state.detailDraft_multiDestination = {};
+      state.loading_detailDraftMd = true;
+    },
+    [getDetailDraftMultiDestination.fulfilled]: (state, action) => {
+      state.detailDraft_multiDestination = action.payload || {};
+      state.loading_detailDraftMd = false;
+    },
+    [getDetailDraftMultiDestination.rejected]: (state) => {
+      state.detailDraft_multiDestination = {};
+      state.loading_detailDraftMd = false;
     },
 
     /** Create Multi Destination */
     [createMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateMd = true;
     },
     [createMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateMd = false;
     },
-    [createMultiDestination.pending]: (state) => {
-      state.loading = false;
+    [createMultiDestination.rejected]: (state) => {
+      state.loading_createUpdateMd = false;
     },
 
     /** Update Multi Destination */
     [updateMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateMd = true;
     },
     [updateMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateMd = false;
     },
-    [updateMultiDestination.pending]: (state) => {
-      state.loading = false;
+    [updateMultiDestination.rejected]: (state) => {
+      state.loading_createUpdateMd = false;
     },
 
     /** Get Multi Destination Approval Hierarchy */
     [getMdApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+      state.list_mdApprovalOptions = [];
+      state.loading_listMdApprovalOption = true;
     },
     [getMdApprovalHierarchy.fulfilled]: (state, action) => {
-      state.data_mdApprovalHierarchy = action.payload;
-      state.loading = false;
+      state.list_mdApprovalOptions = action.payload;
+      state.loading_listMdApprovalOption = false;
     },
     [getMdApprovalHierarchy.rejected]: (state) => {
-      state.data_mdApprovalHierarchy = [];
-      state.loading = false;
+      state.list_mdApprovalOptions = [];
+      state.loading_listMdApprovalOption = false;
     },
 
     /** Get Multi Destination Detail Approval Hierarchy */
     [getDetailMdApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+      state.list_mdApprovalHierarchyDetail = [];
+      state.loading_listMdApprovalHierarchyDetail = true;
     },
     [getDetailMdApprovalHierarchy.fulfilled]: (state, action) => {
-      state.detail_mdApprovalHierarchy = action.payload;
-      state.loading = false;
+      state.list_mdApprovalHierarchyDetail = action.payload;
+      state.loading_listMdApprovalHierarchyDetail = false;
     },
     [getDetailMdApprovalHierarchy.rejected]: (state) => {
-      state.detail_mdApprovalHierarchy = [];
-      state.loading = false;
+      state.list_mdApprovalHierarchyDetail = [];
+      state.loading_listMdApprovalHierarchyDetail = false;
     },
 
     /** Get Multi Destination Attachment Category */
@@ -696,11 +743,11 @@ const multiDestinationSlice = createSlice({
     /** Get Multi Destination Account Standard */
     [getMdAccountStandard.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMdAccountStandard = true;
       }
     },
     [getMdAccountStandard.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listMdAccountStandard = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -725,7 +772,7 @@ const multiDestinationSlice = createSlice({
       }
     },
     [getMdAccountStandard.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listMdAccountStandard = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_mdAccountStandard = [];
@@ -741,11 +788,11 @@ const multiDestinationSlice = createSlice({
     /** Get Multi Destination Attachment */
     [getMultiDestinationAttachment.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_detailMdDetailAttachment = true;
       }
     },
     [getMultiDestinationAttachment.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_detailMdDetailAttachment = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -770,7 +817,7 @@ const multiDestinationSlice = createSlice({
       }
     },
     [getMultiDestinationAttachment.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_detailMdDetailAttachment = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_mdDetailAttachment = [];
@@ -785,35 +832,35 @@ const multiDestinationSlice = createSlice({
 
     /** Approve or Reject Multi Destination */
     [approveOrRejectMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
     /** Approve or Reject Inactive Multi Destination */
     [approveOrRejectInactiveMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectInactiveMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectInactiveMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
     /** Approve or Reject All Inactive Multi Destination */
     [approveOrRejectAllMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectAllMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectAllMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
     /** Inactivate Multi Destination Attachment */

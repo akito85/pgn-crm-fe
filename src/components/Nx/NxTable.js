@@ -5,7 +5,7 @@ import {
   FilterOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
-import { Button, Pagination, Select, Table } from "antd";
+import { Button, Pagination, Select, Spin, Table } from "antd";
 import ColumnSettings from "../ColumnSettings/ColumnSettings";
 import SearchBar from "../SearchBar";
 import NxAdvanceSearch from "./NxAdvanceSearch";
@@ -119,7 +119,7 @@ const NxTable = ({
   onDelete,
   rowSelection,
   onRowClicked = () => { },
-  tableScrolled,
+  tableScrolled = { y: 37.7 },
   expandable,
   className,
   useSelect = true,
@@ -633,7 +633,7 @@ const NxTable = ({
 
             #${idTable} .ant-table-thead .ant-table-cell-fix-left,
             #${idTable} .ant-table-thead .ant-table-cell-fix-right {
-              z-index: 5;
+              z-index: 5 !important;
             }
 
             #${idTable} .ant-table-filter-trigger,
@@ -668,16 +668,17 @@ const NxTable = ({
             #${idTable} .ant-table-body {
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
-              padding-bottom: 8px;
+              padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "8px"};
+              ${(useInfiniteScroll || usePagination) ? "border-left: 0.5px solid #C8CDD4; border-right: 0.5px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
               #${idTable} .ant-table-body {
-                padding-bottom: 12px;
+                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "12px"};
               }
 
               #${idTable} .ant-table-content {
-                padding-bottom: 4px;
+                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "4px"};
               }
             }
 
@@ -713,6 +714,60 @@ const NxTable = ({
 
             #${idTable} .ant-table-column-sorters {
               padding-right: 0px;
+            }
+
+            #${idTable} .ant-table {
+              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              overflow: hidden;
+              border: 1px solid #C8CDD4;
+              ${(useInfiniteScroll || usePagination) ? "border-bottom: none;" : ""}
+            }
+
+            #${idTable} .ant-table-container {
+              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              overflow: hidden;
+              border: none;
+            }
+
+            #${idTable} .ant-table-container table > thead > tr:first-child > *:first-child {
+              border-start-start-radius: 8px;
+            }
+
+            #${idTable} .ant-table-container table > thead > tr:first-child > *:last-child {
+              border-start-end-radius: 8px;
+            }
+
+            #${idTable} .ant-table-bordered .ant-table-cell,
+            #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
+            #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
+            #${idTable} .ant-table-bordered .ant-table-container {
+              border-color: #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-thead {
+              border-left: 0.5px solid #C8CDD4;
+              border-right: 0.5px solid #C8CDD4;
+            }
+
+            #${idTable} .ant-table-thead > tr > th {
+              padding: 4px 8px !important;
+              min-height: 30px;
+              border: 0.5px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
+              padding: 4px 8px !important;
+              min-height: 30px;
+              font-size: 12px;
+              border: 0.5px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-measure-row > td {
+              padding: 0 !important;
+              height: 0 !important;
+              line-height: 0;
+              font-size: 0;
+              overflow: hidden;
             }
           `}
       </style>
@@ -793,70 +848,85 @@ const NxTable = ({
         </div>
       ) : null}
 
-      <Table
-        dataSource={resolvedDataSource}
-        columns={displayedColumns}
-        components={components}
-        scroll={tableScrolled}
-        bordered
-        pagination={false}
-        className={`w-full ${className}`}
-        loading={loading}
-        tableLayout="fixed"
-        expandable={expandable}
-        id={idTable}
-        onChange={onSort}
-        rowSelection={rowSelection}
-        onRow={customOnRow}
-        rowClassName={customRowClassName}
-      />
+      <div style={{ position: "relative" }}>
+        <Table
+          dataSource={resolvedDataSource}
+          columns={displayedColumns}
+          components={components}
+          scroll={tableScrolled.y === undefined ? {...tableScrolled, y: 380} : tableScrolled}
+          bordered
+          pagination={false}
+          className={`w-full ${className}`}
+          loading={loading}
+          tableLayout="fixed"
+          expandable={expandable}
+          id={idTable}
+          onChange={onSort}
+          rowSelection={rowSelection}
+          onRow={customOnRow}
+          rowClassName={customRowClassName}
+        />
 
-      {useInfiniteScroll ? (
-        <div className={"w-full flex justify-end mt-3 items-center"}>
-          <span style={{ fontSize: "12px", color: "#666" }}>
-            Showing {resolvedDataSource?.length || 0} rows
-            {isLoadingMore && " | Loading..."}
-            {!hasMore && resolvedDataSource?.length > 0 && (
-              <span style={{ color: "#52c41a", fontWeight: "500" }}>
-                {" "}
-                | All data showed
-              </span>
-            )}
-          </span>
-        </div>
-      ) : usePagination ? (
-        <div className={"w-full flex justify-between mt-3 items-center"}>
-          <div className="flex items-center gap-3">
-            <Select
-              value={pageSize}
-              onChange={(value) => onSizeChanger(current, value)}
-              className="w-15"
-              style={{ fontSize: "12px" }}
-              size="small"
-            >
-              {[10, 20, 50, 100].map((size) => (
-                <Option key={size} value={size}>
-                  {size}
-                </Option>
-              ))}
-            </Select>
-            <span style={{ fontSize: "12px" }}>
-              Showing {(current - 1) * pageSize + 1} to{" "}
-              {Math.min(current * pageSize, resolvedTotalData)} of {resolvedTotalData} entries
+        {useInfiniteScroll ? (
+          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+            <span style={{ fontSize: "12px", color: "#6B7280" }}>
+              Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
+              {isLoadingMore && " · Loading..."}
             </span>
+            {!hasMore && resolvedDataSource?.length > 0 && (
+              <>
+                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+                <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+              </>
+            )}
           </div>
-          <Pagination
-            total={resolvedTotalData}
-            current={current}
-            pageSize={pageSize}
-            onChange={onChange}
-            showSizeChanger={false}
-            showTotal={false}
-            style={{ display: "flex", gap: "3px" }}
-            size="small"
-          />
-        </div>
-      ) : null}
+        ) : usePagination ? (
+          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Select
+                value={pageSize}
+                onChange={(value) => onSizeChanger(current, value)}
+                className="w-15"
+                style={{ fontSize: "12px" }}
+                size="small"
+              >
+                {[10, 20, 50, 100].map((size) => (
+                  <Option key={size} value={size}>
+                    {size}
+                  </Option>
+                ))}
+              </Select>
+              <span style={{ fontSize: "12px" }}>
+                Showing {(current - 1) * pageSize + 1} to{" "}
+                {Math.min(current * pageSize, resolvedTotalData)} of {resolvedTotalData} entries
+              </span>
+            </div>
+            <Pagination
+              total={resolvedTotalData}
+              current={current}
+              pageSize={pageSize}
+              onChange={onChange}
+              showSizeChanger={false}
+              showTotal={false}
+              style={{ display: "flex", gap: "3px" }}
+              size="small"
+            />
+          </div>
+        ) : null}
+
+        {loading && (
+          <div style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: (useInfiniteScroll || usePagination) ? "33px" : 0,
+            background: "rgba(255, 255, 255, 0.65)",
+            zIndex: 10,
+            borderRadius: "0 0 8px 8px",
+          }} />
+        )}
+      </div>
 
       <NxAdvanceSearch
         visible={isAdvanceOpen}
