@@ -1,13 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
+import { configApp } from "../../../constants/configApp";
 
-const BASE = "/job/dbs/api/v1/oracle";
+const BASE = "/v1/api/oracle";
+const JOB_BASE = configApp.JOB_SERVICE;
 
 export const fetchSchemas = createAsyncThunk(
   "oracleMetadata/fetchSchemas",
   async (_, thunkAPI) => {
     try {
-      const response = await userHttpService.getAll(`${BASE}/schemas`);
+      const response = await userHttpService.getAll(`${BASE}/schemas`, JOB_BASE);
       return response?.data ?? [];
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response?.data ?? error.message);
@@ -20,7 +22,7 @@ export const fetchProcedures = createAsyncThunk(
   async (schema, thunkAPI) => {
     try {
       const response = await userHttpService.getAll(
-        `${BASE}/schemas/${schema}/procedures`
+        `${BASE}/schemas/${schema}/procedures`, JOB_BASE
       );
       return { schema, procedures: response?.data ?? [] };
     } catch (error) {
@@ -34,7 +36,7 @@ export const fetchProcedureParameters = createAsyncThunk(
   async ({ schema, procedure }, thunkAPI) => {
     try {
       const response = await userHttpService.getAll(
-        `${BASE}/schemas/${schema}/procedures/${procedure}/parameters`
+        `${BASE}/schemas/${schema}/procedures/${procedure}/parameters`, JOB_BASE
       );
       return { schema, procedure, parameters: response?.data ?? [] };
     } catch (error) {

@@ -259,20 +259,7 @@ const CreateJobPage = () => {
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Description" name="description" className="md:col-span-3 w-full" {...formItemProps} rules={[
-                { required: true, message: "Please input description" },
-                { max: 255,       message: "Maximum 255 characters" },
-              ]}>
-                <TextArea placeholder="Enter job description" rows={4} maxLength={255} showCount />
-              </Form.Item>
-
-            </div>
-          </NxBaseContainer>
-
-          {executeType === "stored_procedure" && (
-            <NxBaseContainer border header="STORED PROCEDURE" className="mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
-
+              {executeType === "stored_procedure" && (<>
                 <Form.Item label="Schema" name="spSchema" {...formItemProps} rules={[
                   { required: true, message: "Please select a schema" },
                 ]}>
@@ -320,10 +307,17 @@ const CreateJobPage = () => {
                     />
                   </div>
                 )}
+              </>)}
 
-              </div>
-            </NxBaseContainer>
-          )}
+              <Form.Item label="Description" name="description" className="md:col-span-3 w-full" {...formItemProps} rules={[
+                { required: true, message: "Please input description" },
+                { max: 255,       message: "Maximum 255 characters" },
+              ]}>
+                <TextArea placeholder="Enter job description" rows={4} maxLength={255} showCount />
+              </Form.Item>
+
+            </div>
+          </NxBaseContainer>
 
           <NxBaseContainer
             border
