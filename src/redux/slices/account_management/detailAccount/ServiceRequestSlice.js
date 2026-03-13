@@ -139,7 +139,7 @@ export const createServiceRequestForAccount = createAsyncThunk(
 // Create Service Request with nested data
 export const createCompleteServiceRequest = createAsyncThunk(
   "CREATE_COMPLETE_SERVICE_REQUEST",
-  async ({ accountId, body }, thunkAPI) => {
+  async ({ accountId, body, successBodyExtra = {} }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/create`;
       const response = await accountManagementService.createData(url, body);
@@ -149,6 +149,7 @@ export const createCompleteServiceRequest = createAsyncThunk(
         description: isDraft
           ? "Service Request draft has been saved."
           : "Service Request has been submitted.",
+        ...successBodyExtra,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
