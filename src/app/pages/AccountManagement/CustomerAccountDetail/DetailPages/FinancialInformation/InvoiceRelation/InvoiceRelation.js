@@ -1,11 +1,9 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect } from "react";
 import { useState } from "react";
 import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  downloadInvoiceRelation,
-  getInvoiceRelation,
   getIrApprovalHistory,
   inactivateInvoiceRelation
 } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
@@ -20,63 +18,26 @@ import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   const dispatch = useDispatch();
 
-  const {
-    list_invoiceRelation: invoiceRelations,
-    pagination_invoiceRelation: pagination,
-    data_irApprovalHistory,
-    loading_listIr
-  } = useSelector((state) => state.financialInformation);
+  const { data_irApprovalHistory } = useSelector(
+    (state) => state.financialInformation
+  );
 
-  //declare
-  const searchInput = useRef(null);
-
-  //state
-  const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
+  const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateIrId, setInactivateIrId] = useState(0);
   const [inactivateIrAccountNumber, setInactivateIrAccountNumber] = useState(0);
-
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] =
     useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [filters, setFilters] = useState([]);
-  const [filterRules, setFilterRules] = useState([]);
 
-  const totalElement = pagination.totalElement;
-  const hasMore = invoiceRelations.length < (totalElement || 0);
-
-  const handleRefresh = () => {
-    const body = {
-      page: 0,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      filters,
-      filterRules
-    };
-
-    dispatch(
-      getInvoiceRelation({
-        id,
-        body,
-        isLoadMore: false
-      })
-    );
-    setPage(1);
-  };
+  const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
    * Open or close inactivate modal
    * @param {boolean} show
    * @param {number} irId
-   * @param {number} irAppHierId
+   * @param {string} irAccountNumber
    */
   const handleInactivateModal = (
     show,
@@ -105,55 +66,20 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
       remark
     };
 
-    dispatch(
-      inactivateInvoiceRelation({
-        body
-      })
-    )
+    dispatch(inactivateInvoiceRelation({ body }))
       .unwrap()
       .then(() => {
-        const body = {
-          page: 0,
-          size: loadMoreSize,
-          sort,
-          searchs: search,
-          filters,
-          filterRules
-        };
-
-        dispatch(
-          getInvoiceRelation({
-            id,
-            body,
-            isLoadMore: false
-          })
-        );
         setShowInactiveModal(false);
+        triggerRefresh();
         handleClear();
       })
       .catch(() => {});
   };
 
   /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
+   * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
+   * @returns {{ key: string, value: string, label: string }[]}
    */
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0]
-      };
-    });
-  };
-
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -177,73 +103,7 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
     }
   };
 
-  const handleDownload = () => {
-    const body = {
-      sort,
-      searchs: search,
-      filters,
-      filterRules
-    };
-
-    dispatch(downloadInvoiceRelation({ body, id }));
-  };
-
-  /**
-   * @param {*} _
-   * @param {*} __
-   * @param {import("antd/lib/table/interface").SorterResult} sort
-   */
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPage = pagination.totalPage || 0;
-
-    if (nextPage <= totalPage) {
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        filters,
-        filterRules
-      };
-
-      await dispatch(
-        getInvoiceRelation({
-          id,
-          body,
-          isLoadMore: true
-        })
-      ).unwrap();
-    }
-    setPage(nextPage);
-  };
-
-  useEffect(() => {
-    const body = {
-      page: 0,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      filters,
-      filterRules
-    };
-
-    dispatch(
-      getInvoiceRelation({
-        id,
-        body,
-        isLoadMore: false
-      })
-    );
-  }, [sort, search]);
-
+  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
     if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
       const temp = {
@@ -269,31 +129,19 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   return (
     <Fragment>
       <InvoiceRelationTable
-        data={invoiceRelations}
         idAccount={id}
         idCustomer={idCustomer}
-        totalElement={totalElement}
-        page={page}
-        onSort={onSort}
         handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
         handleApproval={setShowApprovalModal}
-        handleDownload={handleDownload}
-        handleLoadMore={handleLoadMore}
-        hasMore={hasMore}
-        searchText={searchText}
-        search={search}
-        searchedColumn={searchedColumn}
-        searchInput={searchInput}
-        handleSearch={handleSearch}
-        loading={loading_listIr}
+        refreshSignal={refreshSignal}
       />
 
       <InvoiceRelationApprovalModal
         id={id}
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
-        afterFinish={handleRefresh}
+        afterFinish={triggerRefresh}
       />
 
       {/* Inactivate Modal */}
