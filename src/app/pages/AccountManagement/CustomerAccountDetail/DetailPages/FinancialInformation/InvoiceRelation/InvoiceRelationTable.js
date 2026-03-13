@@ -169,7 +169,7 @@ const InvoiceRelationTable = ({
 
     setPage(0);
     dispatch(getInvoiceRelation({ id: idAccount, body, isLoadMore: false }));
-  }, [sort, search]);
+  }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
   useEffect(() => {
