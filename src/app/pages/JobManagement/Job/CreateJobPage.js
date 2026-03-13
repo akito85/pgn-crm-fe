@@ -13,6 +13,7 @@ import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { createJob } from "../../../../redux/slices/job_management/jobSlice";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
+import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -93,17 +94,24 @@ const CreateJobPage = () => {
   const executeType = Form.useWatch("executeType", form);
   const { schemas, schemasLoading, procedures, proceduresLoading, parameters: spParametersMap, parametersLoading } =
     useSelector((state) => state.oracleMetadata);
+  const { queues: taskQueues, loading: taskQueuesLoading } =
+    useSelector((state) => state.taskQueue);
   const [selectedSchema,    setSelectedSchema]    = useState(null);
   const [selectedProcedure, setSelectedProcedure] = useState(null);
 
   useEffect(() => {
-    if (executeType === "stored_procedure" && schemas.length === 0) {
-      dispatch(fetchSchemas());
-    }
-    if (executeType !== "stored_procedure") {
+    dispatch(fetchTaskQueues());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (executeType === "stored_procedure") {
+      if (schemas.length === 0) dispatch(fetchSchemas());
+      form.setFieldValue('handler', 'StoredProcedureJobHandler');
+    } else {
       setSelectedSchema(null);
       setSelectedProcedure(null);
       dispatch(clearProcedures());
+      form.setFieldValue('handler', undefined);
     }
   }, [executeType, dispatch]);
 
@@ -177,9 +185,10 @@ const CreateJobPage = () => {
       <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 
         <NxCardContainer header="JOB CONFIGURATION">
-          <NxBaseContainer border header="Job Information">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
 
+          {/* METADATA */}
+          <NxBaseContainer border header="METADATA">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
               <Form.Item label="Name" name="name" {...formItemProps} rules={[
                 { required: true, message: "Please input name" },
                 { max: 100,       message: "Maximum 100 characters" },
@@ -188,9 +197,9 @@ const CreateJobPage = () => {
               </Form.Item>
 
               <Form.Item label="Code" name="code" {...formItemProps} rules={[
-                { required: true,                   message: "Please input code" },
-                { max: 50,                          message: "Maximum 50 characters" },
-                { pattern: /^[A-Z0-9_-]+$/,        message: "Use uppercase letters, numbers, dash or underscore only" },
+                { required: true,                message: "Please input code" },
+                { max: 50,                       message: "Maximum 50 characters" },
+                { pattern: /^[A-Z0-9_-]+$/,     message: "Use uppercase letters, numbers, dash or underscore only" },
               ]}>
                 <Input placeholder="e.g. GEN_INV" maxLength={50} style={inputStyle} />
               </Form.Item>
@@ -206,6 +215,18 @@ const CreateJobPage = () => {
                 </Select>
               </Form.Item>
 
+              <Form.Item label="Description" name="description" className="md:col-span-3 w-full" {...formItemProps} rules={[
+                { required: true, message: "Please input description" },
+                { max: 255,       message: "Maximum 255 characters" },
+              ]}>
+                <TextArea placeholder="Enter job description" rows={4} maxLength={255} showCount />
+              </Form.Item>
+            </div>
+          </NxBaseContainer>
+
+          {/* EXECUTION */}
+          <NxBaseContainer border header="EXECUTION" className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
               <Form.Item label="Execute Type" name="executeType" {...formItemProps} rules={[
                 { required: true, message: "Please select execute type" },
               ]}>
@@ -218,44 +239,38 @@ const CreateJobPage = () => {
                 </Select>
               </Form.Item>
 
-              {executeType !== "stored_procedure" && (
-                <Form.Item label="Handler" name="handler" {...formItemProps} rules={[
-                  { required: true, message: "Please input handler" },
-                  { max: 100,       message: "Maximum 100 characters" },
-                ]}>
-                  <Input placeholder="e.g. com.nxs.jobhandler.genfile" maxLength={100} style={inputStyle} />
-                </Form.Item>
-              )}
-              {executeType === "stored_procedure" && <div />}
-
-              <Form.Item label="Timeout" name="timeout" {...formItemProps}>
-                <InputNumber placeholder="Enter timeout in seconds" min={0} precision={0} style={fieldStyle} />
-              </Form.Item>
-
-              <Form.Item label="Max Retry" name="maxRetry" {...formItemProps}>
-                <InputNumber placeholder="Enter max retry attempts" min={0} max={100} precision={0} style={fieldStyle} />
-              </Form.Item>
-
-              <Form.Item label="Module" name="module" {...formItemProps} rules={[
-                { required: true, message: "Please select module" },
+              <Form.Item label="Handler" name="handler" {...formItemProps} rules={[
+                { required: executeType !== "stored_procedure", message: "Please input handler" },
+                { max: 100, message: "Maximum 100 characters" },
               ]}>
-                <Select placeholder="Select module" style={fieldStyle}>
-                  <Option value="payment">Payment</Option>
-                  <Option value="billing">Billing</Option>
-                  <Option value="collection">Collection</Option>
-                  <Option value="reporting">Reporting</Option>
-                  <Option value="notification">Notification</Option>
-                </Select>
+                <Input
+                  placeholder="e.g. com.nxs.jobhandler.genfile"
+                  maxLength={100}
+                  style={inputStyle}
+                  disabled={executeType === "stored_procedure"}
+                />
               </Form.Item>
 
-              <Form.Item label="Access Group" name="accessGroup" {...formItemProps} rules={[
-                { required: true, message: "Please select access group" },
-              ]}>
-                <Select placeholder="Select access group" style={fieldStyle}>
-                  <Option value="admin_sor_1">Admin SOR 1</Option>
-                  <Option value="admin_sor_2">Admin SOR 2</Option>
-                  <Option value="operator">Operator</Option>
-                  <Option value="viewer">Viewer</Option>
+              <Form.Item
+                label="Task Queue"
+                name="taskQueueId"
+                tooltip="Assigns this job to a specific worker queue. Workers in that queue will exclusively pick up and process this job. Leave blank to use the default queue."
+                {...formItemProps}
+              >
+                <Select
+                  placeholder="Default queue (leave blank)"
+                  style={fieldStyle}
+                  loading={taskQueuesLoading}
+                  allowClear
+                >
+                  {taskQueues.map((q) => (
+                    <Option key={q.queueId} value={q.queueId}>
+                      {q.queueName}
+                      {q.priority != null && (
+                        <span className="ml-2 text-xs text-gray-400">(priority {q.priority})</span>
+                      )}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
 
@@ -308,17 +323,76 @@ const CreateJobPage = () => {
                   </div>
                 )}
               </>)}
-
-              <Form.Item label="Description" name="description" className="md:col-span-3 w-full" {...formItemProps} rules={[
-                { required: true, message: "Please input description" },
-                { max: 255,       message: "Maximum 255 characters" },
-              ]}>
-                <TextArea placeholder="Enter job description" rows={4} maxLength={255} showCount />
-              </Form.Item>
-
             </div>
           </NxBaseContainer>
 
+          {/* CONFIGURATION */}
+          <NxBaseContainer border header="CONFIGURATION" className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
+              <Form.Item
+                label="Timeout (seconds)"
+                name="timeout"
+                tooltip="Maximum time a job execution is allowed to run before it is automatically cancelled. Set to 0 for no limit."
+                {...formItemProps}
+              >
+                <InputNumber placeholder="e.g. 3600 (1 hour), 0 = no limit" min={0} precision={0} style={fieldStyle} />
+              </Form.Item>
+
+              <Form.Item
+                label="Max Retry"
+                name="maxRetry"
+                tooltip="Number of times the job will automatically retry after a failure. Once all retries are exhausted the job is marked as failed."
+                {...formItemProps}
+              >
+                <InputNumber placeholder="e.g. 3 (default: 0 = no retry)" min={0} max={100} precision={0} style={fieldStyle} />
+              </Form.Item>
+
+              <Form.Item
+                label="Backoff Multiplier"
+                name={['retryPolicy', 'backoffMultiplier']}
+                initialValue={2}
+                tooltip="Controls how much longer the job waits between each retry attempt. A value of 2 means each retry doubles the wait time (e.g. 1s → 2s → 4s → 8s). Set to 1 for immediate retries with no delay increase."
+                {...formItemProps}
+              >
+                <Select style={fieldStyle}>
+                  <Option value={1}>1× — No delay increase (retry immediately)</Option>
+                  <Option value={2}>2× — Double wait each retry (default)</Option>
+                  <Option value={3}>3× — Triple wait each retry</Option>
+                  <Option value={5}>5× — Aggressive backoff</Option>
+                </Select>
+              </Form.Item>
+            </div>
+          </NxBaseContainer>
+
+          {/* ACCESS */}
+          <NxBaseContainer border header="ACCESS" className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
+              <Form.Item label="Module" name="module" {...formItemProps} rules={[
+                { required: true, message: "Please select module" },
+              ]}>
+                <Select placeholder="Select module" style={fieldStyle}>
+                  <Option value="payment">Payment</Option>
+                  <Option value="billing">Billing</Option>
+                  <Option value="collection">Collection</Option>
+                  <Option value="reporting">Reporting</Option>
+                  <Option value="notification">Notification</Option>
+                </Select>
+              </Form.Item>
+
+              <Form.Item label="Access Group" name="accessGroup" {...formItemProps} rules={[
+                { required: true, message: "Please select access group" },
+              ]}>
+                <Select placeholder="Select access group" style={fieldStyle}>
+                  <Option value="admin_sor_1">Admin SOR 1</Option>
+                  <Option value="admin_sor_2">Admin SOR 2</Option>
+                  <Option value="operator">Operator</Option>
+                  <Option value="viewer">Viewer</Option>
+                </Select>
+              </Form.Item>
+            </div>
+          </NxBaseContainer>
+
+          {/* PARAMETERS */}
           <NxBaseContainer
             border
             header="PARAMETERS"
@@ -337,6 +411,7 @@ const CreateJobPage = () => {
               emptyText='No parameters. Click "Add" to create one.'
             />
           </NxBaseContainer>
+
         </NxCardContainer>
 
         <NxCardContainer border header="NOTIFICATIONS" className="mt-4">
