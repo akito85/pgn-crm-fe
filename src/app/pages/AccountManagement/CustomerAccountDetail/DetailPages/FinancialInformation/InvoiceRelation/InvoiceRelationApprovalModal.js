@@ -29,14 +29,12 @@ const InvoiceRelationApprovalModal = ({
   } = useSelector((state) => state.financialInformation);
 
   // Declaration
-  const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
   // State
   const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -201,33 +199,11 @@ const InvoiceRelationApprovalModal = ({
     setCurrent((prev) => prev - 1);
   };
 
-  // Scroll Left Handler
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  // Scroll Right Handler
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Scroll Handler
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
-
   /**
    * Advances to the next step and scrolls the Steps header to the right.
    */
   const handleButtonNext = () => {
     next();
-    scrollRightHandler();
   };
 
   /**
@@ -343,7 +319,6 @@ const InvoiceRelationApprovalModal = ({
               <Button
                 onClick={() => {
                   prev();
-                  scrollLeftHandler();
                 }}
                 type={"menu"}
                 disabled={current < 1}
@@ -393,17 +368,11 @@ const InvoiceRelationApprovalModal = ({
           rounded={false}
         >
           <div className="flex flex-row justify-center">
-            <div
-              onScroll={handleScroll}
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-            >
-              <Steps
-                current={current}
-                items={steps}
-                labelPlacement="vertical"
-              />
-            </div>
+            <Steps
+              current={current}
+              items={steps}
+              labelPlacement="vertical"
+            />
           </div>
         </NxBaseContainer>
 
