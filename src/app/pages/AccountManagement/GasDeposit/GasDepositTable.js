@@ -3,60 +3,49 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { getGasDepositColumns } from "./getGasDepositColumns";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import GasDepositDetailTable from "./GasDepositDetailTable";
+import { useDispatch, useSelector } from "react-redux";
+import { getGasDeposit, downloadGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
 /**
- * Gas deposit list table (presentational component).
- * Renders the paginated, infinitely-scrolled gas deposit table with
- * expandable rows, toolbar actions, and column-pin support.
+ * Gas deposit list table (container + presentational component).
+ * Owns search, pagination, sort, filter, and download state/logic.
+ * The parent (`GasDepositModule`) is responsible only for modals, permissions,
+ * and the detail mutation table.
  *
  * @param {object}    props
  * @param {"sa"|"ua"} props.moduleType                   - Module context: standalone ("sa") or under-account ("ua")
- * @param {number}    [props.totalElement=0]              - Total record count displayed in the table header
  * @param {Function}  [props.handleInactivateModal]       - Opens the inactivate confirmation modal
  * @param {Function}  [props.handleApprovalHistoryModal]  - Opens the approval history modal
  * @param {Function}  [props.handleApproval]              - Triggers the approval action
- * @param {Function}  [props.handleDownload]              - Triggers export/download
- * @param {Function}  [props.handleLoadMore]              - Loads the next page (infinite scroll)
- * @param {Function}  [props.handleSearch]                - Column search handler
- * @param {Function}  [props.onSort]                      - Column sort handler
  * @param {Function}  [props.handleSelectDetail]          - Row click / select-detail handler
- * @param {object[]}  [props.dataSource=[]]               - Table row data
- * @param {number}    [props.page=0]                      - Current page index
- * @param {boolean}   [props.hasMore=false]               - Whether more pages exist for infinite scroll
- * @param {string}    [props.searchText=""]               - Active search text value
- * @param {object}    [props.search={}]                   - Ant Design column search state map
- * @param {object}    [props.searchedColumn={}]           - Currently searched column key map
- * @param {*}         [props.searchInput=null]            - Ref to the search input element
- * @param {boolean}   [props.loading=false]               - Loading/skeleton state
+ * @param {number}    [props.idAccount=0]                 - Account ID (used when moduleType is "ua")
+ * @param {number}    [props.idCustomer=0]                - Customer ID
+ * @param {number}    [props.refreshSignal=0]             - Increment to trigger a page-0 refresh from the parent
  */
 const GasDepositTable = ({
   moduleType,
-  totalElement = 0,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
-  handleDownload = () => {},
-  handleLoadMore = () => {},
-  handleSearch = () => {},
-  onSort = () => {},
   handleSelectDetail = () => {},
-  dataSource = [],
-  page = 0,
-  hasMore = false,
-  searchText = "",
-  search = {},
-  searchedColumn = {},
-  searchInput = null,
-  loading = false,
+  idAccount = 0,
+  idCustomer = 0,
+  refreshSignal = 0,
 }) => {
   // --- Hooks ---
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const {
+    list_gasDeposit: dataSource,
+    pagination_gasDeposit: pagination,
+    loading_listGd: loading,
+  } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
   const isStandAlone = moduleType === "sa";
@@ -65,14 +54,147 @@ const GasDepositTable = ({
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
+  const totalElement = pagination.totalElement;
+  const hasMore = dataSource.length < totalElement;
+
   // --- State ---
+  const searchInput = useRef(null);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["statusApproval", "status"],
     left: [],
   }));
 
+  // --- Handlers ---
+  /**
+   * Resets pagination to page 0 and re-fetches the gas deposit list with current search/sort/filter state.
+   */
+  const handleRefresh = () => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
+
+    dispatch(
+      getGasDeposit({
+        id: isUnderAccount ? idAccount : undefined,
+        body,
+        isLoadMore: false,
+      })
+    );
+    setPage(0);
+  };
+
+  /**
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(0);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
+  /**
+   * @param {*} _
+   * @param {*} __
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  /**
+   * Loads the next page of records and appends them to the existing list.
+   */
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPage = pagination.totalPage || 0;
+
+    if (nextPage <= totalPage) {
+      const body = {
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      };
+
+      await dispatch(
+        getGasDeposit({
+          id: isUnderAccount ? idAccount : undefined,
+          body,
+          isLoadMore: true,
+        })
+      ).unwrap();
+    }
+    setPage(nextPage);
+  };
+
+  /**
+   * Dispatches a download action for the current filtered/sorted view.
+   */
+  const handleDownload = () => {
+    const body = {
+      page,
+      size: loadMoreSize,
+      sort,
+      filters,
+      filterRules,
+      searchs: search,
+    };
+
+    dispatch(downloadGasDeposit({ body, id: idAccount }));
+  };
+
+  // --- Effects ---
+  // Re-fetch page 0 whenever sort, search, filters, or filterRules change.
+  useEffect(() => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
+
+    setPage(0);
+    dispatch(getGasDeposit({ id: isUnderAccount ? idAccount : undefined, body, isLoadMore: false }));
+  }, [sort, search, filters, filterRules]);
+
+  // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
+  useEffect(() => {
+    if (refreshSignal > 0) handleRefresh();
+  }, [refreshSignal]);
+
   // --- Column configuration ---
-  // Toolbar and row-level action definitions (approve, history, download, inactivate)
   const itemActions = nxGetAccountActions({
     handleApproval,
     handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
@@ -80,7 +202,6 @@ const GasDepositTable = ({
     handleInactivate: handleInactivateModal,
   });
 
-  // Filter actions by permission, then normalise width/alignment for action columns
   const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
@@ -89,7 +210,6 @@ const GasDepositTable = ({
     })
   );
 
-  // Base data columns → merge with action columns → apply fixed-pin overlay
   const baseColumns = useMemo(() =>
     getGasDepositColumns(
       search,
@@ -107,8 +227,7 @@ const GasDepositTable = ({
   }, [columnDefinitions, fixedColumns]);
 
   /**
-   * Renders the expanded child row for a gas deposit record,
-   * showing its associated detail entries.
+   * Renders the expanded child row for a gas deposit record.
    * @param {object} record - The parent gas deposit row record
    */
   const expandedRowRender = (record) => {
