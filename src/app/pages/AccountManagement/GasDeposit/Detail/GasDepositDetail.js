@@ -249,12 +249,14 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [idAccount, idCustomer]);
 
   useEffect(() => {
-    if (idGd) {
-      dispatch(getDetailGasDeposit(idGd));
-      if (draftExist)
-        dispatch(getDetailDraftGasDeposit(idGd));
-    }
+    if (idGd)
+      dispatch(getDetailGasDeposit(idGd))
   }, [idGd]);
+
+  useEffect(() => {
+    if (idGd && draftExist)
+      dispatch(getDetailDraftGasDeposit(idGd));
+  }, [idGd, draftExist])
 
   return (
     <LayoutMenu>
