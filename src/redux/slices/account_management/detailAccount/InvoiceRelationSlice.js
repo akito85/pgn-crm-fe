@@ -520,8 +520,8 @@ const invoiceRelationSlice = createSlice({
       }
 
       state.pagination_irAccountStandard = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10
       };
@@ -532,8 +532,8 @@ const invoiceRelationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_irAccountStandard = [];
         state.pagination_irAccountStandard = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10
         };
