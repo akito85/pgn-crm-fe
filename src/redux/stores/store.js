@@ -146,12 +146,14 @@ import billingItemCategoryReducer from "../slices/system_setup/master_data/billi
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
+import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 
 const reducer = combineReducers({
   job: jobSlice,
   jobManagement: jobManagementReducer,
   jobGroup: jobGroupReducer,
   jobExecution: jobExecutionReducer,
+  oracleMetadata: oracleMetadataReducer,
   logging: loggingReducer,
   auth: authReducer,
   message: messageReducer,
