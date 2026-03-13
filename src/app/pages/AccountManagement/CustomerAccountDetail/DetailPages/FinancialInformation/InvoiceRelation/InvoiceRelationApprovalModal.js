@@ -14,13 +14,19 @@ import { showModalError } from "../../../../../../../redux/slices/general_slice"
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../../components/Nx/NxModal";
 
+/**
+ * Modal for approving or rejecting pending invoice relation records.
+ * Displays a two-step wizard: select records + enter remark, then confirm.
+ * @param {{ id?: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @returns
+ */
 const InvoiceRelationApprovalModal = ({
   id = 0,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {}
 }) => {
-  // Selector
+  // --- Hooks ---
   const {
     list_invoiceRelationApproval: invoiceRelationApprovals,
     pagination_invoiceRelationApproval: pagination,
@@ -28,12 +34,10 @@ const InvoiceRelationApprovalModal = ({
     loading_approveRejectIr
   } = useSelector((state) => state.financialInformation);
 
-  // Declaration
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
-  // State
   const [current, setCurrent] = useState(0);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
@@ -53,7 +57,9 @@ const InvoiceRelationApprovalModal = ({
     right: []
   });
 
-  // Initial fetch - Load data when modal opens
+  // --- Effects ---
+  // Fetches the first page of pending approvals whenever the modal opens or
+  // any filter/search/sort parameter changes. Resets the page counter to 1.
   useEffect(() => {
     if (isOpen) {
       const body = {
@@ -76,6 +82,7 @@ const InvoiceRelationApprovalModal = ({
     }
   }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
+  // --- Functions / handlers ---
   /**
    * Handles column search: confirms the search, updates search text/column state,
    * and resets the page if the filter value has changed.
@@ -99,15 +106,14 @@ const InvoiceRelationApprovalModal = ({
   };
 
   /**
-   * Loads the next page of invoice relation approvals when the user scrolls
-   * to the bottom of the infinite-scroll table.
+   * Fetches the next page of invoice relation approvals and appends it to the
+   * existing list. Does nothing if all pages have already been loaded.
    * @returns {Promise<void>}
    */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPage = pagination.totalPage || 0;
 
-    // Check if there's more data to load
     if (nextPage <= totalPage) {
       const body = {
         page: nextPage,
@@ -129,6 +135,7 @@ const InvoiceRelationApprovalModal = ({
     }
   };
 
+  // --- Derived values ---
   const totalElement = pagination.totalElement;
   const hasMore = invoiceRelationApprovals.length < totalElement;
 
@@ -136,7 +143,7 @@ const InvoiceRelationApprovalModal = ({
    * Handles table sort changes and updates the sort query string.
    * @param {object} _ - Pagination (unused).
    * @param {object} __ - Filters (unused).
-   * @param {object} sorter - Ant Design sorter object containing field and order.
+   * @param {{ field: string; order: "ascend" | "descend" | undefined }} sorter
    */
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -158,7 +165,6 @@ const InvoiceRelationApprovalModal = ({
     preserveSelectedRowKeys: true
   };
 
-  // Step
   const steps = [
     { key: "ir", title: "INVOICE RELATION" },
     { key: "irc", title: "CONFIRMATION" }
@@ -167,8 +173,8 @@ const InvoiceRelationApprovalModal = ({
   const formFields = [["remark"]];
 
   /**
-   * Advances to the next step after validating form fields and ensuring at
-   * least one row is selected.
+   * Advances the wizard to the next step after validating the current step.
+   * On step 0, requires at least one row to be selected before proceeding.
    * @returns {Promise<void>}
    */
   const next = async () => {
@@ -200,14 +206,15 @@ const InvoiceRelationApprovalModal = ({
   };
 
   /**
-   * Advances to the next step and scrolls the Steps header to the right.
+   * Delegates to `next()` to advance the wizard step.
    */
   const handleButtonNext = () => {
     next();
   };
 
   /**
-   * Resets all modal state and calls `afterFinish` (used after a successful save).
+   * Resets the entire wizard to its initial state: clears selection, search,
+   * pagination, form fields, and closes the modal. Also triggers `afterFinish`.
    */
   const resetForm = () => {
     afterFinish();
@@ -243,7 +250,7 @@ const InvoiceRelationApprovalModal = ({
   /**
    * Validates the form, dispatches the approve/reject action for the selected
    * rows, and resets the modal on success.
-   * @param {"APPROVE"|"REJECT"} action - The action to perform.
+   * @param {"APPROVE" | "REJECT"} action - The action to perform on selected records.
    * @returns {Promise<void>}
    */
   const handleSave = async (action) => {
