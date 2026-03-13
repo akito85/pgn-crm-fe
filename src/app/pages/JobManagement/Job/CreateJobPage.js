@@ -120,6 +120,19 @@ const CreateJobPage = () => {
     navigate(JOB_MGMT_ROUTES.VIEW_JOB);
   };
 
+  const handleClearData = () => {
+    form.resetFields();
+    setDescriptionLength(0);
+    setParameters([]);
+    setNotificationSettings({
+      showInDrawer: false,
+      showAlert: false,
+      sendViaEmail: false,
+      sendViaSMS: false,
+      sendViaWhatsApp: false,
+    });
+  };
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
@@ -132,31 +145,6 @@ const CreateJobPage = () => {
       >
         <NxCardContainer 
           header="JOB CONFIGURATION"
-          actionElement={
-            <div className="flex gap-2">
-              <ButtonComponent
-                type="default"
-                htmlType="button"
-                onClick={handleBack}
-                icon={<LeftOutlined />}
-              >
-                Back
-              </ButtonComponent>
-              <ButtonComponent
-                type="default"
-                htmlType="button"
-                onClick={() => form.resetFields()}
-              >
-                Clear
-              </ButtonComponent>
-              <ButtonComponent
-                type="primary"
-                htmlType="submit"
-              >
-                Save
-              </ButtonComponent>
-            </div>
-          }
         >
           <NxBaseContainer border header="Job Information">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 p-4">
@@ -389,7 +377,7 @@ const CreateJobPage = () => {
                   onClick={handleAddParameter}
                   icon={<PlusOutlined />}
                 >
-                  Add
+                  Create
                 </ButtonComponent>
               }
             >
@@ -465,6 +453,39 @@ const CreateJobPage = () => {
             </div>
           </div>
         </NxBaseContainer>
+        
+        <div className="mt-4 flex justify-between items-center px-4 py-3 bg-white rounded-lg border-solid border-[#C8CDD4]">
+          {/* Cancel - left */}
+          <ButtonComponent onClick={handleBack}>
+            Cancel
+          </ButtonComponent>
+
+          {/* Right buttons */}
+          <div className="flex items-center gap-2">
+            {/* Clear Data - danger */}
+            <ButtonComponent
+              border={false}
+              onClick={handleClearData}
+              className="!bg-[#d32f2f] !text-white !border-transparent"
+              icon={
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.25 12.25H4.66662C4.51279 12.2504 4.36042 12.2203 4.21826 12.1616C4.0761 12.1028 3.94697 12.0165 3.83829 11.9076L1.50845 9.57488C1.28974 9.35609 1.16687 9.0594 1.16687 8.75004C1.16687 8.44068 1.28974 8.14399 1.50845 7.92521L7.34179 2.09188C7.45013 1.98349 7.57876 1.89751 7.72034 1.83885C7.86192 1.78019 8.01366 1.75 8.16691 1.75C8.32016 1.75 8.47191 1.78019 8.61349 1.83885C8.75506 1.89751 8.8837 1.98349 8.99204 2.09188L12.4915 5.59188C12.7102 5.81066 12.833 6.10735 12.833 6.41671C12.833 6.72607 12.7102 7.02276 12.4915 7.24154L7.48645 12.25M2.96445 6.46921L8.11412 11.6189" stroke="white" strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              }
+            >
+              Clear Data
+            </ButtonComponent>
+
+            {/* Submit - success */}
+            <ButtonComponent
+              border={false}
+              htmlType="submit"
+              className="!bg-[#388e3c] !text-white !border-transparent"
+            >
+              Submit
+            </ButtonComponent>
+          </div>
+        </div>
       </Form>
     </LayoutMenu>
   );
