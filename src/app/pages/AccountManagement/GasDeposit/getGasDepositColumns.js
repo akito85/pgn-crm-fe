@@ -3,6 +3,21 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColum
 import StatusComponent from "../../../../components/StatusComponent";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 
+/**
+ * Returns the column definitions for the Gas Deposit table.
+ *
+ * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValue`.
+ * Date columns (earnPeriodStart, earnPeriodEnd, redeemPeriodStart, redeemPeriodEnd) are
+ * formatted as "DD MMM YYYY". Status columns are conditionally included based on `includeStatus`.
+ *
+ * @param {Object} search - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} searchInput - Ref to the search input element (used for focus).
+ * @param {string} searchedColumn - The dataIndex of the column currently being searched.
+ * @param {string} searchText - The current search text value.
+ * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
+ * @param {boolean} [includeStatus=true] - Whether to include the statusApproval and status columns.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
 const getGasDepositColumns = (
   search,
   searchInput,
