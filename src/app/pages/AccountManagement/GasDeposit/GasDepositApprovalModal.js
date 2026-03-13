@@ -14,13 +14,19 @@ import { showModalError } from "../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../components/Nx/NxModal";
 
+/**
+ * Modal for approving or rejecting pending gas deposit records.
+ * Displays a two-step wizard: select records + enter remark, then confirm.
+ * @param {{ id?: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @returns
+ */
 const GasDepositApprovalModal = ({
   id = 0,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {}
 }) => {
-  // Selector
+  // --- Hooks ---
   const {
     list_gasDepositApproval: gasDepositApprovals,
     pagination_gasDepositApproval: pagination,
@@ -28,12 +34,10 @@ const GasDepositApprovalModal = ({
     loading_approveRejectGd
   } = useSelector((state) => state.gasDeposit);
 
-  // Declaration
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
-  // State
   const [current, setCurrent] = useState(0);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
@@ -53,30 +57,44 @@ const GasDepositApprovalModal = ({
     right: []
   });
 
-  // Initial fetch - Load data when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        filters,
-        filterRules
-      };
+  // --- Derived values ---
+  const totalElement = pagination.totalElement;
+  const hasMore = gasDepositApprovals.length < totalElement;
 
-      dispatch(
-        getGasDepositApproval({
-          id,
-          body,
-          isLoadMore: false
-        })
+  const rowSelection = {
+    fixed: true,
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys, newSelectedRows) => {
+      setSelectedRowKeys([...newSelectedRowKeys]);
+      setSelectedRows(
+        newSelectedRows.map((newSelectedRow) => ({ ...newSelectedRow }))
       );
-      setPage(1);
-    }
-  }, [dispatch, isOpen, search, sort, filters, filterRules]);
+    },
+    preserveSelectedRowKeys: true
+  };
 
-  // Function Search API
+  const steps = [
+    {
+      key: "gd",
+      title: "GAS DEPOSIT"
+    },
+    {
+      key: "gdc",
+      title: "CONFIRMATION"
+    }
+  ];
+
+  const formFields = [["remark"]];
+
+  // --- Functions / handlers ---
+
+  /**
+   * Confirms a column search, updates searchText/searchedColumn, and merges
+   * the new search term into the search state map.
+   * @param {string[]} selectedKeys - The search input value(s)
+   * @param {() => void} confirm - Ant Design's confirm callback to close the filter dropdown
+   * @param {string} dataIndex - The column key being searched
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -92,12 +110,14 @@ const GasDepositApprovalModal = ({
     });
   };
 
-  // Load more handler
+  /**
+   * Fetches the next page of gas deposit approvals and appends it to the
+   * existing list. Does nothing if all pages have already been loaded.
+   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPage = pagination.totalPage || 0;
 
-    // Check if there's more data to load
     if (nextPage <= totalPage) {
       const body = {
         page: nextPage,
@@ -119,11 +139,13 @@ const GasDepositApprovalModal = ({
     }
   };
 
-  const totalElement = pagination.totalElement;
-  const hasMore =
-    gasDepositApprovals.length < totalElement;
-
-  // Sort Table
+  /**
+   * Updates the sort state based on the Ant Design table sorter object.
+   * Clears the sort when the sorter order is removed.
+   * @param {*} _ - Unused pagination param
+   * @param {*} __ - Unused filters param
+   * @param {{ field: string; order: "ascend" | "descend" | undefined }} sorter
+   */
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -132,32 +154,10 @@ const GasDepositApprovalModal = ({
     setSort(dataSort);
   };
 
-  const rowSelection = {
-    fixed: true,
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys, newSelectedRows) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(
-        newSelectedRows.map((newSelectedRow) => ({ ...newSelectedRow }))
-      );
-    },
-    preserveSelectedRowKeys: true
-  };
-
-  // Step
-  const steps = [
-    {
-      key: "gd",
-      title: "GAS DEPOSIT"
-    },
-    {
-      key: "gdc",
-      title: "CONFIRMATION"
-    }
-  ];
-
-  const formFields = [["remark"]];
-
+  /**
+   * Resets the entire wizard to its initial state: clears selection, search,
+   * pagination, form fields, and closes the modal. Also triggers `afterFinish`.
+   */
   const resetForm = () => {
     afterFinish();
     setCurrent(0);
@@ -170,9 +170,12 @@ const GasDepositApprovalModal = ({
     setSort("");
     setSearchText("");
     setSearchedColumn("");
-  }
+  };
 
-  // Button Next
+  /**
+   * Advances the wizard to the next step after validating the current step.
+   * On step 0, requires at least one row to be selected before proceeding.
+   */
   const next = async () => {
     try {
       if (current === 0) {
@@ -194,21 +197,32 @@ const GasDepositApprovalModal = ({
     } catch {}
   };
 
-  // Button Previous
+  /**
+   * Returns the wizard to the previous step.
+   */
   const prev = () => {
     setCurrent((prev) => prev - 1);
   };
 
-  // Handle Next
+  /**
+   * Delegates to `next()` to advance the wizard step.
+   */
   const handleButtonNext = () => {
     next();
   };
 
-  // Handle Cancel Form
+  /**
+   * Delegates to `handleCancel()` to close the modal without saving.
+   */
   const handleCancelForm = () => {
     handleCancel();
   };
 
+  /**
+   * Validates the form, builds approve/reject payloads from the selected rows,
+   * and dispatches the approval/rejection action.
+   * @param {"APPROVE" | "REJECT"} action - The action to perform on selected records
+   */
   const handleSave = async (action) => {
     try {
       const values = await form.validateFields();
@@ -260,6 +274,31 @@ const GasDepositApprovalModal = ({
   const columns = useMemo(() => {
     return nxApplyFixedColumns(columnDefinitions, fixedColumns);
   }, [columnDefinitions, fixedColumns]);
+
+  // --- Effects ---
+  // Fetches the first page of pending approvals whenever the modal opens or
+  // any filter/search/sort parameter changes. Resets the page counter to 1.
+  useEffect(() => {
+    if (isOpen) {
+      const body = {
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules
+      };
+
+      dispatch(
+        getGasDepositApproval({
+          id,
+          body,
+          isLoadMore: false
+        })
+      );
+      setPage(1);
+    }
+  }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
   return (
     <>
