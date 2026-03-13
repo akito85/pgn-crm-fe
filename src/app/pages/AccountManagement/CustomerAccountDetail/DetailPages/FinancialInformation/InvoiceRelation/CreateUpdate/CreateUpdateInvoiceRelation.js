@@ -513,7 +513,6 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     } = form.getFieldsValue(true);
 
     const body = {
-      id: idIr,
       accountId,
       relatedAccountId,
       description,

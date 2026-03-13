@@ -98,7 +98,7 @@ export const updateInvoiceRelation = createAsyncThunk(
   "UPDATE_INVOICE_RELATION",
   async ({ id, body: updateBody, attachments = [], action }, thunkAPI) => {
     try {
-      const updateUrl = `/v1/dbs/api/invoice-relation`;
+      const updateUrl = `/v1/dbs/api/invoice-relation/${id}`;
       const response = await accountManagementService.updateData(
         updateUrl,
         updateBody
@@ -108,6 +108,7 @@ export const updateInvoiceRelation = createAsyncThunk(
 
       const uploadPromises = attachments.map((attachment) =>
         accountManagementService.uploadAttachment(uploadUrl, {
+          id: attachment.id,
           files: attachment.file,
           category: attachment.fileCategoryId,
           refId: id,
