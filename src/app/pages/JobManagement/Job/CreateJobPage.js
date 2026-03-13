@@ -105,7 +105,7 @@ const CreateJobPage = () => {
       setSelectedProcedure(null);
       dispatch(clearProcedures());
     }
-  }, [executeType]);
+  }, [executeType, dispatch]);
 
   const handleSchemaChange = (schema) => {
     setSelectedSchema(schema);
@@ -167,6 +167,7 @@ const CreateJobPage = () => {
     setSelectedSchema(null);
     setSelectedProcedure(null);
     dispatch(clearProcedures());
+    dispatch(clearParameters());
   };
 
   return (
