@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo, Fragment } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Button } from "antd";
 import InputComponent from "../../../../components/InputComponent";
@@ -29,14 +29,12 @@ const GasDepositApprovalModal = ({
   } = useSelector((state) => state.gasDeposit);
 
   // Declaration
-  const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
   // State
   const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -149,14 +147,30 @@ const GasDepositApprovalModal = ({
   // Step
   const steps = [
     {
+      key: "gd",
       title: "GAS DEPOSIT"
     },
     {
+      key: "gdc",
       title: "CONFIRMATION"
     }
   ];
 
   const formFields = [["remark"]];
+
+  const resetForm = () => {
+    afterFinish();
+    setCurrent(0);
+    form.resetFields();
+    handleCancel();
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+  }
 
   // Button Next
   const next = async () => {
@@ -185,51 +199,14 @@ const GasDepositApprovalModal = ({
     setCurrent((prev) => prev - 1);
   };
 
-  // Scroll Left Handler
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  // Scroll Right Handler
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Scroll Handler
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
-
   // Handle Next
   const handleButtonNext = () => {
     next();
-    scrollRightHandler();
   };
-
-  // Mapping Step
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title
-  }));
 
   // Handle Cancel Form
   const handleCancelForm = () => {
     handleCancel();
-    setSelectedRowKeys([]);
-    setSelectedRows([]);
-    setCurrent(0);
-    setSearch({});
-    setPage(1);
-    setSort("");
-    setSearchText("");
-    setSearchedColumn("");
-    form.resetFields();
   };
 
   const handleSave = async (action) => {
@@ -262,19 +239,7 @@ const GasDepositApprovalModal = ({
         })
       )
         .unwrap()
-        .then(() => {
-          afterFinish();
-          setCurrent(0);
-          form.resetFields();
-          handleCancel();
-          setSelectedRowKeys([]);
-          setSelectedRows([]);
-          setSearch({});
-          setPage(1);
-          setSort("");
-          setSearchText("");
-          setSearchedColumn("");
-        })
+        .then(resetForm)
         .catch((error) => {});
     } catch {}
   };
@@ -297,7 +262,7 @@ const GasDepositApprovalModal = ({
   }, [columnDefinitions, fixedColumns]);
 
   return (
-    <Fragment>
+    <>
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
@@ -313,11 +278,8 @@ const GasDepositApprovalModal = ({
 
             <div className="flex">
               <Button
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"default"}
+                onClick={prev}
+                type={"menu"}
                 disabled={current < 1}
               >
                 Previous
@@ -365,17 +327,11 @@ const GasDepositApprovalModal = ({
           rounded={false}
         >
           <div className="flex flex-row justify-center">
-            <div
-              onScroll={handleScroll}
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-            >
-              <Steps
-                current={current}
-                items={items}
-                labelPlacement="vertical"
-              />
-            </div>
+            <Steps
+              current={current}
+              items={steps}
+              labelPlacement="vertical"
+            />
           </div>
         </NxBaseContainer>
 
@@ -455,7 +411,7 @@ const GasDepositApprovalModal = ({
           </div>
         </div>
       </NxModal>
-    </Fragment>
+    </>
   );
 };
 

@@ -134,7 +134,7 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
       .unwrap()
       .then(() => {
         const body = {
-          page,
+          page: 0,
           size: loadMoreSize,
           sort,
           searchs: search,
@@ -160,7 +160,7 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
@@ -243,28 +243,16 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   };
 
   useEffect(() => {
+    let path;
     if (isStandAlone)
-      getGrantedAccessAccount(`/account-management/gas-deposit`);
-    else if (isStandard || isOneTime) {
-      const accountType = isStandard ? "/account-standard" : isOneTime ? "/account-onetime" : ""
-      getGrantedAccessAccount(`/account-management${accountType}/gas-deposit`);
-    }
-  }, [])
+      path = "/account-management/gas-deposit";
+    else if (isStandard)
+      path = "/account-management/account-standard/gas-deposit";
+    else if (isOneTime)
+      path = "/account-management/account-onetime/gas-deposit";
 
-  useEffect(() => {
-    if (isStandard) {
-      dispatch(
-        getGrantedAccessAccount(
-          `/account-management/account-standard/gas-deposit`
-        )
-      );
-    } else if (isOneTime) {
-      dispatch(
-        getGrantedAccessAccount(
-          `/account-management/account-onetime/gas-deposit`
-        )
-      );
-    }
+    if (path)    
+      dispatch(getGrantedAccessAccount(path));
   }, []);
 
   useEffect(() => {
@@ -310,7 +298,7 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
       <NxCardContainer header={"GAS DEPOSIT"}>
         <NxBaseContainer border>
           <GasDepositTable
-            data={gasDeposits}
+            dataSource={gasDeposits}
             idAccount={id}
             idCustomer={idCustomer}
             totalElement={totalElement}
@@ -320,7 +308,6 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
             handleApprovalHistoryModal={handleApprovalHistoryModal}
             handleApproval={setShowApprovalModal}
             handleDownload={handleDownload}
-            filters={filters}
             handleLoadMore={handleLoadMore}
             hasMore={hasMore}
             searchText={searchText}
