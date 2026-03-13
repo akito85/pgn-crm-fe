@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Input, Select, InputNumber, message } from "antd";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -12,6 +12,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { createJob } from "../../../../redux/slices/job_management/jobSlice";
+import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -52,6 +53,16 @@ const PARAMETER_COLUMNS = [
   { title: 'Description', dataIndex: 'description', editable: true, inputType: 'text',   placeholder: 'Description' },
 ];
 
+const SP_PARAM_COLUMNS = [
+  { title: 'Parameter', dataIndex: 'name',       editable: false, width: 200 },
+  { title: 'Data Type', dataIndex: 'dataType',   editable: false, width: 140 },
+  { title: 'Direction', dataIndex: 'direction',  editable: false, width: 100,
+    render: (v) => v?.oracleValue ?? v },
+  { title: 'Position',  dataIndex: 'position',   editable: false, width: 90  },
+  { title: 'Default',   dataIndex: 'hasDefault', editable: false, width: 90,
+    render: (v) => v ? 'Yes' : '—' },
+];
+
 const EraserIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -79,6 +90,39 @@ const CreateJobPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const executeType = Form.useWatch("executeType", form);
+  const { schemas, schemasLoading, procedures, proceduresLoading, parameters: spParametersMap, parametersLoading } =
+    useSelector((state) => state.oracleMetadata);
+  const [selectedSchema,    setSelectedSchema]    = useState(null);
+  const [selectedProcedure, setSelectedProcedure] = useState(null);
+
+  useEffect(() => {
+    if (executeType === "stored_procedure" && schemas.length === 0) {
+      dispatch(fetchSchemas());
+    }
+    if (executeType !== "stored_procedure") {
+      setSelectedSchema(null);
+      setSelectedProcedure(null);
+      dispatch(clearProcedures());
+    }
+  }, [executeType]);
+
+  const handleSchemaChange = (schema) => {
+    setSelectedSchema(schema);
+    setSelectedProcedure(null);
+    dispatch(clearParameters());
+    dispatch(fetchProcedures(schema));
+  };
+
+  const handleProcedureChange = (procedure) => {
+    setSelectedProcedure(procedure);
+    dispatch(fetchProcedureParameters({ schema: selectedSchema, procedure }));
+  };
+
+  const spParams = selectedSchema && selectedProcedure
+    ? (spParametersMap[`${selectedSchema}/${selectedProcedure}`] ?? [])
+    : [];
+
   const updateNotification = (key) => (checked) =>
     setNotificationSettings(prev => ({ ...prev, [key]: checked }));
 
@@ -89,12 +133,20 @@ const CreateJobPage = () => {
 
   const onFinish = async (values) => {
     try {
+      const isStoredProcedure = values.executeType === "stored_procedure";
       await dispatch(createJob({
         ...values,
-        timeout: values.timeout || 0,
+        handler: isStoredProcedure ? "StoredProcedureJobHandler" : values.handler,
+        timeout:  values.timeout  || 0,
         maxRetry: values.maxRetry || 0,
         parameters: parameters.filter(p => p.name || p.code),
         notificationSettings,
+        ...(isStoredProcedure && selectedSchema && selectedProcedure && {
+          defaultInput: JSON.stringify({
+            schema: values.spSchema,
+            procedureName: values.spProcedure,
+          }),
+        }),
       })).unwrap();
       message.success('Job created successfully!');
       navigate(JOB_MGMT_ROUTES.VIEW_JOB);
@@ -112,6 +164,9 @@ const CreateJobPage = () => {
     form.resetFields();
     setParameters([]);
     setNotificationSettings(INITIAL_NOTIFICATIONS);
+    setSelectedSchema(null);
+    setSelectedProcedure(null);
+    dispatch(clearProcedures());
   };
 
   return (
@@ -157,15 +212,19 @@ const CreateJobPage = () => {
                   <Option value="process_data">Process Data</Option>
                   <Option value="send_notification">Send Notification</Option>
                   <Option value="update_database">Update Database</Option>
+                  <Option value="stored_procedure">Stored Procedure</Option>
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Handler" name="handler" {...formItemProps} rules={[
-                { required: true, message: "Please input handler" },
-                { max: 100,       message: "Maximum 100 characters" },
-              ]}>
-                <Input placeholder="e.g. com.nxs.jobhandler.genfile" maxLength={100} style={inputStyle} />
-              </Form.Item>
+              {executeType !== "stored_procedure" && (
+                <Form.Item label="Handler" name="handler" {...formItemProps} rules={[
+                  { required: true, message: "Please input handler" },
+                  { max: 100,       message: "Maximum 100 characters" },
+                ]}>
+                  <Input placeholder="e.g. com.nxs.jobhandler.genfile" maxLength={100} style={inputStyle} />
+                </Form.Item>
+              )}
+              {executeType === "stored_procedure" && <div />}
 
               <Form.Item label="Timeout" name="timeout" {...formItemProps}>
                 <InputNumber placeholder="Enter timeout in seconds" min={0} precision={0} style={fieldStyle} />
@@ -208,6 +267,62 @@ const CreateJobPage = () => {
             </div>
           </NxBaseContainer>
 
+          {executeType === "stored_procedure" && (
+            <NxBaseContainer border header="STORED PROCEDURE" className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
+
+                <Form.Item label="Schema" name="spSchema" {...formItemProps} rules={[
+                  { required: true, message: "Please select a schema" },
+                ]}>
+                  <Select
+                    placeholder="Select schema"
+                    style={fieldStyle}
+                    loading={schemasLoading}
+                    onChange={handleSchemaChange}
+                  >
+                    {schemas.map((s) => (
+                      <Option key={s} value={s}>{s}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item label="Procedure / Function" name="spProcedure" {...formItemProps} rules={[
+                  { required: true, message: "Please select a procedure" },
+                ]}>
+                  <Select
+                    placeholder={selectedSchema ? "Select procedure" : "Select schema first"}
+                    style={fieldStyle}
+                    loading={proceduresLoading}
+                    disabled={!selectedSchema}
+                    onChange={handleProcedureChange}
+                  >
+                    {(procedures[selectedSchema] ?? []).map((p) => (
+                      <Option key={p.name} value={p.name}>
+                        {p.name}
+                        <span className="ml-2 text-xs text-gray-400">({p.objectType})</span>
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+                <div />
+
+                {selectedProcedure && (
+                  <div className="md:col-span-3">
+                    <NxTableInlineEdit
+                      idTable="sp-parameters-info-table"
+                      dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
+                      onDataChange={() => {}}
+                      columns={SP_PARAM_COLUMNS}
+                      emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
+                    />
+                  </div>
+                )}
+
+              </div>
+            </NxBaseContainer>
+          )}
+
           <NxBaseContainer
             border
             header="PARAMETERS"
@@ -228,20 +343,22 @@ const CreateJobPage = () => {
           </NxBaseContainer>
         </NxCardContainer>
 
-        <NxBaseContainer border header="NOTIFICATIONS" className="mt-4">
-          <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
-            <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
-            <NotificationRow label="Show in Notification Drawer" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
-            <NotificationRow label="Show as Alert"               checked={notificationSettings.showAlert}    onChange={updateNotification('showAlert')} />
-          </section>
+        <NxCardContainer border header="NOTIFICATIONS" className="mt-4">
+          <div className="flex flex-col gap-4">
+            <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
+              <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
+              <NotificationRow label="Show in Notification Drawer" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
+              <NotificationRow label="Show as Alert"               checked={notificationSettings.showAlert}    onChange={updateNotification('showAlert')} />
+            </section>
 
-          <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
-            <h3 className="text-primary text-sm font-normal uppercase">External Notifications</h3>
-            <NotificationRow label="Send via Email"    checked={notificationSettings.sendViaEmail}    onChange={updateNotification('sendViaEmail')} />
-            <NotificationRow label="Send via SMS"      checked={notificationSettings.sendViaSMS}      onChange={updateNotification('sendViaSMS')} />
-            <NotificationRow label="Send via WhatsApp" checked={notificationSettings.sendViaWhatsApp} onChange={updateNotification('sendViaWhatsApp')} />
-          </section>
-        </NxBaseContainer>
+            <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
+              <h3 className="text-primary text-sm font-normal uppercase">External Notifications</h3>
+              <NotificationRow label="Send via Email"    checked={notificationSettings.sendViaEmail}    onChange={updateNotification('sendViaEmail')} />
+              <NotificationRow label="Send via SMS"      checked={notificationSettings.sendViaSMS}      onChange={updateNotification('sendViaSMS')} />
+              <NotificationRow label="Send via WhatsApp" checked={notificationSettings.sendViaWhatsApp} onChange={updateNotification('sendViaWhatsApp')} />
+            </section>
+          </div>
+        </NxCardContainer>
 
         <footer className="mt-4 flex justify-between items-center px-4 py-3 bg-white rounded-lg border border-solid border-[#C8CDD4]">
           <ButtonComponent onClick={handleBack}>Cancel</ButtonComponent>
