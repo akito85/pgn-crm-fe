@@ -181,14 +181,6 @@ const DetailPage = () => {
                             <Form.Item>
                                 <ButtonComponent
                                     type={'submit'}
-                                    icon={
-                                        <LeftOutlined
-                                            style={{
-                                                color: "#fff",
-                                                fontSize: 16,
-                                                justifyItems: "left",
-                                            }}
-                                        />}
                                     // onClick={handleBackPage}
                                     onClick={handleBack}>
                                     Back

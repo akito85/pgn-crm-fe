@@ -12,6 +12,7 @@ import {
   getAllBillingRequestPaginate,
   getListApprovalById,
   requestedBilling,
+  resetBillingRequestData,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import {
   columnsApproval,
@@ -49,7 +50,7 @@ const ModalRequestApproval = ({
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -74,19 +75,21 @@ const ModalRequestApproval = ({
     dispatch(getAllApprovalList());
   }, [dispatch]);
 
-  // Use Effect - Fetch billing request dengan pagination setiap ada perubahan
+  // Use Effect - Fetch billing request setiap ada perubahan search/sort
   useEffect(() => {
     if (isOpen) {
       dispatch(
         getAllBillingRequestPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 1,
+          pageSize: 100,
           sort,
+          isLoadMore: false,
         }),
       );
+      setPage(1);
     }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  }, [dispatch, isOpen, search, sort]);
 
   useEffect(() => {
     if (boolean === true) {
@@ -120,12 +123,31 @@ const ModalRequestApproval = ({
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const initialPageSize = 100;
+
+  const handleLoadMore = async () => {
+    const totalElements = data_list_billing_request_approval?.page?.totalElements || 0;
+    const currentDataLength = dataSource?.length || 0;
+
+    if (currentDataLength >= totalElements) return;
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    await dispatch(
+      getAllBillingRequestPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+    setPage(nextPage);
   };
+
+  const hasMore =
+    (dataSource?.length || 0) <
+    (data_list_billing_request_approval?.page?.totalElements || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -194,6 +216,7 @@ const ModalRequestApproval = ({
 
   const handleCancelForm = () => {
     handleCancel();
+    dispatch(resetBillingRequestData());
     setSelectedRowKeys([]);
     setDataTableSelect([]);
     setDataTable([]);
@@ -206,6 +229,7 @@ const ModalRequestApproval = ({
     setSearchText("");
     setSearchedColumn("");
     form.resetFields();
+    // Reset data request approval di Redux agar modal selanjutnya mulai fresh
   };
 
   const handleCloseModalError = () => {
@@ -264,16 +288,15 @@ const ModalRequestApproval = ({
   const baseColumns = useMemo(
     () =>
       columnsRequestBilling(
-        page,
-        pageSize,
+        0,
+        0,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        // PERUBAHAN: Tambahkan search sebagai argumen ke-7 (sesuai signature terbaru)
         search,
       ),
-    [page, pageSize, searchedColumn, searchText, search],
+    [searchedColumn, searchText, handleSearch, search],
   );
 
   const allColumns = useMemo(() => {
@@ -390,12 +413,9 @@ const ModalRequestApproval = ({
                 )}
               </div>
               <TableRBI
+                idTable="billing-request-table"
                 dataSource={dataSourceWithKeys}
                 columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
                 totalData={
                   data_list_billing_request_approval?.page?.totalElements || 0
                 }
@@ -407,6 +427,11 @@ const ModalRequestApproval = ({
                 loading={loading}
                 showExport={false}
                 rowSelection={rowSelection}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
               />
               <div className="pt-[30px]">
                 <Form.Item name={"generateInvoice"}>
@@ -489,8 +514,8 @@ const ModalRequestApproval = ({
                 <TableRBI
                   dataSource={dataTable}
                   columns={columnsApproval(
-                    page,
-                    pageSize,
+                    1,
+                    dataTable.length,
                     searchInput,
                     searchedColumn,
                     searchText,
@@ -505,8 +530,8 @@ const ModalRequestApproval = ({
                         <TableRBI
                           dataSource={record?.employeeDetail || []}
                           columns={columnsExpandApproval(
-                            page,
-                            pageSize,
+                            1,
+                            record?.employeeDetail?.length || 0,
                             searchInput,
                             searchedColumn,
                             searchText,
@@ -537,10 +562,6 @@ const ModalRequestApproval = ({
               <TableRBI
                 dataSource={dataTableSelect}
                 columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
                 totalData={dataTableSelect.length || 0}
                 tableScrolled={{ y: 525, x: 15000 }}
                 onSort={onSort}
@@ -548,6 +569,7 @@ const ModalRequestApproval = ({
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={false}
+                usePagination={false}
               />
               <div className="pt-[30px]">
                 <DetailText label={"Generate Invoice"}>
@@ -586,8 +608,8 @@ const ModalRequestApproval = ({
                         : dataTable
                     }
                     columns={columnsApproval(
-                      page,
-                      pageSize,
+                      1,
+                      dataTable.length,
                       searchInput,
                       searchedColumn,
                       searchText,
@@ -605,8 +627,8 @@ const ModalRequestApproval = ({
                             usePagination={false}
                             dataSource={record?.employeeDetail}
                             columns={columnsExpandApproval(
-                              page,
-                              pageSize,
+                              1,
+                              record?.employeeDetail?.length || 0,
                               searchInput,
                               searchedColumn,
                               searchText,
