@@ -15,7 +15,13 @@ import {
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
+/**
+ * Invoice relation list table module
+ * @param {{ id?: number; idCustomer?: number }} props
+ * @returns
+ */
 const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
 
   const { data_irApprovalHistory } = useSelector(
@@ -31,6 +37,7 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
     useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
+  // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
@@ -103,6 +110,7 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
     }
   };
 
+  // --- Effects ---
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
     if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
