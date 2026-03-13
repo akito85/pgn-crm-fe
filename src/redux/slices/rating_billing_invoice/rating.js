@@ -23,6 +23,7 @@ const initialState = {
   data_detail: null,
   data_downlaod: null,
   loadingExpand: {},
+  currentRequestId: null,
 };
 
 // list gas
@@ -37,13 +38,13 @@ export const getListRatingGasPaginate = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
 
-      // URL dengan parameter period
       const url = `/v1/dbs/api/rating/rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&period=${encodeURIComponent(period)}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
+      const responseData = response.data?.data ?? response.data;
 
       return {
-        ...response.data,
+        ...responseData, // spread { result, page, link }
         isLoadMore,
       };
     } catch (error) {
@@ -256,12 +257,17 @@ export const getAllServiceAgreementPaginate = createAsyncThunk(
 
 export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
   "GET_ALL_USAGE_SERVICE_AGREEMENT_PAGINATE",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async (
+    { id, page, pageSize, search, sort, billPeriod, accountNumber },
+    thunkAPI,
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "recordId~desc" : sort;
-      const url = `/v1/dbs/api/rating/list-usage/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
+      const url = `/v1/dbs/api/rating/list-usage/${id}?billPeriod=${encodeURIComponent(billPeriod)}&accountNumber=${accountNumber}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -864,19 +870,25 @@ const ratingSlice = createSlice({
     [getListRatingGasPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
+        state.currentRequestId = action.meta.requestId;
       }
     },
     [getListRatingGasPaginate.fulfilled]: (state, action) => {
+      const isLoadMore = action.payload?.isLoadMore;
+
+      if (!isLoadMore && action.meta.requestId !== state.currentRequestId) {
+        return;
+      }
+
       state.loading = false;
-      const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
         const existingIds = new Set(
-          (state.data?.result || []).map((item) => item.ratingId),
+          (state.data?.result || []).map((item) => item.ratingCode), // ← pastikan ratingCode
         );
         const uniqueNewData = newResult.filter(
-          (item) => !existingIds.has(item.ratingId),
+          (item) => !existingIds.has(item.ratingCode), // ← pastikan ratingCode
         );
         state.data = {
           ...action.payload,
