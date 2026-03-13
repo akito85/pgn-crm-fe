@@ -26,26 +26,17 @@ import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
  * @returns 
  */
 const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
+  // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
-
-  const isStandAlone = moduleType === "sa";
-  const isUnderAccount = moduleType === "ua";
-
-  const isStandard = isUnderAccount && location.pathname.includes("account-standard");
-  const isOneTime = isUnderAccount && location.pathname.includes("account-onetime");
-
   const {
     list_gasDeposit: gasDeposits,
     pagination_gasDeposit: pagination,
     data_gdApprovalHistory,
     loading_listGd
   } = useSelector((state) => state.gasDeposit);
-
-  //declare
   const searchInput = useRef(null);
 
-  //state
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -53,22 +44,27 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateGdId, setInactivateGdId] = useState(0);
   const [inactivateGdAccountNumber, setInactivateGdAccountNumber] = useState(0);
-
-  const [showApprovalHistoryModal, setShowApprovalHistoryModal] =
-    useState(false);
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
   const [selectedDetailId, setSelectedDetailId] = useState();
 
+  // --- Derived values ---
+  const isStandAlone = moduleType === "sa";
+  const isUnderAccount = moduleType === "ua";
+  const isStandard = isUnderAccount && location.pathname.includes("account-standard");
+  const isOneTime = isUnderAccount && location.pathname.includes("account-onetime");
   const totalElement = pagination.totalElement;
   const hasMore = gasDeposits.length < totalElement;
 
+  // --- Functions / handlers ---
+  /**
+   * Resets pagination to page 0 and re-fetches the gas deposit list with current search/sort/filter state.
+   */
   const handleRefresh = () => {
     const body = {
       page: 0,
@@ -89,6 +85,10 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
     setPage(0);
   };
 
+  /**
+   * Stores the selected record's ID to show the detail mutation table below the main table.
+   * @param {object} record - The clicked table row record
+   */
   const handleSelectDetail = (record) => {
     setSelectedDetailId(record.id);
   }
@@ -169,6 +169,11 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
     });
   };
 
+  /**
+   * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
+   * Keys are capitalised for display (e.g. "create" → "Create").
+   * @returns {{ key: string, value: string, label: string }[]}
+   */
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -192,6 +197,9 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
     }
   };
 
+  /**
+   * Dispatches a download action for the current filtered/sorted view.
+   */
   const handleDownload = () => {
     const body = {
       page,
@@ -211,12 +219,18 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
    * @param {import("antd/lib/table/interface").SorterResult} sort
    */
   const onSort = (_, __, sort) => {
+    // Converts antd's SorterResult to the API's "field~asc|desc" format.
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
       : "";
     setSort(dataSort);
   };
 
+  /**
+   * Loads the next page of records and appends them to the existing list.
+   * Only dispatches the API call when the next page index is within bounds (≤ totalPage).
+   * Page state is always incremented so the caller's button state stays correct.
+   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPage = pagination.totalPage || 0;
@@ -242,6 +256,9 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
     setPage(nextPage);
   };
 
+  // --- Effects ---
+  // Resolve the route-based path and fetch the user's granted access permissions.
+  // The path determines which role/menu entries are visible for this module context.
   useEffect(() => {
     let path;
     if (isStandAlone)
@@ -255,6 +272,8 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
       dispatch(getGrantedAccessAccount(path));
   }, []);
 
+  // Re-fetch page 0 whenever sort, search, filters, or filterRules change.
+  // Page is reset to 0 to avoid stale pagination after criteria change.
   useEffect(() => {
     const body = {
       page: 0,
@@ -270,6 +289,9 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
     dispatch(getGasDeposit({ id: isUnderAccount ? id : undefined, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
+  // Reshape raw API approval history into { create, inactive } buckets.
+  // The API groups records by action type ("GAS_DEPOSIT" / "INACTIVE_GAS_DEPOSIT");
+  // the history modal expects them keyed as "create" / "inactive" for tab rendering.
   useEffect(() => {
     if (data_gdApprovalHistory && data_gdApprovalHistory?.dataApprover) {
       const temp = {
@@ -321,6 +343,7 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
         </NxBaseContainer>
       </NxCardContainer>
 
+      {/* Detail mutation table — rendered only when a row is selected */}
       {selectedDetailId && (
         <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
           <NxBaseContainer border>
