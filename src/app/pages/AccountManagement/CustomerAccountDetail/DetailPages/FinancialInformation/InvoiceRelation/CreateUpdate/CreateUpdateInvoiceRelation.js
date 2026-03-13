@@ -19,7 +19,6 @@ import {
   getDetailDraftInvoiceRelation,
   getDetailInvoiceRelation,
   getDetailIrApprovalHierarchy,
-  getInvoiceRelationAttachment,
   getIrApprovalHierarchy,
   getIrAttachmentCategory,
   updateInvoiceRelation
@@ -59,21 +58,20 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     loading_detailIrApprovalHierarchyDetails,
     loading_detailIr,
     loading_detailDraftIr,
-    loading_detailIrDetailAttachment,
     loading_createUpdateIr,
     data_irApprovalHierarchy,
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
     detailDraft_invoiceRelation,
-    list_irDetailAttachment
   } = useSelector((state) => state.invoiceRelation);
+
+  const attachments = detail_invoiceRelation.attachments;
 
   const loading =
     loading_listIrApprovalOption ||
     loading_detailIrApprovalHierarchyDetails ||
     loading_detailIr ||
-    loading_detailDraftIr ||
-    loading_detailIrDetailAttachment;
+    loading_detailDraftIr;
 
   //declare
   const location = useLocation();
@@ -115,7 +113,6 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     if (isUpdate && idIr) {
       dispatch(getDetailInvoiceRelation(idIr));
       dispatch(getDetailDraftInvoiceRelation(idIr));
-      dispatch(getInvoiceRelationAttachment({ id: idIr }));
     }
   }, [formType, idIr]);
 
@@ -151,15 +148,9 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   }, [detail, data_irApprovalHierarchy]);
 
   useEffect(() => {
-    if (isUpdate && list_irDetailAttachment) {
-      const result = list_irDetailAttachment.map((item, index) => ({
-        ...item,
-        key: `invoice-relation-attachment-${item.id}`,
-        dataType: "exist"
-      }));
-      setDataAttachment([...result]);
-    }
-  }, [list_irDetailAttachment]);
+    if (isUpdate && attachments)
+      setDataAttachment([...attachments]);
+  }, [detail]);
 
   useEffect(() => {
     dispatch(getIrApprovalHierarchy());
@@ -543,7 +534,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         : "";
 
     if (isCreate)
-      dispatch(createInvoiceRelation({ body, attachments: newAttachments }))
+      dispatch(createInvoiceRelation({ body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
         .unwrap()
         .then((data) => {
           setTimeout(() => {
@@ -563,7 +554,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           body,
           attachments: dataAttachment.filter(
             (attachment) => attachment.dataType !== "exist"
-          )
+          ),
+          action: confirmationType.toUpperCase()
         })
       )
         .unwrap()
@@ -615,14 +607,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
       }
 
-      if (list_irDetailAttachment) {
-        const result = list_irDetailAttachment.map((item, index) => ({
-          ...item,
-          key: `invoice-relation-attachment-${item.id}`,
-          dataType: "exist"
-        }));
-        setDataAttachment([...result]);
-      }
+      if (attachments)
+        setDataAttachment([...attachments]);
 
       setCurrent(0);
     }
