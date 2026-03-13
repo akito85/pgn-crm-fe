@@ -26,12 +26,11 @@ const DUMMY = {
   page: { totalElements: 1 },
 };
 
-// TODO: replace URL with real endpoint once API is ready
 export const getAllJobPaginate = createAsyncThunk(
   "jobManagement/getAllJobPaginate",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
-      const url = `/job-management/dbs/api/v1/job?search=${search}&page=${page}&size=${pageSize}&sort=${sort}`;
+      const url = `/job/dbs/api/v1/job?search=${search}&page=${page}&size=${pageSize}&sort=${sort}`;
       const response = await userHttpService.getAll(url);
       return response?.data ?? DUMMY;
     } catch (error) {
@@ -59,7 +58,7 @@ export const createJob = createAsyncThunk(
   "jobManagement/createJob",
   async (jobData, thunkAPI) => {
     try {
-      const url = `/job-management/dbs/api/v1/job`;
+      const url = `/job/dbs/api/v1/job`;
       const response = await userHttpService.createData(url, jobData);
       return response?.data;
     } catch (error) {

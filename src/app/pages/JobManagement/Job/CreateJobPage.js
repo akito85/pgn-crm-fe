@@ -110,6 +110,7 @@ const CreateJobPage = () => {
   const handleSchemaChange = (schema) => {
     setSelectedSchema(schema);
     setSelectedProcedure(null);
+    form.setFieldValue('spProcedure', null);
     dispatch(clearParameters());
     dispatch(fetchProcedures(schema));
   };
