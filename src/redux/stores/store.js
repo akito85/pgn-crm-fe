@@ -135,6 +135,7 @@ import invoiceRelationReducer from "../slices/account_management/detailAccount/I
 import globalPropReducer from "../slices/globalPropSlice";
 import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentWarrantyPartner";
 import liborRateReducer from "../slices/receipt_collection/liborRate";
+import caCiMappingReducer from "../slices/receipt_collection/caCiMapping";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
@@ -288,6 +289,7 @@ const reducer = combineReducers({
   paymentCycle: paymentCycleReducer,
   paymentPeriod: paymentPeriodReducer,
   billingItemCategory: billingItemCategoryReducer,
+  caCiMapping: caCiMappingReducer,
 
   // Attachment
   attachment: attachmentReducer,

@@ -87,6 +87,10 @@ import ViewLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/Libor
 import ListDetailLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListDetailLiborRate";
 import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListFormLiborRate";
 
+import ViewCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ViewCaCiMapping";
+import ListDetailCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListDetailCaCiMapping";
+import ListFormCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListFormCaCiMapping";
+
 
 
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
@@ -244,4 +248,10 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_LIBOR_RATE: <ListDetailLiborRate />,
   CREATE_LIBOR_RATE: <ListFormLiborRate type={"create"} />,
   UPDATE_LIBOR_RATE: <ListFormLiborRate type={"update"} />,
+
+  // CA CI Mapping
+  VIEW_CA_CI_MAPPING: <ViewCaCiMapping />,
+  DETAIL_CA_CI_MAPPING: <ListDetailCaCiMapping />,
+  CREATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"create"} />,
+  UPDATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"update"} />,
 };
