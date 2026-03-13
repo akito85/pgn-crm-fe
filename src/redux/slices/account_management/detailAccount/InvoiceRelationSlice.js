@@ -39,36 +39,9 @@ const initialState = {
   data_irApprovalHistory: {}
 };
 
-export const getInvoiceRelationAttachment = createAsyncThunk(
-  "GET_INVOICE_RELATION_ATTACHMENT",
-  async ({ id, page, size, sort, searchs, listType, isLoadMore }, thunkAPI) => {
-    try {
-      const queryParams = new URLSearchParams();
-
-      if (page) queryParams.append("page", page);
-      if (size) queryParams.append("size", size);
-      if (sort) queryParams.append("sort", sort);
-      if (searchs) queryParams.append("searchs", searchs);
-      if (listType) queryParams.append("listType", listType);
-
-      let url = `/v1/dbs/api/invoice-relation/list-attachment/${id}`;
-
-      if (queryParams.toString().length) url += `?${queryParams.toString()}`;
-
-      const response = await accountManagementService.getAll(url);
-      return {
-        ...response.data,
-        isLoadMore
-      };
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
 export const createInvoiceRelation = createAsyncThunk(
   "CREATE_INVOICE_RELATION",
-  async ({ body: createBody, attachments = [] }, thunkAPI) => {
+  async ({ body: createBody, attachments = [], action }, thunkAPI) => {
     try {
       const createUrl = "/v1/dbs/api/invoice-relation/create";
       const response = await accountManagementService.createData(
@@ -84,7 +57,8 @@ export const createInvoiceRelation = createAsyncThunk(
         accountManagementService.uploadAttachment(uploadUrl, {
           files: attachment.file,
           category: attachment.fileCategoryId,
-          refId: id
+          refId: id,
+          action
         })
       );
 
@@ -122,7 +96,7 @@ export const createInvoiceRelation = createAsyncThunk(
 
 export const updateInvoiceRelation = createAsyncThunk(
   "UPDATE_INVOICE_RELATION",
-  async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
+  async ({ id, body: updateBody, attachments = [], action }, thunkAPI) => {
     try {
       const updateUrl = `/v1/dbs/api/invoice-relation`;
       const response = await accountManagementService.updateData(
@@ -136,7 +110,8 @@ export const updateInvoiceRelation = createAsyncThunk(
         accountManagementService.uploadAttachment(uploadUrl, {
           files: attachment.file,
           category: attachment.fileCategoryId,
-          refId: id
+          refId: id,
+          action,
         })
       );
 
@@ -559,53 +534,6 @@ const invoiceRelationSlice = createSlice({
         state.pagination_irAccountStandard = {
           totalPages: 0,
           totalElements: 0,
-          currentPage: 0,
-          pageSize: 10
-        };
-      }
-    },
-
-    /** Get Invoice Relation Attachment */
-    [getInvoiceRelationAttachment.pending]: (state, action) => {
-      if (!action.meta.arg?.isLoadMore) {
-        state.loading_detailIrDetailAttachment = true;
-      }
-    },
-    [getInvoiceRelationAttachment.fulfilled]: (state, action) => {
-      state.loading_detailIrDetailAttachment = false;
-      const { result, page, isLoadMore } = action.payload;
-
-      if (Array.isArray(result)) {
-        if (isLoadMore) {
-          const currentIds = new Set(
-            state.list_irDetailAttachment.map((item) => item.id)
-          );
-          const filteredResult = result.filter(
-            (resultItem) => !currentIds.has(resultItem.id)
-          );
-
-          state.list_irDetailAttachment = [
-            ...state.list_irDetailAttachment,
-            ...filteredResult
-          ];
-        } else state.list_irDetailAttachment = result;
-      }
-
-      state.pagination_irDetailAttachment = {
-        totalPage: page?.totalPages || 0,
-        totalElement: page?.totalElements || 0,
-        currentPage: page?.number || 0,
-        pageSize: page?.size || 10
-      };
-    },
-    [getInvoiceRelationAttachment.rejected]: (state, action) => {
-      state.loading_detailIrDetailAttachment = false;
-
-      if (!action.meta.arg?.isLoadMore) {
-        state.list_irDetailAttachment = [];
-        state.pagination_irDetailAttachment = {
-          totalPages: 0,
-          totalElement: 0,
           currentPage: 0,
           pageSize: 10
         };
