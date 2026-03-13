@@ -6,6 +6,7 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined, PlusOutlined } from "@ant-design/icons";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
@@ -18,6 +19,13 @@ const { Option } = Select;
 const CreateJobPage = () => {
   const [form] = Form.useForm();
   const [descriptionLength, setDescriptionLength] = useState(0);
+  const [notificationSettings, setNotificationSettings] = useState({
+    showInDrawer: false,
+    showAlert: false,
+    sendViaEmail: false,
+    sendViaSMS: false,
+    sendViaWhatsApp: false,
+  });
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -83,11 +91,18 @@ const CreateJobPage = () => {
         module: values.module,
         accessGroup: values.accessGroup,
         parameters: parameters.filter(p => p.name || p.code),
+        notificationSettings: {
+          showInDrawer: notificationSettings.showInDrawer,
+          showAlert: notificationSettings.showAlert,
+          sendViaEmail: notificationSettings.sendViaEmail,
+          sendViaSMS: notificationSettings.sendViaSMS,
+          sendViaWhatsApp: notificationSettings.sendViaWhatsApp,
+        },
       };
 
       const result = await dispatch(createJob(jobData)).unwrap();
       message.success('Job created successfully!');
-      
+
       // Navigate back to job list after successful creation
       navigate(JOB_MGMT_ROUTES.VIEW_JOB);
     } catch (error) {
@@ -388,6 +403,68 @@ const CreateJobPage = () => {
             </NxBaseContainer>
           </div>
         </NxCardContainer>
+
+        {/* Notification Settings Container */}
+        <NxBaseContainer
+          border
+          header="NOTIFICATIONS"
+          className="mt-4"
+        >
+          {/* In-App Notifications Group */}
+          <div className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
+            <p className="text-primary text-sm font-normal uppercase">In-App Notifications</p>
+            {/* Item: Show in Notification Drawer */}
+            <div className="flex items-center justify-between py-2" style={{ borderBottom: '1px dashed #c8cdd4' }}>
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Show in Notification Drawer</span>
+              <NxSwitch
+                size="md"
+                checked={notificationSettings.showInDrawer}
+                onChange={(checked) => setNotificationSettings(prev => ({ ...prev, showInDrawer: checked }))}
+              />
+            </div>
+            {/* Item: Show as Alert */}
+            <div className="flex items-center justify-between py-2" style={{ borderBottom: '1px dashed #c8cdd4' }}>
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Show as Alert</span>
+              <NxSwitch
+                size="md"
+                checked={notificationSettings.showAlert}
+                onChange={(checked) => setNotificationSettings(prev => ({ ...prev, showAlert: checked }))}
+              />
+            </div>
+          </div>
+
+          {/* External Notifications Group */}
+          <div className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
+            <p className="text-primary text-sm font-normal uppercase">External Notifications</p>
+            {/* Item: Send via Email */}
+            <div className="flex items-center justify-between py-2" style={{ borderBottom: '1px dashed #c8cdd4' }}>
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via Email</span>
+              <NxSwitch
+                size="md"
+                checked={notificationSettings.sendViaEmail}
+                onChange={(checked) => setNotificationSettings(prev => ({ ...prev, sendViaEmail: checked }))}
+              />
+            </div>
+            {/* Item: Send via SMS */}
+            <div className="flex items-center justify-between py-2" style={{ borderBottom: '1px dashed #c8cdd4' }}>
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via SMS</span>
+              <NxSwitch
+                size="md"
+                checked={notificationSettings.sendViaSMS}
+                onChange={(checked) => setNotificationSettings(prev => ({ ...prev, sendViaSMS: checked }))}
+              />
+            </div>
+            {/* Item: Send via WhatsApp */}
+            <div className="flex items-center justify-between py-2" style={{ borderBottom: '1px dashed #c8cdd4' }}>
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via WhatsApp</span>
+              <NxSwitch
+                size="md"
+                checked={notificationSettings.sendViaWhatsApp}
+                onChange={(checked) => setNotificationSettings(prev => ({ ...prev, sendViaWhatsApp: checked }))}
+              />
+            </div>
+          </div>
+        </NxBaseContainer>
       </Form>
     </LayoutMenu>
   );
