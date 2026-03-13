@@ -6,7 +6,6 @@ import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { EyeOutlined } from "@ant-design/icons";
 import {
   renderColumn,
   renderDateColumn,
@@ -413,7 +412,7 @@ const ViewCaCiMapping = () => {
       render: (record) => (
         <Tooltip title={"Detail"}>
           <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_CA_CI_MAPPING} state={{ id: record?.id }}>
-            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+            <SVGIcon name="IconDetail" width={20} />
           </Link>
         </Tooltip>
       ),
