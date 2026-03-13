@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo, Fragment } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
@@ -76,9 +76,15 @@ const InvoiceRelationApprovalModal = ({
       );
       setPage(1);
     }
-  }, [dispatch, isOpen, search, sort]);
+  }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
-  // Function Search API
+  /**
+   * Handles column search: confirms the search, updates search text/column state,
+   * and resets the page if the filter value has changed.
+   * @param {string[]} selectedKeys - The selected filter values.
+   * @param {Function} confirm - Ant Design confirm callback to apply the filter.
+   * @param {string} dataIndex - The column key being searched.
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -94,7 +100,11 @@ const InvoiceRelationApprovalModal = ({
     });
   };
 
-  // Load more handler
+  /**
+   * Loads the next page of invoice relation approvals when the user scrolls
+   * to the bottom of the infinite-scroll table.
+   * @returns {Promise<void>}
+   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPage = pagination.totalPage || 0;
@@ -102,7 +112,7 @@ const InvoiceRelationApprovalModal = ({
     // Check if there's more data to load
     if (nextPage <= totalPage) {
       const body = {
-        page,
+        page: nextPage,
         size: loadMoreSize,
         sort,
         searchs: search,
@@ -124,7 +134,12 @@ const InvoiceRelationApprovalModal = ({
   const totalElement = pagination.totalElement;
   const hasMore = invoiceRelationApprovals.length < totalElement;
 
-  // Sort Table
+  /**
+   * Handles table sort changes and updates the sort query string.
+   * @param {object} _ - Pagination (unused).
+   * @param {object} __ - Filters (unused).
+   * @param {object} sorter - Ant Design sorter object containing field and order.
+   */
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -147,17 +162,17 @@ const InvoiceRelationApprovalModal = ({
 
   // Step
   const steps = [
-    {
-      title: "INVOICE RELATION"
-    },
-    {
-      title: "CONFIRMATION"
-    }
+    { key: "ir", title: "INVOICE RELATION" },
+    { key: "irc", title: "CONFIRMATION" }
   ];
 
   const formFields = [["remark"]];
 
-  // Button Next
+  /**
+   * Advances to the next step after validating form fields and ensuring at
+   * least one row is selected.
+   * @returns {Promise<void>}
+   */
   const next = async () => {
     try {
       if (current === 0) {
@@ -179,7 +194,9 @@ const InvoiceRelationApprovalModal = ({
     } catch {}
   };
 
-  // Button Previous
+  /**
+   * Returns to the previous step.
+   */
   const prev = () => {
     setCurrent((prev) => prev - 1);
   };
@@ -205,19 +222,35 @@ const InvoiceRelationApprovalModal = ({
     }
   };
 
-  // Handle Next
+  /**
+   * Advances to the next step and scrolls the Steps header to the right.
+   */
   const handleButtonNext = () => {
     next();
     scrollRightHandler();
   };
 
-  // Mapping Step
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title
-  }));
+  /**
+   * Resets all modal state and calls `afterFinish` (used after a successful save).
+   */
+  const resetForm = () => {
+    afterFinish();
+    setCurrent(0);
+    form.resetFields();
+    handleCancel();
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+  };
 
-  // Handle Cancel Form
+  /**
+   * Cancels the modal without triggering `afterFinish`: closes the modal and
+   * resets all local state.
+   */
   const handleCancelForm = () => {
     handleCancel();
     setSelectedRowKeys([]);
@@ -231,6 +264,12 @@ const InvoiceRelationApprovalModal = ({
     form.resetFields();
   };
 
+  /**
+   * Validates the form, dispatches the approve/reject action for the selected
+   * rows, and resets the modal on success.
+   * @param {"APPROVE"|"REJECT"} action - The action to perform.
+   * @returns {Promise<void>}
+   */
   const handleSave = async (action) => {
     try {
       const values = await form.validateFields();
@@ -262,17 +301,7 @@ const InvoiceRelationApprovalModal = ({
       )
         .unwrap()
         .then(() => {
-          afterFinish();
-          setCurrent(0);
-          form.resetFields();
-          handleCancel();
-          setSelectedRowKeys([]);
-          setSelectedRows([]);
-          setSearch({});
-          setPage(1);
-          setSort("");
-          setSearchText("");
-          setSearchedColumn("");
+          resetForm();
         })
         .catch((error) => {});
     } catch {}
@@ -288,7 +317,7 @@ const InvoiceRelationApprovalModal = ({
         handleSearch,
         false
       ),
-    [page, loadMoreSize, searchedColumn, searchText]
+    [search, searchInput, searchedColumn, searchText]
   );
 
   const columns = useMemo(() => {
@@ -296,17 +325,17 @@ const InvoiceRelationApprovalModal = ({
   }, [columnDefinitions, fixedColumns]);
 
   return (
-    <Fragment>
+    <>
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        title="APPROVAL INVOICE RELATTION INFORMATION"
+        title="APPROVAL INVOICE RELATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
         footer={
           <div className="flex justify-between">
-            <Button type={"default"} onClick={handleCancelForm}>
+            <Button type={"menu"} onClick={handleCancelForm}>
               Cancel
             </Button>
 
@@ -316,7 +345,7 @@ const InvoiceRelationApprovalModal = ({
                   prev();
                   scrollLeftHandler();
                 }}
-                type={"default"}
+                type={"menu"}
                 disabled={current < 1}
               >
                 Previous
@@ -371,7 +400,7 @@ const InvoiceRelationApprovalModal = ({
             >
               <Steps
                 current={current}
-                items={items}
+                items={steps}
                 labelPlacement="vertical"
               />
             </div>
@@ -392,7 +421,7 @@ const InvoiceRelationApprovalModal = ({
                     dataSource={invoiceRelationApprovals}
                     columns={columns}
                     totalData={totalElement}
-                    tableScrolled={{ x: "max-content" }}
+                    tableScrolled={{ x: invoiceRelationApprovals.length ? "max-content" : 5000 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
@@ -433,7 +462,6 @@ const InvoiceRelationApprovalModal = ({
                 <NxTable
                   dataSource={selectedRows}
                   columns={columns}
-                  totalData={totalElement}
                   tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
@@ -451,7 +479,7 @@ const InvoiceRelationApprovalModal = ({
           </div>
         </div>
       </NxModal>
-    </Fragment>
+    </>
   );
 };
 
