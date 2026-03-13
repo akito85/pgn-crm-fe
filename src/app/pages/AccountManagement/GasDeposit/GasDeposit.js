@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { useState } from "react";
 import GasDepositTable from "./GasDepositTable";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,7 +8,7 @@ import {
   getGdApprovalHistory,
   inactivateGasDeposit,
   getGdApprovalHierarchy,
-  getDetailGdApprovalHierarchy
+  getDetailGdApprovalHierarchy,
 } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import GasDepositApprovalModal from "./GasDepositApprovalModal";
 import NxInactivateModal from "../../../../components/Nx/NxInactivateModal";
@@ -88,6 +88,10 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
     );
     setPage(0);
   };
+
+  const handleSelectDetail = (record) => {
+    setSelectedDetailId(record.id);
+  }
 
   /**
    * Open or close inactivate modal
@@ -325,6 +329,7 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
             searchInput={searchInput}
             handleSearch={handleSearch}
             loading={loading_listGd}
+            handleSelectDetail={handleSelectDetail}
           />
         </NxBaseContainer>
       </NxCardContainer>

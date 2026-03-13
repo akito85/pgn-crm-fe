@@ -11,21 +11,22 @@ import GasDepositDetailTable from "./GasDepositDetailTable";
 
 const GasDepositTable = ({
   moduleType,
-  data = [],
   totalElement = 0,
-  page = 0,
-  onSort = () => {},
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
   handleLoadMore = () => {},
+  handleSearch = () => {},
+  onSort = () => {},
+  handleSelectDetail = () => {},
+  dataSource = [],
+  page = 0,
   hasMore = false,
   searchText = "",
-  search = "",
+  search = {},
   searchedColumn = {},
-  searchInput = "",
-  handleSearch = () => {},
+  searchInput = null,
   loading = false,
 }) => {
   const location = useLocation();
@@ -86,7 +87,7 @@ const GasDepositTable = ({
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="gas-deposit-table"
-        dataSource={data}
+        dataSource={dataSource}
         totalData={totalElement}
         current={page}
         tableScrolled={{ x: data.length ? "max-content" : 4000 }}
@@ -102,6 +103,7 @@ const GasDepositTable = ({
         columnDefinitions={columnDefinitions}
         loading={loading}
         expandable={{ expandedRowRender }}
+        onRowClick={handleSelectDetail}
       />
     </div>
   );
