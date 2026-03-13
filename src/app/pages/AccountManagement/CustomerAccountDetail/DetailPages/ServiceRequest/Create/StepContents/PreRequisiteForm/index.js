@@ -116,11 +116,19 @@ export default function PreRequisiteForm({
   }, [loadFirst]);
 
   // Tangkap prerequisite baru dari Create page (CREATE flow)
-  // Pakai ref guard agar tidak diproses 2x akibat React StrictMode
+  // Ref guard untuk React StrictMode double-mount; window.history.replaceState
+  // untuk mencegah duplikat saat komponen unmount+remount (user pindah step lalu kembali)
   useEffect(() => {
     const newPrerequisite = location?.state?.newPrerequisite;
     if (newPrerequisite && isCreateFlow && !newPrerequisiteProcessed.current) {
       newPrerequisiteProcessed.current = true;
+
+      // Hapus newPrerequisite dari history state agar tidak diproses ulang saat remount
+      window.history.replaceState(
+        { ...window.history.state, usr: { ...location.state, newPrerequisite: undefined } },
+        "",
+      );
+
       const mapped = {
         ...newPrerequisite,
         key: `local-${Date.now()}`,
