@@ -10,7 +10,7 @@ export const fetchSchemas = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const response = await userHttpService.getAll(`${BASE}/schemas`, JOB_BASE);
-      return response?.data ?? [];
+      return response ?? [];
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response?.data ?? error.message);
     }
@@ -24,7 +24,7 @@ export const fetchProcedures = createAsyncThunk(
       const response = await userHttpService.getAll(
         `${BASE}/schemas/${schema}/procedures`, JOB_BASE
       );
-      return { schema, procedures: response?.data ?? [] };
+      return { schema, procedures: response ?? [] };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response?.data ?? error.message);
     }
@@ -38,7 +38,7 @@ export const fetchProcedureParameters = createAsyncThunk(
       const response = await userHttpService.getAll(
         `${BASE}/schemas/${schema}/procedures/${procedure}/parameters`, JOB_BASE
       );
-      return { schema, procedure, parameters: response?.data ?? [] };
+      return { schema, procedure, parameters: response ?? [] };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response?.data ?? error.message);
     }
