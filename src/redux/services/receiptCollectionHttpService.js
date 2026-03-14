@@ -99,6 +99,59 @@ const downloadData = async (url) => {
   }
 };
 
+const downloadXlsx = async (
+  url,
+  fallbackFilename = "download",
+  customBaseUrl
+) => {
+  try {
+    const baseUrl = customBaseUrl || configApp.PAYMENT_SERVICE;
+
+    const response = await axios.get(baseUrl + url, {
+      headers: tokenHeader(),
+      responseType: "blob",
+    });
+
+    const contentDisposition = response.headers["content-disposition"];
+    let filename = null;
+
+    if (contentDisposition) {
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''(.+)/i);
+      if (utf8Match) {
+        filename = decodeURIComponent(utf8Match[1]);
+      } else {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+    }
+
+    const blob = new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    if (blob.size === 0) {
+      throw new Error("Downloaded file is empty");
+    }
+
+    FileSaver.saveAs(blob, filename);
+
+    return response;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 204) {
+        throw new Error("No data available for download");
+      }
+      if (error.response.status === 404) {
+        throw new Error("File not found");
+      }
+    }
+
+    throw error;
+  }
+};
+
 const createData = async (url, body) => {
   try {
     const response = await axios.post(configApp.PAYMENT_SERVICE + url, body, {
@@ -234,7 +287,8 @@ const receiptCollectionHttpService = {
   updateDataTransaction,
   updateDataPost,
   uploadBulk,
-  deleteData
+  deleteData,
+  downloadXlsx,
 };
 
 export default receiptCollectionHttpService;

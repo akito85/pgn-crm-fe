@@ -134,6 +134,7 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/view",
   CREATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/create",
   UPDATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/update",
+  UPLOAD_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/upload",
 
   // History Payment Warranty
   VIEW_HISTORY_PAYMENT_WARRANTY: "/receipt-and-collection/payment-warranty/history",

@@ -31,6 +31,8 @@ import {
     getListCategoryReceipt,
 } from "../../../../../../redux/slices/receipt_collection/receipt";
 
+import { CLAIM_PERIOD_TERM_TYPES } from "../../../../../../constants/warranty";
+
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 
@@ -254,7 +256,7 @@ const ModalCreateWarranty = ({
                 rateDate: moment(values.rateDate).format("YYYY-MM-DD"),
                 effectiveStartDate: moment(values.effStartDate).format("YYYY-MM-DD"),
                 effectiveEndDate: moment(values.effEndDate).format("YYYY-MM-DD"),
-                claimPeriodTermType: (values.claimPeriodTermType || "Date").toUpperCase(),
+                claimPeriodTermType: values.claimPeriodTermType || CLAIM_PERIOD_TERM_TYPES.DATE,
                 claimPeriodTermValue: claimValue,
                 description: values.description,
                 isDraft: isDraft,
@@ -496,9 +498,9 @@ const ModalCreateWarranty = ({
                                 <Form.Item label="Term Of Claim Period" style={{ marginBottom: 0 }}>
                                     <Input.Group compact className="flex gap-2">
                                         <Form.Item name="claimPeriodTermType" style={{ width: '40%', marginBottom: 0 }}>
-                                            <Select placeholder="Type" defaultValue="Date">
-                                                <Option value="Date">Date</Option>
-                                                <Option value="Days">Days</Option>
+                                            <Select placeholder="Type" defaultValue={CLAIM_PERIOD_TERM_TYPES.DATE}>
+                                                <Option value={CLAIM_PERIOD_TERM_TYPES.DATE}>Date</Option>
+                                                <Option value={CLAIM_PERIOD_TERM_TYPES.AFTER}>After</Option>
                                             </Select>
                                         </Form.Item>
                                         <Form.Item name="claimPeriodTermValue" style={{ width: '60%', marginBottom: 0 }}>
