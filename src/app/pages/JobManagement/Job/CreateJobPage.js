@@ -19,11 +19,23 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 
-const INITIAL_PARAMETERS = [
-  { key: 1, name: 'Customer ID',  code: 'CUST_ID',  type: 'String', length: 50, description: 'Unique customer identifier' },
-  { key: 2, name: 'Invoice Date', code: 'INV_DATE', type: 'Date',   length: 10, description: 'Date of invoice generation' },
-  { key: 3, name: 'Amount',       code: 'AMOUNT',   type: 'Number', length: 15, description: 'Invoice amount in IDR' },
-];
+const INITIAL_PARAMETERS = [];
+
+/** Sample payload for quick CRUD API testing. Values must match the Select options in this form. */
+const SAMPLE_JOB = {
+  name:        "Daily Revenue Report",
+  code:        "DAILY_REV_RPT",
+  type:        "scheduled",
+  description: "Generates a daily revenue summary report for all active billing accounts. Used for CRUD API testing.",
+  executeType: "process_data",
+  handler:     "com.nxs.jobrunr.handler.DailyRevenueReportHandler",
+  taskQueueId: null,
+  timeout:     3600,
+  maxRetry:    3,
+  retryPolicy: { backoffMultiplier: 2 },
+  module:      "reporting",
+  accessGroup: "admin_sor_1",
+};
 
 const INITIAL_NOTIFICATIONS = {
   showInDrawer: false,
@@ -237,12 +249,32 @@ const CreateJobPage = () => {
     dispatch(clearParameters());
   };
 
+  const handleLoadSample = () => {
+    form.setFieldsValue(SAMPLE_JOB);
+    setParameters([
+      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   length: 10, description: 'Report start date (YYYY-MM-DD)' },
+      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   length: 10, description: 'Report end date (YYYY-MM-DD)' },
+      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', length: 50, description: 'Target region code' },
+    ]);
+  };
+
   return (
     <LayoutMenu>
       <BreadCrumb routes={breadcrumbRoutes} />
       <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 
-        <NxCardContainer header={isEditMode ? "UPDATE JOB" : "JOB CONFIGURATION"}>
+        <NxCardContainer
+          header={isEditMode ? "UPDATE JOB" : "JOB CONFIGURATION"}
+          actionElement={!isEditMode && (
+            <ButtonComponent
+              border={false}
+              className="!bg-[#0288d1] !text-white !border-transparent text-xs"
+              onClick={handleLoadSample}
+            >
+              Load Sample
+            </ButtonComponent>
+          )}
+        >
 
           {/* METADATA */}
           <NxBaseContainer border header="METADATA">
