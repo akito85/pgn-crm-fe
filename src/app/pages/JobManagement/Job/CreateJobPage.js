@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, Select, InputNumber, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -11,18 +11,13 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { PlusOutlined } from "@ant-design/icons";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
-import { createJob } from "../../../../redux/slices/job_management/jobSlice";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
 import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
+import { useGetJobByIdQuery, useCreateJobMutation, useUpdateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-const BREADCRUMB_ROUTES = [
-  { path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT, breadcrumbName: "Job Scheduler Management" },
-  { path: JOB_MGMT_ROUTES.VIEW_JOB,                      breadcrumbName: "Job List" },
-  { path: "",                                             breadcrumbName: "Create" },
-];
 
 const INITIAL_PARAMETERS = [
   { key: 1, name: 'Customer ID',  code: 'CUST_ID',  type: 'String', length: 50, description: 'Unique customer identifier' },
@@ -91,6 +86,21 @@ const CreateJobPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
+
+  // RTK Query hooks
+  const { data: currentJob } = useGetJobByIdQuery(id, { skip: !id });
+  const [createJobMutation, { isLoading: createLoading }] = useCreateJobMutation();
+  const [updateJobMutation, { isLoading: updateLoading }] = useUpdateJobMutation();
+  const isSubmitting = createLoading || updateLoading;
+
+  const breadcrumbRoutes = [
+    { path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT, breadcrumbName: "Job Scheduler Management" },
+    { path: JOB_MGMT_ROUTES.VIEW_JOB,                      breadcrumbName: "Job List" },
+    { path: "",                                             breadcrumbName: isEditMode ? "Update" : "Create" },
+  ];
+
   const executeType = Form.useWatch("executeType", form);
   const { schemas, schemasLoading, procedures, proceduresLoading, parameters: spParametersMap, parametersLoading } =
     useSelector((state) => state.oracleMetadata);
@@ -102,6 +112,47 @@ const CreateJobPage = () => {
   useEffect(() => {
     dispatch(fetchTaskQueues());
   }, [dispatch]);
+
+  // Populate form when editing an existing job
+  useEffect(() => {
+    if (!isEditMode || !currentJob) return;
+
+    form.setFieldsValue({
+      name:        currentJob.name,
+      code:        currentJob.code,
+      type:        currentJob.type,
+      description: currentJob.description,
+      executeType: currentJob.executeType,
+      handler:     currentJob.handler,
+      taskQueueId: currentJob.taskQueueId,
+      timeout:     currentJob.timeout,
+      maxRetry:    currentJob.maxRetry,
+      retryPolicy: { backoffMultiplier: currentJob.retryPolicy?.backoffMultiplier },
+      module:      currentJob.module,
+      spSchema:    currentJob.spSchema,
+      spProcedure: currentJob.spProcedure,
+    });
+
+    // Restore SP chain dropdowns
+    if (currentJob.spSchema) {
+      setSelectedSchema(currentJob.spSchema);
+      dispatch(fetchProcedures(currentJob.spSchema));
+    }
+    if (currentJob.spSchema && currentJob.spProcedure) {
+      setSelectedProcedure(currentJob.spProcedure);
+      dispatch(fetchProcedureParameters({ schema: currentJob.spSchema, procedure: currentJob.spProcedure }));
+    }
+
+    // Restore parameters (replace placeholder data)
+    if (currentJob.parameters?.length) {
+      setParameters(currentJob.parameters.map((p, i) => ({ ...p, key: p.key ?? i + 1 })));
+    }
+
+    // Restore notification toggles
+    if (currentJob.notificationSettings) {
+      setNotificationSettings(currentJob.notificationSettings);
+    }
+  }, [currentJob, isEditMode, dispatch]);
 
   useEffect(() => {
     if (executeType === "stored_procedure") {
@@ -143,7 +194,7 @@ const CreateJobPage = () => {
   const onFinish = async (values) => {
     try {
       const isStoredProcedure = values.executeType === "stored_procedure";
-      await dispatch(createJob({
+      const payload = {
         ...values,
         handler: isStoredProcedure ? "StoredProcedureJobHandler" : values.handler,
         timeout:  values.timeout  || 0,
@@ -156,12 +207,19 @@ const CreateJobPage = () => {
             procedureName: values.spProcedure,
           }),
         }),
-      })).unwrap();
-      message.success('Job created successfully!');
+      };
+
+      if (isEditMode) {
+        await updateJobMutation({ jobId: id, data: payload }).unwrap();
+        message.success('Job updated successfully!');
+      } else {
+        await createJobMutation(payload).unwrap();
+        message.success('Job created successfully!');
+      }
       navigate(JOB_MGMT_ROUTES.VIEW_JOB);
     } catch (error) {
-      console.error('Failed to create job:', error);
-      message.error(error?.message || 'Failed to create job');
+      console.error('Failed to save job:', error);
+      message.error(error?.message || 'Failed to save job');
     }
   };
 
@@ -181,10 +239,10 @@ const CreateJobPage = () => {
 
   return (
     <LayoutMenu>
-      <BreadCrumb routes={BREADCRUMB_ROUTES} />
+      <BreadCrumb routes={breadcrumbRoutes} />
       <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 
-        <NxCardContainer header="JOB CONFIGURATION">
+        <NxCardContainer header={isEditMode ? "UPDATE JOB" : "JOB CONFIGURATION"}>
 
           {/* METADATA */}
           <NxBaseContainer border header="METADATA">
@@ -446,8 +504,9 @@ const CreateJobPage = () => {
               border={false}
               htmlType="submit"
               className="!bg-[#388e3c] !text-white !border-transparent"
+              loading={isSubmitting}
             >
-              Submit
+              {isEditMode ? "Save Changes" : "Submit"}
             </ButtonComponent>
           </div>
         </footer>
