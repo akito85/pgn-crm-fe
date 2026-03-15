@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Dropdown, Menu, Tooltip, Checkbox } from "antd";
-import { DownOutlined, EyeOutlined, DownloadOutlined,EditOutlined } from "@ant-design/icons";
+import { Spin, Dropdown, Menu, Tooltip, Checkbox, Tabs } from "antd";
+import { DownOutlined, EyeOutlined, DownloadOutlined, EditOutlined } from "@ant-design/icons";
+
 import { Link, useNavigate } from "react-router-dom";
 import { disabledActionByStatus } from "../../../../../utils";
 
@@ -25,6 +26,7 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 // Column Configuration
 import { columnWarranty } from "./ColumnConfig/WarrantyColumns";
 import ListDetailWarranty from "./ListDetailWarranty";
+import SummaryWarrantyTable from "./SummaryWarrantyTable";
 import { WARRANTY_STATUS, WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 
 // Redux / Service
@@ -34,19 +36,21 @@ import {
   getDetailWarranty,
   getApprovalHistory,
   downloadWarrantyListDetail,
-  selectAllWarranties
+  selectAllWarranties,
+  getWarrantySummary,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 
 // Modal
 import ModalRefund from "./Modal/ModalRefund";
 import ModalHold from "./Modal/ModalHold";
 import ModalRelease from "./Modal/ModalRelease";
+import ModalApprovalWarranty from "./Modal/ModalApprovalWarranty";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { deleteWarranty } from "../../../../../redux/slices/receipt_collection/warranty";
 
 const ViewWarranty = () => {
-  const { data, loading, loadingList, dataApprovalHistory, data_detail } = useSelector(
+  const { data, loading, loadingList, dataApprovalHistory, data_detail, dataSummary, loadingSummary } = useSelector(
     (state) => state.warranty
   );
   const warranties = useSelector(selectAllWarranties);
@@ -76,6 +80,8 @@ const ViewWarranty = () => {
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [modalDelete, setModalDelete] = useState(false);
   const [selectedRecordDelete, setSelectedRecordDelete] = useState(null);
+  const [modalApproval, setModalApproval] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -95,15 +101,19 @@ const ViewWarranty = () => {
   }, [activeRowKey, pageDetail]);
 
   useEffect(() => {
-    dispatch(
-      getAllWarrantyListPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [search, page, pageSize, sort, dispatch]);
+    if (activeTab === "summary") {
+      dispatch(getWarrantySummary());
+    } else {
+      dispatch(
+        getAllWarrantyListPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [search, page, pageSize, sort, dispatch, activeTab]);
 
   const routes = [
     {
@@ -200,19 +210,19 @@ const ViewWarranty = () => {
 
   /* Effect for Approval History */
   useEffect(() => {
-    if (dataApprovalHistory && (dataApprovalHistory?.approver || dataApprovalHistory?.history)) {
+    if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
       setDataApprovalHistoryFix({
         dataApprover: {
-          create: dataApprovalHistory?.approver?.PAYMENT_WARRANTY || [],
-          hold: dataApprovalHistory?.approver?.WARRANTY_HOLD || [],
-          release: dataApprovalHistory?.approver?.WARRANTY_RELEASE || [],
-          refund: dataApprovalHistory?.approver?.WARRANTY_REFUND || [],
+          guarantee: dataApprovalHistory?.dataApprover?.WARRANTY_CREATION || [],
+          hold: dataApprovalHistory?.dataApprover?.WARRANTY_HOLD || [],
+          release: dataApprovalHistory?.dataApprover?.WARRANTY_RELEASE || [],
+          refund: dataApprovalHistory?.dataApprover?.WARRANTY_REFUND || [],
         },
         dataHistory: {
-          create: dataApprovalHistory?.history?.PAYMENT_WARRANTY || [],
-          hold: dataApprovalHistory?.history?.WARRANTY_HOLD || [],
-          release: dataApprovalHistory?.history?.WARRANTY_RELEASE || [],
-          refund: dataApprovalHistory?.history?.WARRANTY_REFUND || [],
+          guarantee: dataApprovalHistory?.dataHistory?.WARRANTY_CREATION || [],
+          hold: dataApprovalHistory?.dataHistory?.WARRANTY_HOLD || [],
+          release: dataApprovalHistory?.dataHistory?.WARRANTY_RELEASE || [],
+          refund: dataApprovalHistory?.dataHistory?.WARRANTY_REFUND || [],
         },
       });
     } else {
@@ -326,6 +336,33 @@ const ViewWarranty = () => {
         </ButtonComponent>
       ),
     },
+    isApprover && {
+      action: "Approval",
+      render: (
+        <ButtonComponent
+          onClick={() => setModalApproval(true)}
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconRequestApproval" width={24} />}
+        >
+          Approval
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Upload",
+      render: (
+        <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPLOAD_WARRANTY}>
+          <ButtonComponent
+            type={"submit"}
+            border={false}
+            icon={<SVGIcon name="IconUpload" width={17} color={"#FFFFFF"} />}
+          >
+            Upload
+          </ButtonComponent>
+        </Link>
+      ),
+    },
     {
       action: "Create",
       render: (
@@ -419,136 +456,136 @@ const ViewWarranty = () => {
         );
       },
     },
-    // {
-    //   action: "Refund",
-    //   type: "table",
-    //   render: (record, data_length) => {
-    //     const isDisabled = record?.statusApproval !== "Approved" ||
-    //       (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0);
+    {
+      action: "Refund",
+      type: "table",
+      render: (record, data_length) => {
+        const isDisabled = record?.statusApproval !== "Approved" ||
+          (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0);
 
-    //     return data_length > 3 ? (
-    //       <ButtonComponent
-    //         border={false}
-    //         className="gap-2"
-    //         onClick={(e) => {
-    //           e.stopPropagation();
-    //           if (!isDisabled) {
-    //             setActiveRowKey(record.id);
-    //             setSelectedRecord(record);
-    //             setModalRefund(true);
-    //           }
-    //         }}
-    //         type="action"
-    //         disabled={isDisabled}
-    //         icon={<SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
-    //       >
-    //         <span className={isDisabled ? "text-gray-400" : "text-black"}>Refund</span>
-    //       </ButtonComponent>
-    //     ) : (
-    //       <Tooltip title="Refund">
-    //         <div
-    //           onClick={(e) => {
-    //             e.stopPropagation();
-    //             if (!isDisabled) {
-    //               setActiveRowKey(record.id);
-    //               setSelectedRecord(record);
-    //               setModalRefund(true);
-    //             }
-    //           }}
-    //           className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    //         >
-    //           <SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
-    //         </div>
-    //       </Tooltip>
-    //     );
-    //   },
-    // },
-    // {
-    //   action: "Hold",
-    //   type: "table",
-    //   render: (record, data_length) => {
-    //     const isDisabled = !(record?.statusApproval === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED");
+        return data_length > 3 ? (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isDisabled) {
+                setActiveRowKey(record.id);
+                setSelectedRecord(record);
+                setModalRefund(true);
+              }
+            }}
+            type="action"
+            disabled={isDisabled}
+            icon={<SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+          >
+            <span className={isDisabled ? "text-gray-400" : "text-black"}>Refund</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title="Refund">
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled) {
+                  setActiveRowKey(record.id);
+                  setSelectedRecord(record);
+                  setModalRefund(true);
+                }
+              }}
+              className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      action: "Hold",
+      type: "table",
+      render: (record, data_length) => {
+        const isDisabled = !(record?.statusApproval === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED");
 
-    //     return data_length > 3 ? (
-    //       <ButtonComponent
-    //         border={false}
-    //         className="gap-2"
-    //         onClick={(e) => {
-    //           e.stopPropagation();
-    //           if (!isDisabled) {
-    //             setActiveRowKey(record.id);
-    //             setSelectedRecord(record);
-    //             setModalHold(true);
-    //           }
-    //         }}
-    //         type="action"
-    //         disabled={isDisabled}
-    //         icon={<SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
-    //       >
-    //         <span className={isDisabled ? "text-gray-400" : "text-black"}>Hold</span>
-    //       </ButtonComponent>
-    //     ) : (
-    //       <Tooltip title="Hold">
-    //         <div
-    //           onClick={(e) => {
-    //             e.stopPropagation();
-    //             if (!isDisabled) {
-    //               setActiveRowKey(record.id);
-    //               setSelectedRecord(record);
-    //               setModalHold(true);
-    //             }
-    //           }}
-    //           className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    //         >
-    //           <SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
-    //         </div>
-    //       </Tooltip>
-    //     );
-    //   },
-    // },
-    // {
-    //   action: "Release",
-    //   type: "table",
-    //   render: (record, data_length) => {
-    //     const isDisabled = !(record?.status === "Hold" && record?.statusApproval === "Approved");
+        return data_length > 3 ? (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isDisabled) {
+                setActiveRowKey(record.id);
+                setSelectedRecord(record);
+                setModalHold(true);
+              }
+            }}
+            type="action"
+            disabled={isDisabled}
+            icon={<SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+          >
+            <span className={isDisabled ? "text-gray-400" : "text-black"}>Hold</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title="Hold">
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled) {
+                  setActiveRowKey(record.id);
+                  setSelectedRecord(record);
+                  setModalHold(true);
+                }
+              }}
+              className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      action: "Release",
+      type: "table",
+      render: (record, data_length) => {
+        const isDisabled = !(record?.status === "Hold" && record?.statusApproval === "Approved");
 
-    //     return data_length > 3 ? (
-    //       <ButtonComponent
-    //         border={false}
-    //         className="gap-2"
-    //         onClick={(e) => {
-    //           e.stopPropagation();
-    //           if (!isDisabled) {
-    //             setActiveRowKey(record.id);
-    //             setSelectedRecord(record);
-    //             setModalRelease(true);
-    //           }
-    //         }}
-    //         type="action"
-    //         disabled={isDisabled}
-    //         icon={<SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
-    //       >
-    //         <span className={isDisabled ? "text-gray-400" : "text-black"}>Release</span>
-    //       </ButtonComponent>
-    //     ) : (
-    //       <Tooltip title="Release">
-    //         <div
-    //           onClick={(e) => {
-    //             e.stopPropagation();
-    //             if (!isDisabled) {
-    //               setActiveRowKey(record.id);
-    //               setSelectedRecord(record);
-    //               setModalRelease(true);
-    //             }
-    //           }}
-    //           className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    //         >
-    //           <SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
-    //         </div>
-    //       </Tooltip>
-    //     );
-    //   },
-    // },
+        return data_length > 3 ? (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isDisabled) {
+                setActiveRowKey(record.id);
+                setSelectedRecord(record);
+                setModalRelease(true);
+              }
+            }}
+            type="action"
+            disabled={isDisabled}
+            icon={<SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+          >
+            <span className={isDisabled ? "text-gray-400" : "text-black"}>Release</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title="Release">
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled) {
+                  setActiveRowKey(record.id);
+                  setSelectedRecord(record);
+                  setModalRelease(true);
+                }
+              }}
+              className={`cursor-pointer ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />
+            </div>
+          </Tooltip>
+        );
+      },
+    },
     {
       action: "history",
       type: "table",
@@ -623,7 +660,7 @@ const ViewWarranty = () => {
         );
       }
     },
-  ];
+  ].filter(Boolean);
 
   const baseColumns = useMemo(() => {
     return columnWarranty(
@@ -692,36 +729,57 @@ const ViewWarranty = () => {
         </div>
       }>
         <div className="my-5">
-          <TableRBI
-            dataSource={dataSourceWithKeys}
-            columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            showExport={true}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={data?.page?.totalElements || 0}
-            tableScrolled={{ x: "max-content", y: 525 }}
-            onSort={onSort}
-            handleDownload={handleDownload}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loadingList}
-            onRow={(record) => {
-              const recordKey = record.billingCode || record.invoiceNumber || record.id;
-              const isActive = activeRowKey === recordKey;
-              
-              return {
-                onClick: () => handleDetail(record),
-                className: isActive ? "row-selected" : "",
-                style: {
-                  cursor: "pointer",
-                  backgroundColor: isActive ? "#fffbea" : "transparent",
-                  transition: "background-color 0.2s ease",
-                },
-              };
-            }}
+          <Tabs
+            activeKey={activeTab}
+            onChange={(key) => setActiveTab(key)}
+            items={[
+              {
+                key: "all",
+                label: "All",
+                children: (
+                  <TableRBI
+                    dataSource={dataSourceWithKeys}
+                    columns={processedColumns}
+                    current={page}
+                    pageSize={pageSize}
+                    showExport={true}
+                    onChange={handleChangePage}
+                    onSizeChanger={handleChangePage}
+                    totalData={data?.page?.totalElements || 0}
+                    tableScrolled={{ x: "max-content", y: 525 }}
+                    onSort={onSort}
+                    handleDownload={handleDownload}
+                    columnDefinitions={columnDefinitions}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={loadingList}
+                    onRow={(record) => {
+                      const recordKey = record.billingCode || record.invoiceNumber || record.id;
+                      const isActive = activeRowKey === recordKey;
+                      return {
+                        onClick: () => handleDetail(record),
+                        className: isActive ? "row-selected" : "",
+                        style: {
+                          cursor: "pointer",
+                          backgroundColor: isActive ? "#fffbea" : "transparent",
+                          transition: "background-color 0.2s ease",
+                        },
+                      };
+                    }}
+                  />
+                ),
+              },
+              {
+                key: "summary",
+                label: "Summary",
+                children: (
+                  <SummaryWarrantyTable
+                    data={dataSummary || []}
+                    loading={loadingSummary}
+                  />
+                ),
+              },
+            ]}
           />
         </div>
       </CardContainer>
@@ -781,10 +839,13 @@ const ViewWarranty = () => {
         </div>
       )}
 
-      {/* </Spin> */}
+      <ModalApprovalWarranty
+        isOpen={modalApproval}
+        handleCancel={() => setModalApproval(false)}
+        handleListRefresh={handleRefresh}
+      />
     </LayoutMenu>
   );
-
 };
 
 export default ViewWarranty;

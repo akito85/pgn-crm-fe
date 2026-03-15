@@ -76,6 +76,7 @@ import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarr
 import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListFormWarranty";
 
 import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/History/ListHistoryPaymentWarranty";
+import UploadWarrantyPage from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/Upload/UploadWarrantyPage";
 
 import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
 import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
@@ -229,6 +230,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_WARRANTY: <ListDetailWarranty />,
   CREATE_WARRANTY: <ListFormWarranty type={"create"} />,
   UPDATE_WARRANTY: <ListFormWarranty type={"update"} />,
+  UPLOAD_WARRANTY: <UploadWarrantyPage />,
 
   // History Payment Warranty
   VIEW_HISTORY_PAYMENT_WARRANTY: <ListHistoryPaymentWarranty />,

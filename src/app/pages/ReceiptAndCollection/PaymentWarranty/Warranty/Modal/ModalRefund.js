@@ -33,11 +33,12 @@ import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   getAllCustomerInfoPaginate,
-  getAllWarrantyInfoPaginate,
+  getRefundListPaginate,
+  getRefundDetailList,
+  submitRefund,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-  submitWarrantyRequest,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -54,8 +55,7 @@ const ModalRefund = ({
   // Selector
   const {
     data_customer_info,
-    data_warranty_info,
-    data_refund_info,
+    dataRefundList,
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
@@ -68,8 +68,8 @@ const ModalRefund = ({
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceRefundInfo = data_refund_info?.result || [];
+  const dataSourceWarrantyInfo = dataRefundList?.result || [];
+  const dataSourceRefundInfo = [];
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -285,8 +285,8 @@ const ModalRefund = ({
         remark: remarkRefundInformation,
       };
 
-      // 2. Dispatch the unified thunk
-      const submitRes = await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitRefund(submitBody)).unwrap();
       const transIds = submitRes?.data?.transIds || [];
 
       // 3. Upload new attachments per transId
@@ -366,12 +366,11 @@ const ModalRefund = ({
       }
 
       dispatch(
-        getAllWarrantyInfoPaginate({
+        getRefundListPaginate({
           search: finalSearch,
           page,
           pageSize,
           sort,
-          transTypeName: "REFUND",
         })
       );
     }
@@ -754,7 +753,7 @@ const ModalRefund = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={selectedRow ? 1 : (data_warranty_info?.page?.totalElements || 0)}
+                totalData={selectedRow ? 1 : (dataRefundList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
@@ -780,7 +779,7 @@ const ModalRefund = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_refund_info?.page?.totalElements || 0}
+                totalData={dataSourceRefundInfoWithKeys.length}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsRefundInfo}
