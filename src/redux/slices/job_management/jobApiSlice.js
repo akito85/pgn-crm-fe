@@ -32,6 +32,23 @@ const toFrontend = (job) => ({
   updatedBy:     job.updatedBy,
   updatedAt:     job.updatedAt,
   accessGroupId: job.accessGroupId,
+  notificationSettings: (() => {
+    if (!job.notificationConfig) return null;
+    try {
+      const nc = typeof job.notificationConfig === 'string'
+        ? JSON.parse(job.notificationConfig)
+        : job.notificationConfig;
+      return {
+        showInDrawer:    nc.inApp      ?? false,
+        showAlert:       false,
+        sendViaEmail:    nc.email      ?? false,
+        sendViaSMS:      nc.sms        ?? false,
+        sendViaWhatsApp: nc.whatsapp   ?? false,
+      };
+    } catch (e) {
+      return null;
+    }
+  })(),
 });
 
 /** Map frontend form values → CreateJobRequest */
