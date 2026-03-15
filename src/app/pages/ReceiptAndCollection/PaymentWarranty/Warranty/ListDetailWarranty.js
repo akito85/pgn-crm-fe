@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Tabs, Spin } from "antd";
+import { Tabs, Spin, Alert } from "antd";
 import moment from "moment";
 import {
   getDetailWarranty,
@@ -28,12 +28,16 @@ import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import TableRBI from "../../../../../components/TableRBI";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import { WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 import { columnsHoldInfo } from "./Modal/Table/TableHoldInfo";
 import { columnsReleaseInfo } from "./Modal/Table/TableReleaseInfo";
 import { columnsRefundInfo } from "./Modal/Table/TableRefundInfo";
 import { getDetailWarrantyMutation } from "../../../../../redux/slices/receipt_collection/warranty";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import { useFilteredMutations } from "../../../../../hooks/useFilteredMutations";
+import { getHoldDetailColumns } from "./ColumnConfig/ColumnHoldDetail";
+import { getReleaseDetailColumns } from "./ColumnConfig/ColumnReleaseDetail";
+import { getRefundDetailColumns } from "./ColumnConfig/ColumnRefundDetail";
 import "./warrantyStyles.css";
 
 const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
@@ -176,6 +180,10 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   const processedColumnsRelease = columnsReleaseInfo(1, 999, null, null, "", () => {}, {}, () => {}, {}, () => {}, true);
   const processedColumnsRefund = columnsRefundInfo(1, 999, null, null, "", () => {}, {}, () => {}, {}, () => {}, true);
 
+  const customDetailColumnsHold = getHoldDetailColumns(page, pageSize);
+  const customDetailColumnsRelease = getReleaseDetailColumns(page, pageSize);
+  const customDetailColumnsRefund = getRefundDetailColumns(page, pageSize);
+
   const itemHold = [
     {
       key: "hold",
@@ -184,8 +192,8 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                   <Spin spinning={loadingMutation}>
                     <TableRBI
                       dataSource={(dataHoldDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
-                      columns={processedColumnsHold}
-                      fixedColumns={{ left: ["no"], right: ["holdAmount", "status", "approvalStatus"] }}
+                      columns={customDetailColumnsHold}
+                      fixedColumns={{ left: ["NO", "warrantyCode"], right: ["holdAmount", "status", "approvalStatus"] }}
                       current={page}
                       pageSize={pageSize}
                       onChange={(p, s) => { setPage(p); setPageSize(s); }}
@@ -195,6 +203,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                       pagination={false}
                     />
                   </Spin>
+                  <Alert style={{ marginTop: '24px', marginBottom: '16px' }} className="font-semibold w-full" message="This Approval for HOLD" type="warning" showIcon />
                 </div>,
     },
     ...getCommonTabs(dataListAppHierDetail, data_approval_info, data_detail?.appHierId),
@@ -208,8 +217,8 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                   <Spin spinning={loadingMutation}>
                     <TableRBI
                       dataSource={(dataReleaseDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
-                      columns={processedColumnsRelease}
-                      fixedColumns={{ left: ["no"], right: ["releaseAmount", "status", "approvalStatus"] }}
+                      columns={customDetailColumnsRelease}
+                      fixedColumns={{ left: ["NO", "warrantyCode"], right: ["releaseAmount", "status", "approvalStatus"] }}
                       current={page}
                       pageSize={pageSize}
                       onChange={(p, s) => { setPage(p); setPageSize(s); }}
@@ -219,6 +228,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                       pagination={false}
                     />
                   </Spin>
+                  <Alert style={{ marginTop: '24px', marginBottom: '16px' }} className="font-semibold w-full" message="This Approval for RELEASE" type="warning" showIcon />
                 </div>,
     },
     ...getCommonTabs(dataListAppHierDetail, data_approval_info, data_detail?.appHierId),
@@ -232,8 +242,8 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                   <Spin spinning={loadingMutation}>
                     <TableRBI
                       dataSource={(dataRefundDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
-                      columns={processedColumnsRefund}
-                      fixedColumns={{ left: ["no"], right: ["date", "refundAmount", "status", "approvalStatus"] }}
+                      columns={customDetailColumnsRefund}
+                      fixedColumns={{ left: ["NO", "receiptCode"], right: ["refundAmount", "currency"] }}
                       current={page}
                       pageSize={pageSize}
                       onChange={(p, s) => { setPage(p); setPageSize(s); }}
@@ -243,6 +253,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
                       pagination={false}
                     />
                   </Spin>
+                  <Alert style={{ marginTop: '24px', marginBottom: '16px' }} className="font-semibold w-full" message="This Approval for REFUND" type="warning" showIcon />
                 </div>,
     },
     ...getCommonTabs(dataListAppHierDetail, data_approval_info, data_detail?.appHierId),
@@ -264,7 +275,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
     setActiveTabRefund(key);
   };
 
-  const isShowButton = data_detail?.isApprover || false;
+  const isShowButton = (data_detail?.isApprover || false) && data_detail?.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [approvalAction, setApprovalAction] = useState("");
@@ -319,11 +330,12 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
       {!isEmbedded && <BreadCrumb routes={routes} />}
 
       <CardContainerNoBorder
+        key={(isHold || isRelease || isRefund) ? "collapsed" : "expanded"}
         header="GUARANTEE DETAIL"
         className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
         noPadding
         collapsible={true}
-        defaultExpanded={true}
+        defaultExpanded={!(isHold || isRelease || isRefund)}
       >
         <div className="full-width-tabs">
           <Tabs
@@ -419,6 +431,11 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
         approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
         menu="Payment Guarantee"
         named={data_detail?.customerName || "-"}
+        customMessage={
+          (isRefund || isHold || isRelease)
+            ? `Are you sure want to ${approvalAction === "APPROVE" ? "approve" : "reject"} ${isRefund ? "Refund" : isHold ? "Hold" : "Release"} Guarantee?`
+            : undefined
+        }
       />
     </Spin>
   );

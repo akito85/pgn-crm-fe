@@ -211,11 +211,12 @@ const ModalApprovalWarranty = ({
     if (current < steps.length - 1) {
       handleButtonNext();
     } else {
-      const payload = {
-        ids: dataTableSelect.map(item => item.id),
+      const payload = dataTableSelect.map((item) => ({
+        id: item.id,
         action: action,
         remark: formValue.remark,
-      };
+        approvalId: item.approvalId,
+      }));
 
       dispatch(submitApproval({ body: payload }))
         .unwrap()

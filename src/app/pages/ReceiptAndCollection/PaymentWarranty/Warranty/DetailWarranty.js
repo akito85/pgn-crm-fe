@@ -130,10 +130,14 @@ const DetailWarranty = ({ data_detail }) => {
   };
 
   useEffect(() => {
-    if (dataApprovalHistory && (dataApprovalHistory?.approver || dataApprovalHistory?.history)) {
+    if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
       setDataApprovalHistoryFix({
-        dataApprover: dataApprovalHistory?.approver || {},
-        dataHistory: dataApprovalHistory?.history || {},
+        dataApprover: {
+          mutation: dataApprovalHistory?.dataApprover?.WARRANTY_MUTATION || []
+        },
+        dataHistory: {
+          mutation: dataApprovalHistory?.dataHistory?.WARRANTY_MUTATION || []
+        },
       });
     } else {
       setDataApprovalHistoryFix({});
@@ -142,11 +146,12 @@ const DetailWarranty = ({ data_detail }) => {
 
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
+    const keyData = Object.keys(data).filter(key => data[key].length > 0);
     return keyData.map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase().replace(/_/g, " "),
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
+
 
   const handleHistory = async (record) => {
     try {
@@ -259,11 +264,11 @@ const DetailWarranty = ({ data_detail }) => {
 
       <SectionCard title="MUTATION DATA INFORMATION">
         <div className="flex justify-end mb-4">
-          {!data_detail?.isApprover && data_detail?.approvalStatus !== WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL && (
-            <ButtonComponent type="submit" icon={<PlusOutlined />} onClick={handleCreate}>
-              Create
-            </ButtonComponent>
-          )}
+                {!data_detail?.isApprover && data_detail?.approvalStatus !== WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL && (
+                  <ButtonComponent type="submit" icon={<PlusOutlined />} onClick={() => setIsModalMutationOpen(true)}>
+                    Create
+                  </ButtonComponent>
+                )}
         </div>
         <Spin spinning={loadingMutation}>
           <TableRBI
@@ -272,7 +277,9 @@ const DetailWarranty = ({ data_detail }) => {
                 page, pageSize, null, null, "", () => {}, {}, 
                 handleEdit, handleDelete, handleHistory, 
                 handleApproveMutation, handleRejectMutation,
-                false, false, data_detail?.isApprover
+                false, false, data_detail?.isApprover,
+                dataMutation?.content || [],
+                data_detail?.id
               )}
 fixedColumns={{ left: ["no"], right: ["action"] }}
               current={page}
