@@ -31,40 +31,59 @@ const toFrontend = (job) => ({
   createdAt:     job.createdAt,
   updatedBy:     job.updatedBy,
   updatedAt:     job.updatedAt,
+  accessGroupId: job.accessGroupId,
 });
 
 /** Map frontend form values → CreateJobRequest */
 const toBackendCreate = (v) => ({
-  jobName:       v.name,
-  jobCode:       v.code,
-  jobType:       v.type,
-  description:   v.description,
-  execType:      v.executeType,
-  handlerClass:  v.handler,
-  taskQueueId:   v.taskQueueId ?? null,
-  timeoutSeconds: v.timeout  || 0,
-  maxRetry:      v.maxRetry  || 0,
-  retryPolicy:   v.retryPolicy ?? null,
-  moduleName:    v.module    ?? null,
-  defaultInput:  v.defaultInput ?? null,
-  inputSchema:   v.inputSchema  ?? null,
-  parentJobId:   v.parentJobId  ?? null,
+  jobName:        v.name,
+  jobCode:        v.code,
+  jobType:        v.type,
+  description:    v.description,
+  execType:       v.executeType,
+  handlerClass:   v.handler,
+  taskQueueId:    v.taskQueueId    ?? null,
+  timeoutSeconds: v.timeout        ?? null,
+  maxRetry:       v.maxRetry       || 0,
+  retryPolicy:    v.retryPolicy    ?? null,
+  moduleName:     v.module         ?? null,
+  defaultInput:   v.defaultInput   ?? null,
+  inputSchema:    v.inputSchema    ?? null,
+  parentJobId:    v.parentJobId    ?? null,
+  accessGroupId:  v.accessGroupId  ?? null,
+  notificationConfig: v.notificationSettings
+    ? {
+        inApp:     v.notificationSettings.showInDrawer    ?? false,
+        email:     v.notificationSettings.sendViaEmail    ?? false,
+        sms:       v.notificationSettings.sendViaSMS      ?? false,
+        whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
+      }
+    : null,
 });
 
 /** Map frontend form values → UpdateJobRequest */
 const toBackendUpdate = (v) => ({
-  jobName:       v.name,
-  jobType:       v.type,
-  description:   v.description,
-  execType:      v.executeType,
-  handlerClass:  v.handler,
-  taskQueueId:   v.taskQueueId ?? null,
-  timeoutSeconds: v.timeout  || 0,
-  maxRetry:      v.maxRetry  || 0,
-  retryPolicy:   v.retryPolicy ?? null,
-  moduleName:    v.module    ?? null,
-  defaultInput:  v.defaultInput ?? null,
-  inputSchema:   v.inputSchema  ?? null,
+  jobName:        v.name,
+  jobType:        v.type,
+  description:    v.description,
+  execType:       v.executeType,
+  handlerClass:   v.handler,
+  taskQueueId:    v.taskQueueId    ?? null,
+  timeoutSeconds: v.timeout        ?? null,
+  maxRetry:       v.maxRetry       || 0,
+  retryPolicy:    v.retryPolicy    ?? null,
+  moduleName:     v.module         ?? null,
+  defaultInput:   v.defaultInput   ?? null,
+  inputSchema:    v.inputSchema    ?? null,
+  accessGroupId:  v.accessGroupId  ?? null,
+  notificationConfig: v.notificationSettings
+    ? {
+        inApp:     v.notificationSettings.showInDrawer    ?? false,
+        email:     v.notificationSettings.sendViaEmail    ?? false,
+        sms:       v.notificationSettings.sendViaSMS      ?? false,
+        whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
+      }
+    : null,
 });
 
 const getHeaders = () => {

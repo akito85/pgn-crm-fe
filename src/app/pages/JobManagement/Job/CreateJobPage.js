@@ -13,6 +13,7 @@ import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
 import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
+import { getAllGroupAccessPaginate } from "../../../../redux/slices/system_setup/group_access";
 import { useGetJobByIdQuery, useCreateJobMutation, useUpdateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
 
 const { TextArea } = Input;
@@ -25,17 +26,26 @@ const INITIAL_PARAMETERS = [];
 const SAMPLE_JOB = {
   name:        "Daily Revenue Report",
   code:        "DAILY_REV_RPT",
-  type:        "scheduled",
+  type:        "SCHEDULE",
   description: "Generates a daily revenue summary report for all active billing accounts. Used for CRUD API testing.",
-  executeType: "process_data",
+  executeType: "SCRIPT",
   handler:     "com.nxs.jobrunr.handler.DailyRevenueReportHandler",
   taskQueueId: null,
   timeout:     3600,
   maxRetry:    3,
   retryPolicy: { backoffMultiplier: 2 },
   module:      "reporting",
-  accessGroup: "admin_sor_1",
+  accessGroupId: null,
 };
+
+const MODULE_OPTIONS = [
+  { value: 'payment',      label: 'Payment' },
+  { value: 'billing',      label: 'Billing' },
+  { value: 'collection',   label: 'Collection' },
+  { value: 'reporting',    label: 'Reporting' },
+  { value: 'notification', label: 'Notification' },
+  { value: 'account',      label: 'Account' },
+];
 
 const INITIAL_NOTIFICATIONS = {
   showInDrawer: false,
@@ -118,11 +128,14 @@ const CreateJobPage = () => {
     useSelector((state) => state.oracleMetadata);
   const { queues: taskQueues, loading: taskQueuesLoading } =
     useSelector((state) => state.taskQueue);
+  const { data: groupAccessData, loading: groupAccessLoading } = useSelector((state) => state.groupAccess);
+  const groupList = groupAccessData?.result ?? [];
   const [selectedSchema,    setSelectedSchema]    = useState(null);
   const [selectedProcedure, setSelectedProcedure] = useState(null);
 
   useEffect(() => {
     dispatch(fetchTaskQueues());
+    dispatch(getAllGroupAccessPaginate({ search: '', page: 0, pageSize: 200 }));
   }, [dispatch]);
 
   // Populate form when editing an existing job
@@ -164,10 +177,14 @@ const CreateJobPage = () => {
     if (currentJob.notificationSettings) {
       setNotificationSettings(currentJob.notificationSettings);
     }
+
+    if (currentJob.accessGroupId) {
+      form.setFieldValue('accessGroupId', currentJob.accessGroupId);
+    }
   }, [currentJob, isEditMode, dispatch]);
 
   useEffect(() => {
-    if (executeType === "stored_procedure") {
+    if (executeType === "STORED_PROCEDURE") {
       if (schemas.length === 0) dispatch(fetchSchemas());
       form.setFieldValue('handler', 'StoredProcedureJobHandler');
     } else {
@@ -205,7 +222,7 @@ const CreateJobPage = () => {
 
   const onFinish = async (values) => {
     try {
-      const isStoredProcedure = values.executeType === "stored_procedure";
+      const isStoredProcedure = values.executeType === "STORED_PROCEDURE";
       const payload = {
         ...values,
         handler: isStoredProcedure ? "StoredProcedureJobHandler" : values.handler,
@@ -298,10 +315,10 @@ const CreateJobPage = () => {
                 { required: true, message: "Please select type" },
               ]}>
                 <Select placeholder="Select type" style={fieldStyle}>
-                  <Option value="batch">Batch</Option>
-                  <Option value="realtime">Real-time</Option>
-                  <Option value="scheduled">Scheduled</Option>
-                  <Option value="triggered">Triggered</Option>
+                  <Option value="BATCH">Batch</Option>
+                  <Option value="SCHEDULE">Scheduled</Option>
+                  <Option value="QUEUE">Queue</Option>
+                  <Option value="WORKFLOW">Workflow</Option>
                 </Select>
               </Form.Item>
 
@@ -321,23 +338,21 @@ const CreateJobPage = () => {
                 { required: true, message: "Please select execute type" },
               ]}>
                 <Select placeholder="Select execute type" style={fieldStyle}>
-                  <Option value="generate_file">Generate File</Option>
-                  <Option value="process_data">Process Data</Option>
-                  <Option value="send_notification">Send Notification</Option>
-                  <Option value="update_database">Update Database</Option>
-                  <Option value="stored_procedure">Stored Procedure</Option>
+                  <Option value="STORED_PROCEDURE">Stored Procedure</Option>
+                  <Option value="SCRIPT">Script</Option>
+                  <Option value="CUSTOM_HANDLER">Custom Handler</Option>
                 </Select>
               </Form.Item>
 
               <Form.Item label="Handler" name="handler" {...formItemProps} rules={[
-                { required: executeType !== "stored_procedure", message: "Please input handler" },
+                { required: executeType !== "STORED_PROCEDURE", message: "Please input handler" },
                 { max: 100, message: "Maximum 100 characters" },
               ]}>
                 <Input
                   placeholder="e.g. com.nxs.jobhandler.genfile"
                   maxLength={100}
                   style={inputStyle}
-                  disabled={executeType === "stored_procedure"}
+                  disabled={executeType === "STORED_PROCEDURE"}
                 />
               </Form.Item>
 
@@ -364,7 +379,7 @@ const CreateJobPage = () => {
                 </Select>
               </Form.Item>
 
-              {executeType === "stored_procedure" && (<>
+              {executeType === "STORED_PROCEDURE" && (<>
                 <Form.Item label="Schema" name="spSchema" {...formItemProps} rules={[
                   { required: true, message: "Please select a schema" },
                 ]}>
@@ -460,23 +475,25 @@ const CreateJobPage = () => {
               <Form.Item label="Module" name="module" {...formItemProps} rules={[
                 { required: true, message: "Please select module" },
               ]}>
-                <Select placeholder="Select module" style={fieldStyle}>
-                  <Option value="payment">Payment</Option>
-                  <Option value="billing">Billing</Option>
-                  <Option value="collection">Collection</Option>
-                  <Option value="reporting">Reporting</Option>
-                  <Option value="notification">Notification</Option>
+                <Select placeholder="Select module" style={fieldStyle} allowClear>
+                  {MODULE_OPTIONS.map(m => (
+                    <Option key={m.value} value={m.value}>{m.label}</Option>
+                  ))}
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Access Group" name="accessGroup" {...formItemProps} rules={[
-                { required: true, message: "Please select access group" },
-              ]}>
-                <Select placeholder="Select access group" style={fieldStyle}>
-                  <Option value="admin_sor_1">Admin SOR 1</Option>
-                  <Option value="admin_sor_2">Admin SOR 2</Option>
-                  <Option value="operator">Operator</Option>
-                  <Option value="viewer">Viewer</Option>
+              <Form.Item label="Access Group" name="accessGroupId" {...formItemProps}>
+                <Select
+                  placeholder="Select access group"
+                  style={fieldStyle}
+                  allowClear
+                  loading={groupAccessLoading}
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {groupList.map(g => (
+                    <Option key={g.gaId} value={g.gaId}>{g.name}</Option>
+                  ))}
                 </Select>
               </Form.Item>
             </div>
@@ -508,7 +525,7 @@ const CreateJobPage = () => {
           <div className="flex flex-col gap-4">
             <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
               <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
-              <NotificationRow label="Show in Notification Drawer" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
+              <NotificationRow label="In App Message" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
               <NotificationRow label="Show as Alert"               checked={notificationSettings.showAlert}    onChange={updateNotification('showAlert')} />
             </section>
 
