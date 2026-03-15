@@ -28,6 +28,7 @@ import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import TableRBI from "../../../../../components/TableRBI";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import { WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 import { columnsHoldInfo } from "./Modal/Table/TableHoldInfo";
 import { columnsReleaseInfo } from "./Modal/Table/TableReleaseInfo";
 import { columnsRefundInfo } from "./Modal/Table/TableRefundInfo";
@@ -264,7 +265,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
     setActiveTabRefund(key);
   };
 
-  const isShowButton = data_detail?.isApprover || false;
+  const isShowButton = (data_detail?.isApprover || false) && data_detail?.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [approvalAction, setApprovalAction] = useState("");

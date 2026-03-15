@@ -23,7 +23,9 @@ export const columnMutation = (
   handleReject = () => {},
   isCreate = false,
   disabled = false,
-  isApprover = false
+  isApprover = false,
+  data = [],
+  mainWarrantyId = null
 ) => {
   const columns = [
     {
@@ -230,24 +232,37 @@ export const columnMutation = (
       fixed: "right",
       width: 120,
       render: (record) => {
-        if (!record.isApproval) return null;
+        const isGrouped = record.pwGroupId && mainWarrantyId && String(record.pwGroupId) === String(mainWarrantyId);
+        const showApproveReject = record.isApproval && !isGrouped;
 
         return (
-          <div className="w-full flex justify-center items-center py-1 gap-4">
-            <Tooltip title="Reject">
-              <div
+          <div className="w-full flex justify-center items-center py-1 gap-2">
+            {showApproveReject && (
+              <>
+                <Tooltip title="Reject">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => handleReject(record)}
+                  >
+                    <SVGIcon name="IconReject" width={20} color="#D90000" />
+                  </div>
+                </Tooltip>
+                <Tooltip title="Approve">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => handleApprove(record)}
+                  >
+                    <SVGIcon name="IconApprove" width={20} color="#ACC424" />
+                  </div>
+                </Tooltip>
+              </>
+            )}
+            <Tooltip title="Approval History">
+              <div 
                 className="cursor-pointer"
-                onClick={() => handleReject(record)}
+                onClick={() => handleHistory(record)}
               >
-                <SVGIcon name="IconReject" width={20} color="#D90000" />
-              </div>
-            </Tooltip>
-            <Tooltip title="Approve">
-              <div
-                className="cursor-pointer"
-                onClick={() => handleApprove(record)}
-              >
-                <SVGIcon name="IconApprove" width={20} color="#ACC424" />
+                <SVGIcon name="IconLogHistory" width={20} color="#000000" />
               </div>
             </Tooltip>
           </div>
@@ -255,6 +270,7 @@ export const columnMutation = (
       },
     });
   }
+
 
   return columns;
 };

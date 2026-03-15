@@ -695,11 +695,14 @@ export const submitApproval = createAsyncThunk(
   async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/payment-warranty/approval-submit";
-      const response = await receiptCollectionHttpService.createData(url, body);
+      
+      // Ensure we send a list (array) as required by backend V2
+      const payload = Array.isArray(body) ? body : [body];
+      const response = await receiptCollectionHttpService.createData(url, payload);
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+        description: `Your data has been ${payload[0]?.action === "APPROVE" ? "approved" : "rejected"
           }.`,
         return: true,
       };
