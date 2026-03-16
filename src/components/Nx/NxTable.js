@@ -733,6 +733,7 @@ const NxTable = ({
               border: 1px solid #C8CDD4;
               border-bottom: none;
               border-collapse: collapse;
+              border-spacing: 0;
             }
 
             #${idTable} .ant-table-container {
@@ -772,14 +773,24 @@ const NxTable = ({
             #${idTable} .ant-table-thead > tr > th {
               padding: 4px 8px !important;
               height: 30px !important;
-              border: 1px solid #C8CDD4 !important;
+              border-right: 1px solid #C8CDD4 !important;
+              border-bottom: 1px solid #C8CDD4 !important;
             }
 
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
               padding: 4px 8px !important;
               min-height: 30px;
               font-size: 12px;
-              border: 1px solid #C8CDD4 !important;
+              border-right: 1px solid #C8CDD4 !important;
+              border-bottom: 1px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
+              border-left: 1px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-thead > tr > th:first-child {
+              border-left: 1px solid #C8CDD4 !important;
             }
 
             #${idTable} .ant-table-measure-row > td {
