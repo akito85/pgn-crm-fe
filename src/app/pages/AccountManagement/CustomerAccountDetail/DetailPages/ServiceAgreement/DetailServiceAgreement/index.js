@@ -89,6 +89,14 @@ const DetailServiceAgreement = () => {
       )
     ) {
       setActiveTab("tosSubmission");
+    } else if (
+      path && (
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/create") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/view") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/update")
+      )
+    ) {
+      setActiveTab("warranty");
     } else {
       setActiveTab("saInformation");
     }
@@ -288,8 +296,16 @@ const DetailServiceAgreement = () => {
     {
       key: "warranty",
       label: "Warranty",
-      disabled: true,
-      children: <Warranty />,
+      disabled: statusSa !== "ACTIVE",
+      children: (
+        <Warranty
+          idSA={idSA}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={type}
+          dataDetailSA={data_detail}
+        />
+      ),
     },
     {
       key: "tosSubmission",

@@ -37,15 +37,15 @@ const initialState = {
   },
   list_invoiceRelation: [],
   pagination_invoiceRelation: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
   list_invoiceRelationApproval: [],
   pagination_invoiceRelationApproval: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
@@ -1156,8 +1156,8 @@ const financialInformationSlice = createSlice({
       }
 
       state.pagination_invoiceRelation = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -1168,8 +1168,8 @@ const financialInformationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelation = [];
         state.pagination_invoiceRelation = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -1201,8 +1201,8 @@ const financialInformationSlice = createSlice({
       }
 
       state.pagination_invoiceRelationApproval = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -1213,8 +1213,8 @@ const financialInformationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelationApproval = [];
         state.pagination_invoiceRelationApproval = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }

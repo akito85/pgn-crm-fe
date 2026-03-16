@@ -4,7 +4,7 @@ import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../../components/StatusComponent";
 
 const InvoiceRelationDetailInfo = ({
-  dataDetail = {},
+  detail = {},
 }) => {
   const {
     accountNumber,
@@ -13,7 +13,7 @@ const InvoiceRelationDetailInfo = ({
     endDate,
     status,
     description,
-  } = dataDetail;
+  } = detail;
 
   return (
     <NxBaseContainer border>

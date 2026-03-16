@@ -113,8 +113,9 @@ const GenerateInvoicePage = () => {
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  // eslint-disable-next-line no-unused-vars
+  const [sort, setSort] = useState("");
   const [dataTable, setDataTable] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [filterRowSelected, setFilterRowSelected] = useState([]);
@@ -298,6 +299,7 @@ const GenerateInvoicePage = () => {
       setCriteriaRows([]);
       setEditingKey("");
       setDraftRow({});
+      fetchBillingData();
     } else if (criteriaRows.length === 0) {
       const newKey = `row_${Date.now()}`;
       setCriteriaRows([{ key: newKey }]);
@@ -354,11 +356,13 @@ const GenerateInvoicePage = () => {
   };
 
   const saveCriteriaRow = () => {
-    setCriteriaRows((prev) =>
-      prev.map((r) => (r.key === editingKey ? { ...r, ...draftRow } : r)),
+    const newRows = criteriaRows.map((r) =>
+      r.key === editingKey ? { ...r, ...draftRow } : r,
     );
+    setCriteriaRows(newRows);
     setEditingKey("");
     setDraftRow({});
+    fetchBillingData(buildCriteriaParams(newRows));
   };
 
   const cancelCriteriaRow = () => {
@@ -389,6 +393,7 @@ const GenerateInvoicePage = () => {
     const ccIds = updated.map((r) => r.costCenter).filter(Boolean);
     if (segmentIds.length > 0) dispatch(getAccountGroupTypeInvoice(segmentIds));
     if (ccIds.length > 0) dispatch(getMeterReadingCodeInvoice(ccIds));
+    fetchBillingData(buildCriteriaParams(updated));
   };
 
   const getLabelById = (options, id) =>
@@ -547,9 +552,32 @@ const GenerateInvoicePage = () => {
     return cols;
   };
 
-  const fetchBillingData = () => {
+  const buildCriteriaParams = (rows) => {
+    const accountSegments = rows.map((r) => r.accountSegment).filter(Boolean);
+    const accountGroupTypes = rows
+      .map((r) => r.accountGroupType)
+      .filter(Boolean);
+    const costCenters = rows.map((r) => r.costCenter).filter(Boolean);
+    const meterReadingCodes = rows
+      .map((r) => r.meterReadingCode)
+      .filter(Boolean);
+    return {
+      ...(accountSegments.length && {
+        accountSegment: accountSegments.join(","),
+      }),
+      ...(accountGroupTypes.length && {
+        accountGroupType: accountGroupTypes.join(","),
+      }),
+      ...(costCenters.length && { costCenter: costCenters.join(",") }),
+      ...(meterReadingCodes.length && {
+        meterReadingCode: meterReadingCodes.join(","),
+      }),
+    };
+  };
+
+  const fetchBillingData = (params = {}) => {
     setLoading(true);
-    dispatch(getBillingApproval())
+    dispatch(getBillingApproval(params))
       .unwrap()
       .then(() => setLoading(false))
       .catch((err) => {
@@ -629,11 +657,6 @@ const GenerateInvoicePage = () => {
     form
       .validateFields()
       .then(() => {
-        if (selectedRowKeys.length === 0) {
-          message.warning("Please select at least one billing");
-          return;
-        }
-
         const savedRows = criteriaRows.filter((r) => r.key !== editingKey);
 
         const body = {
@@ -814,12 +837,7 @@ const GenerateInvoicePage = () => {
             Back
           </Button>
 
-          <Button
-            type="primary"
-            onClick={handleSubmit}
-            loading={loading}
-            disabled={selectedRowKeys.length === 0}
-          >
+          <Button type="primary" onClick={handleSubmit} loading={loading}>
             Save Changes
           </Button>
         </div>

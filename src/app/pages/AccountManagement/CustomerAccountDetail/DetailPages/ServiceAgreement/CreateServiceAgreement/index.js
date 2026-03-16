@@ -1627,7 +1627,7 @@ const CreateServiceAgreement = ({ saType }) => {
   let saInformationFields = [
     'serviceType',
     'serviceAgreementNumber',
-    'serviceAgreementDate',
+    'serviceAgreementType',
     'saReferenceNumber',
     'serviceAgreementDate',
     'startDate',
@@ -1642,6 +1642,22 @@ const CreateServiceAgreement = ({ saType }) => {
     saInformationFields = [
       ...saInformationFields,
       'saReferenceNumber'
+    ];
+  }
+
+  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
+  if (saInfoObj?.serviceAgreementType === 1170) {
+    saInformationFields = [
+      ...saInformationFields,
+      'pjbgType'
+    ];
+  }
+
+  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
+  if (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main" && !saInfoObj?.alreadyGasIn) {
+    saInformationFields = [
+      ...saInformationFields,
+      'gasInPlanDate'
     ];
   }
 
@@ -1704,18 +1720,12 @@ const CreateServiceAgreement = ({ saType }) => {
     form
       .validateFields(saDetailFields)
       .then((values) => {
-        console.log("Validation passed:", values);
         handleMandatory(setTabPagesSaDetail, listDataAttachment); // Removed incorrect call
 
 
-        console.log('dataPricing?.length', dataPricing?.length)
-        console.log('saDetailObj?.pricingRule', saDetailObj?.pricingRule)
-        console.log('hasValue(saDetailObj?.pricingRule)', hasValue(saDetailObj?.pricingRule))
         if (dataPricing?.length < 2 && !hasValue(saDetailObj?.pricingRule)) {
-          console.log('setModalSaDetail(true)')
           setModalSaDetail(true);
         } else {
-          console.log('seharusnya ga kesini')
           next();
           scrollRightHandler();
         }

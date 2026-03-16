@@ -168,7 +168,12 @@ const SaInformation = ({
       alreadyGasIn: e.target.checked,
       gasInPlanDate: null
     })
-    form.resetFields(["gasInPlanDate"])
+    form.setFieldsValue({ gasInPlanDate: undefined })
+    if (e.target.checked) {
+      setTimeout(() => {
+        form.setFields([{ name: 'gasInPlanDate', errors: [] }])
+      }, 0)
+    }
   };
 
   return (
@@ -205,7 +210,7 @@ const SaInformation = ({
             </Form.Item>
             {/* Check If Not SA Main  */}
             {saRecordData.isMain !== "Y" && (
-              <div className={"grid grid-cols-3 w-full gap-x-6"}>
+              <div>
                 <Form.Item
                   name={"serviceAgreementReferenceNumber"}
                   label={"Service Agreement Reference Number"}
@@ -346,8 +351,13 @@ const SaInformation = ({
                   getValueFromEvent={(e) => handleSaInformationObj(e, "gasInPlanDate")}
                   rules={[
                     {
-                      message: "Please input your Gas In Plan Date",
-                      required: (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true,
+                      validator: (_, value) => {
+                        const isRequired = (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true;
+                        if (isRequired && !value) {
+                          return Promise.reject("Please input Gas In Plan Date");
+                        }
+                        return Promise.resolve();
+                      },
                     },
                   ]}
                 >
@@ -402,7 +412,7 @@ const SaInformation = ({
                 },
               ]}
             >
-              <SelectComponent disabled={saRecordData.status === "ACTIVE" || saRecordData?.isMain == "N" ? true : false}>
+              <SelectComponent disabled={saRecordData.status === "ACTIVE"? true : false}>
                 {dataBillingCycle &&
                   dataBillingCycle?.map((item, index) => (
                     <Select.Option value={item.id} key={index}>
@@ -422,7 +432,7 @@ const SaInformation = ({
                 },
               ]}
             >
-              <SelectComponent disabled={saRecordData.status === "ACTIVE" || saRecordData?.isMain == "N" ? true : false}>
+              <SelectComponent disabled={saRecordData.status === "ACTIVE" ? true : false}>
                 {dataTermOfPayment &&
                   dataTermOfPayment?.map((item, index) => (
                     <Select.Option value={item.termsOfPaymentId} key={index}>
@@ -442,7 +452,7 @@ const SaInformation = ({
                 },
               ]}
             >
-              <SelectComponent disabled={saRecordData.status === "ACTIVE" || saRecordData?.isMain == "N" ? true : false}>
+              <SelectComponent disabled={saRecordData.status === "ACTIVE"? true : false}>
                 {dataInvoiceTemplate &&
                   dataInvoiceTemplate?.map((item, index) => (
                     <Select.Option value={item.id} key={index}>

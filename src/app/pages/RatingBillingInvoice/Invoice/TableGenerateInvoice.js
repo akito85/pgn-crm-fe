@@ -1,4 +1,3 @@
-import moment from "moment";
 import { hasValue, renderColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 

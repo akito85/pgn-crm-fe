@@ -292,6 +292,7 @@ export default function InfoDataRequirement({
           idTable={"DataRequirement"}
           usePagination={false}
           useSelect={true}
+          tableScrolled={{ y: 400, x: "max-content" }}
           dataMain={dataRequirement}
           columnMain={columnMain}
           showAdvanceSearch={false}
@@ -348,6 +349,7 @@ export default function InfoDataRequirement({
               idTable={"DataRequirementValues"}
               className="mt-4"
               usePagination={false}
+              tableScrolled={{ y: 400, x: "max-content" }}
               useSelect={false}
               loading={loading_data_requirement_values}
               dataMain={(data_data_requirement_values[selectedTypeValue] || []).map((item, idx) => ({

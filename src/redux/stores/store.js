@@ -60,6 +60,7 @@ import lateReducer from "../slices/receipt_collection/lateCharge";
 import accountServiceAgreementReducer from "../slices/account_management/detailAccount/serviceAgreementSlice";
 import postOfSalesReducer from "../slices/rating_billing_invoice/PointOfSales";
 import tosSubmissionReducer from "../slices/account_management/detailAccount/tosSubmissionSlice";
+import saWarrantyReducer from "../slices/account_management/detailAccount/warrantySlice";
 import invoiceReducer from "../slices/rating_billing_invoice/invoice";
 import attachmentReducer from "../slices/attachmentSlice";
 import locationReducer from "../slices/account_management/MasterData/location_slice";
@@ -90,10 +91,7 @@ import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
-import { tasklistSlice } from "../slices/tasklist/tasklistSlice";
-import prabillingLogReducer from "../slices/rating_billing_invoice/prabillingLog";
-import jobSlice from "../slices/system_setup/jobSlice";
-import loggingReducer from "../slices/system_setup/logging";
+import { tasklistSlice } from "../slices/tasklist/tasklistSlice";   
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
 import taxExemptionReducer from "../slices/rating_billing_invoice/taxExemption";
 import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
@@ -151,13 +149,11 @@ import taskQueueReducer from "../slices/job_management/taskQueueSlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 
 const reducer = combineReducers({
-  job: jobSlice,
   jobManagement: jobManagementReducer,
   jobGroup: jobGroupReducer,
   jobExecution: jobExecutionReducer,
   oracleMetadata: oracleMetadataReducer,
   taskQueue: taskQueueReducer,
-  logging: loggingReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -213,6 +209,7 @@ const reducer = combineReducers({
   distributionMedia: distributionMediaReducer,
   accountServiceAgreement: accountServiceAgreementReducer,
   tosSubmission: tosSubmissionReducer,
+  saWarranty: saWarrantyReducer,
   rawMaterialSource: rawMaterialSourceReducer,
   productDistribution: productDistributionReducer,
   accountGasUtilization: accountGasUtilizationReducer,
@@ -240,7 +237,6 @@ const reducer = combineReducers({
   globalProp: globalPropReducer,
 
   // RBI reducer
-  prabillingLog: prabillingLogReducer,
   rbi_calculation: calculationReducer,
   rbi_prabilling: prabillingReducer,
   monitoring: monitoringReducer,
