@@ -515,7 +515,7 @@ const CreateJobPage = () => {
               dataSource={parameters}
               onDataChange={setParameters}
               columns={PARAMETER_COLUMNS}
-              emptyText='No parameters. Click "Add" to create one.'
+              emptyText='No parameters defined. Click Create to add one.'
             />
           </NxBaseContainer>
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { Table, Input, InputNumber, Select } from "antd";
+import { Table, Input, InputNumber, Select, Empty } from "antd";
 
 const { Option } = Select;
 
@@ -57,7 +57,7 @@ const NxTableInlineEdit = ({
   rowKey = "key",
   loading = false,
   showDelete = true,
-  emptyText = 'No data. Click "Add" to create a new row.',
+  emptyText = 'No data. Click Create to add a new row.',
 }) => {
   const [editingKey, setEditingKey] = useState(null);
   const [editingValues, setEditingValues] = useState({});
@@ -268,12 +268,14 @@ const NxTableInlineEdit = ({
     <div id={idTable}>
       <style>{`
         #${idTable} .ant-table {
-          border-radius: 8px;
+          border-radius: 8px 8px 0 0;
           overflow: hidden;
+          border: 1px solid #C8CDD4;
+          border-bottom: none;
         }
 
         #${idTable} .ant-table-container {
-          border-radius: 8px;
+          border-radius: 8px 8px 0 0;
           overflow: hidden;
           border: none;
         }
@@ -305,14 +307,6 @@ const NxTableInlineEdit = ({
 
         #${idTable} .ant-table-tbody > tr.nx-row-editing > td {
           padding: 0 8px !important;
-        }
-
-        #${idTable} .ant-table-tbody > tr:last-child > td:first-child {
-          border-end-start-radius: 8px;
-        }
-
-        #${idTable} .ant-table-tbody > tr:last-child > td:last-child {
-          border-end-end-radius: 8px;
         }
 
         #${idTable} .ant-table-tbody > tr:hover > td {
@@ -349,10 +343,15 @@ const NxTableInlineEdit = ({
         pagination={false}
         size="small"
         loading={loading}
-        locale={{ emptyText }}
+        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} /> }}
         style={{ margin: 0 }}
         rowClassName={(record) => isEditing(record) ? "nx-row-editing" : ""}
       />
+      <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", width: "100%" }}>
+        <span style={{ fontSize: "12px", color: "#6B7280" }}>
+          Showing {dataSource.length} of {dataSource.length} entries
+        </span>
+      </div>
     </div>
   );
 };
