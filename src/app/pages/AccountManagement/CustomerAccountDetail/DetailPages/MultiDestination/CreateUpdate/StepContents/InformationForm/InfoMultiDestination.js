@@ -427,7 +427,7 @@ export default function InfoMultiDestination({
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        header={"CHOOSE ACCOUNT"}
+        title={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}
         footer={[

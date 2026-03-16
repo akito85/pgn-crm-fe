@@ -141,7 +141,7 @@ const RawMaterialSourceDetail = ({ data_detail, openModal, closeModal }) => {
       isOpen={openModal}
       handleCancel={closeModal}
       type="detail"
-      header="Detail Raw Material Source"
+      title="DETAIL RAW MATERIAL SOURCE"
       width={800}
       footer={
         <ButtonComponent type={"default"} onClick={closeModal}>

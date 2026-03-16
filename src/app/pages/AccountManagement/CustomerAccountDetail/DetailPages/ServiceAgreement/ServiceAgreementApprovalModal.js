@@ -345,7 +345,7 @@ const ServiceAgreementApprovalModal = ({
             <NxModal
                 isOpen={isOpen}
                 type={"confirmation"}
-                header="Approval Service Agreement"
+                title="APPROVAL SERVICE AGREEMENT"
                 handleCancel={handleCancelForm}
                 onFinish={handleSave}
                 width={1000}

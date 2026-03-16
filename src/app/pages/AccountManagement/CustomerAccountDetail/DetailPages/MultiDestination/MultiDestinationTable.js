@@ -35,8 +35,6 @@ const MultiDestinationTable = ({
   const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
     handleView: (id, subjectId, objectId) => navigate(
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION :
@@ -86,7 +84,6 @@ const MultiDestinationTable = ({
     handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
     handleInactivate: handleInactivateModal,
-    idKey: "idMd",
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({

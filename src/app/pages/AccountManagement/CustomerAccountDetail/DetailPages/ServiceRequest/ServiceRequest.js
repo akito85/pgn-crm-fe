@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { Spin } from "antd";
 import ServiceRequestTable from "./ServiceRequestTable";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
-import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequest";
+import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NotFound from "../../../../../NotFound";
@@ -14,7 +14,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const location = useLocation();
   const searchInput = useRef(null);
 
-  const { serviceRequests, pagination, loading } = useSelector(
+  const { serviceRequests, pagination, loadingList } = useSelector(
     (state) => state.serviceRequest
   );
   const { access_account } = useSelector((state) => state.accountManagement);
@@ -30,21 +30,16 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [tempFilters, setTempFilters] = useState([]);
 
-  // Derived states
-  const currentData = useMemo(() => serviceRequests || [], [serviceRequests]);
-  const currentPagination = pagination;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
+  const currentData = useMemo(() => {
+    if (!Array.isArray(serviceRequests)) return [];
+    return serviceRequests.map((item, index) => ({
       ...item,
-      key: `${item.id}-${index}`,
+      key: `${item.id ?? "sr"}-${index}`,
     }));
-  }, [currentData]);
+  }, [serviceRequests]);
+
+  const hasMore = currentData.length < (pagination?.totalElements || 0);
 
   const isAccessGranted = access_account?.isGranted === true;
 
@@ -64,23 +59,16 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   // Fetch data when filters change
   useEffect(() => {
     if (isAccessGranted) {
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        inputFields: tempFilters,
-      };
-
       dispatch(
         getFilteredServiceRequests({
           idAccount,
-          body,
+          body: { page: 1, size: loadMoreSize, sort, searchs: search },
           isLoadMore: false,
         })
       );
+      setPage(1);
     }
-  }, [sort, search, tempFilters, isAccessGranted]);
+  }, [sort, search, isAccessGranted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -111,26 +99,18 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = currentPagination?.totalPages || 0;
+    const totalPages = pagination?.totalPages || 0;
 
     if (nextPage <= totalPages) {
-      const body = {
-        page: nextPage,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        inputFields: tempFilters,
-      };
-
       await dispatch(
         getFilteredServiceRequests({
           idAccount,
-          body,
+          body: { page: nextPage, size: loadMoreSize, sort, searchs: search },
           isLoadMore: true,
         })
       );
+      setPage(nextPage);
     }
-    setPage(nextPage);
   };
 
   return (
@@ -145,10 +125,10 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
         <NxCardContainer header={"SERVICE REQUEST"}>
           <NxBaseContainer border>
             <ServiceRequestTable
-              data={dataSourceWithKeys}
+              data={currentData}
               idAccount={idAccount}
               idCustomer={idCustomer}
-              totalElement={currentPagination?.totalElements || 0}
+              totalElement={pagination?.totalElements || 0}
               page={page}
               onSort={onSort}
               handleApproval={setShowApprovalModal}
@@ -160,7 +140,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
               searchedColumn={searchedColumn}
               searchInput={searchInput}
               handleSearch={handleSearch}
-              loading={loading}
+              loading={loadingList}
             />
           </NxBaseContainer>
         </NxCardContainer>

@@ -23,6 +23,7 @@ import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccoun
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
 const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
   const id = idAccount;
@@ -371,35 +372,33 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
   return (
     <>
       <Spin spinning={loading}>
-        <NxCardContainer
-          header="SERVICE AGREEMENT LIST"
-          actionElement={
-            <div className="flex gap-[20px]">
+        <NxCardContainer header="SERVICE AGREEMENT LIST">
+          <NxBaseContainer border>
+            <div className="flex gap-4">
               <ToolbarAccount items={toolbarActions} advancedAccess={filteredArray} />
             </div>
-          }
-        >
-          <ServiceAgreementTable
-            data={dataSourceWithKeys}
-            idAccount={id}
-            idCustomer={idCustomer}
-            type={type}
-            totalElement={totalElements}
-            page={page}
-            onSort={onSort}
-            handleOpenDeleteDraft={handleOpenDeleteDraft}
-            handleOpenInactivate={handleOpenInactivate}
-            handleApprovalHistory={handleApprovalHistory}
-            handleLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            searchText={searchText}
-            search={search}
-            searchedColumn={searchedColumn}
-            searchInput={searchInput}
-            handleSearch={handleSearch}
-            loading={loading}
-            filteredArray={filteredArray}
-          />
+            <ServiceAgreementTable
+              data={dataSourceWithKeys}
+              idAccount={id}
+              idCustomer={idCustomer}
+              type={type}
+              totalElement={totalElements}
+              page={page}
+              onSort={onSort}
+              handleOpenDeleteDraft={handleOpenDeleteDraft}
+              handleOpenInactivate={handleOpenInactivate}
+              handleApprovalHistory={handleApprovalHistory}
+              handleLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              searchText={searchText}
+              search={search}
+              searchedColumn={searchedColumn}
+              searchInput={searchInput}
+              handleSearch={handleSearch}
+              loading={loading}
+              filteredArray={filteredArray}
+            />
+          </NxBaseContainer>
         </NxCardContainer>
       </Spin>
 

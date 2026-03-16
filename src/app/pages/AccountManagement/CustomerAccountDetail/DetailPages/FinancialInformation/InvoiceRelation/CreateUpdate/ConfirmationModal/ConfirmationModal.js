@@ -44,18 +44,18 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION INVOICE RELATION"}
+      title={"CONFIRMATION INVOICE RELATION"}
       type={"confirmation"}
       hidePadding={{
         top: true,
       }}
       loading={loading}
       footer={[
-        <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
+        <div className={"flex justify-between"} key={`footer-1`}>
           <Button type={"menu"} disabled={loading_createUpdateIr} onClick={() => handleCancel()}>
             Cancel
           </Button>
-          <div className="flex gap-x-2">
+          <div className="flex">
             <Button disabled={loading_createUpdateIr || activeTab < 1} type={"menu"} onClick={() => handleChangeTab("prev")}>
               Previous
             </Button>

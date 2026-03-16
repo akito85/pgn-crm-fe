@@ -1,42 +1,24 @@
-import { Form, Input, InputNumber, Select, Table, Tooltip } from "antd";
-import React, { useEffect, useRef, useState } from "react";
-import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
-import { getColumnSearchPropsCriteria } from "../../columnTableCriteria";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
-import SVGIcon from "../../../../../../assets/Icon/index";
+import { Form, Input, InputNumber, Select, Tooltip } from "antd";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import Highlighter from "react-highlight-words";
+
+import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import SVGIcon from "../../../../../../assets/Icon/index";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 
-const onFilter = (dataIndex, value, record) => {
-  const tempSearchText = value.toLowerCase();
-  switch (dataIndex) {
-    case "attribute":
-    case "unit":
-    case "fromItem":
-      return record[dataIndex]?.label.toLowerCase().includes(tempSearchText);
-    default:
-      return record[dataIndex]
-        ?.toString()
-        .toLowerCase()
-        .includes(tempSearchText);
+const getComparableText = (value) => {
+  if (value === null || value === undefined) {
+    return "";
   }
-};
 
-const sorter = (fieldSort, a, b) => {
-  const handleDataSort = (obj) => {
-    switch (fieldSort) {
-      case "attribute":
-      case "unit":
-      case "fromItem":
-        return obj[fieldSort]?.label.toString().toLowerCase();
-      default:
-        return obj[fieldSort]?.toString().toLowerCase();
-    }
-  };
-  let fa = handleDataSort(a);
-  let fb = handleDataSort(b);
-  return fa.localeCompare(fb);
+  if (typeof value === "object") {
+    return (value.label || value.value || "").toString().toLowerCase();
+  }
+
+  return value.toString().toLowerCase();
 };
 
 const EditableCell = ({
@@ -45,39 +27,34 @@ const EditableCell = ({
   title,
   inputType,
   record,
-  index,
   children,
   options = [],
   required,
   disabled,
   dependDataIndex,
   dataEditRecord,
-  urlIndex,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
   const key = record?.key || 0;
-  const dataDepend = dependDataIndex
-    ? dataEditRecord[key + dependDataIndex]
-    : "";
+  const dataDepend = dependDataIndex ? dataEditRecord[key + dependDataIndex] : "";
 
   const rules = () => {
-    let rule = [];
+    const rule = [];
     if (required) {
       rule.push({
         ...required,
         message: `${required.message} ${title}!`,
       });
     }
+
     return rule.length !== 0 ? rule : undefined;
   };
-
-  const defaultDisable = disabled || false;
 
   const filterOption = (input, option) =>
     option.props.children.toLowerCase().includes(input.toLowerCase());
 
-  const getInputNode = (inputType) => {
+  const getInputNode = () => {
     switch (inputType) {
       case "select":
         return (
@@ -86,7 +63,7 @@ const EditableCell = ({
             optionFilterProp="children"
             filterOption={filterOption}
             labelInValue
-            disabled={dependDataIndex ? !dataDepend : defaultDisable}
+            disabled={dependDataIndex ? !dataDepend : disabled}
           >
             {options.map((option) => (
               <Select.Option key={option.value} value={option.value}>
@@ -96,28 +73,15 @@ const EditableCell = ({
           </Select>
         );
       case "number":
-        return (
-          <InputNumber
-            type={"number"}
-            controls={false}
-            style={{
-              width: "100%",
-            }}
-          />
-        );
+        return <InputNumber type="number" controls={false} style={{ width: "100%" }} />;
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
       default:
         return <InputComponent />;
     }
   };
-  const inputNode = getInputNode(inputType);
 
-  if (
-    dataIndex === "operation" ||
-    dataIndex === "no" ||
-    dataIndex === "status"
-  ) {
+  if (dataIndex === "operation" || dataIndex === "no") {
     return (
       <td {...restProps}>
         <div>{children}</div>
@@ -130,16 +94,12 @@ const EditableCell = ({
       {editing ? (
         <Form.Item
           name={dataIndex}
-          style={{
-            margin: 0,
-          }}
-          valuePropName={"value"}
+          style={{ margin: 0 }}
+          valuePropName="value"
           rules={rules()}
-          getValueFromEvent={(value) =>
-            handleEditDataRecord(value, key, dataIndex)
-          }
+          getValueFromEvent={(value) => handleEditDataRecord(value, key, dataIndex)}
         >
-          {inputNode}
+          {getInputNode()}
         </Form.Item>
       ) : (
         children
@@ -147,76 +107,105 @@ const EditableCell = ({
     </td>
   );
 };
+
 const TableDetailTos = ({
   type,
-  dispatch = () => {},
   dataTable = [],
   updateTable = () => {},
   storedData = false,
   setStoredData = () => {},
+  editDetail = true,
 }) => {
   const searchInput = useRef(null);
   const [formTable] = Form.useForm();
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [displayData, setDisplayData] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
   const [editingKey, setEditingKey] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [editDataRecord, setEditDataRecord] = useState({});
+  const [search, setSearch] = useState({});
+  const [fieldSort, setFieldSort] = useState("");
+  const [orderSort, setOrderSort] = useState("");
   const [statusAction, setStatusAction] = useState("");
-  const isEditing = (record) => record.key === editingKey;
-  const [totalData, setTotalData] = useState(0);
-  const {
-    dataListTosAttribute = [],
-    dataListUnitTos = [],
-    dataListFromItem = [],
-  } = useSelector((state) => state.product);
+  const [editDataRecord, setEditDataRecord] = useState({});
+  const [fixedColumns, setFixedColumns] = useState({ right: ["operation"], left: [] });
 
-  useEffect(() => {
-    setTotalData(dataTable.length);
-  }, [dataTable]);
+  const { dataListTosAttribute = [], dataListUnitTos = [], dataListFromItem = [] } = useSelector(
+    (state) => state.product
+  );
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const isEditing = useCallback((record) => record.key === editingKey, [editingKey]);
+
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
+    const nextValue = selectedKeys[0];
+    setSearchText(nextValue);
+    setSearchedColumn(nextValue ? dataIndex : "");
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: nextValue,
+    }));
+    setLoadedCount(20);
+  }, []);
+
+  const handleSort = useCallback((_, __, sorter) => {
+    if (!sorter?.order) {
+      setFieldSort("");
+      setOrderSort("");
+      setLoadedCount(20);
+      return;
     }
-    setSearchedColumn(tempSearchColumn);
-  };
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
+
+    setFieldSort(sorter.field);
+    setOrderSort(sorter.order);
+    setLoadedCount(20);
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    if (!hasMore) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      setLoadedCount((prevValue) => prevValue + 20);
+      resolve();
+    });
+  }, [hasMore]);
+
   const handleEditDataRecord = (data, key, index) => {
     const keyName = key + index;
     const value = index === "description" ? data.target.value : data;
-    setEditDataRecord((prevState) => {
-      return {
-        ...prevState,
-        [keyName]: value,
-      };
-    });
+
+    setEditDataRecord((prevState) => ({
+      ...prevState,
+      [keyName]: value,
+    }));
+
     return value;
   };
-  const edit = (record, field) => {
+
+  const edit = useCallback((record) => {
     setStoredData(true);
     setStatusAction("edit");
     formTable.setFieldsValue(record);
     setEditingKey(record.key);
-  };
-  const cancel = (record) => {
+  }, [formTable, setStoredData]);
+
+  const deleteRow = useCallback((record) => {
+    updateTable((prevState) => prevState.filter((item) => item.key !== record.key));
+  }, [updateTable]);
+
+  const cancel = useCallback((record) => {
     setStoredData(false);
     setEditingKey("");
     if (statusAction === "add") {
       deleteRow(record);
     }
     setStatusAction("");
-  };
+  }, [deleteRow, setStoredData, statusAction]);
 
-  const save = async (key) => {
+  const save = useCallback(async (key) => {
     try {
       const row = await formTable.validateFields();
       const newData = [...dataTable];
@@ -237,277 +226,255 @@ const TableDetailTos = ({
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
-  };
+  }, [dataTable, formTable, setStoredData, updateTable]);
 
-  const deleteRow = (record) => {
-    updateTable((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
-    );
-  };
+  const processedData = useMemo(() => {
+    let tempData = [...dataTable];
 
-  const columns = () => {
-    const temp = [
+    Object.entries(search).forEach(([searchKey, searchValue]) => {
+      if (!searchValue && searchValue !== 0) {
+        return;
+      }
+
+      const normalizedValue = searchValue.toString().toLowerCase();
+      tempData = tempData.filter((item) => {
+        const recordValue = getComparableText(item[searchKey]);
+        return recordValue.includes(normalizedValue);
+      });
+    });
+
+    if (fieldSort && orderSort) {
+      tempData.sort((a, b) => {
+        const valueA = getComparableText(a[fieldSort]);
+        const valueB = getComparableText(b[fieldSort]);
+        if (orderSort === "ascend") {
+          return valueA.localeCompare(valueB, undefined, { numeric: true });
+        }
+        return valueB.localeCompare(valueA, undefined, { numeric: true });
+      });
+    }
+
+    return tempData;
+  }, [dataTable, fieldSort, orderSort, search]);
+
+  useEffect(() => {
+    setDisplayData(processedData.slice(0, loadedCount));
+    setHasMore(loadedCount < processedData.length);
+  }, [loadedCount, processedData]);
+
+  const baseColumns = useMemo(() => {
+    const isPreview = type === "preview";
+
+    const columns = [
       {
         title: "NO",
         width: 60,
         dataIndex: "no",
+        key: "no",
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         title: "ATTRIBUTE",
         width: 240,
         dataIndex: "attribute",
-        onFilter: (value, record) => onFilter("attribute", value, record),
-        sorter: (a, b) => sorter("attribute", a, b),
+        key: "attribute",
+        sorter: true,
         options: dataListTosAttribute,
         inputType: "select",
         disabled: true,
         required: { required: true, message: "Please input your" },
-        ...getColumnSearchPropsCriteria(
+        ...getColumnSearchPropsUseFilteredValueFE(
+          search,
           "attribute",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true,
+          "input"
         ),
+        render: (value) => value?.label || "-",
       },
       {
         title: "VALUE",
         width: 240,
         dataIndex: "value",
-        onFilter: (value, record) => onFilter("value", value, record),
-        sorter: (a, b) => sorter("value", a, b),
+        key: "value",
+        sorter: true,
         inputType: "number",
         align: "right",
-        ...getColumnSearchPropsPaging(
+        ...getColumnSearchPropsUseFilteredValueFE(
+          search,
           "value",
           searchInput,
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
+          "input"
         ),
-        render: (text) =>
-          searchedColumn === "value" ? (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text === 0 ? text.toString() : text || ""}
-            />
-          ) : (
-            text
-          ),
       },
       {
         title: "UNIT",
         width: 240,
         dataIndex: "unit",
-        onFilter: (value, record) => onFilter("unit", value, record),
-        sorter: (a, b) => sorter("unit", a, b),
+        key: "unit",
+        sorter: true,
         options: dataListUnitTos,
         inputType: "select",
         dependDataIndex: "attribute",
-        ...getColumnSearchPropsCriteria(
+        ...getColumnSearchPropsUseFilteredValueFE(
+          search,
           "unit",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true,
+          "input"
         ),
+        render: (value) => value?.label || "-",
       },
       {
         title: "FROM ITEM",
         width: 240,
         dataIndex: "fromItem",
-        onFilter: (value, record) => onFilter("fromItem", value, record),
-        sorter: (a, b) => sorter("fromItem", a, b),
+        key: "fromItem",
+        sorter: true,
         options: dataListFromItem,
         inputType: "select",
-        ...getColumnSearchPropsCriteria(
+        ...getColumnSearchPropsUseFilteredValueFE(
+          search,
           "fromItem",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
+          true,
+          "input"
         ),
+        render: (value) => value?.label || "-",
       },
       {
         title: "ACTION",
-        width: 240,
-        fixed: "right",
+        width: 180,
+        key: "operation",
         dataIndex: "operation",
         render: (_, record) => {
-          const editable = record.key === editingKey;
+          const editable = isEditing(record);
+          const isConfigurable = record?.attribute?.label === "Configurable";
+          const disableEdit = !editDetail || isConfigurable || !!editingKey;
+
+          if (editable) {
+            return (
+              <div className="flex w-full justify-center my-1 gap-2">
+                <ButtonComponent onClick={() => cancel(record)} type="default">
+                  Cancel
+                </ButtonComponent>
+                <ButtonComponent onClick={() => save(record.key)} type="submit">
+                  Save
+                </ButtonComponent>
+              </div>
+            );
+          }
+
           return (
-            <div className="flex w-full justify-center my-3 gap-2">
-              {editable ? (
-                <>
-                  <ButtonComponent
-                    onClick={() => cancel(record)}
-                    type="default"
-                  >
-                    Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
-                    onClick={() => save(record.key)}
-                    type="submit"
-                  >
-                    Save
-                  </ButtonComponent>
-                </>
-              ) : (
-                <>
-                  <Tooltip title="Edit">
-                    <div
-                      className={`flex justify-center${
-                        editingKey ? " cursor-not-allowed" : ""
-                      }`}
-                    >
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        width={24}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </div>
-                  </Tooltip>
-                  {/* <Tooltip title="Delete">
-                    <div
-                      className={`flex justify-center${
-                        record.typeData === "exist" ? " cursor-not-allowed" : ""
-                      }`}
-                    >
-                      <SVGIcon
-                        name="IconDelete"
-                        color={
-                          record.typeData !== "exist" ? "#D90000" : "#8D91A0"
-                        }
-                        width={24}
-                        className={
-                          record.typeData === "exist" ? "disabled" : undefined
-                        }
-                        onClick={
-                          record.typeData !== "exist"
-                            ? () => deleteRow(record)
-                            : undefined
-                        }
-                      />
-                    </div>
-                  </Tooltip> */}
-                </>
-              )}
+            <div className="flex w-full justify-center my-1 gap-2">
+              <Tooltip title="Edit">
+                <div className={`flex justify-center${disableEdit ? " cursor-not-allowed" : ""}`}>
+                  <SVGIcon
+                    name="IconEdit"
+                    color={disableEdit ? "#8D91A0" : "#ACC424"}
+                    width={24}
+                    onClick={!disableEdit ? () => edit(record) : undefined}
+                  />
+                </div>
+              </Tooltip>
             </div>
           );
         },
       },
     ];
-    return type !== "preview"
-      ? temp
-      : temp.filter((col) => col.title !== "ACTION");
-  };
 
-  const [optionSelectedCol, setOptionSelectedCol] = useState([]);
+    return isPreview ? columns.filter((column) => column.key !== "operation") : columns;
+  }, [
+    dataListFromItem,
+    dataListTosAttribute,
+    dataListUnitTos,
+    editDetail,
+    editingKey,
+    handleSearch,
+    isEditing,
+    search,
+    searchedColumn,
+    searchText,
+    type,
+    cancel,
+    edit,
+    save,
+  ]);
 
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
+  const allColumns = useMemo(() => {
+    const mappedColumns = baseColumns.map((column) => ({
+      ...column,
+      key: column.key || column.dataIndex || column.title,
+    }));
 
-  const filterColumn = (dataColumn) => {
-    return dataColumn.filter((col) => {
-      return !optionSelectedCol.includes(col.title);
-    });
-  };
+    return nxApplyFixedColumns(mappedColumns, fixedColumns);
+  }, [baseColumns, fixedColumns]);
 
-  const onChange = (_, __, ___, extra) => {
-    setTotalData(extra?.currentDataSource?.length || 0);
-  };
+  const columnDefinitions = useMemo(
+    () =>
+      allColumns.map((column) => ({
+        key: column.key,
+        title: column.title,
+      })),
+    [allColumns]
+  );
 
   return (
-    <div className={"relative flex flex-col w-full"}>
-      <div
-        className={`${
-          totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-        } w-1/4 flex`}
-      >
-        <Select
-          mode="multiple"
-          placeholder="Show All Column"
-          className={"w-full"}
-          maxTagCount={3}
-          onChange={handleDisplayColumn}
-        >
-          {columns()
-            .map((col) => (
-              <Select.Option
-                key={col.title}
-                value={col.title}
-                disabled={
-                  optionSelectedCol.length > 3
-                    ? optionSelectedCol.includes(col.title)
-                      ? false
-                      : true
-                    : false
-                }
-              >
-                {col.title}
-              </Select.Option>
-            ))
-            .splice(1)}
-        </Select>
-      </div>
-      <Form form={formTable} component={false}>
-        <Table
-          dataSource={dataTable}
-          columns={filterColumn(
-            columns().map((col) => ({
-              ...col,
-              onCell: (record) => ({
-                record,
-                inputType: col.inputType,
-                dataIndex: col.dataIndex,
-                title: col.title,
-                editing: isEditing(record),
-                indexValue: col.indexValue,
-                dependDataIndex: col.dependDataIndex,
-                urlIndex: col.url,
-                options: col.options,
-                required: col.required,
-                dataEditRecord: editDataRecord,
-                disabled: col.disabled,
-                handleEditDataRecord: handleEditDataRecord,
-              }),
-            }))
-          )}
-          pagination={{
-            position: ["topRight"],
-            current: page,
-            pageSize: pageSize,
-            onChange: handleChangeSize,
-            className: "pr-1 w-3/4",
-            style: { marginLeft: "auto", marginRight: 0 },
-            showSizeChanger: true,
-            showTotal: (total, range) =>
-              `Showing ${range[0]} to ${range[1]} of ${total} records`,
-          }}
-          rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-          scroll={{
-            x: 1500,
-            y: 300,
-          }}
-          components={{
-            body: {
-              cell: EditableCell,
-            },
-          }}
-          onChange={onChange}
-        />
-      </Form>
-    </div>
+    <Form form={formTable} component={false}>
+      <NxTable
+        idTable="tos-detail-table"
+        dataSource={displayData}
+        totalData={processedData.length}
+        columns={allColumns.map((column) => ({
+          ...column,
+          onCell: (record) => ({
+            record,
+            inputType: column.inputType,
+            dataIndex: column.dataIndex,
+            title: column.title,
+            editing: isEditing(record),
+            dependDataIndex: column.dependDataIndex,
+            options: column.options,
+            required: column.required,
+            dataEditRecord: editDataRecord,
+            disabled: column.disabled,
+            handleEditDataRecord,
+          }),
+          shouldCellUpdate: (record, prevRecord) => record !== prevRecord,
+        }))}
+        columnDefinitions={columnDefinitions}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        onSort={handleSort}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        tableScrolled={{ x: "max-content", y: 300 }}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        components={{
+          body: {
+            cell: EditableCell,
+          },
+        }}
+      />
+    </Form>
   );
 };
 
