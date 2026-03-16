@@ -679,17 +679,17 @@ const NxTable = ({
             #${idTable} .ant-table-body {
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
-              padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "8px"};
+              padding-bottom: 0;
               ${(useInfiniteScroll || usePagination) ? "border-left: 0.5px solid #C8CDD4; border-right: 0.5px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
               #${idTable} .ant-table-body {
-                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "12px"};
+                padding-bottom: 0;
               }
 
               #${idTable} .ant-table-content {
-                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "4px"};
+                padding-bottom: 0;
               }
             }
 
