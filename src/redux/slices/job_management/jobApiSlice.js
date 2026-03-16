@@ -42,12 +42,20 @@ const toFrontend = (job) => {
     code:          job.jobCode,
     type:          job.jobType,
     description:   job.description,
+    desc:          job.description,   // alias used by table columns
     executeType:   job.execType,
+    execType:      job.execType,      // alias used by child table columns
     handler:       job.handlerClass,
+    handlerClass:  job.handlerClass,  // alias used by child table columns
     taskQueueId:   job.taskQueueId,
     taskQueueName: job.taskQueueName,
     timeout:       job.timeoutSeconds,
     maxRetry:      job.maxRetry,
+    createdDate:   job.createdAt,     // alias used by table columns
+    updatedDate:   job.updatedAt,     // alias used by table columns
+    module:        job.moduleName,    // alias used by table columns
+    accessGroup:   job.accessGroupId ? String(job.accessGroupId) : null,
+    parent:        job.parentJobId   ? String(job.parentJobId)   : null,
     retryPolicy:   job.retryPolicy,
     module:        job.moduleName,
     defaultInput:  job.defaultInput,
