@@ -87,7 +87,6 @@ const InvoiceRelationDetail = ({
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
-
   const routes = [
     {
       path: "",

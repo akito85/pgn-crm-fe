@@ -144,11 +144,16 @@ import billingItemCategoryReducer from "../slices/system_setup/master_data/billi
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
+import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
+import taskQueueReducer from "../slices/job_management/taskQueueSlice";
+import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
   jobGroup: jobGroupReducer,
   jobExecution: jobExecutionReducer,
+  oracleMetadata: oracleMetadataReducer,
+  taskQueue: taskQueueReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -308,6 +313,9 @@ const reducer = combineReducers({
   // tasklist
   [tasklistSlice.reducerPath]: tasklistSlice.reducer,
 
+  // job management API (RTK Query)
+  [jobApiSlice.reducerPath]: jobApiSlice.reducer,
+
   // debt and collection
   gracePeriod: gracePeriodReducer,
   activityName: activityNameReducer,
@@ -332,7 +340,8 @@ const store = configureStore({
     getDefaultMiddleware()
       .concat(reportCustomerSlice.middleware)
       .concat(reportCustomerAgreementSlice.middleware)
-      .concat(tasklistSlice.middleware),
+      .concat(tasklistSlice.middleware)
+      .concat(jobApiSlice.middleware),
 });
 
 setupListeners(store.dispatch);

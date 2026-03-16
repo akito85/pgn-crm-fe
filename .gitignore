@@ -38,3 +38,6 @@ docs/
 *.txt
 *.sql
 *.zip
+# Local workspace (mockups, scratch work, design artifacts)
+.workspace/
+.sup*
