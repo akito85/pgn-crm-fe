@@ -25,7 +25,7 @@ const InvoiceRelationDetail = ({
   const isOneTime = accountType === "oneTime";
   const dispatch = useDispatch();
 
-  const { detail_invoiceRelation, detailDraft_invoiceRelation } = useSelector(
+  const { detail_invoiceRelation, detailDraft_invoiceRelation, loading_detailIr, loading_detailDraftIr, loading_approveRejectIr } = useSelector(
     (state) => state.invoiceRelation
   )
 
@@ -33,7 +33,7 @@ const InvoiceRelationDetail = ({
     (state) => state.customerAccount
   );
   
-  const isLoading = loading || loadingAccount;
+  const isLoading = loading || loadingAccount || loading_detailIr || loading_detailDraftIr;
 
   //declare
   const navigate = useNavigate();
@@ -139,7 +139,6 @@ const InvoiceRelationDetail = ({
       .unwrap()
       .then(() => {
         dispatch(getDetailInvoiceRelation(idIr));
-        dispatch(getDetailDraftInvoiceRelation(idIr));
         handleClear();
         handleApprovalModal(false);
       })
@@ -152,7 +151,6 @@ const InvoiceRelationDetail = ({
       .unwrap()
       .then(() => {
         dispatch(getDetailInvoiceRelation(idIr));
-        dispatch(getDetailDraftInvoiceRelation(idIr));
         handleClear();
         handleApprovalModal(false);
       })
@@ -172,14 +170,17 @@ const InvoiceRelationDetail = ({
       dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information/invoice-relation'))
     else if (isOneTime)
       dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information/invoice-relation'))
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    if (idIr) {
+    if (idIr)
       dispatch(getDetailInvoiceRelation(idIr));
+  }, [idIr]);
+  
+  useEffect(() => {
+    if (idIr && draftExist)
       dispatch(getDetailDraftInvoiceRelation(idIr));
-    }
-  }, [idIr])
+  }, [idIr, draftExist])
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
@@ -260,6 +261,7 @@ const InvoiceRelationDetail = ({
         handleCloseModal={() => handleApprovalModal(false)}
         customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
+        loading={loading_approveRejectIr}
       />
     </LayoutMenu>
   );

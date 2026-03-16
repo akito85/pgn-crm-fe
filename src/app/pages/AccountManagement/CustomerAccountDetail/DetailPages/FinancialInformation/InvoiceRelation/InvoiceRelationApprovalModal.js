@@ -13,6 +13,7 @@ import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
 
 /**
  * Modal for approving or rejecting pending invoice relation records.
@@ -31,8 +32,11 @@ const InvoiceRelationApprovalModal = ({
     list_invoiceRelationApproval: invoiceRelationApprovals,
     pagination_invoiceRelationApproval: pagination,
     loading_listIrApproval,
-    loading_approveRejectIr
+    loading_approveIr,
+    loading_rejectIr
   } = useSelector((state) => state.financialInformation);
+
+  const loadingApproval = loading_approveIr || loading_rejectIr;
 
   const searchInput = useRef(null);
   const [form] = Form.useForm();
@@ -316,9 +320,10 @@ const InvoiceRelationApprovalModal = ({
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
-            <Button type={"menu"} onClick={handleCancelForm}>
+            <Button type={"menu"} onClick={handleCancelForm} disabled={loadingApproval}>
               Cancel
             </Button>
 
@@ -328,7 +333,7 @@ const InvoiceRelationApprovalModal = ({
                   prev();
                 }}
                 type={"menu"}
-                disabled={current < 1}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
               </Button>
@@ -338,7 +343,7 @@ const InvoiceRelationApprovalModal = ({
                   onClick={() => handleButtonNext()}
                   type={"submit"}
                   disabled={
-                    current > steps.length - 1 || steps[current].disabled
+                    current > steps.length - 1 || steps[current].disabled || loadingApproval
                   }
                 >
                   Next
@@ -349,14 +354,16 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading_approveRejectIr}
+                    disabled={loadingApproval}
+                    loading={loading_rejectIr}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading_approveRejectIr}
+                    disabled={loadingApproval}
+                    loading={loading_approveIr}
                   >
                     Approve
                   </Button>
@@ -366,22 +373,13 @@ const InvoiceRelationApprovalModal = ({
           </div>
         }
       >
-        <NxBaseContainer
-          border={{
-            top: false,
-            right: false,
-            left: false
-          }}
-          rounded={false}
-        >
-          <div className="flex flex-row justify-center">
-            <Steps
-              current={current}
-              items={steps}
-              labelPlacement="vertical"
-            />
-          </div>
-        </NxBaseContainer>
+        <NxFormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={handleButtonNext}
+          inModal
+        />
 
         <div className="p-4">
           {/* STEP 1: INVOICE RELATION INFORMATION */}
@@ -397,7 +395,7 @@ const InvoiceRelationApprovalModal = ({
                     dataSource={invoiceRelationApprovals}
                     columns={columns}
                     totalData={totalElement}
-                    tableScrolled={{ x: invoiceRelationApprovals.length ? "max-content" : 5000 }}
+                    tableScrolled={{ x: invoiceRelationApprovals.length ? "max-content" : 1200 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
