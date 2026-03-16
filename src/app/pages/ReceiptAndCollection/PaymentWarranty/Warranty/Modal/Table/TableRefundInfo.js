@@ -1,6 +1,7 @@
 import { InputNumber } from "antd";
 import moment from "moment";
 import DateComponent from "../../../../../../../components/DateComponent";
+import StatusComponent from "../../../../../../../components/StatusComponent";
 import { columnsWarrantyInfo } from "./TableWarrantyInfo";
 
 export const columnsRefundInfo = (
@@ -67,11 +68,35 @@ export const columnsRefundInfo = (
             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
             parser={value => value.replace(/\$\s?|(\.*)/g, '')}
             value={refundAmountData[record.key]}
-            onChange={(val) => handleRefundAmountChange(val, record.key)}
+            onChange={(val) => handleRefundAmountChange(val, record.key, record.currencyBalance)}
             controls={false}
           />
         )
       )
-    }
+    },
+    {
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
+      width: 120,
+      align: "center",
+      render: (text) => (
+        <div className="flex justify-center">
+          <StatusComponent colour={text}>{text}</StatusComponent>
+        </div>
+      ),
+    },
+    {
+      key: "approvalStatus",
+      title: "STATUS APPROVAL",
+      dataIndex: "approvalStatus",
+      width: 150,
+      align: "center",
+      render: (text) => (
+        <div className="flex justify-center">
+          <StatusComponent colour={text}>{text}</StatusComponent>
+        </div>
+      ),
+    },
   ];
 };

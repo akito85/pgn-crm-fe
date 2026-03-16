@@ -4,19 +4,12 @@ import CardContainer from "../../../../../components/CardContainer";
 import { formMessageRequired } from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";
 import moment from "moment";
-import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
 import DateComponent from "../../../../../components/DateComponent";
 
 const PartnerForm = (props) => {
   const {
     form,
   } = props;
-
-  const dispatch = useDispatch();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const id = location?.state?.id;
 
   const disabledDate = (current) => {
     if (
