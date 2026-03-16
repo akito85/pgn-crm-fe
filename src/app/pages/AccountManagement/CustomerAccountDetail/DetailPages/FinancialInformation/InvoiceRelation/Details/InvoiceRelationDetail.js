@@ -18,11 +18,20 @@ import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxAppr
 import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
+/**
+ * Invoice relation detail view (container + presentational component).
+ * Fetches original and draft records, supports approve/reject workflow.
+ *
+ * @param {object}                    props
+ * @param {"standard"|"oneTime"}      [props.accountType="standard"] - Account type context.
+ */
 const InvoiceRelationDetail = ({
   accountType = "standard"
 }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
+
+  // --- Hooks ---
   const dispatch = useDispatch();
 
   const { detail_invoiceRelation, detailDraft_invoiceRelation, loading_detailIr, loading_detailDraftIr, loading_approveRejectIr } = useSelector(
@@ -32,10 +41,7 @@ const InvoiceRelationDetail = ({
   const { loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
   );
-  
-  const isLoading = loading || loadingAccount || loading_detailIr || loading_detailDraftIr;
 
-  //declare
   const navigate = useNavigate();
   const location = useLocation();
   const idAccount = location?.state?.idAccount;
@@ -53,16 +59,15 @@ const InvoiceRelationDetail = ({
     }
   ]
   const originalKey = tabOptions[0]?.key;
-  const [activeKey, setActiveKey] = useState(originalKey || "")
-  const detail = (activeKey === originalKey ? detail_invoiceRelation : detailDraft_invoiceRelation) || {}
 
-  const handleSetActiveKey = (newActiveKey) => {
-    setActiveKey(newActiveKey)
-  }
-  
-  //state
+  // --- State ---
+  const [activeKey, setActiveKey] = useState(originalKey || "")
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
+
+  // --- Derived values ---
+  const isLoading = loading || loadingAccount || loading_detailIr || loading_detailDraftIr;
+  const detail = (activeKey === originalKey ? detail_invoiceRelation : detailDraft_invoiceRelation) || {}
 
   const {
     status,
@@ -82,7 +87,7 @@ const InvoiceRelationDetail = ({
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
-  
+
   const routes = [
     {
       path: "",
@@ -109,9 +114,19 @@ const InvoiceRelationDetail = ({
     },
   ];
 
+  // --- Handlers ---
   /**
-   * @param {boolean} show
-   * @param {"approve"|"reject"} action 
+   * Switches the active detail tab between Original and Current.
+   * @param {string} newActiveKey
+   */
+  const handleSetActiveKey = (newActiveKey) => {
+    setActiveKey(newActiveKey)
+  }
+
+  /**
+   * Opens or closes the approval/rejection modal.
+   * @param {boolean}            show   - true to open, false to close
+   * @param {"approve"|"reject"} [action] - Which action to arm
    */
   const handleApprovalModal = (show, action) => {
     if (show) {
@@ -124,7 +139,10 @@ const InvoiceRelationDetail = ({
   }
 
   /**
-   * @param {"approve"|"reject"} action 
+   * Dispatches approve or reject for the current invoice relation record.
+   * @param {string}             description - Remark entered in the approval form
+   * @param {"approve"|"reject"} action
+   * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
     const body = [{
@@ -168,6 +186,7 @@ const InvoiceRelationDetail = ({
     }
   }
 
+  // --- Effects ---
   useEffect(() => {
     if (isStandard)
       dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information/invoice-relation'))
