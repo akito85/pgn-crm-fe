@@ -136,10 +136,10 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
 
   return (
     <NxModal
-    isOpen={openModal}
-    handleCancel={closeModal}
+      isOpen={openModal}
+      handleCancel={closeModal}
       type="detail"
-      header="DETAIL PRODUCT DISTRIBUTION SOURCE"
+      title="DETAIL PRODUCT DISTRIBUTION SOURCE"
       width={800}
       footer={
         <ButtonComponent type={"default"} onClick={closeModal}>

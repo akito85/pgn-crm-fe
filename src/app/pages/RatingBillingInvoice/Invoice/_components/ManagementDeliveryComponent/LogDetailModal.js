@@ -1,367 +1,110 @@
-// components/ManagementDeliveryInvoice/LogDetailModal.js
-import React from "react";
-import { Modal, Button, Card, Row, Col, Divider, Table, Tag } from "antd";
-import {
-  FileTextOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
+import React, { useEffect } from "react";
+import { Modal, Button, Table, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
+import { getDeliveryLogs } from "../../../../../../redux/slices/rating_billing_invoice/managementDeliveryInvoice";
+
+const formatDateTime = (dateString) => {
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
+
+const columns = [
+  {
+    title: "ID",
+    dataIndex: "id",
+    key: "id",
+    width: 90,
+    render: (text) => (
+      <span className="font-mono font-semibold text-primary">{text}</span>
+    ),
+  },
+  {
+    title: "Activity",
+    dataIndex: "activity",
+    key: "activity",
+    width: 220,
+  },
+  {
+    title: "Created By",
+    dataIndex: "createdBy",
+    key: "createdBy",
+    width: 120,
+  },
+  {
+    title: "Date & Time",
+    dataIndex: "createdDtm",
+    key: "createdDtm",
+    width: 160,
+    render: (text) => formatDateTime(text),
+  },
+  {
+    title: "Message",
+    dataIndex: "message",
+    key: "message",
+    render: (text) => (
+      <span className="text-xs whitespace-pre-wrap break-all text-gray-700">
+        {text || "-"}
+      </span>
+    ),
+  },
+];
 
 const LogDetailModal = ({ visible, onCancel, logData }) => {
-  if (!logData) return null;
+  const dispatch = useDispatch();
+  const { data_logs, loading_logs } = useSelector(
+    (state) => state.managementDeliveryInvoice,
+  );
 
-  // Mock log detail data - Replace with actual API data
-  const detailData = {
-    deliveryId: "790",
-    invoiceNo: "INV-002",
-    sentTime: "01/10/2025 10:11:05",
-    channel: "WhatsApp",
-    recipient: "+628123456789",
-    status: "Gagal",
-    templateId: "TPL-WA-002",
-    gatewayTransactionId: "null",
-  };
-
-  const logHistory = [
-    {
-      logId: "112233",
-      error: "invalid_recipient",
-      message: "Nomor telepon tidak terdaftar di WhatsApp.",
-      action: true,
-    },
-    {
-      logId: "112230",
-      error: "begin_whatsapp_send",
-      message: "Mengirimkan pesan ke WA GW.",
-      action: true,
-    },
-  ];
-
-  const columns = [
-    {
-      title: "Log ID",
-      dataIndex: "logId",
-      key: "logId",
-      width: 100,
-      render: (text) => (
-        <span
-          style={{
-            fontWeight: "600",
-            color: "#1890ff",
-            fontFamily: "monospace",
-          }}
-        >
-          {text}
-        </span>
-      ),
-    },
-    {
-      title: "Error",
-      dataIndex: "error",
-      key: "error",
-      width: 200,
-      render: (text) => (
-        <Tag
-          color={text.includes("invalid") ? "error" : "default"}
-          style={{
-            fontFamily: "monospace",
-            fontSize: "12px",
-            padding: "2px 8px",
-          }}
-        >
-          {text}
-        </Tag>
-      ),
-    },
-    {
-      title: "Message",
-      dataIndex: "message",
-      key: "message",
-      ellipsis: true,
-      render: (text) => (
-        <span style={{ fontSize: "13px", color: "#262626" }}>{text}</span>
-      ),
-    },
-    {
-      title: "Aksi",
-      key: "action",
-      width: 200,
-      align: "center",
-      render: (_, record) =>
-        record.action && (
-          <Button size="small" style={{ fontSize: "12px" }}>
-            View Request/Response
-          </Button>
-        ),
-    },
-  ];
-
-  const getStatusConfig = (status) => {
-    if (status === "Gagal") {
-      return {
-        color: "#ff4d4f",
-        icon: <CloseCircleOutlined />,
-        bgColor: "#fff1f0",
-      };
+  console.log("LogDetailModal - logData:", data_logs);
+  useEffect(() => {
+    if (visible && logData?.deliveryId) {
+      dispatch(getDeliveryLogs(logData.deliveryId));
     }
-    return {
-      color: "#52c41a",
-      icon: <CheckCircleOutlined />,
-      bgColor: "#f6ffed",
-    };
-  };
+  }, [visible, logData?.deliveryId, dispatch]);
 
-  const statusConfig = getStatusConfig(detailData.status);
+  if (!logData) return null;
 
   return (
     <Modal
       title={
-        <div style={{ fontSize: "18px", fontWeight: "600", color: "#262626" }}>
-          <FileTextOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
-          Log Detail Pengiriman #{detailData.deliveryId}
-        </div>
+        <span className="text-base font-semibold text-primary">
+          Log History #{logData.deliveryId || "-"}
+        </span>
       }
       open={visible}
       onCancel={onCancel}
       width={900}
-      footer={[
-        <Button key="close" type="primary" size="large" onClick={onCancel}>
-          Tutup
-        </Button>,
-      ]}
+      footer={
+        <Button type="primary" onClick={onCancel}>
+          Close
+        </Button>
+      }
       style={{ top: 20 }}
-      bodyStyle={{ maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
+      styles={{
+        header: { backgroundColor: "#F5F5F5" },
+        body: { maxHeight: "calc(100vh - 200px)", overflowY: "auto" },
+      }}
       zIndex={1001}
     >
-      {/* Delivery Information */}
-      <Card
-        style={{
-          marginBottom: "16px",
-          backgroundColor: "#f9fafb",
-          border: "1px solid #e5e7eb",
-          padding: "16px",
-        }}
-      >
-        <Row gutter={[16, 16]}>
-          <Col span={8}>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                ID Pengiriman
-              </div>
-              <div
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "600",
-                  color: "#1890ff",
-                }}
-              >
-                #{detailData.deliveryId}
-              </div>
-            </div>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                No. Invoice
-              </div>
-              <div
-                style={{
-                  fontSize: "15px",
-                  fontWeight: "600",
-                  color: "#262626",
-                }}
-              >
-                {detailData.invoiceNo}
-              </div>
-            </div>
-          </Col>
-          <Col span={8}>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Waktu Kirim
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  color: "#262626",
-                }}
-              >
-                🕐 {detailData.sentTime}
-              </div>
-            </div>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Kanal
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  color: "#262626",
-                }}
-              >
-                📱 {detailData.channel}
-              </div>
-            </div>
-          </Col>
-          <Col span={8}>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Penerima
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  color: "#262626",
-                }}
-              >
-                {detailData.recipient}
-              </div>
-            </div>
-            <div style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Status
-              </div>
-              <Tag
-                color={statusConfig.color}
-                icon={statusConfig.icon}
-                style={{
-                  fontWeight: "600",
-                  padding: "4px 12px",
-                  fontSize: "13px",
-                }}
-              >
-                {detailData.status}
-              </Tag>
-            </div>
-          </Col>
-        </Row>
-
-        <Divider style={{ margin: "12px 0" }} />
-
-        <Row gutter={[16, 16]}>
-          <Col span={12}>
-            <div style={{ marginBottom: "8px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                Template ID
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  color: "#262626",
-                  fontFamily: "monospace",
-                }}
-              >
-                {detailData.templateId}
-              </div>
-            </div>
-          </Col>
-          <Col span={12}>
-            <div style={{ marginBottom: "8px" }}>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#8c8c8c",
-                  marginBottom: "4px",
-                }}
-              >
-                ID Transaksi Gateway
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  color: "#8c8c8c",
-                  fontFamily: "monospace",
-                  fontStyle: "italic",
-                }}
-              >
-                {detailData.gatewayTransactionId}
-              </div>
-            </div>
-          </Col>
-        </Row>
-      </Card>
-
-      {/* Log History Table */}
-      <Divider
-        orientation="left"
-        style={{ fontWeight: "600", fontSize: "15px" }}
-      >
-        📋 Riwayat Log
-      </Divider>
-
-      <div style={{ marginTop: "16px" }}>
+      <Spin spinning={loading_logs} indicator={<LoadingOutlined spin />}>
         <Table
-          dataSource={logHistory}
+          dataSource={data_logs}
           columns={columns}
           pagination={false}
           bordered
           size="middle"
-          rowKey="logId"
+          rowKey="id"
           style={{ borderRadius: "8px", overflow: "hidden" }}
         />
-      </div>
-
-      {/* Info Box */}
-      <div
-        style={{
-          marginTop: "16px",
-          padding: "12px 16px",
-          backgroundColor: "#fff7e6",
-          border: "1px solid #ffd591",
-          borderRadius: "6px",
-          fontSize: "12px",
-          color: "#ad6800",
-        }}
-      >
-        <strong>💡 Info:</strong> Log menampilkan riwayat detail proses
-        pengiriman pesan. Klik "View Request/Response" untuk melihat detail
-        request dan response dari gateway.
-      </div>
+      </Spin>
     </Modal>
   );
 };

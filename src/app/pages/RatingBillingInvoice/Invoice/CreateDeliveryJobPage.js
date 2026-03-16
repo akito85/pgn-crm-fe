@@ -4,7 +4,6 @@ import { Button, DatePicker, Form, Upload, message, Spin } from "antd";
 import {
   PlusOutlined,
   InboxOutlined,
-  ArrowLeftOutlined,
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -195,7 +194,7 @@ const CreateDeliveryJobPage = () => {
       }
 
       // Submit via API
-      const response = await ratingBillingHttpService.uploadAttachment(
+      await ratingBillingHttpService.uploadAttachment(
         "/v1/dbs/api/rbi/delivery/create-job-delivery",
         formData,
         (percent) => {

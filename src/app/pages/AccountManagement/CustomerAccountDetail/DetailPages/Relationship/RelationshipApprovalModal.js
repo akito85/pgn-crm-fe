@@ -413,7 +413,7 @@ const RelationshipApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Relationship Information"
+        title="APPROVAL RELATIONSHIP INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -423,7 +423,7 @@ const RelationshipApprovalModal = ({
               Cancel
             </Button>
 
-            <div className="flex gap-x-4">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();

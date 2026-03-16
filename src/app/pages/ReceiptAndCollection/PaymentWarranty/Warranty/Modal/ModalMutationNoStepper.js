@@ -5,7 +5,8 @@ import moment from "moment";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import MutationForm from "../Form/MutationForm";
 import { 
-  getMutationCategoryOptions 
+  getMutationCategoryOptions,
+  getDetailMutation
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 const ModalMutationNoStepper = ({
@@ -28,10 +29,47 @@ const ModalMutationNoStepper = ({
       dispatch(getMutationCategoryOptions());
       
       if (modalType === "update" && selectedRecord) {
-        form.setFieldsValue({
-          ...selectedRecord,
-          date: selectedRecord.date ? moment(selectedRecord.date) : null
-        });
+        if (selectedRecord.id) {
+          // Fetch specific mutation data from API if it already exists (has ID)
+          dispatch(getDetailMutation({ id: selectedRecord.id }))
+            .unwrap()
+            .then((res) => {
+              const resData = res?.data || res;
+              if (resData) {
+                // Determine source from isManual if source is null
+                const source = resData.isManual ? "Manual" : (resData.source || "Manual");
+                
+                form.setFieldsValue({
+                  ...selectedRecord, // Keep existing data from list as fallback
+                  ...resData,
+                  source: source,
+                  mutationNumber: resData.mutationNumber || resData.documentNumber || selectedRecord?.mutationNumber,
+                  date: resData.date 
+                    ? moment(resData.date) 
+                    : resData.transactionDate 
+                      ? moment(resData.transactionDate) 
+                      : (selectedRecord?.date ? moment(selectedRecord.date) : null),
+                  eqvAmount: resData.eqvAmount ?? resData.equivalentAmount ?? selectedRecord?.eqvAmount,
+                  convertedCurrency: resData.convertedCurrency || resData.currency || selectedRecord?.convertedCurrency,
+                });
+              }
+            })
+            .catch((err) => {
+              message.error("Failed to load mutation details");
+            });
+        } else {
+          // Local mutation without ID
+          form.setFieldsValue({
+            ...selectedRecord,
+            mutationNumber: selectedRecord.mutationNumber || selectedRecord.documentNumber,
+            date: selectedRecord.date 
+              ? moment(selectedRecord.date) 
+              : selectedRecord.transactionDate 
+                ? moment(selectedRecord.transactionDate) 
+                : null,
+            eqvAmount: selectedRecord.eqvAmount ?? selectedRecord.equivalentAmount,
+          });
+        }
       } else {
         form.resetFields();
       }
@@ -47,8 +85,8 @@ const ModalMutationNoStepper = ({
     try {
       const values = await form.validateFields();
       
-      // Resolve currency name for display in the table
-      const currencyName = currencyDDL?.data?.find(c => c.id === values.convertedCurrency)?.name || "IDR";
+      // values.convertedCurrency is already the currency name (Option value={item.name})
+      const currencyName = values.convertedCurrency || "IDR";
       
       const mutationWithDisplay = {
         ...values,

@@ -37,15 +37,15 @@ const initialState = {
   },
   list_invoiceRelation: [],
   pagination_invoiceRelation: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
   list_invoiceRelationApproval: [],
   pagination_invoiceRelationApproval: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
@@ -485,25 +485,9 @@ export const getPaymentRelationApproval = createAsyncThunk(
 
 export const getInvoiceRelation = createAsyncThunk(
   "GET_INVOICE_RELATION",
-  async ({ id, body, page, size, sort, searchs, listType, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
-
-      if (page)
-        queryParams.append("page", page);
-      if (size)
-        queryParams.append("size", size);
-      if (sort)
-        queryParams.append("sort", sort);
-      if (searchs)
-        queryParams.append("searchs", searchs);
-      if (listType)
-        queryParams.append("listType", listType);
-
-      let url = `/v1/dbs/api/invoice-relation/list/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
+      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
 
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
         headers: { "Accept": "application/json, text/plain, */*" }
@@ -520,25 +504,14 @@ export const getInvoiceRelation = createAsyncThunk(
 
 export const getInvoiceRelationApproval = createAsyncThunk(
   "GET_INVOICE_RELATION_APPROVAL",
-  async ({ id, body, page, size, sort, searchs, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
+      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
 
-      if (page)
-        queryParams.append("page", page);
-      if (size)
-        queryParams.append("size", size);
-      if (sort)
-        queryParams.append("sort", sort);
-      if (searchs)
-        queryParams.append("searchs", searchs);
-
-      queryParams.append("listType", "approval");
-
-      let url = `/v1/dbs/api/invoice-relation/list/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
+      body = {
+        ...body,
+        listType: "approval",
+      }
 
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
         headers: { "Accept": "application/json, text/plain, */*" }
@@ -1183,8 +1156,8 @@ const financialInformationSlice = createSlice({
       }
 
       state.pagination_invoiceRelation = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -1195,8 +1168,8 @@ const financialInformationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelation = [];
         state.pagination_invoiceRelation = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -1228,8 +1201,8 @@ const financialInformationSlice = createSlice({
       }
 
       state.pagination_invoiceRelationApproval = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -1240,8 +1213,8 @@ const financialInformationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelationApproval = [];
         state.pagination_invoiceRelationApproval = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }

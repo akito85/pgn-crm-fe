@@ -274,7 +274,7 @@ export default function InfoPaymentRelation({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        header={"CHOOSE ACCOUNT"}
+        title={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}
         footer={[

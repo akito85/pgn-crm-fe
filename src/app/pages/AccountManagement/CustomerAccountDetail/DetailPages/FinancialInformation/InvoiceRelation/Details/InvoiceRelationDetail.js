@@ -5,10 +5,9 @@ import { Button, Spin } from "antd";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import InvoiceRelationDetailTabs from "./InvoiceRelationDetailTabs";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { getAccountStandardDetail, getAccountOneTimeDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
+import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import { getDetailInvoiceRelation, getDetailDraftInvoiceRelation, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
@@ -19,7 +18,7 @@ import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxAppr
 import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
-const InvoiceRelationDetails = ({
+const InvoiceRelationDetail = ({
   accountType = "standard"
 }) => {
   const isStandard = accountType === "standard";
@@ -32,10 +31,6 @@ const InvoiceRelationDetails = ({
 
   const { loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
-  );
-
-  const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
   );
   
   const isLoading = loading || loadingAccount;
@@ -180,21 +175,6 @@ const InvoiceRelationDetails = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (idCustomer)
-      dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
-
-  useEffect(() => {
-    if (idAccount && idCustomer) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-      } else if (isOneTime) {
-        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
-      }
-    }
-  }, [idAccount, idCustomer]);
-
-  useEffect(() => {
     if (idIr) {
       dispatch(getDetailInvoiceRelation(idIr));
       dispatch(getDetailDraftInvoiceRelation(idIr));
@@ -228,8 +208,7 @@ const InvoiceRelationDetails = ({
           )}
 
           <InvoiceRelationDetailTabs
-            dataDetail={detail}
-            subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
+            detail={detail}
             dispatch={dispatch}
             idIr={idIr}
           />
@@ -286,4 +265,4 @@ const InvoiceRelationDetails = ({
   );
 };
 
-export default InvoiceRelationDetails;
+export default InvoiceRelationDetail;

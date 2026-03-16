@@ -347,34 +347,8 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     );
   }
 
-  const handleWheel = (e) => {
-    const expandedContainer = e.currentTarget;
-    const expandedTableWrapper =
-      expandedContainer.querySelector(".ant-table-body");
-    if (!expandedTableWrapper) {
-      return;
-    }
-
-    const { scrollWidth, clientWidth } = expandedTableWrapper;
-    const hasHorizontalScroll = scrollWidth > clientWidth;
-    const isHorizontalScrolling = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-
-    // Stop scroll chaining to parent table on horizontal scroll,
-    // even when at left/right edge.
-    if (hasHorizontalScroll && isHorizontalScrolling) {
-      e.stopPropagation();
-    }
-  };
-
   return (
-    <div
-      className="bg-white"
-      style={{
-        // marginLeft: "31px",
-        overscrollBehaviorX: "contain",
-      }}
-      onWheel={handleWheel}
-    >
+    <div className="bg-white" style={{ marginLeft: 48 }}>
       <TableRBI
         idTable={`expanded-table-${rowKey}`}
         columns={expandedColumns}

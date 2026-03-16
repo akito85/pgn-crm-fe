@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import { Spin, Tooltip } from "antd";
+import { Link } from "react-router-dom";
+import { Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -26,7 +26,6 @@ const ViewTaxExemption = () => {
 
   // Declaration
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const searchInput = useRef(null);
 
   const dataSource = data?.result || [];
@@ -239,33 +238,33 @@ const ViewTaxExemption = () => {
       render: (record) => {
         const isDraft = record?.statusApproval === "DRAFT";
         return (
-          <Tooltip title={isDraft ? "Create Tax Exemption" : "Only available for DRAFT status"}>
-            <span>
-              <ButtonComponent
-                type="ghost"
-                border={false}
-                disabled={!isDraft}
-                icon={
-                  <SVGIcon
-                    name="IconButtonCreate"
-                    width={20}
-                    style={{ filter: isDraft ? "invert(1)" : "invert(0.5)" }}
-                  />
-                }
-                onClick={() => {
-                  if (!isDraft) return;
-                  setSelectedRecord(record);
-                  setModalCreate(true);
-                }}
-                style={{
-                  cursor: isDraft ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                Create Tax Exemption
-              </ButtonComponent>
-            </span>
+          <Tooltip
+            title={
+              isDraft
+                ? "Create Tax Exemption"
+                : "Only available for DRAFT status"
+            }
+          >
+            <div
+              // disabled={!isDraft}
+              onClick={() => {
+                if (!isDraft) return;
+                setSelectedRecord(record);
+                setModalCreate(true);
+              }}
+              style={{
+                display: "inline-block",
+                lineHeight: 0,
+                cursor: isDraft ? "pointer" : "not-allowed",
+                opacity: isDraft ? 1 : 0.4,
+              }}
+            >
+              <SVGIcon
+                name="IconButtonCreate"
+                width={20}
+                style={{ filter: isDraft ? "invert(1)" : "invert(0.5)" }}
+              />
+            </div>
           </Tooltip>
         );
       },
@@ -276,19 +275,16 @@ const ViewTaxExemption = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Approval History">
-          <ButtonComponent
-            type="ghost"
-            border={false}
+          <div
             onClick={() => handleApprovalHistory(record?.taxExemptionId)}
-            icon={<SVGIcon name="IconLogHistory" width={20} />}
             style={{
               cursor: "pointer",
               display: "inline-block",
               lineHeight: 0,
             }}
           >
-            Approval History
-          </ButtonComponent>
+            <SVGIcon name="IconLogHistory" width={20} />
+          </div>
         </Tooltip>
       ),
     },
@@ -323,7 +319,7 @@ const ViewTaxExemption = () => {
     itemGrantAccess,
   ).map((col) => ({
     ...col,
-    width: 100,
+    width: 60,
     align: "center",
   }));
 
@@ -392,7 +388,7 @@ const ViewTaxExemption = () => {
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading || false}>
+      <>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -416,6 +412,8 @@ const ViewTaxExemption = () => {
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              showRefresh={true}
               showExport={false}
               usePagination={false}
               useInfiniteScroll={true}
@@ -455,7 +453,7 @@ const ViewTaxExemption = () => {
           dataApprover={dataApprovalHistory?.dataApprover}
           dataHistory={dataApprovalHistory?.dataHistory}
         />
-      </Spin>
+      </>
     </LayoutMenu>
   );
 };

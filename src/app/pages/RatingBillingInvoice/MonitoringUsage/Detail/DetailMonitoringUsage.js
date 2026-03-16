@@ -604,24 +604,14 @@ const DetailMonitoringUsage = () => {
 
           {/* Action Buttons */}
           <div className="w-full flex mt-5">
-            <div className="w-full justify-start">
-              <Form.Item>
-                <ButtonComponent
-                  type={"submit"}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 16,
-                        justifyItems: "left",
-                      }}
-                    />
-                  }
-                  onClick={handleBack}
-                >
-                  Back
-                </ButtonComponent>
-              </Form.Item>
+            <div className="w-fit">
+              <ButtonComponent
+                htmlType="button"
+                type={"submit"}
+                onClick={handleBack}
+              >
+                Back
+              </ButtonComponent>
             </div>
             {detail_batch?.batchInformation?.status !== "COMPLETE" && (
               <div className="w-full flex justify-end gap-5">
