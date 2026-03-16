@@ -168,7 +168,12 @@ const SaInformation = ({
       alreadyGasIn: e.target.checked,
       gasInPlanDate: null
     })
-    form.resetFields(["gasInPlanDate"])
+    form.setFieldsValue({ gasInPlanDate: undefined })
+    if (!e.target.checked) {
+      setTimeout(() => {
+        form.validateFields(['gasInPlanDate'])
+      }, 0)
+    }
   };
 
   return (
@@ -346,8 +351,13 @@ const SaInformation = ({
                   getValueFromEvent={(e) => handleSaInformationObj(e, "gasInPlanDate")}
                   rules={[
                     {
-                      message: "Please input your Gas In Plan Date",
-                      required: (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true,
+                      validator: (_, value) => {
+                        const isRequired = (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true;
+                        if (isRequired && !value) {
+                          return Promise.reject("Please input Gas In Plan Date");
+                        }
+                        return Promise.resolve();
+                      },
                     },
                   ]}
                 >

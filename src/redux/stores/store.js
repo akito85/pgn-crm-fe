@@ -60,6 +60,7 @@ import lateReducer from "../slices/receipt_collection/lateCharge";
 import accountServiceAgreementReducer from "../slices/account_management/detailAccount/serviceAgreementSlice";
 import postOfSalesReducer from "../slices/rating_billing_invoice/PointOfSales";
 import tosSubmissionReducer from "../slices/account_management/detailAccount/tosSubmissionSlice";
+import saWarrantyReducer from "../slices/account_management/detailAccount/warrantySlice";
 import invoiceReducer from "../slices/rating_billing_invoice/invoice";
 import attachmentReducer from "../slices/attachmentSlice";
 import locationReducer from "../slices/account_management/MasterData/location_slice";
@@ -208,6 +209,7 @@ const reducer = combineReducers({
   distributionMedia: distributionMediaReducer,
   accountServiceAgreement: accountServiceAgreementReducer,
   tosSubmission: tosSubmissionReducer,
+  saWarranty: saWarrantyReducer,
   rawMaterialSource: rawMaterialSourceReducer,
   productDistribution: productDistributionReducer,
   accountGasUtilization: accountGasUtilizationReducer,

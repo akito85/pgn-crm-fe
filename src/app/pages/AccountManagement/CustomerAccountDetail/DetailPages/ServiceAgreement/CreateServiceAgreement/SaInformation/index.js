@@ -39,7 +39,7 @@ const SaInformation = ({
   const [isGas, setIsGas] = useState('')
   const [inputValue, setInputValue] = useState('');
 
-  console.log(`SA Type ${saType}`)
+  // console.log(`SA Type ${saType}`)
 
   useEffect(() => {
     if (saInfoObj.serviceType) {
@@ -185,7 +185,12 @@ const SaInformation = ({
       alreadyGasIn: e.target.checked,
       gasInPlanDate: null
     })
-    form.resetFields(["gasInPlanDate"])
+    // form.setFieldsValue({ gasInPlanDate: undefined })
+    // if (!e.target.checked) {
+    //   setTimeout(() => {
+    //     form.validateFields(['gasInPlanDate'])
+    //   }, 0)
+    // }
   };
 
   return (
