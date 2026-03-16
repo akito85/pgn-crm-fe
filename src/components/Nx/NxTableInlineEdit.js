@@ -272,6 +272,8 @@ const NxTableInlineEdit = ({
           overflow: hidden;
           border: 1px solid #C8CDD4;
           border-bottom: none;
+          border-collapse: collapse;
+          border-spacing: 0;
         }
 
         #${idTable} .ant-table-container {
@@ -289,20 +291,42 @@ const NxTableInlineEdit = ({
         }
 
         #${idTable} .ant-table-thead {
-          border-left: 0.5px solid #C8CDD4;
-          border-right: 0.5px solid #C8CDD4;
+          border-left: 1px solid #C8CDD4;
+          border-right: 1px solid #C8CDD4;
         }
 
         #${idTable} .ant-table-thead > tr > th {
           padding: 4px 8px !important;
           height: 30px !important;
-          border: 0.5px solid #C8CDD4 !important;
+          border-right: 1px solid #C8CDD4 !important;
+          border-bottom: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-thead > tr:first-child > th {
+          border-top: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-thead > tr > th:first-child {
+          border-left: 1px solid #C8CDD4 !important;
         }
 
         #${idTable} .ant-table-tbody > tr > td {
           padding: 6px 8px !important;
           font-size: 12px;
-          border: 0.5px solid #C8CDD4 !important;
+          border-right: 1px solid #C8CDD4 !important;
+          border-bottom: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr > td:first-child {
+          border-left: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr:last-child > *:first-child {
+          border-end-start-radius: 0;
+        }
+
+        #${idTable} .ant-table-tbody > tr:last-child > *:last-child {
+          border-end-end-radius: 0;
         }
 
         #${idTable} .ant-table-tbody > tr.nx-row-editing > td {
