@@ -728,14 +728,14 @@ const NxTable = ({
             }
 
             #${idTable} .ant-table {
-              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              border-radius: 8px 8px 0 0;
               overflow: hidden;
               border: 1px solid #C8CDD4;
-              ${(useInfiniteScroll || usePagination) ? "border-bottom: none;" : ""}
+              border-bottom: none;
             }
 
             #${idTable} .ant-table-container {
-              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              border-radius: 8px 8px 0 0;
               overflow: hidden;
               border: none;
             }
@@ -746,6 +746,14 @@ const NxTable = ({
 
             #${idTable} .ant-table-container table > thead > tr:first-child > *:last-child {
               border-start-end-radius: 8px;
+            }
+
+            #${idTable} .ant-table-tbody > tr:last-child > *:first-child {
+              border-end-start-radius: 0;
+            }
+
+            #${idTable} .ant-table-tbody > tr:last-child > *:last-child {
+              border-end-end-radius: 0;
             }
 
             #${idTable} .ant-table-bordered .ant-table-cell,
