@@ -79,6 +79,9 @@ const InvoiceRelationDetail = ({
     updatedBy,
     tappId,
   } = detail;
+
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
+  const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
   
   const routes = [
     {
@@ -181,9 +184,6 @@ const InvoiceRelationDetail = ({
     if (idIr && draftExist)
       dispatch(getDetailDraftInvoiceRelation(idIr));
   }, [idIr, draftExist])
-
-  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
-  const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
 
   return (
     <LayoutMenu>
