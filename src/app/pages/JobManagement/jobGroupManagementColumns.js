@@ -7,6 +7,7 @@ import { getJobManagementColumns } from "./jobManagementColumns";
 export const getJobGroupManagementColumns = () => [
   {
     title: "NO",
+    key: "no",
     width: 60,
     align: "center",
     render: (_, __, index) => index + 1,

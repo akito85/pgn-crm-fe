@@ -14,6 +14,7 @@ import {
   getAllJobGroupPaginate,
   getJobsByGroupId,
 } from "../../../../redux/slices/job_management/jobGroupSlice";
+import { useDeleteJobGroupMutation } from "../../../../redux/slices/job_management/jobGroupApiSlice";
 import {
   getJobGroupManagementColumns,
   getJobGroupChildTableColumns,
@@ -57,11 +58,12 @@ const DeleteMenuIcon = () => (
 const JobGroupPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [deleteJobGroup, { isLoading: deleteLoading }] = useDeleteJobGroupMutation();
 
   // Permission check
   const { actions } = useGrantAccessHooks();
   const permissions = useMemo(
-    () => (actions ?? []).map((a) => a.toLowerCase()),
+    () => (actions ?? []).filter(Boolean).map((a) => a.toLowerCase()),
     [actions]
   );
   const canCreate = permissions.includes("create");
@@ -124,7 +126,7 @@ const JobGroupPage = () => {
       // Fetch jobs for newly expanded groups if not already cached
       newlyExpanded.forEach((groupId) => {
         if (!jobsByGroupId[groupId]?.data) {
-          dispatch(getJobsByGroupId({ groupId, page: 1, pageSize: 20 }));
+          dispatch(getJobsByGroupId({ groupId, page: 0, pageSize: 20 }));
         }
       });
     },
@@ -310,13 +312,11 @@ const JobGroupPage = () => {
   // Delete handler
   const handleDeleteConfirm = async () => {
     try {
-      // TODO: Call deleteJobGroup mutation when API endpoint is ready
-      // await deleteJobGroupMutation(groupToDelete.id).unwrap();
+      await deleteJobGroup(groupToDelete.id).unwrap();
       setDeleteModalOpen(false);
       setGroupToDelete(null);
       handleRefresh();
     } catch (error) {
-      // Error handling
       console.error("Delete failed:", error);
     }
   };
@@ -348,6 +348,13 @@ const JobGroupPage = () => {
 
   return (
     <LayoutMenu>
+      <style>{`
+        #job-group-list-table .ant-table-expanded-row > td {
+          border-left: none !important;
+          border-right: none !important;
+          border-bottom: none !important;
+        }
+      `}</style>
       <BreadCrumb routes={routes} />
       <NxCardContainer
         header="JOB GROUP LIST"
@@ -362,17 +369,15 @@ const JobGroupPage = () => {
             >
               <span className="text-xs font-medium tracking-tight">Download List</span>
             </ButtonComponent>
-            {canCreate && (
-              <ButtonComponent
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={createHandler}
-                isPrimary={true}
-                className="px-2 py-2 rounded-lg min-h-[32px]"
-              >
-                <span className="text-xs font-medium tracking-tight">Create</span>
-              </ButtonComponent>
-            )}
+            <ButtonComponent
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={createHandler}
+              isPrimary={true}
+              className="px-2 py-2 rounded-lg min-h-[32px]"
+            >
+              <span className="text-xs font-medium tracking-tight">Create</span>
+            </ButtonComponent>
           </div>
         }
       >
@@ -408,11 +413,11 @@ const JobGroupPage = () => {
       <NxModal
         isOpen={deleteModalOpen}
         title="Delete Job Group"
-        loading={false}
+        loading={deleteLoading}
         handleCancel={handleDeleteCancel}
         width={480}
         footer={[
-          <ButtonComponent key="cancel" onClick={handleDeleteCancel}>
+          <ButtonComponent key="cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
             Cancel
           </ButtonComponent>,
           <ButtonComponent
@@ -420,6 +425,7 @@ const JobGroupPage = () => {
             border={false}
             className="!bg-[#d32f2f] !text-white !border-transparent"
             onClick={handleDeleteConfirm}
+            loading={deleteLoading}
           >
             Delete
           </ButtonComponent>,

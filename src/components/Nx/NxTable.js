@@ -147,6 +147,7 @@ const NxTable = ({
   selectedRowKey = null,
   onRowClick = () => { },
   components: externalComponents,
+  nestedAlignConfig = {}, // { expandCellWidth, parentCol1Width, parentCol2Width }
 }) => {
   // Resolve aliases for backward compatibility
   const resolvedDataSource = dataSource || dataMain || [];
@@ -433,7 +434,7 @@ const NxTable = ({
   );
 
   const displayedColumns = useMemo(() => {
-    const cols = (resolvedColumns || []).map((c) => ({
+    const cols = (resolvedColumns || []).filter(Boolean).map((c) => ({
       ...c,
       key: c.key || c.dataIndex || c.title,
     }));
@@ -599,7 +600,14 @@ const NxTable = ({
   );
 
   return (
-    <div className={"flex flex-col w-full"}>
+    <div
+      className={"flex flex-col w-full"}
+      style={{
+        ...(nestedAlignConfig.expandCellWidth !== undefined && { '--nx-expand-cell-width': nestedAlignConfig.expandCellWidth }),
+        ...(nestedAlignConfig.parentCol1Width !== undefined && { '--nx-parent-col1-width': nestedAlignConfig.parentCol1Width }),
+        ...(nestedAlignConfig.parentCol2Width !== undefined && { '--nx-parent-col2-width': nestedAlignConfig.parentCol2Width }),
+      }}
+    >
       <style>
         {`
             #${idTable} .ant-table-content {
@@ -803,6 +811,52 @@ const NxTable = ({
               line-height: 0;
               font-size: 0;
               overflow: hidden;
+            }
+
+            /* ── Nested table alignment ───────────────────────────────────────
+               Child first column left edge aligns with parent second column
+               left edge. Uses padding-left on the expanded td (NOT margin on
+               inner div) so the cell never overflows its fixed width.
+               
+               Override via nestedAlignConfig prop:
+                 expandCellWidth  – width of the expand trigger cell (default 32px)
+                 parentCol1Width  – width of parent's first data column (default 150px)
+            ──────────────────────────────────────────────────────────────────── */
+
+            #${idTable} {
+              --nx-expand-cell-width: 32px;
+              --nx-parent-col1-width: 150px;
+              --nx-child-offset: calc(var(--nx-expand-cell-width) + var(--nx-parent-col1-width));
+            }
+
+            /* Constrain the expanded td and indent the child table via padding.
+               overflow:hidden prevents the child from blowing out the parent width. */
+            #${idTable} .ant-table-expanded-row > td {
+              padding-top: 0 !important;
+              padding-bottom: 0 !important;
+              padding-left: var(--nx-child-offset) !important;
+              padding-right: 0 !important;
+              overflow: hidden !important;
+            }
+
+            /* Child table fills remaining width naturally — no margin needed */
+            #${idTable} .ant-table-expanded-row .ant-table-wrapper,
+            #${idTable} .ant-table-expanded-row > td > div {
+              margin-left: 0 !important;
+              overflow: hidden !important;
+            }
+
+            /* Remove child table's own outer border (it now shares the parent column border) */
+            #${idTable} .ant-table-expanded-row .ant-table {
+              border-left: none !important;
+              border-radius: 0 !important;
+            }
+
+            /* Re-add left border on child's first header/cell so the vertical
+               line from the parent second-column separator continues cleanly */
+            #${idTable} .ant-table-expanded-row .ant-table-thead > tr > th:first-child,
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr > td:first-child {
+              border-left: 1px solid #C8CDD4 !important;
             }
           `}
       </style>
