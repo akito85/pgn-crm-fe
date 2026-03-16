@@ -1,6 +1,5 @@
 import { memo, useEffect } from "react";
 import { useState } from "react";
-import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -135,7 +134,7 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   }, [data_irApprovalHistory]);
 
   return (
-    <Fragment>
+    <>
       <InvoiceRelationTable
         idAccount={id}
         idCustomer={idCustomer}
@@ -144,14 +143,12 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
         handleApproval={setShowApprovalModal}
         refreshSignal={refreshSignal}
       />
-
       <InvoiceRelationApprovalModal
         id={id}
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={triggerRefresh}
       />
-
       {/* Inactivate Modal */}
       <NxInactivateModal
         isOpen={showInactiveModal}
@@ -169,7 +166,6 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
         getApprovalOptions={getIrApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailIrApprovalHierarchy}
       />
-
       {/* Approval History Modal */}
       <NxHistoryModal
         isOpen={showApprovalHistoryModal}
@@ -179,7 +175,7 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
-    </Fragment>
+    </>
   );
 };
 
