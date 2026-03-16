@@ -30,7 +30,7 @@ const NxBaseContainer = ({
     <div className={containerClass} style={containerStyle}>
       {header && (
         <div 
-          className={`flex justify-between items-center min-h-[50px] px-4 py-2 border-b border-[#C8CDD4] ${rounded ? "rounded-t-lg" : ""}`}
+          className={`flex justify-between items-center min-h-[50px] px-4 pt-4 border-b border-[#C8CDD4] ${rounded ? "rounded-t-lg" : ""}`}
           style={headerBackgroundVisible ? { backgroundColor: headerBackgroundColor } : {}}
         >
           <div className="flex items-center gap-x-1">

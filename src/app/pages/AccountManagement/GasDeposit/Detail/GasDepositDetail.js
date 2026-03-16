@@ -29,31 +29,27 @@ import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
 
 /**
- * Gas deposit detail
- * @param {{ moduleType: "sa" | "ua"; accountType?: "standard" | "oneTime" }} props
- * @returns
+ * Gas deposit detail view (container + presentational component).
+ * Fetches original and draft records, supports approve/reject workflow.
+ *
+ * @param {object}                    props
+ * @param {"sa"|"ua"}                 props.moduleType   - Module context: standalone ("sa") or under-account ("ua")
+ * @param {"standard"|"oneTime"}      [props.accountType] - Account type (only relevant when moduleType is "ua")
  */
 const GasDepositDetail = ({ moduleType, accountType }) => {
-  const isStandAlone = moduleType === "sa";
-  const isUnderAccount = moduleType === "ua";
-
-  const isStandard = isUnderAccount && accountType === "standard";
-  const isOneTime = isUnderAccount && accountType === "oneTime";
-  const dispatch = useDispatch();
-
-  const { detail_gasDeposit, detailDraft_gasDeposit } = useSelector(
-    (state) => state.gasDeposit
-  );
-
-  const { loading, loadingAccount } = useSelector(
-    (state) => state.customerAccount
-  );
-
-  const isLoading = loading || loadingAccount;
-
-  //declare
+  // --- Hooks ---
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const { detail_gasDeposit, detailDraft_gasDeposit } = useSelector((state) => state.gasDeposit);
+  const { loading, loadingAccount } = useSelector((state) => state.customerAccount);
+
+  // --- Derived values ---
+  const isStandAlone = moduleType === "sa";
+  const isUnderAccount = moduleType === "ua";
+  const isStandard = isUnderAccount && accountType === "standard";
+  const isOneTime = isUnderAccount && accountType === "oneTime";
+  const isLoading = loading || loadingAccount;
   const idAccount = location.state?.idAccount;
   const idCustomer = location.state?.idCustomer;
   const idGd = location.state?.id;
@@ -70,18 +66,16 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   ];
 
   const originalKey = tabOptions[0].key;
+
+  // --- State ---
   const [activeKey, setActiveKey] = useState(originalKey || "");
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approveOrReject, setApproveOrReject] = useState("");
+
+  // Computed (depends on state + selectors)
   const detail =
     (activeKey === originalKey ? detail_gasDeposit : detailDraft_gasDeposit) ||
     {};
-
-  const handleSetActiveKey = (newActiveKey) => {
-    setActiveKey(newActiveKey);
-  };
-
-  //state
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [approveOrReject, setApproveOrReject] = useState("");
 
   const { status, statusApproval } = detail_gasDeposit;
 
@@ -131,9 +125,28 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
     }
   ].filter(Boolean);
 
+  const draftExist =
+    status &&
+    status !== "DRAFT" &&
+    statusApproval &&
+    statusApproval !== "APPROVED";
+  const isApproval = ["GAS_DEPOSIT", "INACTIVE_GAS_DEPOSIT"].includes(
+    approvalType
+  );
+
+  // --- Handlers ---
   /**
-   * @param {boolean} show
-   * @param {"approve"|"reject"} action
+   * Switches the active detail tab between Original and Current.
+   * @param {string} newActiveKey
+   */
+  const handleSetActiveKey = (newActiveKey) => {
+    setActiveKey(newActiveKey);
+  };
+
+  /**
+   * Opens or closes the approval/rejection modal.
+   * @param {boolean}            show   - true to open, false to close
+   * @param {"approve"|"reject"} [action] - Which action to arm
    */
   const handleApprovalModal = (show, action) => {
     if (show) {
@@ -146,7 +159,10 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   };
 
   /**
+   * Dispatches approve or reject for the current gas deposit record.
+   * @param {string}             description - Remark entered in the approval form
    * @param {"approve"|"reject"} action
+   * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
     const body = [
@@ -198,6 +214,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
     }
   };
 
+  // --- Effects ---
   useEffect(() => {
     if (isStandAlone)
       dispatch(getGrantedAccessAccount("/account-management/gas-deposit"));
@@ -232,20 +249,14 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [idAccount, idCustomer]);
 
   useEffect(() => {
-    if (idGd) {
-      dispatch(getDetailGasDeposit(idGd));
-      dispatch(getDetailDraftGasDeposit(idGd));
-    }
+    if (idGd)
+      dispatch(getDetailGasDeposit(idGd))
   }, [idGd]);
 
-  const draftExist =
-    status &&
-    status !== "DRAFT" &&
-    statusApproval &&
-    statusApproval !== "APPROVED";
-  const isApproval = ["GAS_DEPOSIT", "INACTIVE_GAS_DEPOSIT"].includes(
-    approvalType
-  );
+  useEffect(() => {
+    if (idGd && draftExist)
+      dispatch(getDetailDraftGasDeposit(idGd));
+  }, [idGd, draftExist])
 
   return (
     <LayoutMenu>

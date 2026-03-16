@@ -3,6 +3,13 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../../components/StatusComponent";
 
+/**
+ * Presentational info panel for an invoice relation record.
+ * Displays account details, dates, status, and description.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Invoice relation detail record
+ */
 const InvoiceRelationDetailInfo = ({
   detail = {},
 }) => {

@@ -280,7 +280,7 @@ export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
   async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/invoice-relation/approve-inactive";
-      const response = await accountManagementService.activationWithRemark(
+      await accountManagementService.activationWithRemark(
         url,
         body
       );
@@ -290,8 +290,8 @@ export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
         description: `Your data has been ${action === "approve" ? "approved" : "rejected"}.`,
         return: false
       };
+
       thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -322,7 +322,8 @@ export const inactivateInvoiceRelation = createAsyncThunk(
   async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/invoice-relation/inactive";
-      const response = await accountManagementService.activationWithRemark(
+      
+      await accountManagementService.activationWithRemark(
         url,
         body
       );
@@ -332,8 +333,8 @@ export const inactivateInvoiceRelation = createAsyncThunk(
         description: `Your data has been submitted`,
         return: false
       };
+
       thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
     } catch (error) {
       const message =
         (error.response &&

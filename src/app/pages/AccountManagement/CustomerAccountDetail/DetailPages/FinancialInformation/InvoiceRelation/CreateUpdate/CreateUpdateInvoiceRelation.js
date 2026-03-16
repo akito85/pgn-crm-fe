@@ -64,40 +64,40 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     detail_invoiceRelation,
     detailDraft_invoiceRelation,
   } = useSelector((state) => state.invoiceRelation);
-
-  const attachments = detail_invoiceRelation.attachments;
-
+  
   const loading =
-    loading_listIrApprovalOption ||
+  loading_listIrApprovalOption ||
     loading_detailIrApprovalHierarchyDetails ||
     loading_detailIr ||
     loading_detailDraftIr;
-
+    
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idIr = location?.state?.id;
-
+  
   const status = detail_invoiceRelation.status || "DRAFT";
   const statusApproval = detail_invoiceRelation.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
-
+  
   const isDraftApproval = statusApproval === "DRAFT";
   const isRejectApproval = statusApproval === "REJECT";
 
   //state
-  const [dataAttachment, setDataAttachment] = useState([]);
-
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
+  
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
-
+  
   const attachmentIsRequired = true;
-
+  
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_invoiceRelation : detail_invoiceRelation;
+  const attachments = detail.attachments;
 
   const formFields = [
     ["accountNumber", "accountName", "startDate", "endDate", "description"],
@@ -149,7 +149,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   useEffect(() => {
     if (isUpdate && attachments)
-      setDataAttachment([...attachments]);
+      setAttachmentDataSource([...attachments]);
   }, [detail]);
 
   useEffect(() => {
@@ -195,50 +195,55 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (current === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
-            const errorBody = {
-              title: "Failed",
-              description: `Please upload at least one attachment`
-            };
-            dispatch(showModalError(errorBody));
-
-            throw new Error("There was no file attached");
-          }
-        } else {
-          await form.validateFields(formFields[current]);
-
-          const {
-            accountId : relatedAccountId,
-            description,
-            startDate,
-            endDate,
-            appHierId
-          } = form.getFieldsValue(true);
-
-          const body = {
-            stepNumber: current + 1,
-            type: formType.toUpperCase(),
-            id: idIr,
-            data : {
-              accountId, 
-              relatedAccountId,
-              description, 
-              startDate: NxDate.formatForAPI(startDate),
-              endDate: NxDate.formatForAPI(endDate),
-              appHierId,
+        if (submitType === "submit") {
+          if (current === 2) {
+            if (attachmentIsRequired && !attachmentDataSource.length) {
+              const errorBody = {
+                title: "Failed",
+                description: `Please upload at least one attachment`
+              };
+              dispatch(showModalError(errorBody));
+  
+              throw new Error("There was no file attached");
             }
+          } else {
+            await form.validateFields(formFields[current]);
+  
+            const {
+              accountId : relatedAccountId,
+              description,
+              startDate,
+              endDate,
+              appHierId
+            } = form.getFieldsValue(true);
+  
+            const body = {
+              stepNumber: current + 1,
+              type: formType.toUpperCase(),
+              id: idIr,
+              data : {
+                accountId, 
+                relatedAccountId,
+                description, 
+                startDate: NxDate.formatForAPI(startDate),
+                endDate: NxDate.formatForAPI(endDate),
+                appHierId,
+              }
+            }
+  
+            await dispatch(
+              validateCreateUpdate({
+                body,
+                services: accountManagementService,
+                endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+                type: formType
+              })
+            ).unwrap();
           }
-
-          await dispatch(
-            validateCreateUpdate({
-              body,
-              services: accountManagementService,
-              endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-              type: formType
-            })
-          ).unwrap();
-        }
+        } else if (submitType === "draft")
+          await form.validateFields(["accountNumber", "accountName"]);
+        else
+          return;
       } catch (err) {
         return;
       }
@@ -355,8 +360,9 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           header: "Attachment",
           content: (
             <AttachmentInvoiceRelation
-              data={dataAttachment}
-              updateData={setDataAttachment}
+              dataSource={attachmentDataSource}
+              setDataSource={setAttachmentDataSource}
+              setDeleted={setDeletedAttachments}
               dispatch={dispatch}
               key={`invoice-relation-tab-2`}
               getAPICategory={getIrAttachmentCategory}
@@ -376,7 +382,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const next = async () => {
     try {
       if (current === 2) {
-        if (attachmentIsRequired && !dataAttachment.length) {
+        if (attachmentIsRequired && !attachmentDataSource.length) {
           const errorBody = {
             title: "Failed",
             description: `Please upload at least one attachment`
@@ -434,7 +440,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     for (let i = current; i < newCurrent; i++) {
       try {
         if (i === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
+          if (attachmentIsRequired && !attachmentDataSource.length) {
             const errorBody = {
               title: "Failed",
               description: `Please upload at least one attachment`
@@ -512,6 +518,13 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       remark
     } = form.getFieldsValue(true);
 
+    const attachments = [
+      ...attachmentDataSource.filter(
+        attachment => ["exist", "draft"].includes(attachment.dataType)
+      ),
+      ...deletedAttachments
+    ];
+
     const body = {
       accountId,
       relatedAccountId,
@@ -520,11 +533,12 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
-      remark
+      remark,
+      attachments
     };
 
     // Filter only new attachments (not existing ones)
-    const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType !== "exist");
 
     const navigateTarget = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
@@ -551,8 +565,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         updateInvoiceRelation({
           id: idIr,
           body,
-          attachments: dataAttachment.filter(
-            (attachment) => attachment.dataType !== "exist"
+          attachments: attachmentDataSource.filter(
+            (attachment) => attachment.dataType === "new"
           ),
           action: confirmationType.toUpperCase()
         })
@@ -573,25 +587,26 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   const handleClear = () => {
     if (isCreate) {
-      setDataAttachment([]);
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
       if (data_irApprovalHierarchy?.length) {
         const {
-          accountId: relatedAccountId,
+          accountId,
           startDate,
           endDate,
           description,
           appHierId,
-          relatedAccountNumber,
-          relatedAccountName
+          accountName,
+          accountNumber,
         } = detail;
 
         form.setFieldsValue({
-          relatedAccountId,
-          accountName: relatedAccountName,
-          accountNumber: relatedAccountNumber,
+          accountId,
+          accountName,
+          accountNumber,
           startDate: NxDate.formatForAPI(startDate),
           endDate: NxDate.formatForAPI(endDate),
           description,
@@ -607,7 +622,9 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       }
 
       if (attachments)
-        setDataAttachment([...attachments]);
+        setAttachmentDataSource([...attachments]);
+
+      setDeletedAttachments([]);
 
       setCurrent(0);
     }
@@ -677,7 +694,6 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                       handleSetShowConfirmationModal(true, "draft")
                     }
                     type={"secondary"}
-                    disabled={current !== steps.length - 1}
                   >
                     Save as Draft
                   </Button>
@@ -733,10 +749,11 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                 })
               )}
               type={confirmationType}
-              dataAttachment={dataAttachment}
+              attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_createUpdateIr}
+              handleSubmitForm={handleSubmitForm}
             />
           </Form>
         </Spin>

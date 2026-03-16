@@ -9,7 +9,7 @@ import InfoInvoiceRelation from "../StepContents/InformationForm/InfoInvoiceRela
 const ConfirmationModalTabs = ({
   form,
   approvalData,
-  dataAttachment,
+  attachmentDataSource,
   service,
   type = "",
   configApplication,
@@ -39,7 +39,7 @@ const ConfirmationModalTabs = ({
       label: "Attachment",
       children: (
         <AttachmentSectionForm
-          data={dataAttachment}
+          dataSource={attachmentDataSource}
           dispatch={dispatch}
           service={service}
           configApplication={configApplication}
