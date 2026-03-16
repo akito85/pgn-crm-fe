@@ -293,6 +293,8 @@ const ModalCreateWarranty = ({
             handleRefresh();
             handleBackForm();
         } catch (error) {
+            const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save warranty';
+            message.error(`Save failed: ${errorMsg}`);
             console.error(error);
         } finally {
             setLoadingSave(false);

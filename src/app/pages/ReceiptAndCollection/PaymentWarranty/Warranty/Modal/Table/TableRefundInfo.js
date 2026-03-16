@@ -68,7 +68,7 @@ export const columnsRefundInfo = (
             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
             parser={value => value.replace(/\$\s?|(\.*)/g, '')}
             value={refundAmountData[record.key]}
-            onChange={(val) => handleRefundAmountChange(val, record.key)}
+            onChange={(val) => handleRefundAmountChange(val, record.key, record.currencyBalance)}
             controls={false}
           />
         )

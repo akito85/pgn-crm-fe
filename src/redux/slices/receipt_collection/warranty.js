@@ -1370,10 +1370,18 @@ const warrantySlice = createSlice({
       if (action.payload.isLoadMore) {
         state.data_approval_list = {
           ...action.payload,
-          result: [...(state.data_approval_list?.result || []), ...(action.payload.result || [])],
+          result: [
+            ...(state.data_approval_list?.result || []),
+            ...action.payload.result.map(item => ({ ...item }))
+          ].filter((item, index, self) => 
+            index === self.findIndex(t => t.id === item.id)
+          ), // Avoid duplicates
         };
       } else {
-        state.data_approval_list = action.payload;
+        state.data_approval_list = {
+          ...action.payload,
+          result: action.payload.result.map(item => ({ ...item }))
+        };
       }
     },
     [getListApprovalWarranty.rejected]: (state) => {

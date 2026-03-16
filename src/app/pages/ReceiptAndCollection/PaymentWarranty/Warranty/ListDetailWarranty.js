@@ -74,13 +74,24 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
 
   useEffect(() => {
     if (id) {
-      dispatch(getDetailWarranty({ id }));
-      dispatch(getDetailWarrantyMutation({ id, page: 1, pageSize: 999 }));
+      const fetchDetails = async () => {
+        try {
+          // Fetch primary detail first
+          await dispatch(getDetailWarranty({ id })).unwrap();
+          
+          // Fetch secondary details in parallel once primary is fetched
+          await Promise.all([
+            dispatch(getDetailWarrantyMutation({ id, page: 1, pageSize: 999 })),
+            isHold ? dispatch(getHoldDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
+            isRelease ? dispatch(getReleaseDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
+            isRefund ? dispatch(getRefundDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
+          ]);
+        } catch (error) {
+          console.error('Failed to fetch warranty details:', error);
+        }
+      };
       
-      // Fetch specific transaction details if present
-      if (isHold) dispatch(getHoldDetailList({ id, page: 1, pageSize: 999 }));
-      if (isRelease) dispatch(getReleaseDetailList({ id, page: 1, pageSize: 999 }));
-      if (isRefund) dispatch(getRefundDetailList({ id, page: 1, pageSize: 999 }));
+      fetchDetails();
     }
     dispatch(getAllApprovalList());
   }, [id, dispatch, isHold, isRelease, isRefund]);
