@@ -732,6 +732,7 @@ const NxTable = ({
               overflow: hidden;
               border: 1px solid #C8CDD4;
               border-bottom: none;
+              border-collapse: collapse;
             }
 
             #${idTable} .ant-table-container {
