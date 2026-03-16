@@ -777,6 +777,10 @@ const NxTable = ({
               border-bottom: 1px solid #C8CDD4 !important;
             }
 
+            #${idTable} .ant-table-thead > tr:first-child > th {
+              border-top: 1px solid #C8CDD4 !important;
+            }
+
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
               padding: 4px 8px !important;
               min-height: 30px;
