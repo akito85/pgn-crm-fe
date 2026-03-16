@@ -185,12 +185,12 @@ const SaInformation = ({
       alreadyGasIn: e.target.checked,
       gasInPlanDate: null
     })
-    // form.setFieldsValue({ gasInPlanDate: undefined })
-    // if (!e.target.checked) {
-    //   setTimeout(() => {
-    //     form.validateFields(['gasInPlanDate'])
-    //   }, 0)
-    // }
+    form.setFieldsValue({ gasInPlanDate: undefined })
+    if (e.target.checked) {
+      setTimeout(() => {
+        form.setFields([{ name: 'gasInPlanDate', errors: [] }])
+      }, 0)
+    }
   };
 
   return (
