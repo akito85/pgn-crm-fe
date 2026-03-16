@@ -15,12 +15,16 @@ const ConfirmationModal = ({
   service,
   configApplication,
   loading = false,
+  handleSubmitForm = () => {},
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
   const [activeTab, setActiveTab] = useState(0);
 
   const { loading_createUpdateIr } = useSelector((state) => state.invoiceRelation);
+
+  const isSubmit = type === "submit";
+  const isDraft = type === "draft";
 
   /**
    * @param {"next" | "prev"} direction
@@ -65,8 +69,8 @@ const ConfirmationModal = ({
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} form={formId} htmlType={"submit"} loading={loading_createUpdateIr}>
-                {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
+              <Button type={"submit"} form={formId} htmlType={isSubmit ? "submit" : "button"} onClick={isDraft ? handleSubmitForm : undefined} loading={loading_createUpdateIr}>
+                {isSubmit ? "Submit" : isDraft ? "Save as Draft" : ""}
               </Button>
             )}
           </div>
