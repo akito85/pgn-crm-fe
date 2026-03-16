@@ -54,6 +54,16 @@ const UploadWarrantyLayout = ({
     accept: ".xlsx, .xls",
     maxCount: 1,
     beforeUpload: (file) => {
+      const allowedTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        message.error('Invalid file type. Please upload Excel file only.');
+        return false;
+      }
+
       if (file.size > MAX_FILE_SIZE) {
         message.error('File size exceeds 5 MB limit');
         return false;

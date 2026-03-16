@@ -523,7 +523,15 @@ const ModalRefund = ({
 
   // Refund Information Step
   const [refundAmountData, setRefundAmountData] = useState({});
-  const handleRefundAmountChange = (value, recordKey) => {
+  const handleRefundAmountChange = (value, recordKey, maxAmount) => {
+    if (value > maxAmount) {
+      message.warning(`Refund amount cannot exceed balance: ${maxAmount.toLocaleString()}`);
+      return;
+    }
+    if (value <= 0) {
+      message.warning('Refund amount must be greater than 0');
+      return;
+    }
     setRefundAmountData(prev => ({ ...prev, [recordKey]: value }));
   };
 

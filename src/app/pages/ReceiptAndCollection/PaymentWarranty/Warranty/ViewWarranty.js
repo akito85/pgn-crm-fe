@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Dropdown, Menu, Tooltip, Checkbox, Tabs } from "antd";
+import { debounce } from "lodash";
 import { DownOutlined, EyeOutlined, DownloadOutlined, EditOutlined } from "@ant-design/icons";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -50,7 +51,7 @@ import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { deleteWarranty } from "../../../../../redux/slices/receipt_collection/warranty";
 
 const ViewWarranty = () => {
-  const { data, loading, loadingList, dataApprovalHistory, data_detail, dataSummary, loadingSummary } = useSelector(
+  const { data, loading, loadingList, dataApprovalHistory, data_detail, dataSummary, loadingSummary, loadingApproval } = useSelector(
     (state) => state.warranty
   );
   const warranties = useSelector(selectAllWarranties);
@@ -89,8 +90,9 @@ const ViewWarranty = () => {
   }));
 
   useEffect(() => {
+    let timeoutId;
     if (pageDetail && activeRowKey && detailRef.current) {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         detailRef.current.scrollIntoView({
           behavior: "smooth",
           block: "start",
@@ -98,6 +100,9 @@ const ViewWarranty = () => {
         });
       }, 100);
     }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [activeRowKey, pageDetail]);
 
   useEffect(() => {
@@ -130,20 +135,18 @@ const ViewWarranty = () => {
     }
   ];
 
-  const handleSearch = React.useCallback((selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  }, []);
+  const handleSearch = useMemo(() => 
+    debounce((selectedKeys, confirm, dataIndex) => {
+      confirm();
+      setSearchText(selectedKeys[0]);
+      setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+      setSearch((prevState) => {
+        if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
+        return { ...prevState, [dataIndex]: selectedKeys[0] };
+      });
+    }, 500),
+    []
+  );
 
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -238,13 +241,9 @@ const ViewWarranty = () => {
     }));
   };
 
-  const handleHistory = async (record) => {
-    try {
-      await dispatch(getApprovalHistory({ id: record.id })).unwrap();
-      setOpenModalHistory(true);
-    } catch (error) {
-      setOpenModalHistory(false);
-    }
+  const handleHistory = (record) => {
+    setOpenModalHistory(true);
+    dispatch(getApprovalHistory({ id: record.id }));
   };
 
   const handleDelete = (record) => {
@@ -809,9 +808,14 @@ const ViewWarranty = () => {
       />
 
       <ModalHistory
-        isOpen={openModalHistory && dataApprovalHistoryFix}
+        isOpen={openModalHistory}
         handleClose={() => setOpenModalHistory(false)}
-        header={"Approval History"}
+        header={
+          <div className="flex items-center gap-2">
+            <span>Approval History</span>
+            {loadingApproval && <Spin size="small" />}
+          </div>
+        }
         width={850}
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}

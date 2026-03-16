@@ -287,17 +287,17 @@ const ModalMutation = ({
         <div style={{ display: valuePage !== "Mutation Details" ? "none" : undefined }}>
           <SectionCard title="MUTATION INFORMATION" defaultActiveKey={['1']}>
             <div className="grid grid-cols-5 gap-y-4 gap-x-4">
-              <DetailText label="Source">{DOMPurify.sanitize(mutationData.source) || "-"}</DetailText>
-              <DetailText label="Mutation Number">{DOMPurify.sanitize(mutationData.mutationNumber) || "-"}</DetailText>
-              <DetailText label="Type">{DOMPurify.sanitize(mutationData.type) || "-"}</DetailText>
-              <DetailText label="Category">{DOMPurify.sanitize(mutationData.category) || "-"}</DetailText>
+              <DetailText label="Source"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.source || '-') }} /></DetailText>
+              <DetailText label="Mutation Number"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.mutationNumber || '-') }} /></DetailText>
+              <DetailText label="Type"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.type || '-') }} /></DetailText>
+              <DetailText label="Category"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.category || '-') }} /></DetailText>
               <DetailText label="Date">{mutationData.date ? moment(mutationData.date).format("DD MMM YYYY") : "-"}</DetailText>
               <DetailText label="Amount">{mutationData.amount?.toLocaleString() || "-"}</DetailText>
-              <DetailText label="Converted Currency">{DOMPurify.sanitize(mutationData.convertedCurrencyName) || "-"}</DetailText>
+              <DetailText label="Converted Currency"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.convertedCurrencyName || '-') }} /></DetailText>
               <DetailText label="Rate">{mutationData.rate?.toLocaleString() || "-"}</DetailText>
               <DetailText label="EQV Amount">{mutationData.eqvAmount?.toLocaleString() || "-"}</DetailText>
               <div className="col-span-5">
-                <DetailText label="Description">{DOMPurify.sanitize(mutationData.description) || "-"}</DetailText>
+                <DetailText label="Description"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.description || '-') }} /></DetailText>
               </div>
             </div>
           </SectionCard>

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button } from "antd";
+import { Steps, Form, Button, message } from "antd";
 import { FormStepper } from "../../../../../../components/FormStepNavigation";
 import { RightOutlined } from "@ant-design/icons";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
@@ -54,9 +54,10 @@ const ModalApprovalWarranty = ({
   const [bodyError, setBodyError] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState({
-    status: "right",
     approvalStatus: "right",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initial fetch
   useEffect(() => {
@@ -207,26 +208,30 @@ const ModalApprovalWarranty = ({
     form.resetFields();
   };
 
-  const handleSave = (formValue) => {
+  const handleSave = async (formValue) => {
+    if (isSubmitting) return; // Prevent double submission
+
     if (current < steps.length - 1) {
       handleButtonNext();
     } else {
-      const payload = dataTableSelect.map((item) => ({
-        id: item.id,
-        action: action,
-        remark: formValue.remark,
-        approvalId: item.approvalId,
-      }));
+      setIsSubmitting(true);
+      try {
+        const payload = dataTableSelect.map((item) => ({
+          id: item.id,
+          action: action,
+          remark: formValue.remark,
+          approvalId: item.approvalId,
+        }));
 
-      dispatch(submitApproval({ body: payload }))
-        .unwrap()
-        .then(() => {
-          handleCancelForm();
-          handleListRefresh();
-        })
-        .catch((error) => {
-          console.log("Error", error);
-        });
+        await dispatch(submitApproval({ body: payload })).unwrap();
+        handleCancelForm();
+        handleListRefresh();
+      } catch (error) {
+        message.error('Failed to submit approval. Please try again.');
+        console.error("Error", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -296,7 +301,7 @@ const ModalApprovalWarranty = ({
                   <Button
                     key="btn-reject"
                     htmlType="submit"
-                    form="formApproveWarranty"
+                    disabled={isSubmitting}
                     onClick={() => setAction("REJECT")}
                     style={{
                       backgroundColor: "#BE3036",
@@ -305,6 +310,7 @@ const ModalApprovalWarranty = ({
                       borderRadius: "6px",
                       height: "32px",
                       fontSize: "12px",
+                      opacity: isSubmitting ? 0.6 : 1,
                     }}
                   >
                     Reject
@@ -313,6 +319,7 @@ const ModalApprovalWarranty = ({
                     key="btn-approve"
                     htmlType="submit"
                     form="formApproveWarranty"
+                    disabled={isSubmitting}
                     onClick={() => setAction("APPROVE")}
                     style={{
                       backgroundColor: "#388E3C",
@@ -321,6 +328,7 @@ const ModalApprovalWarranty = ({
                       borderRadius: "6px",
                       height: "32px",
                       fontSize: "12px",
+                      opacity: isSubmitting ? 0.6 : 1,
                     }}
                   >
                     Approve
