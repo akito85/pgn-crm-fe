@@ -15,6 +15,7 @@ const NxApproveOrRejectModal = ({
   children,
   customMessage,
   width = 1000,
+  loading = false,
 }) => {
   const [form] = Form.useForm();
 
@@ -38,15 +39,17 @@ const NxApproveOrRejectModal = ({
       title={`${header} INFORMATION`}
       width={width}
       type={"confirmation"}
+      loading={loading}
       footer={
         <div className="w-full flex justify-end">
-          <Button onClick={handleCancelModalFinal} type="menu">
+          <Button onClick={handleCancelModalFinal} type="menu" disabled={loading}>
             Cancel
           </Button>
           <Button
             form="formApproveReject"
             type="submit"
             htmlType="submit"
+            loading={loading}
           >
             Confirm
           </Button>
@@ -54,7 +57,6 @@ const NxApproveOrRejectModal = ({
       }
     >
       <div className="p-4">
-
         <Form
           id="formApproveReject"
           layout="vertical"
@@ -78,9 +80,7 @@ const NxApproveOrRejectModal = ({
             showIcon
             className="p-0 m-0"
           />
-
           {children}
-
           <Form.Item
             name={"remark"}
             label={"Remark"}
@@ -92,6 +92,7 @@ const NxApproveOrRejectModal = ({
               rows={1}
               type="textarea"
               placeholder={"Type your remark"}
+              disabled={loading}
             />
           </Form.Item>
         </Form>
