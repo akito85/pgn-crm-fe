@@ -10,7 +10,15 @@ import NxTable from "../../../../../components/Nx/NxTable";
 import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
 import { nxApplyFixedColumns } from "../../../../../utils/Nx/nxApplyFixedColumns";
 
+/**
+ * Presentational attachment panel for a gas deposit record.
+ * Displays, previews, and downloads file attachments.
+ *
+ * @param {object}   props
+ * @param {object[]} [props.attachments=[]] - List of attachment records
+ */
 const GasDepositDetailAttch = ({ attachments = [] }) => {
+  // --- State ---
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
@@ -24,6 +32,7 @@ const GasDepositDetailAttch = ({ attachments = [] }) => {
 
   const searchInput = useRef(null);
 
+  // --- Handlers ---
   const handleShow = async (r) => {
     if ((r.fileType || r.type).includes("application/vnd")) {
       accountManagementService.downloadData(r.urlFile1);
@@ -64,6 +73,7 @@ const GasDepositDetailAttch = ({ attachments = [] }) => {
     });
   };
 
+  // --- Derived values ---
   const columnDefinitions = useMemo(
     () =>
       getDetailAttachmentColumns(

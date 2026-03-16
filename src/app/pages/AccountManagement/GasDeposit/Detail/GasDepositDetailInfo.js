@@ -3,9 +3,17 @@ import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import NxDate from "../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../components/StatusComponent";
 
+/**
+ * Presentational info panel for a gas deposit record.
+ * Displays account details, dates, status, and description.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Gas deposit detail record
+ */
 const GasDepositDetailInfo = ({
   detail = {},
 }) => {
+  // --- Derived values ---
   const {
     accountNumber,
     accountName,
