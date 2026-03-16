@@ -64,41 +64,40 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     detail_invoiceRelation,
     detailDraft_invoiceRelation,
   } = useSelector((state) => state.invoiceRelation);
-
-  const attachments = detail_invoiceRelation.attachments;
-
+  
   const loading =
-    loading_listIrApprovalOption ||
+  loading_listIrApprovalOption ||
     loading_detailIrApprovalHierarchyDetails ||
     loading_detailIr ||
     loading_detailDraftIr;
-
+    
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idIr = location?.state?.id;
-
+  
   const status = detail_invoiceRelation.status || "DRAFT";
   const statusApproval = detail_invoiceRelation.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
-
+  
   const isDraftApproval = statusApproval === "DRAFT";
   const isRejectApproval = statusApproval === "REJECT";
 
   //state
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
-
+  
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
-
+  
   const attachmentIsRequired = true;
-
+  
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_invoiceRelation : detail_invoiceRelation;
+  const attachments = detail.attachments;
 
   const formFields = [
     ["accountNumber", "accountName", "startDate", "endDate", "description"],
