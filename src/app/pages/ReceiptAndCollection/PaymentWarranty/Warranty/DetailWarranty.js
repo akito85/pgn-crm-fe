@@ -133,10 +133,16 @@ const DetailWarranty = ({ data_detail }) => {
     if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
       setDataApprovalHistoryFix({
         dataApprover: {
-          mutation: dataApprovalHistory?.dataApprover?.WARRANTY_MUTATION || []
+          mutation: dataApprovalHistory?.dataApprover?.WARRANTY_MUTATION?.length ? dataApprovalHistory.dataApprover.WARRANTY_MUTATION :
+                   (dataApprovalHistory?.dataApprover?.WARRANTY_HOLD?.length ? dataApprovalHistory.dataApprover.WARRANTY_HOLD :
+                   (dataApprovalHistory?.dataApprover?.WARRANTY_RELEASE?.length ? dataApprovalHistory.dataApprover.WARRANTY_RELEASE :
+                   (dataApprovalHistory?.dataApprover?.WARRANTY_REFUND?.length ? dataApprovalHistory.dataApprover.WARRANTY_REFUND : [])))
         },
         dataHistory: {
-          mutation: dataApprovalHistory?.dataHistory?.WARRANTY_MUTATION || []
+          mutation: dataApprovalHistory?.dataHistory?.WARRANTY_MUTATION?.length ? dataApprovalHistory.dataHistory.WARRANTY_MUTATION :
+                   (dataApprovalHistory?.dataHistory?.WARRANTY_HOLD?.length ? dataApprovalHistory.dataHistory.WARRANTY_HOLD :
+                   (dataApprovalHistory?.dataHistory?.WARRANTY_RELEASE?.length ? dataApprovalHistory.dataHistory.WARRANTY_RELEASE :
+                   (dataApprovalHistory?.dataHistory?.WARRANTY_REFUND?.length ? dataApprovalHistory.dataHistory.WARRANTY_REFUND : [])))
         },
       });
     } else {
