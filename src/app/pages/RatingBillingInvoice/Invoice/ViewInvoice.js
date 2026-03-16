@@ -30,7 +30,9 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const ViewInvoice = () => {
   // Selector
-  const { data, loading, data_detail } = useSelector((state) => state.invoice);
+  const { data, loading, data_detail, loading_detail } = useSelector(
+    (state) => state.invoice,
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -49,10 +51,11 @@ const ViewInvoice = () => {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [bodyError, setBodyError] = useState({});
 
-  const [pageDetail, setPageDetail] = useState(false);
+  const [pageDetail, setPageDetail] = useState(false); // eslint-disable-line
+  const [modalDetail, setModalDetail] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [modalReGenerate, setModalReGenerate] = useState(false);
-  const [modalGenerate, setModalGenerate] = useState(false);
+  const [modalGenerate, setModalGenerate] = useState(false); // eslint-disable-line
 
   // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
@@ -201,9 +204,9 @@ const ViewInvoice = () => {
 
   // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
     dispatch(getDetailInvoice(record?.invoiceNumber));
     setInvoiceNumber(record?.invoiceNumber);
+    setModalDetail(true);
   };
 
   // Handle Re Generate
@@ -331,29 +334,6 @@ const ViewInvoice = () => {
     setPage(1);
   };
 
-  const refreshTable = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      getAllInvoicePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: 100,
-        sort,
-        isLoadMore: false,
-      }),
-    );
-    setPage(1);
-  };
-
   // ✅ Get base columns with key property including action column
   const baseColumns = useMemo(() => {
     return columnsInvoice(
@@ -379,34 +359,14 @@ const ViewInvoice = () => {
             <ButtonComponent
               icon={<SVGIcon name="IconDetail" width={20} />}
               border={false}
-              onClick={() => {
-                handleDetail(record);
-                setTimeout(
-                  () =>
-                    window.scrollTo({
-                      top: document.body.scrollHeight,
-                      behavior: "smooth",
-                    }),
-                  100,
-                );
-              }}
+              onClick={() => handleDetail(record)}
             >
               <span className="text-black ml-3">Detail</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Detail" placement="left">
               <div
-                onClick={() => {
-                  handleDetail(record);
-                  setTimeout(
-                    () =>
-                      window.scrollTo({
-                        top: document.body.scrollHeight,
-                        behavior: "smooth",
-                      }),
-                    100,
-                  );
-                }}
+                onClick={() => handleDetail(record)}
                 style={{
                   cursor: "pointer",
                   display: "inline-block",
@@ -424,23 +384,43 @@ const ViewInvoice = () => {
       action: "Regenerate",
       type: "table",
       render: (record, data) => {
+        const isFailed = record?.status?.toLowerCase() === "failed";
         const Content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconReGenerate" width={20} />}
+              icon={
+                <SVGIcon
+                  name="IconReGenerate"
+                  width={20}
+                  color={isFailed ? undefined : "#8D91A0"}
+                />
+              }
               border={false}
-              onClick={() => handleReGenerate(record)}
+              disabled={!isFailed}
+              onClick={isFailed ? () => handleReGenerate(record) : undefined}
             >
-              <span className="text-black ml-3">Re-Generate</span>
+              <span
+                className={isFailed ? "text-black ml-3" : "text-gray-400 ml-3"}
+              >
+                Re-Generate
+              </span>
             </ButtonComponent>
           ) : (
-            <Tooltip title="Re-Generate" placement="left">
+            <Tooltip
+              title={
+                isFailed
+                  ? "Re-Generate"
+                  : "Re-Generate (only available when status is Failed)"
+              }
+              placement="left"
+            >
               <div
-                onClick={() => handleReGenerate(record)}
+                onClick={() => isFailed && handleReGenerate(record)}
                 style={{
-                  cursor: "pointer",
                   display: "inline-block",
                   lineHeight: 0,
+                  cursor: isFailed ? "pointer" : "not-allowed",
+                  opacity: isFailed ? 1 : 0.4,
                 }}
               >
                 <SVGIcon name="IconReGenerate" width={20} />
@@ -618,13 +598,13 @@ const ViewInvoice = () => {
         </div>
       </CardContainer>
 
-      {/* Invoice Log */}
-      {pageDetail === true && data_detail ? (
-        <DetailInvoice
-          detail={data_detail?.logs}
-          invoiceNumber={invoiceNumber}
-        />
-      ) : null}
+      {/* Modal Detail */}
+      <DetailInvoice
+        isOpen={modalDetail}
+        onClose={() => setModalDetail(false)}
+        detail={data_detail}
+        loading={loading_detail}
+      />
 
       {/* Modal Re-Generate */}
       <ModalApproveOrReject

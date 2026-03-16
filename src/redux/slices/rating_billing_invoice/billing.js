@@ -141,7 +141,7 @@ export const getAllBillingPaginate = createAsyncThunk(
 
 export const getAllBillingRequestPaginate = createAsyncThunk(
   "GET_ALL_BILLING_REQUEST_PAGINATE",
-  async ({ page, pageSize, search, sort } = {}, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore = false } = {}, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
@@ -149,7 +149,7 @@ export const getAllBillingRequestPaginate = createAsyncThunk(
       const url = `/v1/dbs/api/billing/request-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
-      return responseData;
+      return { ...responseData, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -497,6 +497,10 @@ const billingSlice = createSlice({
       state.data = [];
       state.currentRequestId = null;
     },
+    // TAMBAHAN: reset data billing request approval (untuk modal request)
+    resetBillingRequestData: (state) => {
+      state.data_list_billing_request_approval = [];
+    },
   },
   extraReducers: {
     // Requested Billing
@@ -574,15 +578,35 @@ const billingSlice = createSlice({
     },
 
     // Get All Billing Request Pagination
-    [getAllBillingRequestPaginate.pending]: (state) => {
-      state.loading = true;
+    [getAllBillingRequestPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllBillingRequestPaginate.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data_list_billing_request_approval = action.payload;
+      const isLoadMore = action.payload?.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        const existing = state.data_list_billing_request_approval?.result || [];
+        const existingIds = new Set(existing.map((item) => item.billCode));
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.billCode),
+        );
+        state.data_list_billing_request_approval = {
+          ...action.payload,
+          result: [...existing, ...uniqueNewData],
+        };
+      } else {
+        state.data_list_billing_request_approval = action.payload;
+      }
     },
-    [getAllBillingRequestPaginate.rejected]: (state) => {
+    [getAllBillingRequestPaginate.rejected]: (state, action) => {
       state.loading = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_list_billing_request_approval = [];
+      }
     },
 
     // Get All Billing Approve Pagination
@@ -782,6 +806,6 @@ const billingSlice = createSlice({
   },
 });
 
-export const { setBillingFilters, resetBillingData } = billingSlice.actions;
+export const { setBillingFilters, resetBillingData, resetBillingRequestData } = billingSlice.actions;
 const { reducer } = billingSlice;
 export default reducer;

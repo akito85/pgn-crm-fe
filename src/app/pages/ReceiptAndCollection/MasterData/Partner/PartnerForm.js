@@ -1,17 +1,15 @@
-import { Select, Input, InputNumber } from "antd";
+import { InputNumber } from "antd";
 import { Form } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import { formMessageRequired } from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";
 import moment from "moment";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import DateComponent from "../../../../../components/DateComponent";
-import SelectComponent from "../../../../../components/SelectComponent";
 
 const PartnerForm = (props) => {
   const {
-    dataType,
     form,
   } = props;
 
@@ -59,7 +57,7 @@ const PartnerForm = (props) => {
   return (
     <div>
       <style>{alignStyle}</style>
-      <BaseContainer header={"PARTNER INFORMATION"}>
+      <CardContainer header={"PARTNER INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Partner Code"}
@@ -76,19 +74,6 @@ const PartnerForm = (props) => {
             <InputComponent placeholder="Input Partner Name" />
           </Form.Item>
 
-          <Form.Item
-            label={"Type"}
-            name={"type"}
-            rules={formMessageRequired("Type")}
-          >
-            <SelectComponent placeholder="Select Type">
-              {dataType?.data?.map((data) => (
-                <Select.Option key={data.name} value={data.name}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
           <Form.Item
             label={"Sec Key Signature"}
             name={"secKeySignature"}
@@ -138,8 +123,7 @@ const PartnerForm = (props) => {
             <DateComponent placeholder="Select End Date" dateDisable={disabledDate} />
           </Form.Item>
         </div>
-
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

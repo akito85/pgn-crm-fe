@@ -21,6 +21,8 @@ import ApproveOrRejectTOS from "../../app/pages/AccountManagement/CustomerAccoun
 import CustomerDetail from "../../app/pages/AccountManagement/Customer/CustomerDetail";
 import UpdateCustomer from "../../app/pages/AccountManagement/Customer/Update/UpdateCustomer";
 import CreateTosSubmission from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/TosSubmission/CreateTosSubmission";
+import CreateWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/CreateWarrantyTerm";
+import DetailWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/DetailWarrantyTerm";
 import UpdateServiceAgreement from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/UpdateServiceAgreement";
 import ViewMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/ViewMeterReadingCode";
 import FormMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/FormMeterReadingCode";
@@ -54,7 +56,7 @@ import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/Cust
 import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
 import PreRequisiteCreateForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/StepContents/PreRequisiteForm/Create";
 
-import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetails";
+import InvoiceRelationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetail";
 import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
 import MultiDestinationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/Details/MultiDestinationDetails";
 import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/CreateUpdate/CreateUpdateMultiDestination";
@@ -122,12 +124,12 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"oneTime"} />,
 
   // Invoice Relation Account Standard
-  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails accountType="standard" />,
+  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetail accountType="standard" />,
   CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"create"} accountType={"standard"} />,
   UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"update"} accountType={"standard"} />,
 
   // Invoice Relation Account One Time
-  VIEW_DETAIL_INVOICE_RELATION_ONETIME_PAGE: <InvoiceRelationDetails accountType="oneTime" />,
+  VIEW_DETAIL_INVOICE_RELATION_ONETIME_PAGE: <InvoiceRelationDetail accountType="oneTime" />,
   CREATE_INVOICE_RELATION_ONETIME_PAGE: <CreateUpdateInvoiceRelation formType={"create"} accountType={"oneTime"} />,
   UPDATE_INVOICE_RELATION_ONETIME_PAGE: <CreateUpdateInvoiceRelation formType={"update"} accountType={"oneTime"} />,
 
@@ -195,6 +197,11 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   CREATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"create"} />,
   UPDATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"update"} />,
   DETAIL_TOS_SUBMISSION_PAGE: <ApproveOrRejectTOS />,
+
+  // WARRANTY TERM
+  CREATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'create'} />,
+  UPDATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'update'} />,
+  DETAIL_WARRANTY_TERM_PAGE: <DetailWarrantyTerm />,
 
   // RAW MATERIAL SOURCE
   CREATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"create"}/>,
