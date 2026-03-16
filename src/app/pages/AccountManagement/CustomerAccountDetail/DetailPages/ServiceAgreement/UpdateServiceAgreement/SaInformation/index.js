@@ -169,9 +169,9 @@ const SaInformation = ({
       gasInPlanDate: null
     })
     form.setFieldsValue({ gasInPlanDate: undefined })
-    if (!e.target.checked) {
+    if (e.target.checked) {
       setTimeout(() => {
-        form.validateFields(['gasInPlanDate'])
+        form.setFields([{ name: 'gasInPlanDate', errors: [] }])
       }, 0)
     }
   };
@@ -210,7 +210,7 @@ const SaInformation = ({
             </Form.Item>
             {/* Check If Not SA Main  */}
             {saRecordData.isMain !== "Y" && (
-              <div className={"grid grid-cols-3 w-full gap-x-6"}>
+              <div>
                 <Form.Item
                   name={"serviceAgreementReferenceNumber"}
                   label={"Service Agreement Reference Number"}
@@ -412,7 +412,7 @@ const SaInformation = ({
                 },
               ]}
             >
-              <SelectComponent disabled={saRecordData.status === "ACTIVE" || saRecordData?.isMain == "N" ? true : false}>
+              <SelectComponent disabled={saRecordData.status === "ACTIVE"? true : false}>
                 {dataBillingCycle &&
                   dataBillingCycle?.map((item, index) => (
                     <Select.Option value={item.id} key={index}>
@@ -432,7 +432,7 @@ const SaInformation = ({
                 },
               ]}
             >
-              <SelectComponent disabled={saRecordData.status === "ACTIVE" || saRecordData?.isMain == "N" ? true : false}>
+              <SelectComponent disabled={saRecordData.status === "ACTIVE" ? true : false}>
                 {dataTermOfPayment &&
                   dataTermOfPayment?.map((item, index) => (
                     <Select.Option value={item.termsOfPaymentId} key={index}>
@@ -452,7 +452,7 @@ const SaInformation = ({
                 },
               ]}
             >
-              <SelectComponent disabled={saRecordData.status === "ACTIVE" || saRecordData?.isMain == "N" ? true : false}>
+              <SelectComponent disabled={saRecordData.status === "ACTIVE"? true : false}>
                 {dataInvoiceTemplate &&
                   dataInvoiceTemplate?.map((item, index) => (
                     <Select.Option value={item.id} key={index}>

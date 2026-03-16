@@ -1458,8 +1458,53 @@ const UpdateServiceAgreement = ({ saType }) => {
 		});
 	}
 
+	// Fields for SA Information step
+	let saInformationFields = [
+		'serviceType',
+		'serviceAgreementNumber',
+		'serviceAgreementType',
+		'saReferenceNumber',
+		'serviceAgreementDate',
+		'startDate',
+		'endDate',
+		'termOfPayment',
+		'billingCycle',
+		'invoiceTemplate',
+	];
+
+	if (saRecordData?.typeSa === "addon") {
+
+		saInformationFields = [
+			...saInformationFields,
+			'saReferenceNumber'
+		];
+	}
+
+  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
+	if (saInfoObj?.serviceAgreementType === 1170) {
+		saInformationFields = [
+			...saInformationFields,
+			'pjbgType'
+		];
+	}
+
+  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
+	if (saInfoObj?.serviceType === 608 && saRecordData?.isMain === "Y" && !saInfoObj?.alreadyGasIn) {
+		saInformationFields = [
+			...saInformationFields,
+			'gasInPlanDate'
+		];
+	}
+
+	if (segment === "KI") {
+		saInformationFields = [
+			...saInformationFields,
+			'commitmentDate',
+		];
+	}
+
 	const functionCheckSaInformation = () => {
-		form.validateFields()
+		form.validateFields(saInformationFields)
 			.then((values) => {
 				next();
 				scrollRightHandler();
