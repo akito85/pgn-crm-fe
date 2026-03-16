@@ -21,6 +21,8 @@ import ApproveOrRejectTOS from "../../app/pages/AccountManagement/CustomerAccoun
 import CustomerDetail from "../../app/pages/AccountManagement/Customer/CustomerDetail";
 import UpdateCustomer from "../../app/pages/AccountManagement/Customer/Update/UpdateCustomer";
 import CreateTosSubmission from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/TosSubmission/CreateTosSubmission";
+import CreateWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/CreateWarrantyTerm";
+import DetailWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/DetailWarrantyTerm";
 import UpdateServiceAgreement from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/UpdateServiceAgreement";
 import ViewMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/ViewMeterReadingCode";
 import FormMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/FormMeterReadingCode";
@@ -195,6 +197,11 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   CREATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"create"} />,
   UPDATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"update"} />,
   DETAIL_TOS_SUBMISSION_PAGE: <ApproveOrRejectTOS />,
+
+  // WARRANTY TERM
+  CREATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'create'} />,
+  UPDATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'update'} />,
+  DETAIL_WARRANTY_TERM_PAGE: <DetailWarrantyTerm />,
 
   // RAW MATERIAL SOURCE
   CREATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"create"}/>,
