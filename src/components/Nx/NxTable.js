@@ -924,7 +924,15 @@ const NxTable = ({
               size="small"
             />
           </div>
-        ) : null}
+        ) : (
+          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+            <span style={{ fontSize: "12px", color: "#6B7280" }}>
+              Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
+            </span>
+            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+            <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+          </div>
+        )}
 
         {loading && (
           <div style={{
