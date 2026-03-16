@@ -51,7 +51,7 @@ import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { deleteWarranty } from "../../../../../redux/slices/receipt_collection/warranty";
 
 const ViewWarranty = () => {
-  const { data, loading, loadingList, dataApprovalHistory, data_detail, dataSummary, loadingSummary } = useSelector(
+  const { data, loading, loadingList, dataApprovalHistory, data_detail, dataSummary, loadingSummary, loadingApproval } = useSelector(
     (state) => state.warranty
   );
   const warranties = useSelector(selectAllWarranties);
@@ -241,13 +241,9 @@ const ViewWarranty = () => {
     }));
   };
 
-  const handleHistory = async (record) => {
-    try {
-      await dispatch(getApprovalHistory({ id: record.id })).unwrap();
-      setOpenModalHistory(true);
-    } catch (error) {
-      setOpenModalHistory(false);
-    }
+  const handleHistory = (record) => {
+    setOpenModalHistory(true);
+    dispatch(getApprovalHistory({ id: record.id }));
   };
 
   const handleDelete = (record) => {
@@ -812,9 +808,14 @@ const ViewWarranty = () => {
       />
 
       <ModalHistory
-        isOpen={openModalHistory && dataApprovalHistoryFix}
+        isOpen={openModalHistory}
         handleClose={() => setOpenModalHistory(false)}
-        header={"Approval History"}
+        header={
+          <div className="flex items-center gap-2">
+            <span>Approval History</span>
+            {loadingApproval && <Spin size="small" />}
+          </div>
+        }
         width={850}
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
