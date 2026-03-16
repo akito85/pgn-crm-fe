@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, Select, InputNumber, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -107,8 +107,9 @@ const CreateJobPage = () => {
   const [notificationSettings, setNotificationSettings] = useState(INITIAL_NOTIFICATIONS);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const { id } = useParams();
+  const id = location.state?.id;
   const isEditMode = Boolean(id);
 
   // RTK Query hooks

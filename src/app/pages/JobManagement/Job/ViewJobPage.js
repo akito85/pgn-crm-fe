@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Spin } from "antd";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -33,7 +33,8 @@ const KvGrid = ({ children }) => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const ViewJobPage = () => {
-  const { id } = useParams();
+  const location = useLocation();
+  const id = location.state?.id;
   const navigate = useNavigate();
 
   const { data: job, isLoading } = useGetJobByIdQuery(id);
@@ -239,7 +240,7 @@ const ViewJobPage = () => {
         <ButtonComponent
           border={false}
           className="!bg-[#1976d2] !text-white !border-transparent"
-          onClick={() => navigate(JOB_MGMT_ROUTES.UPDATE_JOB.replace(":id", id))}
+          onClick={() => navigate(JOB_MGMT_ROUTES.UPDATE_JOB, { state: { id } })}
         >
           Edit
         </ButtonComponent>
