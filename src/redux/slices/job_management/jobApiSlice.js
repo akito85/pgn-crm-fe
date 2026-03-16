@@ -8,100 +8,176 @@ const JOB_BASE = `${configApp.JOB_SERVICE}/v1/api/job/definitions`;
 // ─── Field Transformers ───────────────────────────────────────────────────────
 
 /** Map backend JobResponse → frontend-friendly shape (matches form field names) */
-const toFrontend = (job) => ({
-  id:            job.jobId,
-  name:          job.jobName,
-  code:          job.jobCode,
-  type:          job.jobType,
-  description:   job.description,
-  executeType:   job.execType,
-  handler:       job.handlerClass,
-  taskQueueId:   job.taskQueueId,
-  taskQueueName: job.taskQueueName,
-  timeout:       job.timeoutSeconds,
-  maxRetry:      job.maxRetry,
-  retryPolicy:   job.retryPolicy,
-  module:        job.moduleName,
-  defaultInput:  job.defaultInput,
-  inputSchema:   job.inputSchema,
-  parentJobId:   job.parentJobId,
-  status:        job.status,
-  version:       job.version,
-  createdBy:     job.createdBy,
-  createdAt:     job.createdAt,
-  updatedBy:     job.updatedBy,
-  updatedAt:     job.updatedAt,
-  accessGroupId: job.accessGroupId,
-  notificationSettings: (() => {
-    if (!job.notificationConfig) return null;
+const toFrontend = (job) => {
+  // Parse defaultInput to extract spSchema and spProcedure for stored procedures
+  let spSchema = null, spProcedure = null;
+  if (job.defaultInput) {
     try {
-      const nc = typeof job.notificationConfig === 'string'
-        ? JSON.parse(job.notificationConfig)
-        : job.notificationConfig;
-      return {
-        showInDrawer:    nc.inApp      ?? false,
-        showAlert:       false,
-        sendViaEmail:    nc.email      ?? false,
-        sendViaSMS:      nc.sms        ?? false,
-        sendViaWhatsApp: nc.whatsapp   ?? false,
-      };
+      const defaultInputObj = typeof job.defaultInput === 'string'
+        ? JSON.parse(job.defaultInput)
+        : job.defaultInput;
+      spSchema = defaultInputObj?.schema;
+      spProcedure = defaultInputObj?.procedureName;
     } catch (e) {
-      return null;
+      console.warn('Failed to parse defaultInput:', e);
     }
-  })(),
-});
+  }
+
+  // Parse inputSchema to extract parameters
+  let parameters = [];
+  if (job.inputSchema) {
+    try {
+      const inputSchemaObj = typeof job.inputSchema === 'string'
+        ? JSON.parse(job.inputSchema)
+        : job.inputSchema;
+      parameters = inputSchemaObj?.parameters ?? [];
+    } catch (e) {
+      console.warn('Failed to parse inputSchema:', e);
+    }
+  }
+
+  return {
+    id:            job.jobId,
+    name:          job.jobName,
+    code:          job.jobCode,
+    type:          job.jobType,
+    description:   job.description,
+    executeType:   job.execType,
+    handler:       job.handlerClass,
+    taskQueueId:   job.taskQueueId,
+    taskQueueName: job.taskQueueName,
+    timeout:       job.timeoutSeconds,
+    maxRetry:      job.maxRetry,
+    retryPolicy:   job.retryPolicy,
+    module:        job.moduleName,
+    defaultInput:  job.defaultInput,
+    inputSchema:   job.inputSchema,
+    spSchema:      spSchema,
+    spProcedure:   spProcedure,
+    parameters:    parameters,
+    parentJobId:   job.parentJobId,
+    status:        job.status,
+    version:       job.version,
+    createdBy:     job.createdBy,
+    createdAt:     job.createdAt,
+    updatedBy:     job.updatedBy,
+    updatedAt:     job.updatedAt,
+    accessGroupId: job.accessGroupId,
+    notificationSettings: (() => {
+      if (!job.notificationConfig) return null;
+      try {
+        const nc = typeof job.notificationConfig === 'string'
+          ? JSON.parse(job.notificationConfig)
+          : job.notificationConfig;
+        return {
+          showInDrawer:    nc.inApp      ?? false,
+          showAlert:       false,
+          sendViaEmail:    nc.email      ?? false,
+          sendViaSMS:      nc.sms        ?? false,
+          sendViaWhatsApp: nc.whatsapp   ?? false,
+        };
+      } catch (e) {
+        return null;
+      }
+    })(),
+  };
+};
 
 /** Map frontend form values → CreateJobRequest */
-const toBackendCreate = (v) => ({
-  jobName:        v.name,
-  jobCode:        v.code,
-  jobType:        v.type,
-  description:    v.description,
-  execType:       v.executeType,
-  handlerClass:   v.handler,
-  taskQueueId:    v.taskQueueId    ?? null,
-  timeoutSeconds: v.timeout        ?? null,
-  maxRetry:       v.maxRetry       || 0,
-  retryPolicy:    v.retryPolicy    ?? null,
-  moduleName:     v.module         ?? null,
-  defaultInput:   v.defaultInput   ?? null,
-  inputSchema:    v.inputSchema    ?? null,
-  parentJobId:    v.parentJobId    ?? null,
-  accessGroupId:  v.accessGroupId  ?? null,
-  notificationConfig: v.notificationSettings
-    ? {
-        inApp:     v.notificationSettings.showInDrawer    ?? false,
-        email:     v.notificationSettings.sendViaEmail    ?? false,
-        sms:       v.notificationSettings.sendViaSMS      ?? false,
-        whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
-      }
-    : null,
-});
+const toBackendCreate = (v) => {
+  // Build defaultInput with SP metadata if procedure-based
+  let defaultInput = v.defaultInput ?? null;
+  if (v.executeType === "STORED_PROCEDURE" && v.spSchema && v.spProcedure) {
+    defaultInput = JSON.stringify({
+      schema: v.spSchema,
+      procedureName: v.spProcedure,
+    });
+  }
+
+  // Build inputSchema with parameters if provided
+  let inputSchema = v.inputSchema ?? null;
+  if (v.parameters && v.parameters.length > 0) {
+    const params = v.parameters.filter(p => p.name || p.code);
+    if (params.length > 0) {
+      inputSchema = JSON.stringify({
+        parameters: params,
+      });
+    }
+  }
+
+  return {
+    jobName:        v.name,
+    jobCode:        v.code,
+    jobType:        v.type,
+    description:    v.description,
+    execType:       v.executeType,
+    handlerClass:   v.handler,
+    taskQueueId:    v.taskQueueId    ?? null,
+    timeoutSeconds: v.timeout        ?? null,
+    maxRetry:       v.maxRetry       || 0,
+    retryPolicy:    v.retryPolicy    ?? null,
+    moduleName:     v.module         ?? null,
+    defaultInput:   defaultInput,
+    inputSchema:    inputSchema,
+    parentJobId:    v.parentJobId    ?? null,
+    accessGroupId:  v.accessGroupId  ?? null,
+    notificationConfig: v.notificationSettings
+      ? {
+          inApp:     v.notificationSettings.showInDrawer    ?? false,
+          email:     v.notificationSettings.sendViaEmail    ?? false,
+          sms:       v.notificationSettings.sendViaSMS      ?? false,
+          whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
+        }
+      : null,
+  };
+};
 
 /** Map frontend form values → UpdateJobRequest */
-const toBackendUpdate = (v) => ({
-  jobName:        v.name,
-  jobType:        v.type,
-  description:    v.description,
-  execType:       v.executeType,
-  handlerClass:   v.handler,
-  taskQueueId:    v.taskQueueId    ?? null,
-  timeoutSeconds: v.timeout        ?? null,
-  maxRetry:       v.maxRetry       || 0,
-  retryPolicy:    v.retryPolicy    ?? null,
-  moduleName:     v.module         ?? null,
-  defaultInput:   v.defaultInput   ?? null,
-  inputSchema:    v.inputSchema    ?? null,
-  accessGroupId:  v.accessGroupId  ?? null,
-  notificationConfig: v.notificationSettings
-    ? {
-        inApp:     v.notificationSettings.showInDrawer    ?? false,
-        email:     v.notificationSettings.sendViaEmail    ?? false,
-        sms:       v.notificationSettings.sendViaSMS      ?? false,
-        whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
-      }
-    : null,
-});
+const toBackendUpdate = (v) => {
+  // Build defaultInput with SP metadata if procedure-based
+  let defaultInput = v.defaultInput ?? null;
+  if (v.executeType === "STORED_PROCEDURE" && v.spSchema && v.spProcedure) {
+    defaultInput = JSON.stringify({
+      schema: v.spSchema,
+      procedureName: v.spProcedure,
+    });
+  }
+
+  // Build inputSchema with parameters if provided
+  let inputSchema = v.inputSchema ?? null;
+  if (v.parameters && v.parameters.length > 0) {
+    const params = v.parameters.filter(p => p.name || p.code);
+    if (params.length > 0) {
+      inputSchema = JSON.stringify({
+        parameters: params,
+      });
+    }
+  }
+
+  return {
+    jobName:        v.name,
+    jobType:        v.type,
+    description:    v.description,
+    execType:       v.executeType,
+    handlerClass:   v.handler,
+    taskQueueId:    v.taskQueueId    ?? null,
+    timeoutSeconds: v.timeout        ?? null,
+    maxRetry:       v.maxRetry       || 0,
+    retryPolicy:    v.retryPolicy    ?? null,
+    moduleName:     v.module         ?? null,
+    defaultInput:   defaultInput,
+    inputSchema:    inputSchema,
+    accessGroupId:  v.accessGroupId  ?? null,
+    notificationConfig: v.notificationSettings
+      ? {
+          inApp:     v.notificationSettings.showInDrawer    ?? false,
+          email:     v.notificationSettings.sendViaEmail    ?? false,
+          sms:       v.notificationSettings.sendViaSMS      ?? false,
+          whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
+        }
+      : null,
+  };
+};
 
 const getHeaders = () => {
   const token = JSON.parse(

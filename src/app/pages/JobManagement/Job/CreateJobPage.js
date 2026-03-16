@@ -156,6 +156,7 @@ const CreateJobPage = () => {
       module:      currentJob.module,
       spSchema:    currentJob.spSchema,
       spProcedure: currentJob.spProcedure,
+      accessGroupId: currentJob.accessGroupId,
     });
 
     // Restore SP chain dropdowns
@@ -168,7 +169,7 @@ const CreateJobPage = () => {
       dispatch(fetchProcedureParameters({ schema: currentJob.spSchema, procedure: currentJob.spProcedure }));
     }
 
-    // Restore parameters (replace placeholder data)
+    // Restore parameters (extracted from inputSchema JSON)
     if (currentJob.parameters?.length) {
       setParameters(currentJob.parameters.map((p, i) => ({ ...p, key: p.key ?? i + 1 })));
     }
@@ -176,10 +177,6 @@ const CreateJobPage = () => {
     // Restore notification toggles
     if (currentJob.notificationSettings) {
       setNotificationSettings(currentJob.notificationSettings);
-    }
-
-    if (currentJob.accessGroupId) {
-      form.setFieldValue('accessGroupId', currentJob.accessGroupId);
     }
   }, [currentJob, isEditMode, dispatch]);
 
@@ -222,20 +219,13 @@ const CreateJobPage = () => {
 
   const onFinish = async (values) => {
     try {
-      const isStoredProcedure = values.executeType === "STORED_PROCEDURE";
+      // Combine form values with parameters and notification settings
       const payload = {
         ...values,
-        handler: isStoredProcedure ? "StoredProcedureJobHandler" : values.handler,
         timeout:  values.timeout  || 0,
         maxRetry: values.maxRetry || 0,
         parameters: parameters.filter(p => p.name || p.code),
         notificationSettings,
-        ...(isStoredProcedure && selectedSchema && selectedProcedure && {
-          defaultInput: JSON.stringify({
-            schema: values.spSchema,
-            procedureName: values.spProcedure,
-          }),
-        }),
       };
 
       if (isEditMode) {
