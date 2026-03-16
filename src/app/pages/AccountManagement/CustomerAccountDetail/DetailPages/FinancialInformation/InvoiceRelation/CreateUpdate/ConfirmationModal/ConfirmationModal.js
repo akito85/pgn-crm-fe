@@ -10,7 +10,7 @@ const ConfirmationModal = ({
   isOpen,
   handleCancel,
   approvalData,
-  dataAttachment,
+  attachmentDataSource,
   type = "",
   service,
   configApplication,
@@ -76,7 +76,7 @@ const ConfirmationModal = ({
       <ConfirmationModalTabs
         form={form}
         approvalData={approvalData}
-        dataAttachment={dataAttachment}
+        attachmentDataSource={attachmentDataSource}
         service={service}
         type={type}
         configApplication={configApplication}

@@ -90,7 +90,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const isRejectApproval = statusApproval === "REJECT";
 
   //state
-  const [dataAttachment, setDataAttachment] = useState([]);
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
@@ -149,7 +150,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   useEffect(() => {
     if (isUpdate && attachments)
-      setDataAttachment([...attachments]);
+      setAttachmentDataSource([...attachments]);
   }, [detail]);
 
   useEffect(() => {
@@ -196,7 +197,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     if (show) {
       try {
         if (current === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
+          if (attachmentIsRequired && !attachmentDataSource.length) {
             const errorBody = {
               title: "Failed",
               description: `Please upload at least one attachment`
@@ -355,8 +356,9 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           header: "Attachment",
           content: (
             <AttachmentInvoiceRelation
-              data={dataAttachment}
-              updateData={setDataAttachment}
+              dataSource={attachmentDataSource}
+              setDataSource={setAttachmentDataSource}
+              setDeleted={setDeletedAttachments}
               dispatch={dispatch}
               key={`invoice-relation-tab-2`}
               getAPICategory={getIrAttachmentCategory}
@@ -376,7 +378,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const next = async () => {
     try {
       if (current === 2) {
-        if (attachmentIsRequired && !dataAttachment.length) {
+        if (attachmentIsRequired && !attachmentDataSource.length) {
           const errorBody = {
             title: "Failed",
             description: `Please upload at least one attachment`
@@ -434,7 +436,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     for (let i = current; i < newCurrent; i++) {
       try {
         if (i === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
+          if (attachmentIsRequired && !attachmentDataSource.length) {
             const errorBody = {
               title: "Failed",
               description: `Please upload at least one attachment`
@@ -512,6 +514,13 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       remark
     } = form.getFieldsValue(true);
 
+    const attachments = [
+      ...attachmentDataSource.filter(
+        attachment => ["exist", "draft"].includes(attachment.dataType)
+      ),
+      ...deletedAttachments
+    ];
+
     const body = {
       accountId,
       relatedAccountId,
@@ -520,11 +529,12 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
-      remark
+      remark,
+      attachments
     };
 
     // Filter only new attachments (not existing ones)
-    const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType !== "exist");
 
     const navigateTarget = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
@@ -551,8 +561,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         updateInvoiceRelation({
           id: idIr,
           body,
-          attachments: dataAttachment.filter(
-            (attachment) => attachment.dataType !== "exist"
+          attachments: attachmentDataSource.filter(
+            (attachment) => attachment.dataType === "new"
           ),
           action: confirmationType.toUpperCase()
         })
@@ -573,25 +583,26 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   const handleClear = () => {
     if (isCreate) {
-      setDataAttachment([]);
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
       if (data_irApprovalHierarchy?.length) {
         const {
-          accountId: relatedAccountId,
+          accountId,
           startDate,
           endDate,
           description,
           appHierId,
-          relatedAccountNumber,
-          relatedAccountName
+          accountName,
+          accountNumber,
         } = detail;
 
         form.setFieldsValue({
-          relatedAccountId,
-          accountName: relatedAccountName,
-          accountNumber: relatedAccountNumber,
+          accountId,
+          accountName,
+          accountNumber,
           startDate: NxDate.formatForAPI(startDate),
           endDate: NxDate.formatForAPI(endDate),
           description,
@@ -607,7 +618,9 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       }
 
       if (attachments)
-        setDataAttachment([...attachments]);
+        setAttachmentDataSource([...attachments]);
+
+      setDeletedAttachments([]);
 
       setCurrent(0);
     }
@@ -733,7 +746,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                 })
               )}
               type={confirmationType}
-              dataAttachment={dataAttachment}
+              attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_createUpdateIr}
