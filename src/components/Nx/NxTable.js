@@ -680,7 +680,7 @@ const NxTable = ({
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
               padding-bottom: 0;
-              ${(useInfiniteScroll || usePagination) ? "border-left: 0.5px solid #C8CDD4; border-right: 0.5px solid #C8CDD4;" : ""}
+              ${(useInfiniteScroll || usePagination) ? "border-left: 1px solid #C8CDD4; border-right: 1px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
@@ -764,21 +764,21 @@ const NxTable = ({
             }
 
             #${idTable} .ant-table-thead {
-              border-left: 0.5px solid #C8CDD4;
-              border-right: 0.5px solid #C8CDD4;
+              border-left: 1px solid #C8CDD4;
+              border-right: 1px solid #C8CDD4;
             }
 
             #${idTable} .ant-table-thead > tr > th {
               padding: 4px 8px !important;
               height: 30px !important;
-              border: 0.5px solid #C8CDD4 !important;
+              border: 1px solid #C8CDD4 !important;
             }
 
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
               padding: 4px 8px !important;
               min-height: 30px;
               font-size: 12px;
-              border: 0.5px solid #C8CDD4 !important;
+              border: 1px solid #C8CDD4 !important;
             }
 
             #${idTable} .ant-table-measure-row > td {
