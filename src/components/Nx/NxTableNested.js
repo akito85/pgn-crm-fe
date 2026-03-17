@@ -246,6 +246,7 @@ const ParentRow = ({
   onExpand,
   actionColumn,
   first3Widths,
+  columnWidths = {},
   isChildLoading = false,
 }) => {
   const bg = isEven ? ROW_HOVER : ROW_WHITE;
@@ -323,7 +324,7 @@ const ParentRow = ({
             value = col.render(value, record, no - 1);
           }
 
-          const width = first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
+          const width = columnWidths[fieldKey] || first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
           const isLastDataCol = colIdx === parentColumns.length - 1;
           const showActionBorder = actionColumn && isLastDataCol;
 
@@ -376,7 +377,7 @@ const ParentRow = ({
               columns={childColumns.map((col) => {
                 const fieldKey = col.key || col.dataIndex;
                 const wrappedCol = wrapColumnRender(col);
-                const width = first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
+                const width = columnWidths[fieldKey] || first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
                 return { ...wrappedCol, width };
               })}
               isLoading={isChildLoading}
@@ -398,6 +399,7 @@ const NxTableNested = ({
   onExpand         = () => {},
   actionColumn     = null,
   loadingKeys      = new Set(),
+  columnWidths     = {}, // Optional: { fieldKey: width, ... }
 }) => {
   const [expandedKeys, setExpandedKeys] = useState(new Set());
 
@@ -487,7 +489,7 @@ const NxTableNested = ({
         {/* Parent column headers */}
         {parentColumns.map((col, colIdx) => {
           const fieldKey = col.key || col.dataIndex;
-          const width = first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
+          const width = columnWidths[fieldKey] || first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
           const isLastCol = colIdx === parentColumns.length - 1;
 
           return (
@@ -498,7 +500,7 @@ const NxTableNested = ({
                 width: isLastCol ? undefined : width,
                 flex: isLastCol ? 1 : "none",
                 minWidth: isLastCol ? undefined : width,
-                justifyContent: "space-between",
+                justifyContent: "center",
                 borderRight: isLastCol ? (actionColumn ? `1px solid rgba(255,255,255,0.2)` : "none") : `1px solid rgba(255,255,255,0.2)`,
               }}
             >
@@ -538,6 +540,7 @@ const NxTableNested = ({
             onExpand={() => onExpand(row.id)}
             actionColumn={actionColumn}
             first3Widths={first3Widths}
+            columnWidths={columnWidths}
             isChildLoading={loadingKeys.has(row.id)}
           />
         ))
@@ -599,6 +602,7 @@ NxTableNested.propTypes = {
     render: PropTypes.func,
   }),
   loadingKeys: PropTypes.instanceOf(Set),
+  columnWidths: PropTypes.objectOf(PropTypes.number),
 };
 
 NxTableNested.defaultProps = {
@@ -606,6 +610,7 @@ NxTableNested.defaultProps = {
   onExpand: () => {},
   actionColumn: null,
   loadingKeys: new Set(),
+  columnWidths: {},
 };
 
 export default NxTableNested;
