@@ -332,10 +332,11 @@ const ParentRow = ({
               key={fieldKey || colIdx}
               style={{
                 ...cellBase,
-                width,
-                flexShrink: 0,
+                width: isLastDataCol ? undefined : width,
+                minWidth: isLastDataCol ? undefined : width,
+                flexShrink: isLastDataCol ? 1 : 0,
                 borderRight: showActionBorder ? `1px solid ${BORDER_COL}` : (colIdx < parentColumns.length - 1 ? `1px solid ${BORDER_COL}` : "none"),
-                flex: colIdx < parentColumns.length - 1 ? "0 0 auto" : "1",
+                flex: isLastDataCol ? 1 : "0 0 auto",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -494,8 +495,9 @@ const NxTableNested = ({
               key={fieldKey || colIdx}
               style={{
                 ...headerCellBase,
-                width,
-                flex: isLastCol && !actionColumn ? 1 : 0,
+                width: isLastCol ? undefined : width,
+                flex: isLastCol ? 1 : "none",
+                minWidth: isLastCol ? undefined : width,
                 justifyContent: "space-between",
                 borderRight: isLastCol ? (actionColumn ? `1px solid rgba(255,255,255,0.2)` : "none") : `1px solid rgba(255,255,255,0.2)`,
               }}
