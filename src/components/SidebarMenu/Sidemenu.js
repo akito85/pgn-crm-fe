@@ -63,8 +63,15 @@ const SideMenu = ({ isCollapsed }) => {
   // Used in onOpenChange to prevent Ant Design from collapsing the active parent
   // when it fires onOpenChange during <Link> navigation (a known Ant Design v4 quirk).
   const requiredParentKeysRef = useRef([]);
+  // isNavigatingRef: true only during the brief window after a URL change.
+  // onOpenChange uses this to distinguish between Ant Design's spurious fire
+  // (during <Link> navigation) vs. intentional user clicks on submenu headers.
+  const isNavigatingRef = useRef(false);
   const getLocation = location.pathname;
-  const { side_bar } = useSelector((state) => state?.auth);
+  // Select ONLY side_bar — not the entire auth slice.
+  // checkGrantedAccess modifies auth.loading, auth.user, auth.data_switch on every navigation.
+  // Selecting the whole slice caused 2-4 spurious re-renders per click (after isNavigatingRef expired).
+  const side_bar = useSelector((state) => state?.auth?.side_bar);
 
   const datas = useMemo(() => JSON.parse(side_bar), [side_bar]);
 
@@ -158,6 +165,10 @@ const SideMenu = ({ isCollapsed }) => {
   };
 
   useEffect(() => {
+    // Signal that a navigation just happened — onOpenChange will protect
+    // the active parent only while this flag is true.
+    isNavigatingRef.current = true;
+
     const activeKeys = filterMenuByPath(mappingMenu(datas), getLocation);
 
     // Set temporary if user is on a form/detail page with no direct menu match
@@ -192,12 +203,30 @@ const SideMenu = ({ isCollapsed }) => {
     // Only MERGE required parent keys — never replace the full openMenuKeys.
     // This preserves any other submenus the user manually opened.
     // openMenuKeys never receives leaf keys, so Ant Design won't glitch on navigation.
+    // Reference stability: return prev when values are unchanged to prevent rc-menu
+    // from re-distributing context and firing SubMenu motion on every navigation.
     if (requiredParentKeys.length > 0) {
       setOpenMenuKeys((prev) => {
         const merged = new Set([...(prev || []), ...requiredParentKeys]);
-        return Array.from(merged);
+        const newKeys = Array.from(merged);
+        if (
+          prev &&
+          prev.length === newKeys.length &&
+          newKeys.every((k) => prev.includes(k))
+        ) {
+          return prev;
+        }
+        return newKeys;
       });
     }
+
+    // Clear navigation flag after React batches the state updates above.
+    // requestAnimationFrame ensures this runs after the current render cycle,
+    // so onOpenChange still sees isNavigatingRef=true if Ant Design fires it
+    // synchronously during this render, but any subsequent user clicks see false.
+    requestAnimationFrame(() => {
+      isNavigatingRef.current = false;
+    });
   }, [getLocation]);
 
   // remove menu from whitelist — non-mutating: returns new objects, never modifies datas
@@ -304,43 +333,55 @@ const SideMenu = ({ isCollapsed }) => {
     [datas, generateMenuItems]
   );
 
-  // render props if collapse
-  const renderProps = (collapsed) => {
-    // Fall back to temporaryKeys only on form/detail pages (urlLeafKeys also empty).
-    // When on a real page, respect openMenuKeys even if the user collapsed everything.
-    const keysToUse =
+  // Memoize selectedKeys — stable reference prevents Menu re-render
+  const selectedKeys = useMemo(
+    () => (urlLeafKeys?.length === 0 ? temporaryKeys : urlLeafKeys),
+    [urlLeafKeys, temporaryKeys]
+  );
+
+  // Memoize the resolved openKeys value — stable reference across re-renders
+  const resolvedOpenKeys = useMemo(
+    () =>
       openMenuKeys?.length === 0 && urlLeafKeys?.length === 0
         ? temporaryKeys
-        : openMenuKeys;
+        : openMenuKeys,
+    [openMenuKeys, urlLeafKeys, temporaryKeys]
+  );
 
-    if (collapsed) {
-      return {
-        defaultOpenKeys: keysToUse,
-      };
+  // Stable onOpenChange — uses refs (not state) so dependencies are empty.
+  // This prevents rc-menu from seeing a new callback on every render,
+  // which was the mechanism that allowed spurious onOpenChange fires
+  // to drop the active parent key after the isNavigatingRef window closed.
+  const handleOpenChange = useCallback((keys) => {
+    if (isNavigatingRef.current) {
+      setOpenMenuKeys((prev) => {
+        const merged = new Set([...keys, ...requiredParentKeysRef.current]);
+        const newKeys = Array.from(merged);
+        if (
+          prev &&
+          prev.length === newKeys.length &&
+          newKeys.every((k) => prev.includes(k))
+        ) {
+          return prev;
+        }
+        return newKeys;
+      });
     } else {
-      return {
-        openKeys: keysToUse,
-        onOpenChange: (keys) => {
-          // Ant Design v4 fires onOpenChange during <Link> navigation, passing a
-          // reduced key set that excludes the active parent. Merge with the ref to
-          // ensure the current page's ancestor submenus are never collapsed by this.
-          setOpenMenuKeys(() => {
-            const merged = new Set([...keys, ...requiredParentKeysRef.current]);
-            return Array.from(merged);
-          });
-        },
-      };
+      setOpenMenuKeys(keys);
     }
-  };
+  }, []);
 
   return (
     <div>
       <Menu
         theme="light"
-        selectedKeys={urlLeafKeys?.length === 0 ? temporaryKeys : urlLeafKeys}
+        selectedKeys={selectedKeys}
         mode="inline"
         className={"mb-6"}
-        {...renderProps(isCollapsed)}
+        {...(isCollapsed
+          ? { defaultOpenKeys: resolvedOpenKeys }
+          : { openKeys: resolvedOpenKeys, onOpenChange: handleOpenChange }
+        )}
       >
         {menuItems}
       </Menu>

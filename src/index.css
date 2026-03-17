@@ -937,10 +937,15 @@ span.ant-tree-title {
 .ant-menu-title-content a {
   color: rgba(0, 0, 0, 0.85);
 }
-.ant-menu-submenu-selected svg,
-.ant-menu-submenu:has(.ant-menu-item-selected) > .ant-menu-submenu-title svg {
+.ant-menu-item-selected svg,
+.ant-menu-submenu:has(> .ant-menu-sub > .ant-menu-item-selected) > .ant-menu-submenu-title svg {
   filter: invert(44%) sepia(41%) saturate(3760%) hue-rotate(191deg)
     brightness(101%) contrast(102%);
+}
+/* Nested submenu/item icons smaller than top-level for visual hierarchy */
+.ant-menu-sub.ant-menu-inline .sidebar-icon {
+  width: 16px !important;
+  height: 16px;
 }
 .ant-menu-submenu-selected .ant-menu-title-content .active {
   color: var(--primary);
