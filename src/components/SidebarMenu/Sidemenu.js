@@ -52,7 +52,7 @@ const whitelistMenu = [
 ];
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
-  const [active, setActive] = useState([]);
+  const [openKeys, setOpenKeys] = useState([]);
   const [selectedLeafKeys, setSelectedLeafKeys] = useState([]);
   const [temporaryKeys, setTemporaryKeys] = useState([]);
   const getLocation = location.pathname;
@@ -165,17 +165,27 @@ const SideMenu = ({ isCollapsed }) => {
       setTemporaryKeys(extractingKeys);
     }
 
-    // Get all keys (selected items and their parents for expansion)
-    const allKeys = extractPaths(activeKeys).map((item) => item.key);
-
-    // Get only leaf node keys (items without children)
+    // Get only leaf node keys (actual menu items, no children)
     const leafKeys = extractPaths(activeKeys)
       .filter((item) => !item.children || item.children.length === 0)
       .map((item) => item.key);
 
-    setActive(allKeys);
+    // Get only parent keys required to expose the selected item
+    const requiredParentKeys = extractPaths(activeKeys)
+      .filter((item) => item.children && item.children.length > 0)
+      .map((item) => item.key);
+
     setSelectedLeafKeys(leafKeys);
-  }, [getLocation, datas]);
+
+    // Only MERGE required parent keys into openKeys — never replace
+    // This prevents the collapse/expand flicker on navigation
+    if (requiredParentKeys.length > 0) {
+      setOpenKeys((prev) => {
+        const merged = new Set([...(prev || []), ...requiredParentKeys]);
+        return Array.from(merged);
+      });
+    }
+  }, [getLocation]);
 
   // remove menu from list
   function removeProfileItems(tree) {
@@ -295,15 +305,17 @@ const SideMenu = ({ isCollapsed }) => {
 
   // render props if collapse
   const renderProps = (collapsed) => {
+    const keysToUse = openKeys?.length === 0 ? temporaryKeys : openKeys;
+
     if (collapsed) {
       return {
-        defaultOpenKeys: active?.length === 0 ? temporaryKeys : active,
+        defaultOpenKeys: keysToUse,
       };
     } else {
       return {
-        openKeys: active?.length === 0 ? temporaryKeys : active,
+        openKeys: keysToUse,
         onOpenChange: (keys) => {
-          setActive(keys);
+          setOpenKeys(keys);
         },
       };
     }
