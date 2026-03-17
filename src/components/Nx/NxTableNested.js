@@ -200,6 +200,7 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
                 cellValue = row[col.key] ?? "—";
               }
 
+              const isNoColumn = (col.key || col.dataIndex) === "no";
               return (
                 <div
                   key={rowIdx}
@@ -207,7 +208,7 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
                     height:         30,
                     display:        "flex",
                     alignItems:     "center",
-                    justifyContent: col.align === "center" ? "center" : "flex-start",
+                    justifyContent: isNoColumn || col.align === "center" ? "center" : "flex-start",
                     borderBottom:   `1px solid ${BORDER_COL}`,
                     padding:        "4px 8px",
                     background:     rowIdx % 2 === 0 ? ROW_WHITE : ROW_HOVER,
