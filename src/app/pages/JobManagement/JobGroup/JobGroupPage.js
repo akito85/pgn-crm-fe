@@ -145,7 +145,7 @@ const JobGroupPage = () => {
   const tableDataWithJobs = useMemo(() => {
     return accumulatedData.map((group) => ({
       ...group,
-      jobs: jobsByGroupId[group.id]?.data || [],
+      children: jobsByGroupId[group.id]?.data || [],
     }));
   }, [accumulatedData, jobsByGroupId]);
 
