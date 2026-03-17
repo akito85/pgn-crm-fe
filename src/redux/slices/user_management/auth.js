@@ -62,8 +62,8 @@ export const login = createAsyncThunk(
           })
         );
         if (
-          data.data.token.userType === "Non Employee" &&
-          data.data.token.userLevel !== "Super User"
+          data.data.token.userType === "Non Employee" ||
+          data.data.token.userLevel === "Super User"
         ) {
           thunkAPI.dispatch(
             setData({
@@ -110,8 +110,8 @@ export const login = createAsyncThunk(
           })
         );
         if (
-          data.data.token.userType === "Non Employee" &&
-          data.data.token.userLevel !== "Super User"
+          data.data.token.userType === "Non Employee" ||
+          data.data.token.userLevel === "Super User"
         ) {
           thunkAPI.dispatch(
             setData({
