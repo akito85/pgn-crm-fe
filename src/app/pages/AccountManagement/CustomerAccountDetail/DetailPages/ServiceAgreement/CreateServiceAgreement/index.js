@@ -89,6 +89,8 @@ const CreateServiceAgreement = ({ saType }) => {
   const [dataTableDetailProduct, setDataTableDetailProduct] = useState({});
   const [modalValidateSa, setModalValidateSa] = useState(false);
   const [messageValidateSa, setMessageValidateSa] = useState("");
+  const [loadingNext, setLoadingNext] = useState(false);
+  const [loadingChooseProduct, setLoadingChooseProduct] = useState(false);
 
   // For SA Information Date
   const [serviceAgreementDate, setServiceAgreementDate] = useState("");
@@ -412,27 +414,27 @@ const CreateServiceAgreement = ({ saType }) => {
           handleDetailApproval(data?.saInfo?.appHierId);
 
           // Define Data From API
-          const dataDetailPricing = (data?.saPricing || []).map(
+          const dataDetailPricing = (data?.saPricing || []).filter(Boolean).map(
             (item, index) => {
               return {
-                currency: item.currency,
-                currencyId: item.currencyId,
+                currency: item?.currency,
+                currencyId: item?.currencyId,
                 description: item.description ? item.description : null,
                 flag: null,
-                id: item.id,
-                idPricing: item.id,
-                key: index + 1,
-                lineNumber: item.lineNumber,
-                max: item.max,
+                id: item?.id,
+                idPricing: item?.id,
+                key: `${item?.id ?? 'sa'}-${item?.min ?? 0}-${item?.max ?? 'unlim'}-${index}`,
+                lineNumber: item?.lineNumber,
+                max: item?.max,
                 maximumName: null,
-                min: item.min,
-                priceCode: item.idMPricing,
-                priceCodeName: item.priceCode,
-                priceDetail: `${item.value}/${item.currency}/${item.uom}`,
+                min: item?.min,
+                priceCode: item?.idMPricing,
+                priceCodeName: item?.priceCode,
+                priceDetail: `${item?.value}/${item?.currency}/${item?.uom}`,
                 unlimited: item.isUnlim == "Y" ? true : false,
-                uom: item.uomId,
-                uomName: item.uom,
-                value: item.value,
+                uom: item?.uomId,
+                uomName: item?.uom,
+                value: item?.value,
                 adjustment: item?.adjustment?.adjustmentText,
                 adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
               };
@@ -836,9 +838,11 @@ const CreateServiceAgreement = ({ saType }) => {
       saDate: moment(saInfoObj.serviceAgreementDate).format("YYYY-MM-DD"),
       // saDate: 2023-10-20"
     };
+    setLoadingChooseProduct(true);
     dispatch(getDetailProductSa({ body: body }))
       .unwrap()
       .then((data) => {
+        setLoadingChooseProduct(false);
         if (data.product !== null) {
           // Start DDL Product Selected
           const tempProductDetail = data?.product?.productDetail;
@@ -1027,26 +1031,26 @@ const CreateServiceAgreement = ({ saType }) => {
           );
           const dataDetailPricing = (
             data?.product?.productPricing?.priceRuleTiering || []
-          ).map((item, index) => {
+          ).filter(Boolean).map((item, index) => {
             return {
-              currency: item.currency,
-              currencyId: item.currency,
-              description: item.description,
+              currency: item?.currency,
+              currencyId: item?.currency,
+              description: item?.description,
               flag: null,
-              id: item.priceCodeId,
-              idPricing: item.pricingRuleDetailId,
-              key: index + 1,
-              lineNumber: item.lineNumber,
-              max: item.max,
+              id: item?.priceCodeId,
+              idPricing: item?.pricingRuleDetailId,
+              key: `${item?.priceCodeId ?? 'pc'}-${item?.min ?? 0}-${item?.max ?? 'unlim'}-${index}`,
+              lineNumber: item?.lineNumber,
+              max: item?.max,
               maximumName: null,
-              min: item.min,
-              priceCode: item.priceCodeId,
-              priceCodeName: item.priceCode,
-              priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
-              unlimited: item.isUnlim,
-              uom: item.uom,
-              uomName: item.uom,
-              value: item.value,
+              min: item?.min,
+              priceCode: item?.priceCodeId,
+              priceCodeName: item?.priceCode,
+              priceDetail: `${item?.value}/${item?.currencyName}/${item?.uomName}`,
+              unlimited: item?.isUnlim,
+              uom: item?.uom,
+              uomName: item?.uom,
+              value: item?.value,
               adjustment: item?.adjustment?.adjustmentText,
               adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
             };
@@ -1085,8 +1089,9 @@ const CreateServiceAgreement = ({ saType }) => {
           );
         }
       })
-      .catch(() => {
-        console.log("error");
+      .catch((e) => {
+        setLoadingChooseProduct(false);
+        console.log("error", e);
       });
   };
 
@@ -1271,26 +1276,26 @@ const CreateServiceAgreement = ({ saType }) => {
           );
           const dataDetailPricing = (
             data?.productPricing?.priceRuleTiering || []
-          ).map((item, index) => {
+          ).filter(Boolean).map((item, index) => {
             return {
-              currency: item.currency,
-              currencyId: item.currency,
-              description: item.description,
+              currency: item?.currency,
+              currencyId: item?.currency,
+              description: item?.description,
               flag: null,
-              id: item.priceCodeId,
-              idPricing: item.pricingRuleDetailId,
-              key: index + 1,
-              lineNumber: item.lineNumber,
-              max: item.max,
+              id: item?.priceCodeId,
+              idPricing: item?.pricingRuleDetailId,
+              key: `${item?.priceCodeId ?? 'pc'}-${item?.min ?? 0}-${item?.max ?? 'unlim'}-${index}`,
+              lineNumber: item?.lineNumber,
+              max: item?.max,
               maximumName: null,
-              min: item.min,
-              priceCode: item.priceCodeId,
-              priceCodeName: item.priceCode,
-              priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
-              unlimited: item.isUnlim,
-              uom: item.uom,
-              uomName: item.uom,
-              value: item.value,
+              min: item?.min,
+              priceCode: item?.priceCodeId,
+              priceCodeName: item?.priceCode,
+              priceDetail: `${item?.value}/${item?.currencyName}/${item?.uomName}`,
+              unlimited: item?.isUnlim,
+              uom: item?.uom,
+              uomName: item?.uom,
+              value: item?.value,
               adjustment: item?.adjustment?.adjustmentText,
               adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
             };
@@ -1395,6 +1400,7 @@ const CreateServiceAgreement = ({ saType }) => {
           setDataTableDetailProduct={setDataTableDetailProduct}
           modalChooseProduct={modalChooseProduct}
           setModalChooseProduct={setModalChooseProduct}
+          loadingChooseProduct={loadingChooseProduct}
           dataTableProduct={dataTableProduct}
           setDataTableProduct={setDataTableProduct}
           dataPricing={dataPricing}
@@ -1484,7 +1490,9 @@ const CreateServiceAgreement = ({ saType }) => {
 
   const navigate = useNavigate();
   const next = () => {
-    if (current === 0 && saInfoObj.serviceType === 608 && isMain) {
+    if (current === 0 
+      && saInfoObj.serviceType === 608 
+      && isMain) {
       const body = {
         saId: idSa,
         accountId: idAccount,
@@ -1494,9 +1502,11 @@ const CreateServiceAgreement = ({ saType }) => {
         endDate: null,
         saType: "main",
       };
+      setLoadingNext(true);
       dispatch(checkValidateCreateSa({ body }))
         .unwrap()
         .then((data) => {
+          setLoadingNext(false);
           if (data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
@@ -1507,6 +1517,7 @@ const CreateServiceAgreement = ({ saType }) => {
         })
         .catch((error) => {
           if (error?.data) {
+            setLoadingNext(false);
             let message = error?.data?.message;
             if (error?.data?.data?.isCreated === false) {
               setModalValidateSa(true);
@@ -1526,9 +1537,11 @@ const CreateServiceAgreement = ({ saType }) => {
         saType: "Amendment",
         saReferenceNumber: saReferenceNumber,
       };
+      setLoadingNext(true);
       dispatch(checkValidateCreateSa({ body }))
         .unwrap()
         .then((data) => {
+          setLoadingNext(false);
           if (data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
@@ -1543,6 +1556,7 @@ const CreateServiceAgreement = ({ saType }) => {
         })
         .catch((error) => {
           if (error?.data) {
+            setLoadingNext(false);
             let message = error?.data?.message;
             if (error?.data?.data?.isCreated === false) {
               setModalValidateSa(true);
@@ -1562,9 +1576,11 @@ const CreateServiceAgreement = ({ saType }) => {
         saType: "addon",
         saReferenceNumber: saReferenceNumber,
       };
+      setLoadingNext(true);
       dispatch(checkValidateCreateSa({ body }))
         .unwrap()
         .then((data) => {
+          setLoadingNext(false);
           if (data?.isCreated === true) {
             setCurrent(current + 1);
           } else {
@@ -1575,6 +1591,7 @@ const CreateServiceAgreement = ({ saType }) => {
         })
         .catch((error) => {
           if (error?.data) {
+            setLoadingNext(false);
             let message = error?.data?.message;
             if (error?.data?.data?.isCreated === false) {
               setModalValidateSa(true);
@@ -1584,7 +1601,9 @@ const CreateServiceAgreement = ({ saType }) => {
           }
         });
     } else {
+      setLoadingNext(true);
       setCurrent(current + 1);
+      setLoadingNext(false);
     }
   };
   const prev = () => {
@@ -1654,7 +1673,10 @@ const CreateServiceAgreement = ({ saType }) => {
   }
 
   // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
-  if (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main" && !saInfoObj?.alreadyGasIn) {
+  if (saInfoObj?.serviceType === 608 
+    && saRecordData?.typeSa === "main" 
+    && !saInfoObj?.alreadyGasIn
+  ) {
     saInformationFields = [
       ...saInformationFields,
       'gasInPlanDate'
@@ -2046,6 +2068,7 @@ const CreateServiceAgreement = ({ saType }) => {
     dispatch(createServiceAgreement({ body: body }))
       .unwrap()
       .then(async (data) => {
+        dispatch(resetDataDetail());
         const idServiceagreement = data.saId;
         for (let icon = 0; icon < listDataAttachment.length; icon++) {
           const element = listDataAttachment[icon];
@@ -2076,7 +2099,7 @@ const CreateServiceAgreement = ({ saType }) => {
         setLoadingForm(false);
         setModalConfirm(false);
       });
-    dispatch(resetDataDetail());
+    
   };
 
   const handleCloseModalError = () => {
@@ -2159,6 +2182,7 @@ const CreateServiceAgreement = ({ saType }) => {
                   onClick={() => {
                     setModalBack(true);
                   }}
+                  loading={loadingNext}
                 >
                   Cancel
                 </ButtonComponent>
@@ -2172,7 +2196,7 @@ const CreateServiceAgreement = ({ saType }) => {
                       )
                     }
                     type="reject"
-
+                    loading={loadingNext}
                     onClick={() =>
                       saRecordData?.typeSa === "main"
                         ? handleClear()
@@ -2189,6 +2213,7 @@ const CreateServiceAgreement = ({ saType }) => {
                         htmlType="submit"
                         type="secondary"
                         onClick={() => setTypeSubmit("draft")}
+                        loading={loadingNext}
                       >
                         Save as Draft
                       </ButtonComponent>
@@ -2201,6 +2226,7 @@ const CreateServiceAgreement = ({ saType }) => {
                         scrollLeftHandler();
                       }}
                       type={"menu"}
+                      loading={loadingNext}
                     >
                       Previous
                     </ButtonComponent>
@@ -2210,6 +2236,7 @@ const CreateServiceAgreement = ({ saType }) => {
                       onClick={handleButtonNext}
                       type={"submit"}
                       disabled={steps[current].disabled}
+                      loading={loadingNext}
                     >
                       Next
                     </ButtonComponent>
