@@ -446,6 +446,7 @@ const NxTableNested = ({
         flexDirection: "column",
         background:   "#fff",
         fontFamily:   FONT_FAMILY,
+        width:        "100%",
       }}
     >
       <style>{`

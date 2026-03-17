@@ -380,7 +380,7 @@ const JobGroupPage = () => {
           </div>
         }
       >
-        <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+        <div style={{ maxHeight: "600px", overflowY: "auto", width: "100%" }}>
           <NxTableNested
             parentColumns={getJobGroupManagementColumns()}
             childColumns={childColumns}
