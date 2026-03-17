@@ -52,8 +52,8 @@ const whitelistMenu = [
 ];
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
-  const [selectedKeys, setSelectedKeys] = useState([]);
-  const [openKeys, setOpenKeys] = useState([]);
+  const [active, setActive] = useState([]);
+  const [selectedLeafKeys, setSelectedLeafKeys] = useState([]);
   const [temporaryKeys, setTemporaryKeys] = useState([]);
   const getLocation = location.pathname;
   const { side_bar } = useSelector((state) => state?.auth);
@@ -165,27 +165,17 @@ const SideMenu = ({ isCollapsed }) => {
       setTemporaryKeys(extractingKeys);
     }
 
-    // Extract selected items (leaf nodes only) and parent keys for expansion
-    const selectedItems = extractPaths(activeKeys).map((item) => item.key);
-    const parentKeys = extractPaths(activeKeys)
-      .map((item) => item.key)
-      .filter((key) => {
-        // Get all parent keys by checking if any other key starts with this key
-        const mappedData = mappingMenu(datas);
-        const allFlatItems = extractPaths(mappedData);
-        const isParent = allFlatItems.some(
-          (item) => item.key !== key && item.key?.startsWith(key + "-")
-        );
-        return isParent;
-      });
+    // Get all keys (selected items and their parents for expansion)
+    const allKeys = extractPaths(activeKeys).map((item) => item.key);
 
-    setSelectedKeys(selectedItems);
-    // Merge manually expanded keys with parent keys needed for selected item
-    setOpenKeys((prevKeys) => {
-      const merged = new Set([...(prevKeys || []), ...parentKeys]);
-      return Array.from(merged);
-    });
-  }, [getLocation]);
+    // Get only leaf node keys (items without children)
+    const leafKeys = extractPaths(activeKeys)
+      .filter((item) => !item.children || item.children.length === 0)
+      .map((item) => item.key);
+
+    setActive(allKeys);
+    setSelectedLeafKeys(leafKeys);
+  }, [getLocation, datas]);
 
   // remove menu from list
   function removeProfileItems(tree) {
@@ -239,11 +229,6 @@ const SideMenu = ({ isCollapsed }) => {
     (data) => {
       return data.map((item) => {
         if (item.children) {
-          // SubMenu is blue only if it or any of its children are selected
-          const isSubmenuSelected = selectedKeys?.some(
-            (key) => key === item?.key || key?.startsWith(item?.key + "-")
-          );
-
           return (
             <Menu.SubMenu
               key={item?.key}
@@ -251,7 +236,7 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={isSubmenuSelected ? "#0075BF" : "#000000"}
+                  color={selectedLeafKeys?.includes(item?.key) ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
@@ -271,7 +256,7 @@ const SideMenu = ({ isCollapsed }) => {
             <Menu.Item
               key={item?.key}
               className={
-                selectedKeys?.includes(item?.key) &&
+                selectedLeafKeys?.includes(item?.key) &&
                 isCollapsed &&
                 "ant-menu-submenu ant-menu-submenu-vertical ant-menu-submenu-selected ant-menu-submenu-title"
               }
@@ -279,7 +264,7 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={selectedKeys?.includes(item?.key) ? "#0075BF" : "#000000"}
+                  color={selectedLeafKeys?.includes(item?.key) ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
@@ -297,22 +282,20 @@ const SideMenu = ({ isCollapsed }) => {
         }
       });
     },
-    [selectedKeys, isCollapsed, newTabCallback]
+    [selectedLeafKeys, isCollapsed, newTabCallback]
   );
 
   // render props if collapse
   const renderProps = (collapsed) => {
-    const keysToUse = selectedKeys?.length === 0 ? temporaryKeys : openKeys;
-
     if (collapsed) {
       return {
-        defaultOpenKeys: keysToUse,
+        defaultOpenKeys: active?.length === 0 ? temporaryKeys : active,
       };
     } else {
       return {
-        openKeys: keysToUse,
+        openKeys: active?.length === 0 ? temporaryKeys : active,
         onOpenChange: (keys) => {
-          setOpenKeys(keys);
+          setActive(keys);
         },
       };
     }
@@ -322,7 +305,7 @@ const SideMenu = ({ isCollapsed }) => {
     <div>
       <Menu
         theme="light"
-        selectedKeys={selectedKeys}
+        selectedKeys={selectedLeafKeys}
         mode="inline"
         className={"mb-6"}
         {...renderProps(isCollapsed)}
