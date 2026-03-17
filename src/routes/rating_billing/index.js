@@ -355,4 +355,10 @@ export const rating_billing = [
     path: RBI_ROUTES.CONTENT_MANAGEMENT_DETAIL,
     element: RBI_ELEMENTS.CONTENT_MANAGEMENT_DETAIL,
   },
+
+  // Gas Deposit
+  {
+    path: RBI_ROUTES.GAS_DEPOSIT_VIEW,
+    element: RBI_ELEMENTS.GAS_DEPOSIT_VIEW_ELEMENT,
+  },
 ];
