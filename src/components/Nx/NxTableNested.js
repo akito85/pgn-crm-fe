@@ -167,7 +167,7 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
                 height:         30,
                 display:        "flex",
                 alignItems:     "center",
-                justifyContent: col.align === "center" ? "center" : "flex-start",
+                justifyContent: "center",
                 borderBottom:   `1px solid ${BORDER_COL}`,
                 padding:        "4px 8px",
                 overflow:       "hidden",

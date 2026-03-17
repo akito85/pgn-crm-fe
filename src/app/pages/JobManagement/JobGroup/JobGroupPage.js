@@ -172,12 +172,24 @@ const JobGroupPage = () => {
   const childColumns = useMemo(() => {
     const allColumns = getJobGroupChildTableColumns(accessGroupsMap);
     const excludeKeys = ["desc", "accessGroup", "createdBy", "createdDate", "updatedBy", "updatedDate"];
+    const columnWidths = {
+      parameters: 800,
+      maxRetry: 30,
+      timeout: 30,
+      handlerClass: 110,
+      execType: 45,
+      type: 45,
+    };
     return allColumns
       .filter((col) => !excludeKeys.includes(col.key || col.dataIndex))
-      .map((col) => ({
-        ...col,
-        key: col.key || col.dataIndex || col.title,
-      }));
+      .map((col) => {
+        const fieldKey = col.key || col.dataIndex;
+        return {
+          ...col,
+          key: fieldKey || col.title,
+          width: columnWidths[fieldKey],
+        };
+      });
   }, [accessGroupsMap]);
 
   // Action column with three-dots menu and view button (permission-gated)
