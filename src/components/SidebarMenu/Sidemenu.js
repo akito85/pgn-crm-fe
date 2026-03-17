@@ -52,7 +52,7 @@ const whitelistMenu = [
 ];
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
-  const [openKeys, setOpenKeys] = useState([]);
+  const [active, setActive] = useState([]);
   const [selectedLeafKeys, setSelectedLeafKeys] = useState([]);
   const [temporaryKeys, setTemporaryKeys] = useState([]);
   const getLocation = location.pathname;
@@ -165,26 +165,14 @@ const SideMenu = ({ isCollapsed }) => {
       setTemporaryKeys(extractingKeys);
     }
 
-    // Get only leaf node keys (actual menu items, no children)
+    // Restore original active tracking (controls expansion)
+    setActive(extractPaths(activeKeys).map((item) => item.key));
+
+    // Track leaf keys separately for icon coloring (URL-based only)
     const leafKeys = extractPaths(activeKeys)
       .filter((item) => !item.children || item.children.length === 0)
       .map((item) => item.key);
-
-    // Get only parent keys required to expose the selected item
-    const requiredParentKeys = extractPaths(activeKeys)
-      .filter((item) => item.children && item.children.length > 0)
-      .map((item) => item.key);
-
     setSelectedLeafKeys(leafKeys);
-
-    // Only MERGE required parent keys into openKeys — never replace
-    // This prevents the collapse/expand flicker on navigation
-    if (requiredParentKeys.length > 0) {
-      setOpenKeys((prev) => {
-        const merged = new Set([...(prev || []), ...requiredParentKeys]);
-        return Array.from(merged);
-      });
-    }
   }, [getLocation]);
 
   // remove menu from list
@@ -305,17 +293,19 @@ const SideMenu = ({ isCollapsed }) => {
 
   // render props if collapse
   const renderProps = (collapsed) => {
-    const keysToUse = openKeys?.length === 0 ? temporaryKeys : openKeys;
-
     if (collapsed) {
       return {
-        defaultOpenKeys: keysToUse,
+        defaultOpenKeys: active?.length === 0 ? temporaryKeys : active,
       };
     } else {
       return {
-        openKeys: keysToUse,
+        openKeys: active?.length === 0 ? temporaryKeys : active,
         onOpenChange: (keys) => {
-          setOpenKeys(keys);
+          if (active?.length === 0) {
+            setTemporaryKeys(keys);
+          } else {
+            setActive(keys);
+          }
         },
       };
     }
