@@ -328,6 +328,7 @@ const ParentRow = ({
           const width = columnWidths[fieldKey] || first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
           const isLastDataCol = colIdx === parentColumns.length - 1;
           const showActionBorder = actionColumn && isLastDataCol;
+          const isNoColumn = fieldKey === "no";
 
           return (
             <div
@@ -337,6 +338,7 @@ const ParentRow = ({
                 width: isLastDataCol ? undefined : width,
                 minWidth: isLastDataCol ? undefined : width,
                 flexShrink: isLastDataCol ? 1 : 0,
+                justifyContent: isNoColumn || col.align === "center" ? "center" : "flex-start",
                 borderRight: showActionBorder ? `1px solid ${BORDER_COL}` : (colIdx < parentColumns.length - 1 ? `1px solid ${BORDER_COL}` : "none"),
                 flex: isLastDataCol ? 1 : "0 0 auto",
                 overflow: "hidden",
