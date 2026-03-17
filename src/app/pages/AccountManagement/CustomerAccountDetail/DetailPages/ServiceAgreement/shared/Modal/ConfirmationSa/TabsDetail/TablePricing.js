@@ -193,6 +193,7 @@ const TablePricing = ({
     <div className="py-4">
       <NxTable
         idTable="confirmation-pricing-table"
+        rowKey="key"
         dataSource={displayData}
         columns={columns}
         totalData={processedData.length}

@@ -554,6 +554,7 @@ const TablePricing = ({
 			<div className="w-full">
 				<NxTable
 					idTable="pricing-table"
+					rowKey="key"
 					dataSource={displayData?.map(item => ({ ...item, max: item?.max === 0 || hasValue(item?.max) === false ? "Unlimited" : item?.max }))}
 					columns={filterColumns(
 						getPricingColumns({
