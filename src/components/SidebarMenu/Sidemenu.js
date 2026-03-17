@@ -53,7 +53,6 @@ const whitelistMenu = [
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
   const [active, setActive] = useState([]);
-  const [selectedLeafKeys, setSelectedLeafKeys] = useState([]);
   const [temporaryKeys, setTemporaryKeys] = useState([]);
   const getLocation = location.pathname;
   const { side_bar } = useSelector((state) => state?.auth);
@@ -165,14 +164,7 @@ const SideMenu = ({ isCollapsed }) => {
       setTemporaryKeys(extractingKeys);
     }
 
-    // Restore original active tracking (controls expansion)
     setActive(extractPaths(activeKeys).map((item) => item.key));
-
-    // Track leaf keys separately for icon coloring (URL-based only)
-    const leafKeys = extractPaths(activeKeys)
-      .filter((item) => !item.children || item.children.length === 0)
-      .map((item) => item.key);
-    setSelectedLeafKeys(leafKeys);
   }, [getLocation]);
 
   // remove menu from list
@@ -227,13 +219,13 @@ const SideMenu = ({ isCollapsed }) => {
     (data) => {
       return data.map((item) => {
         if (item.children) {
-          // Check if any child is selected
-          const hasSelectedChild = item.children.some((child) => {
-            const flatChildren = extractPaths([child]);
-            return flatChildren.some((flatChild) =>
-              selectedLeafKeys?.includes(flatChild.key)
-            );
-          });
+          // Parent icon is blue only when a leaf child is actively visited (in active from URL)
+          // Not when just expanded manually — leaf children have no children of their own
+          const hasActiveLeafChild = extractPaths(item.children).some(
+            (child) =>
+              (!child.children || child.children.length === 0) &&
+              active?.includes(child.key)
+          );
 
           return (
             <Menu.SubMenu
@@ -242,7 +234,7 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={hasSelectedChild ? "#0075BF" : "#000000"}
+                  color={hasActiveLeafChild ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
@@ -262,7 +254,7 @@ const SideMenu = ({ isCollapsed }) => {
             <Menu.Item
               key={item?.key}
               className={
-                selectedLeafKeys?.includes(item?.key) &&
+                active?.includes(item?.key) &&
                 isCollapsed &&
                 "ant-menu-submenu ant-menu-submenu-vertical ant-menu-submenu-selected ant-menu-submenu-title"
               }
@@ -270,7 +262,7 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={selectedLeafKeys?.includes(item?.key) ? "#0075BF" : "#000000"}
+                  color={active?.includes(item?.key) ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
@@ -288,7 +280,7 @@ const SideMenu = ({ isCollapsed }) => {
         }
       });
     },
-    [selectedLeafKeys, isCollapsed, newTabCallback]
+    [active, isCollapsed, newTabCallback]
   );
 
   // render props if collapse
@@ -315,7 +307,7 @@ const SideMenu = ({ isCollapsed }) => {
     <div>
       <Menu
         theme="light"
-        selectedKeys={selectedLeafKeys}
+        selectedKeys={active?.length === 0 ? temporaryKeys : active}
         mode="inline"
         className={"mb-6"}
         {...renderProps(isCollapsed)}
