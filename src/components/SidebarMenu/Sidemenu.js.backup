@@ -150,7 +150,10 @@ const SubMenuItem = ({
     );
   }
 
-  // Expanded mode: smooth animation via max-height transitions.
+  // Expanded mode: instant show/hide via display.
+  // No CSS transition -- any transition on max-height or display is unreliable
+  // in React 18 concurrent mode because isNavigatingRef can be cleared mid-render,
+  // allowing animation to fire during programmatic navigation re-renders.
   return (
     <li className={submenuClasses} role="none">
       <div
@@ -174,20 +177,13 @@ const SubMenuItem = ({
           className="ant-menu-submenu-arrow"
           style={{
             transform: isOpen ? "rotate(-180deg) translateY(2px)" : "none",
-            transition: "transform 0.2s ease-in-out",
           }}
         />
       </div>
       <ul
         className="ant-menu ant-menu-sub ant-menu-inline"
         role="menu"
-        style={{
-          display: isOpen ? 'block' : 'none',
-          maxHeight: isOpen ? '1000px' : '0',
-          overflow: 'hidden',
-          opacity: isOpen ? 1 : 0,
-          transition: 'all 0.3s ease-in-out',
-        }}
+        style={{ display: isOpen ? "block" : "none" }}
       >
         {renderItems(item.children, selectedKeys, false)}
       </ul>
@@ -197,17 +193,8 @@ const SubMenuItem = ({
 
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
-  // openMenuKeys: which SubMenus are expanded - now persisted across navigations
-  const [openMenuKeys, setOpenMenuKeys] = useState(() => {
-    // Try to restore from localStorage if available
-    try {
-      const saved = localStorage.getItem('sidebar_open_keys');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  
+  // openMenuKeys: which SubMenus are expanded
+  const [openMenuKeys, setOpenMenuKeys] = useState([]);
   // urlLeafKeys: which leaf items match the current URL
   const [urlLeafKeys, setUrlLeafKeys] = useState([]);
   // temporaryKeys: fallback when on a form/detail page with no direct menu match
@@ -317,21 +304,7 @@ const SideMenu = ({ isCollapsed }) => {
     return filterRecursive(data);
   };
 
-  // Update localStorage whenever openMenuKeys changes
   useEffect(() => {
-    try {
-      localStorage.setItem('sidebar_open_keys', JSON.stringify(openMenuKeys));
-    } catch (e) {
-      console.warn('Could not save sidebar state to localStorage:', e);
-    }
-  }, [openMenuKeys]);
-
-  useEffect(() => {
-    // Only run if datas is valid
-    if (!datas || !Array.isArray(datas)) {
-      return;
-    }
-
     const activeKeys = filterMenuByPath(mappingMenu(datas), getLocation);
 
     // Set temporary if user is on a form/detail page with no direct menu match
@@ -354,12 +327,8 @@ const SideMenu = ({ isCollapsed }) => {
         ?.map((item) => item.key) || [];
       if (fallbackParentKeys.length > 0) {
         setOpenMenuKeys((prev) => {
-          // Preserve all existing user-expanded keys and add required ones
-          const newSet = new Set([...(prev || [])]);
-          fallbackParentKeys.forEach(key => newSet.add(key));
-          const newKeys = Array.from(newSet);
-
-          // Only update if there are actual changes
+          const merged = new Set([...(prev || []), ...fallbackParentKeys]);
+          const newKeys = Array.from(merged);
           if (
             prev &&
             prev.length === newKeys.length &&
@@ -370,41 +339,37 @@ const SideMenu = ({ isCollapsed }) => {
           return newKeys;
         });
       }
-    } else {
-      const allActiveItems = extractPaths(activeKeys);
+    }
 
-      // Leaf keys: actual selectable items (no children) -- drives selectedKeys
-      const leafKeys = allActiveItems
-        .filter((item) => !item.children || item.children.length === 0)
-        .map((item) => item.key);
+    const allActiveItems = extractPaths(activeKeys);
 
-      // Parent keys: submenus that must be open to show the current page
-      const requiredParentKeys = allActiveItems
-        .filter((item) => item.children && item.children.length > 0)
-        .map((item) => item.key);
+    // Leaf keys: actual selectable items (no children) -- drives selectedKeys
+    const leafKeys = allActiveItems
+      .filter((item) => !item.children || item.children.length === 0)
+      .map((item) => item.key);
 
-      setUrlLeafKeys(leafKeys);
+    // Parent keys: submenus that must be open to show the current page
+    const requiredParentKeys = allActiveItems
+      .filter((item) => item.children && item.children.length > 0)
+      .map((item) => item.key);
 
-      // Only MERGE required parent keys -- never replace the full openMenuKeys.
-      // This preserves any other submenus the user manually opened.
-      if (requiredParentKeys.length > 0) {
-        setOpenMenuKeys((prev) => {
-          // Preserve all existing user-expanded keys and add required ones
-          const newSet = new Set([...(prev || [])]);
-          requiredParentKeys.forEach(key => newSet.add(key));
-          const newKeys = Array.from(newSet);
+    setUrlLeafKeys(leafKeys);
 
-          // Only update if there are actual changes
-          if (
-            prev &&
-            prev.length === newKeys.length &&
-            newKeys.every((k) => prev.includes(k))
-          ) {
-            return prev;
-          }
-          return newKeys;
-        });
-      }
+    // Only MERGE required parent keys -- never replace the full openMenuKeys.
+    // This preserves any other submenus the user manually opened.
+    if (requiredParentKeys.length > 0) {
+      setOpenMenuKeys((prev) => {
+        const merged = new Set([...(prev || []), ...requiredParentKeys]);
+        const newKeys = Array.from(merged);
+        if (
+          prev &&
+          prev.length === newKeys.length &&
+          newKeys.every((k) => prev.includes(k))
+        ) {
+          return prev;
+        }
+        return newKeys;
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getLocation, datas]);
@@ -452,15 +417,9 @@ const SideMenu = ({ isCollapsed }) => {
   }, []);
 
   const toggleSubmenu = useCallback((key) => {
-    setOpenMenuKeys((prev) => {
-      if (prev.includes(key)) {
-        // Close the submenu
-        return prev.filter((k) => k !== key);
-      } else {
-        // Open the submenu - add to the list
-        return [...prev, key];
-      }
-    });
+    setOpenMenuKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   }, []);
 
   // openMenuKeys is the single source of truth for which submenus are open.
