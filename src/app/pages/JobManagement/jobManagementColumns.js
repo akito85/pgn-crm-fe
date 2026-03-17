@@ -71,13 +71,14 @@ export const getJobManagementColumns = (accessGroupsMap = {}) => [
     dataIndex: "execType",
     key: "execType",
     align: "left",
-    width: 120,
+    width: 220,
   },
   {
     title: "HANDLER CLASS",
     dataIndex: "handlerClass",
     key: "handlerClass",
     align: "left",
+    width: 220,
     ellipsis: true,
   },
   {
