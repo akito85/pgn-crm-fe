@@ -59,18 +59,29 @@ const ChildTable = ({ children: jobs, isHovered, columns = [], nameColWidth = 15
     );
   }
 
-  // NO/NAME/CODE are fixed-width; handlerClass gets flex:2; everything else is flex:1
+  // All columns are fixed-width for consistent rendering regardless of container size
+  const COL_WIDTHS = {
+    no:           60,
+    name:         nameColWidth,
+    code:         180,
+    parameter:    800,
+    parameters:   800,
+    handlerClass: 280,
+    execType:     180,
+    timeout:      100,
+    maxRetry:     100,
+    type:         120,
+  };
+  const DEFAULT_COL_WIDTH = 100;
+
   const displayColumns = columns.length > 0
     ? columns.map((col) => {
         const key = col.key || col.dataIndex || col.title;
-        if (key === "no")   return { ...col, key, width: 60,           fixed: true };
-        if (key === "name") return { ...col, key, width: nameColWidth,  fixed: true };
-        if (key === "code") return { ...col, key, width: 180,           fixed: true };
-        return { ...col, key, fixed: false, flexWeight: key === "handlerClass" ? 2 : 1 };
+        return { ...col, key, width: COL_WIDTHS[key] ?? DEFAULT_COL_WIDTH };
       })
     : [
-        { key: "no",   title: "NO",   width: 60,          fixed: true },
-        { key: "name", title: "NAME", dataIndex: "name", width: nameColWidth, fixed: true },
+        { key: "no",   title: "NO",   width: 60 },
+        { key: "name", title: "NAME", dataIndex: "name", width: nameColWidth },
       ];
 
   const lastIdx = displayColumns.length - 1;
@@ -78,19 +89,19 @@ const ChildTable = ({ children: jobs, isHovered, columns = [], nameColWidth = 15
   return (
     // overflowX: auto enables horizontal scroll when child columns exceed container width
     <div className="nx-child-scroll" style={{ overflowX: "auto", width: "100%" }}>
-      {/* No explicit width here — natural width = sum of fixed column widths, triggers scroll */}
-      <div style={{ display: "flex" }}>
+      {/* min-width: max-content forces the flex container to be as wide as its children need */}
+      <div style={{ display: "flex", minWidth: "max-content" }}>
       {displayColumns.map((col, colIdx) => (
         <div
           key={col.key || colIdx}
           style={{
-            width:       col.fixed ? col.width : undefined,
-            flex:        col.fixed ? "none" : col.flexWeight ?? 1,
-            minWidth:    col.fixed ? col.width : 0,
-            flexShrink:  0,
+            width:      col.width,
+            minWidth:   col.width,
+            flexShrink: 0,
+            flex:       "none",
             borderRight: colIdx < lastIdx ? `1px solid ${BORDER_COL}` : "none",
-            display:        "flex",
-            flexDirection:  "column",
+            display:       "flex",
+            flexDirection: "column",
           }}
         >
           {/* header */}

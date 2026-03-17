@@ -12,7 +12,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { getJobManagementColumns } from "../jobManagementColumns";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
-import { useSearchJobsQuery, useDeleteJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
+import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 
 const PAGE_SIZE = 20;
@@ -79,6 +79,12 @@ const JobPage = () => {
     sortBy: sort.sortBy,
     sortDir: sort.sortDir,
   });
+
+  const { data: accessGroupsRaw } = useGetAccessGroupsQuery();
+  const accessGroupsMap = useMemo(() => {
+    if (!accessGroupsRaw) return {};
+    return Object.fromEntries(accessGroupsRaw.map((g) => [g.groupId, g.groupName]));
+  }, [accessGroupsRaw]);
 
   const [deleteJobMutation, { isLoading: deleteLoading }] = useDeleteJobMutation();
 
@@ -207,8 +213,8 @@ const JobPage = () => {
   }, [toView, toUpdate, canUpdate, canDelete, canView]);
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(), ...(actionColumn ? [actionColumn] : [])],
-    [actionColumn]
+    () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
+    [actionColumn, accessGroupsMap]
   );
 
   const allColumns = useMemo(

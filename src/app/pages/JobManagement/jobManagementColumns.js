@@ -1,4 +1,19 @@
-export const getJobManagementColumns = () => [
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const formatDate = (val) => {
+  if (!val) return "—";
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return val;
+  const date = `${String(d.getDate()).padStart(2, "0")}-${MONTHS[d.getMonth()]}-${d.getFullYear()}`;
+  const hh   = String(d.getHours()).padStart(2, "0");
+  const mm   = String(d.getMinutes()).padStart(2, "0");
+  const ss   = String(d.getSeconds()).padStart(2, "0");
+  const cs   = String(Math.floor(d.getMilliseconds() / 10)).padStart(2, "0");
+  return `${date} ${hh}:${mm}:${ss}.${cs}`;
+};
+
+// accessGroupsMap: { [groupId]: groupName } — passed in from the page component
+export const getJobManagementColumns = (accessGroupsMap = {}) => [
   {
     title: "NO",
     key: "no",
@@ -35,10 +50,20 @@ export const getJobManagementColumns = () => [
   },
   {
     title: "PARAMETER",
-    dataIndex: "parameter",
+    dataIndex: "parameters",
     key: "parameter",
     align: "left",
     ellipsis: true,
+    render: (params) => {
+      if (!Array.isArray(params) || params.length === 0) return "—";
+      return params
+        .map((p) => {
+          const type   = p.length ? `${p.type}(${p.length})` : p.type;
+          const req    = p.required ? "Required" : "Optional";
+          return `${p.name} ${type} ${req}`;
+        })
+        .join("; ");
+    },
   },
   {
     title: "EXEC TYPE",
@@ -80,7 +105,8 @@ export const getJobManagementColumns = () => [
     dataIndex: "createdDate",
     key: "createdDate",
     align: "left",
-    width: 140,
+    width: 175,
+    render: (val) => formatDate(val),
   },
   {
     title: "UPDATED BY",
@@ -94,7 +120,8 @@ export const getJobManagementColumns = () => [
     dataIndex: "updatedDate",
     key: "updatedDate",
     align: "left",
-    width: 140,
+    width: 175,
+    render: (val) => formatDate(val),
   },
   {
     title: "MODULE",
@@ -109,6 +136,13 @@ export const getJobManagementColumns = () => [
     key: "accessGroup",
     align: "left",
     width: 140,
+    render: (val) => {
+      if (!val) return "—";
+      // val may already be a name (from backend enrichment) or a numeric id string
+      const numId = Number(val);
+      if (!isNaN(numId) && accessGroupsMap[numId]) return accessGroupsMap[numId];
+      return val;
+    },
   },
   {
     title: "PARENT",

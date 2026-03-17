@@ -21,6 +21,7 @@ import {
 } from "../jobGroupManagementColumns";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
+import { useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 
 const PAGE_SIZE = 20;
 
@@ -73,6 +74,13 @@ const JobGroupPage = () => {
 
   // Redux state
   const { data, loading, jobsByGroupId } = useSelector((state) => state.jobGroup);
+
+  // Access group id→name map (shared with child columns)
+  const { data: accessGroupsRaw } = useGetAccessGroupsQuery();
+  const accessGroupsMap = useMemo(() => {
+    if (!accessGroupsRaw) return {};
+    return Object.fromEntries(accessGroupsRaw.map((g) => [g.groupId, g.groupName]));
+  }, [accessGroupsRaw]);
 
   // Local state
   const [page, setPage] = useState(1);
@@ -162,7 +170,7 @@ const JobGroupPage = () => {
 
   // Get child columns for nested table (exclude desc and audit columns)
   const childColumns = useMemo(() => {
-    const allColumns = getJobGroupChildTableColumns();
+    const allColumns = getJobGroupChildTableColumns(accessGroupsMap);
     const excludeKeys = ["desc", "accessGroup", "createdBy", "createdDate", "updatedBy", "updatedDate"];
     return allColumns
       .filter((col) => !excludeKeys.includes(col.key || col.dataIndex))
@@ -170,7 +178,7 @@ const JobGroupPage = () => {
         ...col,
         key: col.key || col.dataIndex || col.title,
       }));
-  }, []);
+  }, [accessGroupsMap]);
 
   // Action column with three-dots menu and view button (permission-gated)
   const actionColumn = useMemo(() => {

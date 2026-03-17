@@ -36,9 +36,15 @@ const toJobRow = (job) => ({
   updatedBy:   job.updatedBy,
   updatedDate: job.updatedAt,
   module:      job.moduleName,
-  accessGroup: job.accessGroupId ? String(job.accessGroupId) : null,
+  accessGroup: job.accessGroupName ?? (job.accessGroupId ? String(job.accessGroupId) : null),
   parent:      job.parentJobId   ? String(job.parentJobId)   : null,
-  parameter:   job.inputSchema   ?? null,
+  parameters:  (() => {
+    if (!job.inputSchema) return [];
+    try {
+      const s = typeof job.inputSchema === 'string' ? JSON.parse(job.inputSchema) : job.inputSchema;
+      return s?.parameters ?? [];
+    } catch { return []; }
+  })(),
   status:      job.status,
 });
 
