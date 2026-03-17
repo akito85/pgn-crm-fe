@@ -641,7 +641,7 @@ const DistributionMediaForm = ({
                     },
                   ]}
                 >
-                  <SelectComponent isPassingId>
+                  <SelectComponent>
                     {data_productName &&
                       filterProductName()?.map((data) => (
                         <Select.Option
@@ -654,7 +654,7 @@ const DistributionMediaForm = ({
                   </SelectComponent>
                 </Form.Item>
                 <Form.Item label="Price Code" name="priceCode">
-                  <InputComponent disabled isPassingId />
+                  <InputComponent disabled />
                 </Form.Item>
                 <div className="col-span-2">
                   <Form.Item
@@ -667,7 +667,6 @@ const DistributionMediaForm = ({
                       disabled
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      isPassingId
                     />
                   </Form.Item>
                 </div>
@@ -705,7 +704,7 @@ const DistributionMediaForm = ({
                     },
                   ]}
                 >
-                  <DateComponent isPassingId />
+                  <DateComponent />
                 </Form.Item>
 
                 <Form.Item
@@ -717,7 +716,6 @@ const DistributionMediaForm = ({
                     type="textarea"
                     value={remark}
                     onChange={(e) => setRemark(e.target.value)}
-                    isPassingId
                   />
                 </Form.Item>
               </div>
