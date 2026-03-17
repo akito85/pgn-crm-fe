@@ -1,5 +1,5 @@
 import { Menu } from "antd";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SVGIcon from "../../../src/assets/Icon/index";
@@ -55,10 +55,14 @@ const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
   // openMenuKeys: which SubMenus are expanded — only ever contains submenu keys, never leaf keys
   const [openMenuKeys, setOpenMenuKeys] = useState([]);
-  // urlLeafKeys: which leaf items match the current URL — used for selectedKeys and icon color
+  // urlLeafKeys: which leaf items match the current URL — used for selectedKeys
   const [urlLeafKeys, setUrlLeafKeys] = useState([]);
   // temporaryKeys: fallback when on a form/detail page that has no direct menu match
   const [temporaryKeys, setTemporaryKeys] = useState([]);
+  // requiredParentKeysRef: always holds the current page's ancestor submenu keys.
+  // Used in onOpenChange to prevent Ant Design from collapsing the active parent
+  // when it fires onOpenChange during <Link> navigation (a known Ant Design v4 quirk).
+  const requiredParentKeysRef = useRef([]);
   const getLocation = location.pathname;
   const { side_bar } = useSelector((state) => state?.auth);
 
@@ -179,6 +183,9 @@ const SideMenu = ({ isCollapsed }) => {
     const requiredParentKeys = allActiveItems
       .filter((item) => item.children && item.children.length > 0)
       .map((item) => item.key);
+
+    // Keep the ref in sync — onOpenChange reads this to protect the active parent.
+    requiredParentKeysRef.current = requiredParentKeys;
 
     setUrlLeafKeys(leafKeys);
 
@@ -312,8 +319,13 @@ const SideMenu = ({ isCollapsed }) => {
       return {
         openKeys: keysToUse,
         onOpenChange: (keys) => {
-          // keys from Ant Design contains only submenu keys — safe to store directly
-          setOpenMenuKeys(keys);
+          // Ant Design v4 fires onOpenChange during <Link> navigation, passing a
+          // reduced key set that excludes the active parent. Merge with the ref to
+          // ensure the current page's ancestor submenus are never collapsed by this.
+          setOpenMenuKeys(() => {
+            const merged = new Set([...keys, ...requiredParentKeysRef.current]);
+            return Array.from(merged);
+          });
         },
       };
     }
