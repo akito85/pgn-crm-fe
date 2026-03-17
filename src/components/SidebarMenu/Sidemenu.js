@@ -319,6 +319,26 @@ const SideMenu = ({ isCollapsed }) => {
         (item) => item?.key
       );
       setTemporaryKeys(extractingKeys);
+
+      // Merge fallback parent keys into openMenuKeys so they are never dropped
+      // when openMenuKeys later becomes non-empty (the accordion / glitch root cause).
+      const fallbackParentKeys = extractPaths(parentKey)
+        ?.filter((item) => item.children && item.children.length > 0)
+        ?.map((item) => item.key) || [];
+      if (fallbackParentKeys.length > 0) {
+        setOpenMenuKeys((prev) => {
+          const merged = new Set([...(prev || []), ...fallbackParentKeys]);
+          const newKeys = Array.from(merged);
+          if (
+            prev &&
+            prev.length === newKeys.length &&
+            newKeys.every((k) => prev.includes(k))
+          ) {
+            return prev;
+          }
+          return newKeys;
+        });
+      }
     }
 
     const allActiveItems = extractPaths(activeKeys);
@@ -351,7 +371,8 @@ const SideMenu = ({ isCollapsed }) => {
         return newKeys;
       });
     }
-  }, [getLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getLocation, datas]);
 
   // remove menu from whitelist -- non-mutating: returns new objects, never modifies datas
   function removeProfileItems(tree) {
@@ -401,12 +422,11 @@ const SideMenu = ({ isCollapsed }) => {
     );
   }, []);
 
-  // Fallback: when both openMenuKeys and urlLeafKeys are empty (form/detail pages),
-  // use temporaryKeys as the effective open keys so the parent submenu auto-expands.
-  const effectiveOpenKeys =
-    openMenuKeys?.length === 0 && urlLeafKeys?.length === 0
-      ? temporaryKeys
-      : openMenuKeys;
+  // openMenuKeys is the single source of truth for which submenus are open.
+  // Fallback parents (form/detail pages) are now merged into openMenuKeys directly
+  // in the effect above, so there is no need to conditionally switch to temporaryKeys.
+  // This eliminates the accordion effect and the open/close glitch on leaf navigation.
+  const effectiveOpenKeys = openMenuKeys;
 
   const selectedKeys =
     urlLeafKeys?.length === 0 ? temporaryKeys : urlLeafKeys;
