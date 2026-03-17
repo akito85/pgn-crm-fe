@@ -1065,6 +1065,18 @@ span.ant-tree-title {
 .ant-menu {
   font-size: 12px !important;
 }
+/* Suppress submenu arrow rotation transition in the sidebar so submenus open/close
+   instantly with no animation -- eliminates the expand/collapse glitch on navigation.
+   Scoped to .ant-layout-sider so other antd menus (e.g. dropdowns) are unaffected. */
+.ant-layout-sider .ant-menu-submenu-arrow,
+.ant-layout-sider .ant-menu-submenu-arrow::before,
+.ant-layout-sider .ant-menu-submenu-arrow::after {
+  transition: none !important;
+}
+.ant-layout-sider .ant-menu-submenu,
+.ant-layout-sider .ant-menu-submenu-inline {
+  transition: none !important;
+}
 /* Collapsed sidebar: popup flyout for submenus on hover */
 .custom-menu-popup {
   background: #fff;
