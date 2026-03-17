@@ -25,6 +25,7 @@ const CustomerServiceRequestDetailTabs = ({
   idServiceRequest,
   data_accountDetail,
   data_customerDetail,
+  data_detail,
 }) => {
   // Use provided options or fall back to default tabs
   const tabOptions = options.length > 0 ? options : [
@@ -62,11 +63,12 @@ const CustomerServiceRequestDetailTabs = ({
       accountType,
       data_accountDetail,
       data_customerDetail,
+      data_detail,
     };
 
     switch (section) {
       case dataTabs.sreqi:
-        return <CustomerServiceRequestDetailInfo {...commonProps} type={AccountType}/>;
+        return <CustomerServiceRequestDetailInfo {...commonProps} />;
       case dataTabs.attch:
         return <CustomerServiceRequestDetailAttch {...commonProps} />;
       case dataTabs.contact:

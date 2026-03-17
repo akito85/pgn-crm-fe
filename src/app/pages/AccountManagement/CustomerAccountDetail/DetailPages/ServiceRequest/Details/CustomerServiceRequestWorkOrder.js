@@ -27,6 +27,7 @@ import { USER_ROUTES } from "../../../../../../../routes/user_management/user_ro
 
 const CustomerServiceRequestWorkOrder = ({
   data = [],
+  data_detail,
   handleChange = () => {},
   handleChangeSize = () => {},
   totalElement = 0,
@@ -184,8 +185,10 @@ const CustomerServiceRequestWorkOrder = ({
   // nav
   const navigate = useNavigate();
 
-  // Use dummy data if no data provided
-  const tableData = (Array.isArray(data) && data.length > 0) ? data : dummyData;
+  const apiData = data_detail?.workOrders;
+  const tableData = (Array.isArray(apiData) && apiData.length > 0)
+    ? apiData
+    : (Array.isArray(data) && data.length > 0) ? data : dummyData;
 
   // Sanitize pagination values to prevent NaN
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;

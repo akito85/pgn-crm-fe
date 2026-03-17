@@ -24,6 +24,7 @@ import {
 
 const CustomerServiceRequestDetailAttch = ({
   data = [],
+  data_detail,
   handleChange = () => {},
   handleChangeSize = () => {},
   totalElement = 0,
@@ -82,8 +83,11 @@ const CustomerServiceRequestDetailAttch = ({
   // nav
   const navigate = useNavigate();
 
-  // Use dummy data if no data provided
-  const tableData = (Array.isArray(data) && data.length > 0) ? data : dummyData;
+  // Use data_detail.attachments → data prop → dummyData
+  const apiData = data_detail?.attachments;
+  const tableData = (Array.isArray(apiData) && apiData.length > 0)
+    ? apiData
+    : (Array.isArray(data) && data.length > 0) ? data : dummyData;
 
   // Sanitize pagination values to prevent NaN
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;

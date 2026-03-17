@@ -1,333 +1,231 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Tooltip } from "antd";
-import TablePagination from "../../../../../../../components/TablePagination";
-import SVGIcon from "../../../../../../../assets/Icon/index";
-import { Fragment } from "react";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import React, { Fragment } from "react";
+import { Tag } from "antd";
+import moment from "moment";
+
 import DetailText from "../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../components/BaseContainer";
-import { CloseOutlined, PauseCircleOutlined, PlayCircleOutlined, LockOutlined, PlusOutlined, CheckCircleOutlined } from "@ant-design/icons";
-import CustomerServiceRequestHeader from "./CustomerServiceRequestHeader";
-import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import { dateFormatting } from "../../../../../../../utils";
 
+// ─── Status badge helper ────────────────────────────────────────────────────
 
-const CustomerServiceRequestDetailInfo = ({
-  data = [],
-  handleChange = () => {},
-  handleChangeSize = () => {},
-  totalElement = 0,
-  page = 1,
-  pageSize = 10,
-  searchText = "",
-  searchedColumn = "",
-  onSort = () => {},
-  getColumnSearchProps = () => {},
-  searchInput,
-  handleSearch,
-  id,
-  idAccount,
-  idCustomer,
-  accountType,
-  data_accountDetail,
-  data_customerDetail,
-}) => {
-  // State
-  const [dataDetail, setDataDetail] = useState({});
-  const dispatch = useDispatch();
-  const [SRStatus, setSRStatus] = useState(null);
+const STATUS_COLOR = {
+  OPEN:             { bg: "#22c55e", label: "Open" },
+  IN_PROGRESS:      { bg: "#f97316", label: "In Progress" },
+  ON_HOLD:          { bg: "#eab308", label: "On Hold" },
+  RESOLVED:         { bg: "#3b82f6", label: "Resolved" },
+  CLOSED:           { bg: "#6b7280", label: "Closed" },
+  CANCELLED:        { bg: "#ef4444", label: "Cancelled" },
+  CANCELED:         { bg: "#ef4444", label: "Cancelled" },
+  DRAFT:            { bg: "#a855f7", label: "Draft" },
+  ACTIVE:           { bg: "#22c55e", label: "Active" },
+  WAITING_APPROVAL: { bg: "#f59e0b", label: "Waiting Approval" },
+  APPROVED:         { bg: "#10b981", label: "Approved" },
+  REJECTED:         { bg: "#ef4444", label: "Rejected" },
+  COMPLETED:        { bg: "#10b981", label: "Completed" },
+  COMPLETE:         { bg: "#10b981", label: "Completed" },
+  NONE:             { bg: "#9ca3af", label: "None" },
+};
 
-  const { loading, loadingAccount } = useSelector(
-    (state) => state.customerAccount
-    );
-  const { access_account } = useSelector(
-    (state) => state.accountManagement
+const StatusBadge = ({ value }) => {
+  const key = (value || "").toUpperCase().replace(/ /g, "_");
+  const cfg = STATUS_COLOR[key] || { bg: "#9ca3af", label: value || "-" };
+  return (
+    <Tag
+      style={{
+        backgroundColor: cfg.bg,
+        color: "#fff",
+        border: "none",
+        borderRadius: 20,
+        padding: "2px 10px",
+        fontSize: 12,
+        fontWeight: 500,
+      }}
+    >
+      {cfg.label}
+    </Tag>
   );
+};
 
-  const isLoading = loading || loadingAccount;
+// ─── Date formatters ─────────────────────────────────────────────────────────
 
-  //declare
-  const navigate = useNavigate();
-  const location = useLocation();
+const fmt     = (d) => (d ? moment(d).format(dateFormatting?.dateTime || "DD MMM YYYY HH:mm:ss") : "-");
+const fmtDate = (d) => (d ? moment(d).format(dateFormatting?.date     || "DD MMM YYYY")           : "-");
 
-  useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers'))
-  }, [dispatch])
+// ─── Main component ──────────────────────────────────────────────────────────
 
+const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
+  const sr             = data_detail  || {};
+  const dataRequirements = Array.isArray(sr.dataRequirements) ? sr.dataRequirements : [];
+  const actionLog        = Array.isArray(sr.actionLog)        ? sr.actionLog        : [];
+  const historyLog       = sr.historyLog || {};
 
-  const log = []
-
-  // Updated dummy data based on fikri.susilo extracted table data
-  const dummyData = [
-    {
-      id: "1",
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Update status to \"Closed\", remark: \"sudah selesai\""
-    },
-    {
-      id: "2", 
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Update status to \"Resolved\", remark: \"lanjut\""
-    },
-    {
-      id: "3",
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Update status to \"In Progress\", remark: \"lanjut\""
-    },
-    {
-      id: "4",
-      date: "22 Jan 2022 19:35:23",
-      username: "fikri.susilo",
-      remark: "Create service request"
-    }
-  ];
-
-  const HistoryLogDummy = {
-    recordId: "491",
-    createdDate: "21 Dec 2021 23:11:09",
-    createdBy: "Annisa",
-    updatedDate: "28 Dec 2021 23:11:09",
-    updatedBy: "Annisa"
-  };
-
-  const ServiceRequestDummy = {
-    serviceRequestNumber: "SR20240800000002",
-    serviceRequestReference: "SR20240800000004",
-    costCenter: "015 - AREA BOGOR",
-    type: "Field Service",
-    category: "Gas Management",
-    subCategory: "Gas Termination",
-    channel: "Manual",
-    priority: "High",
-    requestSource: "Customer",
-    requestDate: "21 Jan 2022 12:34:34",
-    openDate: "21 Jan 2022 12:34:34",
-    resolvedDate: "21 Jan 2022 12:34:34",
-    closedDate: "21 Jan 2022 12:34:34",
-    ageHour: "3.4",
-    statusApproval: "Approved",
-    statusPreRequisite: "Completed",
-    status: "Open",
-    description: "-"
-  };
-
-  // Use dummy data if no data provided
-  const tableData = (Array.isArray(data) && data.length > 0) ? data : dummyData;
-
-  // Sanitize pagination values to prevent NaN
-  const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
-  const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
-
-  const handleDetail = (value) => {
-    setDataDetail(value);
-  };
-
-  const handleViewFile = (fileData) => {
-    // Placeholder for view file action
-    console.log("View file:", fileData);
-    // Add your file viewing logic here
-  };
-
-  const columns = [
+  // ── Data Requirement columns ──
+  const drColumns = [
     {
       title: "NO",
-      width: 80,
+      width: 60,
       align: "center",
-      render: (text, object, index) => (sanitizedPage - 1) * sanitizedPageSize + index + 1,
+      render: (_, __, i) => i + 1,
+    },
+    {
+      title: "TYPE",
+      dataIndex: "drType",
+      width: 100,
+      sorter: true,
+      filter: true,
+    },
+    {
+      title: "VALUE",
+      dataIndex: "drValue",
+      sorter: true,
+      filter: true,
+    },
+    {
+      title: "DESCRIPTION",
+      dataIndex: "drDesc",
+      sorter: true,
+      filter: true,
+    },
+  ];
+
+  // ── Action Log columns ──
+  const logColumns = [
+    {
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (_, __, i) => i + 1,
     },
     {
       title: "DATE",
-      dataIndex: "date",
-      width: 200,
+      dataIndex: "createdDate",
+      width: 180,
       sorter: true,
-      ...getColumnSearchProps("date"),
+      filter: true,
+      render: (v) => fmt(v),
     },
     {
-      title: "USERNAME", 
-      dataIndex: "username",
-      width: 200,
+      title: "USERNAME",
+      dataIndex: "createdBy",
+      width: 150,
       sorter: true,
-      ...getColumnSearchProps("username"),
+      filter: true,
     },
     {
       title: "REMARK",
       dataIndex: "remark",
-      width: 400,
+      width: 250,
       sorter: true,
-      ...getColumnSearchProps("remark"),
+      filter: true,
     },
     {
-      title: "ACTION",
-      align: "center",
-      width: 100,
-      fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex w-full justify-center gap-6">
-            <Tooltip title="View">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEye"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => {
-                    handleViewFile(r);
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
+      title: "NEW VALUE",
+      dataIndex: "newValue",
+      sorter: true,
+      filter: true,
+      render: (v) =>
+        v ? (
+          <span className="text-xs text-gray-500 truncate max-w-xs block">{v}</span>
+        ) : (
+          "-"
+        ),
     },
   ];
 
-  console.log(SRStatus)
-
   return (
     <Fragment>
-      <div className="flex items-center justify-between">
-        {/* Left Side Buttons Group */}
-        <div className="flex items-center gap-3">
-          {/* Cancel Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "resolved" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("canceled")}}
-              icon={<CloseOutlined className="text-2xl" />}
-            >
-              Cancel
-            </ButtonComponent>
-          )}
-
-          {/* On Hold Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "on-hold" && SRStatus !== "resolved" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("on-hold")}}
-              icon={<PauseCircleOutlined className="text-2xl" />}
-            >
-              Marks as On Hold
-            </ButtonComponent>
-          )}
-        </div>
-
-        {/* Right Side Buttons Group */}
-        <div className="flex items-center gap-3">
-          {/* Marks as Open Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && (SRStatus === "on-hold" || SRStatus === "in-progress" || SRStatus === "resolved") && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("open")}}
-              icon={<PlayCircleOutlined className="text-2xl" />}
-            >
-              Marks as Open
-            </ButtonComponent>
-          )}
-
-          {/* Marks as In Progress Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "in-progress" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("in-progress")}}
-              icon={<PlayCircleOutlined className="text-2xl" />}
-            >
-              Marks as In Progress
-            </ButtonComponent>
-          )}
-
-          {/* Mark as Resolved Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && SRStatus !== "resolved" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("resolved")}}
-              icon={<CheckCircleOutlined className="text-2xl" />}
-            >
-              Mark as Resolved
-            </ButtonComponent>
-          )}
-
-          {/* Mark as Closed Button */}
-          {SRStatus !== "canceled" && SRStatus !== "closed" && (
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setSRStatus("closed")}}
-              icon={<LockOutlined className="text-2xl text-white" />}
-              className="bg-[#0075bf] text-white hover:bg-[#0075bf]/90 transition-colors"
-            >
-              Mark as Closed
-            </ButtonComponent>
-          )}
-        </div>
-      </div>
-      <div className="w-full">
-        <CustomerServiceRequestHeader
-          id={id}
-          data_detail={data_customerDetail}
-          data_accountDetail={data_accountDetail}
-          dispatch={dispatch}
-          access_account={access_account}
-        />
-      </div>
-      
-      <BaseContainer header={"SERVICE REQUEST"}>
+      {/* ── SERVICE REQUEST INFORMATION ── */}
+      <BaseContainer header="SERVICE REQUEST INFORMATION">
         <div className="w-full grid grid-cols-4 gap-4">
-          {/* Service Request Information */}
-          <DetailText label="Service Request Number">{data?.serviceRequestNumber || ServiceRequestDummy.serviceRequestNumber}</DetailText>
-          <DetailText label="Service Request Reference"><u>{data?.serviceRequestReference || ServiceRequestDummy.serviceRequestReference}</u></DetailText>
-          <DetailText label="Cost Center">{data?.costCenter || ServiceRequestDummy.costCenter}</DetailText>
-          <DetailText label="Type">{data?.type || ServiceRequestDummy.type}</DetailText>
-          <DetailText label="Category">{data?.category || ServiceRequestDummy.category}</DetailText>
-          <DetailText label="Sub Category">{data?.subCategory || ServiceRequestDummy.subCategory}</DetailText>
-          <DetailText label="Channel">{data?.channel || ServiceRequestDummy.channel}</DetailText>
-          <DetailText label="Priority">{data?.priority || ServiceRequestDummy.priority}</DetailText>
-          <DetailText label="Request Source">{data?.requestSource || ServiceRequestDummy.requestSource}</DetailText>
-          <DetailText label="Request Date">{data?.requestDate || ServiceRequestDummy.requestDate}</DetailText>
-          <DetailText label="Open Date">{data?.openDate || ServiceRequestDummy.openDate}</DetailText>
-          <DetailText label="Resolved Date">{data?.resolvedDate || ServiceRequestDummy.resolvedDate}</DetailText>
-          <DetailText label="Closed Date">{data?.closedDate || ServiceRequestDummy.closedDate}</DetailText>
-          <DetailText label="Age (Hour)">{data?.ageHour || ServiceRequestDummy.ageHour}</DetailText>
-          <DetailText label="Status Approval">{data?.statusApproval || ServiceRequestDummy.statusApproval}</DetailText>
-          <DetailText label="Status Pre-Requisite">{data?.statusPreRequisite || ServiceRequestDummy.statusPreRequisite}</DetailText>
-          <DetailText label="Status">{data?.status || ServiceRequestDummy.status}</DetailText>
+          <DetailText label="Service Request Reference">
+            {sr.requestNumber || "-"}
+          </DetailText>
+          <DetailText label="Type">{sr.requestTypeName || "-"}</DetailText>
+          <DetailText label="Category">{sr.requestCategoryName || "-"}</DetailText>
+          <DetailText label="Sub Category">
+            {sr.requestSubCategoryName || "-"}
+          </DetailText>
+
+          <DetailText label="Channel">{sr.channelName || "-"}</DetailText>
+          <DetailText label="Priority">{sr.priorityName || "-"}</DetailText>
+          <DetailText label="Request Source">{sr.sourceName || "-"}</DetailText>
+          <DetailText label="Cost Center">{sr.costCenterName || "-"}</DetailText>
+
+          <DetailText label="Request Date">{fmtDate(sr.requestDate)}</DetailText>
+          <DetailText label="Open Date">{fmtDate(sr.openDate)}</DetailText>
+          <DetailText label="Resolved Date">{fmtDate(sr.resolvedDate)}</DetailText>
+          <DetailText label="Age (Hour)">{sr.duration ?? "-"}</DetailText>
+
+          <DetailText label="Closed Date">{fmtDate(sr.closedDate)}</DetailText>
+          <DetailText label="Reference">{sr.reference || "-"}</DetailText>
+          <div />
+          <div />
+
+          <DetailText label="Status">
+            <StatusBadge value={sr.status} />
+          </DetailText>
+          <DetailText label="Status Pre-Requisite">
+            <StatusBadge value={sr.statusPrerequisite} />
+          </DetailText>
+          <DetailText label="Status Approval">
+            <StatusBadge value={sr.statusApproval} />
+          </DetailText>
+          <div />
         </div>
-        <div className="w-full">
-          <DetailText label="Description">{data?.description || ServiceRequestDummy.description}</DetailText>
+        <div className="w-full mt-2">
+          <DetailText label="Description">{sr.description || "-"}</DetailText>
         </div>
       </BaseContainer>
 
-      <BaseContainer header={"ACTION LOG"}>
-        <TablePagination
-          dataSource={tableData.map((item, idx) => ({
+      {/* ── DATA REQUIREMENT ── */}
+      <BaseContainer header="DATA REQUIREMENT">
+        <NxTable
+          dataSource={dataRequirements.map((item, i) => ({
             ...item,
-            key: item.id || idx,
+            key: item.id || i,
           }))}
-          totalData={sanitizedTotalElement}
-          current={sanitizedPage}
-          pageSize={sanitizedPageSize}
-          onChange={handleChange}
-          onSizeChanger={handleChangeSize}
-          tableScrolled={{ y: 525, x: 1500 }}
-          onSort={onSort}
-          columns={columns}
+          columns={drColumns}
+          usePagination={false}
+          fontSize="small"
+          tablePadding="small"
+          tableScrolled={{ x: "max-content" }}
         />
       </BaseContainer>
 
-      <BaseContainer header={"HISTORY LOG INFORMATION"}>
+      {/* ── ACTION LOG ── */}
+      <BaseContainer header="ACTION LOG">
+        <NxTable
+          dataSource={actionLog.map((item, i) => ({
+            ...item,
+            key: item.id || i,
+          }))}
+          columns={logColumns}
+          usePagination={true}
+          fontSize="small"
+          tablePadding="small"
+          tableScrolled={{ x: "max-content", y: 300 }}
+        />
+      </BaseContainer>
+
+      {/* ── HISTORY LOG INFORMATION ── */}
+      <BaseContainer header="HISTORY LOG INFORMATION">
         <div className="w-full grid grid-cols-5 gap-4">
-          {/* History Log Information */}
-          <DetailText label="Record Id">{log?.recordId || HistoryLogDummy.recordId}</DetailText>
-          <DetailText label="Created Date">{log?.createdDate || HistoryLogDummy.createdDate}</DetailText>
-          <DetailText label="Created By">{log?.createdBy || HistoryLogDummy.createdBy}</DetailText>
-          <DetailText label="Updated Date">{log?.updatedDate || HistoryLogDummy.updatedDate}</DetailText>
-          <DetailText label="Updated By">{log?.updatedBy || HistoryLogDummy.updatedBy}</DetailText>
+          <DetailText label="Record ID">
+            {historyLog.recordId || sr.id || "-"}
+          </DetailText>
+          <DetailText label="Created Date">
+            {fmt(historyLog.createdDate || sr.createdDate)}
+          </DetailText>
+          <DetailText label="Created By">
+            {historyLog.createdBy || sr.createdBy || "-"}
+          </DetailText>
+          <DetailText label="Updated Date">
+            {fmt(historyLog.updatedDate || sr.updatedDate)}
+          </DetailText>
+          <DetailText label="Updated By">
+            {historyLog.updatedBy || sr.updatedBy || "-"}
+          </DetailText>
         </div>
       </BaseContainer>
     </Fragment>
