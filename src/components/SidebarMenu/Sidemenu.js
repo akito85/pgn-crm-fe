@@ -1,9 +1,14 @@
-import { Menu } from "antd";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SVGIcon from "../../../src/assets/Icon/index";
-import { useState } from "react";
 
 /** Whitelist Sidemenu */
 const whitelistMenu = [
@@ -51,33 +56,183 @@ const whitelistMenu = [
   "Notifications",
 ];
 
+/**
+ * SubMenuItem -- renders a submenu <li> with expand/collapse (expanded mode)
+ * or a hover-triggered popup flyout (collapsed mode).
+ *
+ * DOM constraint: must preserve .ant-menu-submenu > .ant-menu-sub > .ant-menu-item-selected
+ * nesting for the :has() CSS selector in index.css that colors parent submenu icons.
+ */
+const SubMenuItem = ({
+  item,
+  isOpen,
+  isSelected,
+  isCollapsed,
+  isNavigating,
+  hoveredKey,
+  onToggle,
+  onHover,
+  onLeave,
+  selectedKeys,
+  renderItems,
+}) => {
+  const contentRef = useRef(null);
+  const titleRef = useRef(null);
+  const [measuredHeight, setMeasuredHeight] = useState(0);
+  const [popupTop, setPopupTop] = useState(0);
+
+  // Measure scrollHeight for maxHeight animation.
+  // useLayoutEffect ensures measurement before paint -- no flash.
+  // Re-measures when open state or child count changes.
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      setMeasuredHeight(contentRef.current.scrollHeight);
+    }
+  }, [isOpen, item.children?.length]);
+
+  const isHovered = isCollapsed && hoveredKey === item.key;
+
+  // Compute popup position when hover state changes (collapsed mode only).
+  // useLayoutEffect ensures measurement happens before paint -- no position flicker.
+  useLayoutEffect(() => {
+    if (isHovered && titleRef.current) {
+      const rect = titleRef.current.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const maxH = 300;
+      setPopupTop(rect.top + maxH > vh ? vh - maxH - 8 : rect.top);
+    }
+  }, [isHovered]);
+
+  const submenuClasses = [
+    "ant-menu-submenu",
+    "ant-menu-submenu-inline",
+    isOpen && !isCollapsed ? "ant-menu-submenu-open" : "",
+    isSelected ? "ant-menu-submenu-selected" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  // Collapsed mode: popup flyout on hover
+  if (isCollapsed) {
+    return (
+      <li
+        className={submenuClasses}
+        role="none"
+        onMouseEnter={() => onHover(item.key)}
+        onMouseLeave={onLeave}
+      >
+        <div
+          className="ant-menu-submenu-title"
+          ref={titleRef}
+          aria-haspopup="true"
+          aria-expanded={isHovered}
+          style={{ paddingLeft: 0 }}
+        >
+          <span className="ant-menu-item-icon">
+            <SVGIcon
+              name={item?.icon}
+              width={20}
+              style={{
+                marginRight: "80px",
+                marginLeft: "-5px",
+                marginTop: "10px",
+              }}
+              className="sidebar-icon"
+            />
+          </span>
+          <span className="ant-menu-title-content">
+            <span>{item.name}</span>
+          </span>
+        </div>
+        {isHovered && (
+          <ul
+            className="ant-menu ant-menu-sub ant-menu-vertical custom-menu-popup"
+            role="menu"
+            style={{
+              position: "fixed",
+              left: 80,
+              top: popupTop,
+              zIndex: 1050,
+            }}
+          >
+            {renderItems(item.children, selectedKeys, false)}
+          </ul>
+        )}
+      </li>
+    );
+  }
+
+  // Expanded mode: inline expand/collapse
+  return (
+    <li className={submenuClasses} role="none">
+      <div
+        className="ant-menu-submenu-title"
+        onClick={() => onToggle(item.key)}
+        aria-expanded={isOpen}
+        style={{ paddingLeft: 24 }}
+      >
+        <span className="ant-menu-item-icon">
+          <SVGIcon
+            name={item?.icon}
+            width={20}
+            style={{ marginRight: "12px" }}
+            className="sidebar-icon"
+          />
+        </span>
+        <span className="ant-menu-title-content">
+          <span>{item.name}</span>
+        </span>
+        <i
+          className="ant-menu-submenu-arrow"
+          style={{
+            transform: isOpen ? "rotate(-180deg) translateY(2px)" : "none",
+            transition: isNavigating ? "none" : "transform 0.3s",
+          }}
+        />
+      </div>
+      <ul
+        ref={contentRef}
+        className="ant-menu ant-menu-sub ant-menu-inline"
+        role="menu"
+        style={{
+          maxHeight: isOpen ? measuredHeight : 0,
+          overflow: "hidden",
+          transition: isNavigating ? "none" : "max-height 0.25s ease-in-out",
+        }}
+      >
+        {renderItems(item.children, selectedKeys, false)}
+      </ul>
+    </li>
+  );
+};
+
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
-  // Ref to the wrapper div — used to suppress SubMenu CSS animation during navigation.
-  // Even with memoized props, Ant Design v4's SiderContext can force Menu re-renders.
-  // Disabling the transition during navigation prevents any visual flicker.
-  const menuContainerRef = useRef(null);
-  // openMenuKeys: which SubMenus are expanded — only ever contains submenu keys, never leaf keys
+  // openMenuKeys: which SubMenus are expanded
   const [openMenuKeys, setOpenMenuKeys] = useState([]);
-  // urlLeafKeys: which leaf items match the current URL — used for selectedKeys
+  // urlLeafKeys: which leaf items match the current URL
   const [urlLeafKeys, setUrlLeafKeys] = useState([]);
-  // temporaryKeys: fallback when on a form/detail page that has no direct menu match
+  // temporaryKeys: fallback when on a form/detail page with no direct menu match
   const [temporaryKeys, setTemporaryKeys] = useState([]);
-  // requiredParentKeysRef: always holds the current page's ancestor submenu keys.
-  // Used in onOpenChange to prevent Ant Design from collapsing the active parent
-  // when it fires onOpenChange during <Link> navigation (a known Ant Design v4 quirk).
+  // hoveredSubmenu: key of submenu being hovered in collapsed mode (drives popup visibility)
+  const [hoveredSubmenu, setHoveredSubmenu] = useState(null);
+  // requiredParentKeysRef: always holds the current page's ancestor submenu keys
   const requiredParentKeysRef = useRef([]);
-  // isNavigatingRef: true only during the brief window after a URL change.
-  // onOpenChange uses this to distinguish between Ant Design's spurious fire
-  // (during <Link> navigation) vs. intentional user clicks on submenu headers.
+  // isNavigatingRef: true only during the brief window after a URL change
   const isNavigatingRef = useRef(false);
   const getLocation = location.pathname;
-  // Select ONLY side_bar — not the entire auth slice.
+  // Select ONLY side_bar -- not the entire auth slice.
   // checkGrantedAccess modifies auth.loading, auth.user, auth.data_switch on every navigation.
-  // Selecting the whole slice caused 2-4 spurious re-renders per click (after isNavigatingRef expired).
+  // Selecting the whole slice caused 2-4 spurious re-renders per click.
   const side_bar = useSelector((state) => state?.auth?.side_bar);
 
-  const datas = useMemo(() => JSON.parse(side_bar), [side_bar]);
+  const datas = useMemo(() => {
+    try {
+      return JSON.parse(side_bar) || [];
+    } catch {
+      return [];
+    }
+  }, [side_bar]);
 
   // convert to flat map from tree data
   const extractPaths = useCallback(
@@ -169,16 +324,10 @@ const SideMenu = ({ isCollapsed }) => {
   };
 
   useEffect(() => {
-    // Signal that a navigation just happened — onOpenChange will protect
-    // the active parent only while this flag is true.
+    // Signal that a navigation just happened.
+    // isNavigatingRef suppresses CSS transitions in SubMenuItem so submenus
+    // snap open/closed programmatically without animation during URL changes.
     isNavigatingRef.current = true;
-
-    // Suppress SubMenu CSS animation during navigation to prevent visual flicker.
-    // This handles the edge case where SiderContext or other re-renders force
-    // rc-menu to re-evaluate SubMenu visibility during the navigation window.
-    if (menuContainerRef.current) {
-      menuContainerRef.current.classList.add("menu-navigating");
-    }
 
     const activeKeys = filterMenuByPath(mappingMenu(datas), getLocation);
 
@@ -190,13 +339,15 @@ const SideMenu = ({ isCollapsed }) => {
         mappingMenu(datas),
         findMatching?.path
       );
-      const extractingKeys = extractPaths(parentKey)?.map((item) => item?.key);
+      const extractingKeys = extractPaths(parentKey)?.map(
+        (item) => item?.key
+      );
       setTemporaryKeys(extractingKeys);
     }
 
     const allActiveItems = extractPaths(activeKeys);
 
-    // Leaf keys: actual selectable items (no children) — drives icon color + selectedKeys
+    // Leaf keys: actual selectable items (no children) -- drives selectedKeys
     const leafKeys = allActiveItems
       .filter((item) => !item.children || item.children.length === 0)
       .map((item) => item.key);
@@ -206,16 +357,12 @@ const SideMenu = ({ isCollapsed }) => {
       .filter((item) => item.children && item.children.length > 0)
       .map((item) => item.key);
 
-    // Keep the ref in sync — onOpenChange reads this to protect the active parent.
     requiredParentKeysRef.current = requiredParentKeys;
 
     setUrlLeafKeys(leafKeys);
 
-    // Only MERGE required parent keys — never replace the full openMenuKeys.
+    // Only MERGE required parent keys -- never replace the full openMenuKeys.
     // This preserves any other submenus the user manually opened.
-    // openMenuKeys never receives leaf keys, so Ant Design won't glitch on navigation.
-    // Reference stability: return prev when values are unchanged to prevent rc-menu
-    // from re-distributing context and firing SubMenu motion on every navigation.
     if (requiredParentKeys.length > 0) {
       setOpenMenuKeys((prev) => {
         const merged = new Set([...(prev || []), ...requiredParentKeys]);
@@ -231,20 +378,16 @@ const SideMenu = ({ isCollapsed }) => {
       });
     }
 
-    // Clear navigation flag and re-enable animation after React commits the state
-    // updates above. Double-RAF ensures we wait for both the commit AND the browser
-    // paint, so the Menu has settled with the new openKeys before animation resumes.
+    // Clear navigation flag after paint settles.
+    // Double-RAF ensures both React commit AND browser paint complete.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         isNavigatingRef.current = false;
-        if (menuContainerRef.current) {
-          menuContainerRef.current.classList.remove("menu-navigating");
-        }
       });
     });
   }, [getLocation]);
 
-  // remove menu from whitelist — non-mutating: returns new objects, never modifies datas
+  // remove menu from whitelist -- non-mutating: returns new objects, never modifies datas
   function removeProfileItems(tree) {
     if (!Array.isArray(tree)) return tree;
     return tree
@@ -269,7 +412,9 @@ const SideMenu = ({ isCollapsed }) => {
           {data?.name}
         </a>
       );
-    } else if (data?.path?.includes("http://10.129.2.39:8080/ords/f?p=113")) {
+    } else if (
+      data?.path?.includes("http://10.129.2.39:8080/ords/f?p=113")
+    ) {
       return (
         <a
           href={"http://rms.pgn.co.id:7780/apex/f?p=113"}
@@ -284,123 +429,117 @@ const SideMenu = ({ isCollapsed }) => {
     }
   }, []);
 
-  // render sub menu
-  // Does NOT depend on urlLeafKeys — menu structure is stable across navigations.
-  // Active state is communicated via selectedKeys/openKeys props only.
-  // Icon coloring is handled by CSS :has(.ant-menu-item-selected) — no JS needed.
-  const generateMenuItems = useCallback(
-    (data) => {
-      return data.map((item) => {
-        if (item.children) {
-          return (
-            <Menu.SubMenu
-              key={item?.key}
-              icon={
-                <SVGIcon
-                  name={item?.icon}
-                  width={20}
-                  style={{
-                    marginRight: isCollapsed ? "80px" : "12px",
-                    marginLeft: isCollapsed ? "-5px" : "",
-                    marginTop: isCollapsed ? "10px" : "",
-                  }}
-                  className="sidebar-icon"
-                />
-              }
-              title={<span>{item.name}</span>}
-            >
-              {generateMenuItems(item.children)}
-            </Menu.SubMenu>
-          );
-        } else {
-          return (
-            <Menu.Item
-              key={item?.key}
-              icon={
-                <SVGIcon
-                  name={item?.icon}
-                  width={20}
-                  style={{
-                    marginRight: isCollapsed ? "80px" : "12px",
-                    marginLeft: isCollapsed ? "-5px" : "",
-                    marginTop: isCollapsed ? "10px" : "",
-                  }}
-                  className="sidebar-icon"
-                />
-              }
-            >
-              {newTabCallback(item)}
-            </Menu.Item>
-          );
-        }
-      });
-    },
-    [isCollapsed, newTabCallback]
-  );
-
-  // Memoize the full menu JSX tree.
-  // datas and generateMenuItems are both stable across URL navigations —
-  // so menuItems reference is stable too. <Menu> receives the same children
-  // on every navigation, preventing Ant Design's context propagation from
-  // triggering its internal open/close animation check on re-renders.
-  const menuItems = useMemo(
-    () => generateMenuItems(mappingMenu(removeProfileItems(datas))),
-    [datas, generateMenuItems]
-  );
-
-  // Memoize selectedKeys — stable reference prevents Menu re-render
-  const selectedKeys = useMemo(
-    () => (urlLeafKeys?.length === 0 ? temporaryKeys : urlLeafKeys),
-    [urlLeafKeys, temporaryKeys]
-  );
-
-  // Memoize the resolved openKeys value — stable reference across re-renders
-  const resolvedOpenKeys = useMemo(
-    () =>
-      openMenuKeys?.length === 0 && urlLeafKeys?.length === 0
-        ? temporaryKeys
-        : openMenuKeys,
-    [openMenuKeys, urlLeafKeys, temporaryKeys]
-  );
-
-  // Stable onOpenChange — uses refs (not state) so dependencies are empty.
-  // This prevents rc-menu from seeing a new callback on every render,
-  // which was the mechanism that allowed spurious onOpenChange fires
-  // to drop the active parent key after the isNavigatingRef window closed.
-  const handleOpenChange = useCallback((keys) => {
-    if (isNavigatingRef.current) {
-      setOpenMenuKeys((prev) => {
-        const merged = new Set([...keys, ...requiredParentKeysRef.current]);
-        const newKeys = Array.from(merged);
-        if (
-          prev &&
-          prev.length === newKeys.length &&
-          newKeys.every((k) => prev.includes(k))
-        ) {
-          return prev;
-        }
-        return newKeys;
-      });
-    } else {
-      setOpenMenuKeys(keys);
-    }
+  const toggleSubmenu = useCallback((key) => {
+    setOpenMenuKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   }, []);
 
+  // Fallback: when both openMenuKeys and urlLeafKeys are empty (form/detail pages),
+  // use temporaryKeys as the effective open keys so the parent submenu auto-expands.
+  const effectiveOpenKeys =
+    openMenuKeys?.length === 0 && urlLeafKeys?.length === 0
+      ? temporaryKeys
+      : openMenuKeys;
+
+  const selectedKeys =
+    urlLeafKeys?.length === 0 ? temporaryKeys : urlLeafKeys;
+
+  const menuData = useMemo(
+    () => mappingMenu(removeProfileItems(datas)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [datas]
+  );
+
+  const renderItems = useCallback(
+    (items, selKeys, isTopLevel) => {
+      return items.map((item) => {
+        if (item.children) {
+          const hasSelectedChild = selKeys.some((sk) =>
+            extractPaths([item]).some(
+              (child) =>
+                child.key === sk &&
+                (!child.children || child.children.length === 0)
+            )
+          );
+          const isOpen = effectiveOpenKeys.includes(item.key);
+
+          return (
+            <SubMenuItem
+              key={item.key}
+              item={item}
+              isOpen={isOpen}
+              isSelected={hasSelectedChild}
+              isCollapsed={isCollapsed}
+              isNavigating={isNavigatingRef.current}
+              hoveredKey={hoveredSubmenu}
+              onToggle={toggleSubmenu}
+              onHover={setHoveredSubmenu}
+              onLeave={() => setHoveredSubmenu(null)}
+              selectedKeys={selKeys}
+              renderItems={renderItems}
+            />
+          );
+        }
+
+        const isSelected = selKeys.includes(item.key);
+        return (
+          <li
+            key={item.key}
+            className={`ant-menu-item${
+              isSelected ? " ant-menu-item-selected" : ""
+            }`}
+            role="menuitem"
+            style={{
+              paddingLeft: isTopLevel ? (isCollapsed ? 0 : 24) : 48,
+            }}
+          >
+            {item.icon && (
+              <span className="ant-menu-item-icon">
+                <SVGIcon
+                  name={item.icon}
+                  width={20}
+                  style={{
+                    marginRight: isCollapsed ? "80px" : "12px",
+                    marginLeft: isCollapsed ? "-5px" : "",
+                    marginTop: isCollapsed ? "10px" : "",
+                  }}
+                  className="sidebar-icon"
+                />
+              </span>
+            )}
+            <span className="ant-menu-title-content">
+              {newTabCallback(item)}
+            </span>
+          </li>
+        );
+      });
+    },
+    [
+      isCollapsed,
+      effectiveOpenKeys,
+      hoveredSubmenu,
+      newTabCallback,
+      extractPaths,
+      toggleSubmenu,
+    ]
+  );
+
+  const rootClasses = [
+    "ant-menu",
+    "ant-menu-light",
+    "ant-menu-root",
+    "ant-menu-inline",
+    isCollapsed ? "ant-menu-inline-collapsed" : "",
+    "mb-6",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div ref={menuContainerRef}>
-      <Menu
-        theme="light"
-        selectedKeys={selectedKeys}
-        mode="inline"
-        className={"mb-6"}
-        {...(isCollapsed
-          ? { defaultOpenKeys: resolvedOpenKeys }
-          : { openKeys: resolvedOpenKeys, onOpenChange: handleOpenChange }
-        )}
-      >
-        {menuItems}
-      </Menu>
-    </div>
+    <ul className={rootClasses} role="menu">
+      {renderItems(menuData, selectedKeys, true)}
+    </ul>
   );
 };
 
