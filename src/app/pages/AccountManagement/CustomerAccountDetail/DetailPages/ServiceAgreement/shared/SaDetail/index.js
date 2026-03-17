@@ -922,9 +922,9 @@ const SaDetail = ({
                                           );
 
                                           // Always clear table data first
-                                          setDataPricing([]);
-                                          setDataTableLateCharge([]);
-                                          setSendLateCharge({});
+                                          // setDataPricing([]);
+                                          // setDataTableLateCharge([]);
+                                          // setSendLateCharge({});
 
                                           // Sync saDetailObj 1:1
                                           setSaDetailObj((prev) => ({
