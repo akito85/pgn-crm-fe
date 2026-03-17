@@ -1217,21 +1217,21 @@ const financialInformationSlice = createSlice({
 
     /** Approve or Reject All Inactive Invoice Relation */
     [approveOrRejectAllInvoiceRelation.pending]: (state, action) => {
-      if (action.meta.arg?.action === "approve")
+      if (action.meta.arg?.action === "approved")
         state.loading_approveIr = true;
-      else if (action.meta.arg?.action === "reject")
+      else if (action.meta.arg?.action === "rejected")
         state.loading_rejectIr = true;
     },
     [approveOrRejectAllInvoiceRelation.fulfilled]: (state, action) => {
-      if (action.meta.arg?.action === "approve")
+      if (action.meta.arg?.action === "approved")
         state.loading_approveIr = false;
-      else if (action.meta.arg?.action === "reject")
+      else if (action.meta.arg?.action === "rejected")
         state.loading_rejectIr = false;
     },
     [approveOrRejectAllInvoiceRelation.rejected]: (state,action) => {
-      if (action.meta.arg?.action === "approve")
+      if (action.meta.arg?.action === "approved")
         state.loading_approveIr = false;
-      else if (action.meta.arg?.action === "reject")
+      else if (action.meta.arg?.action === "rejected")
         state.loading_rejectIr = false;
     },
 

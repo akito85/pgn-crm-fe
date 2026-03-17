@@ -354,7 +354,7 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    disabled={loadingApproval}
+                    disabled={!loading_rejectIr && loadingApproval}
                     loading={loading_rejectIr}
                   >
                     Reject
@@ -362,7 +362,7 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    disabled={loadingApproval}
+                    disabled={!loading_approveIr && loadingApproval}
                     loading={loading_approveIr}
                   >
                     Approve
