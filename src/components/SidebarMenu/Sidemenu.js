@@ -1,5 +1,5 @@
 import { Menu } from "antd";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SVGIcon from "../../../src/assets/Icon/index";
@@ -54,6 +54,8 @@ const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
   const [active, setActive] = useState([]);
   const [temporaryKeys, setTemporaryKeys] = useState([]);
+  // Tracks submenu keys the user manually opened — survives page navigation
+  const userOpenKeysRef = useRef([]);
   const getLocation = location.pathname;
   const { side_bar } = useSelector((state) => state?.auth);
 
@@ -164,7 +166,10 @@ const SideMenu = ({ isCollapsed }) => {
       setTemporaryKeys(extractingKeys);
     }
 
-    setActive(extractPaths(activeKeys).map((item) => item.key));
+    // Merge URL-required keys with whatever submenus the user had opened manually
+    const urlKeys = extractPaths(activeKeys).map((item) => item.key);
+    const merged = new Set([...urlKeys, ...userOpenKeysRef.current]);
+    setActive(Array.from(merged));
   }, [getLocation]);
 
   // remove menu from list
@@ -293,6 +298,8 @@ const SideMenu = ({ isCollapsed }) => {
       return {
         openKeys: active?.length === 0 ? temporaryKeys : active,
         onOpenChange: (keys) => {
+          // Persist user's expand/collapse intent so it survives navigation
+          userOpenKeysRef.current = keys;
           if (active?.length === 0) {
             setTemporaryKeys(keys);
           } else {
