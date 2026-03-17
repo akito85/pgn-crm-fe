@@ -180,7 +180,11 @@ const SideMenu = ({ isCollapsed }) => {
       });
 
     setSelectedKeys(selectedItems);
-    setOpenKeys(parentKeys);
+    // Merge manually expanded keys with parent keys needed for selected item
+    setOpenKeys((prevKeys) => {
+      const merged = new Set([...(prevKeys || []), ...parentKeys]);
+      return Array.from(merged);
+    });
   }, [getLocation]);
 
   // remove menu from list
