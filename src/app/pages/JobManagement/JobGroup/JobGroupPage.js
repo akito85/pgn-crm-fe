@@ -168,16 +168,6 @@ const JobGroupPage = () => {
     [dispatch, jobsByGroupId]
   );
 
-  // Column width configuration for child table (use the 'key' property from column definitions)
-  const tableColumnWidths = useMemo(() => ({
-    parameter: 800,      // PARAMETER column (dataIndex: parameters, key: parameter)
-    maxRetry: 30,        // MAX RETRY column
-    timeout: 30,         // TIMEOUT column
-    handlerClass: 120,   // HANDLER CLASS column
-    execType: 60,        // EXEC TYPE column
-    type: 50,            // TYPE column
-  }), []);
-
   // Get child columns for nested table (exclude desc and audit columns)
   const childColumns = useMemo(() => {
     const allColumns = getJobGroupChildTableColumns(accessGroupsMap);
@@ -399,7 +389,6 @@ const JobGroupPage = () => {
             onExpand={handleExpandRow}
             actionColumn={actionColumn}
             loadingKeys={loadingKeys}
-            columnWidths={tableColumnWidths}
           />
         </div>
       </NxCardContainer>

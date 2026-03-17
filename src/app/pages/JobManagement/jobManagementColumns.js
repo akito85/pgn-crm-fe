@@ -53,6 +53,7 @@ export const getJobManagementColumns = (accessGroupsMap = {}) => [
     dataIndex: "parameters",
     key: "parameter",
     align: "left",
+    width: 800,
     ellipsis: true,
     render: (params) => {
       if (!Array.isArray(params) || params.length === 0) return "—";
