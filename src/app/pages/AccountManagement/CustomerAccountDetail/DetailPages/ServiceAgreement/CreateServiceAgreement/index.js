@@ -1489,6 +1489,101 @@ const CreateServiceAgreement = ({ saType }) => {
   ];
 
   const navigate = useNavigate();
+
+  const getCheckValidateCreateSaBody = () => {
+    if (isMain) {
+      return {
+        saId: idSa,
+        accountId: idAccount,
+        isMain: true,
+        productId: null,
+        startDate: null,
+        endDate: null,
+        saType: "main",
+      };
+    }
+
+    if (saRecordData?.typeSa === "Amendment") {
+      return {
+        saId: idSa,
+        accountId: idAccount,
+        isMain: false,
+        productId: null,
+        startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
+        endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
+        saType: "Amendment",
+        saReferenceNumber: saReferenceNumber,
+      };
+    }
+
+    if (current === 1 && saRecordData?.typeSa === "addon") {
+      return {
+        saId: idSa,
+        accountId: idAccount,
+        isMain: false,
+        productId: saDetailObj?.productId,
+        startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
+        endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
+        saType: "addon",
+        saReferenceNumber: saReferenceNumber,
+      };
+    }
+
+    return null;
+  };
+
+  const runCheckValidateCreateSa = async () => {
+    const body = getCheckValidateCreateSaBody();
+
+    if (!body) {
+      return true;
+    }
+
+    try {
+      const data = await dispatch(checkValidateCreateSa({ body })).unwrap();
+
+      if (data?.isCreated === true) {
+        return true;
+      }
+
+      setModalValidateSa(true);
+      setMessageValidateSa(data?.message);
+      return false;
+    } catch (error) {
+      if (error?.data) {
+        const message = error?.data?.message;
+        const isCreated = error?.data?.data?.isCreated;
+
+        if (isCreated === false || hasValue(message)) {
+          setModalValidateSa(true);
+          setMessageValidateSa(message);
+        }
+      }
+
+      return false;
+    }
+  };
+
+  const handleSaveAsDraft = async () => {
+    setLoadingNext(true);
+    setTypeSubmit("draft");
+
+    try {
+      await form.validateFields(["serviceType", "serviceAgreementNumber"]);
+
+      const isCreateValid = await runCheckValidateCreateSa();
+      if (!isCreateValid) {
+        return;
+      }
+
+      handleSubmitForm(form.getFieldsValue(true), "draft");
+    } catch (_error) {
+      return;
+    } finally {
+      setLoadingNext(false);
+    }
+  };
+
   const next = () => {
     if (current === 0 
       && saInfoObj.serviceType === 608 
@@ -1841,8 +1936,12 @@ const CreateServiceAgreement = ({ saType }) => {
   };
 
   // Save/show to confirmation modal
-  const handleSubmitForm = (formValue) => {
-    if (listDataAttachment.length > 0) {
+  const handleSubmitForm = (formValue, submitType = typeSubmit) => {
+    if (submitType !== "draft" && listDataAttachment.length === 0) {
+      setModalValidateAttachment(true);
+      return;
+    }
+
       const objPaymentType = {
         name: {
           label: null,
@@ -1886,7 +1985,7 @@ const CreateServiceAgreement = ({ saType }) => {
       ];
       const tempArrayCalcRule = [...dataTableCalcRule, objCalcType];
       const body = {
-        isDraft: typeSubmit === "draft" && true,
+        isDraft: submitType === "draft",
         saInfo: {
           saReferenceNumber: saReferenceNumber ? saReferenceNumber : null,
           accountId: idAccount,
@@ -2015,9 +2114,6 @@ const CreateServiceAgreement = ({ saType }) => {
       };
       setDataFinal(body);
       setModalConfirm(true);
-    } else {
-      setModalValidateAttachment(true);
-    }
   };
 
   const handleConfirm = () => {
@@ -2207,18 +2303,17 @@ const CreateServiceAgreement = ({ saType }) => {
                   </ButtonComponent>
 
 
-                  {current === steps.length - 1 && (
+                  {/* {current === steps.length - 1 && ( */}
                     <>
                       <ButtonComponent
-                        htmlType="submit"
                         type="secondary"
-                        onClick={() => setTypeSubmit("draft")}
+                        onClick={handleSaveAsDraft}
                         loading={loadingNext}
                       >
                         Save as Draft
                       </ButtonComponent>
                     </>
-                  )}
+                  {/* )} */}
                   {current > 0 && (
                     <ButtonComponent
                       onClick={() => {
