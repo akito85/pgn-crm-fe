@@ -6,7 +6,7 @@ import { Dropdown, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
-import NxJobGroupTable from "../../../../components/Nx/NxJobGroupTable";
+import NxTableNested from "../../../../components/Nx/NxTableNested";
 import NxModal from "../../../../components/Nx/NxModal";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -381,11 +381,12 @@ const JobGroupPage = () => {
         }
       >
         <div style={{ maxHeight: "600px", overflowY: "auto" }}>
-          <NxJobGroupTable
+          <NxTableNested
+            parentColumns={getJobGroupManagementColumns()}
+            childColumns={childColumns}
             dataSource={tableDataWithJobs}
             loading={loading}
             onExpand={handleExpandRow}
-            childColumns={childColumns}
             actionColumn={actionColumn}
             loadingKeys={loadingKeys}
           />
