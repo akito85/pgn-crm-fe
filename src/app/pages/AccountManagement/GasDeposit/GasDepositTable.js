@@ -196,6 +196,22 @@ const GasDepositTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
+    handleView: (id) => navigate(
+      isStandAlone ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_SA :
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_ONETIME :
+        "",
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
     handleApproval,
     handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
@@ -233,7 +249,8 @@ const GasDepositTable = ({
   const expandedRowRender = (record) => {
     return (
       <GasDepositDetailTable
-        data={record.details}
+        dataSource={record.details}
+        handleView={handleSelectDetail}
       />
     );
   };
@@ -259,7 +276,6 @@ const GasDepositTable = ({
         columnDefinitions={columnDefinitions}
         loading={loading}
         expandable={{ expandedRowRender }}
-        onRowClick={handleSelectDetail}
       />
     </div>
   );
