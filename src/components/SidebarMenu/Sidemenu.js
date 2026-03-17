@@ -200,27 +200,19 @@ const SideMenu = ({ isCollapsed }) => {
     }
   }, [getLocation]);
 
-  // remove menu from list
+  // remove menu from whitelist — non-mutating: returns new objects, never modifies datas
   function removeProfileItems(tree) {
-    if (!Array.isArray(tree)) {
-      return tree;
-    }
-
+    if (!Array.isArray(tree)) return tree;
     return tree
       .map((item) => {
-        if (whitelistMenu.includes(item.name)) {
-          return null;
-        }
-
+        if (whitelistMenu.includes(item.name)) return null;
         if (item.children) {
-          item.children = removeProfileItems(item.children);
+          return { ...item, children: removeProfileItems(item.children) };
         }
-
         return item;
       })
-      .filter((item) => item !== null);
+      .filter(Boolean);
   }
-  const menu = removeProfileItems(datas);
 
   const newTabCallback = useCallback((data) => {
     if (data?.path?.includes("https://dev-plasma.pgn.co.id/")) {
@@ -302,6 +294,16 @@ const SideMenu = ({ isCollapsed }) => {
     [isCollapsed, newTabCallback]
   );
 
+  // Memoize the full menu JSX tree.
+  // datas and generateMenuItems are both stable across URL navigations —
+  // so menuItems reference is stable too. <Menu> receives the same children
+  // on every navigation, preventing Ant Design's context propagation from
+  // triggering its internal open/close animation check on re-renders.
+  const menuItems = useMemo(
+    () => generateMenuItems(mappingMenu(removeProfileItems(datas))),
+    [datas, generateMenuItems]
+  );
+
   // render props if collapse
   const renderProps = (collapsed) => {
     // Fall back to temporaryKeys only on form/detail pages (urlLeafKeys also empty).
@@ -340,7 +342,7 @@ const SideMenu = ({ isCollapsed }) => {
         className={"mb-6"}
         {...renderProps(isCollapsed)}
       >
-        {generateMenuItems(mappingMenu(menu))}
+        {menuItems}
       </Menu>
     </div>
   );
