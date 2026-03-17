@@ -20,8 +20,10 @@ export const RenderContentActions = (
         <Popover
           trigger={"click"}
           placement="bottomRight"
+          showArrow={false}
+          overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
           content={
-            <Space direction="vertical">
+            <div className="flex flex-col">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.map((item, index) => {
@@ -31,7 +33,7 @@ export const RenderContentActions = (
                     return null;
                   }
                 })}
-            </Space>
+            </div>
           }
         >
           <div

@@ -299,20 +299,38 @@ button.ant-btn.ant-btn-reject:disabled {
 }
 
 button.ant-btn.ant-btn-action {
+  display: flex;
+  column-gap: 8px;
   width: fit-content;
   background: transparent;
-  color: #000000;
+  color: black;
   align-items: center;
   border: none;
   padding: 8px;
-}
 
-button.ant-btn.ant-btn-action:hover {
-  background: #F5F5F5;
-}
+  svg {
+    color: black;
+    transition: color 0.3s ease-in-out;
+  }
 
-button.ant-btn.ant-btn-action:disabled:hover {
-  background: transparent;
+  &:hover {
+    background-color: #F5F5F5;
+
+    svg {
+      color: #0075BF;
+    }
+  }
+
+  &:disabled {
+    svg {
+      color: #BDBDBD;
+    }
+
+    &:hover {
+      color: black;
+      background: transparent;
+    }
+  }
 }
 
 button.ant-btn.ant-btn-table-action {
