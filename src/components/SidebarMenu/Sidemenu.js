@@ -236,7 +236,7 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={selectedLeafKeys?.includes(item?.key) ? "#0075BF" : "#000000"}
+                  color="#000000"
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
