@@ -1,5 +1,5 @@
 import { Menu } from "antd";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SVGIcon from "../../../src/assets/Icon/index";
@@ -50,12 +50,15 @@ const whitelistMenu = [
   "Relationship",
   "Notifications",
 ];
+
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
-  const [active, setActive] = useState([]);
+  // openMenuKeys: which SubMenus are expanded — only ever contains submenu keys, never leaf keys
+  const [openMenuKeys, setOpenMenuKeys] = useState([]);
+  // urlLeafKeys: which leaf items match the current URL — used for selectedKeys and icon color
+  const [urlLeafKeys, setUrlLeafKeys] = useState([]);
+  // temporaryKeys: fallback when on a form/detail page that has no direct menu match
   const [temporaryKeys, setTemporaryKeys] = useState([]);
-  // Tracks submenu keys the user manually opened — survives page navigation
-  const userOpenKeysRef = useRef([]);
   const getLocation = location.pathname;
   const { side_bar } = useSelector((state) => state?.auth);
 
@@ -67,12 +70,11 @@ const SideMenu = ({ isCollapsed }) => {
       data.flatMap((item) => [
         item,
         ...(item.children ? extractPaths(item.children) : []),
-        // ...(item.children ? extractPaths(item.children) : []),
       ]),
     []
   );
 
-  // flat aray from tree data
+  // flat array from tree data with unique keys
   const extractPathsKey = useCallback(
     (data, parentKey = "") =>
       data.flatMap((item) => {
@@ -154,7 +156,7 @@ const SideMenu = ({ isCollapsed }) => {
   useEffect(() => {
     const activeKeys = filterMenuByPath(mappingMenu(datas), getLocation);
 
-    // set temporary if user in the form page or detail
+    // Set temporary if user is on a form/detail page with no direct menu match
     if (activeKeys?.length === 0) {
       const keys = extractPathsKey(datas);
       const findMatching = findMatchingPath(keys, getLocation);
@@ -166,10 +168,29 @@ const SideMenu = ({ isCollapsed }) => {
       setTemporaryKeys(extractingKeys);
     }
 
-    // Merge URL-required keys with whatever submenus the user had opened manually
-    const urlKeys = extractPaths(activeKeys).map((item) => item.key);
-    const merged = new Set([...urlKeys, ...userOpenKeysRef.current]);
-    setActive(Array.from(merged));
+    const allActiveItems = extractPaths(activeKeys);
+
+    // Leaf keys: actual selectable items (no children) — drives icon color + selectedKeys
+    const leafKeys = allActiveItems
+      .filter((item) => !item.children || item.children.length === 0)
+      .map((item) => item.key);
+
+    // Parent keys: submenus that must be open to show the current page
+    const requiredParentKeys = allActiveItems
+      .filter((item) => item.children && item.children.length > 0)
+      .map((item) => item.key);
+
+    setUrlLeafKeys(leafKeys);
+
+    // Only MERGE required parent keys — never replace the full openMenuKeys.
+    // This preserves any other submenus the user manually opened.
+    // openMenuKeys never receives leaf keys, so Ant Design won't glitch on navigation.
+    if (requiredParentKeys.length > 0) {
+      setOpenMenuKeys((prev) => {
+        const merged = new Set([...(prev || []), ...requiredParentKeys]);
+        return Array.from(merged);
+      });
+    }
   }, [getLocation]);
 
   // remove menu from list
@@ -219,17 +240,17 @@ const SideMenu = ({ isCollapsed }) => {
       return <Link to={data?.path}>{data?.name}</Link>;
     }
   }, []);
+
   // render sub menu
   const generateMenuItems = useCallback(
     (data) => {
       return data.map((item) => {
         if (item.children) {
-          // Parent icon is blue only when a leaf child is actively visited (in active from URL)
-          // Not when just expanded manually — leaf children have no children of their own
+          // Parent icon blue only if a leaf child matches current URL
           const hasActiveLeafChild = extractPaths(item.children).some(
             (child) =>
               (!child.children || child.children.length === 0) &&
-              active?.includes(child.key)
+              urlLeafKeys?.includes(child.key)
           );
 
           return (
@@ -259,7 +280,7 @@ const SideMenu = ({ isCollapsed }) => {
             <Menu.Item
               key={item?.key}
               className={
-                active?.includes(item?.key) &&
+                urlLeafKeys?.includes(item?.key) &&
                 isCollapsed &&
                 "ant-menu-submenu ant-menu-submenu-vertical ant-menu-submenu-selected ant-menu-submenu-title"
               }
@@ -267,7 +288,7 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={active?.includes(item?.key) ? "#0075BF" : "#000000"}
+                  color={urlLeafKeys?.includes(item?.key) ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
@@ -279,32 +300,28 @@ const SideMenu = ({ isCollapsed }) => {
               }
             >
               {newTabCallback(item)}
-              {/* <Link to={item.path}>{item.name}</Link> */}
             </Menu.Item>
           );
         }
       });
     },
-    [active, isCollapsed, newTabCallback]
+    [urlLeafKeys, isCollapsed, newTabCallback]
   );
 
   // render props if collapse
   const renderProps = (collapsed) => {
+    const keysToUse = openMenuKeys?.length === 0 ? temporaryKeys : openMenuKeys;
+
     if (collapsed) {
       return {
-        defaultOpenKeys: active?.length === 0 ? temporaryKeys : active,
+        defaultOpenKeys: keysToUse,
       };
     } else {
       return {
-        openKeys: active?.length === 0 ? temporaryKeys : active,
+        openKeys: keysToUse,
         onOpenChange: (keys) => {
-          // Persist user's expand/collapse intent so it survives navigation
-          userOpenKeysRef.current = keys;
-          if (active?.length === 0) {
-            setTemporaryKeys(keys);
-          } else {
-            setActive(keys);
-          }
+          // keys from Ant Design contains only submenu keys — safe to store directly
+          setOpenMenuKeys(keys);
         },
       };
     }
@@ -314,7 +331,7 @@ const SideMenu = ({ isCollapsed }) => {
     <div>
       <Menu
         theme="light"
-        selectedKeys={active?.length === 0 ? temporaryKeys : active}
+        selectedKeys={urlLeafKeys?.length === 0 ? temporaryKeys : urlLeafKeys}
         mode="inline"
         className={"mb-6"}
         {...renderProps(isCollapsed)}
