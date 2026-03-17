@@ -68,7 +68,6 @@ const SubMenuItem = ({
   isOpen,
   isSelected,
   isCollapsed,
-  isNavigating,
   hoveredKey,
   onToggle,
   onHover,
@@ -76,19 +75,8 @@ const SubMenuItem = ({
   selectedKeys,
   renderItems,
 }) => {
-  const contentRef = useRef(null);
   const titleRef = useRef(null);
-  const [measuredHeight, setMeasuredHeight] = useState(0);
   const [popupTop, setPopupTop] = useState(0);
-
-  // Measure scrollHeight for maxHeight animation.
-  // useLayoutEffect ensures measurement before paint -- no flash.
-  // Re-measures when open state or child count changes.
-  useLayoutEffect(() => {
-    if (contentRef.current) {
-      setMeasuredHeight(contentRef.current.scrollHeight);
-    }
-  }, [isOpen, item.children?.length]);
 
   const isHovered = isCollapsed && hoveredKey === item.key;
 
@@ -162,7 +150,10 @@ const SubMenuItem = ({
     );
   }
 
-  // Expanded mode: inline expand/collapse
+  // Expanded mode: instant show/hide via display.
+  // No CSS transition -- any transition on max-height or display is unreliable
+  // in React 18 concurrent mode because isNavigatingRef can be cleared mid-render,
+  // allowing animation to fire during programmatic navigation re-renders.
   return (
     <li className={submenuClasses} role="none">
       <div
@@ -186,19 +177,13 @@ const SubMenuItem = ({
           className="ant-menu-submenu-arrow"
           style={{
             transform: isOpen ? "rotate(-180deg) translateY(2px)" : "none",
-            transition: isNavigating ? "none" : "transform 0.3s",
           }}
         />
       </div>
       <ul
-        ref={contentRef}
         className="ant-menu ant-menu-sub ant-menu-inline"
         role="menu"
-        style={{
-          maxHeight: isOpen ? measuredHeight : 0,
-          overflow: "hidden",
-          transition: isNavigating ? "none" : "max-height 0.25s ease-in-out",
-        }}
+        style={{ display: isOpen ? "block" : "none" }}
       >
         {renderItems(item.children, selectedKeys, false)}
       </ul>
@@ -216,10 +201,6 @@ const SideMenu = ({ isCollapsed }) => {
   const [temporaryKeys, setTemporaryKeys] = useState([]);
   // hoveredSubmenu: key of submenu being hovered in collapsed mode (drives popup visibility)
   const [hoveredSubmenu, setHoveredSubmenu] = useState(null);
-  // requiredParentKeysRef: always holds the current page's ancestor submenu keys
-  const requiredParentKeysRef = useRef([]);
-  // isNavigatingRef: true only during the brief window after a URL change
-  const isNavigatingRef = useRef(false);
   const getLocation = location.pathname;
   // Select ONLY side_bar -- not the entire auth slice.
   // checkGrantedAccess modifies auth.loading, auth.user, auth.data_switch on every navigation.
@@ -324,11 +305,6 @@ const SideMenu = ({ isCollapsed }) => {
   };
 
   useEffect(() => {
-    // Signal that a navigation just happened.
-    // isNavigatingRef suppresses CSS transitions in SubMenuItem so submenus
-    // snap open/closed programmatically without animation during URL changes.
-    isNavigatingRef.current = true;
-
     const activeKeys = filterMenuByPath(mappingMenu(datas), getLocation);
 
     // Set temporary if user is on a form/detail page with no direct menu match
@@ -357,8 +333,6 @@ const SideMenu = ({ isCollapsed }) => {
       .filter((item) => item.children && item.children.length > 0)
       .map((item) => item.key);
 
-    requiredParentKeysRef.current = requiredParentKeys;
-
     setUrlLeafKeys(leafKeys);
 
     // Only MERGE required parent keys -- never replace the full openMenuKeys.
@@ -377,14 +351,6 @@ const SideMenu = ({ isCollapsed }) => {
         return newKeys;
       });
     }
-
-    // Clear navigation flag after paint settles.
-    // Double-RAF ensures both React commit AND browser paint complete.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        isNavigatingRef.current = false;
-      });
-    });
   }, [getLocation]);
 
   // remove menu from whitelist -- non-mutating: returns new objects, never modifies datas
@@ -471,7 +437,6 @@ const SideMenu = ({ isCollapsed }) => {
               isOpen={isOpen}
               isSelected={hasSelectedChild}
               isCollapsed={isCollapsed}
-              isNavigating={isNavigatingRef.current}
               hoveredKey={hoveredSubmenu}
               onToggle={toggleSubmenu}
               onHover={setHoveredSubmenu}
