@@ -69,6 +69,10 @@ import IconJobExecution from "./IconJobExecution";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
+  const { color = "#000000" } = props;
+  // Pass color to all icons
+  const iconProps = { ...props, color };
+
   switch (props.name) {
     case "IconAccountManagement":
       return <IconAccountManagement {...props} />;

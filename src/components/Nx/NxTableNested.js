@@ -560,6 +560,9 @@ const NxTableNested = ({
           gap:            8,
           borderTop:      `1px solid ${BORDER_COL}`,
           fontFamily:     FONT_FAMILY,
+          position:       "relative", 
+          zIndex:         "1",
+          marginTop:      "-1px",
         }}
       >
         <span style={{ fontSize: 12, color: "#6B7280" }}>

@@ -112,7 +112,7 @@ const ViewJobPage = () => {
         </NxBaseContainer>
 
         {/* PARAMETERS */}
-        <NxBaseContainer border header="PARAMETERS" className="mt-4">
+        <NxBaseContainer border header="PARAMETERS" className="mt-4" minHeight="250px">
           {!job.parameters?.length ? (
             <p style={{ color: "#999", fontSize: 13, padding: "8px 0" }}>No parameters defined.</p>
           ) : (
@@ -152,6 +152,7 @@ const ViewJobPage = () => {
               useSelect={false}
               loading={false}
               rowKey="key"
+              tableScrolled={job.parameters && job.parameters.length > 10 ? { y: 380 } : {}}
             />
           )}
         </NxBaseContainer>

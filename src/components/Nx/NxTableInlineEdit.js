@@ -144,7 +144,7 @@ const NxTableInlineEdit = ({
             value={value || undefined}
             placeholder={col.placeholder || `Select ${col.title}`}
             onChange={(v) => handleEditChange(col.dataIndex, v)}
-            style={{ width: "100%", height: "34px" }}
+            style={{ width: "100%", height: "34px", fontFamily: "'PlusJakartaSans', 'PublicSans', sans-serif" }}
           >
             {(col.selectOptions || []).map((opt) => (
               <Option key={opt.value} value={opt.value}>
@@ -166,7 +166,7 @@ const NxTableInlineEdit = ({
             max={col.max}
             precision={col.precision ?? 0}
             onChange={(v) => handleEditChange(col.dataIndex, v)}
-            style={{ width: "100%", height: "34px" }}
+            style={{ width: "100%", height: "34px", fontFamily: "'PlusJakartaSans', 'PublicSans', sans-serif" }}
           />
         </div>
       );
@@ -179,34 +179,68 @@ const NxTableInlineEdit = ({
           placeholder={col.placeholder || col.title}
           maxLength={col.maxLength}
           onChange={(e) => handleEditChange(col.dataIndex, e.target.value)}
-          style={{ height: "34px", padding: "4px 8px" }}
+          style={{ height: "34px", padding: "4px 8px", fontFamily: "'PlusJakartaSans', 'PublicSans', sans-serif" }}
         />
       </div>
     );
   };
 
-  const processedColumns = columns.map((col) => ({
-    ...col,
-    key: col.key || col.dataIndex,
-    onHeaderCell: () => ({
-      style: { textTransform: "uppercase", fontSize: "10px" },
-    }),
-    onCell: () => ({
-      style: { fontSize: "12px" },
-    }),
-    render: (text, record) => renderCell(col, text, record),
-  }));
+  const processedColumns = columns.map((col) => {
+    let textAlign = "left";
+    if (col.isNumber || col.align === "right") {
+      textAlign = "right";
+    } else if (col.isClassification) {
+      textAlign = "center";
+    }
+
+    return {
+      ...col,
+      key: col.key || col.dataIndex,
+      onHeaderCell: (column) => ({
+        style: {
+          textTransform: "uppercase",
+          fontSize: "10px",
+          cursor: "default",
+        },
+      }),
+      onCell: (record, index) => {
+        return {
+          style: {
+            textAlign: textAlign,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            fontSize: "12px",
+          },
+        };
+      },
+      render: (text, record) => renderCell(col, text, record),
+    };
+  });
 
   const actionsColumn = {
     title: "",
     key: "__actions__",
     width: 140,
-    onHeaderCell: () => ({
-      style: { textTransform: "uppercase", fontSize: "10px" },
+    onHeaderCell: (column) => ({
+      style: {
+        textTransform: "uppercase",
+        fontSize: "10px",
+        cursor: "default",
+      },
     }),
-    onCell: () => ({
-      style: { padding: "4px 8px" },
-    }),
+    onCell: (record, index) => {
+      return {
+        style: {
+          textAlign: "center",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          fontSize: "12px",
+          padding: "4px 8px",
+        },
+      };
+    },
     render: (_, record) => {
       const editing = isEditing(record);
 
@@ -270,8 +304,7 @@ const NxTableInlineEdit = ({
         #${idTable} .ant-table {
           border-radius: 8px 8px 0 0;
           overflow: hidden;
-          border: 1px solid #C8CDD4;
-          border-bottom: none;
+          border: none;
           border-collapse: collapse;
           border-spacing: 0;
         }
@@ -290,37 +323,6 @@ const NxTableInlineEdit = ({
           border-start-end-radius: 8px;
         }
 
-        #${idTable} .ant-table-thead {
-          border-left: 1px solid #C8CDD4;
-          border-right: 1px solid #C8CDD4;
-        }
-
-        #${idTable} .ant-table-thead > tr > th {
-          padding: 4px 8px !important;
-          height: 30px !important;
-          border-right: 1px solid #C8CDD4 !important;
-          border-bottom: 1px solid #C8CDD4 !important;
-        }
-
-        #${idTable} .ant-table-thead > tr:first-child > th {
-          border-top: 1px solid #C8CDD4 !important;
-        }
-
-        #${idTable} .ant-table-thead > tr > th:first-child {
-          border-left: 1px solid #C8CDD4 !important;
-        }
-
-        #${idTable} .ant-table-tbody > tr > td {
-          padding: 6px 8px !important;
-          font-size: 12px;
-          border-right: 1px solid #C8CDD4 !important;
-          border-bottom: 1px solid #C8CDD4 !important;
-        }
-
-        #${idTable} .ant-table-tbody > tr > td:first-child {
-          border-left: 1px solid #C8CDD4 !important;
-        }
-
         #${idTable} .ant-table-tbody > tr:last-child > *:first-child {
           border-end-start-radius: 0;
         }
@@ -329,12 +331,62 @@ const NxTableInlineEdit = ({
           border-end-end-radius: 0;
         }
 
+        #${idTable} .ant-table-bordered .ant-table-cell,
+        #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
+        #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
+        #${idTable} .ant-table-bordered .ant-table-container {
+          border-color: #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-thead > tr > th {
+          padding: 4px 8px !important;
+          height: 30px !important;
+          border-right: 1px solid #C8CDD4 !important;
+          border-bottom: 1px solid #C8CDD4 !important;
+          font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+          background-color: #2C6FAD !important;
+          color: #fff !important;
+        }
+
+        #${idTable} .ant-table-thead > tr:first-child > th {
+          border-top: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
+          padding: 4px 8px !important;
+          min-height: 30px;
+          font-size: 12px;
+          border-right: 1px solid #C8CDD4 !important;
+          border-bottom: 1px solid #C8CDD4 !important;
+          font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+        }
+
+        #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
+          border-left: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-thead > tr > th:first-child {
+          border-left: 1px solid #C8CDD4 !important;
+        }
+
         #${idTable} .ant-table-tbody > tr.nx-row-editing > td {
           padding: 0 8px !important;
         }
 
+        #${idTable} .ant-table-tbody > tr:nth-child(odd) > td {
+          background-color: #FFFFFF !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr:nth-child(even) > td {
+          background-color: #EBF2FA !important;
+        }
+
         #${idTable} .ant-table-tbody > tr:hover > td {
-          background-color: #f5f8ff !important;
+          background-color: #EBF2FA !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr.nx-row-editing:hover > td {
+          background-color: #FFFFFF !important;
         }
 
         #${idTable} .ant-select-selector {
@@ -359,22 +411,35 @@ const NxTableInlineEdit = ({
         #${idTable} .ant-select-selection-placeholder {
           font-size: 12px;
         }
+
+        #${idTable} .ant-table-measure-row > td {
+          padding: 0 !important;
+          height: 0 !important;
+          line-height: 0;
+          font-size: 0;
+          overflow: hidden;
+        }
       `}</style>
       <Table
         dataSource={dataSource}
-        columns={[...processedColumns, actionsColumn]}
         rowKey={rowKey}
+        columns={[...processedColumns, actionsColumn]}
+        scroll={{ y: 380 }}
+        bordered
         pagination={false}
         size="small"
         loading={loading}
         locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} /> }}
         style={{ margin: 0 }}
+        tableLayout="fixed"
         rowClassName={(record) => isEditing(record) ? "nx-row-editing" : ""}
       />
-      <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", width: "100%" }}>
+      <div style={{ borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
         <span style={{ fontSize: "12px", color: "#6B7280" }}>
           Showing {dataSource.length} of {dataSource.length} entries
         </span>
+        <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+        <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
       </div>
     </div>
   );

@@ -225,11 +225,14 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
+                  color={active?.includes(item?.key) ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
                     marginTop: isCollapsed ? "10px" : "",
+                    transition: "color 0.3s ease",
                   }}
+                  className="sidebar-icon"
                 />
               }
               title={<span>{item.name}</span>}
@@ -250,11 +253,14 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
+                  color={active?.includes(item?.key) ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
                     marginTop: isCollapsed ? "10px" : "",
+                    transition: "color 0.3s ease",
                   }}
+                  className="sidebar-icon"
                 />
               }
             >

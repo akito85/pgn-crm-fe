@@ -409,13 +409,15 @@ const CreateJobPage = () => {
 
                 {selectedProcedure && (
                   <div className="md:col-span-3">
-                    <NxTableInlineEdit
-                      idTable="sp-parameters-info-table"
-                      dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
-                      onDataChange={() => {}}
-                      columns={SP_PARAM_COLUMNS}
-                      emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
-                    />
+                    <NxBaseContainer border={false} minHeight="250px" padding={false}>
+                      <NxTableInlineEdit
+                        idTable="sp-parameters-info-table"
+                        dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
+                        onDataChange={() => {}}
+                        columns={SP_PARAM_COLUMNS}
+                        emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
+                      />
+                    </NxBaseContainer>
                   </div>
                 )}
               </>)}
@@ -500,6 +502,7 @@ const CreateJobPage = () => {
                 Create
               </ButtonComponent>
             }
+            minHeight="250px"
           >
             <NxTableInlineEdit
               idTable="job-parameters-table"
