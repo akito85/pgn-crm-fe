@@ -118,7 +118,7 @@ const ConfirmationSa = ({
       return ''
     }
     if (PjbgName.length !== 0) {
-      return PjbgName[0].name
+      return PjbgName[0].text
     }
   }
 
@@ -233,12 +233,16 @@ const ConfirmationSa = ({
                   <NxBaseContainer border header={"SERVICE AGREEMENT INFORMATION"}>
                     <div className="grid grid-cols-3 gap-5">
                       <DetailText label="Service Type">{getServiceTypeName(dataFinal?.saInfo?.serviceType)}</DetailText>
-                      <DetailText label="Service Agreement Reference Number">{dataFinal?.saInfo?.saReferenceNumber || "-"}</DetailText>
+                      {!dataFinal?.saInfo?.isMain && (
+                        <DetailText label="Service Agreement Reference Number">{dataFinal?.saInfo?.saReferenceNumber || "-"}</DetailText>
+                      )}
                     </div>
                     <div className="grid grid-cols-3 gap-5">
                       <DetailText label="Service Agreement Number">{dataFinal?.saInfo?.saNumber}</DetailText>
                       <DetailText label="Service Agreement Type">{getSaTypeName(dataFinal?.saInfo?.saType)}</DetailText>
-                      <DetailText label="PJBG Type">{getPjbgName(dataFinal?.saInfo?.pjbgType)}</DetailText>
+                      {dataFinal?.saInfo?.pjbgType && (
+                        <DetailText label="PJBG Type">{getPjbgName(dataFinal?.saInfo?.pjbgType)}</DetailText>
+                      )}
                       <DetailText label="Service Agreement Date">{dataFinal?.saInfo?.saDate ? moment(dataFinal?.saInfo?.saDate).format(dateFormatting.date) : ''}</DetailText>
                       <DetailText label="Start Date">{dataFinal?.saInfo?.startDate ? moment(dataFinal?.saInfo?.startDate).format(dateFormatting.date) : ''}</DetailText>
                       <DetailText label="End Date">{dataFinal?.saInfo?.endDate ? moment(dataFinal?.saInfo?.endDate).format(dateFormatting.date) : ''}</DetailText>

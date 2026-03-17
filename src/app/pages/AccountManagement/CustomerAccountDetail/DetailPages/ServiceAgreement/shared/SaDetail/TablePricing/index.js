@@ -94,6 +94,12 @@ const TablePricing = ({
 	// 	}
 	// }, [dataFromApi]);
 
+	// Reset loadedCount when data changes (e.g. pricingRule switch)
+	useEffect(() => {
+		setLoadedCount(10);
+		setPage(1);
+	}, [data]);
+
 	useEffect(() => {
 		let result = [...data];
 		result = filterData(result, search);
