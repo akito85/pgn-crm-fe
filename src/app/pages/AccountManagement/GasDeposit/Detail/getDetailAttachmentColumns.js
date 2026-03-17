@@ -1,5 +1,5 @@
 import { Tooltip } from "antd";
-import SVGIcon from "../../../../../../../../assets/Icon/index";
+import SVGIcon from "../../../../../assets/Icon/index";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../utils/sorterFunction";
 

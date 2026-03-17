@@ -15,12 +15,18 @@ const GasDepositDetailInfo = ({
 }) => {
   // --- Derived values ---
   const {
-    accountNumber,
-    accountName,
-    startDate,
-    endDate,
+    earnPeriodStart,
+    earnPeriodEnd,
+    redeemPeriodStart,
+    redeemPeriodEnd,
+    currency,
+    balanceM3,
+    balanceMscf,
+    balanceMmbtu,
+    balanceAmount,
+    availableAmount,
     status,
-    description,
+    remark,
   } = detail;
 
   return (
@@ -28,10 +34,16 @@ const GasDepositDetailInfo = ({
       <div className="flex flex-col gap-y-4">
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Gas Deposit Information */}
-          <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
-          <NxDetailText label="Account Name">{accountName}</NxDetailText>
-          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
-          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Earn Period Start">{NxDate.formatDate(earnPeriodStart, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Earn Period End">{NxDate.formatDate(earnPeriodEnd, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Release Period Start">{NxDate.formatDate(redeemPeriodStart, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Release Period End">{NxDate.formatDate(redeemPeriodEnd, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Currency">{currency}</NxDetailText>
+          <NxDetailText label="Balance (M3)">{balanceM3}</NxDetailText>
+          <NxDetailText label="Balance (MSCF)">{balanceMscf}</NxDetailText>
+          <NxDetailText label="Balance (MBTU)">{balanceMmbtu}</NxDetailText>
+          <NxDetailText label="Balance Ammount">{balanceAmount}</NxDetailText>
+          <NxDetailText label="Available Ammount">{availableAmount}</NxDetailText>
           <NxDetailText label="Status">
             <StatusComponent colour={status} margin={false}>
               {status}
@@ -39,7 +51,7 @@ const GasDepositDetailInfo = ({
           </NxDetailText>
         </div>
         <div className="w-full">
-          <NxDetailText label="Description">{description}</NxDetailText>
+          <NxDetailText label="Remark">{remark}</NxDetailText>
         </div>
       </div>
     </NxBaseContainer>
