@@ -276,6 +276,7 @@ const ServiceAgreementAttachmentInformation = ({
     <NxBaseContainer header={header} border>
       <NxTable
         idTable={tableId}
+        rowKey="key"
         dataSource={displayData}
         totalData={processedData.length}
         columns={columns}

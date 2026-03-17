@@ -168,6 +168,7 @@ const SaInformation = ({
       alreadyGasIn: e.target.checked,
       gasInPlanDate: null
     })
+    handleSaInformationObj(e.target.checked, "alreadyGasIn");
     form.setFieldsValue({ gasInPlanDate: undefined })
     if (e.target.checked) {
       setTimeout(() => {
