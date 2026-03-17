@@ -937,7 +937,8 @@ span.ant-tree-title {
 .ant-menu-title-content a {
   color: rgba(0, 0, 0, 0.85);
 }
-.ant-menu-submenu-selected svg {
+.ant-menu-submenu-selected svg,
+.ant-menu-submenu:has(.ant-menu-item-selected) > .ant-menu-submenu-title svg {
   filter: invert(44%) sepia(41%) saturate(3760%) hue-rotate(191deg)
     brightness(101%) contrast(102%);
 }

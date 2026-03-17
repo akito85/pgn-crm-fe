@@ -242,17 +242,13 @@ const SideMenu = ({ isCollapsed }) => {
   }, []);
 
   // render sub menu
+  // Does NOT depend on urlLeafKeys — menu structure is stable across navigations.
+  // Active state is communicated via selectedKeys/openKeys props only.
+  // Icon coloring is handled by CSS :has(.ant-menu-item-selected) — no JS needed.
   const generateMenuItems = useCallback(
     (data) => {
       return data.map((item) => {
         if (item.children) {
-          // Parent icon blue only if a leaf child matches current URL
-          const hasActiveLeafChild = extractPaths(item.children).some(
-            (child) =>
-              (!child.children || child.children.length === 0) &&
-              urlLeafKeys?.includes(child.key)
-          );
-
           return (
             <Menu.SubMenu
               key={item?.key}
@@ -260,12 +256,10 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={hasActiveLeafChild ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
                     marginTop: isCollapsed ? "10px" : "",
-                    transition: "color 0.3s ease",
                   }}
                   className="sidebar-icon"
                 />
@@ -279,21 +273,14 @@ const SideMenu = ({ isCollapsed }) => {
           return (
             <Menu.Item
               key={item?.key}
-              className={
-                urlLeafKeys?.includes(item?.key) &&
-                isCollapsed &&
-                "ant-menu-submenu ant-menu-submenu-vertical ant-menu-submenu-selected ant-menu-submenu-title"
-              }
               icon={
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color={urlLeafKeys?.includes(item?.key) ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
                     marginTop: isCollapsed ? "10px" : "",
-                    transition: "color 0.3s ease",
                   }}
                   className="sidebar-icon"
                 />
@@ -305,12 +292,17 @@ const SideMenu = ({ isCollapsed }) => {
         }
       });
     },
-    [urlLeafKeys, isCollapsed, newTabCallback]
+    [isCollapsed, newTabCallback]
   );
 
   // render props if collapse
   const renderProps = (collapsed) => {
-    const keysToUse = openMenuKeys?.length === 0 ? temporaryKeys : openMenuKeys;
+    // Fall back to temporaryKeys only on form/detail pages (urlLeafKeys also empty).
+    // When on a real page, respect openMenuKeys even if the user collapsed everything.
+    const keysToUse =
+      openMenuKeys?.length === 0 && urlLeafKeys?.length === 0
+        ? temporaryKeys
+        : openMenuKeys;
 
     if (collapsed) {
       return {
