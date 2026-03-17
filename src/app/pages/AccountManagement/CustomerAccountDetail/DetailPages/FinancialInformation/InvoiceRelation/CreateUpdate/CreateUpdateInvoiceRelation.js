@@ -35,6 +35,7 @@ import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
+import { nxRemoveKeys } from "../../../../../../../../components/Nx/NxRemoveKeys";
 
 const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "standard" }) => {
   const isStandard = accountType === "standard";
@@ -521,12 +522,12 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       remark
     } = form.getFieldsValue(true);
 
-    const attachments = [
+    const attachments = nxRemoveKeys([
       ...attachmentDataSource.filter(
         attachment => ["exist", "draft"].includes(attachment.dataType)
       ),
       ...deletedAttachments
-    ];
+    ]);
 
     const body = {
       accountId,
