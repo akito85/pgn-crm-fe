@@ -53,6 +53,10 @@ const whitelistMenu = [
 
 const SideMenu = ({ isCollapsed }) => {
   const location = useLocation();
+  // Ref to the wrapper div — used to suppress SubMenu CSS animation during navigation.
+  // Even with memoized props, Ant Design v4's SiderContext can force Menu re-renders.
+  // Disabling the transition during navigation prevents any visual flicker.
+  const menuContainerRef = useRef(null);
   // openMenuKeys: which SubMenus are expanded — only ever contains submenu keys, never leaf keys
   const [openMenuKeys, setOpenMenuKeys] = useState([]);
   // urlLeafKeys: which leaf items match the current URL — used for selectedKeys
@@ -169,6 +173,13 @@ const SideMenu = ({ isCollapsed }) => {
     // the active parent only while this flag is true.
     isNavigatingRef.current = true;
 
+    // Suppress SubMenu CSS animation during navigation to prevent visual flicker.
+    // This handles the edge case where SiderContext or other re-renders force
+    // rc-menu to re-evaluate SubMenu visibility during the navigation window.
+    if (menuContainerRef.current) {
+      menuContainerRef.current.classList.add("menu-navigating");
+    }
+
     const activeKeys = filterMenuByPath(mappingMenu(datas), getLocation);
 
     // Set temporary if user is on a form/detail page with no direct menu match
@@ -220,12 +231,16 @@ const SideMenu = ({ isCollapsed }) => {
       });
     }
 
-    // Clear navigation flag after React batches the state updates above.
-    // requestAnimationFrame ensures this runs after the current render cycle,
-    // so onOpenChange still sees isNavigatingRef=true if Ant Design fires it
-    // synchronously during this render, but any subsequent user clicks see false.
+    // Clear navigation flag and re-enable animation after React commits the state
+    // updates above. Double-RAF ensures we wait for both the commit AND the browser
+    // paint, so the Menu has settled with the new openKeys before animation resumes.
     requestAnimationFrame(() => {
-      isNavigatingRef.current = false;
+      requestAnimationFrame(() => {
+        isNavigatingRef.current = false;
+        if (menuContainerRef.current) {
+          menuContainerRef.current.classList.remove("menu-navigating");
+        }
+      });
     });
   }, [getLocation]);
 
@@ -372,7 +387,7 @@ const SideMenu = ({ isCollapsed }) => {
   }, []);
 
   return (
-    <div>
+    <div ref={menuContainerRef}>
       <Menu
         theme="light"
         selectedKeys={selectedKeys}

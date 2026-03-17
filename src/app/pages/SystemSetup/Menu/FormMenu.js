@@ -48,21 +48,27 @@ const FormMenu = (props) => {
   const id = location?.state?.id;
   const [payload, setPayload] = useState({});
   const [iconFile, setIconFile] = useState(null);
-  const [selectedIcon, setSelectedIcon] = useState(null);
 
-  // Available icon names from SVGIcon component
+  // All sidebar-appropriate icons from SVGIcon registry (sorted alphabetically)
   const availableIcons = [
     "IconAccountManagement",
     "IconBilling",
     "IconCalendarEvent",
     "IconHome",
     "IconInvoice",
+    "IconJobExecution",
+    "IconJobGroup",
+    "IconJobList",
+    "IconLogHistory",
+    "IconMonitoringSession",
     "IconProduct",
     "IconRating",
+    "IconReceipt",
     "IconReport",
+    "IconReporting",
+    "IconSupport",
     "IconSystemSetup",
     "IconUserManagement",
-    "IconMonitoringSession",
   ];
 
   const assert = () => {
@@ -81,7 +87,6 @@ const FormMenu = (props) => {
     });
     setIsPage(data_detail?.data?.isPage);
     setTopPage(data_detail?.data?.isTopParent);
-    setSelectedIcon(data_detail?.data?.icon);
   };
 
 
@@ -238,18 +243,16 @@ const FormMenu = (props) => {
 
   const handleIconUpload = (file) => {
     setIconFile(file);
-    // Read file as base64 for frontend preview/storage
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = () => {
       form.setFieldsValue({ icon: `uploaded_${file.name}` });
-      setSelectedIcon(`uploaded_${file.name}`);
     };
     reader.readAsDataURL(file);
     return false; // Prevent default upload
   };
 
   const handleIconSelect = (value) => {
-    setSelectedIcon(value);
+    // Clear uploaded file when user picks from the dropdown instead
     setIconFile(null);
   };
 
@@ -383,7 +386,6 @@ const FormMenu = (props) => {
                       onRemove={() => {
                         setIconFile(null);
                         form.setFieldsValue({ icon: undefined });
-                        setSelectedIcon(null);
                       }}
                     >
                       <Button icon={<UploadOutlined />}>

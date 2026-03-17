@@ -1065,6 +1065,15 @@ span.ant-tree-title {
 .ant-menu {
   font-size: 12px !important;
 }
+/* Suppress SubMenu expand/collapse animation during navigation.
+   Applied via ref by SideMenu's useEffect, removed after paint settles.
+   This prevents visual flicker when SiderContext forces Menu re-renders. */
+.menu-navigating .ant-menu-sub.ant-menu-inline {
+  transition: none !important;
+}
+.menu-navigating .ant-menu-inline-collapsed > .ant-menu-submenu > .ant-menu-submenu-title {
+  transition: none !important;
+}
 
 .width-collapsed {
   min-width: 80px !important;
