@@ -299,24 +299,28 @@ const ConfirmationSa = ({
                       )}
                     </div>
                   </NxBaseContainer>
-                  <NxBaseContainer border header={"SERVICE AGREEMENT DETAIL"}>
-                    {/* {saDetailObj?.productVersionId && ( */}
-                    <>
-                      <div className="grid grid-cols-3 gap-5">
-                        {saDetailObj?.createFrom === 1 && (
-                          <>
-                            <DetailText label="Product">{saDetailObj?.productName}</DetailText>
-                            <DetailText label="Service Type">{saDetailObj?.serviceTypeProduct}</DetailText>
-                            <DetailText label="Product Class">{saDetailObj?.productClass}</DetailText>
-                            <DetailText label="Product Version">{getListVersionname(saDetailObj?.productVersionId)}</DetailText>
-                            <DetailText label="Description">{saDetailObj?.description}</DetailText>
-                          </>
-                        )}
-                      </div>
+                  {
+                    saDetailObj?.createFrom === 1 && (
+                      <NxBaseContainer border header={"SERVICE AGREEMENT DETAIL"}>
+                        {/* {saDetailObj?.productVersionId && ( */}
+                        <>
+                          <div className="grid grid-cols-3 gap-5">
+                            {saDetailObj?.createFrom === 1 && (
+                              <>
+                                <DetailText label="Product">{saDetailObj?.productName}</DetailText>
+                                <DetailText label="Service Type">{saDetailObj?.serviceTypeProduct}</DetailText>
+                                <DetailText label="Product Class">{saDetailObj?.productClass}</DetailText>
+                                <DetailText label="Product Version">{getListVersionname(saDetailObj?.productVersionId)}</DetailText>
+                                <DetailText label="Description">{saDetailObj?.description}</DetailText>
+                              </>
+                            )}
+                          </div>
 
-                    </>
-                    {/* )} */}
-                  </NxBaseContainer>
+                        </>
+                        {/* )} */}
+                      </NxBaseContainer>
+                    )
+                  }
                   <NxBaseContainer border header={"PAYMENT INFORMATION"}>
                     <div>
                       <TableDetail dataTableProduct={dataTableProduct} saDetailObj={saDetailObj} />
