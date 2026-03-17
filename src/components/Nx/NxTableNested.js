@@ -151,10 +151,10 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
           <div
             key={col.key || colIdx}
             style={{
-              width:      col.width,
-              minWidth:   col.width,
-              flexShrink: 0,
-              flex:       "none",
+              width:      colIdx === lastIdx ? undefined : col.width,
+              minWidth:   colIdx === lastIdx ? undefined : col.width,
+              flexShrink: colIdx === lastIdx ? 1 : 0,
+              flex:       colIdx === lastIdx ? 1 : "none",
               borderRight: colIdx < lastIdx ? `1px solid ${BORDER_COL}` : "none",
               display:       "flex",
               flexDirection: "column",
@@ -479,7 +479,7 @@ const NxTableNested = ({
       `}</style>
 
       {/* Header row */}
-      <div style={{ display: "flex", alignItems: "stretch" }}>
+      <div style={{ display: "flex", alignItems: "stretch", width: "100%" }}>
         {/* Toggle header (blank) */}
         <div style={{ ...headerCellBase, width: EXPAND_COL_WIDTH, borderRight: `1px solid rgba(255,255,255,0.2)` }} />
 
@@ -495,6 +495,7 @@ const NxTableNested = ({
               style={{
                 ...headerCellBase,
                 width,
+                flex: isLastCol && !actionColumn ? 1 : 0,
                 justifyContent: "space-between",
                 borderRight: isLastCol ? (actionColumn ? `1px solid rgba(255,255,255,0.2)` : "none") : `1px solid rgba(255,255,255,0.2)`,
               }}
