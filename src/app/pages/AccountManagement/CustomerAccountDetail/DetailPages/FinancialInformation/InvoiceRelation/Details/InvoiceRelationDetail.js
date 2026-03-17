@@ -157,11 +157,7 @@ const InvoiceRelationDetail = ({
         action,
       }))
       .unwrap()
-      .then(() => {
-        dispatch(getDetailInvoiceRelation(idIr));
-        handleClear();
-        handleApprovalModal(false);
-      })
+      .then(() => navigate(-1))
       .catch(() => {});
     } else if (approvalType === "INACTIVE_INVOICE_RELATION") {
       dispatch(approveOrRejectInactiveInvoiceRelation({
@@ -169,11 +165,7 @@ const InvoiceRelationDetail = ({
         action,
       }))
       .unwrap()
-      .then(() => {
-        dispatch(getDetailInvoiceRelation(idIr));
-        handleClear();
-        handleApprovalModal(false);
-      })
+      .then(() => navigate(-1))
       .catch(() => {});
     } else {
       const errorBody = {
