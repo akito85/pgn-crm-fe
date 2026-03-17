@@ -78,7 +78,7 @@ export const getJobManagementColumns = (accessGroupsMap = {}) => [
     dataIndex: "handlerClass",
     key: "handlerClass",
     align: "left",
-    width: 220,
+    width: 330,
     ellipsis: true,
   },
   {

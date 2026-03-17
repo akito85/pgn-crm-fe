@@ -173,10 +173,10 @@ const JobGroupPage = () => {
   const tableColumnWidths = useMemo(() => ({
     parameter: 800,    // PARAMETER column (dataIndex: parameters, key: parameter)
     type: 120,         // TYPE column (matches original)
-    execType: 220,     // EXEC TYPE column (increased)
+    execType: 220,     // EXEC TYPE column
     timeout: 100,      // TIMEOUT column (matches original)
     maxRetry: 100,     // MAX RETRY column (matches original)
-    handlerClass: 220, // HANDLER CLASS column (increased)
+    handlerClass: 330, // HANDLER CLASS column (increased)
   }), []);
 
   // Get child columns for nested table (exclude desc and audit columns)
