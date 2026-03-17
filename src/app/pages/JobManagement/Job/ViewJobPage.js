@@ -5,6 +5,8 @@ import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { useGetJobByIdQuery } from "../../../../redux/slices/job_management/jobApiSlice";
@@ -59,20 +61,15 @@ const ViewJobPage = () => {
 
       <NxCardContainer header="JOB DETAIL">
 
-        {/* METADATA */}
-        <NxBaseContainer border header="METADATA">
-          <KvGrid>
+        {/* JOB INFORMATION */}
+        <NxBaseContainer border header="JOB INFORMATION">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: "16px 24px", padding: "12px 0" }}>
+            {/* Row 1: METADATA */}
             <KvItem label="Name"        value={job.name} />
             <KvItem label="Code"        value={job.code} />
             <KvItem label="Type"        value={job.type} />
-            <KvItem label="Status"      value={job.status} />
-            <KvItem label="Description" value={job.description} />
-          </KvGrid>
-        </NxBaseContainer>
 
-        {/* EXECUTION */}
-        <NxBaseContainer border header="EXECUTION" className="mt-4">
-          <KvGrid>
+            {/* Row 2: EXECUTION */}
             <KvItem label="Execute Type" value={job.executeType} />
             <KvItem label="Handler"      value={job.handler} />
             <KvItem label="Task Queue"   value={job.taskQueueName ?? (job.taskQueueId ? String(job.taskQueueId) : "Default")} />
@@ -89,28 +86,28 @@ const ViewJobPage = () => {
                 return <KvItem label="Default Input" value={job.defaultInput} />;
               }
             })()}
-          </KvGrid>
-        </NxBaseContainer>
 
-        {/* CONFIGURATION */}
-        <NxBaseContainer border header="CONFIGURATION" className="mt-4">
-          <KvGrid>
+            {/* Row 3: CONFIGURATION */}
             <KvItem label="Timeout (s)"        value={job.timeout} />
             <KvItem label="Max Retry"          value={job.maxRetry} />
-            <KvItem label="Backoff Multiplier" value={job.retryPolicy?.backoffMultiplier} />
-            <KvItem label="Version"            value={job.version} />
-          </KvGrid>
-        </NxBaseContainer>
+            {job.retryPolicy && (() => {
+              try {
+                const policy = typeof job.retryPolicy === 'string' ? JSON.parse(job.retryPolicy) : job.retryPolicy;
+                return <KvItem label="Backoff Multiplier" value={policy?.backoffMultiplier} />;
+              } catch {
+                return null;
+              }
+            })()}
 
-        {/* ACCESS */}
-        <NxBaseContainer border header="ACCESS" className="mt-4">
-          <KvGrid>
-            <KvItem label="Module"     value={job.module} />
-            <KvItem label="Created By" value={job.createdBy} />
-            <KvItem label="Created At" value={job.createdAt} />
-            <KvItem label="Updated By" value={job.updatedBy} />
-            <KvItem label="Updated At" value={job.updatedAt} />
-          </KvGrid>
+            {/* Row 4: ACCESS */}
+            <KvItem label="Module"      value={job.module} />
+            <KvItem label="Group Access" value={job.accessGroupId ?? "—"} />
+
+            {/* Row 5: DESCRIPTION - spans columns 3-5 */}
+            <div style={{ gridColumn: "3 / -1" }}>
+              <KvItem label="Description" value={job.description} />
+            </div>
+          </div>
         </NxBaseContainer>
 
         {/* PARAMETERS */}
@@ -118,31 +115,122 @@ const ViewJobPage = () => {
           {!job.parameters?.length ? (
             <p style={{ color: "#999", fontSize: 13, padding: "8px 0" }}>No parameters defined.</p>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 8 }}>
-              <thead>
-                <tr style={{ background: "#fafafa" }}>
-                  {["Name", "Code", "Type", "Length", "Description"].map((h) => (
-                    <th key={h} style={{ textAlign: "left", padding: "8px 12px", border: "1px solid #e0e0e0", color: "#666", fontWeight: 500, fontSize: 11, textTransform: "uppercase" }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {job.parameters.map((p, i) => (
-                  <tr key={p.key ?? i}>
-                    <td style={{ padding: "8px 12px", border: "1px solid #e0e0e0" }}>{p.name ?? "—"}</td>
-                    <td style={{ padding: "8px 12px", border: "1px solid #e0e0e0" }}>{p.code ?? "—"}</td>
-                    <td style={{ padding: "8px 12px", border: "1px solid #e0e0e0" }}>{p.type ?? "—"}</td>
-                    <td style={{ padding: "8px 12px", border: "1px solid #e0e0e0" }}>{p.length ?? "—"}</td>
-                    <td style={{ padding: "8px 12px", border: "1px solid #e0e0e0" }}>{p.description ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <NxTable
+              idTable="jobParametersTable"
+              dataSource={job.parameters}
+              columns={[
+                {
+                  title: "Name",
+                  dataIndex: "name",
+                  key: "name",
+                },
+                {
+                  title: "Code",
+                  dataIndex: "code",
+                  key: "code",
+                },
+                {
+                  title: "Type",
+                  dataIndex: "type",
+                  key: "type",
+                },
+                {
+                  title: "Length",
+                  dataIndex: "length",
+                  key: "length",
+                },
+                {
+                  title: "Description",
+                  dataIndex: "description",
+                  key: "description",
+                },
+              ]}
+              usePagination={false}
+              showSearchBar={false}
+              showAdvanceSearch={false}
+              useSelect={false}
+              loading={false}
+              rowKey="key"
+            />
           )}
         </NxBaseContainer>
 
+      </NxCardContainer>
+
+      {/* NOTIFICATION SETTINGS */}
+      <NxCardContainer header="NOTIFICATION SETTINGS" className="mt-4">
+        <div className="flex flex-col gap-4">
+          {/* In-App Notifications */}
+          <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
+            <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
+            <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">In App Message</span>
+              <NxSwitch size="md" checked={job.notificationSettings?.showInDrawer ?? false} disabled />
+            </div>
+            <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Show as Alert</span>
+              <NxSwitch size="md" checked={job.notificationSettings?.showAlert ?? false} disabled />
+            </div>
+          </section>
+
+          {/* External Notifications */}
+          <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
+            <h3 className="text-primary text-sm font-normal uppercase">External Notifications</h3>
+            <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via Email</span>
+              <NxSwitch size="md" checked={job.notificationSettings?.sendViaEmail ?? false} disabled />
+            </div>
+            <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via SMS</span>
+              <NxSwitch size="md" checked={job.notificationSettings?.sendViaSMS ?? false} disabled />
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via WhatsApp</span>
+              <NxSwitch size="md" checked={job.notificationSettings?.sendViaWhatsApp ?? false} disabled />
+            </div>
+          </section>
+        </div>
+      </NxCardContainer>
+
+      {/* HISTORY LOG INFORMATION */}
+      <NxCardContainer header="HISTORY LOG INFORMATION" className="mt-4">
+        <div className="w-full p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: "16px 24px", padding: "0" }}>
+            {/* Record ID */}
+            <div className="flex flex-col justify-start items-start gap-1">
+              <div className="text-Semantic-Text-light-text-primary text-xs font-semibold leading-[18px] tracking-tight">Record ID</div>
+              <div className="text-Semantic-Text-light-text-primary text-xs font-medium leading-[18px] tracking-tight">{job.jobId ?? "—"}</div>
+            </div>
+
+            {/* Created Date */}
+            <div className="flex flex-col justify-start items-start gap-1">
+              <div className="text-Semantic-Text-light-text-primary text-xs font-semibold leading-[18px] tracking-tight">Created Date</div>
+              <div className="text-Semantic-Text-light-text-primary text-xs font-medium leading-[18px] tracking-tight">
+                {job.createdAt ? new Date(job.createdAt).toLocaleString() : "—"}
+              </div>
+            </div>
+
+            {/* Created By */}
+            <div className="flex flex-col justify-start items-start gap-1">
+              <div className="text-Semantic-Text-light-text-primary text-xs font-semibold leading-[18px] tracking-tight">Created By</div>
+              <div className="text-Semantic-Text-light-text-primary text-xs font-medium leading-[18px] tracking-tight">{job.createdBy ?? "—"}</div>
+            </div>
+
+            {/* Updated Date */}
+            <div className="flex flex-col justify-start items-start gap-1">
+              <div className="text-Semantic-Text-light-text-primary text-xs font-semibold leading-[18px] tracking-tight">Updated Date</div>
+              <div className="text-Semantic-Text-light-text-primary text-xs font-medium leading-[18px] tracking-tight">
+                {job.updatedAt ? new Date(job.updatedAt).toLocaleString() : "—"}
+              </div>
+            </div>
+
+            {/* Updated By */}
+            <div className="flex flex-col justify-start items-start gap-1">
+              <div className="text-Semantic-Text-light-text-primary text-xs font-semibold leading-[18px] tracking-tight">Updated By</div>
+              <div className="text-Semantic-Text-light-text-primary text-xs font-medium leading-[18px] tracking-tight">{job.updatedBy ?? "—"}</div>
+            </div>
+          </div>
+        </div>
       </NxCardContainer>
 
       {/* Footer */}

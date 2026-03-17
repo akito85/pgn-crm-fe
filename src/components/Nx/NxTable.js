@@ -679,17 +679,17 @@ const NxTable = ({
             #${idTable} .ant-table-body {
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
-              padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "8px"};
-              ${(useInfiniteScroll || usePagination) ? "border-left: 0.5px solid #C8CDD4; border-right: 0.5px solid #C8CDD4;" : ""}
+              padding-bottom: 0;
+              ${(useInfiniteScroll || usePagination) ? "border-left: 1px solid #C8CDD4; border-right: 1px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
               #${idTable} .ant-table-body {
-                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "12px"};
+                padding-bottom: 0;
               }
 
               #${idTable} .ant-table-content {
-                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "4px"};
+                padding-bottom: 0;
               }
             }
 
@@ -728,14 +728,16 @@ const NxTable = ({
             }
 
             #${idTable} .ant-table {
-              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              border-radius: 8px 8px 0 0;
               overflow: hidden;
               border: 1px solid #C8CDD4;
-              ${(useInfiniteScroll || usePagination) ? "border-bottom: none;" : ""}
+              border-bottom: none;
+              border-collapse: collapse;
+              border-spacing: 0;
             }
 
             #${idTable} .ant-table-container {
-              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              border-radius: 8px 8px 0 0;
               overflow: hidden;
               border: none;
             }
@@ -748,6 +750,14 @@ const NxTable = ({
               border-start-end-radius: 8px;
             }
 
+            #${idTable} .ant-table-tbody > tr:last-child > *:first-child {
+              border-end-start-radius: 0;
+            }
+
+            #${idTable} .ant-table-tbody > tr:last-child > *:last-child {
+              border-end-end-radius: 0;
+            }
+
             #${idTable} .ant-table-bordered .ant-table-cell,
             #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
             #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
@@ -756,21 +766,35 @@ const NxTable = ({
             }
 
             #${idTable} .ant-table-thead {
-              border-left: 0.5px solid #C8CDD4;
-              border-right: 0.5px solid #C8CDD4;
+              border-left: 1px solid #C8CDD4;
+              border-right: 1px solid #C8CDD4;
             }
 
             #${idTable} .ant-table-thead > tr > th {
               padding: 4px 8px !important;
               height: 30px !important;
-              border: 0.5px solid #C8CDD4 !important;
+              border-right: 1px solid #C8CDD4 !important;
+              border-bottom: 1px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-thead > tr:first-child > th {
+              border-top: 1px solid #C8CDD4 !important;
             }
 
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
               padding: 4px 8px !important;
               min-height: 30px;
               font-size: 12px;
-              border: 0.5px solid #C8CDD4 !important;
+              border-right: 1px solid #C8CDD4 !important;
+              border-bottom: 1px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
+              border-left: 1px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-thead > tr > th:first-child {
+              border-left: 1px solid #C8CDD4 !important;
             }
 
             #${idTable} .ant-table-measure-row > td {
@@ -924,7 +948,15 @@ const NxTable = ({
               size="small"
             />
           </div>
-        ) : null}
+        ) : (
+          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+            <span style={{ fontSize: "12px", color: "#6B7280" }}>
+              Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
+            </span>
+            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+            <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+          </div>
+        )}
 
         {loading && (
           <div style={{
