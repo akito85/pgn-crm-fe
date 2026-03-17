@@ -19,47 +19,110 @@ const SVG = ({
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
+    {/* Calendar background */}
     <rect
-      x="4"
-      y="5"
-      width="16"
-      height="16"
+      x="3"
+      y="4"
+      width="18"
+      height="18"
       rx="2"
+      fill={color}
+      opacity="0.1"
       stroke={color}
-      strokeWidth="1.75"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path
-      d="M16 3V7"
-      stroke={color}
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+
+    {/* Month header bar */}
+    <rect
+      x="3"
+      y="4"
+      width="18"
+      height="4"
+      rx="2"
+      fill={color}
+      opacity="0.15"
     />
-    <path
-      d="M8 3V7"
-      stroke={color}
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+
+    {/* Top left date tab */}
+    <rect
+      x="7"
+      y="1.5"
+      width="3"
+      height="3"
+      rx="0.5"
+      fill={color}
     />
+
+    {/* Top right date tab */}
+    <rect
+      x="14"
+      y="1.5"
+      width="3"
+      height="3"
+      rx="0.5"
+      fill={color}
+    />
+
+    {/* Week divider line */}
     <path
-      d="M4 11H20"
+      d="M3 9H21"
       stroke={color}
-      strokeWidth="1.75"
+      strokeWidth="1.5"
       strokeLinecap="round"
-      strokeLinejoin="round"
+    />
+
+    {/* Date squares - first row */}
+    <rect
+      x="5"
+      y="10.5"
+      width="2.2"
+      height="2.2"
+      fill={color}
+      opacity="0.3"
     />
     <rect
-      x="8"
-      y="15"
-      width="2"
-      height="2"
-      stroke={color}
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      x="8.2"
+      y="10.5"
+      width="2.2"
+      height="2.2"
+      fill={color}
+      opacity="0.3"
+    />
+
+    {/* Date squares - second row */}
+    <rect
+      x="5"
+      y="13.5"
+      width="2.2"
+      height="2.2"
+      fill={color}
+      opacity="0.2"
+    />
+    <rect
+      x="8.2"
+      y="13.5"
+      width="2.2"
+      height="2.2"
+      fill={color}
+      opacity="0.2"
+    />
+    <rect
+      x="11.4"
+      y="13.5"
+      width="2.2"
+      height="2.2"
+      fill={color}
+      opacity="0.2"
+    />
+
+    {/* Highlight today's date */}
+    <circle
+      cx="16.5"
+      cy="14.6"
+      r="1.5"
+      fill={color}
     />
   </svg>
 );
