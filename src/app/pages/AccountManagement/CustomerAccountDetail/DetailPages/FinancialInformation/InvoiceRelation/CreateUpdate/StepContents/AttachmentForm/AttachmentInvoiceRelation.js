@@ -251,17 +251,18 @@ const AttachmentSectionForm = ({
   const handleDelete = (record) => {
     setDataSource(
       prevState => prevState.filter(
-        attachment => attachment.id !== record.id
+        attachment => attachment.key !== record.key
       )
     );
 
-    setDeleted(prevState => [
-      ...prevState,
-      {
-        ...record,
-        isDeleted: true,
-      }
-    ]);
+    if (record.dataType === "draft")
+      setDeleted(prevState => [
+        ...prevState,
+        {
+          ...record,
+          isDeleted: true,
+        }
+      ]);
   };
 
   const handleOpenModal = () => {

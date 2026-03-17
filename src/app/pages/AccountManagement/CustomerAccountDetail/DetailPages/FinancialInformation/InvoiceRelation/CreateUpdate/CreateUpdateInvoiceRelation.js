@@ -149,7 +149,10 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   useEffect(() => {
     if (isUpdate && attachments)
-      setAttachmentDataSource([...attachments]);
+      setAttachmentDataSource([...attachments.map((attachment) => ({
+        ...attachment,
+        key: attachment.id,
+      }))]);
   }, [detail]);
 
   useEffect(() => {
@@ -538,7 +541,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     };
 
     // Filter only new attachments (not existing ones)
-    const newAttachments = attachmentDataSource.filter((a) => a.dataType !== "exist");
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
 
     const navigateTarget = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
