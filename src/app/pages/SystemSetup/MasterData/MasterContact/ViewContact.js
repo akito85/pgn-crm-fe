@@ -560,6 +560,7 @@ const ViewContact = () => {
                     header={'contact detail'}
                     footer={[
                         <ButtonComponent
+                            key="back"
                             onClick={handleCancel}
                         >
                             Back

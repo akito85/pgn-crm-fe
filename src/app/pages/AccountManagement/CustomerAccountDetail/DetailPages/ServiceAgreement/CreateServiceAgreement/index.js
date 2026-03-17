@@ -2242,7 +2242,7 @@ const CreateServiceAgreement = ({ saType }) => {
         width={400}
         maskClosable={false}
         footer={[
-          <div className={"w-full justify-end flex gap-[20px]"}>
+          <div key="footer" className={"w-full justify-end flex gap-[20px]"}>
             <ButtonComponent
               type={"default"}
               onClick={() => setModalBack(false)}

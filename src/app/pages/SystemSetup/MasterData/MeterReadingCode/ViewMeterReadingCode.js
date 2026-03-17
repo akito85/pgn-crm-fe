@@ -522,7 +522,7 @@ const ViewMeterReadingCode = () => {
           header={"detail meter reading code"}
           width={1000}
           footer={[
-            <ButtonComponent onClick={handleCancel}>Back</ButtonComponent>,
+            <ButtonComponent key="back" onClick={handleCancel}>Back</ButtonComponent>,
           ]}
         >
           <CardComponent header={"meter reading code information"}>

@@ -661,7 +661,7 @@ const FormContact = ({ type }) => {
                 width={900}
                 header={'confirmation'}
                 footer={[
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                    <div key="footer" className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                         <ButtonComponent
                             onClick={handleCancel}
                             type="default"
