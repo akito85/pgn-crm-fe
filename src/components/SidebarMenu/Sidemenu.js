@@ -229,6 +229,14 @@ const SideMenu = ({ isCollapsed }) => {
     (data) => {
       return data.map((item) => {
         if (item.children) {
+          // Check if any child is selected
+          const hasSelectedChild = item.children.some((child) => {
+            const flatChildren = extractPaths([child]);
+            return flatChildren.some((flatChild) =>
+              selectedLeafKeys?.includes(flatChild.key)
+            );
+          });
+
           return (
             <Menu.SubMenu
               key={item?.key}
@@ -236,7 +244,7 @@ const SideMenu = ({ isCollapsed }) => {
                 <SVGIcon
                   name={item?.icon}
                   width={20}
-                  color="#000000"
+                  color={hasSelectedChild ? "#0075BF" : "#000000"}
                   style={{
                     marginRight: isCollapsed ? "80px" : "12px",
                     marginLeft: isCollapsed ? "-5px" : "",
