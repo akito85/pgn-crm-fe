@@ -69,7 +69,7 @@ const ViewJobGroupDetailPage = () => {
   }
 
   const jobs = groupJobs?.data ?? [];
-  const childColumns = getJobGroupChildTableColumns(1, 50);
+  const childColumns = getJobGroupChildTableColumns();
 
   return (
     <LayoutMenu>

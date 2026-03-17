@@ -207,8 +207,8 @@ const JobPage = () => {
   }, [toView, toUpdate, canUpdate, canDelete, canView]);
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(page + 1, PAGE_SIZE), actionColumn],
-    [actionColumn, page]
+    () => [...getJobManagementColumns(), ...(actionColumn ? [actionColumn] : [])],
+    [actionColumn]
   );
 
   const allColumns = useMemo(

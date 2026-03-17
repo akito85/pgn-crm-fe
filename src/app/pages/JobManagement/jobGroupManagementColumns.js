@@ -50,8 +50,8 @@ export const getJobGroupManagementColumns = () => [
  * Keeps all other columns: NO, NAME, CODE, TYPE, DESC, PARAMETER, EXEC TYPE,
  * HANDLER CLASS, TIMEOUT, MAX RETRY, CREATED BY, CREATED DATE, UPDATED BY, UPDATED DATE
  */
-export const getJobGroupChildTableColumns = (page = 1, pageSize = 10) => {
-  const allJobColumns = getJobManagementColumns(page, pageSize);
+export const getJobGroupChildTableColumns = () => {
+  const allJobColumns = getJobManagementColumns();
 
   // Exclude MODULE and PARENT columns
   const excludeKeys = ["module", "parent"];

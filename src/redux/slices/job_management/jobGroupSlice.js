@@ -16,6 +16,7 @@ const getHeaders = () => {
 const toGroupRow = (g) => ({
   ...g,
   desc: g.description,    // jobGroupManagementColumns reads 'desc'
+  accessGroup: g.accessGroupId ? String(g.accessGroupId) : (g.accessGroup != null ? String(g.accessGroup) : null),
 });
 
 // Map backend JobResponse → frontend row shape for child table

@@ -407,7 +407,7 @@ const NxTable = ({
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              fontSize: "11px",
+              fontSize: "12px",
               ...(externalOnCell.style || {}),
             },
           };
@@ -688,7 +688,6 @@ const NxTable = ({
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
               padding-bottom: 0;
-              ${(useInfiniteScroll || usePagination) ? "border-left: 1px solid #C8CDD4; border-right: 1px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
@@ -735,11 +734,16 @@ const NxTable = ({
               padding-right: 0px;
             }
 
+            /* Active sorter icon color — override primary color back to white */
+            #${idTable} .ant-table-thead .ant-table-column-sorter-up.active .anticon,
+            #${idTable} .ant-table-thead .ant-table-column-sorter-down.active .anticon {
+              color: rgba(255, 255, 255, 0.85) !important;
+            }
+
             #${idTable} .ant-table {
               border-radius: 8px 8px 0 0;
               overflow: hidden;
-              border: 1px solid #C8CDD4;
-              border-bottom: none;
+              border: none;
               border-collapse: collapse;
               border-spacing: 0;
             }
@@ -773,16 +777,12 @@ const NxTable = ({
               border-color: #C8CDD4 !important;
             }
 
-            #${idTable} .ant-table-thead {
-              border-left: 1px solid #C8CDD4;
-              border-right: 1px solid #C8CDD4;
-            }
-
             #${idTable} .ant-table-thead > tr > th {
               padding: 4px 8px !important;
               height: 30px !important;
               border-right: 1px solid #C8CDD4 !important;
               border-bottom: 1px solid #C8CDD4 !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
             }
 
             #${idTable} .ant-table-thead > tr:first-child > th {
@@ -795,6 +795,7 @@ const NxTable = ({
               font-size: 12px;
               border-right: 1px solid #C8CDD4 !important;
               border-bottom: 1px solid #C8CDD4 !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
             }
 
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
@@ -804,6 +805,7 @@ const NxTable = ({
             #${idTable} .ant-table-thead > tr > th:first-child {
               border-left: 1px solid #C8CDD4 !important;
             }
+
 
             #${idTable} .ant-table-measure-row > td {
               padding: 0 !important;
@@ -825,7 +827,7 @@ const NxTable = ({
 
             #${idTable} {
               --nx-expand-cell-width: 32px;
-              --nx-parent-col1-width: 150px;
+              --nx-parent-col1-width: 60px;
               --nx-child-offset: calc(var(--nx-expand-cell-width) + var(--nx-parent-col1-width));
             }
 
@@ -846,10 +848,58 @@ const NxTable = ({
               overflow: hidden !important;
             }
 
-            /* Remove child table's own outer border (it now shares the parent column border) */
+            /* ── Nested (Child) Table Styling ──────────────────────────────────
+               Child tables use the same header blue (#2C6FAD), borders (#C8CDD4),
+               and alternating row styling as parent tables. */
+
             #${idTable} .ant-table-expanded-row .ant-table {
-              border-left: none !important;
+              border-left: 1px solid #C8CDD4 !important;
               border-radius: 0 !important;
+              border-top: none !important;
+              border-right: none !important;
+              border-bottom: none !important;
+            }
+
+            #${idTable} .ant-table-expanded-row .ant-table-container {
+              border-radius: 0 !important;
+            }
+
+            #${idTable} .ant-table-expanded-row .ant-table-wrapper {
+              border-radius: 0 !important;
+            }
+
+            #${idTable} .ant-table-expanded-row > td > div {
+              border-radius: 0 !important;
+            }
+
+            /* Child table header styling */
+            #${idTable} .ant-table-expanded-row .ant-table-thead > tr > th {
+              background-color: #2C6FAD !important;
+              color: #fff !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+              border-color: #C8CDD4 !important;
+              border-right: 1px solid rgba(255,255,255,0.2) !important;
+            }
+
+            /* Child table body cells */
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr > td {
+              border-color: #C8CDD4 !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+              font-size: 12px !important;
+            }
+
+            /* Child table alternating row colors */
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:nth-child(odd) > td {
+              background-color: #FFFFFF !important;
+            }
+
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:nth-child(even) > td {
+              background-color: #EBF2FA !important;
+            }
+
+            /* Child table row hover */
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:hover > td {
+              background-color: #EBF2FA !important;
             }
 
             /* Re-add left border on child's first header/cell so the vertical
@@ -961,7 +1011,7 @@ const NxTable = ({
           <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
-              {isLoadingMore && " · Loading..."}
+              {isLoadingMore && hasMore && " · Loading..."}
             </span>
             {!hasMore && resolvedDataSource?.length > 0 && (
               <>

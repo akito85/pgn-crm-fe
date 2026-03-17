@@ -85,7 +85,7 @@ const JobExecutionPage = () => {
   };
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(1, PAGE_SIZE), actionColumn],
+    () => [...getJobManagementColumns(), ...(actionColumn ? [actionColumn] : [])],
     []
   );
 

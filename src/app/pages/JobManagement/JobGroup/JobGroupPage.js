@@ -6,7 +6,7 @@ import { Dropdown, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
-import NxTable from "../../../../components/Nx/NxTable";
+import NxJobGroupTable from "../../../../components/Nx/NxJobGroupTable";
 import NxModal from "../../../../components/Nx/NxModal";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -133,46 +133,44 @@ const JobGroupPage = () => {
     [dispatch, expandedRowKeys, jobsByGroupId]
   );
 
-  // Expandable row renderer - shows child jobs table
-  const expandedRowRender = useCallback(
-    (record) => {
-      const groupJobs = jobsByGroupId[record.id];
-      const isLoading = groupJobs?.loading;
-      const jobs = groupJobs?.data || [];
+  // Prepare data for custom table (includes jobs for each group)
+  const tableDataWithJobs = useMemo(() => {
+    return accumulatedData.map((group) => ({
+      ...group,
+      jobs: jobsByGroupId[group.id]?.data || [],
+    }));
+  }, [accumulatedData, jobsByGroupId]);
 
-      if (isLoading) {
-        return (
-          <div style={{ padding: "20px", textAlign: "center" }}>
-            <Spin tip="Loading jobs..." />
-          </div>
-        );
+  // Set of group IDs whose child jobs are currently being fetched
+  const loadingKeys = useMemo(() => {
+    return new Set(
+      Object.entries(jobsByGroupId)
+        .filter(([, v]) => v?.loading)
+        .map(([k]) => k)
+    );
+  }, [jobsByGroupId]);
+
+  // Handle expand row - lazy load jobs
+  const handleExpandRow = useCallback(
+    (groupId) => {
+      if (!jobsByGroupId[groupId]?.data) {
+        dispatch(getJobsByGroupId({ groupId, page: 0, pageSize: 20 }));
       }
-
-      if (!jobs || jobs.length === 0) {
-        return (
-          <div style={{ padding: "20px", textAlign: "center", color: "#999" }}>
-            No jobs in this group
-          </div>
-        );
-      }
-
-      const childColumns = getJobGroupChildTableColumns(1, 20);
-      return (
-        <NxTable
-          idTable={`job-group-${record.id}-child-table`}
-          dataSource={jobs}
-          columns={childColumns}
-          pagination={false}
-          usePagination={false}
-          useSelect={false}
-          useInfiniteScroll={false}
-          tableScrolled={{ y: 250, x: "max-content" }}
-          loading={false}
-        />
-      );
     },
-    [jobsByGroupId]
+    [dispatch, jobsByGroupId]
   );
+
+  // Get child columns for nested table (exclude desc and audit columns)
+  const childColumns = useMemo(() => {
+    const allColumns = getJobGroupChildTableColumns();
+    const excludeKeys = ["desc", "accessGroup", "createdBy", "createdDate", "updatedBy", "updatedDate"];
+    return allColumns
+      .filter((col) => !excludeKeys.includes(col.key || col.dataIndex))
+      .map((col) => ({
+        ...col,
+        key: col.key || col.dataIndex || col.title,
+      }));
+  }, []);
 
   // Action column with three-dots menu and view button (permission-gated)
   const actionColumn = useMemo(() => {
@@ -348,13 +346,6 @@ const JobGroupPage = () => {
 
   return (
     <LayoutMenu>
-      <style>{`
-        #job-group-list-table .ant-table-expanded-row > td {
-          border-left: none !important;
-          border-right: none !important;
-          border-bottom: none !important;
-        }
-      `}</style>
       <BreadCrumb routes={routes} />
       <NxCardContainer
         header="JOB GROUP LIST"
@@ -381,32 +372,16 @@ const JobGroupPage = () => {
           </div>
         }
       >
-        <NxTable
-          idTable="job-group-list-table"
-          dataSource={accumulatedData}
-          totalData={data?.page?.totalElements}
-          current={page}
-          loading={loading}
-          columns={processedColumns}
-          columnDefinitions={columnDefinitions}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          tableScrolled={{ y: 500, x: "max-content" }}
-          onSort={onSort}
-          usePagination={false}
-          useInfiniteScroll={true}
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          loadMoreThreshold={20}
-          onRefresh={handleRefresh}
-          showRefresh={true}
-          expandable={{
-            expandedRowKeys,
-            onExpandedRowsChange: handleRowExpand,
-            expandedRowRender,
-            rowExpandable: () => true,
-          }}
-        />
+        <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+          <NxJobGroupTable
+            dataSource={tableDataWithJobs}
+            loading={loading}
+            onExpand={handleExpandRow}
+            childColumns={childColumns}
+            actionColumn={actionColumn}
+            loadingKeys={loadingKeys}
+          />
+        </div>
       </NxCardContainer>
 
       {/* Delete Confirmation Modal */}
