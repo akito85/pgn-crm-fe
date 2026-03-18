@@ -12,6 +12,7 @@ import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { useGetJobGroupByIdQuery } from "../../../../redux/slices/job_management/jobGroupApiSlice";
 import { getJobsByGroupId } from "../../../../redux/slices/job_management/jobGroupSlice";
 import { getJobGroupChildTableColumns } from "../jobGroupManagementColumns";
+import { getAllGroupAccessPaginate } from "../../../../redux/slices/system_setup/group_access";
 
 // ─── Key-Value Display Helpers ────────────────────────────────────────────────
 
@@ -36,18 +37,22 @@ const ViewJobGroupDetailPage = () => {
 
   const { data: group, isLoading } = useGetJobGroupByIdQuery(id, { skip: !id });
   const { jobsByGroupId } = useSelector((state) => state.jobGroup);
+  const { data: groupAccessData } = useSelector((state) => state.groupAccess);
   const groupJobs = jobsByGroupId[id];
+  const groupAccessList = groupAccessData?.result ?? [];
 
   // Redirect if no ID
   useEffect(() => {
     if (!id) navigate(JOB_MGMT_ROUTES.VIEW_JOB_GROUP);
   }, [id, navigate]);
 
-  // Fetch jobs for this group
+  // Fetch jobs for this group and group access data
   useEffect(() => {
     if (id && !groupJobs?.data) {
       dispatch(getJobsByGroupId({ groupId: id, page: 0, pageSize: 50 }));
     }
+    // Fetch group access data
+    dispatch(getAllGroupAccessPaginate({ search: '', page: 0, pageSize: 200 }));
   }, [id, dispatch, groupJobs]);
 
   const breadcrumbRoutes = [
@@ -81,12 +86,14 @@ const ViewJobGroupDetailPage = () => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px 24px", padding: "12px 0" }}>
             <KvItem label="Group Name" value={group.name} />
             <KvItem label="Group Code" value={group.code} />
-            <div>
-              <div style={{ fontSize: 10, color: "#999", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>
-                Active
-              </div>
-              <NxSwitch size="md" checked={group.isActive === "Y"} disabled />
-            </div>
+            <KvItem 
+              label="Group Access" 
+              value={
+                group.accessGroupId 
+                  ? groupAccessList.find(ga => ga.gaId === group.accessGroupId)?.name || "Unknown" 
+                  : "Not assigned"
+              } 
+            />
             <div style={{ gridColumn: "1 / -1" }}>
               <KvItem label="Description" value={group.description} />
             </div>

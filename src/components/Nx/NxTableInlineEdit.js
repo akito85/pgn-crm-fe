@@ -48,6 +48,8 @@ const TrashIcon = () => (
  *   loading       {boolean}
  *   showDelete    {boolean}  - show delete button (default: true)
  *   emptyText     {string}   - empty state message
+ *   editMode      {string}   - 'full' | 'deleteOnly' (default: 'full')
+ *   onAddRow      {Function} - callback to add a new row (optional)
  */
 const NxTableInlineEdit = ({
   idTable = "nx-table-inline-edit",
@@ -58,6 +60,8 @@ const NxTableInlineEdit = ({
   loading = false,
   showDelete = true,
   emptyText = 'No data. Click Create to add a new row.',
+  editMode = 'full',
+  onAddRow,
 }) => {
   const [editingKey, setEditingKey] = useState(null);
   const [editingValues, setEditingValues] = useState({});
@@ -269,6 +273,27 @@ const NxTableInlineEdit = ({
         );
       }
 
+      // If editMode is 'deleteOnly', only show delete button
+      if (editMode === 'deleteOnly') {
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center" }}>
+            {showDelete && (
+              <button
+                type="button"
+                onClick={() => handleDelete(record[rowKey])}
+                title="Delete"
+                style={iconBtnStyle}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#fff1f0")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+              >
+                <TrashIcon />
+              </button>
+            )}
+          </div>
+        );
+      }
+
+      // Default behavior - show both edit and delete buttons
       return (
         <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center" }}>
           <button
@@ -434,7 +459,7 @@ const NxTableInlineEdit = ({
         tableLayout="fixed"
         rowClassName={(record) => isEditing(record) ? "nx-row-editing" : ""}
       />
-      <div style={{ borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+      <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
         <span style={{ fontSize: "12px", color: "#6B7280" }}>
           Showing {dataSource.length} of {dataSource.length} entries
         </span>
