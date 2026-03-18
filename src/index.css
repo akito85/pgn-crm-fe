@@ -1122,6 +1122,70 @@ span.ant-tree-title {
   max-width: 280px !important;
 }
 
+/* Center icons in collapsed sidebar */
+.ant-menu-inline-collapsed .ant-menu-item-icon,
+.ant-menu-submenu-inline.ant-menu-submenu-popup .ant-menu-item-icon {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-right: 0 !important;
+}
+
+/* When collapsed, all menu items should have minimal padding to center icons */
+.ant-menu-inline-collapsed .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-submenu > .ant-menu-submenu-title {
+  padding: 0 !important;  /* Remove padding to allow full centering */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Override any conflicting submenu title padding when collapsed */
+.ant-menu-inline-collapsed .ant-menu-submenu > .ant-menu-submenu-title {
+  left: 0 !important;
+  padding: 0 !important;
+  text-overflow: clip !important;
+}
+
+/* Submenu items in collapsed state should also be centered */
+.ant-menu-inline-collapsed .ant-menu-sub .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-sub .ant-menu-submenu-title {
+  padding: 0 !important;  /* Remove padding to allow full centering */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Expanded state - maintain proper indentation hierarchy */
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-item {
+  padding: 0 24px !important;
+}
+
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-submenu-title {
+  padding: 0 24px !important;
+}
+
+/* Submenu items in expanded state should have proper indentation */
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-sub .ant-menu-item {
+  padding: 0 24px 0 48px !important;  /* Left padding for indentation, right for balance */
+}
+
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-sub .ant-menu-submenu-title {
+  padding: 0 24px 0 48px !important;  /* Left padding for indentation, right for balance */
+}
+
+/* Hide text content when sidebar is collapsed */
+.sidebar-collapsed-content {
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  display: inline-block !important;
+  line-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .ant-picker {
   box-sizing: border-box;
   margin: 0;

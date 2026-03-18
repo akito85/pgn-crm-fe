@@ -90,6 +90,7 @@ const Icon = (props) => {
       return <IconArrowNarrowLeft {...props} />;
     case "IconBilling":
       return <IconBilling {...props} />;
+    case "IconCalendar":       // alias — menu management uses "IconCalendar", component is IconCalendarEvent
     case "IconCalendarEvent":
       return <IconCalendarEvent {...props} />;
     case "IconClear":
