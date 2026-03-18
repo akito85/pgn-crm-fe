@@ -284,7 +284,7 @@ const UpdateCustomer = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         <div className="w-full">
@@ -465,7 +465,7 @@ const UpdateCustomer = () => {
           />
         </ModalCustom>
       </Spin>
-    </div>
+    </>
   );
 };
 

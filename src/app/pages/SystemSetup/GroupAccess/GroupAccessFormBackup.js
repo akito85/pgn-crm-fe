@@ -285,7 +285,7 @@ const GroupAccessForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <Spin spinning={loading || loading_group_access}>
         <BreadCrumb routes={routes} />
         <Form
@@ -517,7 +517,7 @@ const GroupAccessForm = (props) => {
 
       {/* try again modal */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 export default GroupAccessForm;

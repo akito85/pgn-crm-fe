@@ -290,7 +290,7 @@ const DetailSynchronizeReceipt = () => {
   };
 
   return (
-    <div>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
@@ -355,7 +355,7 @@ const DetailSynchronizeReceipt = () => {
       </div>
 
       {/* </Spin> */}
-    </div>
+    </>
   );
 };
 

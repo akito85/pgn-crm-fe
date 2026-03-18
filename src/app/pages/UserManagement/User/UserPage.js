@@ -543,7 +543,7 @@ const UserPage = () => {
 
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Toolbar items={itemActions} />
       <Spin spinning={loading}>
@@ -655,7 +655,7 @@ const UserPage = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

@@ -1536,7 +1536,7 @@ const CalculationPage = () => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -1608,7 +1608,7 @@ const CalculationPage = () => {
           </Tabs.TabPane>
         </Tabs>
       </CardContainer>
-    </div>
+    </>
   );
 };
 

@@ -307,7 +307,7 @@ const ListDetailPaymentItem = () => {
   console.log(dataDraft, "datadraft");
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -413,7 +413,7 @@ const ListDetailPaymentItem = () => {
           </div>
         ) : null}
       </div>
-    </div>
+    </>
   );
 };
 

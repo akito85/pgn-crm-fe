@@ -132,7 +132,7 @@ const ListFormReverse = () => {
     };
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <RadioTabs
@@ -249,7 +249,7 @@ const ListFormReverse = () => {
                     selectedHierarchy={selectedHierarchy}
                 />
             </ModalCustom>
-        </div>
+        </>
     );
 };
 

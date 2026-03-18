@@ -360,7 +360,7 @@ const CreateAccounting = () => {
     );
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer
@@ -419,7 +419,7 @@ const CreateAccounting = () => {
                     </div>
                 </CardContainer>
             </Spin>
-        </div>
+        </>
     );
 };
 

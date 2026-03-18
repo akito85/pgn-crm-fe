@@ -140,7 +140,7 @@ const ListDetailPartnerCa = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <Tabs
@@ -201,7 +201,7 @@ const ListDetailPartnerCa = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </div>
+    </>
   );
 };
 

@@ -118,7 +118,7 @@ const ProductClassCreate = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -261,7 +261,7 @@ const ProductClassCreate = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

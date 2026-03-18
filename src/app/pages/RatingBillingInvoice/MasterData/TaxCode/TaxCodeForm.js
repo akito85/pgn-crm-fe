@@ -989,7 +989,7 @@ const TaxCodeForm = ({ type }) => {
   }, [form, listDataCriteria]);
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -1164,7 +1164,7 @@ const TaxCodeForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 export default TaxCodeForm;

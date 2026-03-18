@@ -791,7 +791,7 @@ console.log(formValue, 'form Value');
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <RadioTabs
@@ -948,7 +948,7 @@ console.log(formValue, 'form Value');
           handleOk={() => navigate(-1)}
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

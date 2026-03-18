@@ -269,7 +269,7 @@ const ListDetailDeduction = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -326,7 +326,7 @@ const ListDetailDeduction = () => {
           </div>
         ) : null}
       </div>
-    </div>
+    </>
   );
 };
 

@@ -236,7 +236,7 @@ const ViewSynchronizeReceipt = () => {
   };
 
   return (
-    <div>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
@@ -262,7 +262,7 @@ const ViewSynchronizeReceipt = () => {
       </CardContainer>
 
       {/* </Spin> */}
-    </div>
+    </>
   );
 };
 

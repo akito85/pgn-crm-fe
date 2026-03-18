@@ -270,7 +270,7 @@ const ListFormTransferToReceipt = (props) => {
   });
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <RadioTabs
@@ -364,7 +364,7 @@ const ListFormTransferToReceipt = (props) => {
         onClose={() => setShowSearchReceiptModal(false)}
         onConfirm={handleConfirmSearchReceipt}
       />
-    </div>
+    </>
   );
 };
 

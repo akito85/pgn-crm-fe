@@ -237,7 +237,7 @@ const JobPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <NxCardContainer
         header="JOB LIST"
@@ -319,7 +319,7 @@ const JobPage = () => {
           </div>
         </div>
       </NxModal>
-    </div>
+    </>
   );
 };
 

@@ -275,7 +275,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
     ];
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
 
             <div className="text-xl font-bold text-primary mb-5">
@@ -503,7 +503,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 menu={`Receipt ${typeLabel}`}
                 named={data_detail?.receiptNumber}
             />
-        </div>
+        </>
     );
 };
 

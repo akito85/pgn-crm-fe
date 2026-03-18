@@ -336,7 +336,7 @@ const ListDetailTransactionCalender = () => {
 
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <div>
@@ -400,7 +400,7 @@ const ListDetailTransactionCalender = () => {
           }
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

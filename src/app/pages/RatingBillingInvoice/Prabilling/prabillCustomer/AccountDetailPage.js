@@ -428,7 +428,7 @@ const AccountDetailPage = () => {
   );
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       {/* INIT / CUSTOMER & ACCOUNT INFORMATION */}
@@ -601,7 +601,7 @@ const AccountDetailPage = () => {
           Back
         </ButtonComponent>
       </div>
-    </div>
+    </>
   );
 };
 

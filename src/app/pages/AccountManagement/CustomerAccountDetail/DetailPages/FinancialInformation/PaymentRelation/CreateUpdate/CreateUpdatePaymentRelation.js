@@ -628,7 +628,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   };
 
   return (
-    <div>
+    <>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
         <HeaderDetail
@@ -755,7 +755,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           </Form>
         </Spin>
       </div>
-    </div>
+    </>
   );
 };
 

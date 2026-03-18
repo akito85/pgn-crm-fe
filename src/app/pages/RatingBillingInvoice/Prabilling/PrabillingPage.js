@@ -519,7 +519,7 @@ const PrabillingPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -642,7 +642,7 @@ const PrabillingPage = () => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

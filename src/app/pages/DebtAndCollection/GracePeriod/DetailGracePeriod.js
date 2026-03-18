@@ -40,7 +40,7 @@ const ListDetailGracePeriod = () => {
     },
   ];
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"Detail Grace Period"}>
@@ -71,7 +71,7 @@ const ListDetailGracePeriod = () => {
           Back
         </ButtonComponent>
       </div>
-    </div>
+    </>
   );
 };
 

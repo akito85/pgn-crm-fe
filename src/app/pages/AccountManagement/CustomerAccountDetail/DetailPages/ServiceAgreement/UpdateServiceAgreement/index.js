@@ -1818,7 +1818,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	// console.log(dataTermOfService, ' data tos depan');
 
 	return (
-		<div>
+		<>
 			<Spin spinning={isLoading}>
 				<div className="flex flex-col gap-y-4">
 					<NxBreadCrumb routes={routes(idAccount)} />
@@ -2038,7 +2038,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					<p className="pl-[70px]">{messageValidateSa}</p>
 				</div>
 			</ModalError>
-		</div>
+		</>
 	);
 };
 

@@ -480,7 +480,7 @@ const ListFormCaPaymentChannel = (props) => {
     };
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loadingForm}>
                 <FormStepper steps={steps} current={current} />
@@ -599,7 +599,7 @@ const ListFormCaPaymentChannel = (props) => {
                     </p>
                 </div>
             </ModalConfirm>
-        </div>
+        </>
     );
 };
 

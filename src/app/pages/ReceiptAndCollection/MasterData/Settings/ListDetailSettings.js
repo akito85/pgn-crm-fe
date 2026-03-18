@@ -156,7 +156,7 @@ const ListDetailSettings = () => {
 
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <Tabs
@@ -216,7 +216,7 @@ const ListDetailSettings = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </div>
+    </>
   );
 };
 

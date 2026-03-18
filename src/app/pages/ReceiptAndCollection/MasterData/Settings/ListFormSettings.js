@@ -463,7 +463,7 @@ const ListFormSettings = (props) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <FormStepper
@@ -586,7 +586,7 @@ const ListFormSettings = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

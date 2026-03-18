@@ -575,7 +575,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading || loadingForm}>
         <BreadCrumb routes={routes} />
         
@@ -744,7 +744,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
           </ModalCustom>
         ) : null}
       </Spin>
-    </div>
+    </>
   );
 };
 

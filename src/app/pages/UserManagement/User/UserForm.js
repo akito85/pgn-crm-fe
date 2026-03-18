@@ -328,7 +328,7 @@ const UserForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <div className={"flex flex-col "}>
         <BreadCrumb routes={routes} />
         <Spin spinning={loading || isLoading}>
@@ -582,7 +582,7 @@ const UserForm = (props) => {
 
       {/* try again modal */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

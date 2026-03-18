@@ -564,7 +564,7 @@ const ViewPaymentChannel = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <CardContainer
         header={
@@ -621,7 +621,7 @@ const ViewPaymentChannel = () => {
         onFinish={handleSubmitModalInactivate}
       />
       {renderModal()}
-    </div>
+    </>
   );
 };
 

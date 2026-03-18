@@ -344,7 +344,7 @@ const DetailServiceAgreement = () => {
   ];
 
   return (
-    <div>
+    <>
       <div>
         <Spin spinning={loading}>
           <div className="flex flex-col gap-y-4">
@@ -460,7 +460,7 @@ const DetailServiceAgreement = () => {
           message={message}
         />
       </div>
-    </div>
+    </>
   );
 };
 

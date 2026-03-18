@@ -939,7 +939,7 @@ const BillingItemForm = (props) => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -1172,7 +1172,7 @@ const BillingItemForm = (props) => {
           </ModalError>
         )}
       </Spin>
-    </div>
+    </>
   );
 };
 

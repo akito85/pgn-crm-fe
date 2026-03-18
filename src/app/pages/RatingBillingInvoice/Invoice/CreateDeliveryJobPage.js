@@ -259,7 +259,7 @@ const CreateDeliveryJobPage = () => {
   };
 
   return (
-    <div>
+    <>
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -635,7 +635,7 @@ const CreateDeliveryJobPage = () => {
           </Form>
         </Spin>
       </CardContainer>
-    </div>
+    </>
   );
 };
 

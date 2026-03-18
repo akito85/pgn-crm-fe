@@ -118,7 +118,7 @@ const ListDetailPaymentWarrantyPartner = () => {
   const approverItemsCount = data_detail?.activeApprovals?.filter(a => a?.tApprovalDto?.isApprover).length || 0;
 
   return (
-    <div>
+    <>
         <BreadCrumb routes={routes} />
         <CardContainerNoBorder
           header="PAYMENT GUARANTEE PARTNER DETAIL"
@@ -229,7 +229,7 @@ const ListDetailPaymentWarrantyPartner = () => {
         }}
         showApproval={!loading_detail && data_detail?.isApprover && data_detail?.activeApprovals?.length > 0}
       />
-    </div>
+    </>
   );
 };
 

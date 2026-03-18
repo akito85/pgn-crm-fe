@@ -441,7 +441,7 @@ const ViewLiborRate = () => {
   const { renderModal } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer header={
@@ -496,7 +496,7 @@ const ViewLiborRate = () => {
         />
       </Spin>
       {renderModal()}
-    </div>
+    </>
   );
 };
 

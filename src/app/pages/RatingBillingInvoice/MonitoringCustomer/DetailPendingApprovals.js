@@ -179,7 +179,7 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -265,7 +265,7 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
           </div>
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -271,16 +271,16 @@ const NotificationSettings = () => {
 
   if (isLoading && !localSettings.displayType) {
     return (
-      <div>
+      <>
         <div className="flex items-center justify-center h-64">
           <Spin size="large" tip="Loading settings..." />
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div>
+    <>
       <div className={transitionClass}>
         {/* General Settings */}
         <NxPanel
@@ -507,7 +507,7 @@ const NotificationSettings = () => {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

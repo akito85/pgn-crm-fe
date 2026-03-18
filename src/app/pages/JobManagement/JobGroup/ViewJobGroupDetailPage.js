@@ -58,12 +58,12 @@ const ViewJobGroupDetailPage = () => {
 
   if (isLoading || !group) {
     return (
-      <div>
+      <>
         <BreadCrumb routes={breadcrumbRoutes} />
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
           <Spin size="large" />
         </div>
-      </div>
+      </>
     );
   }
 
@@ -71,7 +71,7 @@ const ViewJobGroupDetailPage = () => {
   const childColumns = getJobGroupChildTableColumns();
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={breadcrumbRoutes} />
 
       <NxCardContainer header="JOB GROUP DETAIL">
@@ -162,7 +162,7 @@ const ViewJobGroupDetailPage = () => {
         </ButtonComponent>
       </footer>
 
-    </div>
+    </>
   );
 };
 

@@ -40,7 +40,7 @@ const DetailActivityAction = () => {
     },
   ];
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"Detail Activity Action"}>
@@ -72,7 +72,7 @@ const DetailActivityAction = () => {
           Back
         </ButtonComponent>
       </div>
-    </div>
+    </>
   );
 };
 

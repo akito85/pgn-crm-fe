@@ -455,9 +455,9 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   }
 
   return (
-    <div>
+    <>
       {content}
-    </div>
+    </>
   );
 };
 

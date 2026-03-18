@@ -266,7 +266,7 @@ const CreateJobPage = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={breadcrumbRoutes} />
       <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 
@@ -554,7 +554,7 @@ const CreateJobPage = () => {
         </footer>
 
       </Form>
-    </div>
+    </>
   );
 };
 

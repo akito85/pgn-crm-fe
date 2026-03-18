@@ -212,7 +212,7 @@ const RelationshipDetails = ({ accountType = "standard" }) => {
   }, [idAccount, idRelationship]);
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -297,7 +297,7 @@ const RelationshipDetails = ({ accountType = "standard" }) => {
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }
       />
-    </div>
+    </>
   );
 };
 

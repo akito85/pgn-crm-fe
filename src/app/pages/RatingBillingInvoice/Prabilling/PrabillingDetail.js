@@ -399,7 +399,7 @@ const PrabillingDetail = () => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading_detail_prabilling}>
 
@@ -509,7 +509,7 @@ const PrabillingDetail = () => {
         </div>
 
       </Spin>
-    </div>
+    </>
   );
 };
 

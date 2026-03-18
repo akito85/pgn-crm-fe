@@ -185,7 +185,7 @@ const PromoDiscountDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -267,7 +267,7 @@ const PromoDiscountDetail = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

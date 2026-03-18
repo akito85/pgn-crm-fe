@@ -476,7 +476,7 @@ const DetailMonitoringUsage = () => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSave}>
@@ -689,7 +689,7 @@ const DetailMonitoringUsage = () => {
           />
         </ModalConfirm>
       </Spin>
-    </div>
+    </>
   );
 };
 

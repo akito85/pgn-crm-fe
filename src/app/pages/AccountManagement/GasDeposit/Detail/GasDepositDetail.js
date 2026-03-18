@@ -262,7 +262,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [idGd, draftExist])
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -366,7 +366,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }
       />
-    </div>
+    </>
   );
 };
 

@@ -581,7 +581,7 @@ const ViewPartner = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <CardContainer
         header={
@@ -638,7 +638,7 @@ const ViewPartner = () => {
         onFinish={handleSubmitModalInactivate}
       />
       {renderModal()}
-    </div>
+    </>
   );
 };
 

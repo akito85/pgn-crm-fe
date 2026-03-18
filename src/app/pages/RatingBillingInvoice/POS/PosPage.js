@@ -678,7 +678,7 @@ const PosPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -795,7 +795,7 @@ const PosPage = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

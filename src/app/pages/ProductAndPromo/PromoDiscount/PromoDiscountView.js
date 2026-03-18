@@ -235,7 +235,7 @@ const PromoDiscountView = () => {
   };
   // console.log(itemsActionView(), "item");
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -309,7 +309,7 @@ const PromoDiscountView = () => {
           </div>
         </ModalError>
       ) : null}
-    </div>
+    </>
   );
 };
 

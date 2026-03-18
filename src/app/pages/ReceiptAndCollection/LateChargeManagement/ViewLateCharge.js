@@ -215,7 +215,7 @@ const ViewLateCharge = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
@@ -249,7 +249,7 @@ const ViewLateCharge = () => {
           />
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

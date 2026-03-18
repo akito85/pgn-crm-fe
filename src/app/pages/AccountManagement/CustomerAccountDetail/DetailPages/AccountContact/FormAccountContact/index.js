@@ -686,7 +686,7 @@ const FormAccountAddress = ({ type }) => {
     dispatch(resetDataDetail());
   };
   return (
-    <div>
+    <>
       <>
         <Spin spinning={loading}>
           <BreadCrumbAdvanced routes={routes(id)}/>
@@ -1117,7 +1117,7 @@ const FormAccountAddress = ({ type }) => {
           </ModalSuccess>
         ) : null}
       </>
-    </div>
+    </>
   );
 };
 

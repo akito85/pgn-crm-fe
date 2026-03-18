@@ -207,7 +207,7 @@ const DelegationForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loadings}>
         <BreadCrumb routes={routes} />
         <Form
@@ -374,7 +374,7 @@ const DelegationForm = ({ type }) => {
           apiPosition={position_Delegation}
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

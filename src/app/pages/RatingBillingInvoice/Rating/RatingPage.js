@@ -290,7 +290,7 @@ const RatingPage = () => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -376,7 +376,7 @@ const RatingPage = () => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

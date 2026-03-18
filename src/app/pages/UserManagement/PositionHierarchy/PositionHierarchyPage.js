@@ -181,7 +181,7 @@ const PositionHierarchyPage = () => {
     const renderContentModal = (type) => {
         if (type === 'activation') {
             return (
-                <div>
+                <>
                     <div className="w-full modalTerminate">
                         <Alert
                             icon={
@@ -240,11 +240,11 @@ const PositionHierarchyPage = () => {
                             </Form.Item>
                         </div>
                     </Form>
-                </div>
+                </>
             );
         } else {
             return (
-                <div>
+                <>
                     <Form
                         form={form}
                         layout="vertical"
@@ -275,7 +275,7 @@ const PositionHierarchyPage = () => {
                             </Form.Item>
                         </div>
                     </Form>
-                </div>
+                </>
             );
 
         }
@@ -524,7 +524,7 @@ const PositionHierarchyPage = () => {
     ];
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <Toolbar items={itemActions} />
@@ -558,7 +558,7 @@ const PositionHierarchyPage = () => {
                 {/* modal try again hooks */}
                 {renderModal()}
             </Spin>
-        </div>
+        </>
     );
 }
 

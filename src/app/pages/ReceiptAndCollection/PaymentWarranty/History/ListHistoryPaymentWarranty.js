@@ -78,7 +78,7 @@ const ListHistoryPaymentWarranty = () => {
     };
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <BaseContainer header="PAYMENT WARRANTY HISTORY LIST">
@@ -101,7 +101,7 @@ const ListHistoryPaymentWarranty = () => {
                     />
                 </BaseContainer>
             </Spin>
-        </div>
+        </>
     );
 };
 

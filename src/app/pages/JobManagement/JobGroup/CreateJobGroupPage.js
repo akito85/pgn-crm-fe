@@ -81,7 +81,7 @@ const CreateJobGroupPage = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={breadcrumbRoutes} />
       <Form
         form={form}
@@ -185,7 +185,7 @@ const CreateJobGroupPage = () => {
         </footer>
 
       </Form>
-    </div>
+    </>
   );
 };
 

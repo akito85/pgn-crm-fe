@@ -177,7 +177,7 @@ const ViewTransferToReceipt = () => {
   );
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer header={
@@ -206,7 +206,7 @@ const ViewTransferToReceipt = () => {
           />
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -584,7 +584,7 @@ const PositionHierarchyForm = (props) => {
 
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
     return (
-        <div>
+        <>
             <BreadCrumb routes={breadCrumbRoutes} />
             <Spin spinning={loading}>
                 {type === "update" &&
@@ -791,7 +791,7 @@ const PositionHierarchyForm = (props) => {
 
             {/* modal try again */}
             {renderModal()}
-        </div>
+        </>
     );
 }
 

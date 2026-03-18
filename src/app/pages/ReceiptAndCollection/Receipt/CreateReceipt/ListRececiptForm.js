@@ -669,7 +669,7 @@ const ListRececiptForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       {/* Step Indicator with FormStepper */}
       <div className="mb-3">
@@ -885,7 +885,7 @@ const ListRececiptForm = ({ type }) => {
         </div>
       </ModalConfirm>
       {/* </Spin> */}
-    </div>
+    </>
   );
 };
 

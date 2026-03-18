@@ -103,7 +103,7 @@ const MonitoringSession = () => {
     setSort(dataSort);
   };
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BaseContainer header={"MONITORING SESSION"}>
           <TablePagination
@@ -118,7 +118,7 @@ const MonitoringSession = () => {
           />
         </BaseContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

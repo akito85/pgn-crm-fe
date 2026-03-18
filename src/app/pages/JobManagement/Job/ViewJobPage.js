@@ -46,17 +46,17 @@ const ViewJobPage = () => {
 
   if (isLoading || !job) {
     return (
-      <div>
+      <>
         <BreadCrumb routes={breadcrumbRoutes} />
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
           <Spin size="large" />
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={breadcrumbRoutes} />
 
       <NxCardContainer header="JOB DETAIL">
@@ -246,7 +246,7 @@ const ViewJobPage = () => {
         </ButtonComponent>
       </footer>
 
-    </div>
+    </>
   );
 };
 

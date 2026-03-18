@@ -715,7 +715,7 @@ const GenerateInvoicePage = () => {
   };
 
   return (
-    <div>
+    <>
       <Form layout="vertical" form={form}>
         <CardContainer header="GENERATE INFORMATION">
           <div className="grid grid-cols-3 gap-3">
@@ -841,7 +841,7 @@ const GenerateInvoicePage = () => {
           </Button>
         </div>
       </Form>
-    </div>
+    </>
   );
 };
 

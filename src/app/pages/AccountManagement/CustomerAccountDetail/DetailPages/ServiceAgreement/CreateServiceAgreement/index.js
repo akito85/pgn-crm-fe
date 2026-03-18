@@ -2113,7 +2113,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes(stateSave)} />
@@ -2402,7 +2402,7 @@ const CreateServiceAgreement = ({ saType }) => {
           </p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

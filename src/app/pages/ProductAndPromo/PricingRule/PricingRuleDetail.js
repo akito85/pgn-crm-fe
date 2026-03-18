@@ -425,7 +425,7 @@ const PricingRuleDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="flex flex-col w-full gap-4">
@@ -523,7 +523,7 @@ const PricingRuleDetail = () => {
           message={message}
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

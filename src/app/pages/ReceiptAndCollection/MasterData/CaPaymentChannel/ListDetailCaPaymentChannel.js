@@ -122,7 +122,7 @@ const ListDetailCaPaymentChannel = () => {
     };
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <Tabs
                 activeKey={segmentedPage}
@@ -180,7 +180,7 @@ const ListDetailCaPaymentChannel = () => {
                 }}
                 showApproval={isShowButton === true}
             />
-        </div>
+        </>
     );
 };
 

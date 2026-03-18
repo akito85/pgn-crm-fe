@@ -88,7 +88,7 @@ const ProfilePage = () => {
         }
     }
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <ButtonComponent onClick={() => navigate(-1)} border={false} icon={<LeftOutlined
                     style={{
@@ -104,7 +104,7 @@ const ProfilePage = () => {
                     </BaseContainer>
                 </div>
             </Spin>
-        </div>
+        </>
     );
 }
 

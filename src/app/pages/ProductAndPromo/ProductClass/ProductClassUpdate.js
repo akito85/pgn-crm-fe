@@ -138,7 +138,7 @@ const ProductClassUpdate = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -277,7 +277,7 @@ const ProductClassUpdate = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

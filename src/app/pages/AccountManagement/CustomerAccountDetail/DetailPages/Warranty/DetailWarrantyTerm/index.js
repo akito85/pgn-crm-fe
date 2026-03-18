@@ -165,7 +165,7 @@ const DetailWarrantyTerm = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced
           routes={breadcrumbRoutes({ idAccount, idCustomer, type, idSA })}
@@ -191,7 +191,7 @@ const DetailWarrantyTerm = () => {
           </ButtonComponent>
         </NxBaseContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

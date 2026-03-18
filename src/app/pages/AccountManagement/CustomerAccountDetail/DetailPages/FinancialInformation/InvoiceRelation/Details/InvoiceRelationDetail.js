@@ -203,7 +203,7 @@ const InvoiceRelationDetail = ({
   }, [idIr, draftExist])
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -280,7 +280,7 @@ const InvoiceRelationDetail = ({
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
         loading={loading_approveRejectIr}
       />
-    </div>
+    </>
   );
 };
 

@@ -398,7 +398,7 @@ const ServicePointAssetAssign = ({ }) => {
 
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(id, idAccount)} />
 
@@ -703,7 +703,7 @@ const ServicePointAssetAssign = ({ }) => {
           </div>
         </ModalConfirm>
       </Spin>
-    </div>
+    </>
   );
 };
 

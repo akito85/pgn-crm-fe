@@ -467,7 +467,7 @@ const DetailGasSource = () => {
 
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -605,7 +605,7 @@ const DetailGasSource = () => {
       </ModalCustom>
       {/* End Modal History Log */}
 
-    </div>
+    </>
   );
 };
 

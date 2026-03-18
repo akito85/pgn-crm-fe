@@ -189,7 +189,7 @@ const DetailTaxExemption = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -401,7 +401,7 @@ const DetailTaxExemption = () => {
           named={taxExemption.proformaInvoiceNumber}
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

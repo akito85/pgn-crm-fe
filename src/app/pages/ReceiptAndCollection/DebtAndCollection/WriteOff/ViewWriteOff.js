@@ -144,7 +144,7 @@ const ViewWriteOff = () => {
   ]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer header={
@@ -169,7 +169,7 @@ const ViewWriteOff = () => {
           />
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

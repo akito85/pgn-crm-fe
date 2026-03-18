@@ -713,7 +713,7 @@ const ViewWarranty = () => {
   }, [dataSource]);
 
   return (
-    <div>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
       <CardContainer header={
@@ -847,7 +847,7 @@ const ViewWarranty = () => {
         handleCancel={() => setModalApproval(false)}
         handleListRefresh={handleRefresh}
       />
-    </div>
+    </>
   );
 };
 

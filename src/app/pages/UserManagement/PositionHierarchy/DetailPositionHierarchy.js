@@ -254,7 +254,7 @@ const DetailPositionHierarchy = () => {
   console.log(transformDataToTree(dataDiagram));
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"POSITION HIERARCHY INFORMATION"}>
@@ -401,7 +401,7 @@ const DetailPositionHierarchy = () => {
         {/* render modal try again */}
         {renderModal()}
       </Spin>
-    </div>
+    </>
   );
 };
 

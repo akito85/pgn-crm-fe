@@ -326,7 +326,7 @@ const ProductDetail = () => {
     setBodyError({});
   };
   return (
-    <div>
+    <>
       <Spin
         spinning={loadingProduct}
         className={"w-full top-20"}
@@ -564,7 +564,7 @@ const ProductDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

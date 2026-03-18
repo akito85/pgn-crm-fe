@@ -305,7 +305,7 @@ const ListDetailTOP = () => {
   const isShowButton = data_detail?.approvalInformation?.isApprover;
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div className="w-full gap-5">
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -407,7 +407,7 @@ const ListDetailTOP = () => {
           </Form.Item>
         </Form>
       </ModalApproveOrReject> */}
-    </div>
+    </>
   );
 };
 

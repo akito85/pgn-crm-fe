@@ -386,7 +386,7 @@ const ViewTaxExemption = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <>
         <BreadCrumb routes={routes} />
 
@@ -453,7 +453,7 @@ const ViewTaxExemption = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
       </>
-    </div>
+    </>
   );
 };
 

@@ -210,7 +210,7 @@ const ViewActivityAction = () => {
   
 
   return (
-    <div>
+    <>
       <Spin
         spinning={loading || false}
         className={"w-full top-20"}
@@ -276,7 +276,7 @@ const ViewActivityAction = () => {
           </p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

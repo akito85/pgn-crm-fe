@@ -346,7 +346,7 @@ const ListFormTransferToCustomer = (props) => {
     });
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loadingForm}>
                 <RadioTabs
@@ -514,7 +514,7 @@ const ListFormTransferToCustomer = (props) => {
                 onClose={() => setShowSearchWarrantyModal(false)}
                 onConfirm={handleConfirmWarranty}
             />
-        </div>
+        </>
     );
 };
 

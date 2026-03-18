@@ -487,7 +487,7 @@ const ViewBank = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
@@ -550,7 +550,7 @@ const ViewBank = () => {
 
         {renderModal()}
       </Spin>
-    </div>
+    </>
   );
 };
 

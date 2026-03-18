@@ -520,7 +520,7 @@ const CreateGasSource = ({ type }) => {
     // setBodyError({});
   };
   return (
-    <div>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -674,7 +674,7 @@ const CreateGasSource = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

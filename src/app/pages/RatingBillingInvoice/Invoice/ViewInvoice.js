@@ -542,7 +542,7 @@ const ViewInvoice = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -648,7 +648,7 @@ const ViewInvoice = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

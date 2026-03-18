@@ -533,7 +533,7 @@ const ViewReconcileReceiptHistories = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -566,7 +566,7 @@ const ViewReconcileReceiptHistories = () => {
         </CardContainer>
       </Spin>
       {renderModal()}
-    </div>
+    </>
   );
 };
 

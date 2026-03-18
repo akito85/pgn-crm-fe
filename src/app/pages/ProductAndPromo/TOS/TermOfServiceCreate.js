@@ -395,7 +395,7 @@ const TermOfServiceCreate = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -611,7 +611,7 @@ const TermOfServiceCreate = () => {
           </ModalError>
         ) : null}
       </Spin>
-    </div>
+    </>
   );
 };
 

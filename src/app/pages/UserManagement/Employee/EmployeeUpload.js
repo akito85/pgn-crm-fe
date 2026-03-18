@@ -226,7 +226,7 @@ const EmployeeUpload = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"w-full flex justify-end"}>
@@ -378,7 +378,7 @@ const EmployeeUpload = () => {
           </div>
         </ModalConfirm>
       </Spin>
-    </div>
+    </>
   );
 };
 

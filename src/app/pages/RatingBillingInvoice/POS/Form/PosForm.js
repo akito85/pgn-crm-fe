@@ -1468,7 +1468,7 @@ const PosForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading || loadingForm || loadingAccount}>
         <BreadCrumb routes={routes} />
 
@@ -1673,7 +1673,7 @@ const PosForm = ({ type }) => {
           </div>
         </ModalConfirm>
       </Spin>
-    </div>
+    </>
   );
 };
 

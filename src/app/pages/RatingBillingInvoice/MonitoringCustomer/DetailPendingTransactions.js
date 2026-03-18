@@ -199,7 +199,7 @@ const DetailPendingTransactions = ({
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -320,7 +320,7 @@ const DetailPendingTransactions = ({
           </div>
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

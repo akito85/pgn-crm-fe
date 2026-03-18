@@ -40,7 +40,7 @@ const DetailActivityType = () => {
     },
   ];
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"Detail Activity Type"}>
@@ -69,7 +69,7 @@ const DetailActivityType = () => {
           Back
         </ButtonComponent>
       </div>
-    </div>
+    </>
   );
 };
 

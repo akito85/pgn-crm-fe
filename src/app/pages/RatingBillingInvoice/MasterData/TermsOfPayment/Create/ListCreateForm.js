@@ -812,7 +812,7 @@ const ListCreateForm = ({ type }) => {
   }, [form, list]);
   
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={false}>
         <RadioTabs
@@ -1000,7 +1000,7 @@ const ListCreateForm = ({ type }) => {
           datatype={data_type}
         />
       </ModalCustom>
-    </div>
+    </>
   );
 };
 

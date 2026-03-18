@@ -592,7 +592,7 @@ const Employee = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -707,7 +707,7 @@ const Employee = () => {
       </ModalCustom>
 
       {renderModal()}
-    </div>
+    </>
   );
 };
 

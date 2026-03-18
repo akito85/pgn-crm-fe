@@ -270,7 +270,7 @@ const FormAssets = ({ type }) => {
 
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
     return (
-        <div>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -693,7 +693,7 @@ const FormAssets = ({ type }) => {
 
             {/* modal retry */}
             {renderModal()};
-        </div>
+        </>
     );
 }
 

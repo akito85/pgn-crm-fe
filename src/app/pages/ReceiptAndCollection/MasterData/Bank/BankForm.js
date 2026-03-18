@@ -493,7 +493,7 @@ const BankForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <div className="w-full mt-4">
@@ -630,7 +630,7 @@ const BankForm = ({ type }) => {
           </div>
         </ModalConfirm>
       </div>
-    </div>
+    </>
   );
 };
 

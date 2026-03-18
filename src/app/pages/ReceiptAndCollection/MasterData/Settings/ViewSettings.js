@@ -692,7 +692,7 @@ const ViewSettings = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {/* <Toolbar items={itemActions} /> */}
@@ -761,7 +761,7 @@ const ViewSettings = () => {
       </Spin>
       {/* modal try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

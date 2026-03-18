@@ -801,7 +801,7 @@ const PricingRuleView = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -924,7 +924,7 @@ const PricingRuleView = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

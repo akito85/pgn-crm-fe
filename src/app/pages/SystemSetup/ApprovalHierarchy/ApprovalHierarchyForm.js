@@ -544,7 +544,7 @@ const ApprovalHierarchyForm = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <PageHeader breadcrumb={<BreadCrumb routes={routes} />} />
       <Spin spinning={loading || isLoading}>
         <div className="flex w-full justify-end gap-5">
@@ -854,7 +854,7 @@ const ApprovalHierarchyForm = (props) => {
 
       {/* render modal */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

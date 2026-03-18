@@ -282,7 +282,7 @@ const ManagementDeliveryInvoice = () => {
   );
 
   return (
-    <div>
+    <>
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -341,7 +341,7 @@ const ManagementDeliveryInvoice = () => {
           messageData={selectedInvoice}
         />
       </CardContainer>
-    </div>
+    </>
   );
 };
 

@@ -234,13 +234,13 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
 const GasDeposit = ({ moduleType, id = 0, idCustomer = 0 }) => {
   if (moduleType === "sa")
     return (
-      <div>
+      <>
         <GasDepositModule
           moduleType={moduleType}
           id={id}
           idCustomer={idCustomer}
         />
-      </div>
+      </>
     );
   else if (moduleType === "ua")
     return (

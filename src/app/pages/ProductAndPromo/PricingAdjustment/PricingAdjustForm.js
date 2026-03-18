@@ -1006,7 +1006,7 @@ const PricingAdjustForm = (props) => {
     }
   };
   return (
-    <div>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"} tip={"Loading..."}>
         <BreadCrumb routes={routes(defineRoute())} />
         <Form
@@ -1327,7 +1327,7 @@ const PricingAdjustForm = (props) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

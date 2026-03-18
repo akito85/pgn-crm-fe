@@ -76,7 +76,7 @@ const DailyRoutes = () => {
   ];
 
   return (
-    <div>
+    <>
       {/* <Spin> */}
       <BreadCrumb routes={routes} />
       <div className="pt-[20px]">
@@ -127,7 +127,7 @@ const DailyRoutes = () => {
         )}
       </div>
       {/* </Spin> */}
-    </div>
+    </>
   );
 };
 
