@@ -118,7 +118,7 @@ const LayoutMenu = ({ children }) => {
     location.pathname.includes(path),
   );
 
-  const { user, remember, data_switch, loading: authLoading } = useSelector((state) => state.auth);
+  const { user, remember, data_switch } = useSelector((state) => state.auth);
   const { data: data_profile } = useSelector((state) => state.profile);
   const {
     bodyError,
@@ -193,10 +193,7 @@ const LayoutMenu = ({ children }) => {
 
   // use effect check grant access
   useEffect(() => {
-    // Skip permission check for dashboard route as it should be accessible by all authenticated users
-    if (location?.pathname !== '/') {
-      dispatch(checkGrantedAccess(location?.pathname));
-    }
+    dispatch(checkGrantedAccess(location?.pathname));
     dispatch(getProfile());
   }, [dispatch, location, data_switch]);
 
@@ -621,10 +618,12 @@ const LayoutMenu = ({ children }) => {
                 </div>
               </ModalError>
             ) : null}
-            {/* Show children while checking permissions or if granted access, only show unauthorized if explicitly denied */}
-            {data_grant_access?.response?.data?.data?.isGranted === false && 
-             data_grant_access?.response?.data && // Ensure the API response has been received
-             !isPublicPath ? (
+            {location.pathname === '/' ? (
+              // Always render dashboard regardless of permission check state
+              <div className="mt-[15px]">{children}</div>
+            ) : 
+            (data_grant_access?.response?.data?.data?.isGranted === false &&
+              !isPublicPath) ? (
               <NotFound type={"unauthorized"} />
             ) : (
               <div className="mt-[15px]">{children}</div>

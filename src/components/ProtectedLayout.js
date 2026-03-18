@@ -10,12 +10,12 @@ import LayoutMenu from './SidebarMenu/LayoutMenu';
 const ProtectedLayout = ({ children }) => {
   const location = useLocation();
   const noLayoutRoutes = ['/switch-entity', '/switch-position'];
-  
+
   // If current route is in noLayoutRoutes, render children without LayoutMenu
   if (noLayoutRoutes.includes(location.pathname)) {
     return <>{children}</>;
   }
-  
+
   return <LayoutMenu>{children}</LayoutMenu>;
 };
 
