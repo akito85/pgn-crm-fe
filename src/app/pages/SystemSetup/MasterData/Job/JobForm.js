@@ -137,130 +137,128 @@ const JobForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
-      <Spin spinning={loading || isLoading}>
-        <BreadCrumb routes={routes} />
-        <Form
-          form={form}
-          layout={"vertical"}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+    <Spin spinning={loading || isLoading}>
+      <BreadCrumb routes={routes} />
+      <Form
+        form={form}
+        layout={"vertical"}
+        onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+      >
+        <BaseContainer
+          header={type === "update" ? "UPDATE JOB" : "CREATE JOB"}
         >
-          <BaseContainer
-            header={type === "update" ? "UPDATE JOB" : "CREATE JOB"}
-          >
-            <div className="flex flex-col w-full">
-              <Form.Item
-                className={"w-1/2"}
-                name={"jobName"}
-                label={"Job Name"}
-                rules={formMessageRequired("Job Name")}
-              >
-                <InputComponent disabled={type === "update"} onInput={(e) =>
-                  (e.target.value = e.target.value.trimStart())
-                } />
-              </Form.Item>
-              <Form.Item
-                className={"w-full"}
-                name={"description"}
-                label={"Description"}
-              >
-                <InputComponent
-                  type="textarea"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+          <div className="flex flex-col w-full">
+            <Form.Item
+              className={"w-1/2"}
+              name={"jobName"}
+              label={"Job Name"}
+              rules={formMessageRequired("Job Name")}
+            >
+              <InputComponent disabled={type === "update"} onInput={(e) =>
+                (e.target.value = e.target.value.trimStart())
+              } />
+            </Form.Item>
+            <Form.Item
+              className={"w-full"}
+              name={"description"}
+              label={"Description"}
+            >
+              <InputComponent
+                type="textarea"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </Form.Item>
+          </div>
+        </BaseContainer>
+
+        <div className={"w-full flex my-5"}>
+          <div>
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setModalBack(true)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                ></LeftOutlined>
+              }
+            >
+              Back
+            </ButtonComponent>
+          </div>
+          <div className={"w-full justify-end flex gap-2"}>
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name={
+                    type === "update" ? "IconButtonReset" : "IconButtonClear"
+                  }
+                  width={24}
                 />
-              </Form.Item>
-            </div>
-          </BaseContainer>
-
-          <div className={"w-full flex my-5"}>
-            <div>
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setModalBack(true)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  ></LeftOutlined>
-                }
-              >
-                Back
-              </ButtonComponent>
-            </div>
-            <div className={"w-full justify-end flex gap-2"}>
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? "IconButtonReset" : "IconButtonClear"
-                    }
-                    width={24}
-                  />
-                }
-                type={"submit"}
-                border={false}
-                onClick={handleClick}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent type={"submit"} htmlType={"submit"}>
-                Save
-              </ButtonComponent>
-            </div>
-          </div>
-        </Form>
-
-        <ModalCustom
-          isOpen={openModal}
-          handleCancel={handleCancel}
-          header={"CONFIRMATION"}
-          width={500}
-          type={"confirmation"}
-        >
-          <div className="w-full flex flex-col gap-4">
-            <span className="text-primary uppercase">Job Information</span>
-            <div className="flex flex-col gap-4 pl-4">
-              <DetailText label={"Job name"}>{formValue?.jobName}</DetailText>
-              <DetailText label={"Description"}>
-                {formValue?.description}
-              </DetailText>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-5">
-            <ButtonComponent onClick={handleCancel} type="default">
-              Cancel
+              }
+              type={"submit"}
+              border={false}
+              onClick={handleClick}
+            >
+              {type === "update" ? "Reset" : "Clear"}
             </ButtonComponent>
-            <ButtonComponent onClick={saveAction} type="submit">
-              Submit
+            <ButtonComponent type={"submit"} htmlType={"submit"}>
+              Save
             </ButtonComponent>
           </div>
-        </ModalCustom>
+        </div>
+      </Form>
 
-        {/* modal back */}
-        <ModalConfirm
-          isOpen={modalBack}
-          handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
-          width={400}
-        >
-          <div className="flex justify-center mt-5 gap-[20px]">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className="text-[18px] font-bold">
-              Are you sure you want to back?
-            </p>
+      <ModalCustom
+        isOpen={openModal}
+        handleCancel={handleCancel}
+        header={"CONFIRMATION"}
+        width={500}
+        type={"confirmation"}
+      >
+        <div className="w-full flex flex-col gap-4">
+          <span className="text-primary uppercase">Job Information</span>
+          <div className="flex flex-col gap-4 pl-4">
+            <DetailText label={"Job name"}>{formValue?.jobName}</DetailText>
+            <DetailText label={"Description"}>
+              {formValue?.description}
+            </DetailText>
           </div>
-        </ModalConfirm>
+        </div>
 
-        {/* render modal try again */}
-        {renderModal()}
-      </Spin>
-    </LayoutMenu>
+        <div className="flex justify-end gap-5">
+          <ButtonComponent onClick={handleCancel} type="default">
+            Cancel
+          </ButtonComponent>
+          <ButtonComponent onClick={saveAction} type="submit">
+            Submit
+          </ButtonComponent>
+        </div>
+      </ModalCustom>
+
+      {/* modal back */}
+      <ModalConfirm
+        isOpen={modalBack}
+        handleCancel={() => setModalBack(false)}
+        handleOk={() => navigate(-1)}
+        width={400}
+      >
+        <div className="flex justify-center mt-5 gap-[20px]">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className="text-[18px] font-bold">
+            Are you sure you want to back?
+          </p>
+        </div>
+      </ModalConfirm>
+
+      {/* render modal try again */}
+      {renderModal()}
+    </Spin>
   );
 };
 

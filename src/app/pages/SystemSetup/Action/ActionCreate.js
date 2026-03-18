@@ -134,7 +134,7 @@ const ActionCreate = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Form
         layout="vertical"
@@ -256,7 +256,7 @@ const ActionCreate = (props) => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

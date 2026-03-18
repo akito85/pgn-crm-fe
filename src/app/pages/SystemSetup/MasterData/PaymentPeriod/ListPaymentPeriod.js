@@ -654,7 +654,7 @@ const ListPaymentPeriod = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer
@@ -820,7 +820,7 @@ const ListPaymentPeriod = () => {
                     onFinish={handleSubmitModalOpenClose}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

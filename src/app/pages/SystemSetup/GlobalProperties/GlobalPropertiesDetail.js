@@ -175,7 +175,7 @@ const GlobalPropertiesDetail = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"global properties information"}>
@@ -252,7 +252,7 @@ const GlobalPropertiesDetail = () => {
         </div>
       </Spin>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

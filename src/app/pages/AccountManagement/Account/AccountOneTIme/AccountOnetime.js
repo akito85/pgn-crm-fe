@@ -154,64 +154,62 @@ const AccountOnetime = () => {
 
   ]
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+    <Spin spinning={loading}>
+      <BreadCrumb routes={routes} />
 
-        <Toolbar items={itemActions}/>
+      <Toolbar items={itemActions}/>
 
-        {/* <div className="w-full flex justify-end gap-[20px]">
+      {/* <div className="w-full flex justify-end gap-[20px]">
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          type="submit"
+          onClick={handleDownload}
+        >
+          Download List
+        </ButtonComponent>
+
+        <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_ONETIME}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonDownload" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
-            onClick={handleDownload}
           >
-            Download List
+            Create Account One Time
           </ButtonComponent>
+        </NavLink>
+      </div> */}
 
-          <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_ONETIME}>
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-            >
-              Create Account One Time
-            </ButtonComponent>
-          </NavLink>
-        </div> */}
-
-        <BaseContainer header={"ACCOUNT - ONE TIME LIST"}>
-          <div className="w-full">
-            <TablePagination
-              dataSource={data_accountOneTime?.result}
-              columns={[
-                ...columnsAccountOneTime(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                ),
-                ...useColumnActionPermission(
-                  ["Activate", "View", "Update"],
-                  itemActions
-                )
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onShowSizeChange={handleChange}
-              onSort={onSort}
-              totalData={data_accountOneTime?.page?.totalElements}
-              tableScrolled={{
-                x: 9000,
-                y: 500,
-              }}
-            />
-          </div>
-        </BaseContainer>
-      </Spin>
-    </LayoutMenu>
+      <BaseContainer header={"ACCOUNT - ONE TIME LIST"}>
+        <div className="w-full">
+          <TablePagination
+            dataSource={data_accountOneTime?.result}
+            columns={[
+              ...columnsAccountOneTime(
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch
+              ),
+              ...useColumnActionPermission(
+                ["Activate", "View", "Update"],
+                itemActions
+              )
+            ]}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            onShowSizeChange={handleChange}
+            onSort={onSort}
+            totalData={data_accountOneTime?.page?.totalElements}
+            tableScrolled={{
+              x: 9000,
+              y: 500,
+            }}
+          />
+        </div>
+      </BaseContainer>
+    </Spin>
   );
 };
 

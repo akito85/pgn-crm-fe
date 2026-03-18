@@ -363,231 +363,229 @@ const DetailTaxImplicationRule = () => {
 
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumbAdvanced routes={routes(taxImplicationId || data_detail_tax_implication_rule?.taxImplicationId)} />
-        <div className="flex flex-col">
+    <Spin spinning={loading}>
+      <BreadCrumbAdvanced routes={routes(taxImplicationId || data_detail_tax_implication_rule?.taxImplicationId)} />
+      <div className="flex flex-col">
 
-          {/* Tax Implication Information */}
-          <BaseContainer header={"tax implication information"}>
-            <div className="grid grid-cols-3 gap-2">
-              <DetailText label={"Tax Implication Name"}>
-                {data_detail?.name}
+        {/* Tax Implication Information */}
+        <BaseContainer header={"tax implication information"}>
+          <div className="grid grid-cols-3 gap-2">
+            <DetailText label={"Tax Implication Name"}>
+              {data_detail?.name}
+            </DetailText>
+            <DetailText label={"Category"}>
+              {data_detail?.category.name}
+            </DetailText>
+            <DetailText label={"Service Type"}>
+              {data_detail?.serviceType?.name}
+            </DetailText>
+            <div className="col-span-3">
+              <DetailText label={"Criteria"}>
+                {(data_detail?.criteria || [])?.reduce(
+                  (prev, current, index) =>
+                    prev + `${index === 0 ? current.label : ", " + current.label} `,
+                  ""
+                )}
               </DetailText>
-              <DetailText label={"Category"}>
-                {data_detail?.category.name}
+            </div>
+            <div className="col-span-3">
+              <DetailText label={"Description"}>
+                {data_detail?.description}
               </DetailText>
-              <DetailText label={"Service Type"}>
-                {data_detail?.serviceType?.name}
+            </div>
+          </div>
+        </BaseContainer>
+
+        {/* Card Information Request */}
+        {bodyApproval.isApprover && bodyApproval.approvalType ? (
+          <BaseContainer
+            header={`${(bodyApproval.approvalDetail.remarks || "").split(" ")[0]
+              } REQUEST INFORMATION`}
+          >
+            <div className="grid grid-cols-4 w-full">
+              <DetailText label={"Requested Date"}>
+                {bodyApproval.approvalDetail.requestedDate
+                  ? moment(bodyApproval.approvalDetail.requestedDate).format(
+                    dateFormatting.dateTime
+                  )
+                  : ""}
               </DetailText>
-              <div className="col-span-3">
-                <DetailText label={"Criteria"}>
-                  {(data_detail?.criteria || [])?.reduce(
-                    (prev, current, index) =>
-                      prev + `${index === 0 ? current.label : ", " + current.label} `,
-                    ""
-                  )}
-                </DetailText>
-              </div>
-              <div className="col-span-3">
-                <DetailText label={"Description"}>
-                  {data_detail?.description}
-                </DetailText>
-              </div>
+              <DetailText label={"Requested By"}>
+                {bodyApproval.approvalDetail.requestedBy}
+              </DetailText>
+              <DetailText label={"Remark"}>
+                {bodyApproval.approvalDetail.remarks}
+              </DetailText>
             </div>
           </BaseContainer>
+        ) : null}
 
-          {/* Card Information Request */}
-          {bodyApproval.isApprover && bodyApproval.approvalType ? (
-            <BaseContainer
-              header={`${(bodyApproval.approvalDetail.remarks || "").split(" ")[0]
-                } REQUEST INFORMATION`}
-            >
-              <div className="grid grid-cols-4 w-full">
-                <DetailText label={"Requested Date"}>
-                  {bodyApproval.approvalDetail.requestedDate
-                    ? moment(bodyApproval.approvalDetail.requestedDate).format(
-                      dateFormatting.dateTime
-                    )
-                    : ""}
-                </DetailText>
-                <DetailText label={"Requested By"}>
-                  {bodyApproval.approvalDetail.requestedBy}
-                </DetailText>
-                <DetailText label={"Remark"}>
-                  {bodyApproval.approvalDetail.remarks}
-                </DetailText>
-              </div>
-            </BaseContainer>
-          ) : null}
-
-          {/* Tabs */}
-          <div className="my-4">
-            <RadioTabs
-              data={listSectionInfo}
-              onChange={handleTaxImplicationRuleInfo}
-              currentPosition={typeTaxImplicationInfo}
-            />
-          </div>
-
-          {/* Content Tab */}
-          {typeTaxImplicationInfo === "Tax Implication Rule" && (
-            <LayoutDetailTaxImplicationRule
-              key={"detail"}
-              dataTaxImplicationRule={dataTaxImplicationRule}
-              dispatch={dispatch}
-              listDataAttachment={listDataAttachment}
-              setListDataAttachment={setListDataAttachment}
-              listDataDetailCondition={listDataDetailCondition}
-              setListDataDetailCondition={setListDataDetailCondition}
-              listDataDetailFormula={listDataDetailFormula}
-              setListDataDetailFormula={setListDataDetailFormula}
-              type={type}
-              dataLogInformation={dataLogInformation}
-              description={dataTaxImplicationRule?.description || ""}
-              dataOverrideRule={data_detail_tax_implication_rule}
-              transactionCodeData={transactionCodeData}
-            />
-          )}
-          {typeTaxImplicationInfo === "Draft" && (
-            <LayoutDetailTaxImplicationRule
-              key={"draft"}
-              dataTaxImplicationRule={dataTaxImplicationRule}
-              dispatch={dispatch}
-              listDataAttachment={listDataDraftAttachment}
-              setListDataAttachment={setListDataDraftAttachment}
-              listDataDetailCondition={listDataDetailCondition}
-              setListDataDetailCondition={setListDataDetailCondition}
-              listDataDetailFormula={listDataDetailFormula}
-              setListDataDetailFormula={setListDataDetailFormula}
-              type={type}
-              dataLogInformation={dataLogInformation}
-              description={dataDraftTaxImplicationRule?.description || ""}
-              dataOverrideRule={data_detail_draft_tax_implication_rule}
-              transactionCodeData={transactionCodeData}
-            />
-          )}
-          {typeTaxImplicationInfo === "Attachment" && (
-            <AttachmentDetail
-              type={type}
-              listDataAttachment={listDataAttachment}
-              updateData={setListDataAttachment}
-              dispatch={dispatch}
-            />
-          )}
-
-          <div
-            className={`flex w-full${showButtonApproval ? " justify-between" : ""
-              } align-middle my-3`}
-          >
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            {showButtonApproval ? (
-              <div className="flex align-middle gap-3">
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => handleModalConfirmation("Reject")}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => handleModalConfirmation("Approve")}
-                >
-                  Approve
-                </ButtonComponent>
-              </div>
-            ) : null}
-          </div>
+        {/* Tabs */}
+        <div className="my-4">
+          <RadioTabs
+            data={listSectionInfo}
+            onChange={handleTaxImplicationRuleInfo}
+            currentPosition={typeTaxImplicationInfo}
+          />
         </div>
 
-        {/* Modal Approve/Reject*/}
-        {/* <ModalApproveOrReject
-          isOpen={modalConfirm}
-          header={`${approveOrReject} information`}
-          message={`Are you sure you want to ${approveOrReject} Tax Implication Rule ${data_detail?.name} - ${data_detail_tax_implication_rule?.documentNumber}?`}
-          width={1000}
-          handleCancel={handleCloseModalApproveReject}
-          footer={
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                type={"default"}
-                onClick={handleCloseModalApproveReject}
-              >
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                form={"formApproveRejcet"}
-                type={"submit"}
-                htmlType={"submit"}
-                border={false}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
+        {/* Content Tab */}
+        {typeTaxImplicationInfo === "Tax Implication Rule" && (
+          <LayoutDetailTaxImplicationRule
+            key={"detail"}
+            dataTaxImplicationRule={dataTaxImplicationRule}
+            dispatch={dispatch}
+            listDataAttachment={listDataAttachment}
+            setListDataAttachment={setListDataAttachment}
+            listDataDetailCondition={listDataDetailCondition}
+            setListDataDetailCondition={setListDataDetailCondition}
+            listDataDetailFormula={listDataDetailFormula}
+            setListDataDetailFormula={setListDataDetailFormula}
+            type={type}
+            dataLogInformation={dataLogInformation}
+            description={dataTaxImplicationRule?.description || ""}
+            dataOverrideRule={data_detail_tax_implication_rule}
+            transactionCodeData={transactionCodeData}
+          />
+        )}
+        {typeTaxImplicationInfo === "Draft" && (
+          <LayoutDetailTaxImplicationRule
+            key={"draft"}
+            dataTaxImplicationRule={dataTaxImplicationRule}
+            dispatch={dispatch}
+            listDataAttachment={listDataDraftAttachment}
+            setListDataAttachment={setListDataDraftAttachment}
+            listDataDetailCondition={listDataDetailCondition}
+            setListDataDetailCondition={setListDataDetailCondition}
+            listDataDetailFormula={listDataDetailFormula}
+            setListDataDetailFormula={setListDataDetailFormula}
+            type={type}
+            dataLogInformation={dataLogInformation}
+            description={dataDraftTaxImplicationRule?.description || ""}
+            dataOverrideRule={data_detail_draft_tax_implication_rule}
+            transactionCodeData={transactionCodeData}
+          />
+        )}
+        {typeTaxImplicationInfo === "Attachment" && (
+          <AttachmentDetail
+            type={type}
+            listDataAttachment={listDataAttachment}
+            updateData={setListDataAttachment}
+            dispatch={dispatch}
+          />
+        )}
+
+        <div
+          className={`flex w-full${showButtonApproval ? " justify-between" : ""
+            } align-middle my-3`}
         >
-          <Form form={form} name="formApproveRejcet" layout={"vertical"} onFinish={handleConfirm}>
-            <Form.Item
-              label={"Remark"}
-              name={"remark"}
-              rules={[{ message: requiredMessage("Remark"), required: true }]}
-            >
-              <InputComponent
-                rows={1}
-                placeholder="Type your remark"
-                type="textarea"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
+          <ButtonComponent
+            type={"submit"}
+            onClick={() => navigate(-1)}
+            icon={
+              <LeftOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 24,
+                  justifyItems: "center",
+                }}
               />
-            </Form.Item>
-          </Form>
-        </ModalApproveOrReject> */}
-
-        <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCloseModalApproveReject}
-          onFinish={handleConfirm}
-          header={approveOrReject}
-          menu={"Tax Implciation Rule"}
-          named={`${data_detail?.name} - ${data_detail_tax_implication_rule?.documentNumber}`}
-          // customMessage={`Are you sure you want to ${approveOrReject} Late Charge Rule with document number ${data_detail_tax_implication_rule?.documentNumber}?`}
-          approveOrReject={approveOrReject}
-        />
-
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+            }
+          >
+            Back
+          </ButtonComponent>
+          {showButtonApproval ? (
+            <div className="flex align-middle gap-3">
+              <ButtonComponent
+                type="reject"
+                onClick={() => handleModalConfirmation("Reject")}
+              >
+                Reject
+              </ButtonComponent>
+              <ButtonComponent
+                type="approve"
+                onClick={() => handleModalConfirmation("Approve")}
+              >
+                Approve
+              </ButtonComponent>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "approved" : "rejected"
-              } ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
-          </div>
-        </ModalError>
+          ) : null}
+        </div>
+      </div>
 
-      </Spin>
-    </LayoutMenu>
+      {/* Modal Approve/Reject*/}
+      {/* <ModalApproveOrReject
+        isOpen={modalConfirm}
+        header={`${approveOrReject} information`}
+        message={`Are you sure you want to ${approveOrReject} Tax Implication Rule ${data_detail?.name} - ${data_detail_tax_implication_rule?.documentNumber}?`}
+        width={1000}
+        handleCancel={handleCloseModalApproveReject}
+        footer={
+          <div className={"w-full flex justify-end gap-5"}>
+            <ButtonComponent
+              type={"default"}
+              onClick={handleCloseModalApproveReject}
+            >
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              form={"formApproveRejcet"}
+              type={"submit"}
+              htmlType={"submit"}
+              border={false}
+            >
+              Confirm
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <Form form={form} name="formApproveRejcet" layout={"vertical"} onFinish={handleConfirm}>
+          <Form.Item
+            label={"Remark"}
+            name={"remark"}
+            rules={[{ message: requiredMessage("Remark"), required: true }]}
+          >
+            <InputComponent
+              rows={1}
+              placeholder="Type your remark"
+              type="textarea"
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+            />
+          </Form.Item>
+        </Form>
+      </ModalApproveOrReject> */}
+
+      <ModalApproveOrReject
+        isOpen={modalConfirm}
+        handleCloseModal={handleCloseModalApproveReject}
+        onFinish={handleConfirm}
+        header={approveOrReject}
+        menu={"Tax Implciation Rule"}
+        named={`${data_detail?.name} - ${data_detail_tax_implication_rule?.documentNumber}`}
+        // customMessage={`Are you sure you want to ${approveOrReject} Late Charge Rule with document number ${data_detail_tax_implication_rule?.documentNumber}?`}
+        approveOrReject={approveOrReject}
+      />
+
+      {/** Modal Retry */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
+          </div>
+          <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "approved" : "rejected"
+            } ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
+
+    </Spin>
   )
 }
 

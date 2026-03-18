@@ -674,63 +674,61 @@ const ListPaymentCycle = () => {
     ];
 
     return (
-        <LayoutMenu>
-            <Spin spinning={loading}>
-                <BreadCrumb routes={routes} />
-                <CardContainer
-                    header={
-                        <div className="flex -my-4 justify-between items-center">
-                            <p className="mt-[15px] font-bold">PAYMENT CYCLE LIST</p>
-                            <div className="flex gap-2">
-                                <Toolbar items={itemActions} />
-                            </div>
+        <Spin spinning={loading}>
+            <BreadCrumb routes={routes} />
+            <CardContainer
+                header={
+                    <div className="flex -my-4 justify-between items-center">
+                        <p className="mt-[15px] font-bold">PAYMENT CYCLE LIST</p>
+                        <div className="flex gap-2">
+                            <Toolbar items={itemActions} />
                         </div>
-                    }
-                >
-                    <TableRBI
-                        dataSource={data?.result}
-                        pageSize={pageSize}
-                        showExport={false}
-                        columns={[
-                            ...columns,
-                            ...useColumnActionPermission(
-                                ["view", "update", "history", "activate"],
-                                itemActions
-                            ),
-                        ]}
-                        current={page}
-                        onChange={handleChange}
-                        onSizeChanger={handleChange}
-                        totalData={data?.page?.totalElements}
-                        onSort={onSort}
-                        tableScrolled={{
-                            x: "max-content",
-                            y: 525,
-                        }}
-                        onAdvanceSearch={handleAdvanceSearch}
-                    />
-                </CardContainer>
-                <ModalInactivateWithHierarchy
-                    selector={"cycle"}
-                    dispatch={dispatch}
-                    getAPIOption={getAllApprovalList}
-                    getAPIDetail={getListApprovalById}
-                    alertMessage={`Are you sure you want to inactivate this Payment Cycle?`}
-                    openModalInactivate={modalActiveInactive}
-                    handleCloseModalInactivate={handleCancelModalInactivate}
-                    onFinish={handleSubmitModalInactivate}
+                    </div>
+                }
+            >
+                <TableRBI
+                    dataSource={data?.result}
+                    pageSize={pageSize}
+                    showExport={false}
+                    columns={[
+                        ...columns,
+                        ...useColumnActionPermission(
+                            ["view", "update", "history", "activate"],
+                            itemActions
+                        ),
+                    ]}
+                    current={page}
+                    onChange={handleChange}
+                    onSizeChanger={handleChange}
+                    totalData={data?.page?.totalElements}
+                    onSort={onSort}
+                    tableScrolled={{
+                        x: "max-content",
+                        y: 525,
+                    }}
+                    onAdvanceSearch={handleAdvanceSearch}
                 />
-                <ModalHistory
-                    isOpen={openModalHistory}
-                    handleClose={() => setOpenModalHistory(false)}
-                    header={"Approval History"}
-                    width={850}
-                    tabOptions={handleOptions()}
-                    dataApprover={dataApprovalHistoryFix?.dataApprover}
-                    dataHistory={dataApprovalHistoryFix?.dataHistory}
-                />
-            </Spin>
-        </LayoutMenu>
+            </CardContainer>
+            <ModalInactivateWithHierarchy
+                selector={"cycle"}
+                dispatch={dispatch}
+                getAPIOption={getAllApprovalList}
+                getAPIDetail={getListApprovalById}
+                alertMessage={`Are you sure you want to inactivate this Payment Cycle?`}
+                openModalInactivate={modalActiveInactive}
+                handleCloseModalInactivate={handleCancelModalInactivate}
+                onFinish={handleSubmitModalInactivate}
+            />
+            <ModalHistory
+                isOpen={openModalHistory}
+                handleClose={() => setOpenModalHistory(false)}
+                header={"Approval History"}
+                width={850}
+                tabOptions={handleOptions()}
+                dataApprover={dataApprovalHistoryFix?.dataApprover}
+                dataHistory={dataApprovalHistoryFix?.dataHistory}
+            />
+        </Spin>
     );
 };
 

@@ -349,7 +349,7 @@ const PaymentCycleForm = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper
@@ -573,7 +573,7 @@ const PaymentCycleForm = ({ type }) => {
                     />
                 </ModalCustom>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

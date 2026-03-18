@@ -178,7 +178,7 @@ const CostCenterForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -360,7 +360,7 @@ const CostCenterForm = (props) => {
 
       {/* render try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

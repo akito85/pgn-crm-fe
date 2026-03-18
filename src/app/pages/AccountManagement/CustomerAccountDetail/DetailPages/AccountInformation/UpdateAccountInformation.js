@@ -299,7 +299,7 @@ const UpdateAccountInformation = () => {
   }
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(idAccount)} />
         <div className="w-full mb-5">
@@ -484,7 +484,7 @@ const UpdateAccountInformation = () => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

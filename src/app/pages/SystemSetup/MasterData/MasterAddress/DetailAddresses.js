@@ -61,7 +61,7 @@ const DetailAddresses = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={'address information'}>
@@ -146,7 +146,7 @@ const DetailAddresses = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   )
 }
 

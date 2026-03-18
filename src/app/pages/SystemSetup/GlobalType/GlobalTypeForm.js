@@ -756,386 +756,384 @@ const GlobalTypeForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        <Form form={globalTypeForm} layout={"vertical"} onFinish={handleFinish}>
-          <BaseContainer header={"global type information"}>
-            <div className="w-full grid grid-cols-2 gap-2">
-              <Form.Item
-                label="Group Name"
-                name="groupName"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Group Name!",
-                  },
-                ]}
-              >
-                <Input allowClear disabled={type === "update"} onInput={(e) =>
-                  (e.target.value = e.target.value.trimStart())
-                } />
-              </Form.Item>
-              <Form.Item
-                label="Sort By"
-                name="sortBy"
-                rules={[
-                  { required: true, message: "Please input your Sort By!" },
-                ]}
-              >
-                <SelectComponent onChange={handleChangeSortBy}>
-                  {dataSortBy &&
-                    dataSortBy.map((ta, index) => (
-                      <Select.Option value={ta.value} key={index}>
-                        {ta.name}
-                      </Select.Option>
-                    ))}
-                </SelectComponent>
-              </Form.Item>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"Description"}
-                  name={"desc"}
-                  className={"w-full"}
-                >
-                  <InputComponent
-                    rows={5}
-                    type="textarea"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </Form.Item>
-              </div>
-            </div>
-          </BaseContainer>
-          <BaseContainer header={"global type value information"}>
-            <div className="w-full flex justify-end mb-[30px]">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {
-                  setModalType("create_list");
-                  setOpenModal(true);
-                }}
-                icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              >
-                Create
-              </ButtonComponent>
-            </div>
-            {/* <div className={"w-full flex mb-5 gap-2 justify-between"}>
-              <Select
-                mode="multiple"
-                placeholder="Show All Column"
-                className={"w-2/6"}
-                maxTagCount={3}
-                onChange={handleDisplayColumn}
-              >
-                {columns
-                  .map((col) => (
-                    <Option
-                      key={col.title}
-                      value={col.title}
-                      disabled={
-                        optionSelectedCol.length > 3
-                          ? optionSelectedCol.includes(col.title)
-                            ? false
-                            : true
-                          : false
-                      }
-                    >
-                      {col.title}
-                    </Option>
-                  ))
-                  .splice(1)}
-              </Select>
-              <Pagination
-                className={"pr-1"}
-                showSizeChanger
-                total={datas?.length}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChangePage}
-                onShowSizeChange={handleChangePage}
-                showTotal={(total, range) =>
-                  `Showing ${range[0]} to ${range[1]} of ${total} records`
-                }
-              />
-            </div>
-            <Table
-              bordered
-              dataSource={paginationTable(page, pageSize)}
-              columns={displayColumn}
-              pagination={false}
-              tableLayout="auto"
-              scroll={{ x: 1500 }}
-            /> */}
-
-            <TablePaginationNew
-              type="FE"
-              dataSource={datas}
-              columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              // totalData={paginationTable("length")}
-              tableScrolled={{ x: 1500, y: 500 }}
-            // onSort={onSort}
-            />
-          </BaseContainer>
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+    <Spin spinning={loading}>
+      <BreadCrumb routes={routes} />
+      <Form form={globalTypeForm} layout={"vertical"} onFinish={handleFinish}>
+        <BaseContainer header={"global type information"}>
+          <div className="w-full grid grid-cols-2 gap-2">
+            <Form.Item
+              label="Group Name"
+              name="groupName"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your Group Name!",
+                },
+              ]}
             >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={handleClear}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
+              <Input allowClear disabled={type === "update"} onInput={(e) =>
+                (e.target.value = e.target.value.trimStart())
+              } />
+            </Form.Item>
+            <Form.Item
+              label="Sort By"
+              name="sortBy"
+              rules={[
+                { required: true, message: "Please input your Sort By!" },
+              ]}
+            >
+              <SelectComponent onChange={handleChangeSortBy}>
+                {dataSortBy &&
+                  dataSortBy.map((ta, index) => (
+                    <Select.Option value={ta.value} key={index}>
+                      {ta.name}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+            <div className="col-span-2">
+              <Form.Item
+                label={"Description"}
+                name={"desc"}
+                className={"w-full"}
+              >
+                <InputComponent
+                  rows={5}
+                  type="textarea"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </Form.Item>
             </div>
           </div>
-        </Form>
-        <ModalCustom
-          isOpen={openModal}
-          type="confirmation"
-          header="global type value"
-          width={700}
-          handleCancel={() => {
-            setParentValues([]);
-            globalListValue.setFields([{ name: "parentValue", errors: [] }]);
-            globalListValue.resetFields();
-            setModalType('');
-            setOpenModal(false);
-          }}
-        >
-          <Form
-            form={globalListValue}
-            layout={"vertical"}
-            onFinish={handleListFinish}
-          >
-            <div className="w-full grid grid-cols-2 gap-2">
-              <Form.Item label="Group Name" name="groupName">
-                <Input
-                  disabled
-                  defaultValue={globalTypeForm.getFieldValue("groupName")}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Display Text"
-                name="displayText"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Display Text!",
-                  },
-                ]}
-              >
-                <InputComponent />
-              </Form.Item>
-              <Form.Item
-                label="Value"
-                name="value"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Value!",
-                  },
-                  {
-                    pattern: /^(?:[a-zA-Z]+(?:[A-Z][a-z]*)*|[a-zA-Z]+(?:_[a-zA-Z]+)*)$/,
-                    message: 'Value must be in snake_case or camelCase!',
-                  }
+        </BaseContainer>
+        <BaseContainer header={"global type value information"}>
+          <div className="w-full flex justify-end mb-[30px]">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => {
+                setModalType("create_list");
+                setOpenModal(true);
+              }}
+              icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            >
+              Create
+            </ButtonComponent>
+          </div>
+          {/* <div className={"w-full flex mb-5 gap-2 justify-between"}>
+            <Select
+              mode="multiple"
+              placeholder="Show All Column"
+              className={"w-2/6"}
+              maxTagCount={3}
+              onChange={handleDisplayColumn}
+            >
+              {columns
+                .map((col) => (
+                  <Option
+                    key={col.title}
+                    value={col.title}
+                    disabled={
+                      optionSelectedCol.length > 3
+                        ? optionSelectedCol.includes(col.title)
+                          ? false
+                          : true
+                        : false
+                    }
+                  >
+                    {col.title}
+                  </Option>
+                ))
+                .splice(1)}
+            </Select>
+            <Pagination
+              className={"pr-1"}
+              showSizeChanger
+              total={datas?.length}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChangePage}
+              onShowSizeChange={handleChangePage}
+              showTotal={(total, range) =>
+                `Showing ${range[0]} to ${range[1]} of ${total} records`
+              }
+            />
+          </div>
+          <Table
+            bordered
+            dataSource={paginationTable(page, pageSize)}
+            columns={displayColumn}
+            pagination={false}
+            tableLayout="auto"
+            scroll={{ x: 1500 }}
+          /> */}
 
-                ]}
-              >
-                <Input disabled={type === 'update' && modalType === 'update_list'} />
-              </Form.Item>
-              <Form.Item label="Order" name="order" rules={sortBySelected === 'CUSTOM_ORDER' && formMessageRequired('order')}>
-                <InputComponent
-                  controls={false}
-                  type="number"
-                  style={{
-                    width: "100%",
-                  }}
-                  onInput={(e) =>
-                    (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))
-                  }
-                />
-              </Form.Item>
-              <Form.Item label="Parent Group" name="parentGroup">
-                <SelectComponent onChange={(e) => handleChangeParentGroup(e)}>
-                  {dataParentGroup?.length
-                    ? dataParentGroup.map((ta, index) => (
-                      <Select.Option value={ta.glbTypeId} key={index}>
-                        {ta.groupName}
-                      </Select.Option>
-                    ))
-                    : null}
-                </SelectComponent>
-              </Form.Item>
-              <Form.Item
-                label="Parent Value"
-                name="parentValue"
-                rules={
-                  parentValues.length > 0
-                    ? formMessageRequired("Parent Value")
-                    : undefined
-                }
-              >
-                <SelectComponent>
-                  {parentValues.map((ta, index) => (
-                    <Select.Option value={ta.glbTypeValId} key={index}>
-                      {ta.text}
-                    </Select.Option>
-                  ))}
-                </SelectComponent>
-              </Form.Item>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"Description"}
-                  name={"description"}
-                  className={"w-full"}
-                >
-                  <InputComponent rows={5} type="textarea" />
-                </Form.Item>
-              </div>
-            </div>
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  type="default"
-                  onClick={() => {
-                    setParentValues([]);
-                    globalListValue.setFields([
-                      { name: "parentValue", errors: [] },
-                    ]);
-                    globalListValue.resetFields();
-                    setOpenModal(false);
-                    setModalType('')
-                  }}
-                >
-                  Cancel
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </Form>
-        </ModalCustom>
-        <ModalCustom
-          isOpen={openConfirmation}
-          type="confirmation"
-          header="Confirmation"
-          width={800}
-          handleCancel={() => {
-            setOpenConfirmation(false);
-          }}
-          handleOk={() => setOpenConfirmation(false)}
-          footer={
-            <div className={"w-full flex justify-end gap-5"}>
+          <TablePaginationNew
+            type="FE"
+            dataSource={datas}
+            columns={columns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            // totalData={paginationTable("length")}
+            tableScrolled={{ x: 1500, y: 500 }}
+          // onSort={onSort}
+          />
+        </BaseContainer>
+        <div className="mt-[30px] flex">
+          <ButtonComponent
+            type={"submit"}
+            onClick={() => setModalBack(true)}
+            icon={
+              <LeftOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 24,
+                  justifyItems: "center",
+                }}
+              />
+            }
+          >
+            Back
+          </ButtonComponent>
+
+          <div className={"w-full flex justify-end gap-5"}>
+            <Form.Item>
               <ButtonComponent
-                type={"default"}
-                onClick={() => setOpenConfirmation(false)}
+                icon={
+                  <SVGIcon
+                    name={
+                      type === "update"
+                        ? `IconButtonReset`
+                        : `IconButtonClear`
+                    }
+                    width={24}
+                  />
+                }
+                type="submit"
+                onClick={handleClear}
+              >
+                {type === "update" ? "Reset" : "Clear"}
+              </ButtonComponent>
+            </Form.Item>
+            <Form.Item>
+              <ButtonComponent type="submit" htmlType={"submit"}>
+                Save
+              </ButtonComponent>
+            </Form.Item>
+          </div>
+        </div>
+      </Form>
+      <ModalCustom
+        isOpen={openModal}
+        type="confirmation"
+        header="global type value"
+        width={700}
+        handleCancel={() => {
+          setParentValues([]);
+          globalListValue.setFields([{ name: "parentValue", errors: [] }]);
+          globalListValue.resetFields();
+          setModalType('');
+          setOpenModal(false);
+        }}
+      >
+        <Form
+          form={globalListValue}
+          layout={"vertical"}
+          onFinish={handleListFinish}
+        >
+          <div className="w-full grid grid-cols-2 gap-2">
+            <Form.Item label="Group Name" name="groupName">
+              <Input
+                disabled
+                defaultValue={globalTypeForm.getFieldValue("groupName")}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Display Text"
+              name="displayText"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your Display Text!",
+                },
+              ]}
+            >
+              <InputComponent />
+            </Form.Item>
+            <Form.Item
+              label="Value"
+              name="value"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your Value!",
+                },
+                {
+                  pattern: /^(?:[a-zA-Z]+(?:[A-Z][a-z]*)*|[a-zA-Z]+(?:_[a-zA-Z]+)*)$/,
+                  message: 'Value must be in snake_case or camelCase!',
+                }
+
+              ]}
+            >
+              <Input disabled={type === 'update' && modalType === 'update_list'} />
+            </Form.Item>
+            <Form.Item label="Order" name="order" rules={sortBySelected === 'CUSTOM_ORDER' && formMessageRequired('order')}>
+              <InputComponent
+                controls={false}
+                type="number"
+                style={{
+                  width: "100%",
+                }}
+                onInput={(e) =>
+                  (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))
+                }
+              />
+            </Form.Item>
+            <Form.Item label="Parent Group" name="parentGroup">
+              <SelectComponent onChange={(e) => handleChangeParentGroup(e)}>
+                {dataParentGroup?.length
+                  ? dataParentGroup.map((ta, index) => (
+                    <Select.Option value={ta.glbTypeId} key={index}>
+                      {ta.groupName}
+                    </Select.Option>
+                  ))
+                  : null}
+              </SelectComponent>
+            </Form.Item>
+            <Form.Item
+              label="Parent Value"
+              name="parentValue"
+              rules={
+                parentValues.length > 0
+                  ? formMessageRequired("Parent Value")
+                  : undefined
+              }
+            >
+              <SelectComponent>
+                {parentValues.map((ta, index) => (
+                  <Select.Option value={ta.glbTypeValId} key={index}>
+                    {ta.text}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+            <div className="col-span-2">
+              <Form.Item
+                label={"Description"}
+                name={"description"}
+                className={"w-full"}
+              >
+                <InputComponent rows={5} type="textarea" />
+              </Form.Item>
+            </div>
+          </div>
+          <div className={"w-full flex justify-end gap-5"}>
+            <Form.Item>
+              <ButtonComponent
+                type="default"
+                onClick={() => {
+                  setParentValues([]);
+                  globalListValue.setFields([
+                    { name: "parentValue", errors: [] },
+                  ]);
+                  globalListValue.resetFields();
+                  setOpenModal(false);
+                  setModalType('')
+                }}
               >
                 Cancel
               </ButtonComponent>
-              <ButtonComponent
-                type={"submit"}
-                border={false}
-                onClick={() => handleConfirm()}
-              >
-                Confirm
+            </Form.Item>
+            <Form.Item>
+              <ButtonComponent type="submit" htmlType={"submit"}>
+                Save
               </ButtonComponent>
-            </div>
-          }
-        >
-          <ConfirmationLayout
-            dataParentAndGroup={dataParentAndGroup}
-            data={payload?.body}
-          />
-        </ModalCustom>
-        <ModalCustom
-          isOpen={openDetail}
-          type="detail"
-          header="DETAIL GLOBAL TYPE VALUE"
-          width={1000}
-          handleCancel={() => {
-            setOpenConfirmation(false);
-            setOpenDetail(false)
-          }}
-          handleOk={() => {
-            setOpenConfirmation(false)
-            setOpenDetail(false)
-          }}
-          footer={
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setOpenDetail(false)}
-              >
-                Back
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <DetailGlobalTypeValue data={data_detail_value} />
-        </ModalCustom>
-        <ModalConfirm
-          isOpen={openActivation}
-          handleCancel={() => setOpenActivation(false)}
-          handleOk={() => handleActiveOrInactive(selectedData)}
-        >
-          <ActivationGlobalTypeValue selectedData={selectedData} />
-        </ModalConfirm>
-        <ModalAttention
-          isOpen={globalTypeValueIsNull}
-          handleCancel={() => setGlobalTypeValueIsNull(false)}
-          handleOk={() => setGlobalTypeValueIsNull(false)}
-          textList={"global type value information"}
+            </Form.Item>
+          </div>
+        </Form>
+      </ModalCustom>
+      <ModalCustom
+        isOpen={openConfirmation}
+        type="confirmation"
+        header="Confirmation"
+        width={800}
+        handleCancel={() => {
+          setOpenConfirmation(false);
+        }}
+        handleOk={() => setOpenConfirmation(false)}
+        footer={
+          <div className={"w-full flex justify-end gap-5"}>
+            <ButtonComponent
+              type={"default"}
+              onClick={() => setOpenConfirmation(false)}
+            >
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              type={"submit"}
+              border={false}
+              onClick={() => handleConfirm()}
+            >
+              Confirm
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <ConfirmationLayout
+          dataParentAndGroup={dataParentAndGroup}
+          data={payload?.body}
         />
-        {/* Modal Back */}
-        <ModalBack
-          isOpen={modalBack}
-          handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
-        />
-        {/** Modal Retry */}
-        {renderModal()}
-      </Spin>
-    </LayoutMenu>
+      </ModalCustom>
+      <ModalCustom
+        isOpen={openDetail}
+        type="detail"
+        header="DETAIL GLOBAL TYPE VALUE"
+        width={1000}
+        handleCancel={() => {
+          setOpenConfirmation(false);
+          setOpenDetail(false)
+        }}
+        handleOk={() => {
+          setOpenConfirmation(false)
+          setOpenDetail(false)
+        }}
+        footer={
+          <div className={"w-full flex justify-end gap-5"}>
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setOpenDetail(false)}
+            >
+              Back
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <DetailGlobalTypeValue data={data_detail_value} />
+      </ModalCustom>
+      <ModalConfirm
+        isOpen={openActivation}
+        handleCancel={() => setOpenActivation(false)}
+        handleOk={() => handleActiveOrInactive(selectedData)}
+      >
+        <ActivationGlobalTypeValue selectedData={selectedData} />
+      </ModalConfirm>
+      <ModalAttention
+        isOpen={globalTypeValueIsNull}
+        handleCancel={() => setGlobalTypeValueIsNull(false)}
+        handleOk={() => setGlobalTypeValueIsNull(false)}
+        textList={"global type value information"}
+      />
+      {/* Modal Back */}
+      <ModalBack
+        isOpen={modalBack}
+        handleCancel={() => setModalBack(false)}
+        handleOk={() => navigate(-1)}
+      />
+      {/** Modal Retry */}
+      {renderModal()}
+    </Spin>
   );
 };
 

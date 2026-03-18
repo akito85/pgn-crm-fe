@@ -154,63 +154,61 @@ const AccountStandard = () => {
   ]
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+    <Spin spinning={loading}>
+      <BreadCrumb routes={routes} />
 
-        <Toolbar items={itemActions}/>
-        {/* <div className="w-full flex justify-end gap-[20px]">
+      <Toolbar items={itemActions}/>
+      {/* <div className="w-full flex justify-end gap-[20px]">
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          type="submit"
+          onClick={handleDownload}
+        >
+          Download List
+        </ButtonComponent>
+
+        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_STANDARD}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonDownload" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
-            onClick={handleDownload}
           >
-            Download List
+            Create Account Standard
           </ButtonComponent>
+        </Link>
+      </div> */}
 
-          <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_STANDARD}>
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-            >
-              Create Account Standard
-            </ButtonComponent>
-          </Link>
-        </div> */}
-
-        <BaseContainer header={"ACCOUNT - STANDARD LIST"}>
-          <div className="w-full">
-            <TablePagination
-              dataSource={data_accountStandard?.result}
-              columns={[
-                ...columnsAccountStandard(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                ),
-                ...useColumnActionPermission(
-                  ["Activate", "View", "Update"],
-                  itemActions
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onShowSizeChange={handleChange}
-              onSort={onSort}
-              totalData={data_accountStandard?.page?.totalElements}
-              tableScrolled={{
-                x: 9000,
-                y: 500,
-              }}
-            />
-          </div>
-        </BaseContainer>
-      </Spin>
-    </LayoutMenu>
+      <BaseContainer header={"ACCOUNT - STANDARD LIST"}>
+        <div className="w-full">
+          <TablePagination
+            dataSource={data_accountStandard?.result}
+            columns={[
+              ...columnsAccountStandard(
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+              ),
+              ...useColumnActionPermission(
+                ["Activate", "View", "Update"],
+                itemActions
+              ),
+            ]}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            onShowSizeChange={handleChange}
+            onSort={onSort}
+            totalData={data_accountStandard?.page?.totalElements}
+            tableScrolled={{
+              x: 9000,
+              y: 500,
+            }}
+          />
+        </div>
+      </BaseContainer>
+    </Spin>
   );
 };
 

@@ -256,7 +256,7 @@ const FormMenu = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading || isLoading}>
         <Form
@@ -533,7 +533,7 @@ const FormMenu = (props) => {
 
       {/* render modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

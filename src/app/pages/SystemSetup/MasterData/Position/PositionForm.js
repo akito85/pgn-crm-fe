@@ -150,7 +150,7 @@ const PositionForm = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <div className={"my-5"}>
         <Form
@@ -280,7 +280,7 @@ const PositionForm = (props) => {
 
       {/* render modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

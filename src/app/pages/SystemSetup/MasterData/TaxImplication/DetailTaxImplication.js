@@ -119,104 +119,102 @@ const DetailTaxImplication = () => {
   }, [id, data_detail]);
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+    <Spin spinning={loading}>
+      <BreadCrumb routes={routes} />
 
-        <div className="flex flex-col">
+      <div className="flex flex-col">
 
-          {/* TAX IMPLICATION INFORMATION */}
-          <BaseContainer header={"tax implication information"}>
-            <div className="grid grid-cols-3 gap-2">
-              <DetailText label={"Tax Implication Name"}>
-                {dataTaxImplication?.taxImplicationName}
+        {/* TAX IMPLICATION INFORMATION */}
+        <BaseContainer header={"tax implication information"}>
+          <div className="grid grid-cols-3 gap-2">
+            <DetailText label={"Tax Implication Name"}>
+              {dataTaxImplication?.taxImplicationName}
+            </DetailText>
+            <DetailText label={"Category"}>
+              {dataTaxImplication?.category}
+            </DetailText>
+            <DetailText label={"Service Type"}>
+              {dataTaxImplication?.serviceType}
+            </DetailText>
+            <DetailText label={"Status"}>
+              {dataTaxImplication?.status?.charAt(0).toUpperCase() + dataTaxImplication?.status?.slice(1).toLowerCase()}
+            </DetailText>
+            <div className="col-span-3">
+              <DetailText label={"Criteria"}>
+                {dataTaxImplication?.criteriaName}
               </DetailText>
-              <DetailText label={"Category"}>
-                {dataTaxImplication?.category}
-              </DetailText>
-              <DetailText label={"Service Type"}>
-                {dataTaxImplication?.serviceType}
-              </DetailText>
-              <DetailText label={"Status"}>
-                {dataTaxImplication?.status?.charAt(0).toUpperCase() + dataTaxImplication?.status?.slice(1).toLowerCase()}
-              </DetailText>
-              <div className="col-span-3">
-                <DetailText label={"Criteria"}>
-                  {dataTaxImplication?.criteriaName}
-                </DetailText>
-              </div>
-              <div className="col-span-3">
-                <DetailText label={"Description"}>
-                  {dataTaxImplication?.description}
-                </DetailText>
-              </div>
             </div>
-          </BaseContainer>
+            <div className="col-span-3">
+              <DetailText label={"Description"}>
+                {dataTaxImplication?.description}
+              </DetailText>
+            </div>
+          </div>
+        </BaseContainer>
 
-          {/* TAX IMPLICATION TABLE CRITERIA */}
-          <BaseContainer header={'tax implication criteria'}>
-            <TaxImplicationTableCriteria
-              type={"detail"}
-              data={dataListCriteria}
-              dataCriteria={criteriaValues}
-              updateData={setDataListCriteria}
-              dispatch={dispatch}
+        {/* TAX IMPLICATION TABLE CRITERIA */}
+        <BaseContainer header={'tax implication criteria'}>
+          <TaxImplicationTableCriteria
+            type={"detail"}
+            data={dataListCriteria}
+            dataCriteria={criteriaValues}
+            updateData={setDataListCriteria}
+            dispatch={dispatch}
+          />
+        </BaseContainer>
+
+        {/* HISTORY LOG INFORMATION */}
+        <BaseContainer header={"history log information"}>
+          <div className="grid grid-cols-5 w-full">
+            <DetailText label={'Record ID'}>{data_detail?.taxImplicationId}</DetailText>
+            <DetailText label={"Created Date"}>
+              {dataTaxImplication.createdDate ? moment(dataTaxImplication.createdDate).format(dateFormatting.dateTime) : ''}
+            </DetailText>
+            <DetailText label={"Created By"}>
+              {dataTaxImplication.createdBy}
+            </DetailText>
+            <DetailText label={"Updated Date"}>
+              {dataTaxImplication.updatedDate ? moment(dataTaxImplication.updatedDate).format(dateFormatting.dateTime) : ''}
+            </DetailText>
+            <DetailText label={"Updated By"}>
+              {dataTaxImplication.updatedBy}
+            </DetailText>
+          </div>
+        </BaseContainer>
+
+        {/* TAX IMPLICATION RULE TABLE */}
+        {Array?.isArray(access_account?.actionList) &&
+          <BaseContainer header={'tax implication rule'}>
+            <TaxImplicationRuleTable
+              id={id}
+              isRuleActive={dataTaxImplication.isRuleActive}
+              access={filteredArray}
             />
           </BaseContainer>
 
-          {/* HISTORY LOG INFORMATION */}
-          <BaseContainer header={"history log information"}>
-            <div className="grid grid-cols-5 w-full">
-              <DetailText label={'Record ID'}>{data_detail?.taxImplicationId}</DetailText>
-              <DetailText label={"Created Date"}>
-                {dataTaxImplication.createdDate ? moment(dataTaxImplication.createdDate).format(dateFormatting.dateTime) : ''}
-              </DetailText>
-              <DetailText label={"Created By"}>
-                {dataTaxImplication.createdBy}
-              </DetailText>
-              <DetailText label={"Updated Date"}>
-                {dataTaxImplication.updatedDate ? moment(dataTaxImplication.updatedDate).format(dateFormatting.dateTime) : ''}
-              </DetailText>
-              <DetailText label={"Updated By"}>
-                {dataTaxImplication.updatedBy}
-              </DetailText>
-            </div>
-          </BaseContainer>
+        }
 
-          {/* TAX IMPLICATION RULE TABLE */}
-          {Array?.isArray(access_account?.actionList) &&
-            <BaseContainer header={'tax implication rule'}>
-              <TaxImplicationRuleTable
-                id={id}
-                isRuleActive={dataTaxImplication.isRuleActive}
-                access={filteredArray}
-              />
-            </BaseContainer>
+      </div>
 
+      <div className={`flex w-full align-middle my-6`}>
+        <ButtonComponent
+          type={"submit"}
+          onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_TAX_IMPLICATION)}
+          icon={
+            <LeftOutlined
+              style={{
+                color: "#fff",
+                fontSize: 24,
+                justifyItems: "center",
+              }}
+            />
           }
+        >
+          Back
+        </ButtonComponent>
+      </div>
 
-        </div>
-
-        <div className={`flex w-full align-middle my-6`}>
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_TAX_IMPLICATION)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Back
-          </ButtonComponent>
-        </div>
-
-      </Spin>
-    </LayoutMenu>
+    </Spin>
   )
 }
 

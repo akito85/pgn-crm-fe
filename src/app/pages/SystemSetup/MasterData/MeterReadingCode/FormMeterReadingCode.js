@@ -165,7 +165,7 @@ const FormMeterReadingCode = ({ type }) => {
 
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -272,7 +272,7 @@ const FormMeterReadingCode = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 

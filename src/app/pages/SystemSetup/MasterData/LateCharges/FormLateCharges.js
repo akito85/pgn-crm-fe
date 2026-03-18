@@ -650,243 +650,241 @@ const FormLateCharges = ({ type }) => {
 
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading || isLoading}>
-        <BreadCrumb routes={routes(type)} />
-        <Form
-          id="lateChargeForm"
-          form={form}
-          layout={"vertical"}
-          onFinish={storedDataInline ? undefined : handleSubmitForm}
-          scrollToFirstError={true}
-        >
-          <BaseContainer header={"late charge information"}>
-            <div className="grid grid-cols-2 gap-2">
+    <Spin spinning={loading || isLoading}>
+      <BreadCrumb routes={routes(type)} />
+      <Form
+        id="lateChargeForm"
+        form={form}
+        layout={"vertical"}
+        onFinish={storedDataInline ? undefined : handleSubmitForm}
+        scrollToFirstError={true}
+      >
+        <BaseContainer header={"late charge information"}>
+          <div className="grid grid-cols-2 gap-2">
+            <Form.Item
+              name={"lateChargeName"}
+              rules={[{ message: requiredMessage("Name"), required: true }]}
+              className={"w-full no-margin-form"}
+              required
+              label={"Name"}
+            >
+              <InputComponent type="text" disabled={type === "update"} />
+            </Form.Item>
+            <Form.Item
+              name={"currency"}
+              rules={[
+                { message: requiredMessage("Currency"), required: true },
+              ]}
+              className="no-margin-form w-full"
+              label={"Currency"}
+              required
+            >
+              <SelectComponent disabled={type === "update"} options={dataListCurrency} />
+            </Form.Item>
+
+            <div className="col-span-3">
               <Form.Item
-                name={"lateChargeName"}
-                rules={[{ message: requiredMessage("Name"), required: true }]}
-                className={"w-full no-margin-form"}
-                required
-                label={"Name"}
-              >
-                <InputComponent type="text" disabled={type === "update"} />
-              </Form.Item>
-              <Form.Item
-                name={"currency"}
+                name={"criteria"}
                 rules={[
-                  { message: requiredMessage("Currency"), required: true },
+                  { message: requiredMessage("Criteria"), required: true },
                 ]}
-                className="no-margin-form w-full"
-                label={"Currency"}
-                required
+                className={"w-full no-margin-form"}
+                label={"Criteria"}
               >
-                <SelectComponent disabled={type === "update"} options={dataListCurrency} />
+                <SelectComponent
+                  disabled={stored}
+                  mode="multiple"
+                  onSelect={handleSelectCriteria}
+                  onDeselect={handleDeselectCriteria}
+                  onClear={handleClearCriteria}
+                  options={dataListCriteriaOpt}
+                />
               </Form.Item>
-
-              <div className="col-span-3">
-                <Form.Item
-                  name={"criteria"}
-                  rules={[
-                    { message: requiredMessage("Criteria"), required: true },
-                  ]}
-                  className={"w-full no-margin-form"}
-                  label={"Criteria"}
-                >
-                  <SelectComponent
-                    disabled={stored}
-                    mode="multiple"
-                    onSelect={handleSelectCriteria}
-                    onDeselect={handleDeselectCriteria}
-                    onClear={handleClearCriteria}
-                    options={dataListCriteriaOpt}
-                  />
-                </Form.Item>
-              </div>
-              <div className="col-span-3">
-                <Form.Item
-                  name={"description"}
-                  className="w-full"
-                  label={"Description"}
-                >
-                  <InputComponent
-                    type="textarea"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </Form.Item>
-              </div>
             </div>
-          </BaseContainer>
-          <BaseContainer header={"late charge criteria"}>
-            <FunctionalCriteria
-              formCriteria={formCriteria}
-              columnCriteria={columnCriteria}
-              dataCriteria={criteriaValues}
-              dataTable={dataTable}
-              setUpdateDataTable={setDataTable}
-              type={type}
-              startDateHeader={moment()}
-              defaultColumn={['no', 'startDate', 'endDate', 'description', 'action']}
-              handleEditDataRecord={handleEditDataRecord}
-              setEditDataRecord={setEditDataRecord}
-              editDataRecord={editDataRecord}
-              conditionalDispatcher={conditionalDispatch}
-              checkStartDate={false}
+            <div className="col-span-3">
+              <Form.Item
+                name={"description"}
+                className="w-full"
+                label={"Description"}
+              >
+                <InputComponent
+                  type="textarea"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </Form.Item>
+            </div>
+          </div>
+        </BaseContainer>
+        <BaseContainer header={"late charge criteria"}>
+          <FunctionalCriteria
+            formCriteria={formCriteria}
+            columnCriteria={columnCriteria}
+            dataCriteria={criteriaValues}
+            dataTable={dataTable}
+            setUpdateDataTable={setDataTable}
+            type={type}
+            startDateHeader={moment()}
+            defaultColumn={['no', 'startDate', 'endDate', 'description', 'action']}
+            handleEditDataRecord={handleEditDataRecord}
+            setEditDataRecord={setEditDataRecord}
+            editDataRecord={editDataRecord}
+            conditionalDispatcher={conditionalDispatch}
+            checkStartDate={false}
 
-            />
-          </BaseContainer>
-          <div className="flex w-full justify-between align-middle my-3">
+          />
+        </BaseContainer>
+        <div className="flex w-full justify-between align-middle my-3">
+          <ButtonComponent
+            type={"submit"}
+            onClick={storedDataInline ? undefined : () => setModalBack(true)}
+            icon={
+              <LeftOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 24,
+                  justifyItems: "center",
+                }}
+              />
+            }
+            disabled={stored}
+          >
+            Back
+          </ButtonComponent>
+          <div className="flex align-middle gap-3">
             <ButtonComponent
-              type={"submit"}
-              onClick={storedDataInline ? undefined : () => setModalBack(true)}
               icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
+                <SVGIcon
+                  name={
+                    type === "update" ? `IconButtonReset` : `IconButtonClear`
+                  }
+                  width={24}
                 />
               }
+              type="submit"
               disabled={stored}
+              onClick={storedDataInline ? undefined : handleClear}
+
             >
-              Back
+              {type === "update" ? "Reset" : "Clear"}
             </ButtonComponent>
-            <div className="flex align-middle gap-3">
+            <ButtonComponent
+              disabled={stored}
+              htmlType="submit"
+              type="submit"
+            >
+              Save
+            </ButtonComponent>
+          </div>
+        </div>
+      </Form>
+      {/** Modal Confirm */}
+      {modalConfirm ? (
+        <ModalCustom
+          isOpen={modalConfirm}
+          handleCancel={handleCancelModalConfirm}
+          header={"Confirmation"}
+          width={1000}
+          type={"confirmation"}
+          footer={
+            <div className="w-full flex justify-end gap-5 p-4">
               <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                disabled={stored}
-                onClick={storedDataInline ? undefined : handleClear}
-
+                onClick={handleCancelModalConfirm}
+                type="default"
               >
-                {type === "update" ? "Reset" : "Clear"}
+                Cancel
               </ButtonComponent>
               <ButtonComponent
-                disabled={stored}
-                htmlType="submit"
                 type="submit"
+                onClick={handleProcessModalConfirm}
               >
-                Save
+                Confirm
               </ButtonComponent>
             </div>
-          </div>
-        </Form>
-        {/** Modal Confirm */}
-        {modalConfirm ? (
-          <ModalCustom
-            isOpen={modalConfirm}
-            handleCancel={handleCancelModalConfirm}
-            header={"Confirmation"}
-            width={1000}
-            type={"confirmation"}
-            footer={
-              <div className="w-full flex justify-end gap-5 p-4">
-                <ButtonComponent
-                  onClick={handleCancelModalConfirm}
-                  type="default"
-                >
-                  Cancel
-                </ButtonComponent>
-                <ButtonComponent
-                  type="submit"
-                  onClick={handleProcessModalConfirm}
-                >
-                  Confirm
-                </ButtonComponent>
-              </div>
-            }
-          >
-            <ContentModalConfirmLateCharge
-              data={formValue}
-              listDataCriteria={dataTable}
-              criteriaValues={criteriaValues}
-              listCriteria={formatCriteria(formValue.criteria || [])}
-            />
-          </ModalCustom>
-        ) : null}
-        {/* Modal Back */}
-        <ModalBack
-          isOpen={modalBack}
-          handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
-        />
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
+          }
         >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not ${type === "update" ? "updated" : "created"
-              }. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
+          <ContentModalConfirmLateCharge
+            data={formValue}
+            listDataCriteria={dataTable}
+            criteriaValues={criteriaValues}
+            listCriteria={formatCriteria(formValue.criteria || [])}
+          />
+        </ModalCustom>
+      ) : null}
+      {/* Modal Back */}
+      <ModalBack
+        isOpen={modalBack}
+        handleCancel={() => setModalBack(false)}
+        handleOk={() => navigate(-1)}
+      />
+      {/** Modal Retry */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-        </ModalError>
+          <p className="pl-[70px]">{`Your data was not ${type === "update" ? "updated" : "created"
+            }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
 
-        {/* Modal Success create late charge */}
-        {modalSuccessCreate ?
-          <Modal
-            open={modalSuccessCreate}
-            onCancel={() => {
-              setModalSuccessCreate(false)
-              navigate(-1)
-            }}
-            className={"modal-custom"}
-            centered={true}
-            width={500}
-            maskClosable={false}
-            footer={
-              <div className="w-full flex justify-end gap-5 p-4">
-                <ButtonComponent
-                  onClick={() => {
-                    setModalSuccessCreate(false)
-                    navigate(-1)
-                  }}
-                  type="default"
-                >
-                  NO
+      {/* Modal Success create late charge */}
+      {modalSuccessCreate ?
+        <Modal
+          open={modalSuccessCreate}
+          onCancel={() => {
+            setModalSuccessCreate(false)
+            navigate(-1)
+          }}
+          className={"modal-custom"}
+          centered={true}
+          width={500}
+          maskClosable={false}
+          footer={
+            <div className="w-full flex justify-end gap-5 p-4">
+              <ButtonComponent
+                onClick={() => {
+                  setModalSuccessCreate(false)
+                  navigate(-1)
+                }}
+                type="default"
+              >
+                NO
+              </ButtonComponent>
+              <Link
+                to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LATE_CHARGES_RULE}
+                state={{
+                  lateChargeId: idCreateRule,
+                }}
+
+              >
+                <ButtonComponent type="submit">
+                  YES
                 </ButtonComponent>
-                <Link
-                  to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_LATE_CHARGES_RULE}
-                  state={{
-                    lateChargeId: idCreateRule,
-                  }}
-
-                >
-                  <ButtonComponent type="submit">
-                    YES
-                  </ButtonComponent>
-                </Link>
-              </div>
-            }
-          >
-            <div className={"flex flex-col w-full"}>
-              <div className="px-5 pt-5 pb-[10px] justify-center">
-                <div className="w-full flex gap-[20px]">
-                  <SVGIcon name="IconSuccess" width={48} />
-                  <p className="text-[18px] font-bold">Successful</p>
-                </div>
-                <p className="pl-[70px]">{`Late Charge has been created, do you want to create late charge rule for this data?`}</p>
-              </div>
+              </Link>
             </div>
-          </Modal>
-          : null}
+          }
+        >
+          <div className={"flex flex-col w-full"}>
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconSuccess" width={48} />
+                <p className="text-[18px] font-bold">Successful</p>
+              </div>
+              <p className="pl-[70px]">{`Late Charge has been created, do you want to create late charge rule for this data?`}</p>
+            </div>
+          </div>
+        </Modal>
+        : null}
 
-      </Spin>
-    </LayoutMenu>
+    </Spin>
   );
 };
 

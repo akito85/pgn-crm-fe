@@ -562,148 +562,146 @@ const EFakturCodeForm = ({ type }) => {
 };
 
   return (
-    <LayoutMenu>
-      <Spin spinning={isLoading}>
-        <BreadCrumb routes={routes} />
-        
-        {/* FormStepper menggantikan RadioTabs */}
-        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
+    <Spin spinning={isLoading}>
+      <BreadCrumb routes={routes} />
+      
+      {/* FormStepper menggantikan RadioTabs */}
+      <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
 
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSave}
-          onFinishFailed={handleError}
-        >
-          {/* Step 1: E-Faktur Code - Conditional Rendering */}
-          {valuePage === listSectionInfo[0].value && (
-            <EFakturCodeSectionForm
-              type={type}
-              form={form}
-              listAdditionalCode={listAdditionalCode}
-              setListAdditionalCode={setListAdditionalCode}
-              storedDataInline={storedDataInline}
-              setStoredDataInline={setStoredDataInline}
-              status={status}
-              statusApproval={statusApproval}
-            />
-          )}
-
-          {/* Step 2: Approval - Conditional Rendering */}
-          {valuePage === listSectionInfo[1].value && (
-            <BaseContainer header={"Approval Information"}>
-              <ApprovalComponentGeneral
-                type={type}
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
-              />
-            </BaseContainer>
-          )}
-
-          {/* Step 3: Attachment - Conditional Rendering */}
-          {valuePage === listSectionInfo[2].value && (
-            <BaseContainer header={"Attachment Information"}>
-              <AttachmentComponent
-                type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                dispatch={dispatch}
-                typeSelector="billing_bucket"
-                getAPICategory={getAttachmentCategory}
-                service={ratingBillingHttpService}
-                configApplication={configApp.RATING_BILLING_SERVICE}
-                getAPIGuard={getConfigFileRBIData}
-                typeRBI={"data"}
-                mandatory={true}
-              />
-            </BaseContainer>
-          )}
-
-          {/* FormFooter menggantikan tombol manual */}
-          <FormFooter
-            current={current}
-            totalSteps={steps.length}
-            onPrev={prev}
-            onNext={next}
-            onCancel={handleBack}
-            onClear={handleClear}
-            onSaveDraft={handleSaveDraft}
-            onSubmit={handleSubmit}
+      <Form
+        layout="vertical"
+        form={form}
+        onFinish={handleSave}
+        onFinishFailed={handleError}
+      >
+        {/* Step 1: E-Faktur Code - Conditional Rendering */}
+        {valuePage === listSectionInfo[0].value && (
+          <EFakturCodeSectionForm
             type={type}
-            disabled={storedDataInline}
-          />
-        </Form>
-
-        {/* Modal Confirmation */}
-        <ModalCustom
-          isOpen={modalConfirm}
-          handleCancel={() => setModalConfirm(false)}
-          header={"CONFIRMATION"}
-          width={1200}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
-                isPrimary
-                onClick={handleConfirm}
-                loading={loadingSave}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <ConfirmationEFakturCode
-            data={bodyData}
-            selectedHierarchy={selectedHierarchy}
-            listDataAppHierDetail={appHierDataDetail}
-            listDataAttachment={listDataAttachment}
+            form={form}
             listAdditionalCode={listAdditionalCode}
-            dataOption={appHierOptions}
+            setListAdditionalCode={setListAdditionalCode}
+            storedDataInline={storedDataInline}
+            setStoredDataInline={setStoredDataInline}
+            status={status}
+            statusApproval={statusApproval}
           />
-        </ModalCustom>
+        )}
 
-        {/* Modal Back */}
-        <ModalConfirm
-          isOpen={modalBack}
-          handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
-          width={400}
-        >
-          <div className="flex justify-center mt-5 gap-[20px]">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className="text-[18px] font-bold">
-              Are you sure you want to back?
-            </p>
-          </div>
-        </ModalConfirm>
+        {/* Step 2: Approval - Conditional Rendering */}
+        {valuePage === listSectionInfo[1].value && (
+          <BaseContainer header={"Approval Information"}>
+            <ApprovalComponentGeneral
+              type={type}
+              dataTable={appHierDataDetail}
+              dataOption={appHierOptions}
+              selectedHierarchy={selectedHierarchy}
+              updateSelectedHierarchy={setSelectedHierarchy}
+            />
+          </BaseContainer>
+        )}
 
-        {/* Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag ? "submitted" : "created"
-            }. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
+        {/* Step 3: Attachment - Conditional Rendering */}
+        {valuePage === listSectionInfo[2].value && (
+          <BaseContainer header={"Attachment Information"}>
+            <AttachmentComponent
+              type={type}
+              data={listDataAttachment}
+              updateData={setListDataAttachment}
+              dispatch={dispatch}
+              typeSelector="billing_bucket"
+              getAPICategory={getAttachmentCategory}
+              service={ratingBillingHttpService}
+              configApplication={configApp.RATING_BILLING_SERVICE}
+              getAPIGuard={getConfigFileRBIData}
+              typeRBI={"data"}
+              mandatory={true}
+            />
+          </BaseContainer>
+        )}
+
+        {/* FormFooter menggantikan tombol manual */}
+        <FormFooter
+          current={current}
+          totalSteps={steps.length}
+          onPrev={prev}
+          onNext={next}
+          onCancel={handleBack}
+          onClear={handleClear}
+          onSaveDraft={handleSaveDraft}
+          onSubmit={handleSubmit}
+          type={type}
+          disabled={storedDataInline}
+        />
+      </Form>
+
+      {/* Modal Confirmation */}
+      <ModalCustom
+        isOpen={modalConfirm}
+        handleCancel={() => setModalConfirm(false)}
+        header={"CONFIRMATION"}
+        width={1200}
+        type={"confirmation"}
+        footer={
+          <div className="w-full flex justify-end gap-5 p-4">
+            <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+              isPrimary
+              onClick={handleConfirm}
+              loading={loadingSave}
+            >
+              Confirm
+            </ButtonComponent>
           </div>
-        </ModalError>
-      </Spin>
-    </LayoutMenu>
+        }
+      >
+        <ConfirmationEFakturCode
+          data={bodyData}
+          selectedHierarchy={selectedHierarchy}
+          listDataAppHierDetail={appHierDataDetail}
+          listDataAttachment={listDataAttachment}
+          listAdditionalCode={listAdditionalCode}
+          dataOption={appHierOptions}
+        />
+      </ModalCustom>
+
+      {/* Modal Back */}
+      <ModalConfirm
+        isOpen={modalBack}
+        handleCancel={() => setModalBack(false)}
+        handleOk={() => navigate(-1)}
+        width={400}
+      >
+        <div className="flex justify-center mt-5 gap-[20px]">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className="text-[18px] font-bold">
+            Are you sure you want to back?
+          </p>
+        </div>
+      </ModalConfirm>
+
+      {/* Modal Retry */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
+          </div>
+          <p className="pl-[70px]">{`Your data was not ${
+            flag ? "submitted" : "created"
+          }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
+    </Spin>
   );
 };
 

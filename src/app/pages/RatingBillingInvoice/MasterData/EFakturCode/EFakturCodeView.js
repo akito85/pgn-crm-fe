@@ -514,83 +514,81 @@ const EFakturCodeView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+    <Spin spinning={loading}>
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
-                LIST E-FAKTUR CODE
-              </p>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] font-bold text-primary">
+              LIST E-FAKTUR CODE
+            </p>
 
-              <Toolbar items={itemGrantAccess} />
-            </div>
-          }
-        >
-          <div className={"w-full"}>
-            <TableRBI
-              dataSource={dataSource}
-              columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSort}
-              tableScrolled={{ y: 525, x: 1000 }}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-            />
+            <Toolbar items={itemGrantAccess} />
           </div>
-        </CardContainer>
+        }
+      >
+        <div className={"w-full"}>
+          <TableRBI
+            dataSource={dataSource}
+            columns={columns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            onSizeChanger={handleChange}
+            totalData={data?.page?.totalElements || 0}
+            onSort={onSort}
+            tableScrolled={{ y: 525, x: 1000 }}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+          />
+        </div>
+      </CardContainer>
 
-        {/* Modal Approval History */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          width={1000}
-          tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
-        />
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
 
-        {/* Modal Inactive */}
-        <ModalInactivateWithHierarchy
-          selector={"masterEfakturCode"}
-          dispatch={dispatch}
-          getAPIOption={getApprovalHierarchyList}
-          getAPIDetail={getApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this E-Faktur Code with name ${
-            chooseId?.einvoiceCodeId || ""
-          }?`}
-          openModalInactivate={modalInactive}
-          handleCloseModalInactivate={handleCancel}
-          onFinish={handleOk}
-        />
+      {/* Modal Inactive */}
+      <ModalInactivateWithHierarchy
+        selector={"masterEfakturCode"}
+        dispatch={dispatch}
+        getAPIOption={getApprovalHierarchyList}
+        getAPIDetail={getApprovalHierarchyDetail}
+        alertMessage={`Are you sure you want to inactivate this E-Faktur Code with name ${
+          chooseId?.einvoiceCodeId || ""
+        }?`}
+        openModalInactivate={modalInactive}
+        handleCloseModalInactivate={handleCancel}
+        onFinish={handleOk}
+      />
 
-        {/* Modal Error Inactive */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
+      {/* Modal Error Inactive */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-        </ModalError>
-      </Spin>
-    </LayoutMenu>
+          <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
+    </Spin>
   );
 };
 

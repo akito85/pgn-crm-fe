@@ -641,7 +641,7 @@ const FormTaxImplication = ({ type }) => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes(type)} />
       <Spin spinning={loading || isLoading || loading_criteria}>
         <Form
@@ -899,7 +899,7 @@ const FormTaxImplication = ({ type }) => {
           : null}
 
       </Spin>
-    </LayoutMenu>
+    </>
   )
 };
 
