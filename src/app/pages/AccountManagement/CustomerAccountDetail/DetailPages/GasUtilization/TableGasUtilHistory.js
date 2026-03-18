@@ -84,18 +84,18 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   );
 
   const itemActions = nxGetAccountActions({
-    handleView: (record, _) => handleDetail(record),
-    handleUpdate: (record, _) => navigate(
+    handleView: ({ id: recordId }) => handleDetail(recordId),
+    handleUpdate: ({ id: recordId }) => navigate(
       ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_UTILIZATION,
       {
         state: {
-          id: record,
+          id: recordId,
           accountId: idAccount,
           customerId: idCustomer,
         }
       }
     ),
-    handleDelete: (record, _) => handleOpenDelete(record),
+    handleDelete: ({ id: recordId }) => handleOpenDelete(recordId),
   });
 
   const [page, setPage] = useState(1);

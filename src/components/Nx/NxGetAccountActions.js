@@ -59,7 +59,7 @@ const nxGetAccountActions = ({
         <Tooltip title="View" key={`table-action-${index}`}>
           <Button
             onClick={() =>
-              handleView(record.id, record.subjectId, record.objectId)
+              handleView(record)
             }
             type="table-action"
           >
@@ -89,7 +89,7 @@ const nxGetAccountActions = ({
             }
             disabled={!isEditable}
             onClick={() =>
-              handleUpdate(record.id, record.subjectId, record.objectId)
+              handleUpdate(record)
             }
             type={"action"}
           >
@@ -102,7 +102,7 @@ const nxGetAccountActions = ({
           >
             <Button
               onClick={() =>
-                handleUpdate(record.id, record.subjectId, record.objectId)
+                handleUpdate(record)
               }
               disabled={!isEditable}
               type="table-action"
@@ -135,7 +135,7 @@ const nxGetAccountActions = ({
             }
             disabled={!isActive}
             onClick={() =>
-              handleInactivate(true, record?.id, record?.relatedAccountNumber)
+              handleInactivate(record)
             }
             type={"action"}
           >
@@ -151,7 +151,7 @@ const nxGetAccountActions = ({
               disabled={!isActive}
               checked={isInactive}
               onClick={() =>
-                handleInactivate(true, record?.id, record?.relatedAccountNumber)
+                handleInactivate(record)
               }
               style={{ transform: "scale(0.9)" }}
             />
@@ -174,7 +174,7 @@ const nxGetAccountActions = ({
                 width={20}
               />
             }
-            onClick={() => handleApprovalHistory(record?.id)}
+            onClick={() => handleApprovalHistory(record)}
             type={"action"}
           >
             Approval History
@@ -182,7 +182,7 @@ const nxGetAccountActions = ({
         ) : (
           <Tooltip title="Approval History" key={`table-action-${index}`}>
             <Button
-              onClick={() => handleApprovalHistory(record?.id)}
+              onClick={() => handleApprovalHistory(record)}
               type="table-action"
             >
               <SVGIcon name="IconLogHistory" width={20} />
@@ -199,7 +199,7 @@ const nxGetAccountActions = ({
     render: (record, _, index) => {
       return (
         <Tooltip title="Delete" key={`table-action-${index}`}>
-          <Button onClick={() => handleDelete(record.id)} type="table-action">
+          <Button onClick={() => handleDelete(record)} type="table-action">
             <SVGIcon
               name="IconDelete"
               className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out"
