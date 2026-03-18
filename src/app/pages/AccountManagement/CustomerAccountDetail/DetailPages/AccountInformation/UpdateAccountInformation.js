@@ -6,7 +6,6 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import HeaderUpdateAccount from "./HeaderUpdateAccount";

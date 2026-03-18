@@ -147,6 +147,7 @@ import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
+import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -315,6 +316,7 @@ const reducer = combineReducers({
 
   // job management API (RTK Query)
   [jobApiSlice.reducerPath]: jobApiSlice.reducer,
+  [jobGroupApiSlice.reducerPath]: jobGroupApiSlice.reducer,
 
   // debt and collection
   gracePeriod: gracePeriodReducer,
@@ -341,7 +343,8 @@ const store = configureStore({
       .concat(reportCustomerSlice.middleware)
       .concat(reportCustomerAgreementSlice.middleware)
       .concat(tasklistSlice.middleware)
-      .concat(jobApiSlice.middleware),
+      .concat(jobApiSlice.middleware)
+      .concat(jobGroupApiSlice.middleware),
 });
 
 setupListeners(store.dispatch);

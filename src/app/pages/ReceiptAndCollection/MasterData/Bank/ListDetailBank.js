@@ -8,7 +8,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectInactiveBank,
   getBankDetail,
@@ -296,7 +295,7 @@ const ListDetailBank = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <div className="w-full gap-5">
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -358,7 +357,7 @@ const ListDetailBank = () => {
             : data_detail?.bank?.bankName
         }
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

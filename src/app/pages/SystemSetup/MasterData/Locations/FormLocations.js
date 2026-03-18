@@ -1,7 +1,6 @@
 import { Button, Form, Input, Select, Spin, Tooltip } from 'antd';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_management/customer_account_routes';
 import BaseContainer from '../../../../../components/BaseContainer';
@@ -653,7 +652,7 @@ const FormLocations = ({ type }) => {
                 width={900}
                 header={'confirmation'}
                 footer={[
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                    <div key="footer" className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                         <ButtonComponent
                             onClick={handleCancel}
                             type="default"

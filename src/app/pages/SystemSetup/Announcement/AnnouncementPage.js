@@ -12,7 +12,6 @@ import {
 } from "../../../../redux/slices/system_setup/announcement";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import BaseContainer from "../../../../components/BaseContainer";
 import TablePagination from "../../../../components/TablePagination";
@@ -245,7 +244,7 @@ const AnnouncementPage = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions}/>
@@ -293,7 +292,7 @@ const AnnouncementPage = () => {
 
       {/* Modal Error */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -1,6 +1,5 @@
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { useEffect, useState, useRef } from "react";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useLocation, useNavigate } from "react-router-dom";
 import HeaderDetail from "../../../HeaderDetail";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
@@ -604,7 +603,7 @@ const CreateUpdateRelationship = ({
 
   return (
     <>
-      <LayoutMenu>
+      <div>
         <div className="flex flex-col gap-y-4">
           <BreadCrumb routes={routes} />
           <HeaderDetail
@@ -713,7 +712,7 @@ const CreateUpdateRelationship = ({
             </Form>
           </Spin>
         </div>
-      </LayoutMenu>
+      </div>
     </>
   );
 };

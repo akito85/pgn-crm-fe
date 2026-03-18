@@ -4,7 +4,6 @@ import { NavLink, Link } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
@@ -488,7 +487,7 @@ const ViewBank = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
@@ -551,7 +550,7 @@ const ViewBank = () => {
 
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

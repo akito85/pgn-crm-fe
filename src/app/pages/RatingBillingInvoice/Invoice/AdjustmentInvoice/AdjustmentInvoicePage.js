@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import SVGIcon from "../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -446,7 +445,7 @@ const AdjustmentInvoicePage = () => {
   }, [currentData]);
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -515,7 +514,7 @@ const AdjustmentInvoicePage = () => {
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

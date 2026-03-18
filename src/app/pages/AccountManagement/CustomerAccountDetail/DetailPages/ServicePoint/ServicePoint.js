@@ -5,7 +5,6 @@ import { useState } from "react";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import ServicePointAsset from "./ServicePointAsset";
 import HeaderServicePoint from "./HeaderServicePoint";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import HeaderDetail from "../../HeaderDetail";
@@ -125,7 +124,7 @@ const ServicePoint = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
+      <div>
         <BreadCrumbAdvanced routes={routes(idAccount)} />
 
         <div className="w-full mb-5">
@@ -181,7 +180,7 @@ const ServicePoint = () => {
             </ButtonComponent>
           </Link>
         </div>
-      </LayoutMenu>
+      </div>
     </Spin>
   );
 };

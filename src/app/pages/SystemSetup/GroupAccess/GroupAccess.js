@@ -1,4 +1,3 @@
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
   Spin,
   Tree,
@@ -355,7 +354,7 @@ const GroupAccess = () => {
   // use hooks handle retry
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading} className={"w-full top-20"}>
         <Toolbar items={itemActions} />
@@ -488,7 +487,7 @@ const GroupAccess = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

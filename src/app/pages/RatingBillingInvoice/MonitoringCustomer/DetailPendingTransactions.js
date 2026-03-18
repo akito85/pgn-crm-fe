@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Select, message, Modal } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
@@ -200,7 +199,7 @@ const DetailPendingTransactions = ({
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -321,7 +320,7 @@ const DetailPendingTransactions = ({
           </div>
         </CardContainer>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

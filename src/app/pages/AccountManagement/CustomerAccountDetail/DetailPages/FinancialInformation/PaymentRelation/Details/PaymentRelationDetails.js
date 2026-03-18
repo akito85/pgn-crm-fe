@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useState } from "react";
@@ -215,7 +214,7 @@ const PaymentRelationDetails = ({
   const isApproval = ["PAYMENT_RELATION", "INACTIVE_PAYMENT_RELATION"].includes(approvalType);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -292,7 +291,7 @@ const PaymentRelationDetails = ({
         customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -487,7 +486,7 @@ const BillingItemView = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -572,7 +571,7 @@ const BillingItemView = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import RadioTabs from "../../../../components/RadioTabs";
 import PricingRule from "./Utils/PricingRule";
@@ -426,7 +425,7 @@ const PricingRuleDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="flex flex-col w-full gap-4">
@@ -524,7 +523,7 @@ const PricingRuleDetail = () => {
           message={message}
         />
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -8,7 +8,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getDetailDeduction,
   approveOrRejectDeduction,
@@ -270,7 +269,7 @@ const ListDetailDeduction = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -327,7 +326,7 @@ const ListDetailDeduction = () => {
           </div>
         ) : null}
       </div>
-    </LayoutMenu>
+    </div>
   );
 };
 

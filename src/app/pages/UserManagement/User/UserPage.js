@@ -18,7 +18,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import {
   donwloadedExcel,
@@ -544,7 +543,7 @@ const UserPage = () => {
 
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Toolbar items={itemActions} />
       <Spin spinning={loading}>
@@ -656,7 +655,7 @@ const UserPage = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

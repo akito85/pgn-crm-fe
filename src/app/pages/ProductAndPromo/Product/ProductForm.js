@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin, Steps } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
@@ -1888,7 +1887,7 @@ const ProductForm = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes(type)} />
         <RadioTabs
@@ -2155,7 +2154,7 @@ const ProductForm = (props) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

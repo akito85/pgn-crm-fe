@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Form, Spin } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -244,7 +243,7 @@ const FormAccountingRules = ({ type }) => {
                 width={900}
                 header={'confirmation'}
                 footer={[
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                    <div key="footer" className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                         <ButtonComponent
                             onClick={handleCancel}
                             type="default"

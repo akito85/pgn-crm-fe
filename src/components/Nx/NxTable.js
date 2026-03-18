@@ -147,6 +147,7 @@ const NxTable = ({
   selectedRowKey = null,
   onRowClick = () => { },
   components: externalComponents,
+  nestedAlignConfig = {}, // { expandCellWidth, parentCol1Width, parentCol2Width }
 }) => {
   // Resolve aliases for backward compatibility
   const resolvedDataSource = dataSource || dataMain || [];
@@ -406,7 +407,7 @@ const NxTable = ({
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              fontSize: "11px",
+              fontSize: "12px",
               ...(externalOnCell.style || {}),
             },
           };
@@ -433,7 +434,7 @@ const NxTable = ({
   );
 
   const displayedColumns = useMemo(() => {
-    const cols = (resolvedColumns || []).map((c) => ({
+    const cols = (resolvedColumns || []).filter(Boolean).map((c) => ({
       ...c,
       key: c.key || c.dataIndex || c.title,
     }));
@@ -599,7 +600,14 @@ const NxTable = ({
   );
 
   return (
-    <div className={"flex flex-col w-full"}>
+    <div
+      className={"flex flex-col w-full"}
+      style={{
+        ...(nestedAlignConfig.expandCellWidth !== undefined && { '--nx-expand-cell-width': nestedAlignConfig.expandCellWidth }),
+        ...(nestedAlignConfig.parentCol1Width !== undefined && { '--nx-parent-col1-width': nestedAlignConfig.parentCol1Width }),
+        ...(nestedAlignConfig.parentCol2Width !== undefined && { '--nx-parent-col2-width': nestedAlignConfig.parentCol2Width }),
+      }}
+    >
       <style>
         {`
             #${idTable} .ant-table-content {
@@ -680,7 +688,6 @@ const NxTable = ({
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
               padding-bottom: 0;
-              ${(useInfiniteScroll || usePagination) ? "border-left: 1px solid #C8CDD4; border-right: 1px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
@@ -727,11 +734,16 @@ const NxTable = ({
               padding-right: 0px;
             }
 
+            /* Active sorter icon color — override primary color back to white */
+            #${idTable} .ant-table-thead .ant-table-column-sorter-up.active .anticon,
+            #${idTable} .ant-table-thead .ant-table-column-sorter-down.active .anticon {
+              color: rgba(255, 255, 255, 0.85) !important;
+            }
+
             #${idTable} .ant-table {
               border-radius: 8px 8px 0 0;
               overflow: hidden;
-              border: 1px solid #C8CDD4;
-              border-bottom: none;
+              border: none;
               border-collapse: collapse;
               border-spacing: 0;
             }
@@ -765,16 +777,12 @@ const NxTable = ({
               border-color: #C8CDD4 !important;
             }
 
-            #${idTable} .ant-table-thead {
-              border-left: 1px solid #C8CDD4;
-              border-right: 1px solid #C8CDD4;
-            }
-
             #${idTable} .ant-table-thead > tr > th {
               padding: 4px 8px !important;
               height: 30px !important;
               border-right: 1px solid #C8CDD4 !important;
               border-bottom: 1px solid #C8CDD4 !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
             }
 
             #${idTable} .ant-table-thead > tr:first-child > th {
@@ -787,6 +795,7 @@ const NxTable = ({
               font-size: 12px;
               border-right: 1px solid #C8CDD4 !important;
               border-bottom: 1px solid #C8CDD4 !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
             }
 
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
@@ -797,12 +806,107 @@ const NxTable = ({
               border-left: 1px solid #C8CDD4 !important;
             }
 
+
             #${idTable} .ant-table-measure-row > td {
               padding: 0 !important;
               height: 0 !important;
               line-height: 0;
               font-size: 0;
               overflow: hidden;
+            }
+
+            /* ── Nested table alignment ───────────────────────────────────────
+               Child first column left edge aligns with parent second column
+               left edge. Uses padding-left on the expanded td (NOT margin on
+               inner div) so the cell never overflows its fixed width.
+               
+               Override via nestedAlignConfig prop:
+                 expandCellWidth  – width of the expand trigger cell (default 32px)
+                 parentCol1Width  – width of parent's first data column (default 150px)
+            ──────────────────────────────────────────────────────────────────── */
+
+            #${idTable} {
+              --nx-expand-cell-width: 32px;
+              --nx-parent-col1-width: 60px;
+              --nx-child-offset: calc(var(--nx-expand-cell-width) + var(--nx-parent-col1-width));
+            }
+
+            /* Constrain the expanded td and indent the child table via padding.
+               overflow:hidden prevents the child from blowing out the parent width. */
+            #${idTable} .ant-table-expanded-row > td {
+              padding-top: 0 !important;
+              padding-bottom: 0 !important;
+              padding-left: var(--nx-child-offset) !important;
+              padding-right: 0 !important;
+              overflow: hidden !important;
+            }
+
+            /* Child table fills remaining width naturally — no margin needed */
+            #${idTable} .ant-table-expanded-row .ant-table-wrapper,
+            #${idTable} .ant-table-expanded-row > td > div {
+              margin-left: 0 !important;
+              overflow: hidden !important;
+            }
+
+            /* ── Nested (Child) Table Styling ──────────────────────────────────
+               Child tables use the same header blue (#2C6FAD), borders (#C8CDD4),
+               and alternating row styling as parent tables. */
+
+            #${idTable} .ant-table-expanded-row .ant-table {
+              border-left: 1px solid #C8CDD4 !important;
+              border-radius: 0 !important;
+              border-top: none !important;
+              border-right: none !important;
+              border-bottom: none !important;
+            }
+
+            #${idTable} .ant-table-expanded-row .ant-table-container {
+              border-radius: 0 !important;
+            }
+
+            #${idTable} .ant-table-expanded-row .ant-table-wrapper {
+              border-radius: 0 !important;
+            }
+
+            #${idTable} .ant-table-expanded-row > td > div {
+              border-radius: 0 !important;
+            }
+
+            /* Child table header styling */
+            #${idTable} .ant-table-expanded-row .ant-table-thead > tr > th {
+              background-color: #2C6FAD !important;
+              color: #fff !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+              border-color: #C8CDD4 !important;
+              border-right: 1px solid rgba(255,255,255,0.2) !important;
+            }
+
+            /* Child table body cells */
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr > td {
+              border-color: #C8CDD4 !important;
+              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+              font-size: 12px !important;
+            }
+
+            /* Child table alternating row colors */
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:nth-child(odd) > td {
+              background-color: #FFFFFF !important;
+            }
+
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:nth-child(even) > td {
+              background-color: #EBF2FA !important;
+            }
+
+            /* Child table row hover */
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:hover > td {
+              background-color: #EBF2FA !important;
+            }
+
+            /* Re-add left border on child's first header/cell so the vertical
+               line from the parent second-column separator continues cleanly */
+            #${idTable} .ant-table-expanded-row .ant-table-thead > tr > th:first-child,
+            #${idTable} .ant-table-expanded-row .ant-table-tbody > tr > td:first-child {
+              border-left: 1px solid #C8CDD4 !important;
             }
           `}
       </style>
@@ -904,10 +1008,10 @@ const NxTable = ({
         />
 
         {useInfiniteScroll ? (
-          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
-              {isLoadingMore && " · Loading..."}
+              {isLoadingMore && hasMore && " · Loading..."}
             </span>
             {!hasMore && resolvedDataSource?.length > 0 && (
               <>
@@ -917,7 +1021,7 @@ const NxTable = ({
             )}
           </div>
         ) : usePagination ? (
-          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <Select
                 value={pageSize}
@@ -949,7 +1053,7 @@ const NxTable = ({
             />
           </div>
         ) : (
-          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
             </span>

@@ -15,7 +15,6 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
 import SVGIcon from "../../../../assets/Icon/index";
 
@@ -235,13 +234,13 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
 const GasDeposit = ({ moduleType, id = 0, idCustomer = 0 }) => {
   if (moduleType === "sa")
     return (
-      <LayoutMenu>
+      <div>
         <GasDepositModule
           moduleType={moduleType}
           id={id}
           idCustomer={idCustomer}
         />
-      </LayoutMenu>
+      </div>
     );
   else if (moduleType === "ua")
     return (

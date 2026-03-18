@@ -15,7 +15,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import TablePagination from "../../../../components/TablePagination";
 import {
   detailPositionHierarchy,
@@ -492,7 +491,7 @@ const ApprovalHierarchyPage = () => {
   // use hooks handle retry
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -618,7 +617,7 @@ const ApprovalHierarchyPage = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 export default ApprovalHierarchyPage;

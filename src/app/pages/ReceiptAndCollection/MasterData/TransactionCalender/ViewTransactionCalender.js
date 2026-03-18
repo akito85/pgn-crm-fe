@@ -7,7 +7,6 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
@@ -673,7 +672,7 @@ const ViewTransactionCalender = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
@@ -733,7 +732,7 @@ const ViewTransactionCalender = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

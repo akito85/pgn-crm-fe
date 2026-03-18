@@ -728,7 +728,7 @@ const ViewMaintainElectronicBankStatement = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {/* <Toolbar items={itemActions} /> */}
@@ -808,7 +808,7 @@ const ViewMaintainElectronicBankStatement = () => {
         </CardContainer>
       </Spin>
       {renderModal}
-    </LayoutMenu>
+    </div>
   );
 };
 

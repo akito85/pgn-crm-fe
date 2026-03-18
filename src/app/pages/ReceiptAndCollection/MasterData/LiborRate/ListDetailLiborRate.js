@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import DetailLiborRate from "./DetailLiborRate";
 import {
   getDetailRateIndex,
@@ -81,7 +80,7 @@ const ListDetailLiborRate = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="mt-5">
@@ -137,7 +136,7 @@ const ListDetailLiborRate = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

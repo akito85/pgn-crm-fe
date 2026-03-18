@@ -8,7 +8,6 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import { dateFormatting, hasValue } from "../../../../utils";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import { columnsDetailLoginBackground } from "./Table/TableDetailBackground";
 import { getDetailBackground } from "../../../../redux/slices/system_setup/login_background";
@@ -113,7 +112,7 @@ const LoginBackgroundDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
 
@@ -213,7 +212,7 @@ const LoginBackgroundDetail = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

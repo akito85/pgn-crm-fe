@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { Button, Form, Upload, Image, Spin } from "antd";

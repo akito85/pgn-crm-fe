@@ -1,5 +1,4 @@
 import React from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Alert, Checkbox, Form, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -522,7 +521,7 @@ const ViewMeterReadingCode = () => {
           header={"detail meter reading code"}
           width={1000}
           footer={[
-            <ButtonComponent onClick={handleCancel}>Back</ButtonComponent>,
+            <ButtonComponent key="back" onClick={handleCancel}>Back</ButtonComponent>,
           ]}
         >
           <CardComponent header={"meter reading code information"}>

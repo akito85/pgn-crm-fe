@@ -7,7 +7,6 @@ import BaseContainer from "../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../components/DetailText";
 import { LeftOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import HeaderDetail from "../../HeaderDetail";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";

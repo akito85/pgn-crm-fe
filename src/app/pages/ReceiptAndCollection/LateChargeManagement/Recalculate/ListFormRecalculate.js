@@ -4,7 +4,6 @@ import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -133,7 +132,7 @@ const ListFormRecalculate = () => {
     };
 
     return (
-        <LayoutMenu>
+        <div>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <RadioTabs
@@ -250,7 +249,7 @@ const ListFormRecalculate = () => {
                     selectedHierarchy={selectedHierarchy}
                 />
             </ModalCustom>
-        </LayoutMenu>
+        </div>
     );
 };
 

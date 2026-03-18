@@ -1,5 +1,5 @@
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import { Checkbox, Form, Input, Select, Spin } from "antd";
+import { LeftOutlined, WarningOutlined, UploadOutlined } from "@ant-design/icons";
+import { Checkbox, Form, Input, Select, Spin, Upload, Button, Space } from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,7 +9,6 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
   getActions,
   getCreateMenu,
@@ -47,6 +46,29 @@ const FormMenu = (props) => {
   const [actions, setActions] = useState([]);
   const id = location?.state?.id;
   const [payload, setPayload] = useState({});
+  const [iconFile, setIconFile] = useState(null);
+
+  // All sidebar-appropriate icons from SVGIcon registry (sorted alphabetically)
+  const availableIcons = [
+    "IconAccountManagement",
+    "IconBilling",
+    "IconCalendarEvent",
+    "IconHome",
+    "IconInvoice",
+    "IconJobExecution",
+    "IconJobGroup",
+    "IconJobList",
+    "IconLogHistory",
+    "IconMonitoringSession",
+    "IconProduct",
+    "IconRating",
+    "IconReceipt",
+    "IconReport",
+    "IconReporting",
+    "IconSupport",
+    "IconSystemSetup",
+    "IconUserManagement",
+  ];
 
   const assert = () => {
     form.setFieldsValue({
@@ -60,9 +82,10 @@ const FormMenu = (props) => {
       parentName:
         data_detail?.data?.parentId === 0 ? "" : data_detail?.data?.parentId,
       actions: data_detail?.data?.actions.map((action) => action.actionId),
+      icon: data_detail?.data?.icon,
     });
     setIsPage(data_detail?.data?.isPage);
-    setTopPage(data_detail?.data?.isTopParent)
+    setTopPage(data_detail?.data?.isTopParent);
   };
 
 
@@ -126,7 +149,8 @@ const FormMenu = (props) => {
           isPage: hasValue(formValue.isPage) ? formValue.isPage : false,
           parentId: formValue?.isPage === true ? formValue?.parentName : null,
           menuId: location?.state.id,
-          actions: hasValue(formValue?.actions) && Array.isArray(formValue?.actions) ? formValue?.actions : []
+          actions: hasValue(formValue?.actions) && Array.isArray(formValue?.actions) ? formValue?.actions : [],
+          icon: formValue.icon || null
         }
         validateCreateUpdateObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/menus/validate-update', type }
       } else {
@@ -138,7 +162,8 @@ const FormMenu = (props) => {
           isTopParent: hasValue(formValue?.isTopParent) ? formValue.isTopParent : false,
           isPage: hasValue(formValue.isPage) ? formValue.isPage : false,
           parentId: formValue?.isPage === true ? formValue?.parentName : null,
-          actions: hasValue(formValue?.actions) && Array.isArray(formValue?.actions) ? formValue?.actions : []
+          actions: hasValue(formValue?.actions) && Array.isArray(formValue?.actions) ? formValue?.actions : [],
+          icon: formValue.icon || null
         }
         validateCreateUpdateObj = { body: body, services: userHttpService, endPoint: '/v1/dbs/api/menus/validate-create', type }
       }
@@ -214,6 +239,21 @@ const FormMenu = (props) => {
   };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+
+  const handleIconUpload = (file) => {
+    setIconFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      form.setFieldsValue({ icon: `uploaded_${file.name}` });
+    };
+    reader.readAsDataURL(file);
+    return false; // Prevent default upload
+  };
+
+  const handleIconSelect = (value) => {
+    // Clear uploaded file when user picks from the dropdown instead
+    setIconFile(null);
+  };
 
   return (
     <LayoutMenu>
@@ -313,6 +353,46 @@ const FormMenu = (props) => {
                 >
                   <InputComponent type="textarea" />
                 </Form.Item>
+                <div className="flex flex-col gap-3 mt-4 pt-4 border-t">
+                  <label className="font-semibold text-sm">Icon Management</label>
+
+                  <Form.Item
+                    label={"Select Icon"}
+                    name={"icon"}
+                    className="w-full"
+                  >
+                    <SelectComponent
+                      placeholder="Choose from available icons"
+                      onChange={handleIconSelect}
+                    >
+                      {availableIcons.map((icon) => (
+                        <Option key={icon} value={icon}>
+                          <Space size="small">
+                            <SVGIcon name={icon} width={16} />
+                            <span>{icon}</span>
+                          </Space>
+                        </Option>
+                      ))}
+                    </SelectComponent>
+                  </Form.Item>
+
+                  <div className="border-t pt-3">
+                    <label className="text-sm font-medium block mb-2">Or Upload Custom Icon</label>
+                    <Upload
+                      accept="image/*,.svg"
+                      maxCount={1}
+                      beforeUpload={handleIconUpload}
+                      onRemove={() => {
+                        setIconFile(null);
+                        form.setFieldsValue({ icon: undefined });
+                      }}
+                    >
+                      <Button icon={<UploadOutlined />}>
+                        Upload Icon File
+                      </Button>
+                    </Upload>
+                  </div>
+                </div>
               </div>
             </BaseContainer>
             <BaseContainer header={"ACTIONS"}>
@@ -416,6 +496,15 @@ const FormMenu = (props) => {
           <div className="w-full">
             <DetailText label={"Description"}>{payload?.body?.description}</DetailText>
           </div>
+          {payload?.body?.icon && (
+            <div className="w-full border-t pt-3">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Icon:</span>
+                <SVGIcon name={payload?.body?.icon} width={20} />
+                <span className="text-sm">{payload?.body?.icon}</span>
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex justify-end gap-5">
           <ButtonComponent onClick={handleCancel} type="default">

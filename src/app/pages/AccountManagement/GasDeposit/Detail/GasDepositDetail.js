@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useState } from "react";
@@ -263,7 +262,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [idGd, draftExist])
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -367,7 +366,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -1,5 +1,4 @@
 /* eslint-disable default-case */
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu.js";
 import BreadCrumb from "../../../../components/BreadCrumb.js";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes.js";
 import { useEffect } from "react";

@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../components/RadioTabs";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -145,7 +144,7 @@ const ListFormLateCharge = ({ type }) => {
     };
 
     return (
-        <LayoutMenu>
+        <div>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <RadioTabs
@@ -261,7 +260,7 @@ const ListFormLateCharge = ({ type }) => {
                     typeSelector="late"
                 />
             </ModalCustom>
-        </LayoutMenu>
+        </div>
     );
 };
 

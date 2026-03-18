@@ -291,7 +291,7 @@ const DetailSynchronizeReceipt = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
@@ -356,7 +356,7 @@ const DetailSynchronizeReceipt = () => {
       </div>
 
       {/* </Spin> */}
-    </LayoutMenu>
+    </div>
   );
 };
 

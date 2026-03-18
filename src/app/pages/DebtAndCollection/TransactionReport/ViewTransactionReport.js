@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { Spin, Table } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -70,7 +69,7 @@ const ViewTransactionReport = () => {
   
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading } className="w-full top-20" tip="Loading...">
         <BreadCrumb routes={routes} />
 
@@ -107,7 +106,7 @@ const ViewTransactionReport = () => {
           </BaseContainer>
         </div>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

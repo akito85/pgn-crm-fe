@@ -5,7 +5,6 @@ import { Tabs, Button, Tooltip } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import CardContainer from "../../../../../components/CardContainer";
 import DetailText from "../../../../../components/DetailText";
@@ -483,7 +482,7 @@ const AccountDetailPage = () => {
   );
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
 
       {/* Customer & Account Info */}
@@ -653,7 +652,7 @@ const AccountDetailPage = () => {
           Back
         </ButtonComponent>
       </div>
-    </LayoutMenu>
+    </div>
   );
 };
 

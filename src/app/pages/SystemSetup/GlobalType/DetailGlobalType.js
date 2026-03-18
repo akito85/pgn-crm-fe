@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
   getDetailGlobalTypeValue,
   getViewDetailGlobalType,

@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Spin, Form } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -119,7 +118,7 @@ const ProductClassCreate = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -262,7 +261,7 @@ const ProductClassCreate = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -782,7 +782,7 @@ const ContentManagementForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -929,7 +929,7 @@ const ContentManagementForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

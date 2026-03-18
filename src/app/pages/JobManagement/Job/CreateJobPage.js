@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, Select, InputNumber, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import { useNavigate, useLocation } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -107,8 +106,9 @@ const CreateJobPage = () => {
   const [notificationSettings, setNotificationSettings] = useState(INITIAL_NOTIFICATIONS);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const { id } = useParams();
+  const id = location.state?.id;
   const isEditMode = Boolean(id);
 
   // RTK Query hooks
@@ -266,7 +266,7 @@ const CreateJobPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={breadcrumbRoutes} />
       <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 
@@ -408,13 +408,15 @@ const CreateJobPage = () => {
 
                 {selectedProcedure && (
                   <div className="md:col-span-3">
-                    <NxTableInlineEdit
-                      idTable="sp-parameters-info-table"
-                      dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
-                      onDataChange={() => {}}
-                      columns={SP_PARAM_COLUMNS}
-                      emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
-                    />
+                    <NxBaseContainer border={false} minHeight="250px" padding={false}>
+                      <NxTableInlineEdit
+                        idTable="sp-parameters-info-table"
+                        dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
+                        onDataChange={() => {}}
+                        columns={SP_PARAM_COLUMNS}
+                        emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
+                      />
+                    </NxBaseContainer>
                   </div>
                 )}
               </>)}
@@ -499,6 +501,7 @@ const CreateJobPage = () => {
                 Create
               </ButtonComponent>
             }
+            minHeight="250px"
           >
             <NxTableInlineEdit
               idTable="job-parameters-table"
@@ -551,7 +554,7 @@ const CreateJobPage = () => {
         </footer>
 
       </Form>
-    </LayoutMenu>
+    </div>
   );
 };
 

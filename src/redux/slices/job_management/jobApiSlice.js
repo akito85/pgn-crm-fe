@@ -42,12 +42,20 @@ const toFrontend = (job) => {
     code:          job.jobCode,
     type:          job.jobType,
     description:   job.description,
+    desc:          job.description,   // alias used by table columns
     executeType:   job.execType,
+    execType:      job.execType,      // alias used by child table columns
     handler:       job.handlerClass,
+    handlerClass:  job.handlerClass,  // alias used by child table columns
     taskQueueId:   job.taskQueueId,
     taskQueueName: job.taskQueueName,
     timeout:       job.timeoutSeconds,
     maxRetry:      job.maxRetry,
+    createdDate:   job.createdAt,     // alias used by table columns
+    updatedDate:   job.updatedAt,     // alias used by table columns
+    module:        job.moduleName,    // alias used by table columns
+    accessGroup:   job.accessGroupName ?? (job.accessGroupId ? String(job.accessGroupId) : null),
+    parent:        job.parentJobId   ? String(job.parentJobId)   : null,
     retryPolicy:   job.retryPolicy,
     module:        job.moduleName,
     defaultInput:  job.defaultInput,
@@ -285,6 +293,18 @@ export const jobApiSlice = createApi({
       ],
     }),
 
+    /** GET /v1/api/job/definitions/access-groups — id→name lookup */
+    getAccessGroups: builder.query({
+      queryFn: async (_, api) => {
+        try {
+          const res = await axios.get(`${JOB_BASE}/access-groups`, { headers: getHeaders() });
+          return { data: res.data };
+        } catch (error) {
+          return { error: { status: error?.response?.status, data: error?.response?.data } };
+        }
+      },
+    }),
+
     /** DELETE /v1/api/job/definitions/:jobId */
     deleteJob: builder.mutation({
       queryFn: async (jobId, api) => {
@@ -307,6 +327,7 @@ export const jobApiSlice = createApi({
 export const {
   useSearchJobsQuery,
   useGetJobByIdQuery,
+  useGetAccessGroupsQuery,
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,

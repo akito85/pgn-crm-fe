@@ -7,7 +7,6 @@ import DocViewer from "react-doc-viewer";
 
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsInvoice } from "./TableViewInvoice";
@@ -543,7 +542,7 @@ const ViewInvoice = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -649,7 +648,7 @@ const ViewInvoice = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </div>
   );
 };
 

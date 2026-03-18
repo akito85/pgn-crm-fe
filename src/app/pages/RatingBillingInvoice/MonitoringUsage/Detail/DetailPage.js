@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import { RBI_ROUTES } from '../../../../../routes/rating_billing/rbi_routes';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -152,7 +151,7 @@ const DetailPage = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <div>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
 
@@ -262,7 +261,7 @@ const DetailPage = () => {
                     />
                 </Form>
             </Spin>
-        </LayoutMenu>
+        </div>
     );
 }
 

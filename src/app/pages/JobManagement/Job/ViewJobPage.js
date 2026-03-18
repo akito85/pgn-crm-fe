@@ -1,7 +1,6 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Spin } from "antd";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -33,7 +32,8 @@ const KvGrid = ({ children }) => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const ViewJobPage = () => {
-  const { id } = useParams();
+  const location = useLocation();
+  const id = location.state?.id;
   const navigate = useNavigate();
 
   const { data: job, isLoading } = useGetJobByIdQuery(id);
@@ -46,17 +46,17 @@ const ViewJobPage = () => {
 
   if (isLoading || !job) {
     return (
-      <LayoutMenu>
+      <div>
         <BreadCrumb routes={breadcrumbRoutes} />
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
           <Spin size="large" />
         </div>
-      </LayoutMenu>
+      </div>
     );
   }
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={breadcrumbRoutes} />
 
       <NxCardContainer header="JOB DETAIL">
@@ -111,7 +111,7 @@ const ViewJobPage = () => {
         </NxBaseContainer>
 
         {/* PARAMETERS */}
-        <NxBaseContainer border header="PARAMETERS" className="mt-4">
+        <NxBaseContainer border header="PARAMETERS" className="mt-4" minHeight="250px">
           {!job.parameters?.length ? (
             <p style={{ color: "#999", fontSize: 13, padding: "8px 0" }}>No parameters defined.</p>
           ) : (
@@ -151,6 +151,7 @@ const ViewJobPage = () => {
               useSelect={false}
               loading={false}
               rowKey="key"
+              tableScrolled={job.parameters && job.parameters.length > 10 ? { y: 380 } : {}}
             />
           )}
         </NxBaseContainer>
@@ -239,13 +240,13 @@ const ViewJobPage = () => {
         <ButtonComponent
           border={false}
           className="!bg-[#1976d2] !text-white !border-transparent"
-          onClick={() => navigate(JOB_MGMT_ROUTES.UPDATE_JOB.replace(":id", id))}
+          onClick={() => navigate(JOB_MGMT_ROUTES.UPDATE_JOB, { state: { id } })}
         >
           Edit
         </ButtonComponent>
       </footer>
 
-    </LayoutMenu>
+    </div>
   );
 };
 

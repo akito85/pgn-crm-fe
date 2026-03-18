@@ -9,7 +9,6 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SelectComponent from "../../../../components/SelectComponent";
 import {
   getDetailActivityActionPaginate,
@@ -134,7 +133,7 @@ const FormActivityAction = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form
@@ -289,7 +288,7 @@ const FormActivityAction = (props) => {
 
       {/* render modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

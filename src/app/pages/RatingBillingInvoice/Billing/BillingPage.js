@@ -8,7 +8,6 @@ import React, {
 import { useDispatch, useSelector } from "react-redux";
 import { Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -345,7 +344,7 @@ const BillingPage = () => {
   );
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -430,7 +429,7 @@ const BillingPage = () => {
         handleRefresh={handleRefresh}
         handleOpenModal={() => setModalApproval(true)}
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

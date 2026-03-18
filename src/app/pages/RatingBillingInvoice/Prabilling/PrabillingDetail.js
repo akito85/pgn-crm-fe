@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tabs } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -86,7 +85,7 @@ const PrabillingDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
 
       <div className="w-full">
@@ -116,7 +115,7 @@ const PrabillingDetail = () => {
           Back
         </ButtonComponent>
       </div>
-    </LayoutMenu>
+    </div>
   );
 };
 

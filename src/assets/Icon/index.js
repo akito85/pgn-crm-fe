@@ -63,9 +63,16 @@ import IconReGenerate from "./IconReGenerate";
 import IconRatingRecalculate from "./IconRatingRecalculate";
 import IconMonitoring from './IconMonitoring';
 import IconPlusCircle from "./IconPlusCircle";
+import IconJobList from "./IconJobList";
+import IconJobGroup from "./IconJobGroup";
+import IconJobExecution from "./IconJobExecution";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
+  const { color = "#000000" } = props;
+  // Pass color to all icons
+  const iconProps = { ...props, color };
+
   switch (props.name) {
     case "IconAccountManagement":
       return <IconAccountManagement {...props} />;
@@ -197,6 +204,12 @@ const Icon = (props) => {
       return <IconPlusCircle {...props} />;
     case "IconReporting":
       return <FileOutlined {...props} style={{ color: "#4B465C" }} />;
+    case "IconJobList":
+      return <IconJobList {...props} />;
+    case "IconJobGroup":
+      return <IconJobGroup {...props} />;
+    case "IconJobExecution":
+      return <IconJobExecution {...props} />;
     default:
       return;
   }

@@ -525,7 +525,7 @@ const PositionHierarchyPage = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <div>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <Toolbar items={itemActions} />
@@ -559,7 +559,7 @@ const PositionHierarchyPage = () => {
                 {/* modal try again hooks */}
                 {renderModal()}
             </Spin>
-        </LayoutMenu>
+        </div>
     );
 }
 

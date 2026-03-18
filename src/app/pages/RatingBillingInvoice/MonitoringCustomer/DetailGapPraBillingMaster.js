@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin, Input, Select, message, Modal } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
@@ -237,7 +236,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -326,7 +325,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
           </div>
         </CardContainer>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

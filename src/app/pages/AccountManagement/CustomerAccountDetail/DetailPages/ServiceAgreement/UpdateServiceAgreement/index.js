@@ -12,7 +12,6 @@ import moment from "moment";
 
 import accountManagementPromoHttpService from "../../../../../../../redux/services/account_management/accountManagementService";
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
@@ -1819,7 +1818,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	// console.log(dataTermOfService, ' data tos depan');
 
 	return (
-		<LayoutMenu>
+		<div>
 			<Spin spinning={isLoading}>
 				<div className="flex flex-col gap-y-4">
 					<NxBreadCrumb routes={routes(idAccount)} />
@@ -2039,7 +2038,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					<p className="pl-[70px]">{messageValidateSa}</p>
 				</div>
 			</ModalError>
-		</LayoutMenu>
+		</div>
 	);
 };
 

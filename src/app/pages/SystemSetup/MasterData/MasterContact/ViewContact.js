@@ -1,5 +1,4 @@
 import React from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Alert, Checkbox, Form, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -560,6 +559,7 @@ const ViewContact = () => {
                     header={'contact detail'}
                     footer={[
                         <ButtonComponent
+                            key="back"
                             onClick={handleCancel}
                         >
                             Back

@@ -7,7 +7,6 @@ import {
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import InputComponent from "../../../../components/InputComponent";
 import SelectComponent from "../../../../components/SelectComponent";
@@ -260,7 +259,7 @@ const CreateDeliveryJobPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -636,7 +635,7 @@ const CreateDeliveryJobPage = () => {
           </Form>
         </Spin>
       </CardContainer>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -11,7 +11,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   submitTransferToReceipt,
   getAllApprovalList,
@@ -271,7 +270,7 @@ const ListFormTransferToReceipt = (props) => {
   });
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <RadioTabs
@@ -365,7 +364,7 @@ const ListFormTransferToReceipt = (props) => {
         onClose={() => setShowSearchReceiptModal(false)}
         onConfirm={handleConfirmSearchReceipt}
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -58,7 +58,6 @@ import NxDateRangePicker from "../../../components/Nx/NxDateRangePicker";
 import NxSearchInput from "../../../components/Nx/NxSearchInput";
 import NxDropdownBase from "../../../components/Nx/NxDropdownBase";
 import NxTextButton from "../../../components/Nx/NxTextButton";
-import LayoutMenu from "../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../components/ButtonComponent";
 
 const { Title, Text } = Typography;
@@ -563,7 +562,7 @@ const NotificationHistory = () => {
 
 
   return (
-  <LayoutMenu>
+  <div>
     <div className={transitionClass}>
     {/*
     <div class="w-full flex flex-col justify-end items-end mb-5">
@@ -915,7 +914,7 @@ const NotificationHistory = () => {
       </button>
     </div>
     </div>
-  </LayoutMenu>
+  </div>
   );
 };
 

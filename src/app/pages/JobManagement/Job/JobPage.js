@@ -4,7 +4,6 @@ import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { Dropdown } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
 import NxModal from "../../../../components/Nx/NxModal";
@@ -12,7 +11,8 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { getJobManagementColumns } from "../jobManagementColumns";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
-import { useSearchJobsQuery, useDeleteJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
+import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
+import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 
 const PAGE_SIZE = 20;
 
@@ -51,6 +51,17 @@ const JobPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Permission check
+  const { actions } = useGrantAccessHooks();
+  const permissions = useMemo(
+    () => (actions ?? []).map((a) => a.toLowerCase()),
+    [actions]
+  );
+  const canCreate = permissions.includes("create");
+  const canUpdate = permissions.includes("update");
+  const canDelete = permissions.includes("delete");
+  const canView   = permissions.includes("view");
+
   const [page, setPage]                   = useState(0); // 0-indexed for backend
   const [sort, setSort]                   = useState({ sortBy: "createdAt", sortDir: "DESC" });
   const [accumulatedData, setAccumulatedData] = useState([]);
@@ -67,6 +78,12 @@ const JobPage = () => {
     sortBy: sort.sortBy,
     sortDir: sort.sortDir,
   });
+
+  const { data: accessGroupsRaw } = useGetAccessGroupsQuery();
+  const accessGroupsMap = useMemo(() => {
+    if (!accessGroupsRaw) return {};
+    return Object.fromEntries(accessGroupsRaw.map((g) => [g.groupId, g.groupName]));
+  }, [accessGroupsRaw]);
 
   const [deleteJobMutation, { isLoading: deleteLoading }] = useDeleteJobMutation();
 
@@ -111,9 +128,9 @@ const JobPage = () => {
     setAccumulatedData([]);
   };
 
-  // Navigation helpers
-  const toViewUrl   = useCallback((id) => JOB_MGMT_ROUTES.VIEW_JOB_DETAIL.replace(":id", id), []);
-  const toUpdateUrl = useCallback((id) => JOB_MGMT_ROUTES.UPDATE_JOB.replace(":id", id), []);
+  // Navigation helpers (state-based — ID passed via location.state, not URL param)
+  const toView   = useCallback((id) => navigate(JOB_MGMT_ROUTES.VIEW_JOB_DETAIL, { state: { id } }), [navigate]);
+  const toUpdate = useCallback((id) => navigate(JOB_MGMT_ROUTES.UPDATE_JOB,      { state: { id } }), [navigate]);
 
   // Delete handlers
   const handleDeleteConfirm = async () => {
@@ -132,62 +149,71 @@ const JobPage = () => {
     setJobToDelete(null);
   };
 
-  // Action column (inside component to close over navigate and state setters)
-  const actionColumn = useMemo(() => ({
-    title: "ACTIONS",
-    key: "actions",
-    width: 120,
-    align: "center",
-    fixed: "right",
-    render: (_, record) => {
-      const menuItems = [
-        {
-          key: "update",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <EditMenuIcon /> Update
-            </span>
-          ),
-          onClick: () => navigate(toUpdateUrl(record.id)),
-        },
-        {
-          key: "delete",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <DeleteMenuIcon /> Delete
-            </span>
-          ),
-          onClick: () => {
-            setJobToDelete({ id: record.id, name: record.name, code: record.code });
-            setDeleteModalOpen(true);
-          },
-        },
-      ];
+  // Action column (permission-gated)
+  const actionColumn = useMemo(() => {
+    const hasAnyAction = canUpdate || canDelete || canView;
+    if (!hasAnyAction) return null;
 
-      return (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-          <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-            <button
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ThreeDotsIcon />
-            </button>
-          </Dropdown>
-          <button
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-            onClick={() => navigate(toViewUrl(record.id))}
-          >
-            <ViewListIcon />
-          </button>
-        </div>
-      );
-    },
-  }), [navigate, toUpdateUrl, toViewUrl]);
+    return {
+      title: "ACTIONS",
+      key: "actions",
+      width: 120,
+      align: "center",
+      fixed: "right",
+      render: (_, record) => {
+        const menuItems = [
+          canUpdate && {
+            key: "update",
+            label: (
+              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <EditMenuIcon /> Update
+              </span>
+            ),
+            onClick: () => toUpdate(record.id),
+          },
+          canDelete && {
+            key: "delete",
+            label: (
+              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <DeleteMenuIcon /> Delete
+              </span>
+            ),
+            onClick: () => {
+              setJobToDelete({ id: record.id, name: record.name, code: record.code });
+              setDeleteModalOpen(true);
+            },
+          },
+        ].filter(Boolean);
+
+        return (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            {menuItems.length > 0 && (
+              <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
+                <button
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ThreeDotsIcon />
+                </button>
+              </Dropdown>
+            )}
+            {canView && (
+              <button
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+                onClick={() => toView(record.id)}
+              >
+                <ViewListIcon />
+              </button>
+            )}
+          </div>
+        );
+      },
+    };
+  }, [toView, toUpdate, canUpdate, canDelete, canView]);
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(page + 1, PAGE_SIZE), actionColumn],
-    [actionColumn, page]
+    () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
+    [actionColumn, accessGroupsMap]
   );
 
   const allColumns = useMemo(
@@ -211,7 +237,7 @@ const JobPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <NxCardContainer
         header="JOB LIST"
@@ -293,7 +319,7 @@ const JobPage = () => {
           </div>
         </div>
       </NxModal>
-    </LayoutMenu>
+    </div>
   );
 };
 

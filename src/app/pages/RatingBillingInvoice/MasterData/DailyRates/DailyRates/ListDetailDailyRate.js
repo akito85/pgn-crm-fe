@@ -9,7 +9,6 @@ import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { configApp } from "../../../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
 import { getConfigFileRBIData } from "../../../../../../redux/slices/attachmentSlice";
@@ -210,7 +209,7 @@ const ListDetailDailyRate = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -308,7 +307,7 @@ const ListDetailDailyRate = () => {
           </Form.Item>
         </Form>
       </ModalApproveOrReject> */}
-    </LayoutMenu>
+    </div>
   );
 };
 

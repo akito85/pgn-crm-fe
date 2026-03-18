@@ -8,7 +8,6 @@ import BreadCrumbAdvanced from "../../../../../components/BreadCrumbAdvanced";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   createAccountInformation,
   createValidasiBankAccount,
@@ -493,7 +492,7 @@ console.log(data_list_gl, ' data list gl');
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumbAdvanced routes={routes(id)} />
       <Spin spinning={loading}>
         <RadioTabs
@@ -657,7 +656,7 @@ console.log(data_list_gl, ' data list gl');
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 
