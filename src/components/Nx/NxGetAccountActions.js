@@ -10,6 +10,8 @@ const nxGetAccountActions = ({
   handleDownload = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
+  handleRecalculate = () => {},
+  handleExpire = () => {},
   handleDelete = () => {}
 }) => [
   {
@@ -222,7 +224,7 @@ const nxGetAccountActions = ({
               />
             }
             border={false}
-            onClick={() => handleApprovalHistory(record?.id)}
+            onClick={() => handleRecalculate(record)}
             type={"action"}
           >
             <span className={"text-black ml-3"}>Recalculate</span>
@@ -230,7 +232,40 @@ const nxGetAccountActions = ({
         ) : (
           <Tooltip title="Recalculate" key={`table-action-${index}`}>
             <Button
-              onClick={() => handleApprovalHistory(record?.id)}
+              onClick={() => handleRecalculate(record)}
+              type="table-action"
+            >
+              <SVGIcon name="IconRating" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Expire",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <SVGIcon
+                name="IconExpire"
+                width={20}
+              />
+            }
+            border={false}
+            onClick={() => handleExpire(record)}
+            type={"action"}
+          >
+            <span className={"text-black ml-3"}>Recalculate</span>
+          </Button>
+        ) : (
+          <Tooltip title="Recalculate" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleExpire(record)}
               type="table-action"
             >
               <SVGIcon name="IconRating" width={20} />
