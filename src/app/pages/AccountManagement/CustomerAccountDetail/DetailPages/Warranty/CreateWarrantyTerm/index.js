@@ -29,7 +29,6 @@ import {
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import HeaderDetail from "../../../HeaderDetail";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 
@@ -415,7 +414,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <NxBreadCrumb
           routes={routes({ idAccount, idCustomer, type, idSA, typeForm })}
@@ -592,7 +591,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

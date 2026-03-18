@@ -9,7 +9,6 @@ import moment from "moment";
 
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
@@ -467,7 +466,7 @@ const ListFormWarranty = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routesBread} />
       <Spin spinning={loadingDetail || loadingApproval || loadingSave}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -607,7 +606,7 @@ const ListFormWarranty = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </div>
   );
 };
 

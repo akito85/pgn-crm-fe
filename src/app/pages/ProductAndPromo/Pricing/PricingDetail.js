@@ -1,5 +1,4 @@
 import React, { useState, Fragment, useEffect } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -433,7 +432,7 @@ const PricingDetail = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loadingPricing}>
         <BreadCrumb routes={routes} />
         <div className="flex flex-col gap-4">
@@ -627,7 +626,7 @@ const PricingDetail = (props) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

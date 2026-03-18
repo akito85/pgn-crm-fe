@@ -21,7 +21,6 @@ import {
   ModalError,
   ModalSuccess,
 } from "../../../../../../components/Modal/ModalPopUp";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import HeaderDetail from "../../HeaderDetail";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
@@ -399,7 +398,7 @@ const ServicePointAssetAssign = ({ }) => {
 
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(id, idAccount)} />
 
@@ -704,7 +703,7 @@ const ServicePointAssetAssign = ({ }) => {
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

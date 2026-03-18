@@ -516,7 +516,7 @@ const DigitalSignatureView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -592,7 +592,7 @@ const DigitalSignatureView = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

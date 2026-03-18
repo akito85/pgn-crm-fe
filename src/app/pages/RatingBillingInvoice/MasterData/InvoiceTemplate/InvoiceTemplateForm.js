@@ -5,7 +5,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import InvoiceTemplateSectionForm from "./Form/InvoiceTemplateSectionForm";
 import BaseContainer from "../../../../../components/BaseContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -911,7 +910,7 @@ const InvoiceTemplateForm = ({ type }) => {
   }, [form, listDataCriteria]);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -1089,7 +1088,7 @@ const InvoiceTemplateForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

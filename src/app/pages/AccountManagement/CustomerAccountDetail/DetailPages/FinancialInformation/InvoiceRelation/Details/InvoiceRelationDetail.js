@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useState } from "react";
@@ -204,7 +203,7 @@ const InvoiceRelationDetail = ({
   }, [idIr, draftExist])
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -281,7 +280,7 @@ const InvoiceRelationDetail = ({
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
         loading={loading_approveRejectIr}
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

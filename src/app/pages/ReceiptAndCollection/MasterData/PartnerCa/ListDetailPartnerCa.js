@@ -8,7 +8,6 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectPartner,
   approveOrRejectInactivePartnerCa,
@@ -141,7 +140,7 @@ const ListDetailPartnerCa = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <div>
         <Tabs
@@ -202,7 +201,7 @@ const ListDetailPartnerCa = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -59,12 +58,12 @@ const ViewJobGroupDetailPage = () => {
 
   if (isLoading || !group) {
     return (
-      <LayoutMenu>
+      <div>
         <BreadCrumb routes={breadcrumbRoutes} />
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
           <Spin size="large" />
         </div>
-      </LayoutMenu>
+      </div>
     );
   }
 
@@ -72,7 +71,7 @@ const ViewJobGroupDetailPage = () => {
   const childColumns = getJobGroupChildTableColumns();
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={breadcrumbRoutes} />
 
       <NxCardContainer header="JOB GROUP DETAIL">
@@ -163,7 +162,7 @@ const ViewJobGroupDetailPage = () => {
         </ButtonComponent>
       </footer>
 
-    </LayoutMenu>
+    </div>
   );
 };
 

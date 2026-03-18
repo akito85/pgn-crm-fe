@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { Dropdown, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTableNested from "../../../../components/Nx/NxTableNested";
 import NxModal from "../../../../components/Nx/NxModal";
@@ -364,7 +363,7 @@ const JobGroupPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <NxCardContainer
         header="JOB GROUP LIST"
@@ -439,7 +438,7 @@ const JobGroupPage = () => {
           </div>
         </div>
       </NxModal>
-    </LayoutMenu>
+    </div>
   );
 };
 

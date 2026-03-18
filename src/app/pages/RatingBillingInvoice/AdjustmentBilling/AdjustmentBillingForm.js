@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin, Form } from "antd";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import {
@@ -516,7 +515,7 @@ const AdjustmentBillingForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <FormStepper
@@ -650,7 +649,7 @@ const AdjustmentBillingForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

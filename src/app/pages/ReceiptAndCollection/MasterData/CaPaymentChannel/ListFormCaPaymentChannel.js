@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
     createCaPaymentChannel,
     createValidasiCaPaymentChannel,
@@ -481,7 +480,7 @@ const ListFormCaPaymentChannel = (props) => {
     };
 
     return (
-        <LayoutMenu>
+        <div>
             <BreadCrumb routes={routes} />
             <Spin spinning={loadingForm}>
                 <FormStepper steps={steps} current={current} />
@@ -600,7 +599,7 @@ const ListFormCaPaymentChannel = (props) => {
                     </p>
                 </div>
             </ModalConfirm>
-        </LayoutMenu>
+        </div>
     );
 };
 

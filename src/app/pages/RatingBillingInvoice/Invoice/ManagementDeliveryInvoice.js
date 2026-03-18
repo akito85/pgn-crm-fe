@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SummaryStatistics from "./_components/ManagementDeliveryComponent/SummaryStatistics";
 import DetailInvoiceModal from "./_components/DetailnvoiceModal";
 import PreviewMessageModal from "./_components/ManagementDeliveryComponent/PreviewMessageModal";
@@ -283,7 +282,7 @@ const ManagementDeliveryInvoice = () => {
   );
 
   return (
-    <LayoutMenu>
+    <div>
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -342,7 +341,7 @@ const ManagementDeliveryInvoice = () => {
           messageData={selectedInvoice}
         />
       </CardContainer>
-    </LayoutMenu>
+    </div>
   );
 };
 

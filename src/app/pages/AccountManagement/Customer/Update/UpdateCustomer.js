@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin, Form } from "antd";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -285,7 +284,7 @@ const UpdateCustomer = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         <div className="w-full">
@@ -466,7 +465,7 @@ const UpdateCustomer = () => {
           />
         </ModalCustom>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

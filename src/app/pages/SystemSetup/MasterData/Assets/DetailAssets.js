@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import { SYSTEM_SETUP_ROUTES } from '../../../../../routes/system_setup/setup_routes';
 import { Spin } from 'antd';
@@ -488,7 +487,7 @@ const DetailAssets = () => {
 
 
     return (
-        <LayoutMenu>
+        <div>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <BaseContainer header={'asset information'}>
@@ -596,7 +595,7 @@ const DetailAssets = () => {
                     Back
                 </ButtonComponent>
             </div>
-        </LayoutMenu>
+        </div>
     );
 }
 

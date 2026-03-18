@@ -88,7 +88,7 @@ const SidebarContainer = React.memo(({ collapsed, onToggle }) => (
           wrapperClassName={!collapsed ? "w-[120px]" : undefined}
         />
       </div>
-      <div className=".. flex self-center justify-end">
+      <div className="flex self-center justify-end">
         {collapsed === false &&
           React.createElement(
             collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
@@ -485,7 +485,7 @@ const LayoutMenu = ({ children }) => {
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
                 <NotificationDropdown />
                 <Dropdown overlay={menu} trigger={["click"]}>
-                  <a onClick={(e) => e.preventDefault()}>
+                  <button type="button" onClick={(e) => e.preventDefault()} style={{ border: 'none', background: 'transparent' }}>
                     {data_profile?.data?.urlImage2 === null ? (
                       data_profile?.data?.username === "" ? (
                         <Avatar size={"middle"} icon={<UserOutlined />} />
@@ -502,7 +502,7 @@ const LayoutMenu = ({ children }) => {
                         src={data_profile?.data?.urlImage2}
                       />
                     )}
-                  </a>
+                  </button>
                 </Dropdown>
                 {/* <IconArrowNarrowLeft
                   name={"IconArrowNarrowLeft"}

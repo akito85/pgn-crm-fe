@@ -826,7 +826,7 @@ const TopView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -883,7 +883,7 @@ const TopView = () => {
           dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

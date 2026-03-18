@@ -11,7 +11,6 @@ import {
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { Upload, Form, Typography, Progress, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -227,7 +226,7 @@ const EmployeeUpload = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"w-full flex justify-end"}>
@@ -379,7 +378,7 @@ const EmployeeUpload = () => {
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

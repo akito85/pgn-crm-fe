@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin } from "antd";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -47,17 +46,17 @@ const ViewJobPage = () => {
 
   if (isLoading || !job) {
     return (
-      <LayoutMenu>
+      <div>
         <BreadCrumb routes={breadcrumbRoutes} />
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
           <Spin size="large" />
         </div>
-      </LayoutMenu>
+      </div>
     );
   }
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={breadcrumbRoutes} />
 
       <NxCardContainer header="JOB DETAIL">
@@ -247,7 +246,7 @@ const ViewJobPage = () => {
         </ButtonComponent>
       </footer>
 
-    </LayoutMenu>
+    </div>
   );
 };
 

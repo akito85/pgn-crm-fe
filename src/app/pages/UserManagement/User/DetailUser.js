@@ -10,7 +10,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -308,7 +307,7 @@ const DetailUser = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <div>
       <div>
         <BreadCrumb routes={routes} />
         <Spin spinning={loading}>
@@ -457,7 +456,7 @@ const DetailUser = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

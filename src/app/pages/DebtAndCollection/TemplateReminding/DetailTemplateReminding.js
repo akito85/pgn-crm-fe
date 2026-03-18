@@ -1,5 +1,4 @@
 /* eslint-disable default-case */
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu.js";
 import BreadCrumb from "../../../../components/BreadCrumb.js";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../routes/DebtAndCollection/rc_routes.js";
 import { useEffect } from "react";
@@ -41,7 +40,7 @@ const ListDetailTemplateReminding = () => {
     },
   ];
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"Detail Template Reminding"}>
@@ -73,7 +72,7 @@ const ListDetailTemplateReminding = () => {
           Back
         </ButtonComponent>
       </div>
-    </LayoutMenu>
+    </div>
   );
 };
 

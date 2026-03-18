@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -327,7 +326,7 @@ const ProductDetail = () => {
     setBodyError({});
   };
   return (
-    <LayoutMenu>
+    <div>
       <Spin
         spinning={loadingProduct}
         className={"w-full top-20"}
@@ -565,7 +564,7 @@ const ProductDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

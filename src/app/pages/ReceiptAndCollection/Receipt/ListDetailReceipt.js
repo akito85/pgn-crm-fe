@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import DetailReceipt from "./DetailReceipt";
 import {
   approveOrRejectHoldReceipt,
@@ -219,7 +218,7 @@ const ListDetailReceipt = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <div className="w-full gap-5">
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -374,7 +373,7 @@ const ListDetailReceipt = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </div>
   );
 };
 

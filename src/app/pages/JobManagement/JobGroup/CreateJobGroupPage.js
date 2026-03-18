@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Form, Input, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -82,7 +81,7 @@ const CreateJobGroupPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={breadcrumbRoutes} />
       <Form
         form={form}
@@ -186,7 +185,7 @@ const CreateJobGroupPage = () => {
         </footer>
 
       </Form>
-    </LayoutMenu>
+    </div>
   );
 };
 

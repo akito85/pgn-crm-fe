@@ -560,7 +560,7 @@ const DigitalSignatureForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -709,7 +709,7 @@ const DigitalSignatureForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -22,7 +22,6 @@ import SVGIcon from "../../../../assets/Icon/index";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../components/RadioTabs";
 import DateComponent from "../../../../components/DateComponent";
 import InputComponent from "../../../../components/InputComponent";
@@ -208,7 +207,7 @@ const DelegationForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loadings}>
         <BreadCrumb routes={routes} />
         <Form
@@ -375,7 +374,7 @@ const DelegationForm = ({ type }) => {
           apiPosition={position_Delegation}
         />
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

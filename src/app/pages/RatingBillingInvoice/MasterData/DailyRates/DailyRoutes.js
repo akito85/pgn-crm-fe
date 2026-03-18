@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import DailyRateView from "./DailyRates/DailyRateView";
 import RateTypeView from "./RatesType/RateTypeView";
@@ -77,7 +76,7 @@ const DailyRoutes = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       {/* <Spin> */}
       <BreadCrumb routes={routes} />
       <div className="pt-[20px]">
@@ -128,7 +127,7 @@ const DailyRoutes = () => {
         )}
       </div>
       {/* </Spin> */}
-    </LayoutMenu>
+    </div>
   );
 };
 

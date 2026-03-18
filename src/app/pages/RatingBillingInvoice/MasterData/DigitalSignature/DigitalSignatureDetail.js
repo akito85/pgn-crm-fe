@@ -233,7 +233,7 @@ const DigitalSignatureDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -338,7 +338,7 @@ const DigitalSignatureDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

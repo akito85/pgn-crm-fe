@@ -217,7 +217,7 @@ const DetailMaintainElectronicBankStatement = () => {
   // ===================== UI ========================
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb
         routes={[
           { breadcrumbName: "Receipt & Collection" },
@@ -320,7 +320,7 @@ const DetailMaintainElectronicBankStatement = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

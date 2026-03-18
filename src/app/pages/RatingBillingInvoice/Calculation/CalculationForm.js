@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Form, Modal, Spin, Select, DatePicker } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { WarningOutlined } from "@ant-design/icons";
@@ -579,7 +578,7 @@ const CalculationForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -1229,7 +1228,7 @@ const CalculationForm = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </div>
   );
 };
 

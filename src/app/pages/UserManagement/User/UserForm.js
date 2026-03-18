@@ -13,7 +13,6 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import InputComponent from "../../../../components/InputComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
   createUser,
   getAllAuthType,
@@ -329,7 +328,7 @@ const UserForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <div>
       <div className={"flex flex-col "}>
         <BreadCrumb routes={routes} />
         <Spin spinning={loading || isLoading}>
@@ -583,7 +582,7 @@ const UserForm = (props) => {
 
       {/* try again modal */}
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

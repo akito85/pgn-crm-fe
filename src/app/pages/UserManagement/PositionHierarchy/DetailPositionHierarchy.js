@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
@@ -255,7 +254,7 @@ const DetailPositionHierarchy = () => {
   console.log(transformDataToTree(dataDiagram));
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"POSITION HIERARCHY INFORMATION"}>
@@ -402,7 +401,7 @@ const DetailPositionHierarchy = () => {
         {/* render modal try again */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

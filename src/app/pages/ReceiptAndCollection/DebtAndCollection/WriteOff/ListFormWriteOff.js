@@ -293,7 +293,7 @@ const ListFormWriteOff = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <RadioTabs
@@ -466,7 +466,7 @@ const ListFormWriteOff = (props) => {
         }}
       />
 
-    </LayoutMenu>
+    </div>
   );
 };
 

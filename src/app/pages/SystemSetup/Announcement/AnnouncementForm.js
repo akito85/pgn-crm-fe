@@ -16,7 +16,6 @@ import { dateFormatting, formMessageRequired, hasValue } from "../../../../utils
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import InputComponent from "../../../../components/InputComponent";
 import DateComponent from "../../../../components/DateComponent";
@@ -262,7 +261,7 @@ const AnnouncementForm = ({ type }) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Form
@@ -516,7 +515,7 @@ const AnnouncementForm = ({ type }) => {
         {/* Modal Retry */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

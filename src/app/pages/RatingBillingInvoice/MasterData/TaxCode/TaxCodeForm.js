@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Form, Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -990,7 +989,7 @@ const TaxCodeForm = ({ type }) => {
   }, [form, listDataCriteria]);
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -1165,7 +1164,7 @@ const TaxCodeForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 export default TaxCodeForm;

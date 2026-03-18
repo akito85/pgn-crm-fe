@@ -4,7 +4,6 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
@@ -565,7 +564,7 @@ const ViewPaymentChannel = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <CardContainer
         header={
@@ -622,7 +621,7 @@ const ViewPaymentChannel = () => {
         onFinish={handleSubmitModalInactivate}
       />
       {renderModal()}
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Select, InputNumber, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -267,7 +266,7 @@ const CreateJobPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={breadcrumbRoutes} />
       <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 
@@ -555,7 +554,7 @@ const CreateJobPage = () => {
         </footer>
 
       </Form>
-    </LayoutMenu>
+    </div>
   );
 };
 

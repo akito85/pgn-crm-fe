@@ -15,7 +15,6 @@ import accountManagementPromoHttpService from "../../../../../../../redux/servic
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
@@ -2091,7 +2090,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes(stateSave)} />
@@ -2376,7 +2375,7 @@ const CreateServiceAgreement = ({ saType }) => {
           </p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
-import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import InfoInvoiceRelation from "./StepContents/InformationForm/InfoInvoiceRelation";
 import ApprovalInvoiceRelation from "./StepContents/ApprovalForm/ApprovalInvoiceRelation";
 import AttachmentInvoiceRelation from "./StepContents/AttachmentForm/AttachmentInvoiceRelation";
@@ -631,7 +630,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
         <HeaderDetail
@@ -758,7 +757,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           </Form>
         </Spin>
       </div>
-    </LayoutMenu>
+    </div>
   );
 };
 

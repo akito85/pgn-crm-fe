@@ -6,7 +6,6 @@ import {
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {  Form, Spin, Select } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -258,7 +257,7 @@ const ForwardTaskForm = ({ type }) => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"Pending Task Information"}>
@@ -428,7 +427,7 @@ const ForwardTaskForm = ({ type }) => {
           ddl={{ dataFrom: data_pending?.fromPosition, dataTo: data_to }}
         />
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

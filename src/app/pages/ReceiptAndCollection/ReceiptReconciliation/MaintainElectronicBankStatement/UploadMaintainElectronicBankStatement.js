@@ -240,7 +240,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
     },
   ];
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer>
@@ -465,7 +465,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </div>
   );
 };
 

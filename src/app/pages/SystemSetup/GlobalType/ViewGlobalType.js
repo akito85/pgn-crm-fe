@@ -3,7 +3,6 @@ import { Spin, Tooltip } from "antd";
 import { NavLink, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";

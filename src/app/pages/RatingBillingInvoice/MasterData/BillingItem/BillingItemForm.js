@@ -11,7 +11,6 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalPopUp";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
@@ -958,7 +957,7 @@ const BillingItemForm = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -1191,7 +1190,7 @@ const BillingItemForm = (props) => {
           </ModalError>
         )}
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

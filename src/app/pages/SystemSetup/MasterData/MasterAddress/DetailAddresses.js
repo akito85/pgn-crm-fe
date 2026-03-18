@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu'
 import BreadCrumb from '../../../../../components/BreadCrumb'
 import BaseContainer from '../../../../../components/BaseContainer'
 import DetailText from '../../../../../components/DetailText'

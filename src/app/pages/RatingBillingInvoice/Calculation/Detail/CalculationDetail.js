@@ -76,7 +76,7 @@ const CalculationDetail = () => {
   };
 
   return (
-      <LayoutMenu>
+      <div>
         <BreadCrumb routes={routes} />
 
         <div className="w-full mt-0">
@@ -105,7 +105,7 @@ const CalculationDetail = () => {
             Back
           </ButtonComponent>
         </div>
-      </LayoutMenu>
+      </div>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import LayoutMenu from "../../components/SidebarMenu/LayoutMenu";
 import BaseContainer from "../../components/BaseContainer";
 import TablePagination from "../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
@@ -104,7 +103,7 @@ const MonitoringSession = () => {
     setSort(dataSort);
   };
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BaseContainer header={"MONITORING SESSION"}>
           <TablePagination
@@ -119,7 +118,7 @@ const MonitoringSession = () => {
           />
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

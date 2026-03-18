@@ -4,7 +4,6 @@ import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { Dropdown } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
 import NxModal from "../../../../components/Nx/NxModal";
@@ -238,7 +237,7 @@ const JobPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <NxCardContainer
         header="JOB LIST"
@@ -320,7 +319,7 @@ const JobPage = () => {
           </div>
         </div>
       </NxModal>
-    </LayoutMenu>
+    </div>
   );
 };
 

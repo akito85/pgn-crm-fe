@@ -107,7 +107,7 @@ const GeneratePasswordPage = () => {
     setModalSuccess(false);
   };
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -235,7 +235,7 @@ const GeneratePasswordPage = () => {
           )}
         </div>
       </ModalSuccess>
-    </LayoutMenu>
+    </div>
   );
 };
 

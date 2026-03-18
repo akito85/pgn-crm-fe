@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -135,7 +134,7 @@ const JobExecutionPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <NxCardContainer 
         header="JOB EXECUTION LIST"
@@ -183,7 +182,7 @@ const JobExecutionPage = () => {
           showRefresh={true}
         />
       </NxCardContainer>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import moment from 'moment'
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ServiceAgreementDetailCompoment from "./ServiceAgreementDetailCompoment";
 import Warranty from "./Warranty";
@@ -346,7 +345,7 @@ const DetailServiceAgreement = () => {
 
   return (
     <div>
-      <LayoutMenu>
+      <div>
         <Spin spinning={loading}>
           <div className="flex flex-col gap-y-4">
             {/* <BreadCrumbAdvanced routes={routes(location?.state)} /> */}
@@ -460,7 +459,7 @@ const DetailServiceAgreement = () => {
           approveOrReject={approveOrReject}
           message={message}
         />
-      </LayoutMenu>
+      </div>
     </div>
   );
 };

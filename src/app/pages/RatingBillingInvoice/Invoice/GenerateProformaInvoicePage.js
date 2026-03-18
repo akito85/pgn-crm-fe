@@ -13,7 +13,6 @@ import {
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { columnsGenerateInvoice } from "./TableGenerateInvoice";
@@ -680,7 +679,7 @@ const GenerateProformaInvoicePage = () => {
   );
 
   return (
-    <LayoutMenu>
+    <div>
       <Form layout="vertical" form={form}>
         <CardContainer header="GENERATE PROFORMA INFORMATION">
           <Form.Item label="Export Format" required>
@@ -747,7 +746,7 @@ const GenerateProformaInvoicePage = () => {
           </Button>
         </div>
       </Form>
-    </LayoutMenu>
+    </div>
   );
 };
 

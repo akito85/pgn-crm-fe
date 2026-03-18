@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import { Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import RadioTabs from "../../../../../components/RadioTabs";
@@ -397,7 +396,7 @@ const TaxCodeDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -497,7 +496,7 @@ const TaxCodeDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 export default TaxCodeDetail;

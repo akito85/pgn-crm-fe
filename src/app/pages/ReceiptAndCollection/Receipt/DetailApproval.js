@@ -3,9 +3,9 @@ import BaseContainer from "../../../../components/BaseContainer";
 
 const detailApproval = () => {
   return (
-    // <LayoutMenu>
+    // <div>
     <BaseContainer></BaseContainer>
-    // </LayoutMenu>
+    // </div>
   );
 };
 

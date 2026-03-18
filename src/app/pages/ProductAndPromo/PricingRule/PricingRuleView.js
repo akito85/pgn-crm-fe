@@ -10,7 +10,6 @@ import {
 } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../assets/Icon/index";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import {
@@ -802,7 +801,7 @@ const PricingRuleView = () => {
   };
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -925,7 +924,7 @@ const PricingRuleView = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import HeaderDetail from "../../../HeaderDetail";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
@@ -166,7 +165,7 @@ const DetailWarrantyTerm = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <div>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced
           routes={breadcrumbRoutes({ idAccount, idCustomer, type, idSA })}
@@ -192,7 +191,7 @@ const DetailWarrantyTerm = () => {
           </ButtonComponent>
         </NxBaseContainer>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 

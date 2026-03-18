@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
@@ -477,7 +476,7 @@ const DetailMonitoringUsage = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <div>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSave}>
@@ -703,7 +702,7 @@ const DetailMonitoringUsage = () => {
           />
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </div>
   );
 };
 
