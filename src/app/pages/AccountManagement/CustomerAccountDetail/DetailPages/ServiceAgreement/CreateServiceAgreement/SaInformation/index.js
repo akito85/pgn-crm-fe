@@ -180,17 +180,15 @@ const SaInformation = ({
   };
 
   const onChangeChecked = (e) => {
-    setSaInfoObj({
-      ...saInfoObj,
-      alreadyGasIn: e.target.checked,
+    const checked = e.target.checked;
+    setSaInfoObj((prev) => ({
+      ...prev,
+      alreadyGasIn: checked,
       gasInPlanDate: null
-    })
+    }))
+    handleSaInformationObj(e, "alreadyGasIn");
     form.setFieldsValue({ gasInPlanDate: undefined })
-    if (e.target.checked) {
-      setTimeout(() => {
-        form.setFields([{ name: 'gasInPlanDate', errors: [] }])
-      }, 0)
-    }
+    form.setFields([{ name: 'gasInPlanDate', errors: [] }])
   };
 
   return (
@@ -367,7 +365,8 @@ const SaInformation = ({
                   label={"Already Gas In"}
                   valuePropName="checked"
                   noStyle
-                  getValueFromEvent={(e) => handleSaInformationObj(e, "alreadyGasIn")}
+                  getValueFromEvent={(e) =>
+                    handleSaInformationObj(e, "alreadyGasIn")}
                 >
                   <div className='flex flex-col'>
                     <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked}>Already Gas In</Checkbox>
@@ -377,13 +376,14 @@ const SaInformation = ({
                 <Form.Item
                   name={"gasInPlanDate"}
                   label={"Gas In Plan Date"}
+                  // dependencies={["alreadyGasIn", "serviceType"]}
                   getValueFromEvent={(e) => handleSaInformationObj(e, "gasInPlanDate")}
                   rules={[
-                    {
-                      message: "Please input Gas In Plan Date",
-                      // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? !saInfoObj?.alreadyGasIn: true,
-                      required: (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true,
-                    },
+                  {
+                    message: "Please input Gas In Plan Date",
+                    // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? saInfoObj?.alreadyGasIn: true
+                    required : saInfoObj?.serviceType === 608 ? (!saInfoObj?.alreadyGasIn) : false
+                  }
                   ]}
                 >
                   <DateComponent

@@ -4,28 +4,30 @@ import { Button, Spin } from "antd";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import GasDepositDetailTabs from "./GasDepositDetailTabs";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
+import { getCustomerDetail } from "../../../../../redux/slices/account_management/Customer/customerAccount";
+import NxDate from "../../../../../components/Nx/NxDatePicker";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
   getGrantedAccessAccount
-} from "../../../../../../../../redux/slices/account_management/accountManagement";
+} from "../../../../../redux/slices/account_management/accountManagement";
 import {
   getDetailGasDeposit,
   getDetailDraftGasDeposit,
   approveOrRejectGasDeposit,
   approveOrRejectInactiveGasDeposit
 } from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
-import { showModalError } from "../../../../../../../../redux/slices/general_slice";
-import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
-import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
-import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
-import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
-import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
-import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import { showModalError } from "../../../../../redux/slices/general_slice";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
+import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb";
+import NxDetailText from "../../../../../components/Nx/NxDetailText";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
+import NxApproveOrRejectModal from "../../../../../components/Nx/NxApproveOrRejectModal";
+import NxTabs from "../../../../../components/Nx/NxTabs";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
+import GasDepositDetailMutationTable from "../GasDepositDetailMutationTable";
+import GasDepositDetailTable from "../GasDepositDetailTable";
 
 /**
  * Gas deposit detail view (container + presentational component).
@@ -70,6 +72,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const [activeKey, setActiveKey] = useState(originalKey || "");
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
+  const [selectedDetailId, setSelectedDetailId] = useState();
 
   // Computed (depends on state + selectors)
   const detail =
@@ -86,7 +89,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
     createdBy,
     updatedDate,
     updatedBy,
-    tappId
+    tappId,
+    details,
   } = detail;
 
   const routes = [
@@ -281,6 +285,29 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
             </NxBaseContainer>
           )}
           <GasDepositDetailTabs detail={detail} />
+
+          {activeKey === originalKey && (
+            <>
+              <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
+                <NxBaseContainer border>
+                  <GasDepositDetailTable
+                    dataSource={details}
+                  />
+                </NxBaseContainer>
+              </NxCardContainer>
+              {selectedDetailId && (
+                <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
+                  <NxBaseContainer border>
+                    <GasDepositDetailMutationTable
+                      detailId={selectedDetailId}
+                      />
+                  </NxBaseContainer>
+                </NxCardContainer>
+              )}
+            </>
+          )}
+
+          {/* Detail mutation table — rendered only when a row is selected */}
 
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
             <NxBaseContainer border>

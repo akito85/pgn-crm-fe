@@ -16,6 +16,7 @@ import { getGrantedAccessAccount } from "../../../../redux/slices/account_manage
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
+import SVGIcon from "../../../../assets/Icon/index";
 
 /**
  * Gas deposit list table module
@@ -164,15 +165,13 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   return (
     <>
       <NxCardContainer header={"GAS DEPOSIT"}>
+        <SVGIcon name="IconExtend" color="black" />
+
         <NxBaseContainer border>
           <GasDepositTable
             moduleType={moduleType}
             idAccount={id}
             idCustomer={idCustomer}
-            handleInactivateModal={handleInactivateModal}
-            handleApprovalHistoryModal={handleApprovalHistoryModal}
-            handleApproval={setShowApprovalModal}
-            handleSelectDetail={handleSelectDetail}
             refreshSignal={refreshSignal}
           />
         </NxBaseContainer>

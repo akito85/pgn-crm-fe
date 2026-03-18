@@ -94,6 +94,12 @@ const TablePricing = ({
 	// 	}
 	// }, [dataFromApi]);
 
+	// Reset loadedCount when data changes (e.g. pricingRule switch)
+	useEffect(() => {
+		setLoadedCount(10);
+		setPage(1);
+	}, [data]);
+
 	useEffect(() => {
 		let result = [...data];
 		result = filterData(result, search);
@@ -548,6 +554,7 @@ const TablePricing = ({
 			<div className="w-full">
 				<NxTable
 					idTable="pricing-table"
+					rowKey="key"
 					dataSource={displayData?.map(item => ({ ...item, max: item?.max === 0 || hasValue(item?.max) === false ? "Unlimited" : item?.max }))}
 					columns={filterColumns(
 						getPricingColumns({

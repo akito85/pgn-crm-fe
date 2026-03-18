@@ -785,7 +785,6 @@ const ContactForm = ({
             >
               <InputComponent
                 disabled={true}
-                isPassingId
               />
             </Form.Item>
             <Button
@@ -813,7 +812,6 @@ const ContactForm = ({
         >
           <SelectComponent
             disabled={!contactTable?.map((a) => a.overview)[0] ? true : false}
-            isPassingId
           >
             {dataAddress &&
               dataAddress?.map((data) => (
@@ -834,7 +832,6 @@ const ContactForm = ({
         >
           <InputComponent
             disabled={!contactTable?.map((a) => a.overview)[0] ? true : false}
-            isPassingId
           />
         </Form.Item>
 
@@ -849,7 +846,6 @@ const ContactForm = ({
               value={description1}
               onChange={(e) => setDescription1(e.target.value)}
               disabled={!contactTable?.map((a) => a.overview)[0] ? true : false}
-              isPassingId
             />
           </Form.Item>
         </div>
@@ -871,7 +867,6 @@ const ContactForm = ({
                 //   !contactTable?.map((a) => a.overview)[0] ? true : false
                 // }
                 disabled={true}
-                isPassingId
               />
             </Form.Item>
             <Button
@@ -902,7 +897,6 @@ const ContactForm = ({
         >
           <SelectComponent
             disabled={!contactTable?.map((a) => a.overview)[1] ? true : false}
-            isPassingId
           >
             {dataAddress &&
               dataAddress?.map((data) => (
@@ -923,7 +917,6 @@ const ContactForm = ({
         >
           <InputComponent
             disabled={!contactTable?.map((a) => a.overview)[1] ? true : false}
-            isPassingId
           />
         </Form.Item>
 
@@ -938,7 +931,6 @@ const ContactForm = ({
               value={description2}
               onChange={(e) => setDescription2(e.target.value)}
               disabled={!contactTable?.map((a) => a.overview)[1] ? true : false}
-              isPassingId
             />
           </Form.Item>
         </div>
@@ -960,7 +952,6 @@ const ContactForm = ({
                 //   !contactTable?.map((a) => a.overview)[1] ? true : false
                 // }
                 disabled={true}
-                isPassingId
               />
             </Form.Item>
             <Button
@@ -991,7 +982,6 @@ const ContactForm = ({
         >
           <SelectComponent
             disabled={!contactTable?.map((a) => a.overview)[2] ? true : false}
-            isPassingId
           >
             {dataAddress &&
               dataAddress?.map((data) => (
@@ -1012,7 +1002,6 @@ const ContactForm = ({
         >
           <InputComponent
             disabled={!contactTable?.map((a) => a.overview)[2] ? true : false}
-            isPassingId
           />
         </Form.Item>
 
@@ -1027,7 +1016,6 @@ const ContactForm = ({
               value={description3}
               onChange={(e) => setDescription3(e.target.value)}
               disabled={!contactTable?.map((a) => a.overview)[2] ? true : false}
-              isPassingId
             />
           </Form.Item>
         </div>
@@ -1049,7 +1037,6 @@ const ContactForm = ({
                 //   !contactTable?.map((a) => a.overview)[2] ? true : false
                 // }
                 disabled={true}
-                isPassingId
               />
             </Form.Item>
             <Button
@@ -1080,7 +1067,6 @@ const ContactForm = ({
         >
           <SelectComponent
             disabled={!contactTable?.map((a) => a.overview)[3] ? true : false}
-            isPassingId
           >
             {dataAddress &&
               dataAddress?.map((data) => (
@@ -1101,7 +1087,6 @@ const ContactForm = ({
         >
           <InputComponent
             disabled={!contactTable?.map((a) => a.overview)[3] ? true : false}
-            isPassingId
           />
         </Form.Item>
 
@@ -1116,7 +1101,6 @@ const ContactForm = ({
               value={description4}
               onChange={(e) => setDescription4(e.target.value)}
               disabled={!contactTable?.map((a) => a.overview)[3] ? true : false}
-              isPassingId
             />
           </Form.Item>
         </div>
@@ -1246,16 +1230,16 @@ const ContactForm = ({
                   },
                 ]}
               >
-                <InputComponent onInput={onInputUpperCase} isPassingId />
+                <InputComponent onInput={onInputUpperCase} />
               </Form.Item>
               <Form.Item label="Middle Name" name="middleName">
-                <InputComponent onInput={onInputUpperCase} isPassingId />
+                <InputComponent onInput={onInputUpperCase} />
               </Form.Item>
               <Form.Item label="Last Name" name="lastName">
-                <InputComponent onInput={onInputUpperCase} isPassingId />
+                <InputComponent onInput={onInputUpperCase} />
               </Form.Item>
               <Form.Item label="Job" name="jobId">
-                <SelectComponent isPassingId>
+                <SelectComponent>
                   {data_job &&
                     data_job?.map((data) => (
                       <Select.Option key={data.id} value={data.id}>
@@ -1265,7 +1249,7 @@ const ContactForm = ({
                 </SelectComponent>
               </Form.Item>
               <Form.Item label="Position" name="positionId">
-                <SelectComponent isPassingId>
+                <SelectComponent>
                   {data_position &&
                     data_position?.map((data) => (
                       <Select.Option key={data.id} value={data.id}>

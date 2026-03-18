@@ -1,8 +1,8 @@
 import GasDepositDetailAttch from "./GasDepositDetailAttch";
 import GasDepositDetailInfo from "./GasDepositDetailInfo";
-import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import { useState } from "react";
-import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import NxTabs from "../../../../../components/Nx/NxTabs";
 
 /**
  * Tabbed detail view for a gas deposit record.
