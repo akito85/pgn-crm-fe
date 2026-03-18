@@ -119,7 +119,7 @@ const DetailTaxImplication = () => {
   }, [id, data_detail]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -216,7 +216,7 @@ const DetailTaxImplication = () => {
         </div>
 
       </Spin>
-    </LayoutMenu>
+    </>
   )
 }
 

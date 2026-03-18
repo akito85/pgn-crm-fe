@@ -363,7 +363,7 @@ const DetailTaxImplicationRule = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(taxImplicationId || data_detail_tax_implication_rule?.taxImplicationId)} />
         <div className="flex flex-col">
@@ -587,7 +587,7 @@ const DetailTaxImplicationRule = () => {
         </ModalError>
 
       </Spin>
-    </LayoutMenu>
+    </>
   )
 }
 

@@ -371,7 +371,7 @@ const PaymentPeriodForm = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper
@@ -521,7 +521,7 @@ const PaymentPeriodForm = ({ type }) => {
                     />
                 </ModalCustom>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

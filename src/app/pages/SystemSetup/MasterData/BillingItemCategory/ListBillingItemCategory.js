@@ -807,7 +807,7 @@ const ListBillingItemCategory = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
       <CardContainer
@@ -884,7 +884,7 @@ const ListBillingItemCategory = () => {
         </div>
       </ModalError>
       {/* </Spin> */}
-    </LayoutMenu>
+    </>
   );
 };
 

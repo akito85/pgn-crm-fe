@@ -550,7 +550,7 @@ const ViewTaxImplication = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
+      <>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -656,7 +656,7 @@ const ViewTaxImplication = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-      </LayoutMenu>
+      </>
     </Spin>
   );
 };

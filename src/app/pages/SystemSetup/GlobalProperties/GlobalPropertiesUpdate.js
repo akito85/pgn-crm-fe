@@ -542,7 +542,7 @@ const GlobalPropertiesUpdate = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -760,7 +760,7 @@ const GlobalPropertiesUpdate = () => {
         {/* render try again */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

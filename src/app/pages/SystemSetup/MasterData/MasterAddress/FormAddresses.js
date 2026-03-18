@@ -370,7 +370,7 @@ const FormAddresses = ({ type }) => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading || isLoading}>
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -723,7 +723,7 @@ const FormAddresses = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 

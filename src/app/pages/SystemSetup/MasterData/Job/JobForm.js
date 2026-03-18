@@ -137,7 +137,7 @@ const JobForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form
@@ -260,7 +260,7 @@ const JobForm = (props) => {
         {/* render modal try again */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

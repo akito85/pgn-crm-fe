@@ -793,7 +793,7 @@ const FormLateChargesRule = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumbAdvanced routes={routes(type, lateChargeId)} />
         <div className="flex flex-col gap-4">
@@ -1042,7 +1042,7 @@ const FormLateChargesRule = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

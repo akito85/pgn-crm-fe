@@ -264,7 +264,7 @@ const ViewPaymentCycle = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <div>
@@ -323,7 +323,7 @@ const ViewPaymentCycle = () => {
                     named={detail.periodName}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

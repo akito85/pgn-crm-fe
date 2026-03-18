@@ -560,7 +560,7 @@ const EntityForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading} >
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
@@ -895,7 +895,7 @@ const EntityForm = (props) => {
       </ModalConfirm>
       {/** Modal Retry */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

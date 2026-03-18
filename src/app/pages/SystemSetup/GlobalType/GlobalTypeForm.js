@@ -756,7 +756,7 @@ const GlobalTypeForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Form form={globalTypeForm} layout={"vertical"} onFinish={handleFinish}>
@@ -1135,7 +1135,7 @@ const GlobalTypeForm = (props) => {
         {/** Modal Retry */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -266,7 +266,7 @@ const BillingItemCategoryDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -359,7 +359,7 @@ const BillingItemCategoryDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

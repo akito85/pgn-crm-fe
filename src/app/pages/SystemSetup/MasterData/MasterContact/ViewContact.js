@@ -509,7 +509,7 @@ const ViewContact = () => {
         }
     ]
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
 
@@ -678,7 +678,7 @@ const ViewContact = () => {
                     <p className="pl-[70px]">Please try again.</p>
                 </div>
             </ModalError>
-        </LayoutMenu>
+        </>
     );
 }
 

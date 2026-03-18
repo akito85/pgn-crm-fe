@@ -390,7 +390,7 @@ const Job = () => {
     },
   ];
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -440,7 +440,7 @@ const Job = () => {
         {/* modal try again */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

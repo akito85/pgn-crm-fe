@@ -246,7 +246,7 @@ const LoginBackgroundForm = ({ type }) => {
   };
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form
@@ -465,7 +465,7 @@ const LoginBackgroundForm = ({ type }) => {
         {/* Modal Retry */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

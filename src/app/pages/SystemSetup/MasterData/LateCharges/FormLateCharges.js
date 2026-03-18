@@ -650,7 +650,7 @@ const FormLateCharges = ({ type }) => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes(type)} />
         <Form
@@ -886,7 +886,7 @@ const FormLateCharges = ({ type }) => {
           : null}
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

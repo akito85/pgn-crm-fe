@@ -342,7 +342,7 @@ const DetailLateChargesRule = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(lateChargeId)} />
         <div className="flex flex-col">
@@ -544,7 +544,7 @@ const DetailLateChargesRule = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

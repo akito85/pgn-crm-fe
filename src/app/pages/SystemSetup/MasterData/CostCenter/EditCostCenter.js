@@ -171,7 +171,7 @@ const EditCostCenter = () => {
 		},
 	];
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading} className="w-full top-20" tip="Loading">
         <BreadCrumb routes={routes}/>
 
@@ -363,7 +363,7 @@ const EditCostCenter = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

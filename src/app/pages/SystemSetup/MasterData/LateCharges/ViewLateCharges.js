@@ -544,7 +544,7 @@ const ViewLateCharges = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
+      <>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -650,7 +650,7 @@ const ViewLateCharges = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-      </LayoutMenu>
+      </>
     </Spin>
   );
 };

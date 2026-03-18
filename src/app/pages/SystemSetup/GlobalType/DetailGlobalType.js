@@ -284,7 +284,7 @@ const DetailGlobalType = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -418,7 +418,7 @@ const DetailGlobalType = () => {
       </Spin>
 
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

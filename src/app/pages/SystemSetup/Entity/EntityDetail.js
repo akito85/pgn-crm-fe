@@ -407,7 +407,7 @@ const EntityDetail = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"my-5"}>
@@ -543,7 +543,7 @@ const EntityDetail = () => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

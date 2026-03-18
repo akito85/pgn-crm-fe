@@ -347,7 +347,7 @@ const PositionPage = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
 
         <BreadCrumb routes={routes} />
@@ -394,7 +394,7 @@ const PositionPage = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

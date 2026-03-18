@@ -552,7 +552,7 @@ const ViewAddresses = () => {
     ]
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
 
@@ -656,7 +656,7 @@ const ViewAddresses = () => {
             {renderModal()}
 
 
-        </LayoutMenu>
+        </>
     );
 }
 

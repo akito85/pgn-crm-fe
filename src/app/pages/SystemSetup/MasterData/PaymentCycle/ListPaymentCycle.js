@@ -674,7 +674,7 @@ const ListPaymentCycle = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer
@@ -730,7 +730,7 @@ const ListPaymentCycle = () => {
                     dataHistory={dataApprovalHistoryFix?.dataHistory}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

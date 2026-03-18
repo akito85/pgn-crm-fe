@@ -548,7 +548,7 @@ const FormContact = ({ type }) => {
     }, [dataContactType, dataCountryCode, dataInputType, data_country_zone, handleChangeInputType, handleChangeType, handleDispatcher, handleSearch, page, pageSize, renderDataOptions, search, searchTextInlane, searchedColumnInlane])
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -728,7 +728,7 @@ const FormContact = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 

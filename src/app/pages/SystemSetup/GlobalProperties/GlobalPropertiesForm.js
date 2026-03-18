@@ -462,7 +462,7 @@ const GlobalPropertiesForm = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -671,7 +671,7 @@ const GlobalPropertiesForm = () => {
         {/** Modal Retry */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

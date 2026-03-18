@@ -115,7 +115,7 @@ const DetailLateCharges = () => {
   }, [id, data_detail]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="flex flex-col">
@@ -197,7 +197,7 @@ const DetailLateCharges = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

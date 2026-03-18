@@ -1004,7 +1004,7 @@ const FormTaxImplicationRule = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumbAdvanced routes={routes(type, taxImplicationId)} />
         <div className="flex flex-col gap-4">
@@ -1289,7 +1289,7 @@ const FormTaxImplicationRule = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   )
 }
 

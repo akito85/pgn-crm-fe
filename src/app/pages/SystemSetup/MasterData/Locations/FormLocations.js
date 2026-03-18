@@ -522,7 +522,7 @@ const FormLocations = ({ type }) => {
 
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -752,7 +752,7 @@ const FormLocations = ({ type }) => {
                     />
                 </div>
             </ModalCustom>
-        </LayoutMenu>
+        </>
     );
 }
 

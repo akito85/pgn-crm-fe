@@ -155,7 +155,7 @@ const FormAccountingRules = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -285,7 +285,7 @@ const FormAccountingRules = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 
