@@ -154,7 +154,7 @@ const AccountOnetime = () => {
 
   ]
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -211,7 +211,7 @@ const AccountOnetime = () => {
           </div>
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

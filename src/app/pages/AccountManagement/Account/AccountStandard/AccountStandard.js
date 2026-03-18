@@ -154,7 +154,7 @@ const AccountStandard = () => {
   ]
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -210,7 +210,7 @@ const AccountStandard = () => {
           </div>
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

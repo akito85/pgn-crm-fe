@@ -1919,7 +1919,7 @@ const StandardForm = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -2251,7 +2251,7 @@ const StandardForm = () => {
         }
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

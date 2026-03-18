@@ -13,7 +13,6 @@ import moment from "moment";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { dateFormatting, hasValue } from "../../../../../utils";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
@@ -1582,7 +1581,7 @@ const OneTimeForm = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         {steps[current].title === "ACCOUNT INFORMATION" &&
@@ -1886,7 +1885,7 @@ const OneTimeForm = () => {
           </ModalError>
         ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

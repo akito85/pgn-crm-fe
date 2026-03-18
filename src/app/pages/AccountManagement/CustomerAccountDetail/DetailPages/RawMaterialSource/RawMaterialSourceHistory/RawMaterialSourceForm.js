@@ -310,7 +310,7 @@ const RawMaterialSourceForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(id)} />
 
@@ -491,7 +491,7 @@ const RawMaterialSourceForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

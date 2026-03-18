@@ -95,7 +95,7 @@ const PremiseDetail = () =>
     }
 
     return (
-      <LayoutMenu>
+      <>
         <Spin spinning={loading} className={"w-full top-20"}>
           <BreadCrumbAdvanced routes={routes(id)} />
           <div className="w-full">
@@ -270,7 +270,7 @@ const PremiseDetail = () =>
             </Link>
           </div>
         </Spin>
-      </LayoutMenu>
+      </>
     );
   };
 export default PremiseDetail;

@@ -562,7 +562,7 @@ const EFakturCodeForm = ({ type }) => {
 };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         
@@ -703,7 +703,7 @@ const EFakturCodeForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

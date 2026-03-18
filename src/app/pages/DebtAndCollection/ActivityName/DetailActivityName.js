@@ -40,7 +40,7 @@ const DetailActivityName = () => {
     },
   ];
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"Detail Activity Name"}>
@@ -71,7 +71,7 @@ const DetailActivityName = () => {
           Back
         </ButtonComponent>
       </div>
-    </LayoutMenu>
+    </>
   );
 };
 

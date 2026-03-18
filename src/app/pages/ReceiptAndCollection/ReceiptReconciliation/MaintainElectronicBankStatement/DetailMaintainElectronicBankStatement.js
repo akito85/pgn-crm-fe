@@ -8,7 +8,6 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 
 import {
   getElectronicDetail,

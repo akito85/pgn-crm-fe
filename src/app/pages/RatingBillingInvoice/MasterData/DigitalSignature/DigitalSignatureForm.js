@@ -6,7 +6,6 @@ import moment from "moment";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
 import BaseContainer from "../../../../../components/BaseContainer";

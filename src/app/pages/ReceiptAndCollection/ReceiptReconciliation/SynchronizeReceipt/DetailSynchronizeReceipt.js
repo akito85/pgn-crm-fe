@@ -6,7 +6,6 @@ import { Input } from "antd";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import DetailText from "../../../../../components/DetailText";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import TableRBI from "../../../../../components/TableRBI";
 import moment from "moment";

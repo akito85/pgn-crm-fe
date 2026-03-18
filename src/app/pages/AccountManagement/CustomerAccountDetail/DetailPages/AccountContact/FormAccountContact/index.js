@@ -687,7 +687,7 @@ const FormAccountAddress = ({ type }) => {
   };
   return (
     <div>
-      <LayoutMenu>
+      <>
         <Spin spinning={loading}>
           <BreadCrumbAdvanced routes={routes(id)}/>
           <HeaderDetail
@@ -1116,7 +1116,7 @@ const FormAccountAddress = ({ type }) => {
             </div>
           </ModalSuccess>
         ) : null}
-      </LayoutMenu>
+      </>
     </div>
   );
 };

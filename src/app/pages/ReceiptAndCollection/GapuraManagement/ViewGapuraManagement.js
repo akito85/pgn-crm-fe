@@ -8,7 +8,6 @@ import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrRej
 
 // Global Custom Components
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import TableRBI from "../../../../components/TableRBI";
 import CardContainer from "../../../../components/CardContainer";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -322,7 +321,7 @@ const ViewGapuraManagement = () => {
 
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
@@ -358,7 +357,7 @@ const ViewGapuraManagement = () => {
 
 
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 
