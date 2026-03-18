@@ -178,7 +178,7 @@ const InvoiceRelationTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: (id) =>
+    handleView: ({ id }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION
@@ -207,7 +207,7 @@ const InvoiceRelationTable = ({
           }
         }
       ),
-    handleUpdate: (id) =>
+    handleUpdate: ({ id }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION
@@ -223,9 +223,9 @@ const InvoiceRelationTable = ({
         }
       ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber)
   });
 
   const actionCols = useColumnActionPermission(

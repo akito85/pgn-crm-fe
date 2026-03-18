@@ -196,7 +196,7 @@ const GasDepositTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: (id) => navigate(
+    handleView: ({ id }) => navigate(
       isStandAlone ?
         ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_SA :
       isStandard ?
@@ -245,9 +245,9 @@ const GasDepositTable = ({
       }
     ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal,
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
   const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
