@@ -1210,14 +1210,20 @@ const NxTable = ({
           rowSelection={rowSelection}
           onRow={customOnRow}
           rowClassName={customRowClassName}
+          /* 
           footer={useInfiniteScroll && hasMore
             ? () => <div ref={sentinelRef} style={{ height: 1 }} aria-hidden="true" />
             : undefined
           }
+          */
         />
 
+        {useInfiniteScroll && hasMore && (
+          <div ref={sentinelRef} style={{ height: 1 }} aria-hidden="true" />
+        )}
+
         {useInfiniteScroll ? (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-2px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
               {isLoadingMore && hasMore && " · Loading..."}
@@ -1230,7 +1236,7 @@ const NxTable = ({
             )}
           </div>
         ) : usePagination ? (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-2px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <Select
                 value={pageSize}
@@ -1262,7 +1268,7 @@ const NxTable = ({
             />
           </div>
         ) : (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid transparent`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
             </span>
