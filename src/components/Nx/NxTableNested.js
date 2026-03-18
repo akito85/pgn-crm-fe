@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Spin } from "antd";
 import PropTypes from 'prop-types';
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -406,10 +407,23 @@ const NxTableNested = ({
 }) => {
   const [expandedKeys, setExpandedKeys] = useState(new Set());
 
-  // Calculate first 3 column widths
+  // Calculate first 3 column widths with initial default values to prevent layout shift
   const first3Widths = useMemo(() => {
+    // If we're loading, provide default widths to prevent layout shift
+    if (loading) {
+      const defaultWidths = {};
+      const numCols = Math.min(3, parentColumns.length);
+      for (let i = 0; i < numCols; i++) {
+        const col = parentColumns[i];
+        const fieldKey = col?.key || col?.dataIndex;
+        if (fieldKey) {
+          defaultWidths[fieldKey] = col?.width || DEFAULT_COL_WIDTH;
+        }
+      }
+      return defaultWidths;
+    }
     return calculateFirst3ColumnWidths(parentColumns, childColumns, dataSource);
-  }, [parentColumns, childColumns, dataSource]);
+  }, [parentColumns, childColumns, dataSource, loading]);
 
   const toggleExpand = (rowId) => {
     const newSet = new Set(expandedKeys);
@@ -521,33 +535,48 @@ const NxTableNested = ({
       </div>
 
       {/* Data rows */}
-      {loading ? (
-        <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
-          Loading...
-        </div>
-      ) : dataSource.length === 0 ? (
-        <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
-          No data
-        </div>
-      ) : (
-        dataSource.map((row, i) => (
-          <ParentRow
-            key={row.id}
-            no={i + 1}
-            record={row}
-            parentColumns={parentColumns}
-            childColumns={childColumns}
-            isEven={i % 2 !== 0}
-            isExpanded={expandedKeys.has(row.id)}
-            onToggleExpand={() => toggleExpand(row.id)}
-            onExpand={() => onExpand(row.id)}
-            actionColumn={actionColumn}
-            first3Widths={first3Widths}
-            columnWidths={columnWidths}
-            isChildLoading={loadingKeys.has(row.id)}
-          />
-        ))
-      )}
+      <div style={{ position: "relative" }}>
+        {loading ? (
+          <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
+            <Spin />
+          </div>
+        ) : dataSource.length === 0 ? (
+          <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
+            No data
+          </div>
+        ) : (
+          dataSource.map((row, i) => (
+            <ParentRow
+              key={row.id}
+              no={i + 1}
+              record={row}
+              parentColumns={parentColumns}
+              childColumns={childColumns}
+              isEven={i % 2 !== 0}
+              isExpanded={expandedKeys.has(row.id)}
+              onToggleExpand={() => toggleExpand(row.id)}
+              onExpand={() => onExpand(row.id)}
+              actionColumn={actionColumn}
+              first3Widths={first3Widths}
+              columnWidths={columnWidths}
+              isChildLoading={loadingKeys.has(row.id)}
+            />
+          ))
+        )}
+        
+        {loading && (
+          <div style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "33px", /* Same as NxTable footer height */
+            background: "rgba(255, 255, 255, 0.65)",
+            zIndex: 10,
+            borderRadius: "0 0 8px 8px",
+          }} />
+        )}
+      </div>
 
       {/* Footer */}
       <div
