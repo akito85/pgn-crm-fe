@@ -2,15 +2,13 @@ import { memo, useEffect } from "react";
 import { useState } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getIrApprovalHistory,
-  inactivateInvoiceRelation
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
 import {
   getIrApprovalHierarchy,
-  getDetailIrApprovalHierarchy
+  getDetailIrApprovalHierarchy,
+  getIrApprovalHistory,
+  inactivateInvoiceRelation
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
@@ -24,7 +22,7 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   const dispatch = useDispatch();
 
   const { data_irApprovalHistory } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.invoiceRelation
   );
 
   const [refreshSignal, setRefreshSignal] = useState(0);
@@ -163,6 +161,7 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
         sliceName="invoiceRelation"
         approvalOptionsStateName="data_irApprovalHierarchy"
         approvalHierarchtDetailsStateName="detail_irApprovalHierarchy"
+        loadingInactivateName={"loading_inactivateIr"}
         getApprovalOptions={getIrApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailIrApprovalHierarchy}
       />

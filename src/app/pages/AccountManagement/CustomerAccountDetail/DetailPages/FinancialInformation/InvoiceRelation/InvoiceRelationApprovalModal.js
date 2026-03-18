@@ -7,7 +7,7 @@ import NxTable from "../../../../../../../components/Nx/NxTable";
 import {
   approveOrRejectAllInvoiceRelation,
   getInvoiceRelationApproval
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
@@ -34,7 +34,7 @@ const InvoiceRelationApprovalModal = ({
     loading_listIrApproval,
     loading_approveIr,
     loading_rejectIr
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.invoiceRelation);
 
   const loadingApproval = loading_approveIr || loading_rejectIr;
 

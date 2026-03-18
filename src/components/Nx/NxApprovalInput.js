@@ -70,6 +70,7 @@ const NxApprovalInput = ({
   hierarchyDetails = [],
   formView = true,
   handleSelectHiararchy = () => {},
+  loading = false,
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -131,9 +132,6 @@ const NxApprovalInput = ({
     <div className="flex flex-col gap-y-4">
       {formView ? (
         <>
-          <Form.Item name={"appHierName"} hidden>
-            <Input />
-          </Form.Item>
           <Form.Item
             name={"appHierId"}
             label="Approval Hierarchy"
@@ -142,6 +140,7 @@ const NxApprovalInput = ({
           >
             <SelectComponent
               onChange={(value, option) => handleSelectHiararchy(value, option.children)}
+              disabled={loading}
             >
               {options.map((data, index) => (
                 <Select.Option key={index} value={data.appHierId}>
