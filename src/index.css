@@ -1147,6 +1147,40 @@ span.ant-tree-title {
   text-overflow: clip !important;
 }
 
+/* Align logo with menu items */
+.logo {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 46px !important;  /* Match menu item height */
+  padding: 0 12px !important;  /* Consistent padding */
+}
+
+/* Adjust logo container when sidebar is collapsed */
+.width-collapsed .logo {
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Smooth transition for logo when expanding/collapsing */
+.logo {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  padding-right: 24px !important;  /* Make room for the toggle button */
+}
+
+/* Align the toggle button with submenu arrows */
+.logo .trigger {
+  position: absolute !important;
+  right: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  top: 0 !important;
+}
+
 /* Submenu items in collapsed state should also be centered */
 .ant-menu-inline-collapsed .ant-menu-sub .ant-menu-item,
 .ant-menu-inline-collapsed .ant-menu-sub .ant-menu-submenu-title {

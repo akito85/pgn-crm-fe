@@ -128,8 +128,20 @@ const LayoutMenu = ({ children }) => {
     data_grant_access,
   } = useSelector((state) => state.general);
   const [form] = Form.useForm();
-  const [collapsed, setCollapsed] = useState(false);
-  const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), []);
+  const [collapsed, setCollapsed] = useState(() => {
+    // Check if collapsed state is stored in localStorage
+    const savedCollapsed = localStorage.getItem('sidebar_collapsed');
+    return savedCollapsed ? JSON.parse(savedCollapsed) : false;
+  });
+  
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const newState = !prev;
+      // Save the new state to localStorage
+      localStorage.setItem('sidebar_collapsed', JSON.stringify(newState));
+      return newState;
+    });
+  }, []);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token"),
