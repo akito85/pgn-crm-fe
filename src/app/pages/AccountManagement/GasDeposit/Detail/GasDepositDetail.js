@@ -1,59 +1,56 @@
 import { useEffect } from "react";
-import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import GasDepositDetailTabs from "./GasDepositDetailTabs";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
+import { getCustomerDetail } from "../../../../../redux/slices/account_management/Customer/customerAccount";
+import NxDate from "../../../../../components/Nx/NxDatePicker";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail,
   getGrantedAccessAccount
-} from "../../../../../../../../redux/slices/account_management/accountManagement";
+} from "../../../../../redux/slices/account_management/accountManagement";
 import {
   getDetailGasDeposit,
   getDetailDraftGasDeposit,
   approveOrRejectGasDeposit,
   approveOrRejectInactiveGasDeposit
 } from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
-import { showModalError } from "../../../../../../../../redux/slices/general_slice";
-import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
-import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
-import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
-import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
-import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
-import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import { showModalError } from "../../../../../redux/slices/general_slice";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
+import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb";
+import NxDetailText from "../../../../../components/Nx/NxDetailText";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
+import NxApproveOrRejectModal from "../../../../../components/Nx/NxApproveOrRejectModal";
+import NxTabs from "../../../../../components/Nx/NxTabs";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
+import GasDepositDetailMutationTable from "../GasDepositDetailMutationTable";
+import GasDepositDetailTable from "../GasDepositDetailTable";
 
 /**
- * Gas deposit detail
- * @param {{ moduleType: "sa" | "ua"; accountType?: "standard" | "oneTime" }} props
- * @returns
+ * Gas deposit detail view (container + presentational component).
+ * Fetches original and draft records, supports approve/reject workflow.
+ *
+ * @param {object}                    props
+ * @param {"sa"|"ua"}                 props.moduleType   - Module context: standalone ("sa") or under-account ("ua")
+ * @param {"standard"|"oneTime"}      [props.accountType] - Account type (only relevant when moduleType is "ua")
  */
 const GasDepositDetail = ({ moduleType, accountType }) => {
-  const isStandAlone = moduleType === "sa";
-  const isUnderAccount = moduleType === "ua";
-
-  const isStandard = isUnderAccount && accountType === "standard";
-  const isOneTime = isUnderAccount && accountType === "oneTime";
-  const dispatch = useDispatch();
-
-  const { detail_gasDeposit, detailDraft_gasDeposit } = useSelector(
-    (state) => state.gasDeposit
-  );
-
-  const { loading, loadingAccount } = useSelector(
-    (state) => state.customerAccount
-  );
-
-  const isLoading = loading || loadingAccount;
-
-  //declare
+  // --- Hooks ---
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const { detail_gasDeposit, detailDraft_gasDeposit } = useSelector((state) => state.gasDeposit);
+  const { loading, loadingAccount } = useSelector((state) => state.customerAccount);
+
+  // --- Derived values ---
+  const isStandAlone = moduleType === "sa";
+  const isUnderAccount = moduleType === "ua";
+  const isStandard = isUnderAccount && accountType === "standard";
+  const isOneTime = isUnderAccount && accountType === "oneTime";
+  const isLoading = loading || loadingAccount;
   const idAccount = location.state?.idAccount;
   const idCustomer = location.state?.idCustomer;
   const idGd = location.state?.id;
@@ -70,18 +67,17 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   ];
 
   const originalKey = tabOptions[0].key;
+
+  // --- State ---
   const [activeKey, setActiveKey] = useState(originalKey || "");
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approveOrReject, setApproveOrReject] = useState("");
+  const [selectedDetailId, setSelectedDetailId] = useState();
+
+  // Computed (depends on state + selectors)
   const detail =
     (activeKey === originalKey ? detail_gasDeposit : detailDraft_gasDeposit) ||
     {};
-
-  const handleSetActiveKey = (newActiveKey) => {
-    setActiveKey(newActiveKey);
-  };
-
-  //state
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [approveOrReject, setApproveOrReject] = useState("");
 
   const { status, statusApproval } = detail_gasDeposit;
 
@@ -93,7 +89,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
     createdBy,
     updatedDate,
     updatedBy,
-    tappId
+    tappId,
+    details,
   } = detail;
 
   const routes = [
@@ -131,9 +128,28 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
     }
   ].filter(Boolean);
 
+  const draftExist =
+    status &&
+    status !== "DRAFT" &&
+    statusApproval &&
+    statusApproval !== "APPROVED";
+  const isApproval = ["GAS_DEPOSIT", "INACTIVE_GAS_DEPOSIT"].includes(
+    approvalType
+  );
+
+  // --- Handlers ---
   /**
-   * @param {boolean} show
-   * @param {"approve"|"reject"} action
+   * Switches the active detail tab between Original and Current.
+   * @param {string} newActiveKey
+   */
+  const handleSetActiveKey = (newActiveKey) => {
+    setActiveKey(newActiveKey);
+  };
+
+  /**
+   * Opens or closes the approval/rejection modal.
+   * @param {boolean}            show   - true to open, false to close
+   * @param {"approve"|"reject"} [action] - Which action to arm
    */
   const handleApprovalModal = (show, action) => {
     if (show) {
@@ -146,7 +162,10 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   };
 
   /**
+   * Dispatches approve or reject for the current gas deposit record.
+   * @param {string}             description - Remark entered in the approval form
    * @param {"approve"|"reject"} action
+   * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
     const body = [
@@ -198,6 +217,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
     }
   };
 
+  // --- Effects ---
   useEffect(() => {
     if (isStandAlone)
       dispatch(getGrantedAccessAccount("/account-management/gas-deposit"));
@@ -232,23 +252,17 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [idAccount, idCustomer]);
 
   useEffect(() => {
-    if (idGd) {
-      dispatch(getDetailGasDeposit(idGd));
-      dispatch(getDetailDraftGasDeposit(idGd));
-    }
+    if (idGd)
+      dispatch(getDetailGasDeposit(idGd))
   }, [idGd]);
 
-  const draftExist =
-    status &&
-    status !== "DRAFT" &&
-    statusApproval &&
-    statusApproval !== "APPROVED";
-  const isApproval = ["GAS_DEPOSIT", "INACTIVE_GAS_DEPOSIT"].includes(
-    approvalType
-  );
+  useEffect(() => {
+    if (idGd && draftExist)
+      dispatch(getDetailDraftGasDeposit(idGd));
+  }, [idGd, draftExist])
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -271,6 +285,29 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
             </NxBaseContainer>
           )}
           <GasDepositDetailTabs detail={detail} />
+
+          {activeKey === originalKey && (
+            <>
+              <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
+                <NxBaseContainer border>
+                  <GasDepositDetailTable
+                    dataSource={details}
+                  />
+                </NxBaseContainer>
+              </NxCardContainer>
+              {selectedDetailId && (
+                <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
+                  <NxBaseContainer border>
+                    <GasDepositDetailMutationTable
+                      detailId={selectedDetailId}
+                      />
+                  </NxBaseContainer>
+                </NxCardContainer>
+              )}
+            </>
+          )}
+
+          {/* Detail mutation table — rendered only when a row is selected */}
 
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
             <NxBaseContainer border>
@@ -329,7 +366,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }
       />
-    </LayoutMenu>
+    </>
   );
 };
 

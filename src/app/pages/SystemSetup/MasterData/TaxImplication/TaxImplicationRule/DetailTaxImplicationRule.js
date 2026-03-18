@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -364,7 +363,7 @@ const DetailTaxImplicationRule = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(taxImplicationId || data_detail_tax_implication_rule?.taxImplicationId)} />
         <div className="flex flex-col">
@@ -588,7 +587,7 @@ const DetailTaxImplicationRule = () => {
         </ModalError>
 
       </Spin>
-    </LayoutMenu>
+    </>
   )
 }
 

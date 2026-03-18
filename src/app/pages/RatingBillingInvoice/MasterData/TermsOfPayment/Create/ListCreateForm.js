@@ -11,7 +11,6 @@ import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import RadioTabs from "../../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { configApp } from "../../../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
 import {
@@ -813,7 +812,7 @@ const ListCreateForm = ({ type }) => {
   }, [form, list]);
   
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={false}>
         <RadioTabs
@@ -1001,7 +1000,7 @@ const ListCreateForm = ({ type }) => {
           datatype={data_type}
         />
       </ModalCustom>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -8,7 +8,6 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
@@ -551,7 +550,7 @@ const ViewTaxImplication = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
+      <>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -657,7 +656,7 @@ const ViewTaxImplication = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-      </LayoutMenu>
+      </>
     </Spin>
   );
 };

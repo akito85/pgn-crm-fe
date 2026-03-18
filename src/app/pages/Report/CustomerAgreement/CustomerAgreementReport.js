@@ -6,7 +6,6 @@ import REPORT_ROUTES from '../../../../routes/report/report_routes';
 import TablePagination from '../../../../components/TablePagination';
 import Toolbar from '../../../../components/Toolbar';
 import useReportCustomerAgreement from './hooks/useReportCustomerAgreement';
-const LayoutMenu = lazy(() => import('../../../../components/SidebarMenu/LayoutMenu'));
 const CustomerAgreementReport = () => {
 
     const {
@@ -38,7 +37,7 @@ const CustomerAgreementReport = () => {
 
     return (
         <Suspense fallback={<Spin />}>
-            <LayoutMenu>
+            <>
                 <Spin spinning={loadings}>
                     <BreadCrumb routes={routes} />
 
@@ -61,7 +60,7 @@ const CustomerAgreementReport = () => {
                     </BaseContainer>
                 </Spin>
                 {renderModal()}
-            </LayoutMenu>
+            </>
         </Suspense>
     );
 }

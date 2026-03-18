@@ -160,12 +160,12 @@ export default function InfoInvoiceRelation({
 
   return (
     <div className="flex flex-col gap-y-4">
-      <div className="w-full grid grid-cols-3 gap-4">
+      <div className="w-full grid grid-cols-2 gap-4">
         <div className="flex gap-2 items-end">
           <Form.Item
             label={"Account Number"}
             required
-            className="no-margin-form"
+            className="no-margin-form w-full"
           >
             <div className="flex gap-x-1">
               <Form.Item
@@ -183,7 +183,7 @@ export default function InfoInvoiceRelation({
               </Form.Item>
               <Button
                 type="submit"
-                className="w-[120px]"
+                className="min-w-[120px]"
                 onClick={() => {
                   setIsOpen(true);
                 }}

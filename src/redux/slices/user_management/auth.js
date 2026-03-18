@@ -62,8 +62,8 @@ export const login = createAsyncThunk(
           })
         );
         if (
-          data.data.token.userType === "Non Employee" &&
-          data.data.token.userLevel !== "Super User"
+          data.data.token.userType === "Non Employee" ||
+          data.data.token.userLevel === "Super User"
         ) {
           thunkAPI.dispatch(
             setData({
@@ -72,6 +72,16 @@ export const login = createAsyncThunk(
               storageType: "local",
             })
           );
+          // Super users also need entities for choose-entity page
+          if (data.data.token.userLevel === "Super User") {
+            thunkAPI.dispatch(
+              setData({
+                key: "entities",
+                data: data.data.entityList,
+                storageType: "local",
+              })
+            );
+          }
         } else {
           level === "superuser" &&
           (data.data.token.userType === "Non Employee" ||
@@ -110,8 +120,8 @@ export const login = createAsyncThunk(
           })
         );
         if (
-          data.data.token.userType === "Non Employee" &&
-          data.data.token.userLevel !== "Super User"
+          data.data.token.userType === "Non Employee" ||
+          data.data.token.userLevel === "Super User"
         ) {
           thunkAPI.dispatch(
             setData({
@@ -120,6 +130,16 @@ export const login = createAsyncThunk(
               storageType: "session",
             })
           );
+          // Super users also need entities for choose-entity page
+          if (data.data.token.userLevel === "Super User") {
+            thunkAPI.dispatch(
+              setData({
+                key: "entities",
+                data: data.data.entityList,
+                storageType: "session",
+              })
+            );
+          }
         } else {
           level === "superuser" &&
           (data.data.token.userType === "Non Employee" ||

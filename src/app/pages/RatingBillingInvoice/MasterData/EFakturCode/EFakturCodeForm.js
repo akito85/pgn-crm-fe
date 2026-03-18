@@ -11,7 +11,6 @@ import {
   validateCreateUpdate,
 } from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import EFakturCodeSectionForm from "./EFakturCodeSectionForm";
@@ -563,7 +562,7 @@ const EFakturCodeForm = ({ type }) => {
 };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         
@@ -704,7 +703,7 @@ const EFakturCodeForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

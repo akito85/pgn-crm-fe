@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Alert, Checkbox, Form, Select, Spin } from "antd";
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import HeaderDetail from "../../../HeaderDetail";
@@ -687,8 +686,8 @@ const FormAccountAddress = ({ type }) => {
     dispatch(resetDataDetail());
   };
   return (
-    <div>
-      <LayoutMenu>
+    <>
+      <>
         <Spin spinning={loading}>
           <BreadCrumbAdvanced routes={routes(id)}/>
           <HeaderDetail
@@ -1117,8 +1116,8 @@ const FormAccountAddress = ({ type }) => {
             </div>
           </ModalSuccess>
         ) : null}
-      </LayoutMenu>
-    </div>
+      </>
+    </>
   );
 };
 

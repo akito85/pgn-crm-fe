@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -167,7 +166,7 @@ const Pricing = () => {
   }
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"} tip={"Loading..."}>
         <BreadCrumb routes={routes(segmentedPage)} />
 
@@ -254,7 +253,7 @@ const Pricing = () => {
           </div>
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

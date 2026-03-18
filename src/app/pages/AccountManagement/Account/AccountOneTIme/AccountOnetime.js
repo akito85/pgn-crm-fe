@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -155,7 +154,7 @@ const AccountOnetime = () => {
 
   ]
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -212,7 +211,7 @@ const AccountOnetime = () => {
           </div>
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

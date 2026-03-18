@@ -4,12 +4,18 @@ import NxCardContainer from "../../../../../../../../components/Nx/NxCardContain
 import { useState } from "react";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
+/**
+ * Tabbed detail view for an invoice relation record.
+ * Renders "Invoice Relation Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Invoice relation detail record
+ */
 const InvoiceRelationDetailTabs = ({
   detail = {},
 }) => {
   const attachments = detail.attachments;
 
-  // Use provided options or fall back to default tabs
   const tabOptions = [
     {
       key: "iri",

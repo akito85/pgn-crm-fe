@@ -4,7 +4,6 @@ import { Steps, Button, message, Form } from "antd";
 import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -117,7 +116,7 @@ const CreateCustomerAccount = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Form
         id="accountForm"
@@ -211,7 +210,7 @@ const CreateCustomerAccount = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

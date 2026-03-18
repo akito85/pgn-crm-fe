@@ -207,8 +207,9 @@ const columnAttachmentData = (
     : res;
 };
 const AttachmentSectionForm = ({
-  data = [],
-  updateData = () => { },
+  dataSource = [],
+  setDataSource = () => {},
+  setDeleted = () => {},
   type,
   dispatch = () => { },
   getAPICategory = () => { },
@@ -217,8 +218,6 @@ const AttachmentSectionForm = ({
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
 }) => {
-
-
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -250,10 +249,20 @@ const AttachmentSectionForm = ({
   };
   
   const handleDelete = (record) => {
-    updateData((prevState) => {
-      const temp = prevState.filter((detail) => detail.key !== record.key);
-      return temp;
-    });
+    setDataSource(
+      prevState => prevState.filter(
+        attachment => attachment.key !== record.key
+      )
+    );
+
+    if (record.dataType === "draft")
+      setDeleted(prevState => [
+        ...prevState,
+        {
+          ...record,
+          isDeleted: true,
+        }
+      ]);
   };
 
   const handleOpenModal = () => {
@@ -305,15 +314,15 @@ const AttachmentSectionForm = ({
                 <Button type="menu" onClick={handleOpenModal}>
                   Choose File
                 </Button>
-                {!data.length && (
+                {!dataSource.length && (
                   <span className="text-sm text-dg-grey-dark">No file choosen</span>
                 )}
               </div>
             </div>
           ) : null}
           <NxTable
-            dataSource={data}
-            totalData={data.length}
+            dataSource={dataSource}
+            totalData={dataSource.length}
             tableScrolled={{ x: 1500 }}
             columns={columnAttachmentData(
               searchInput,
@@ -330,7 +339,7 @@ const AttachmentSectionForm = ({
       </Spin>
       <ModalAttachment
         openUpload={modalUpload}
-        updateData={updateData}
+        updateData={setDataSource}
         categoryOptions={categoryOptions}
         handleCancel={() => setModalUpload(false)}
         valueGuard={

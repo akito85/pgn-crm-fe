@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 
 
 import {
@@ -436,7 +435,7 @@ const ListFormPartnerCa = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <FormStepper
@@ -556,7 +555,7 @@ const ListFormPartnerCa = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu >
+    </>
   );
 };
 

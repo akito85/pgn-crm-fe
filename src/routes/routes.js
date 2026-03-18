@@ -29,7 +29,6 @@ export const index = [
   {
     path: "/switch-entity",
     element: <SwitchPage type={"switch-entity"} />,
-    authority: "130",
   },
   {
     path: "/switch-position",

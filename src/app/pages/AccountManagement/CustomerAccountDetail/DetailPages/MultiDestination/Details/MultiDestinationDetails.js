@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useState } from "react";
@@ -189,7 +188,7 @@ const MultiDestinationDetails = ({
   const isApproval = ["MULTI_DESTINATION", "INACTIVE_MULTI_DESTINATION"].includes(approvalType);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -247,7 +246,7 @@ const MultiDestinationDetails = ({
         customMessage={`Are you sure you want to ${approveOrReject} multi destination - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

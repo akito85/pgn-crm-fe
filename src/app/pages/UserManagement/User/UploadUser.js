@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import InputComponent from "../../../../components/InputComponent";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import { bytesConverter } from "../../../../utils/bytesConverter";
@@ -252,7 +251,7 @@ const UploadUser = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"w-full flex justify-end"}>
@@ -403,7 +402,7 @@ const UploadUser = () => {
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

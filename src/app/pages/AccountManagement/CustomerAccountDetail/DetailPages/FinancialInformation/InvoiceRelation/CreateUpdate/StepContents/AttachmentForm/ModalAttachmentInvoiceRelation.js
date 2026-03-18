@@ -13,6 +13,7 @@ import { bytesConverter } from "../../../../../../../../../../utils/bytesConvert
 import { getBase64 } from "../../../../../../../../../../utils/getBase64";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
 import ExtensionFile from "../../../../../../../../../../utils/ExtensionFile";
+import { nxGenerateRandomId } from "../../../../../../../../../../components/Nx/NxAddIds";
 
 const MAX_FILE_SIZE = 5000000;
 const ModalAttachment = ({
@@ -108,20 +109,11 @@ const ModalAttachment = ({
 
   const handleUpload = (value) => {
     if (fileList.length > 0) {
-      updateData((prevState) => {
-        let key = prevState.reduce(
-          (current, next) => {
-            const nextKey = next.key || 0;
-            return current > nextKey
-              ? parseInt(current) + 1
-              : parseInt(nextKey) + 1;
-          },
-          [1]
-        );
+      updateData(prevState => {
         let newData = fileList.map((file) => {
           return {
             ...file,
-            key: key++,
+            key: nxGenerateRandomId(),
             fileCategoryName: category.label,
             fileCategoryId: category.value,
           };

@@ -15,8 +15,8 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
+import SVGIcon from "../../../../assets/Icon/index";
 
 /**
  * Gas deposit list table module
@@ -165,15 +165,13 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   return (
     <>
       <NxCardContainer header={"GAS DEPOSIT"}>
+        <SVGIcon name="IconExtend" color="black" />
+
         <NxBaseContainer border>
           <GasDepositTable
             moduleType={moduleType}
             idAccount={id}
             idCustomer={idCustomer}
-            handleInactivateModal={handleInactivateModal}
-            handleApprovalHistoryModal={handleApprovalHistoryModal}
-            handleApproval={setShowApprovalModal}
-            handleSelectDetail={handleSelectDetail}
             refreshSignal={refreshSignal}
           />
         </NxBaseContainer>
@@ -236,13 +234,13 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
 const GasDeposit = ({ moduleType, id = 0, idCustomer = 0 }) => {
   if (moduleType === "sa")
     return (
-      <LayoutMenu>
+      <>
         <GasDepositModule
           moduleType={moduleType}
           id={id}
           idCustomer={idCustomer}
         />
-      </LayoutMenu>
+      </>
     );
   else if (moduleType === "ua")
     return (

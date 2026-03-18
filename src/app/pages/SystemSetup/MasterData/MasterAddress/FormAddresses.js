@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_management/customer_account_routes';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import { Form, Select, Spin } from 'antd';
 import BaseContainer from '../../../../../components/BaseContainer';
@@ -371,7 +370,7 @@ const FormAddresses = ({ type }) => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading || isLoading}>
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -631,7 +630,7 @@ const FormAddresses = ({ type }) => {
                 width={900}
                 header={'confirmation'}
                 footer={[
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                    <div key="footer" className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                         <ButtonComponent
                             onClick={handleCancel}
                             type="default"
@@ -724,7 +723,7 @@ const FormAddresses = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 

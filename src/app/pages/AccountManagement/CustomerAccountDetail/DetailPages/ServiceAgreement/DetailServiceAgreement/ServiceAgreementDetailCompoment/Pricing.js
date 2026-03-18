@@ -169,6 +169,18 @@ const Pricing = ({ data }) => {
     });
   }, []);
 
+  const getPricingRowKey = useCallback((record, index) => {
+    const keyCandidates = [record?.key, record?.id, record?.priceCodeId, record?.pricingId];
+
+    for (const candidate of keyCandidates) {
+      if (candidate !== undefined && candidate !== null && candidate !== "") {
+        return String(candidate);
+      }
+    }
+
+    return `${record?.priceCode || "price"}-${record?.min || "min"}-${record?.max || record?.maximumName || "max"}-${record?.currency || "currency"}-${record?.uom || "uom"}-${record?.value || "value"}-${record?.adjustment || "adj"}-${record?.description || "desc"}-${index}`;
+  }, []);
+
   const onSort = (_, __, sort) => {
     if (sort.order) {
       setFieldSort(sort.field);
@@ -301,7 +313,7 @@ const Pricing = ({ data }) => {
           {mergeAdjustment}
         </NxDetailText>
         <NxDetailText label={"Pricing Rule"}>
-          {data?.saInfo?.isPricingRule == "Y" && data?.saInfo?.pricingRuleId == null
+          {data?.saInfo?.isPricingRule === "Y" && data?.saInfo?.pricingRuleId == null
             ? 'Custom Tiering'
             : data?.saInfo?.pricingRuleName}
         </NxDetailText>
@@ -310,6 +322,7 @@ const Pricing = ({ data }) => {
       <div className={"w-full py-4"}>
         <NxTable
           idTable="sa-detail-pricing-table"
+          rowKey={getPricingRowKey}
           dataSource={displayData}
           columns={columns}
           totalData={processedData.length}

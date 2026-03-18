@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Collapse, Spin } from "antd";
 import { DownOutlined, LeftOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
@@ -276,7 +275,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
 
             <div className="text-xl font-bold text-primary mb-5">
@@ -504,7 +503,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 menu={`Receipt ${typeLabel}`}
                 named={data_detail?.receiptNumber}
             />
-        </LayoutMenu>
+        </>
     );
 };
 
