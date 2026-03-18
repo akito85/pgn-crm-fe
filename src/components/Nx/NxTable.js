@@ -4,13 +4,77 @@ import {
   DownloadOutlined,
   FilterOutlined,
   ReloadOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
-import { Button, Pagination, Select, Spin, Table } from "antd";
+import { Button, Input, Pagination, Select, Spin, Table } from "antd";
+import { debounce } from 'lodash';
 import ColumnSettings from "../ColumnSettings/ColumnSettings";
-import SearchBar from "../SearchBar";
 import NxAdvanceSearch from "./NxAdvanceSearch";
 
 const { Option } = Select;
+
+// ── Shared visual constants (mirror NxTableNested) ─────────────────────────
+const HEADER_BG    = "#2C6FAD";
+const BORDER_COL   = "#C8CDD4";
+const ROW_WHITE    = "#FFFFFF";
+const ROW_HOVER    = "#EBF2FA";
+const FONT_FAMILY  = "'PlusJakartaSans', 'PublicSans', sans-serif";
+
+// ── SearchBar Component ─────────────────────────────────────────────────────
+// Owns its own local input state so the parent's re-render (triggered by
+// filtering) never causes the input to lose focus or re-mount.
+const SearchBar = React.memo(({ placeholder = "Search content here ....", onSearch }) => {
+  const [localValue, setLocalValue] = React.useState('');
+  const inputRef = React.useRef(null);
+
+  const debouncedNotify = useCallback(
+    debounce((val) => { onSearch?.(val); }, 220),
+    [onSearch]
+  );
+
+  const handleChange = useCallback((e) => {
+    const val = e.target.value;
+    setLocalValue(val);
+    debouncedNotify(val);
+  }, [debouncedNotify]);
+
+  const handleClear = useCallback(() => {
+    setLocalValue('');
+    onSearch?.('');
+  }, [onSearch]);
+
+  return (
+    <div style={{ position: "relative" }}>
+      <SearchOutlined
+        style={{
+          position: "absolute",
+          left: "8px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: "14px",
+          color: "#9CA3AF",
+          zIndex: 30,
+        }}
+      />
+      <Input
+        ref={inputRef}
+        placeholder={placeholder}
+        value={localValue}
+        style={{
+          height: "32px",
+          paddingLeft: "28px",
+          border: `1px solid ${BORDER_COL}`,
+          borderRadius: "8px",
+          fontSize: "12px",
+          fontFamily: FONT_FAMILY,
+        }}
+        onChange={handleChange}
+        allowClear
+        onClear={handleClear}
+      />
+    </div>
+  );
+});
 
 // Resizable Title Component
 const ResizableTitle = (props) => {
@@ -128,7 +192,9 @@ const NxTable = ({
   useInfiniteScroll = false,
   onLoadMore = () => { },
   hasMore = false,
-  loadMoreThreshold = 20,
+  // loadMoreThreshold is no longer used — infinite scroll uses IntersectionObserver.
+  // Kept here for backward-compat so existing callers don't break.
+  loadMoreThreshold = 20, // eslint-disable-line no-unused-vars
   onSort = () => { },
   handleDownload = () => { },
   columnDefinitions,
@@ -178,8 +244,78 @@ const NxTable = ({
   const [columnWidths, setColumnWidths] = useState({});
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState([]);
+  const [searchValue, setSearchValue] = useState('');
 
   const tableRef = React.useRef(null);
+  // Sentinel ref for IntersectionObserver-based infinite scroll (mirrors NxTableNested)
+  const sentinelRef = React.useRef(null);
+  const isLoadingMoreRef = React.useRef(false);
+
+  // ── Fuzzy match helpers ────────────────────────────────────────────────
+  // Returns true when every character of `query` appears in `text` in order.
+  const fuzzyMatch = useCallback((text, query) => {
+    if (!query) return true;
+    const t = String(text).toLowerCase();
+    const q = query.toLowerCase();
+    let qi = 0;
+    for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+      if (t[ti] === q[qi]) qi++;
+    }
+    return qi === q.length;
+  }, []);
+
+  // Highlight function: exact substring match gets yellow, fuzzy characters get underline.
+  const highlightText = useCallback((text, search) => {
+    if (!search || text === null || text === undefined) return text;
+    const str = String(text);
+    const lower = str.toLowerCase();
+    const sq = search.toLowerCase();
+
+    // Prefer exact substring highlighting
+    const idx = lower.indexOf(sq);
+    if (idx !== -1) {
+      return (
+        <>
+          {str.slice(0, idx)}
+          <span style={{ backgroundColor: '#fde047', padding: '1px 2px', borderRadius: '2px', fontWeight: 600 }}>
+            {str.slice(idx, idx + sq.length)}
+          </span>
+          {str.slice(idx + sq.length)}
+        </>
+      );
+    }
+
+    // Fuzzy: highlight individual matched characters
+    const chars = [];
+    let qi = 0;
+    for (let i = 0; i < str.length; i++) {
+      if (qi < sq.length && str[i].toLowerCase() === sq[qi]) {
+        chars.push(
+          <span key={i} style={{ color: '#1976D2', fontWeight: 700, textDecoration: 'underline' }}>
+            {str[i]}
+          </span>
+        );
+        qi++;
+      } else {
+        chars.push(str[i]);
+      }
+    }
+    return <>{chars}</>;
+  }, []);
+
+  // Filter data based on search value — supports exact substring AND fuzzy match
+  const filteredDataSource = useMemo(() => {
+    if (!searchValue) return resolvedDataSourceWithKeys;
+
+    return resolvedDataSourceWithKeys.filter(row => {
+      return resolvedColumns.some(col => {
+        const value = row[col.dataIndex || col.key];
+        const str = String(value || "").toLowerCase();
+        const sq = searchValue.toLowerCase();
+        return str.includes(sq) || fuzzyMatch(str, sq);
+      });
+    });
+  }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch]);
 
   // Fungsi helper untuk mengumpulkan semua keys dari kolom (termasuk children)
   const getAllColumnKeys = useCallback((cols) => {
@@ -207,47 +343,65 @@ const NxTable = ({
     }
   }, [resolvedColumns, columnOrder.length, getAllColumnKeys]);
 
-  // Infinite scroll handler
+  // ── Infinite scroll via IntersectionObserver ─────────────────────────────
+  // The sentinel <div> sits inside the ant-table-body scroll container so the
+  // observer fires relative to that container — not the viewport.  This makes
+  // infinite scroll work correctly both standalone AND inside a Modal, where
+  // root:null (viewport) would never see the sentinel because the modal clips it.
   React.useEffect(() => {
     if (!useInfiniteScroll || !hasMore) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
 
-    const handleScroll = (e) => {
-      const target = e.target;
-      if (!target) return;
+    let observer = null;
 
-      const scrollTop = target.scrollTop;
-      const scrollHeight = target.scrollHeight;
-      const clientHeight = target.clientHeight;
-      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-      // Use smaller multiplier for more responsive triggering
-      const pixelThreshold = Math.max(loadMoreThreshold * 20, 50);
+    const attachObserver = () => {
+      // The Ant Design scroll container is rendered asynchronously; wait for it.
+      const scrollRoot = document.querySelector(`#${idTable} .ant-table-body`);
+      if (!scrollRoot) return false;
 
-      // Only check isLoadingMore to prevent duplicate calls - don't wait for loading state
-      if (distanceFromBottom <= pixelThreshold && !isLoadingMore) {
-        setIsLoadingMore(true);
-        onLoadMore().finally(() => {
-          setIsLoadingMore(false);
-        });
-      }
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && !isLoadingMoreRef.current) {
+            isLoadingMoreRef.current = true;
+            setIsLoadingMore(true);
+            Promise.resolve(onLoadMore())
+              .catch(() => {})
+              .finally(() => {
+                isLoadingMoreRef.current = false;
+                setIsLoadingMore(false);
+              });
+          }
+        },
+        {
+          // Use the table's own scroll container as root so this works both
+          // standalone and when NxTable is rendered inside a Modal.
+          root: scrollRoot,
+          rootMargin: "0px 0px 80px 0px",
+          threshold: 0,
+        }
+      );
+      observer.observe(sentinel);
+      return true;
     };
 
-    const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
-
-    if (tableBody) {
-      // Use passive listener for better scroll performance
-      tableBody.addEventListener("scroll", handleScroll, { passive: true });
+    // Try immediately; if the scroll container isn't in the DOM yet, poll via
+    // rAF until it is (happens on first render and after modal open animation).
+    if (!attachObserver()) {
+      let rafId;
+      const retry = () => {
+        if (attachObserver()) return;
+        rafId = requestAnimationFrame(retry);
+      };
+      rafId = requestAnimationFrame(retry);
       return () => {
-        tableBody.removeEventListener("scroll", handleScroll);
+        cancelAnimationFrame(rafId);
+        observer?.disconnect();
       };
     }
-  }, [
-    useInfiniteScroll,
-    hasMore,
-    isLoadingMore,
-    loadMoreThreshold,
-    onLoadMore,
-    idTable,
-  ]);
+
+    return () => observer?.disconnect();
+  }, [useInfiniteScroll, hasMore, onLoadMore, idTable]);
 
   // Keyboard arrow navigation
   React.useEffect(() => {
@@ -481,12 +635,44 @@ const NxTable = ({
       });
     }
 
+    // Process columns to add search highlighting
+    const processColumnForSearch = (col) => {
+      // Store the original render function
+      const originalRender = col.render;
+      
+      // Create a new column with search highlighting
+      const newCol = {
+        ...col,
+        render: (text, record, index) => {
+          // Use original render if it exists, otherwise use the text directly
+          let renderedValue = originalRender ? originalRender(text, record, index) : text;
+          
+          // Apply highlighting only if the rendered value is a string and we have a search term
+          if (typeof renderedValue === 'string' && searchValue) {
+            renderedValue = highlightText(renderedValue, searchValue);
+          }
+          
+          return renderedValue;
+        }
+      };
+      
+      // If the column has children, process them recursively
+      if (newCol.children && Array.isArray(newCol.children)) {
+        newCol.children = newCol.children.map(processColumnForSearch);
+      }
+      
+      return newCol;
+    };
+
+    // Apply search highlighting to visible columns
+    const columnsWithHighlighting = visible.map(processColumnForSearch);
+
     // Separate into left, normal, right
     const leftFixed = [];
     const rightFixed = [];
     const normal = [];
 
-    visible.forEach((col) => {
+    columnsWithHighlighting.forEach((col) => {
       const isLeftFixed =
         (Array.isArray(fixedColumns.left) &&
           fixedColumns.left.includes(col.key)) ||
@@ -518,6 +704,8 @@ const NxTable = ({
     fixedColumns,
     columnOrder,
     processColumn,
+    searchValue,
+    highlightText
   ]);
 
   const handleAdvanceSearch = (searchData) => {
@@ -774,36 +962,36 @@ const NxTable = ({
             #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
             #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
             #${idTable} .ant-table-bordered .ant-table-container {
-              border-color: #C8CDD4 !important;
+              border-color: ${BORDER_COL} !important;
             }
 
             #${idTable} .ant-table-thead > tr > th {
               padding: 4px 8px !important;
               height: 30px !important;
-              border-right: 1px solid #C8CDD4 !important;
-              border-bottom: 1px solid #C8CDD4 !important;
-              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+              border-right: 1px solid ${BORDER_COL} !important;
+              border-bottom: 1px solid ${BORDER_COL} !important;
+              font-family: ${FONT_FAMILY};
             }
 
             #${idTable} .ant-table-thead > tr:first-child > th {
-              border-top: 1px solid #C8CDD4 !important;
+              border-top: 1px solid ${BORDER_COL} !important;
             }
 
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
               padding: 4px 8px !important;
               min-height: 30px;
               font-size: 12px;
-              border-right: 1px solid #C8CDD4 !important;
-              border-bottom: 1px solid #C8CDD4 !important;
-              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+              border-right: 1px solid ${BORDER_COL} !important;
+              border-bottom: 1px solid ${BORDER_COL} !important;
+              font-family: ${FONT_FAMILY};
             }
 
             #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
-              border-left: 1px solid #C8CDD4 !important;
+              border-left: 1px solid ${BORDER_COL} !important;
             }
 
             #${idTable} .ant-table-thead > tr > th:first-child {
-              border-left: 1px solid #C8CDD4 !important;
+              border-left: 1px solid ${BORDER_COL} !important;
             }
 
 
@@ -813,6 +1001,19 @@ const NxTable = ({
               line-height: 0;
               font-size: 0;
               overflow: hidden;
+            }
+
+            /* Empty state: force white background matching ROW_WHITE so it's
+               consistent with NxTableNested's "No data" row and NxTableInlineEdit */
+            #${idTable} .ant-table-placeholder > td {
+              background-color: ${ROW_WHITE} !important;
+              border-left: 1px solid ${BORDER_COL} !important;
+              border-right: 1px solid ${BORDER_COL} !important;
+              border-bottom: 1px solid ${BORDER_COL} !important;
+            }
+
+            #${idTable} .ant-table-placeholder:hover > td {
+              background-color: ${ROW_WHITE} !important;
             }
 
             /* ── Nested table alignment ───────────────────────────────────────
@@ -849,11 +1050,11 @@ const NxTable = ({
             }
 
             /* ── Nested (Child) Table Styling ──────────────────────────────────
-               Child tables use the same header blue (#2C6FAD), borders (#C8CDD4),
+               Child tables use the same header blue (${HEADER_BG}), borders (${BORDER_COL}),
                and alternating row styling as parent tables. */
 
             #${idTable} .ant-table-expanded-row .ant-table {
-              border-left: 1px solid #C8CDD4 !important;
+              border-left: 1px solid ${BORDER_COL} !important;
               border-radius: 0 !important;
               border-top: none !important;
               border-right: none !important;
@@ -874,39 +1075,39 @@ const NxTable = ({
 
             /* Child table header styling */
             #${idTable} .ant-table-expanded-row .ant-table-thead > tr > th {
-              background-color: #2C6FAD !important;
+              background-color: ${HEADER_BG} !important;
               color: #fff !important;
-              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
-              border-color: #C8CDD4 !important;
+              font-family: ${FONT_FAMILY};
+              border-color: ${BORDER_COL} !important;
               border-right: 1px solid rgba(255,255,255,0.2) !important;
             }
 
             /* Child table body cells */
             #${idTable} .ant-table-expanded-row .ant-table-tbody > tr > td {
-              border-color: #C8CDD4 !important;
-              font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+              border-color: ${BORDER_COL} !important;
+              font-family: ${FONT_FAMILY};
               font-size: 12px !important;
             }
 
             /* Child table alternating row colors */
             #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:nth-child(odd) > td {
-              background-color: #FFFFFF !important;
+              background-color: ${ROW_WHITE} !important;
             }
 
             #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:nth-child(even) > td {
-              background-color: #EBF2FA !important;
+              background-color: ${ROW_HOVER} !important;
             }
 
             /* Child table row hover */
             #${idTable} .ant-table-expanded-row .ant-table-tbody > tr:hover > td {
-              background-color: #EBF2FA !important;
+              background-color: ${ROW_HOVER} !important;
             }
 
             /* Re-add left border on child's first header/cell so the vertical
                line from the parent second-column separator continues cleanly */
             #${idTable} .ant-table-expanded-row .ant-table-thead > tr > th:first-child,
             #${idTable} .ant-table-expanded-row .ant-table-tbody > tr > td:first-child {
-              border-left: 1px solid #C8CDD4 !important;
+              border-left: 1px solid ${BORDER_COL} !important;
             }
           `}
       </style>
@@ -979,7 +1180,11 @@ const NxTable = ({
 
               {showSearchBar && (
                 <div style={{ width: "200px" }}>
-                  <SearchBar />
+                  {/* SearchBar owns its own DOM input state — no focus loss on parent re-render */}
+                  <SearchBar
+                    placeholder="Search content here ...."
+                    onSearch={(val) => setSearchValue(val)}
+                  />
                 </div>
               )}
             </div>
@@ -989,7 +1194,7 @@ const NxTable = ({
 
       <div style={{ position: "relative" }}>
         <Table
-          dataSource={resolvedDataSourceWithKeys}
+          dataSource={filteredDataSource}
           rowKey={rowKey}
           columns={displayedColumns}
           components={components}
@@ -1005,10 +1210,14 @@ const NxTable = ({
           rowSelection={rowSelection}
           onRow={customOnRow}
           rowClassName={customRowClassName}
+          footer={useInfiniteScroll && hasMore
+            ? () => <div ref={sentinelRef} style={{ height: 1 }} aria-hidden="true" />
+            : undefined
+          }
         />
 
         {useInfiniteScroll ? (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
               {isLoadingMore && hasMore && " · Loading..."}
@@ -1021,7 +1230,7 @@ const NxTable = ({
             )}
           </div>
         ) : usePagination ? (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <Select
                 value={pageSize}
@@ -1053,12 +1262,16 @@ const NxTable = ({
             />
           </div>
         ) : (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
             </span>
-            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
-            <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+            {!loading && resolvedDataSource?.length > 0 && (
+              <>
+                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+                <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+              </>
+            )}
           </div>
         )}
 

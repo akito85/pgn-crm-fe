@@ -3,6 +3,13 @@ import { Table, Input, InputNumber, Select, Empty } from "antd";
 
 const { Option } = Select;
 
+// ── Shared visual constants (mirrors NxTable / NxTableNested) ──────────────
+const HEADER_BG   = "#2C6FAD";
+const BORDER_COL  = "#C8CDD4";
+const ROW_WHITE   = "#FFFFFF";
+const ROW_HOVER   = "#EBF2FA";
+const FONT_FAMILY = "'PlusJakartaSans', 'PublicSans', sans-serif";
+
 const EditIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7.50004 5.8335H5.00004C4.07957 5.8335 3.33337 6.57969 3.33337 7.50016V15.0002C3.33337 15.9206 4.07957 16.6668 5.00004 16.6668H12.5C13.4205 16.6668 14.1667 15.9206 14.1667 15.0002V12.5002" stroke="#1976D2" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
@@ -40,16 +47,19 @@ const TrashIcon = () => (
  *   maxLength     {number}   - max char length for inputType 'text'
  *
  * Props:
- *   idTable       {string}   - unique DOM id for CSS scoping (required)
- *   dataSource    {Array}    - controlled row data
- *   onDataChange  {Function} - (newData) called on Save or Delete
- *   columns       {Array}    - column definitions
- *   rowKey        {string}   - key field name (default: 'key')
- *   loading       {boolean}
- *   showDelete    {boolean}  - show delete button (default: true)
- *   emptyText     {string}   - empty state message
- *   editMode      {string}   - 'full' | 'deleteOnly' (default: 'full')
- *   onAddRow      {Function} - callback to add a new row (optional)
+ *   idTable           {string}   - unique DOM id for CSS scoping (required)
+ *   dataSource        {Array}    - controlled row data
+ *   onDataChange      {Function} - (newData) called on Save or Delete
+ *   columns           {Array}    - column definitions
+ *   rowKey            {string}   - key field name (default: 'key')
+ *   loading           {boolean}
+ *   showDelete        {boolean}  - show delete button (default: true)
+ *   emptyText         {string}   - empty state message
+ *   editMode          {string}   - 'full' | 'deleteOnly' (default: 'full')
+ *   onAddRow          {Function} - callback to add a new row (optional)
+ *   autoEditOnAppend  {boolean}  - auto-enter edit mode when a row is appended
+ *                                  (default: true). Set to false when rows are
+ *                                  pre-filled externally, e.g. picked from a modal.
  */
 const NxTableInlineEdit = ({
   idTable = "nx-table-inline-edit",
@@ -62,18 +72,22 @@ const NxTableInlineEdit = ({
   emptyText = 'No data. Click Create to add a new row.',
   editMode = 'full',
   onAddRow,
+  autoEditOnAppend = true,
 }) => {
   const [editingKey, setEditingKey] = useState(null);
   const [editingValues, setEditingValues] = useState({});
   const [isNewRow, setIsNewRow] = useState(false);
   const prevLengthRef = useRef(dataSource.length);
 
-  // Auto-enter edit mode when a new row is appended (e.g. via "Add" button)
+  // Auto-enter edit mode when a new row is appended (e.g. via "Add" button).
+  // Controlled by the autoEditOnAppend prop — set it to false when rows are
+  // inserted pre-filled from an external source (modal picker, import, etc.)
+  // so they land directly in view/saved mode without opening the editor.
   useEffect(() => {
     const prevLength = prevLengthRef.current;
     prevLengthRef.current = dataSource.length;
 
-    if (dataSource.length > prevLength) {
+    if (autoEditOnAppend && dataSource.length > prevLength) {
       const newRow = dataSource[dataSource.length - 1];
       if (newRow) {
         setEditingKey(newRow[rowKey]);
@@ -81,7 +95,7 @@ const NxTableInlineEdit = ({
         setIsNewRow(true);
       }
     }
-  }, [dataSource, rowKey]);
+  }, [dataSource, rowKey, autoEditOnAppend]);
 
   const isEditing = (record) => record[rowKey] === editingKey;
 
@@ -130,11 +144,11 @@ const NxTableInlineEdit = ({
     [dataSource, editingKey, onDataChange, rowKey]
   );
 
-  const renderCell = (col, text, record) => {
+  const renderCell = (col, text, record, index) => {
     const editing = isEditing(record);
 
     if (!col.editable || !editing) {
-      return col.render ? col.render(text, record) : (text ?? "—");
+      return col.render ? col.render(text, record, index) : (text ?? "—");
     }
 
     const value = editingValues[col.dataIndex];
@@ -148,7 +162,7 @@ const NxTableInlineEdit = ({
             value={value || undefined}
             placeholder={col.placeholder || `Select ${col.title}`}
             onChange={(v) => handleEditChange(col.dataIndex, v)}
-            style={{ width: "100%", height: "34px", fontFamily: "'PlusJakartaSans', 'PublicSans', sans-serif" }}
+            style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
           >
             {(col.selectOptions || []).map((opt) => (
               <Option key={opt.value} value={opt.value}>
@@ -170,7 +184,7 @@ const NxTableInlineEdit = ({
             max={col.max}
             precision={col.precision ?? 0}
             onChange={(v) => handleEditChange(col.dataIndex, v)}
-            style={{ width: "100%", height: "34px", fontFamily: "'PlusJakartaSans', 'PublicSans', sans-serif" }}
+            style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
           />
         </div>
       );
@@ -183,7 +197,7 @@ const NxTableInlineEdit = ({
           placeholder={col.placeholder || col.title}
           maxLength={col.maxLength}
           onChange={(e) => handleEditChange(col.dataIndex, e.target.value)}
-          style={{ height: "34px", padding: "4px 8px", fontFamily: "'PlusJakartaSans', 'PublicSans', sans-serif" }}
+          style={{ height: "34px", padding: "4px 8px", fontFamily: FONT_FAMILY }}
         />
       </div>
     );
@@ -218,7 +232,7 @@ const NxTableInlineEdit = ({
           },
         };
       },
-      render: (text, record) => renderCell(col, text, record),
+      render: (text, record, index) => renderCell(col, text, record, index),
     };
   });
 
@@ -360,38 +374,38 @@ const NxTableInlineEdit = ({
         #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
         #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
         #${idTable} .ant-table-bordered .ant-table-container {
-          border-color: #C8CDD4 !important;
+          border-color: ${BORDER_COL} !important;
         }
 
         #${idTable} .ant-table-thead > tr > th {
           padding: 4px 8px !important;
           height: 30px !important;
-          border-right: 1px solid #C8CDD4 !important;
-          border-bottom: 1px solid #C8CDD4 !important;
-          font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
-          background-color: #2C6FAD !important;
+          border-right: 1px solid ${BORDER_COL} !important;
+          border-bottom: 1px solid ${BORDER_COL} !important;
+          font-family: ${FONT_FAMILY};
+          background-color: ${HEADER_BG} !important;
           color: #fff !important;
         }
 
         #${idTable} .ant-table-thead > tr:first-child > th {
-          border-top: 1px solid #C8CDD4 !important;
+          border-top: 1px solid ${BORDER_COL} !important;
         }
 
         #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
           padding: 4px 8px !important;
           min-height: 30px;
           font-size: 12px;
-          border-right: 1px solid #C8CDD4 !important;
-          border-bottom: 1px solid #C8CDD4 !important;
-          font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+          border-right: 1px solid ${BORDER_COL} !important;
+          border-bottom: 1px solid ${BORDER_COL} !important;
+          font-family: ${FONT_FAMILY};
         }
 
         #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
-          border-left: 1px solid #C8CDD4 !important;
+          border-left: 1px solid ${BORDER_COL} !important;
         }
 
         #${idTable} .ant-table-thead > tr > th:first-child {
-          border-left: 1px solid #C8CDD4 !important;
+          border-left: 1px solid ${BORDER_COL} !important;
         }
 
         #${idTable} .ant-table-tbody > tr.nx-row-editing > td {
@@ -399,19 +413,31 @@ const NxTableInlineEdit = ({
         }
 
         #${idTable} .ant-table-tbody > tr:nth-child(odd) > td {
-          background-color: #FFFFFF !important;
+          background-color: ${ROW_WHITE} !important;
         }
 
         #${idTable} .ant-table-tbody > tr:nth-child(even) > td {
-          background-color: #EBF2FA !important;
+          background-color: ${ROW_HOVER} !important;
         }
 
         #${idTable} .ant-table-tbody > tr:hover > td {
-          background-color: #EBF2FA !important;
+          background-color: ${ROW_HOVER} !important;
         }
 
         #${idTable} .ant-table-tbody > tr.nx-row-editing:hover > td {
-          background-color: #FFFFFF !important;
+          background-color: ${ROW_WHITE} !important;
+        }
+
+        /* Empty state: match the table body background so it blends in */
+        #${idTable} .ant-table-placeholder > td {
+          background-color: ${ROW_WHITE} !important;
+          border-left: 1px solid ${BORDER_COL} !important;
+          border-right: 1px solid ${BORDER_COL} !important;
+          border-bottom: 1px solid ${BORDER_COL} !important;
+        }
+
+        #${idTable} .ant-table-placeholder:hover > td {
+          background-color: ${ROW_WHITE} !important;
         }
 
         #${idTable} .ant-select-selector {
@@ -454,17 +480,30 @@ const NxTableInlineEdit = ({
         pagination={false}
         size="small"
         loading={loading}
-        locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyText} /> }}
+        locale={{
+          emptyText: (
+            <div style={{ padding: "20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: "12px" }}>
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={<span style={{ fontFamily: FONT_FAMILY, fontSize: "12px", color: "#999" }}>{emptyText}</span>}
+              />
+            </div>
+          ),
+        }}
         style={{ margin: 0 }}
         tableLayout="fixed"
         rowClassName={(record) => isEditing(record) ? "nx-row-editing" : ""}
       />
-      <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: "1px solid #C8CDD4", borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+      <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
         <span style={{ fontSize: "12px", color: "#6B7280" }}>
           Showing {dataSource.length} of {dataSource.length} entries
         </span>
-        <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
-        <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+        {!loading && dataSource.length > 0 && (
+          <>
+            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+            <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+          </>
+        )}
       </div>
     </div>
   );
@@ -482,7 +521,7 @@ const iconBtnStyle = {
 };
 
 const cancelBtnStyle = {
-  border: "1px solid #C8CDD4",
+  border: `1px solid ${BORDER_COL}`,
   background: "#fff",
   cursor: "pointer",
   padding: "2px 10px",

@@ -601,21 +601,29 @@ const SearchBar = React.memo(({ placeholder = "Search content here ....", onSear
   }, [onSearch]);
 
   return (
-    <div className="relative">
+    <div style={{ position: "relative" }}>
       <SearchOutlined
-        className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 z-30"
-        style={{ fontSize: "14px" }}
+        style={{
+          position: "absolute",
+          left: "8px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: "14px",
+          color: "#9CA3AF",
+          zIndex: 30,
+        }}
       />
       <AntInput
         ref={inputRef}
         placeholder={placeholder}
-        className="h-[32px]"
         value={localValue}
         style={{
-          paddingLeft: "35px",
-          border: "1px solid #BDBDBD",
+          height: "32px",
+          paddingLeft: "28px",
+          border: `1px solid ${BORDER_COL}`,
           borderRadius: "8px",
           fontSize: "12px",
+          fontFamily: FONT_FAMILY,
         }}
         onChange={handleChange}
         allowClear
@@ -1268,16 +1276,19 @@ const NxTableNested = ({
   };
 
   // ── Infinite scroll via IntersectionObserver ──────────────────────────────
-  // A sentinel <div> sits at the bottom of the scroll container. When it
-  // enters the viewport the observer fires onLoadMore — no scroll math,
-  // no global querySelector, no re-registration on every state change.
+  // The sentinel sits inside the .nx-table-nested-body scroll container; using
+  // that container as the observer root makes infinite scroll work correctly
+  // both standalone and when rendered inside a Modal (root:null / viewport
+  // would never fire inside a modal because the modal clips the sentinel).
   const sentinelRef = useRef(null);
-  const isLoadingMoreRef = useRef(false); // ref mirror so the observer closure is never stale
+  const scrollContainerRef = useRef(null); // ref to the scrollable body div
+  const isLoadingMoreRef = useRef(false);
 
   useEffect(() => {
     if (!useInfiniteScroll || !hasMore) return;
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    const scrollRoot = scrollContainerRef.current;
+    if (!sentinel || !scrollRoot) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -1285,7 +1296,7 @@ const NxTableNested = ({
           isLoadingMoreRef.current = true;
           setIsLoadingMore(true);
           Promise.resolve(onLoadMore())
-            .catch(() => {}) // swallow — caller owns error UI
+            .catch(() => {})
             .finally(() => {
               isLoadingMoreRef.current = false;
               setIsLoadingMore(false);
@@ -1293,8 +1304,8 @@ const NxTableNested = ({
         }
       },
       {
-        // root: null → viewport; rootMargin pre-fires ~80px before sentinel is visible
-        root: null,
+        // Use the table's own scroll container as root — works in modals too.
+        root: scrollRoot,
         rootMargin: "0px 0px 80px 0px",
         threshold: 0,
       }
@@ -1501,6 +1512,7 @@ const NxTableNested = ({
 
         {/* Data rows */}
         <div 
+          ref={scrollContainerRef}
           className="nx-table-nested-body"
           style={{ 
             position: "relative", 
@@ -1579,7 +1591,7 @@ const NxTableNested = ({
           <span style={{ fontSize: 12, color: "#6B7280" }}>
             Showing {filteredDataSource.length} of {dataSource.length} entries
           </span>
-          {!hasMore && filteredDataSource.length > 0 && (
+          {!loading && filteredDataSource.length > 0 && !hasMore && (
             <>
               <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
               <span style={{ fontSize: 12, color: "#22c55e", fontWeight: 500 }}>All data loaded</span>

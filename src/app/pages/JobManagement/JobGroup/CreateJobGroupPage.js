@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Form, Input, Select, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PlusOutlined } from "@ant-design/icons";
@@ -102,53 +102,60 @@ const CreateJobGroupPage = () => {
   
   // State for job selection modal
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   // State for infinite scrolling
   const [currentPage, setCurrentPage] = useState(0);
   const [allJobs, setAllJobs] = useState([]);
   const [hasMore, setHasMore] = useState(true);
-  
+  // Tracks whether the next allJobsData result should replace (reset) vs append
+  const isResetRef = React.useRef(false);
+
   // Fetch all jobs for the modal
-  const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery({ 
-    page: currentPage, 
-    size: 20 // Smaller page size for infinite scroll
+  const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery({
+    page: currentPage,
+    size: 20,
   });
-  
-  // Handle infinite scroll loading
+
+  // Accumulate pages; replace the list when a modal-open reset was requested
   useEffect(() => {
-    if (allJobsData) {
+    if (!allJobsData) return;
+    if (isResetRef.current) {
+      isResetRef.current = false;
+      setAllJobs(allJobsData.result);
+    } else {
       setAllJobs(prev => [...prev, ...allJobsData.result]);
-      // Check if there are more pages to load
-      setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
     }
+    setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
   }, [allJobsData]);
-  
-  // Function to load more data
-  const loadMoreData = () => {
-    if (hasMore && !allJobsLoading) {
+
+  // Returns a Promise so NxTable's IntersectionObserver can await completion
+  const loadMoreData = useCallback(() => {
+    return new Promise((resolve) => {
+      if (!hasMore || allJobsLoading) { resolve(); return; }
       setCurrentPage(prev => prev + 1);
-    }
-  };
+      // Resolve after a tick — actual data arrival is handled by the effect above
+      setTimeout(resolve, 0);
+    });
+  }, [hasMore, allJobsLoading]);
 
   // Function to open the job selection modal
   const handleOpenModal = () => {
-    setCurrentPage(0); // Reset to first page
-    setAllJobs([]); // Clear existing jobs
-    setHasMore(true); // Enable loading more
+    isResetRef.current = true; // next data arrival replaces the list
+    setCurrentPage(0);
+    setHasMore(true);
     setModalVisible(true);
   };
 
   // Function to add a single job to the table
   const handleAddJobToTable = (job) => {
     const newJob = {
-      key: Date.now() + Math.random(), // Unique key
+      key: Date.now() + Math.random(),
       name: job.name || job.jobName,
       code: job.code || job.jobCode,
       type: job.type || job.jobType,
       execType: job.execType || job.executeType || job.exec_type,
-      handlerClass: job.handlerClass || job.handler || job.handler_class
+      handlerClass: job.handlerClass || job.handler || job.handler_class,
     };
-    
     setSelectedJobs(prev => [...prev, newJob]);
   };
 
@@ -338,6 +345,7 @@ const CreateJobGroupPage = () => {
               columns={SELECTED_JOBS_COLUMNS}
               emptyText='No jobs selected. Add jobs to this group.'
               editMode="deleteOnly"
+              autoEditOnAppend={false}
             />
           </NxBaseContainer>
         </NxCardContainer>
