@@ -83,7 +83,7 @@ const MultiDestinationTable = ({
     handleApproval,
     handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(show, id, accountNumber),
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
