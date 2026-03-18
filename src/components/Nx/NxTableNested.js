@@ -883,7 +883,9 @@ const ParentRow = React.memo(({
   const bg = isEven ? ROW_HOVER : ROW_WHITE;
 
   const handleToggle = () => {
-    if (!isExpanded && (!record.children || record.children.length === 0)) {
+    if (!isExpanded) {
+      // Always call onExpand when opening — let the caller decide if a fetch
+      // is needed (idempotent: skip if already loading or already loaded).
       onExpand?.(record.id);
     }
     onToggleExpand?.(record.id);
@@ -1205,16 +1207,13 @@ const NxTableNested = ({
   // collapse rows the user manually opened.
   const autoExpandedRef = useRef(new Set());
 
-  // Single effect that expands/collapses based on childMatchIds.
-  // Replaces the N per-row useEffects that each called setExpandedKeys individually.
   const prevSearchRef = useRef("");
   useEffect(() => {
     const searchCleared = !searchValue && prevSearchRef.current;
     prevSearchRef.current = searchValue;
 
     if (searchCleared) {
-      // Search was cleared — collapse only rows that were auto-opened, not
-      // rows the user manually toggled open.
+      // Collapse only rows the search auto-opened, leave manually-opened rows alone
       const toCollapse = autoExpandedRef.current;
       autoExpandedRef.current = new Set();
       if (toCollapse.size > 0) {
@@ -1228,36 +1227,30 @@ const NxTableNested = ({
     }
     if (!searchValue) return;
 
+    // Expand rows whose loaded children match
     setExpandedKeys(prev => {
       const next = new Set(prev);
       let changed = false;
       dataSource.forEach(row => {
-        if (childMatchIds.has(row.id)) {
-          // Child data is loaded and matches — expand if not already open
-          if (!next.has(row.id)) {
-            next.add(row.id);
-            autoExpandedRef.current.add(row.id);
-            changed = true;
-          }
+        if (childMatchIds.has(row.id) && !next.has(row.id)) {
+          next.add(row.id);
+          autoExpandedRef.current.add(row.id);
+          changed = true;
         }
-        // Rows NOT in childMatchIds are left alone — the user may have manually
-        // opened them, or their children simply haven't loaded yet. We never
-        // force-collapse based on search state.
       });
       return changed ? next : prev;
     });
 
-    // For rows whose children haven't been fetched yet, trigger the fetch.
-    // They won't be in childMatchIds (no children to match against) but we
-    // still need to load them so the user can see results after expanding.
-    dataSource.forEach(row => {
-      if (!row.children || row.children.length === 0) {
-        // Speculatively fetch — the parent's onExpand handler should be
-        // idempotent (ignore if already loading or loaded).
-        onExpand(row.id);
+    // For matched rows whose children haven't loaded yet, trigger the fetch.
+    // Once data arrives, dataSource updates → childMatchIds recomputes →
+    // this effect re-runs → the row gets expanded.
+    childMatchIds.forEach(id => {
+      const row = dataSource.find(r => r.id === id);
+      if (row && (!row.children || row.children.length === 0) && !loadingKeys.has(id)) {
+        onExpand(id);
       }
     });
-  }, [childMatchIds, searchValue, dataSource, onExpand]);
+  }, [childMatchIds, searchValue, dataSource, onExpand, loadingKeys]);
 
   const handleRefresh =
     onRefresh ||
