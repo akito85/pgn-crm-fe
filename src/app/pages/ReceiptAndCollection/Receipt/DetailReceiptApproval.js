@@ -224,6 +224,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     ? moment(data_detail.receiptDate).format(dateFormatting.date)
                     : "",
                 balance: data_detail?.balance || data_detail?.unAppliedAmountReal,
+                amount: data_detail?.amount || 0,
                 holdAmount: data_detail?.holdAmount || data_detail?.unAppliedAmountReal,
                 account: data_detail?.account,
             },
@@ -251,6 +252,14 @@ const DetailReceiptApproval = ({ type: propType }) => {
             title: "BALANCE",
             dataIndex: "balance",
             key: "balance",
+            align: "right",
+            render: (text) =>
+                text ? text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0",
+        },
+        {
+            title: "AMOUNT",
+            dataIndex: "amount",
+            key: "amount",
             align: "right",
             render: (text) =>
                 text ? text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0",

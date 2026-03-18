@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Form, Row, Col, Select, DatePicker, Input } from "antd";
 import CardContainer from "../../../../../../components/CardContainer";
 import InputComponent from "../../../../../../components/InputComponent";
-import { WARRANTY_TYPES } from "../../../../../../constants/warranty";
+import { WARRANTY_TYPES, CLAIM_PERIOD_TERM_TYPES } from "../../../../../../constants/warranty";
 
 const { Option } = Select;
 
@@ -208,9 +208,9 @@ const PaymentGuaranteeSection = ({
                 style={{ width: '40%', marginBottom: 0 }}
                 // API: claimPeriodTermType
               >
-                <Select disabled={isPartialEdit} placeholder="Type" defaultValue="Date">
-                  <Option value="Date">Date</Option>
-                  <Option value="Days">Days</Option>
+                <Select disabled={isPartialEdit} placeholder="Type" defaultValue={CLAIM_PERIOD_TERM_TYPES.DATE}>
+                  <Option value={CLAIM_PERIOD_TERM_TYPES.DATE}>Date</Option>
+                  <Option value={CLAIM_PERIOD_TERM_TYPES.AFTER}>After</Option>
                 </Select>
               </Form.Item>
               <Form.Item 

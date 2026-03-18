@@ -54,7 +54,7 @@ const MutationInfoSection = ({
         <TableRBI
             idTable="table-mutation"
             dataSource={paginatedData}
-            columns={columnMutation(currentPage, currentPageSize, null, null, "", () => {}, {}, handleEdit, handleDelete, () => {}, () => {}, () => {}, isCreate, disabled, isApprover)}
+            columns={columnMutation(currentPage, currentPageSize, null, null, "", () => {}, {}, handleEdit, handleDelete, () => {}, () => {}, () => {}, isCreate, disabled, isApprover, mutationDataInfo || [])}
             current={currentPage}
             pageSize={currentPageSize}
             totalData={totalData}

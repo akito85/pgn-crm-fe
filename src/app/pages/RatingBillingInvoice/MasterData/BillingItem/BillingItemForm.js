@@ -726,7 +726,7 @@ const BillingItemForm = (props) => {
             `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}` === item.glAccountId ||
             g.id === item.glAccountId,
         );
-        return found ? (found.glAccountDesc ?? found.name) : item.glAccountId;
+        return found ? (found.glAccount ?? found.account) : item.glAccountId;
       })();
 
       const specialGlResolved = (() => {
@@ -779,24 +779,6 @@ const BillingItemForm = (props) => {
     }
 
     handleMandatory(setListSectionInfo, listDataAttachment);
-
-    if (dataTable.length === 0) {
-      const errorBody = {
-        title: "Failed",
-        description: `Mapping Information is Mandatory. Please insert data.`,
-      };
-      dispatch(showModalError(errorBody));
-      return;
-    }
-
-    if (handleCheckMissingDetailMap(allDataDetailTable, dataTable)) {
-      const errorBody = {
-        title: "Failed",
-        description: `${handleAllMissingDetailMap(allDataDetailTable, dataTable)}. Please insert data.`,
-      };
-      dispatch(showModalError(errorBody));
-      return;
-    }
 
     const criteriaPayload = buildCriteriaPayload();
     const allValues = form.getFieldsValue(true);
