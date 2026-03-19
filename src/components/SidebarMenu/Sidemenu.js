@@ -235,7 +235,7 @@ const SideMenu = ({ isCollapsed }) => {
       return [];
     }
   });
-  
+
   // urlLeafKeys: which leaf items match the current URL
   const [urlLeafKeys, setUrlLeafKeys] = useState([]);
   // temporaryKeys: fallback when on a form/detail page with no direct menu match

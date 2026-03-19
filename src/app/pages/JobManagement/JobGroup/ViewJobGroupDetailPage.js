@@ -86,13 +86,13 @@ const ViewJobGroupDetailPage = () => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px 24px", padding: "12px 0" }}>
             <KvItem label="Group Name" value={group.name} />
             <KvItem label="Group Code" value={group.code} />
-            <KvItem 
-              label="Group Access" 
+            <KvItem
+              label="Group Access"
               value={
-                group.accessGroupId 
-                  ? groupAccessList.find(ga => ga.gaId === group.accessGroupId)?.name || "Unknown" 
+                group.accessGroupId
+                  ? groupAccessList.find(ga => ga.gaId === group.accessGroupId)?.name || "Unknown"
                   : "Not assigned"
-              } 
+              }
             />
             <div style={{ gridColumn: "1 / -1" }}>
               <KvItem label="Description" value={group.description} />

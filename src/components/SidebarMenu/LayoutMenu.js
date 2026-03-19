@@ -133,7 +133,7 @@ const LayoutMenu = ({ children }) => {
     const savedCollapsed = localStorage.getItem('sidebar_collapsed');
     return savedCollapsed ? JSON.parse(savedCollapsed) : false;
   });
-  
+
   const toggleCollapsed = useCallback(() => {
     setCollapsed((prev) => {
       const newState = !prev;
@@ -633,7 +633,7 @@ const LayoutMenu = ({ children }) => {
             {location.pathname === '/' ? (
               // Always render dashboard regardless of permission check state
               <div className="mt-[15px]">{children}</div>
-            ) : 
+            ) :
             (data_grant_access?.response?.data?.data?.isGranted === false &&
               !isPublicPath) ? (
               <NotFound type={"unauthorized"} />
@@ -727,7 +727,13 @@ const LayoutMenu = ({ children }) => {
                   <Input.Password />
                 </Form.Item>
                 <div className={"w-full justify-end flex gap-2"}>
-                  <ButtonComponent type={"default"} onClick={handleLogout}>
+                  <ButtonComponent
+                    type={"default"}
+                    onClick={() => {
+                      setShowModalExtendToken(false);
+                      form.resetFields();
+                    }}
+                  >
                     Logout
                   </ButtonComponent>
                   <ButtonComponent type={"submit"} htmlType={"submit"}>

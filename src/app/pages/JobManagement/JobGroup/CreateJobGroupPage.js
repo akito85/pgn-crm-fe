@@ -42,7 +42,7 @@ const SELECTED_JOBS_COLUMNS = [
     render: (_, __, index) => index + 1 },
   { title: 'JOB NAME',     dataIndex: 'name',         editable: true,  inputType: 'text',   placeholder: 'Job name', width: 180 },
   { title: 'CODE',         dataIndex: 'code',         editable: true,  inputType: 'text',   placeholder: 'Job code', width: 150 },
-  { 
+  {
     title: 'TYPE',         dataIndex: 'type',         editable: true,  inputType: 'select', width: 120,
     selectOptions: [
       { value: 'BATCH',       label: 'Batch' },
@@ -51,7 +51,7 @@ const SELECTED_JOBS_COLUMNS = [
       { value: 'WORKFLOW',    label: 'Workflow' },
     ],
   },
-  { 
+  {
     title: 'EXEC TYPE',    dataIndex: 'execType',     editable: true,  inputType: 'select', width: 150,
     selectOptions: [
       { value: 'STORED_PROCEDURE', label: 'Stored Procedure' },
@@ -99,7 +99,7 @@ const CreateJobGroupPage = () => {
 
   // State for selected jobs
   const [selectedJobs, setSelectedJobs] = useState([]);
-  
+
   // State for job selection modal
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -169,7 +169,7 @@ const CreateJobGroupPage = () => {
       execType: job.executeType || job.execType,
       handlerClass: job.handler || job.handlerClass
     }));
-    
+
     setSelectedJobs(prev => [...prev, ...newJobs]);
     setModalVisible(false);
   };
@@ -326,7 +326,7 @@ const CreateJobGroupPage = () => {
 
             </div>
           </NxBaseContainer>
-          
+
           <NxBaseContainer
             border
             header="SELECTED JOB"
