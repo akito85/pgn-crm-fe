@@ -114,22 +114,23 @@ const SubMenuItem = ({
           ref={titleRef}
           aria-haspopup="true"
           aria-expanded={isHovered}
-          style={{ paddingLeft: 0 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+          }}
         >
-          <span className="ant-menu-item-icon">
+          <span
+            className="ant-menu-item-icon"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+          >
             <SVGIcon
               name={item?.icon}
-              width={20}
-              style={{
-                marginRight: "80px",
-                marginLeft: "-5px",
-                marginTop: "10px",
-              }}
+              width={24}
+              style={{ display: "block" }}
               className="sidebar-icon"
             />
-          </span>
-          <span className="ant-menu-title-content">
-            <span>{item.name}</span>
           </span>
         </div>
         {isHovered && (
@@ -141,9 +142,11 @@ const SubMenuItem = ({
               left: 80,
               top: popupTop,
               zIndex: 1050,
+              color: "rgba(0, 0, 0, 0.85)",
+              backgroundColor: "#fff",
             }}
           >
-            {renderItems(item.children, selectedKeys, false)}
+            {renderItems(item.children, selectedKeys, false, false)}
           </ul>
         )}
       </li>
@@ -157,40 +160,65 @@ const SubMenuItem = ({
         className="ant-menu-submenu-title"
         onClick={() => onToggle(item.key)}
         aria-expanded={isOpen}
-        style={{ paddingLeft: 24 }}
+        style={{ paddingLeft: 24, display: "flex", alignItems: "center" }}
       >
-        <span className="ant-menu-item-icon">
+        <span
+          className="ant-menu-item-icon"
+          style={{ display: "flex", alignItems: "center" }}
+        >
           <SVGIcon
             name={item?.icon}
             width={20}
-            style={{ marginRight: "12px" }}
+            style={{ marginRight: "12px", display: "block" }}
             className="sidebar-icon"
           />
         </span>
         <span className="ant-menu-title-content">
           <span>{item.name}</span>
         </span>
-        <i
-          className="ant-menu-submenu-arrow"
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 10 10"
+          width="10"
+          height="10"
           style={{
-            transform: isOpen ? "rotate(-180deg) translateY(2px)" : "none",
-            transition: "transform 0.2s ease-in-out",
+            flexShrink: 0,
+            marginLeft: "auto",
+            display: "block",
+            transform: isOpen ? "rotate(-180deg)" : "rotate(0deg)",
+            transition: "transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
+            color: "rgba(0,0,0,0.45)",
           }}
-        />
+        >
+          <polyline
+            points="1,3 5,7 9,3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
-      <ul
-        className="ant-menu ant-menu-sub ant-menu-inline"
-        role="menu"
+      <div
         style={{
-          display: isOpen ? 'block' : 'none',
-          maxHeight: isOpen ? '1000px' : '0',
-          overflow: 'hidden',
-          opacity: isOpen ? 1 : 0,
-          transition: 'all 0.3s ease-in-out',
+          display: 'grid',
+          gridTemplateRows: isOpen ? '1fr' : '0fr',
+          transition: 'grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
-        {renderItems(item.children, selectedKeys, false)}
-      </ul>
+        <ul
+          className="ant-menu ant-menu-sub ant-menu-inline"
+          role="menu"
+          style={{
+            overflow: 'hidden',
+            opacity: isOpen ? 1 : 0,
+            transition: 'opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+        >
+          {renderItems(item.children, selectedKeys, false)}
+        </ul>
+      </div>
     </li>
   );
 };
@@ -207,7 +235,7 @@ const SideMenu = ({ isCollapsed }) => {
       return [];
     }
   });
-  
+
   // urlLeafKeys: which leaf items match the current URL
   const [urlLeafKeys, setUrlLeafKeys] = useState([]);
   // temporaryKeys: fallback when on a form/detail page with no direct menu match
@@ -479,7 +507,7 @@ const SideMenu = ({ isCollapsed }) => {
   );
 
   const renderItems = useCallback(
-    (items, selKeys, isTopLevel) => {
+    (items, selKeys, isTopLevel, inCollapsed = isCollapsed) => {
       return items.map((item) => {
         if (item.children) {
           const hasSelectedChild = selKeys.some((sk) =>
@@ -497,7 +525,7 @@ const SideMenu = ({ isCollapsed }) => {
               item={item}
               isOpen={isOpen}
               isSelected={hasSelectedChild}
-              isCollapsed={isCollapsed}
+              isCollapsed={inCollapsed}
               hoveredKey={hoveredSubmenu}
               onToggle={toggleSubmenu}
               onHover={setHoveredSubmenu}
@@ -516,27 +544,39 @@ const SideMenu = ({ isCollapsed }) => {
               isSelected ? " ant-menu-item-selected" : ""
             }`}
             role="menuitem"
-            style={{
-              paddingLeft: isTopLevel ? (isCollapsed ? 0 : 24) : 48,
-            }}
+            style={
+              inCollapsed
+                ? {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 0,
+                  }
+                : { paddingLeft: isTopLevel ? 24 : 48 }
+            }
           >
-            {item.icon && (
-              <span className="ant-menu-item-icon">
+            {item.icon ? (
+              <span
+                className="ant-menu-item-icon"
+                style={
+                  inCollapsed
+                    ? { display: "flex", alignItems: "center", justifyContent: "center" }
+                    : { display: "flex", alignItems: "center" }
+                }
+              >
                 <SVGIcon
                   name={item.icon}
-                  width={20}
-                  style={{
-                    marginRight: isCollapsed ? "80px" : "12px",
-                    marginLeft: isCollapsed ? "-5px" : "",
-                    marginTop: isCollapsed ? "10px" : "",
-                  }}
+                  width={inCollapsed ? 24 : 20}
+                  style={inCollapsed ? { display: "block" } : { marginRight: "12px", display: "block" }}
                   className="sidebar-icon"
                 />
               </span>
+            ) : null}
+            {!inCollapsed && (
+              <span className="ant-menu-title-content">
+                {newTabCallback(item)}
+              </span>
             )}
-            <span className="ant-menu-title-content">
-              {newTabCallback(item)}
-            </span>
           </li>
         );
       });

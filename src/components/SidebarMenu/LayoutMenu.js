@@ -128,8 +128,20 @@ const LayoutMenu = ({ children }) => {
     data_grant_access,
   } = useSelector((state) => state.general);
   const [form] = Form.useForm();
-  const [collapsed, setCollapsed] = useState(false);
-  const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), []);
+  const [collapsed, setCollapsed] = useState(() => {
+    // Check if collapsed state is stored in localStorage
+    const savedCollapsed = localStorage.getItem('sidebar_collapsed');
+    return savedCollapsed ? JSON.parse(savedCollapsed) : false;
+  });
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const newState = !prev;
+      // Save the new state to localStorage
+      localStorage.setItem('sidebar_collapsed', JSON.stringify(newState));
+      return newState;
+    });
+  }, []);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token"),
@@ -621,7 +633,7 @@ const LayoutMenu = ({ children }) => {
             {location.pathname === '/' ? (
               // Always render dashboard regardless of permission check state
               <div className="mt-[15px]">{children}</div>
-            ) : 
+            ) :
             (data_grant_access?.response?.data?.data?.isGranted === false &&
               !isPublicPath) ? (
               <NotFound type={"unauthorized"} />
@@ -715,7 +727,13 @@ const LayoutMenu = ({ children }) => {
                   <Input.Password />
                 </Form.Item>
                 <div className={"w-full justify-end flex gap-2"}>
-                  <ButtonComponent type={"default"} onClick={handleLogout}>
+                  <ButtonComponent
+                    type={"default"}
+                    onClick={() => {
+                      setShowModalExtendToken(false);
+                      form.resetFields();
+                    }}
+                  >
                     Logout
                   </ButtonComponent>
                   <ButtonComponent type={"submit"} htmlType={"submit"}>
