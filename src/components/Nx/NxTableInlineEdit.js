@@ -467,7 +467,7 @@ const NxTableInlineEdit = ({
 
   // ── Actions column ────────────────────────────────────────────────────────
   const actionsColumn = {
-    title: "",
+    title: "ACTION",
     key: "__actions__",
     width: 200,
     onHeaderCell: () => ({
