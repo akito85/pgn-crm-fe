@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getInvoiceRelation,
   downloadInvoiceRelation
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 
 /**
  * Invoice relation list table (container + presentational component).
@@ -42,7 +42,7 @@ const InvoiceRelationTable = ({
     list_invoiceRelation: dataSource,
     pagination_invoiceRelation: pagination,
     loading_listIr: loading
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.invoiceRelation);
 
   // --- Derived values ---
   const isStandard = location.pathname.includes("account-standard");

@@ -274,3 +274,4 @@ const PremiseDetail = () =>
     );
   };
 export default PremiseDetail;
+
