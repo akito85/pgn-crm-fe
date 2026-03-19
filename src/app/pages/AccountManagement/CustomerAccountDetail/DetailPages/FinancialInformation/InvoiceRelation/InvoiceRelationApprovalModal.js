@@ -7,7 +7,7 @@ import NxTable from "../../../../../../../components/Nx/NxTable";
 import {
   approveOrRejectAllInvoiceRelation,
   getInvoiceRelationApproval
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
@@ -34,7 +34,7 @@ const InvoiceRelationApprovalModal = ({
     loading_listIrApproval,
     loading_approveIr,
     loading_rejectIr
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.invoiceRelation);
 
   const loadingApproval = loading_approveIr || loading_rejectIr;
 
@@ -354,7 +354,7 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    disabled={loadingApproval}
+                    disabled={!loading_rejectIr && loadingApproval}
                     loading={loading_rejectIr}
                   >
                     Reject
@@ -362,7 +362,7 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    disabled={loadingApproval}
+                    disabled={!loading_approveIr && loadingApproval}
                     loading={loading_approveIr}
                   >
                     Approve

@@ -24,6 +24,7 @@ import {
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import CardContainer from "../../../../../components/CardContainer";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
+import { wait } from "@testing-library/user-event/dist/types/utils";
 
 const BillingItemCategoryDetail = () => {
   // Selector
