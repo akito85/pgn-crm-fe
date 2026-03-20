@@ -2,9 +2,9 @@ import { Form, Input, Select } from "antd";
 import { useRef, useState } from "react";
 import NxDetailText from "../../components/Nx/NxDetailText";
 import SelectComponent from "../../components/SelectComponent";
-import TablePagination from "../../components/TablePagination";
 import { requiredMessage } from "../../utils";
 import { getColumnSearchProps } from "../../utils/getColumnSearchProps";
+import NxTable from "./NxTable";
 
 const DataExpand = ({ list = [] }) => {
   const searchInput = useRef(null);
@@ -19,13 +19,16 @@ const DataExpand = ({ list = [] }) => {
 
   const columns = [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "employee",
       title: "EMPLOYEE",
+      width: 300,
       dataIndex: "employeeName",
       sorter: (a, b) => a?.employeeName?.localeCompare(b?.employeeName),
       ...getColumnSearchProps(
@@ -45,15 +48,13 @@ const DataExpand = ({ list = [] }) => {
 
   return (
     <div>
-      <p className="text-primary text-xs font-bold uppercase pt-4">
-        EMPLOYEE INFORMATION
-      </p>
-      <TablePagination
+      <NxTable
+        idTable={"employee-table"}
         useSelect={false}
         usePagination={false}
+        useInfiniteScroll={false}
         dataSource={list}
         columns={columns}
-        className={"mb-4"}
       />
     </div>
   );
@@ -154,10 +155,12 @@ const NxApprovalInput = ({
         <NxDetailText label={"Approval Hierarchy"}>{appHierName}</NxDetailText>
       )}
 
-      {appHierId && hierarchyDetails.length > 0 && (
-        <TablePagination
+      {(appHierId || (!formView && hierarchyDetails.length > 0)) && (
+        <NxTable
+          idTable={"hierarchy-table"}
           useSelect={false}
           usePagination={false}
+          useInfiniteScroll={false}
           dataSource={hierarchyDetails}
           columns={columns}
           expandable={{ expandedRowRender }}
