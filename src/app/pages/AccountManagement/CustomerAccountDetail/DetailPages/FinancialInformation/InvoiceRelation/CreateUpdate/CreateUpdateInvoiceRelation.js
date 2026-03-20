@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import InfoInvoiceRelation from "./StepContents/InformationForm/InfoInvoiceRelation";
 import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
-import AttachmentInvoiceRelation from "./StepContents/AttachmentForm/AttachmentInvoiceRelation";
+import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
@@ -63,6 +63,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
     detailDraft_invoiceRelation,
+    data_irAttachmentCategory,
   } = useSelector((state) => state.invoiceRelation);
   
   const loading =
@@ -351,13 +352,13 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         {
           header: "Attachment",
           content: (
-            <AttachmentInvoiceRelation
-              dataSource={attachmentDataSource}
-              setDataSource={setAttachmentDataSource}
+            <NxAttachmentInput
+              data={attachmentDataSource}
+              updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
-              dispatch={dispatch}
               key={`invoice-relation-tab-2`}
               getAPICategory={getIrAttachmentCategory}
+              categoryData={data_irAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               mandatory={attachmentIsRequired}
