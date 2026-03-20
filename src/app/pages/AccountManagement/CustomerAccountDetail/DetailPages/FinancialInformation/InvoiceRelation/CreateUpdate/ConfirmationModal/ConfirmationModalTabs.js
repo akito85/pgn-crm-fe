@@ -3,7 +3,7 @@ import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import AttachmentSectionForm from "../StepContents/AttachmentForm/AttachmentInvoiceRelation";
-import ApprovalSectionForm from "../StepContents/ApprovalForm/ApprovalInvoiceRelation";
+import NxApprovalInput from "../../../../../../../../../components/Nx/NxApprovalInput";
 import InfoInvoiceRelation from "../StepContents/InformationForm/InfoInvoiceRelation";
 
 const ConfirmationModalTabs = ({
@@ -30,7 +30,7 @@ const ConfirmationModalTabs = ({
       key: 1,
       label: "Approval",
       children: (
-        <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />
+        <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />
       ),
       disabled,
     },

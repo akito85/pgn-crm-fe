@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import InfoInvoiceRelation from "./StepContents/InformationForm/InfoInvoiceRelation";
-import ApprovalInvoiceRelation from "./StepContents/ApprovalForm/ApprovalInvoiceRelation";
+import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
 import AttachmentInvoiceRelation from "./StepContents/AttachmentForm/AttachmentInvoiceRelation";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
@@ -333,21 +333,10 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         {
           header: "Approval",
           content: (
-            <ApprovalInvoiceRelation
+            <NxApprovalInput
               form={form}
-              dataTable={(detail_irApprovalHierarchy || []).map(
-                (detail, index) => ({
-                  ...detail,
-                  employeeDetail: detail.employeeDetail.map(
-                    (employeeDetail, index) => ({
-                      ...employeeDetail,
-                      key: `employee-detail-${index}`
-                    })
-                  ),
-                  key: `detail-detail-${index}`
-                })
-              )}
-              dataOption={data_irApprovalHierarchy}
+              hierarchyDetails={detail_irApprovalHierarchy}
+              options={data_irApprovalHierarchy}
               handleSelectHiararchy={handleSelectHiararchy}
               key={`invoice-relation-tab-1`}
             />
@@ -739,18 +728,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
               formId={"invoiceRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(detail_irApprovalHierarchy || []).map(
-                (detail, index) => ({
-                  ...detail,
-                  employeeDetail: detail.employeeDetail.map(
-                    (employeeDetail, index) => ({
-                      ...employeeDetail,
-                      key: `employee-detail-${index}`
-                    })
-                  ),
-                  key: `detail-detail-${index}`
-                })
-              )}
+              approvalData={detail_irApprovalHierarchy}
               type={confirmationType}
               attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
