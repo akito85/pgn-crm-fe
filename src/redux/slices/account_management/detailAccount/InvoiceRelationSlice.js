@@ -39,10 +39,10 @@ const initialState = {
 
   // --- Supporting / Form Options ---
   loading_listIrApprovalOption: false,
-  data_irApprovalHierarchy: [],
-  loading_detailIrApprovalHierarchyDetails: false,
+  list_irApprovalHierarchy: [],
+  loading_listIrApprovalHierarchyEmployee: false,
   detail_irApprovalHierarchy: [],
-  data_irAttachmentCategory: [],
+  list_irAttachmentCategory: [],
   loading_listIrAccountStandard: false,
   list_irAccountStandard: [],
   pagination_irAccountStandard: {
@@ -834,35 +834,35 @@ const invoiceRelationSlice = createSlice({
       state.loading_listIrApprovalOption = true;
     },
     [getIrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.data_irApprovalHierarchy = action.payload;
+      state.list_irApprovalHierarchy = action.payload;
       state.loading_listIrApprovalOption = false;
     },
     [getIrApprovalHierarchy.rejected]: (state) => {
-      state.data_irApprovalHierarchy = [];
+      state.list_irApprovalHierarchy = [];
       state.loading_listIrApprovalOption = false;
     },
 
     [getDetailIrApprovalHierarchy.pending]: (state) => {
-      state.loading_detailIrApprovalHierarchyDetails = true;
+      state.loading_listIrApprovalHierarchyEmployee = true;
     },
     [getDetailIrApprovalHierarchy.fulfilled]: (state, action) => {
       state.detail_irApprovalHierarchy = action.payload;
-      state.loading_detailIrApprovalHierarchyDetails = false;
+      state.loading_listIrApprovalHierarchyEmployee = false;
     },
     [getDetailIrApprovalHierarchy.rejected]: (state) => {
       state.detail_irApprovalHierarchy = [];
-      state.loading_detailIrApprovalHierarchyDetails = false;
+      state.loading_listIrApprovalHierarchyEmployee = false;
     },
 
     [getIrAttachmentCategory.pending]: (state) => {
       state.loading = true;
     },
     [getIrAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_irAttachmentCategory = action.payload;
+      state.list_irAttachmentCategory = action.payload;
       state.loading = false;
     },
     [getIrAttachmentCategory.rejected]: (state) => {
-      state.data_irAttachmentCategory = [];
+      state.list_irAttachmentCategory = [];
       state.loading = false;
     },
 
