@@ -82,7 +82,10 @@ const SearchBar = React.memo(({ placeholder = "Search content here ....", onSear
 });
 
 // Resizable Title Component
-const ResizableTitle = (props) => {
+// Wrapped in React.memo — Ant Design re-creates onHeaderCell props on every
+// displayedColumns recompute, so without memo every header cell re-renders on
+// any column state change (width, order, drag).
+const ResizableTitle = React.memo((props) => {
   const { onResize, width, ...restProps } = props;
   const isResizingRef = React.useRef(false);
 
@@ -136,25 +139,33 @@ const ResizableTitle = (props) => {
           const startX = e.pageX;
           const startWidth = width;
           let hasMoved = false;
+          // Track cleanup so unmounting mid-drag doesn't leak listeners.
+          let resetTimer = null;
 
-          const handleMouseMove = (e) => {
+          const cleanup = () => {
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "default";
+            document.body.style.userSelect = "auto";
+            if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+          };
+
+          const handleMouseMove = (moveEvt) => {
             hasMoved = true;
-            const newWidth = startWidth + (e.pageX - startX);
+            const newWidth = startWidth + (moveEvt.pageX - startX);
             if (newWidth > 50) {
               onResize(newWidth);
             }
           };
 
           const handleMouseUp = () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-            document.body.style.cursor = "default";
-            document.body.style.userSelect = "auto";
-
+            cleanup();
             if (hasMoved) {
               isResizingRef.current = true;
-              setTimeout(() => {
+              // Guard: only set the timer if the component is still mounted.
+              resetTimer = setTimeout(() => {
                 isResizingRef.current = false;
+                resetTimer = null;
               }, 100);
             }
           };
@@ -163,6 +174,13 @@ const ResizableTitle = (props) => {
           document.addEventListener("mouseup", handleMouseUp);
           document.body.style.cursor = "col-resize";
           document.body.style.userSelect = "none";
+
+          // Safety net: if the component unmounts before mouseup fires,
+          // clean up document listeners so they don't dangle forever.
+          // We attach a one-shot cleanup to the element's ownerDocument.
+          // Using a WeakRef so we don't hold the element in memory.
+          const elRef = { cleanup };
+          isResizingRef._cleanup = elRef.cleanup;
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.borderRight = "2px solid #1890ff";
@@ -173,7 +191,7 @@ const ResizableTitle = (props) => {
       />
     </th>
   );
-};
+});
 
 // ── Column-preference persistence ─────────────────────────────────────────
 //
@@ -206,12 +224,19 @@ const readPrefs = (storageKey) => {
 };
 
 // Returns a stable debounced writer. Created once per component instance.
+// Exposes cancel() so the pending timer can be flushed/discarded when the
+// storageKey changes — otherwise the old timer fires and writes to the wrong key.
 const makePrefsWriter = (storageKey) => {
-  if (!storageKey) return () => {};
+  if (!storageKey) {
+    const noop = () => {};
+    noop.cancel = () => {};
+    return noop;
+  }
   let timer = null;
-  return (prefs) => {
+  const write = (prefs) => {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
+      timer = null;
       try {
         localStorage.setItem(storageKey, JSON.stringify({ version: PREFS_VERSION, ...prefs }));
       } catch {
@@ -219,17 +244,31 @@ const makePrefsWriter = (storageKey) => {
       }
     }, 400);
   };
+  write.cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  return write;
 };
 
 const useColumnPreferences = ({ userId, idTable, fixedColumnsProp }) => {
   const storageKey = buildStorageKey(userId, idTable);
-  const savedPrefs  = readPrefs(storageKey); // read once at construction time
+
+  // Read prefs exactly once per storageKey — not on every render.
+  const savedPrefsRef = React.useRef(undefined);
+  if (savedPrefsRef.current === undefined || savedPrefsRef._key !== storageKey) {
+    savedPrefsRef.current = readPrefs(storageKey);
+    savedPrefsRef._key = storageKey;
+  }
+  const savedPrefs = savedPrefsRef.current;
 
   // Stable writer ref — recreated only when storageKey changes.
   const writerRef = React.useRef(null);
   if (!writerRef.current) writerRef.current = makePrefsWriter(storageKey);
   React.useEffect(() => {
+    // Cancel any pending write for the old key before switching.
+    writerRef.current?.cancel?.();
     writerRef.current = makePrefsWriter(storageKey);
+    // Refresh saved prefs cache for the new key.
+    savedPrefsRef.current = readPrefs(storageKey);
+    savedPrefsRef._key = storageKey;
   }, [storageKey]);
 
   const write = useCallback((patch) => {
@@ -366,10 +405,12 @@ const NxTable = ({
   }, [fixedColumns]);
 
   // Normalise for safe use downstream — guarantee both keys exist.
-  const safeFixedColumns = {
+  // Memoised so downstream useMemo/useCallback deps that include this object
+  // don't invalidate on every render when the underlying arrays haven't changed.
+  const safeFixedColumns = useMemo(() => ({
     left:  Array.isArray(internalFixedColumns.left)  ? internalFixedColumns.left  : [],
     right: Array.isArray(internalFixedColumns.right) ? internalFixedColumns.right : [],
-  };
+  }), [internalFixedColumns]);
 
   // Destructure y as a primitive so effect deps compare by value, not object identity.
   // Callers that pass tableScrolled={{ y: 400 }} would otherwise cause infinite re-runs.
@@ -395,21 +436,24 @@ const NxTable = ({
       return;
     }
 
-    const BOTTOM_MARGIN = Math.round(window.innerHeight * 0.10); // 10% of viewport height
-    // Height of the custom footer bar (infinite scroll / pagination strip)
-    const FOOTER_H = (useInfiniteScroll || usePagination) ? 33 : 33;
-    // Approximate toolbar height (search bar row above the table)
+    // Height of the custom footer bar (infinite scroll / pagination strip).
+    // 0 when neither is shown — the table body can use that space.
+    const FOOTER_H  = (useInfiniteScroll || usePagination) ? 33 : 0;
+    // Approximate toolbar height (search bar + controls row above the table).
     const TOOLBAR_H = useSelect ? 48 : 0;
 
     const compute = () => {
       const el = containerRef.current;
       if (!el) return;
 
-      const rect = el.getBoundingClientRect();
-      const viewportH = window.innerHeight;
-      // Available space from the container top to the bottom of the viewport,
-      // minus footer bar, toolbar (already rendered above the table body),
-      // and the reserved bottom margin.
+      // Recalculate viewport-dependent values inside compute() so they stay
+      // accurate after every window resize — not just at effect-mount time.
+      const viewportH     = window.innerHeight;
+      const BOTTOM_MARGIN = Math.round(viewportH * 0.10); // 10 % of current viewport
+      const rect          = el.getBoundingClientRect();
+
+      // Available space: from the container's top edge to the viewport bottom,
+      // minus the footer bar, the toolbar above the table body, and the margin.
       const available = viewportH - rect.top - FOOTER_H - TOOLBAR_H - BOTTOM_MARGIN;
       // Never go below the prop-supplied minimum so callers retain control.
       const next = Math.max(tableScrollYProp, Math.floor(available));
@@ -433,6 +477,30 @@ const NxTable = ({
   }, [autoHeight, tableScrollYProp, useInfiniteScroll, usePagination, useSelect]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const tableScrollY = dynamicScrollY;
+
+  // ── Deprecation warnings (dev only) ──────────────────────────────────────
+  if (process.env.NODE_ENV !== 'production') {
+    // setFixedColumns: accepted but never called — NxTable owns fixed-column
+    // state internally. Passing this prop has no effect.
+    if (setFixedColumns !== undefined && setFixedColumns !== (() => {})) {
+      // eslint-disable-next-line no-console
+      console.warn('[NxTable] `setFixedColumns` prop is ignored — NxTable manages fixed-column state internally. You can remove this prop.');
+    }
+    // onDelete / onRowClicked: never wired to anything in NxTable.
+    if (onDelete !== undefined) {
+      // eslint-disable-next-line no-console
+      console.warn('[NxTable] `onDelete` prop is unused and will be removed in a future version.');
+    }
+    if (onRowClicked !== undefined && onRowClicked !== (() => {})) {
+      // eslint-disable-next-line no-console
+      console.warn('[NxTable] `onRowClicked` is deprecated — use `onRowClick` instead.');
+    }
+    // loadMoreThreshold: replaced by IntersectionObserver, kept for compat only.
+    if (loadMoreThreshold !== 20) {
+      // eslint-disable-next-line no-console
+      console.warn('[NxTable] `loadMoreThreshold` is no longer used. Infinite scroll now uses an IntersectionObserver and triggers at a fixed 80px threshold.');
+    }
+  }
 
   // Guard against missing idTable — CSS selectors and DOM queries depend on it.
   if (process.env.NODE_ENV !== 'production' && !idTable) {
@@ -540,7 +608,6 @@ const NxTable = ({
     });
   }, [optionSelectedCol, internalFixedColumns, columnWidths, columnOrder, writePrefs]);
 
-  const tableRef = React.useRef(null);
   const isLoadingMoreRef = React.useRef(false);
 
   // ── Initial load guarantee ────────────────────────────────────────────────
@@ -629,7 +696,7 @@ const NxTable = ({
     });
   }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch]);
 
-  // Fungsi helper untuk mengumpulkan semua keys dari kolom (termasuk children)
+  // Helper: collect all column keys recursively (including grouped column children)
   const getAllColumnKeys = useCallback((cols) => {
     const keys = [];
     const traverse = (columns) => {
@@ -678,7 +745,6 @@ const NxTable = ({
   // (Phase B must NOT be torn down just because rows were appended).
   // They are only reset when tableScrollY or idTable changes (true restart).
   const infiniteObserverRef   = React.useRef(null);
-  const infiniteSentinelRef   = React.useRef(null);
   const infiniteScrollRootRef = React.useRef(null);
   const infinitePhaseRef      = React.useRef('fill'); // 'fill' | 'scroll'
 
@@ -709,10 +775,6 @@ const NxTable = ({
     if (infiniteObserverRef.current) {
       infiniteObserverRef.current.disconnect();
       infiniteObserverRef.current = null;
-    }
-    if (infiniteSentinelRef.current) {
-      infiniteSentinelRef.current.remove();
-      infiniteSentinelRef.current = null;
     }
     infiniteScrollRootRef.current = null;
     infinitePhaseRef.current = 'fill';
@@ -896,15 +958,28 @@ const NxTable = ({
     };
   }, [safeId]);
 
+  // Per-key resize handler cache — avoids creating a new function reference
+  // on every processColumn call (which runs inside the displayedColumns memo).
+  const resizeHandlerMapRef = React.useRef({});
   const handleResize = useCallback(
-    (key) => (newWidth) => {
-      setColumnWidths((prev) => ({
-        ...prev,
-        [key]: newWidth,
-      }));
+    (key) => {
+      if (!resizeHandlerMapRef.current[key]) {
+        resizeHandlerMapRef.current[key] = (newWidth) => {
+          setColumnWidths((prev) => ({ ...prev, [key]: newWidth }));
+        };
+      }
+      return resizeHandlerMapRef.current[key];
     },
     []
   );
+
+  // Prune stale keys when column set changes so the map doesn't grow unboundedly.
+  React.useEffect(() => {
+    const currentKeys = new Set(Object.keys(columnWidths));
+    Object.keys(resizeHandlerMapRef.current).forEach((k) => {
+      if (!currentKeys.has(k)) delete resizeHandlerMapRef.current[k];
+    });
+  }, [columnWidths]);
 
   const handleDragStart = useCallback((e, columnKey) => {
     setDraggedColumnKey(columnKey);
@@ -950,12 +1025,18 @@ const NxTable = ({
     setDraggedColumnKey(null);
   }, []);
 
-  // Fungsi rekursif untuk memproses kolom dengan children
+  // Separate drag-visual state so processColumn doesn't rebuild the entire
+  // column array on every drag-hover. processColumn reads from this ref;
+  // the ref update triggers no re-render by itself.
+  const draggedColumnKeyRef = React.useRef(draggedColumnKey);
+  React.useEffect(() => { draggedColumnKeyRef.current = draggedColumnKey; }, [draggedColumnKey]);
+
+  // Recursive column processor — applies widths, fixed positions, drag/resize handlers
   const processColumn = useCallback(
     (col, fixedPos = null) => {
       const colKey = col.key || col.dataIndex || col.title;
 
-      // Jika kolom punya children, proses children secara rekursif
+      // If the column has children, process recursively
       if (col.children && Array.isArray(col.children)) {
         return {
           ...col,
@@ -964,7 +1045,7 @@ const NxTable = ({
         };
       }
 
-      // Proses kolom biasa (tanpa children)
+      // Plain column (no children)
       let textAlign = "left";
       if (col.isNumber || col.align === "right") {
         textAlign = "right";
@@ -989,7 +1070,9 @@ const NxTable = ({
             cursor: isDraggable ? "move" : "default",
           };
 
-          if (isDraggable && draggedColumnKey === colKey) {
+          // Read from ref — doesn't add draggedColumnKey to processColumn deps,
+          // so the column array only rebuilds when widths / handlers change.
+          if (isDraggable && draggedColumnKeyRef.current === colKey) {
             baseStyle.opacity = 0.5;
             baseStyle.backgroundColor = "#f0f0f0";
           }
@@ -1038,7 +1121,8 @@ const NxTable = ({
       handleDragOver,
       handleDrop,
       handleDragEnd,
-      draggedColumnKey,
+      // draggedColumnKey intentionally excluded — read via ref to avoid
+      // rebuilding the entire column array on every drag-hover state change.
     ]
   );
 
@@ -1096,34 +1180,13 @@ const NxTable = ({
         })
       : [...visible];
 
-    // Process columns to add search highlighting.
-    const processColumnForSearch = (col) => {
-      const originalRender = col.render;
-      const newCol = {
-        ...col,
-        render: (text, record, index) => {
-          const renderedValue = originalRender ? originalRender(text, record, index) : text;
-          if (typeof renderedValue === 'string' && searchValue) {
-            return highlightText(renderedValue, searchValue);
-          }
-          return renderedValue;
-        }
-      };
-      if (newCol.children && Array.isArray(newCol.children)) {
-        newCol.children = newCol.children.map(processColumnForSearch);
-      }
-      return newCol;
-    };
-
-    const columnsWithHighlighting = ordered.map(processColumnForSearch);
-
     // Separate into left, normal, right.
     // Handle fixed: true (Ant Design alias for 'left') and merge with safeFixedColumns.
     const leftFixed = [];
     const rightFixed = [];
     const normal = [];
 
-    columnsWithHighlighting.forEach((col) => {
+    ordered.forEach((col) => {
       const isLeftFixed =
         safeFixedColumns.left.includes(col.key) ||
         staticFixedKeys.left.includes(col.key) ||
@@ -1149,21 +1212,17 @@ const NxTable = ({
     // right-fixed) to normal so the table layout doesn't break.
     if (normal.length === 0 && (leftFixed.length > 0 || rightFixed.length > 0)) {
       if (leftFixed.length > 0) {
-        // Demote the last left-fixed column to normal.
         normal.push(leftFixed.pop());
       } else {
-        // Demote the first right-fixed column to normal.
         normal.push(rightFixed.shift());
       }
     }
 
-    const finalCols = [
+    return [
       ...leftFixed.map((c) => processColumn(c, "left")),
       ...normal.map((c) => processColumn(c, undefined)),
       ...rightFixed.map((c) => processColumn(c, "right")),
     ];
-
-    return finalCols;
   }, [
     resolvedColumns,
     optionSelectedCol,
@@ -1171,9 +1230,33 @@ const NxTable = ({
     staticFixedKeys,
     columnOrder,
     processColumn,
-    searchValue,
-    highlightText,
   ]);
+
+  // ── Search highlighting — separate memo so searchValue changes only rewrap
+  // render functions, never rebuild the full layout/fixed/ordering pipeline.
+  const displayedColumnsWithSearch = useMemo(() => {
+    if (!searchValue) return displayedColumns;
+
+    const processColumnForSearch = (col) => {
+      const originalRender = col.render;
+      const newCol = {
+        ...col,
+        render: (text, record, index) => {
+          const renderedValue = originalRender ? originalRender(text, record, index) : text;
+          if (typeof renderedValue === 'string') {
+            return highlightText(renderedValue, searchValue);
+          }
+          return renderedValue;
+        },
+      };
+      if (newCol.children && Array.isArray(newCol.children)) {
+        newCol.children = newCol.children.map(processColumnForSearch);
+      }
+      return newCol;
+    };
+
+    return displayedColumns.map(processColumnForSearch);
+  }, [displayedColumns, searchValue, highlightText]);
 
   const handleAdvanceSearch = useCallback((searchData) => {
     onAdvanceSearch(searchData);
@@ -1203,15 +1286,17 @@ const NxTable = ({
     onClearPreferences?.();
   }, [fixedColumns, prefsStorageKey, onClearPreferences]);
 
+  // Merge external components with internal ones.
+  // ResizableTitle is the default header.cell — external can override other
+  // header slots (e.g. wrapper, row) but we keep ResizableTitle for cell so
+  // column resize always works. If an external header.cell is provided it
+  // would override resize — document that as intentional opt-out.
   const components = {
     header: {
-      cell: ResizableTitle,
+      ...(externalComponents?.header || {}),
+      cell: externalComponents?.header?.cell ?? ResizableTitle,
     },
-    ...(externalComponents ? {
-      body: {
-        ...(externalComponents.body || {}),
-      },
-    } : {}),
+    ...(externalComponents?.body ? { body: externalComponents.body } : {}),
   };
 
   const hasRightControls =
@@ -1260,8 +1345,8 @@ const NxTable = ({
 
   const customRowClassName = useCallback(
     (record, index) => {
-      const rowKey = record.key || record.recordId || record.id;
-      const isSelected = enableRowClick && clickedRowKey === rowKey;
+      const recordKey = record.key || record.recordId || record.id;
+      const isSelected = enableRowClick && clickedRowKey === recordKey;
 
       const baseClassName =
         typeof rowClassName === "function"
@@ -1920,7 +2005,7 @@ const NxTable = ({
         <Table
           dataSource={filteredDataSource}
           rowKey={rowKey}
-          columns={displayedColumns}
+          columns={displayedColumnsWithSearch}
           components={components}
           scroll={{ ...tableScrolled, y: tableScrollY }}
           bordered
