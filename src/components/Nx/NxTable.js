@@ -272,8 +272,8 @@ const NxTable = ({
   totalData = 0, // Default total
   onDelete, // eslint-disable-line no-unused-vars
   rowSelection,
-  onRowClicked = () => { }, // eslint-disable-line no-unused-vars
-  tableScrolled = { y: 380 },
+  onRowClicked = () => { },
+  tableScrolled = {},
   expandable,
   className,
   useSelect = true,
