@@ -120,7 +120,7 @@ const NxTable = ({
   onDelete,
   rowSelection,
   onRowClicked = () => { },
-  tableScrolled = { y: 37.7 },
+  tableScrolled = {},
   expandable,
   className,
   useSelect = true,
