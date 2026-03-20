@@ -55,20 +55,20 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   const {
     loading_listIrApprovalOption,
-    loading_detailIrApprovalHierarchyDetails,
+    loading_listIrApprovalHierarchyEmployee,
     loading_detailIr,
     loading_detailDraftIr,
     loading_createUpdateIr,
-    data_irApprovalHierarchy,
+    list_irApprovalHierarchy,
     detail_irApprovalHierarchy,
     detail_invoiceRelation,
     detailDraft_invoiceRelation,
-    data_irAttachmentCategory,
+    list_irAttachmentCategory,
   } = useSelector((state) => state.invoiceRelation);
   
   const loading =
   loading_listIrApprovalOption ||
-    loading_detailIrApprovalHierarchyDetails ||
+    loading_listIrApprovalHierarchyEmployee ||
     loading_detailIr ||
     loading_detailDraftIr;
     
@@ -118,7 +118,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   }, [formType, idIr]);
 
   useEffect(() => {
-    if (isUpdate && data_irApprovalHierarchy.length) {
+    if (isUpdate && list_irApprovalHierarchy.length) {
       const {
         accountId,
         accountNumber,
@@ -139,14 +139,14 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         appHierId
       });
 
-      const appHierOption = data_irApprovalHierarchy.find(
+      const appHierOption = list_irApprovalHierarchy.find(
         (option) => option.appHierId === appHierId
       );
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, data_irApprovalHierarchy]);
+  }, [detail, list_irApprovalHierarchy]);
 
   useEffect(() => {
     if (isUpdate && attachments)
@@ -337,7 +337,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
             <NxApprovalInput
               form={form}
               hierarchyDetails={detail_irApprovalHierarchy}
-              options={data_irApprovalHierarchy}
+              options={list_irApprovalHierarchy}
               handleSelectHiararchy={handleSelectHiararchy}
               key={`invoice-relation-tab-1`}
             />
@@ -358,7 +358,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
               setDeleted={setDeletedAttachments}
               key={`invoice-relation-tab-2`}
               getAPICategory={getIrAttachmentCategory}
-              categoryData={data_irAttachmentCategory}
+              categoryData={list_irAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               mandatory={attachmentIsRequired}
@@ -585,7 +585,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      if (data_irApprovalHierarchy?.length) {
+      if (list_irApprovalHierarchy?.length) {
         const {
           accountId,
           startDate,
@@ -606,7 +606,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           appHierId
         });
 
-        const appHierOption = data_irApprovalHierarchy.find(
+        const appHierOption = list_irApprovalHierarchy.find(
           (option) => option.appHierId === appHierId
         );
 
