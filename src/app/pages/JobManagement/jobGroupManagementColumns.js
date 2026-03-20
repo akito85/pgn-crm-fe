@@ -1,10 +1,11 @@
+import React from "react";
 import { getJobManagementColumns } from "./jobManagementColumns";
 
 /**
  * Parent row columns for JobGroup List
  * Displays: NO, Name, Code, Access Group, Description
  */
-export const getJobGroupManagementColumns = () => [
+export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
   {
     title: "NO",
     key: "no",
@@ -31,6 +32,12 @@ export const getJobGroupManagementColumns = () => [
     key: "accessGroup",
     align: "left",
     width: 140,
+    render: (val) => {
+      if (!val) return "—";
+      const numId = Number(val);
+      if (!isNaN(numId) && accessGroupsMap[numId]) return accessGroupsMap[numId];
+      return val;
+    },
   },
   {
     title: "DESCRIPTION",
@@ -38,6 +45,29 @@ export const getJobGroupManagementColumns = () => [
     key: "desc",
     align: "left",
     ellipsis: true,
+  },
+  {
+    title: "STATUS",
+    dataIndex: "isActive",
+    key: "isActive",
+    align: "center",
+    width: 100,
+    render: (val) => (
+      <span
+        style={{
+          display: "inline-block",
+          padding: "2px 10px",
+          borderRadius: 12,
+          fontSize: 11,
+          fontWeight: 600,
+          background: val === "Y" ? "#e8f5e9" : "#f5f5f5",
+          color: val === "Y" ? "#2e7d32" : "#757575",
+          border: `1px solid ${val === "Y" ? "#c8e6c9" : "#e0e0e0"}`,
+        }}
+      >
+        {val === "Y" ? "Active" : "Inactive"}
+      </span>
+    ),
   },
 ];
 

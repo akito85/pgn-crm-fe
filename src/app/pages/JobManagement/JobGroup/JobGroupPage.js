@@ -21,6 +21,7 @@ import {
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import { useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
+import { configApp } from "../../../../constants/configApp";
 
 const PAGE_SIZE = 20;
 
@@ -279,8 +280,8 @@ const JobGroupPage = () => {
 
   // Column definitions (actionColumn is null when user has no permissions)
   const baseColumns = useMemo(
-    () => [...getJobGroupManagementColumns(), ...(actionColumn ? [actionColumn] : [])],
-    [actionColumn]
+    () => [...getJobGroupManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
+    [actionColumn, accessGroupsMap]
   );
 
   const allColumns = useMemo(
@@ -342,9 +343,29 @@ const JobGroupPage = () => {
     setGroupToDelete(null);
   };
 
-  const downloadListHandler = () => {
-    // TODO: Implement download functionality
-    console.log("Download List clicked");
+  const downloadListHandler = async () => {
+    try {
+      const token = JSON.parse(
+        localStorage.getItem("token") || sessionStorage.getItem("token") || "{}"
+      );
+      const response = await fetch(
+        `${configApp.JOB_SERVICE}/v1/api/job-group/download`,
+        {
+          method: "GET",
+          headers: { Authorization: token?.accessToken },
+        }
+      );
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "job-groups.csv";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
   };
 
   const createHandler = () => {
@@ -392,7 +413,7 @@ const JobGroupPage = () => {
       >
         <div style={{ maxHeight: "600px", overflowY: "auto", width: "100%" }}>
           <NxTableNested
-            parentColumns={getJobGroupManagementColumns()}
+            parentColumns={getJobGroupManagementColumns(accessGroupsMap)}
             childColumns={childColumns}
             dataSource={tableDataWithJobs}
             loading={loading}
