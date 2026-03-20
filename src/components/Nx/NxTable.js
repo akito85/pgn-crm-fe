@@ -1604,6 +1604,13 @@ const NxTable = ({
               border-left: 1px solid ${BORDER_COL} !important;
             }
 
+            /* Left border on the first right-fixed column — marks the separator
+               between the scrollable area and the pinned-right columns */
+            #${safeId} .ant-table-thead > tr > th.ant-table-cell-fix-right-first,
+            #${safeId} .ant-table-tbody > tr > td.ant-table-cell-fix-right-first {
+              border-left: 1px solid ${BORDER_COL} !important;
+            }
+
 
             #${safeId} .ant-table-measure-row > td {
               padding: 0 !important;
