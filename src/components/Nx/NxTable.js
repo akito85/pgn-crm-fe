@@ -303,6 +303,11 @@ const NxTable = ({
   onRowClick = () => { },
   components: externalComponents,
   nestedAlignConfig = {}, // { expandCellWidth, parentCol1Width, parentCol2Width }
+  // autoHeight: when true (default), the table body expands to fill the
+  // available viewport height below its top edge. tableScrolled.y is still
+  // honoured as a minimum so small screens never render below the floor.
+  // Set to false to keep the fixed tableScrolled.y behaviour unchanged.
+  autoHeight = true,
   // ── Fetch-guarantee & fallback ─────────────────────────────────────────────
   // fetchFailed: set to true when the data fetch errored so the table can show
   //              an actionable empty state instead of the generic Ant Design one.
@@ -368,7 +373,66 @@ const NxTable = ({
 
   // Destructure y as a primitive so effect deps compare by value, not object identity.
   // Callers that pass tableScrolled={{ y: 400 }} would otherwise cause infinite re-runs.
-  const tableScrollY = tableScrolled?.y ?? 380;
+  const tableScrollYProp = tableScrolled?.y ?? 380;
+
+  // ── Viewport-aware dynamic height ─────────────────────────────────────────
+  // When autoHeight=true (default), the table body grows to fill the available
+  // vertical space between its top edge and the bottom of the viewport, minus
+  // a bottom margin that reserves space for footers / padding.
+  //
+  // The computed height is used only when it exceeds the prop-based minimum
+  // (tableScrolled.y). This means:
+  //  • Small screens / insufficient space → prop value wins (safe minimum).
+  //  • Large screens / lots of space → table expands to fill viewport.
+  //  • Infinite scroll is fully preserved: Phase A reads clientHeight from the
+  //    live .ant-table-body DOM element (which reflects this value), so fill
+  //    detection always uses the actual rendered container height.
+  const [dynamicScrollY, setDynamicScrollY] = React.useState(tableScrollYProp);
+
+  React.useEffect(() => {
+    if (!autoHeight) {
+      setDynamicScrollY(tableScrollYProp);
+      return;
+    }
+
+    const BOTTOM_MARGIN = Math.round(window.innerHeight * 0.10); // 10% of viewport height
+    // Height of the custom footer bar (infinite scroll / pagination strip)
+    const FOOTER_H = (useInfiniteScroll || usePagination) ? 33 : 33;
+    // Approximate toolbar height (search bar row above the table)
+    const TOOLBAR_H = useSelect ? 48 : 0;
+
+    const compute = () => {
+      const el = containerRef.current;
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      const viewportH = window.innerHeight;
+      // Available space from the container top to the bottom of the viewport,
+      // minus footer bar, toolbar (already rendered above the table body),
+      // and the reserved bottom margin.
+      const available = viewportH - rect.top - FOOTER_H - TOOLBAR_H - BOTTOM_MARGIN;
+      // Never go below the prop-supplied minimum so callers retain control.
+      const next = Math.max(tableScrollYProp, Math.floor(available));
+      setDynamicScrollY(next);
+    };
+
+    compute(); // run immediately on mount / dep change
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(compute);
+      if (containerRef.current) ro.observe(containerRef.current);
+      window.addEventListener('resize', compute, { passive: true });
+      return () => {
+        ro.disconnect();
+        window.removeEventListener('resize', compute);
+      };
+    }
+
+    window.addEventListener('resize', compute, { passive: true });
+    return () => window.removeEventListener('resize', compute);
+  }, [autoHeight, tableScrollYProp, useInfiniteScroll, usePagination, useSelect]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const tableScrollY = dynamicScrollY;
 
   // Guard against missing idTable — CSS selectors and DOM queries depend on it.
   if (process.env.NODE_ENV !== 'production' && !idTable) {
