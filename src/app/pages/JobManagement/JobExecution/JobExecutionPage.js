@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Dropdown, Form, Radio, Input, Select, Tag, Spin } from "antd";
+import { Dropdown, Form, Radio, Input, InputNumber, Select, Tag, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -69,10 +69,15 @@ const ModalStartJob = ({ open, jobId, onClose, onSubmit, loading }) => {
   const handleOk = () => {
     form.validateFields().then((values) => {
       onSubmit({ jobId, ...values, triggerType });
-      form.resetFields();
-      setTriggerType("IMMEDIATE");
     });
   };
+
+  useEffect(() => {
+    if (!open) {
+      form.resetFields();
+      setTriggerType("IMMEDIATE");
+    }
+  }, [open, form]);
 
   const handleCancel = () => {
     form.resetFields();
@@ -125,7 +130,7 @@ const ModalStartJob = ({ open, jobId, onClose, onSubmit, loading }) => {
           {triggerType === "PERIODICALLY" && (
             <>
               <Form.Item name="intervalSeconds" label="Interval (seconds)" rules={[{ required: true, message: "Required" }]}>
-                <Input type="number" min={1} placeholder="3600" />
+                <InputNumber min={1} placeholder="3600" style={{ width: "100%" }} />
               </Form.Item>
               <Form.Item name="timezone" label="Timezone" initialValue="UTC">
                 <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} />
@@ -165,10 +170,11 @@ const JobExecutionPage = () => {
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
   const [startModalOpen, setStartModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   const handleFetch = useCallback(() => {
     dispatch(getAllJobExecutionPaginate({ search: "", page, pageSize: PAGE_SIZE, sort }));
-  }, [dispatch, page, sort]);
+  }, [dispatch, page, sort, refreshToken]);
 
   useEffect(() => { handleFetch(); }, [handleFetch]);
 
@@ -188,6 +194,7 @@ const JobExecutionPage = () => {
   const handleRefresh = () => {
     setPage(1);
     setAccumulatedData([]);
+    setRefreshToken((n) => n + 1);
   };
 
   const handleLoadMore = () => {
@@ -206,8 +213,8 @@ const JobExecutionPage = () => {
   const afterAction = useCallback(() => {
     setPage(1);
     setAccumulatedData([]);
-    handleFetch();
-  }, [handleFetch]);
+    setRefreshToken((n) => n + 1);
+  }, []);
 
   const handleAction = useCallback((thunk, arg) => {
     dispatch(thunk(arg)).then((res) => {
