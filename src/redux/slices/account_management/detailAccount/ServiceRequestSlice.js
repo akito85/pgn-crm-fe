@@ -20,6 +20,7 @@ const initialState = {
   data_data_requirements: [],
   data_attachments: [],
   data_contacts: [],
+  loading_contacts: false,
   // Dropdowns
   data_types: [],
   data_categories: [],
@@ -613,6 +614,24 @@ export const deletePrerequisiteForServiceRequest = createAsyncThunk(
 );
 
 // =====================================================
+// CONTACTS
+// =====================================================
+
+// Get Contacts by Service Request
+export const getContactsByServiceRequest = createAsyncThunk(
+  "GET_CONTACTS_BY_SERVICE_REQUEST",
+  async ({ accountId, srId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/contacts`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// =====================================================
 // WORK ORDERS
 // =====================================================
 
@@ -1133,6 +1152,21 @@ const serviceRequestSlice = createSlice({
     [createPrerequisiteForServiceRequest.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
+    },
+
+    // =====================================================
+    // CONTACTS
+    // =====================================================
+    [getContactsByServiceRequest.pending]: (state) => {
+      state.loading_contacts = true;
+    },
+    [getContactsByServiceRequest.fulfilled]: (state, action) => {
+      state.loading_contacts = false;
+      const raw = action.payload;
+      state.data_contacts = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+    },
+    [getContactsByServiceRequest.rejected]: (state) => {
+      state.loading_contacts = false;
     },
 
     // =====================================================
