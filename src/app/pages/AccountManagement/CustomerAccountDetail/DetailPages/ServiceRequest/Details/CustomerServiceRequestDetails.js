@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
@@ -17,26 +17,12 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import {
-  getGrantedAccessAccount,
-  getAccountStandardDetail,
-  getAccountOneTimeDetail,
-} from "../../../../../../../redux/slices/account_management/accountManagement";
-import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import {
   getServiceRequestDetailByAccount,
   updateServiceRequestStatus,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
-import CustomerServiceRequestHeader from "./CustomerServiceRequestHeader";
+import HeaderDetail from "../../../HeaderDetail";
 import CustomerServiceRequestDetailTabs from "./CustomerServiceRequestDetailTabs";
-
-const tabs = [
-  { value: "Service Request" },
-  { value: "Contact" },
-  { value: "Pre-Requisite" },
-  { value: "Work Order" },
-  { value: "Attachment" },
-];
 
 const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   const dispatch = useDispatch();
@@ -45,52 +31,21 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
 
   const { id, idAccount, idCustomer, type: accountType } = location?.state || {};
 
-  const { data_customerDetail, loading, loadingAccount } = useSelector(
-    (state) => state.customerAccount
+  const { data_accountDetail, loading: loadingAccountDetail } = useSelector(
+    (state) => state.accountManagement
   );
-  const {
-    access_account,
-    data_accountDetail,
-    loading: loadingAccountDetail,
-  } = useSelector((state) => state.accountManagement);
   const { data_detail, loading_detail, loading_status_update } = useSelector(
     (state) => state.serviceRequest
   );
 
-  const [activeTab, setActiveTab] = useState(tabs[0].value);
-
-  const isLoading = loading || loadingAccount || loadingAccountDetail || loading_detail;
+  const isLoading = loadingAccountDetail || loading_detail;
   const srStatus = (data_detail?.status || "").toUpperCase();
-
-  useEffect(() => {
-    dispatch(
-      getGrantedAccessAccount(
-        "/account-management/customers/view/service-requests/details"
-      )
-    );
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (idAccount && idCustomer && accountType) {
-      if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
-      }
-    }
-  }, [dispatch, idAccount, idCustomer, accountType]);
-
-  useEffect(() => {
-    if (idCustomer) dispatch(getCustomerDetail(idCustomer));
-  }, [dispatch, idCustomer]);
 
   useEffect(() => {
     if (id && idAccount) {
       dispatch(getServiceRequestDetailByAccount({ accountId: idAccount, id }));
     }
   }, [dispatch, id, idAccount]);
-
-  const handleTabChange = (e) => setActiveTab(e.target.value);
 
   const handleStatusUpdate = useCallback(
     async (status) => {
@@ -128,16 +83,23 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
     { path: "", breadcrumbName: "Detail" },
   ];
 
-  // Button visibility rules per design
-  const isClosed    = srStatus === "CLOSED";
-  const isCancelled = srStatus === "CANCELLED" || srStatus === "CANCELED";
-  const isTerminal  = isClosed || isCancelled;
+  // Button config per status: ordered list of actions + which one is primary
+  const STATUS_ACTIONS = {
+    OPEN:        { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED", "IN_PROGRESS"], primary: "IN_PROGRESS" },
+    IN_PROGRESS: { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED"],               primary: "RESOLVED"    },
+    ON_HOLD:     { buttons: ["CANCELLED", "IN_PROGRESS"],                                  primary: "IN_PROGRESS" },
+    RESOLVED:    { buttons: ["CANCELLED", "IN_PROGRESS", "CLOSED"],                        primary: "CLOSED"      },
+  };
 
-  const showCancelBtn     = !isTerminal;
-  const showOnHoldBtn     = !isTerminal && srStatus !== "ON_HOLD" && srStatus !== "RESOLVED";
-  const showInProgressBtn = !isTerminal && srStatus !== "IN_PROGRESS";
-  const showResolvedBtn   = !isTerminal && srStatus !== "RESOLVED";
-  const showClosedBtn     = !isTerminal;
+  const BUTTON_DEF = {
+    CANCELLED:   { label: "Cancel Request",      icon: <CloseOutlined /> },
+    ON_HOLD:     { label: "Mark as On Hold",      icon: <PauseCircleOutlined /> },
+    CLOSED:      { label: "Mark as Closed",       icon: <LockOutlined /> },
+    RESOLVED:    { label: "Mark as Resolved",     icon: <CheckCircleOutlined /> },
+    IN_PROGRESS: { label: "Mark as In Progress",  icon: <PlayCircleOutlined /> },
+  };
+
+  const currentActions = STATUS_ACTIONS[srStatus] || { buttons: [], primary: null };
 
   return (
     <LayoutMenu>
@@ -146,115 +108,56 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
 
         <div className="my-5 flex flex-col gap-4">
           {/* Customer & Account Info */}
-          <CustomerServiceRequestHeader
-            id={id}
-            data_detail={data_customerDetail}
-            data_accountDetail={data_accountDetail}
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            access_account={access_account}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            type={accountType}
+            collapsible={true}
           />
 
           {/* Detail Information Tabs */}
-          <div
-            className="bg-white rounded-[10px] border border-[#c8cdd4] p-5"
-            style={{ boxShadow: "0px 4px 4px rgba(0,0,0,0.06)" }}
-          >
-            <div className="text-sky-600 text-base font-bold mb-4">
-              DETAIL INFORMATION
-            </div>
-            <CustomerServiceRequestDetailTabs
-              id={id}
-              idAccount={idAccount}
-              idCustomer={idCustomer}
-              accountType={accountType}
-              data_accountDetail={data_accountDetail}
-              data_customerDetail={data_customerDetail}
-              data_detail={data_detail}
-              section={activeTab}
-              options={tabs}
-              handleChangeOption={handleTabChange}
-            />
-          </div>
+          <CustomerServiceRequestDetailTabs
+            id={id}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            accountType={accountType}
+            data_accountDetail={data_accountDetail}
+            data_detail={data_detail}
+          />
         </div>
 
         {/* Footer Buttons */}
         <div className="mb-5 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <ButtonComponent
-              type="button"
-              onClick={() => navigate(-1)}
-              icon={<LeftOutlined style={{ color: "#fff", fontSize: 20 }} />}
-            >
-              Back
-            </ButtonComponent>
+          <ButtonComponent
+            type="button"
+            onClick={() => navigate(-1)}
+            icon={<LeftOutlined style={{ color: "#fff", fontSize: 20 }} />}
+          >
+            Back
+          </ButtonComponent>
 
-            {showCancelBtn && (
-              <ButtonComponent
-                type="button"
-                loading={loading_status_update}
-                onClick={() => handleStatusUpdate("CANCELLED")}
-                icon={<CloseOutlined className="text-xl" />}
-                style={{
-                  backgroundColor: "#ef4444",
-                  borderColor: "#ef4444",
-                  color: "#fff",
-                }}
-              >
-                Cancel Request
-              </ButtonComponent>
-            )}
-
-            {showOnHoldBtn && (
-              <ButtonComponent
-                type="button"
-                loading={loading_status_update}
-                onClick={() => handleStatusUpdate("ON_HOLD")}
-                icon={<PauseCircleOutlined className="text-xl" />}
-              >
-                Mark as On Hold
-              </ButtonComponent>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
-            {showInProgressBtn && (
-              <ButtonComponent
-                type="button"
-                loading={loading_status_update}
-                onClick={() => handleStatusUpdate("IN_PROGRESS")}
-                icon={<PlayCircleOutlined className="text-xl" />}
-              >
-                Mark as In Progress
-              </ButtonComponent>
-            )}
-
-            {showResolvedBtn && (
-              <ButtonComponent
-                type="button"
-                loading={loading_status_update}
-                onClick={() => handleStatusUpdate("RESOLVED")}
-                icon={<CheckCircleOutlined className="text-xl" />}
-              >
-                Mark as Resolved
-              </ButtonComponent>
-            )}
-
-            {showClosedBtn && (
-              <ButtonComponent
-                type="button"
-                loading={loading_status_update}
-                onClick={() => handleStatusUpdate("CLOSED")}
-                icon={<LockOutlined className="text-xl" />}
-                style={{
-                  backgroundColor: "#0075bf",
-                  borderColor: "#0075bf",
-                  color: "#fff",
-                }}
-              >
-                Mark as Closed
-              </ButtonComponent>
-            )}
-          </div>
+          {currentActions.buttons.length > 0 && (
+            <div className="flex items-center gap-3 flex-wrap">
+              {currentActions.buttons.map((key) => {
+                const def = BUTTON_DEF[key];
+                const isPrimary = key === currentActions.primary;
+                return (
+                  <ButtonComponent
+                    key={key}
+                    type="button"
+                    loading={loading_status_update}
+                    onClick={() => handleStatusUpdate(key)}
+                    icon={def.icon}
+                    style={isPrimary ? { backgroundColor: "#0075bf", borderColor: "#0075bf", color: "#fff" } : {}}
+                  >
+                    {def.label}
+                  </ButtonComponent>
+                );
+              })}
+            </div>
+          )}
         </div>
       </Spin>
     </LayoutMenu>

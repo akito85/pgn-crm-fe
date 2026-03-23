@@ -1,11 +1,10 @@
 import React, { Fragment } from "react";
 import { Tag } from "antd";
-import moment from "moment";
 
-import DetailText from "../../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../../components/BaseContainer";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { dateFormatting } from "../../../../../../../utils";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 // ─── Status badge helper ────────────────────────────────────────────────────
 
@@ -47,15 +46,10 @@ const StatusBadge = ({ value }) => {
   );
 };
 
-// ─── Date formatters ─────────────────────────────────────────────────────────
-
-const fmt     = (d) => (d ? moment(d).format(dateFormatting?.dateTime || "DD MMM YYYY HH:mm:ss") : "-");
-const fmtDate = (d) => (d ? moment(d).format(dateFormatting?.date     || "DD MMM YYYY")           : "-");
-
 // ─── Main component ──────────────────────────────────────────────────────────
 
 const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
-  const sr             = data_detail  || {};
+  const sr               = data_detail  || {};
   const dataRequirements = Array.isArray(sr.dataRequirements) ? sr.dataRequirements : [];
   const actionLog        = Array.isArray(sr.actionLog)        ? sr.actionLog        : [];
   const historyLog       = sr.historyLog || {};
@@ -71,19 +65,13 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
     {
       title: "TYPE",
       dataIndex: "drType",
-      width: 100,
+      width: 200,
       sorter: true,
       filter: true,
     },
     {
       title: "VALUE",
       dataIndex: "drValue",
-      sorter: true,
-      filter: true,
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "drDesc",
       sorter: true,
       filter: true,
     },
@@ -103,7 +91,7 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
       width: 180,
       sorter: true,
       filter: true,
-      render: (v) => fmt(v),
+      render: (v) => NxDate.formatDate(v, "DD MMM YYYY HH:mm:ss"),
     },
     {
       title: "USERNAME",
@@ -120,66 +108,56 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
       filter: true,
     },
     {
-      title: "NEW VALUE",
+      title: "REMARK",
       dataIndex: "newValue",
       sorter: true,
       filter: true,
-      render: (v) =>
-        v ? (
-          <span className="text-xs text-gray-500 truncate max-w-xs block">{v}</span>
-        ) : (
-          "-"
-        ),
+      render: (v) => v || "-",
     },
   ];
 
   return (
     <Fragment>
       {/* ── SERVICE REQUEST INFORMATION ── */}
-      <BaseContainer header="SERVICE REQUEST INFORMATION">
-        <div className="w-full grid grid-cols-4 gap-4">
-          <DetailText label="Service Request Reference">
-            {sr.requestNumber || "-"}
-          </DetailText>
-          <DetailText label="Type">{sr.requestTypeName || "-"}</DetailText>
-          <DetailText label="Category">{sr.requestCategoryName || "-"}</DetailText>
-          <DetailText label="Sub Category">
-            {sr.requestSubCategoryName || "-"}
-          </DetailText>
+      <NxBaseContainer header="SERVICE REQUEST INFORMATION" border>
+        <div className="flex flex-col gap-y-4">
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label="Service Request Reference">
+              {sr.requestNumber || "-"}
+            </NxDetailText>
+            <NxDetailText label="Type">{sr.requestTypeName || "-"}</NxDetailText>
+            <NxDetailText label="Category">{sr.requestCategoryName || "-"}</NxDetailText>
 
-          <DetailText label="Channel">{sr.channelName || "-"}</DetailText>
-          <DetailText label="Priority">{sr.priorityName || "-"}</DetailText>
-          <DetailText label="Request Source">{sr.sourceName || "-"}</DetailText>
-          <DetailText label="Cost Center">{sr.costCenterName || "-"}</DetailText>
+            <NxDetailText label="Sub Category">{sr.requestSubCategoryName || "-"}</NxDetailText>
+            <NxDetailText label="Channel">{sr.channelName || "-"}</NxDetailText>
+            <NxDetailText label="Priority">{sr.priorityName || "-"}</NxDetailText>
 
-          <DetailText label="Request Date">{fmtDate(sr.requestDate)}</DetailText>
-          <DetailText label="Open Date">{fmtDate(sr.openDate)}</DetailText>
-          <DetailText label="Resolved Date">{fmtDate(sr.resolvedDate)}</DetailText>
-          <DetailText label="Age (Hour)">{sr.duration ?? "-"}</DetailText>
+            <NxDetailText label="Request Source">{sr.sourceName || "-"}</NxDetailText>
+            <NxDetailText label="Request Date">{NxDate.formatDate(sr.requestDate, "DD MMM YYYY")}</NxDetailText>
+            <NxDetailText label="Open Date">{NxDate.formatDate(sr.openDate, "DD MMM YYYY")}</NxDetailText>
 
-          <DetailText label="Closed Date">{fmtDate(sr.closedDate)}</DetailText>
-          <DetailText label="Reference">{sr.reference || "-"}</DetailText>
-          <div />
-          <div />
+            <NxDetailText label="Resolved Date">{NxDate.formatDate(sr.resolvedDate, "DD MMM YYYY")}</NxDetailText>
+            <NxDetailText label="Age (Hour)">{sr.duration ?? "-"}</NxDetailText>
+            <NxDetailText label="Closed Date">{NxDate.formatDate(sr.closedDate, "DD MMM YYYY")}</NxDetailText>
 
-          <DetailText label="Status">
-            <StatusBadge value={sr.status} />
-          </DetailText>
-          <DetailText label="Status Pre-Requisite">
-            <StatusBadge value={sr.statusPrerequisite} />
-          </DetailText>
-          <DetailText label="Status Approval">
-            <StatusBadge value={sr.statusApproval} />
-          </DetailText>
-          <div />
+            <NxDetailText label="Status">
+              <StatusBadge value={sr.status} />
+            </NxDetailText>
+            <NxDetailText label="Status Pre-Requisite">
+              <StatusBadge value={sr.statusPrerequisite} />
+            </NxDetailText>
+            <NxDetailText label="Status Approval">
+              <StatusBadge value={sr.statusApproval} />
+            </NxDetailText>
+          </div>
+          <div className="w-full">
+            <NxDetailText label="Description">{sr.description || "-"}</NxDetailText>
+          </div>
         </div>
-        <div className="w-full mt-2">
-          <DetailText label="Description">{sr.description || "-"}</DetailText>
-        </div>
-      </BaseContainer>
+      </NxBaseContainer>
 
       {/* ── DATA REQUIREMENT ── */}
-      <BaseContainer header="DATA REQUIREMENT">
+      <NxBaseContainer header="DATA REQUIREMENT" border>
         <NxTable
           dataSource={dataRequirements.map((item, i) => ({
             ...item,
@@ -191,10 +169,10 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
           tablePadding="small"
           tableScrolled={{ x: "max-content" }}
         />
-      </BaseContainer>
+      </NxBaseContainer>
 
       {/* ── ACTION LOG ── */}
-      <BaseContainer header="ACTION LOG">
+      <NxBaseContainer header="ACTION LOG" border>
         <NxTable
           dataSource={actionLog.map((item, i) => ({
             ...item,
@@ -206,28 +184,28 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
           tablePadding="small"
           tableScrolled={{ x: "max-content", y: 300 }}
         />
-      </BaseContainer>
+      </NxBaseContainer>
 
       {/* ── HISTORY LOG INFORMATION ── */}
-      <BaseContainer header="HISTORY LOG INFORMATION">
+      <NxBaseContainer header="HISTORY LOG INFORMATION" border>
         <div className="w-full grid grid-cols-5 gap-4">
-          <DetailText label="Record ID">
+          <NxDetailText label="Record ID">
             {historyLog.recordId || sr.id || "-"}
-          </DetailText>
-          <DetailText label="Created Date">
-            {fmt(historyLog.createdDate || sr.createdDate)}
-          </DetailText>
-          <DetailText label="Created By">
+          </NxDetailText>
+          <NxDetailText label="Created Date">
+            {NxDate.formatDate(historyLog.createdDate || sr.createdDate, "DD MMM YYYY HH:mm:ss")}
+          </NxDetailText>
+          <NxDetailText label="Created By">
             {historyLog.createdBy || sr.createdBy || "-"}
-          </DetailText>
-          <DetailText label="Updated Date">
-            {fmt(historyLog.updatedDate || sr.updatedDate)}
-          </DetailText>
-          <DetailText label="Updated By">
+          </NxDetailText>
+          <NxDetailText label="Updated Date">
+            {NxDate.formatDate(historyLog.updatedDate || sr.updatedDate, "DD MMM YYYY HH:mm:ss")}
+          </NxDetailText>
+          <NxDetailText label="Updated By">
             {historyLog.updatedBy || sr.updatedBy || "-"}
-          </DetailText>
+          </NxDetailText>
         </div>
-      </BaseContainer>
+      </NxBaseContainer>
     </Fragment>
   );
 };

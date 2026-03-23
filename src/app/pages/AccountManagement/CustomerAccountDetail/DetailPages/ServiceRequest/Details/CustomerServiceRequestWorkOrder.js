@@ -1,19 +1,11 @@
-import { useState, useEffect, useRef, Fragment } from "react"
-import { useNavigate, useLocation, Link } from "react-router-dom"
+import { Fragment } from "react"
 
 import TablePagination from "../../../../../../../components/TablePagination";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import DetailText from "../../../../../../../components/DetailText";
 import BaseContainer from "../../../../../../../components/BaseContainer";
-import NxDropdownMenu from "../../../../../../../components/Nx/NxDropdownMenu";
 
-import { 
-  CloseOutlined, 
-  PauseCircleOutlined, 
-  PlayCircleOutlined, 
-  LockOutlined, 
-  PlusOutlined, 
-  CheckCircleOutlined,
+import {
+  PlusOutlined,
   FilterOutlined,
   DownloadOutlined,
   EyeOutlined,
@@ -21,9 +13,6 @@ import {
   MoreOutlined
 } from "@ant-design/icons";
 import { Tooltip, Tag } from "antd";
-import SVGIcon from "../../../../../../../assets/Icon/index";
-
-import { USER_ROUTES } from "../../../../../../../routes/user_management/user_routes";
 
 const CustomerServiceRequestWorkOrder = ({
   data = [],
@@ -46,8 +35,6 @@ const CustomerServiceRequestWorkOrder = ({
   data_accountDetail,
   data_customerDetail,
 }) => {
-  const [dataDetail, setDataDetail] = useState({});
-  
   // Updated dummy data based on the HTML structure
   const dummyData = [
     {
@@ -182,9 +169,6 @@ const CustomerServiceRequestWorkOrder = ({
     }
   ];
 
-  // nav
-  const navigate = useNavigate();
-
   const apiData = data_detail?.workOrders;
   const tableData = (Array.isArray(apiData) && apiData.length > 0)
     ? apiData
@@ -194,10 +178,6 @@ const CustomerServiceRequestWorkOrder = ({
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
   const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
-
-  const handleDetail = (value) => {
-    setDataDetail(value);
-  };
 
   const handleViewFile = (fileData) => {
     // Placeholder for view file action
@@ -250,75 +230,6 @@ const CustomerServiceRequestWorkOrder = ({
         return "default";
     }
   };
-
-  const itemActions = [
-    {
-      action: "View",
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={USER_ROUTES.DETAIL_EMPLOYEE}
-              state={{ id: record?.employeeCode }}
-            >
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Update">
-            <Link
-              to={record?.status === "ACTIVE" && USER_ROUTES.UPDATE_EMPLOYEE}
-              state={
-                record?.status === "ACTIVE" && { id: record?.employeeCode }
-              }
-            >
-              <div
-                className={
-                  record?.status === "INACTIVE" && " cursor-not-allowed"
-                }
-              >
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconEdit"
-                      color={
-                        record?.status === "ACTIVE" ? "#0075bf" : "#C0BEC6"
-                      }
-                      width={24}
-                    />
-                  }
-                  border={false}
-                  disabled={record?.status === "ACTIVE" ? false : true}
-                >
-                  {data_length > 3 && (
-                    <span
-                      className={
-                        record?.status === "ACTIVE"
-                          ? "text-black ml-3"
-                          : "text-[#C0BEC6]"
-                      }
-                    >
-                      Update
-                    </span>
-                  )}
-                </ButtonComponent>
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-  ];
 
   const columns = [
     {

@@ -782,6 +782,36 @@ export const getInstallmentPaymentSchedule = createAsyncThunk(
   }
 );
 
+export const updateServiceRequestStatus = createAsyncThunk(
+  "UPDATE_SERVICE_REQUEST_STATUS",
+  async ({ accountId, id, status, remark = "" }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const response = await accountManagementService.updateData(url, {
+        serviceRequestId: id,
+        requestStatus: status,
+        remark,
+      });
+      thunkAPI.dispatch(showModalSuccess({
+        title: "Successful",
+        description: `Service Request status updated to ${status}.`,
+        return: false,
+      }));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+      thunkAPI.dispatch(showModalError({
+        title: "Failed",
+        description: `Status update failed. ${message}`,
+      }));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // =====================================================
 // SLICE DEFINITION
 // =====================================================
@@ -1165,36 +1195,6 @@ const serviceRequestSlice = createSlice({
     },
   },
 });
-
-export const updateServiceRequestStatus = createAsyncThunk(
-  "UPDATE_SERVICE_REQUEST_STATUS",
-  async ({ accountId, id, status, remark = "" }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
-      const response = await accountManagementService.updateData(url, {
-        serviceRequestId: id,
-        requestStatus: status,
-        remark,
-      });
-      thunkAPI.dispatch(showModalSuccess({
-        title: "Successful",
-        description: `Service Request status updated to ${status}.`,
-        return: false,
-      }));
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
-      thunkAPI.dispatch(showModalError({
-        title: "Failed",
-        description: `Status update failed. ${message}`,
-      }));
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
 
 const { reducer } = serviceRequestSlice;
 export const {
