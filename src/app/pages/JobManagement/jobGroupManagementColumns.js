@@ -18,21 +18,18 @@ export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
     dataIndex: "name",
     key: "name",
     align: "left",
-    width: 220,
   },
   {
     title: "JOB GROUP CODE",
     dataIndex: "code",
     key: "code",
     align: "left",
-    width: 120,
   },
   {
     title: "ACCESS GROUP",
     dataIndex: "accessGroup",
     key: "accessGroup",
     align: "left",
-    width: 140,
     render: (val) => {
       if (!val) return "—";
       const numId = Number(val);
@@ -45,7 +42,6 @@ export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
     dataIndex: "desc",
     key: "desc",
     align: "left",
-    width: 150,   // minimum — grows with flex:1 to fill remaining width
     fill: true,
     ellipsis: true,
   },
