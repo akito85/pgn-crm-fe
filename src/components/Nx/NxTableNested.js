@@ -185,10 +185,18 @@ const autoMeasureColumnWidths = (parentCols, childCols, dataSource, actionKey = 
   // Measure parent columns against parent rows
   parentCols.forEach(col => measureCol(col, dataSource));
 
-  // Measure child columns against all loaded child rows
-  const allChildRows = dataSource.flatMap(row =>
-    Array.isArray(row.children) ? row.children : []
-  );
+  // Measure child columns — sample at most PARENT_SAMPLE_FOR_CHILDREN parents
+  // × CHILD_SAMPLE_PER_ROW children each to avoid a 250k-element flatMap at
+  // 50k rows with 5 children each on every infinite scroll page append.
+  const PARENT_SAMPLE_FOR_CHILDREN = 50;
+  const CHILD_SAMPLE_PER_ROW       = 2;
+  const allChildRows = dataSource
+    .slice(0, PARENT_SAMPLE_FOR_CHILDREN)
+    .flatMap(row =>
+      Array.isArray(row.children)
+        ? row.children.slice(0, CHILD_SAMPLE_PER_ROW)
+        : []
+    );
   childCols.forEach(col => measureCol(col, allChildRows));
 
   // Shared keys (same key in both parent and child) are already unified:
@@ -1166,9 +1174,29 @@ const NxTableNested = ({
     return parentColumns.filter(c => (c.key || c.dataIndex) !== actionKey);
   }, [parentColumns, actionKey]);
 
+  // Refs for one-time column-width measurement.
+  // Re-measures only when column definitions change, not on every dataSource append.
+  const hasMeasuredRef    = useRef(false);
+  const measuredWidthsRef = useRef(null);
+  const measuredColSigRef = useRef(null);
+
   const autoMeasuredWidths = useMemo(() => {
     if (!dataSource || dataSource.length === 0) return {};
-    return autoMeasureColumnWidths(filteredParentColumns, childColumns, dataSource, actionKey);
+    // Column signature — triggers a re-measure only when columns actually change.
+    const colSig = `${filteredParentColumns.map(c => c.key || c.dataIndex).join(",")}|${childColumns.map(c => c.key || c.dataIndex).join(",")}|${actionKey ?? ""}`;
+    // Return cached result when columns haven't changed — prevents re-running
+    // autoMeasureColumnWidths on every infinite scroll page append.
+    if (hasMeasuredRef.current && measuredColSigRef.current === colSig) {
+      return measuredWidthsRef.current;
+    }
+    // Wait for enough data before first measurement so narrow initial pages
+    // don't produce column widths that are too narrow for later data.
+    if (dataSource.length < 50) return measuredWidthsRef.current ?? {};
+    const result = autoMeasureColumnWidths(filteredParentColumns, childColumns, dataSource, actionKey);
+    hasMeasuredRef.current    = true;
+    measuredColSigRef.current = colSig;
+    measuredWidthsRef.current = result;
+    return result;
   }, [filteredParentColumns, childColumns, dataSource, actionKey]);
 
   const draggedParentKeyRef = useRef(draggedParentKey);
@@ -1587,47 +1615,39 @@ const NxTableNested = ({
     onRowClick(record, key);
   }, [onRowClick]);
 
-  // ── Fuzzy search + auto-expand ─────────────────────────────────────────────
-  const filteredDataSource = useMemo(() => {
-    if (!searchValue) return dataSource;
-    return dataSource.filter(row => {
+  // ── Combined: filteredDataSource + childMatchIds in one traversal ──────────
+  // Hoisting sq outside the filter eliminates ~500k redundant toLowerCase calls
+  // per keystroke at 50k rows × 10 columns.  A single pass halves traversal
+  // cost compared to the previous two separate filter / forEach loops.
+  const { filteredDataSource, childMatchIds } = useMemo(() => {
+    if (!searchValue) return { filteredDataSource: dataSource, childMatchIds: new Set() };
+    const sq  = searchValue.toLowerCase();
+    const ids = new Set();
+    const filtered = dataSource.filter(row => {
       const parentMatch = parentColumns.some(col => {
         const val = String(row[col.dataIndex || col.key] ?? "").toLowerCase();
-        const sq  = searchValue.toLowerCase();
         return val.includes(sq) || fuzzyMatch(val, sq);
       });
       if (parentMatch) return true;
       if (row.children && Array.isArray(row.children)) {
-        return row.children.some(child =>
+        const childMatch = row.children.some(child =>
           childColumns.some(col => {
             const val = String(child[col.dataIndex || col.key] ?? "").toLowerCase();
-            const sq  = searchValue.toLowerCase();
             return val.includes(sq) || fuzzyMatch(val, sq);
           })
         );
+        if (childMatch) { ids.add(row.id); return true; }
       }
       return false;
     });
+    return { filteredDataSource: filtered, childMatchIds: ids };
   }, [dataSource, parentColumns, childColumns, searchValue]);
 
-  // Auto-expand rows whose children match the search term
-  const childMatchIds = useMemo(() => {
-    if (!searchValue) return new Set();
-    const sq  = searchValue.toLowerCase();
-    const ids = new Set();
-    dataSource.forEach(row => {
-      if (!row.children || row.children.length === 0) return;
-      const matches = row.children.some(child =>
-        childColumns.some(col => {
-          const val = String(child[col.dataIndex || col.key] ?? "").toLowerCase();
-          if (val.includes(sq)) return true;
-          return fuzzyMatch(val, sq);
-        })
-      );
-      if (matches) ids.add(row.id);
-    });
-    return ids;
-  }, [searchValue, dataSource, childColumns]);
+  // O(1) row lookup — eliminates O(n) dataSource.find inside the auto-expand loop.
+  const rowById = useMemo(
+    () => new Map(dataSource.map(r => [r.id, r])),
+    [dataSource]
+  );
 
   const autoExpandedRef = useRef(new Set());
   const prevSearchRef   = useRef("");
@@ -1657,14 +1677,20 @@ const NxTableNested = ({
       return changed ? next : prev;
     });
     toAutoExpand.forEach(id => autoExpandedRef.current.add(id));
-    // Trigger fetch for rows whose children haven't loaded yet
+    // Trigger fetch for rows whose children haven't loaded yet.
+    // Cap to MAX_AUTO_EXPAND_FETCHES simultaneous requests to avoid flooding the API
+    // when many rows match (e.g. 1,000 matches would fire 1,000 simultaneous API calls).
+    const MAX_AUTO_EXPAND_FETCHES = 5;
+    let fetchCount = 0;
     childMatchIds.forEach(id => {
-      const row = dataSource.find(r => r.id === id);
+      if (fetchCount >= MAX_AUTO_EXPAND_FETCHES) return;
+      const row = rowById.get(id); // O(1) Map lookup instead of O(n) dataSource.find
       if (row && (!row.children || row.children.length === 0) && !loadingKeys.has(id)) {
         onExpand(id);
+        fetchCount++;
       }
     });
-  }, [childMatchIds, searchValue, dataSource, onExpand, loadingKeys]);
+  }, [childMatchIds, searchValue, dataSource, rowById, onExpand, loadingKeys]);
 
   // ── Expand / collapse handlers ─────────────────────────────────────────────
   const handleToggleExpand = useCallback((rowId) => {
