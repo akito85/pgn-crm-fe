@@ -969,7 +969,7 @@ const ParentRow = React.memo(({
           {/* Action column */}
           {actionCol && (
             <div style={{
-              ...cellBase,
+              ...CELL_BASE_STYLE,
               width:      actionCol.width || 120,
               flexShrink: 0,
               justifyContent: "center",
