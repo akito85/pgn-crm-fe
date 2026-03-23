@@ -12,8 +12,12 @@ import {
 } from "@ant-design/icons";
 
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import {
@@ -23,6 +27,18 @@ import {
 
 import HeaderDetail from "../../../HeaderDetail";
 import CustomerServiceRequestDetailTabs from "./CustomerServiceRequestDetailTabs";
+
+// ── Action Log columns ────────────────────────────────────────────────────────
+const LOG_COLUMNS = [
+  { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
+  {
+    title: "DATE", dataIndex: "createdDate", width: 180, sorter: true, filter: true,
+    render: (v) => NxDate.formatDate(v, "DD MMM YYYY HH:mm:ss"),
+  },
+  { title: "USERNAME", dataIndex: "createdBy",  width: 150, sorter: true, filter: true },
+  { title: "ACTION",   dataIndex: "remark",     width: 250, sorter: true, filter: true },
+  { title: "REMARK",   dataIndex: "newValue",   sorter: true, filter: true, render: (v) => v || "-" },
+];
 
 const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   const dispatch = useDispatch();
@@ -102,7 +118,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   const currentActions = STATUS_ACTIONS[srStatus] || { buttons: [], primary: null };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading} className="w-full top-20">
         <BreadCrumb routes={routes} />
 
@@ -126,41 +142,80 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
             data_accountDetail={data_accountDetail}
             data_detail={data_detail}
           />
-        </div>
 
-        {/* Footer Buttons */}
-        <div className="mb-5 flex items-center justify-between gap-3 flex-wrap">
-          <ButtonComponent
-            type="button"
-            onClick={() => navigate(-1)}
-            icon={<LeftOutlined style={{ color: "#fff", fontSize: 20 }} />}
-          >
-            Back
-          </ButtonComponent>
+          {/* Action Log */}
+          <NxCardContainer header="ACTION LOG">
+            <NxTable
+              idTable="action-log-table"
+              dataSource={(Array.isArray(data_detail?.actionLog) ? data_detail.actionLog : [])
+                .map((item, i) => ({ ...item, key: item.id || i }))}
+              columns={LOG_COLUMNS}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hasMore={false}
+              showAdvanceSearch={false}
+              showSearchBar={false}
+              fontSize="small"
+              tablePadding="small"
+              tableScrolled={{ x: "max-content", y: 300 }}
+            />
+          </NxCardContainer>
 
-          {currentActions.buttons.length > 0 && (
-            <div className="flex items-center gap-3 flex-wrap">
-              {currentActions.buttons.map((key) => {
-                const def = BUTTON_DEF[key];
-                const isPrimary = key === currentActions.primary;
-                return (
-                  <ButtonComponent
-                    key={key}
-                    type="button"
-                    loading={loading_status_update}
-                    onClick={() => handleStatusUpdate(key)}
-                    icon={def.icon}
-                    style={isPrimary ? { backgroundColor: "#0075bf", borderColor: "#0075bf", color: "#fff" } : {}}
-                  >
-                    {def.label}
-                  </ButtonComponent>
-                );
-              })}
+          {/* History Log Information */}
+          <NxCardContainer header="HISTORY LOG INFORMATION">
+            <div className="w-full grid grid-cols-5 gap-4">
+              <NxDetailText label="Record ID">
+                {data_detail?.historyLog?.recordId || data_detail?.id || "-"}
+              </NxDetailText>
+              <NxDetailText label="Created Date">
+                {NxDate.formatDate(data_detail?.historyLog?.createdDate || data_detail?.createdDate, "DD MMM YYYY HH:mm:ss")}
+              </NxDetailText>
+              <NxDetailText label="Created By">
+                {data_detail?.historyLog?.createdBy || data_detail?.createdBy || "-"}
+              </NxDetailText>
+              <NxDetailText label="Updated Date">
+                {NxDate.formatDate(data_detail?.historyLog?.updatedDate || data_detail?.updatedDate, "DD MMM YYYY HH:mm:ss")}
+              </NxDetailText>
+              <NxDetailText label="Updated By">
+                {data_detail?.historyLog?.updatedBy || data_detail?.updatedBy || "-"}
+              </NxDetailText>
             </div>
-          )}
+          </NxCardContainer>
         </div>
+
+        {/* Footer */}
+        <NxBaseContainer border className="mb-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <ButtonComponent
+              onClick={() => navigate(-1)}
+              icon={<LeftOutlined />}
+            >
+              Back
+            </ButtonComponent>
+
+            {currentActions.buttons.length > 0 && (
+              <div className="flex items-center gap-3 flex-wrap">
+                {currentActions.buttons.map((key) => {
+                  const def = BUTTON_DEF[key];
+                  const isPrimary = key === currentActions.primary;
+                  return (
+                    <ButtonComponent
+                      key={key}
+                      loading={loading_status_update}
+                      onClick={() => handleStatusUpdate(key)}
+                      icon={def.icon}
+                      isPrimary={isPrimary}
+                    >
+                      {def.label}
+                    </ButtonComponent>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </NxBaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

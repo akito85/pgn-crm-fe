@@ -43,14 +43,14 @@ const ServiceRequestTable = ({
         state: { idAccount, idCustomer, type: "standard" },
       });
     },
-    handleView: (id) => {
+    handleView: (record) => {
       navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST, {
-        state: { id, idAccount, idCustomer, type: "standard" },
+        state: { id: record?.id, idAccount, idCustomer, type: "standard" },
       });
     },
-    handleUpdate: (id) => {
+    handleUpdate: (record) => {
       navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST, {
-        state: { id, idAccount, idCustomer, type: "update" },
+        state: { id: record?.id, idAccount, idCustomer, type: "update" },
       });
     },
     handleApproval,

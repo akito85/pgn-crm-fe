@@ -1,130 +1,33 @@
-import React, { Fragment } from "react";
-import { Tag } from "antd";
-
+import { Fragment } from "react";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import StatusComponent from "../../../../../../../components/StatusComponent";
 
-// ─── Status badge helper ────────────────────────────────────────────────────
-
-const STATUS_COLOR = {
-  OPEN:             { bg: "#22c55e", label: "Open" },
-  IN_PROGRESS:      { bg: "#f97316", label: "In Progress" },
-  ON_HOLD:          { bg: "#eab308", label: "On Hold" },
-  RESOLVED:         { bg: "#3b82f6", label: "Resolved" },
-  CLOSED:           { bg: "#6b7280", label: "Closed" },
-  CANCELLED:        { bg: "#ef4444", label: "Cancelled" },
-  CANCELED:         { bg: "#ef4444", label: "Cancelled" },
-  DRAFT:            { bg: "#a855f7", label: "Draft" },
-  ACTIVE:           { bg: "#22c55e", label: "Active" },
-  WAITING_APPROVAL: { bg: "#f59e0b", label: "Waiting Approval" },
-  APPROVED:         { bg: "#10b981", label: "Approved" },
-  REJECTED:         { bg: "#ef4444", label: "Rejected" },
-  COMPLETED:        { bg: "#10b981", label: "Completed" },
-  COMPLETE:         { bg: "#10b981", label: "Completed" },
-  NONE:             { bg: "#9ca3af", label: "None" },
+// "IN_PROGRESS" → "In Progress"
+const formatStatus = (val) => {
+  if (!val) return null;
+  return val.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
-const StatusBadge = ({ value }) => {
-  const key = (value || "").toUpperCase().replace(/ /g, "_");
-  const cfg = STATUS_COLOR[key] || { bg: "#9ca3af", label: value || "-" };
-  return (
-    <Tag
-      style={{
-        backgroundColor: cfg.bg,
-        color: "#fff",
-        border: "none",
-        borderRadius: 20,
-        padding: "2px 10px",
-        fontSize: 12,
-        fontWeight: 500,
-      }}
-    >
-      {cfg.label}
-    </Tag>
-  );
-};
-
-// ─── Main component ──────────────────────────────────────────────────────────
+const DR_COLUMNS = [
+  { title: "NO",    width: 60, align: "center", render: (_, __, i) => i + 1 },
+  { title: "TYPE",  dataIndex: "drType",  width: 200, sorter: true, filter: true },
+  { title: "VALUE", dataIndex: "drValue", sorter: true, filter: true },
+];
 
 const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
-  const sr               = data_detail  || {};
-  const dataRequirements = Array.isArray(sr.dataRequirements) ? sr.dataRequirements : [];
-  const actionLog        = Array.isArray(sr.actionLog)        ? sr.actionLog        : [];
-  const historyLog       = sr.historyLog || {};
-
-  // ── Data Requirement columns ──
-  const drColumns = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (_, __, i) => i + 1,
-    },
-    {
-      title: "TYPE",
-      dataIndex: "drType",
-      width: 200,
-      sorter: true,
-      filter: true,
-    },
-    {
-      title: "VALUE",
-      dataIndex: "drValue",
-      sorter: true,
-      filter: true,
-    },
-  ];
-
-  // ── Action Log columns ──
-  const logColumns = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (_, __, i) => i + 1,
-    },
-    {
-      title: "DATE",
-      dataIndex: "createdDate",
-      width: 180,
-      sorter: true,
-      filter: true,
-      render: (v) => NxDate.formatDate(v, "DD MMM YYYY HH:mm:ss"),
-    },
-    {
-      title: "USERNAME",
-      dataIndex: "createdBy",
-      width: 150,
-      sorter: true,
-      filter: true,
-    },
-    {
-      title: "REMARK",
-      dataIndex: "remark",
-      width: 250,
-      sorter: true,
-      filter: true,
-    },
-    {
-      title: "REMARK",
-      dataIndex: "newValue",
-      sorter: true,
-      filter: true,
-      render: (v) => v || "-",
-    },
-  ];
+  const sr  = data_detail || {};
+  const drs = Array.isArray(sr.dataRequirements) ? sr.dataRequirements : [];
 
   return (
     <Fragment>
-      {/* ── SERVICE REQUEST INFORMATION ── */}
+      {/* SERVICE REQUEST INFORMATION */}
       <NxBaseContainer header="SERVICE REQUEST INFORMATION" border>
         <div className="flex flex-col gap-y-4">
           <div className="w-full grid grid-cols-3 gap-4">
-            <NxDetailText label="Service Request Reference">
-              {sr.requestNumber || "-"}
-            </NxDetailText>
+            <NxDetailText label="Service Request Reference">{sr.requestNumber || "-"}</NxDetailText>
             <NxDetailText label="Type">{sr.requestTypeName || "-"}</NxDetailText>
             <NxDetailText label="Category">{sr.requestCategoryName || "-"}</NxDetailText>
 
@@ -141,13 +44,19 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
             <NxDetailText label="Closed Date">{NxDate.formatDate(sr.closedDate, "DD MMM YYYY")}</NxDetailText>
 
             <NxDetailText label="Status">
-              <StatusBadge value={sr.status} />
+              <StatusComponent colour={(sr.status || "").toLowerCase()} margin={false}>
+                {formatStatus(sr.status)}
+              </StatusComponent>
             </NxDetailText>
             <NxDetailText label="Status Pre-Requisite">
-              <StatusBadge value={sr.statusPrerequisite} />
+              <StatusComponent colour={(sr.statusPrerequisite || "").toLowerCase()} margin={false}>
+                {formatStatus(sr.statusPrerequisite)}
+              </StatusComponent>
             </NxDetailText>
             <NxDetailText label="Status Approval">
-              <StatusBadge value={sr.statusApproval} />
+              <StatusComponent colour={(sr.statusApproval || "").toLowerCase()} margin={false}>
+                {formatStatus(sr.statusApproval)}
+              </StatusComponent>
             </NxDetailText>
           </div>
           <div className="w-full">
@@ -156,55 +65,18 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
         </div>
       </NxBaseContainer>
 
-      {/* ── DATA REQUIREMENT ── */}
-      <NxBaseContainer header="DATA REQUIREMENT" border>
+      {/* DATA REQUIREMENT */}
+      <NxBaseContainer header="DATA REQUIREMENT" border className="overflow-hidden">
         <NxTable
-          dataSource={dataRequirements.map((item, i) => ({
-            ...item,
-            key: item.id || i,
-          }))}
-          columns={drColumns}
+          dataSource={drs.map((item, i) => ({ ...item, key: item.id || i }))}
+          columns={DR_COLUMNS}
           usePagination={false}
+          showAdvanceSearch={false}
+          showSearchBar={false}
           fontSize="small"
           tablePadding="small"
           tableScrolled={{ x: "max-content" }}
         />
-      </NxBaseContainer>
-
-      {/* ── ACTION LOG ── */}
-      <NxBaseContainer header="ACTION LOG" border>
-        <NxTable
-          dataSource={actionLog.map((item, i) => ({
-            ...item,
-            key: item.id || i,
-          }))}
-          columns={logColumns}
-          usePagination={true}
-          fontSize="small"
-          tablePadding="small"
-          tableScrolled={{ x: "max-content", y: 300 }}
-        />
-      </NxBaseContainer>
-
-      {/* ── HISTORY LOG INFORMATION ── */}
-      <NxBaseContainer header="HISTORY LOG INFORMATION" border>
-        <div className="w-full grid grid-cols-5 gap-4">
-          <NxDetailText label="Record ID">
-            {historyLog.recordId || sr.id || "-"}
-          </NxDetailText>
-          <NxDetailText label="Created Date">
-            {NxDate.formatDate(historyLog.createdDate || sr.createdDate, "DD MMM YYYY HH:mm:ss")}
-          </NxDetailText>
-          <NxDetailText label="Created By">
-            {historyLog.createdBy || sr.createdBy || "-"}
-          </NxDetailText>
-          <NxDetailText label="Updated Date">
-            {NxDate.formatDate(historyLog.updatedDate || sr.updatedDate, "DD MMM YYYY HH:mm:ss")}
-          </NxDetailText>
-          <NxDetailText label="Updated By">
-            {historyLog.updatedBy || sr.updatedBy || "-"}
-          </NxDetailText>
-        </div>
       </NxBaseContainer>
     </Fragment>
   );

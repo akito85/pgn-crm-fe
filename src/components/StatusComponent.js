@@ -48,7 +48,38 @@ const StatusComponent = ({
         break;
 
       case "open":
+        bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "in_progress":
+        bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      case "on_hold":
+        bgColor = "bg-[#F2D957]";
+        tColor = "text-black";
+        break;
+
+      case "resolved":
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
+        break;
+
+      case "closed":
         bgColor = "bg-gray-600";
+        tColor = "text-white";
+        break;
+
+      case "waiting_approval":
+      case "waiting_for_approval":
+        bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      case "none":
+        bgColor = "bg-gray-400";
         tColor = "text-white";
         break;
 
@@ -327,7 +358,7 @@ const StatusComponent = ({
       }
     >
       {/* {renderIconStatus()} */}
-      {children.replace("_", " ")}
+      {children.replace(/_/g, " ")}
     </div>
   );
 };
