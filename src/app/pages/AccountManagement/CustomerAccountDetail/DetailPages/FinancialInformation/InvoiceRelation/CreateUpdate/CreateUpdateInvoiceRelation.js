@@ -680,7 +680,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                     type={"reject"}
                     icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    {isUpdate ? "Reset" : "Clear"}
+                    {isUpdate ? "Reset" : "Clear"} Data
                   </Button>
                   <Button
                     onClick={() =>
@@ -715,9 +715,9 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                         onClick={() =>
                           handleSetShowConfirmationModal(true, "submit")
                         }
-                        type={"submit"}
+                        type={"approve"}
                       >
-                        Save & Submit
+                        Submit
                       </Button>
                     </>
                   )}
