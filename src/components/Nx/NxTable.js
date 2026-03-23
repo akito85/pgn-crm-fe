@@ -206,6 +206,22 @@ const NxTable = ({
     }
   }, [resolvedColumns, columnOrder.length, getAllColumnKeys]);
 
+  // Auto-fill: if content fits container but hasMore, trigger load more automatically
+  React.useEffect(() => {
+    if (!useInfiniteScroll || !hasMore || isLoadingMore) return;
+
+    const timer = setTimeout(() => {
+      const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
+      if (!tableBody) return;
+      if (tableBody.scrollHeight <= tableBody.clientHeight) {
+        setIsLoadingMore(true);
+        onLoadMore().finally(() => setIsLoadingMore(false));
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [resolvedDataSource?.length, useInfiniteScroll, hasMore, isLoadingMore, idTable, onLoadMore]);
+
   // Infinite scroll handler
   React.useEffect(() => {
     if (!useInfiniteScroll || !hasMore) return;
