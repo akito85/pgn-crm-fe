@@ -55,6 +55,8 @@ import {
 
 import {
   getServiceRequestById,
+  getServiceRequestDetailByAccount,
+  getDetailDraftServiceRequest,
   getServiceRequestApprovalHierarchies,
   getServiceRequestApprovalHierarchyDetail,
   getServiceRequestTypes,
@@ -66,6 +68,7 @@ import {
   getServiceRequestDataRequirements,
   getServiceRequestPrerequisites,
   createCompleteServiceRequest,
+  updateCompleteServiceRequest,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
@@ -106,6 +109,8 @@ const CreateCustomerServiceRequest = (props) => {
     data_prerequisite_types,
     data_data_requirement_types,
     data_detail: serviceRequestDetail,
+    data_detail_draft: serviceRequestDetailDraft,
+    loading_update,
   } = useSelector((state) => state.serviceRequest);
 
   // Map state keys to the dropdowns structure expected by child components
@@ -134,13 +139,14 @@ const CreateCustomerServiceRequest = (props) => {
     data_business_purpose,
   } = useSelector((state) => state.accountAddress);
 
-  const { idAccount, idCustomer, accountType } = useMemo(() => {
+  const { idAccount, idCustomer, accountType, id } = useMemo(() => {
     // Prioritas 1: Ambil dari location.state (navigasi normal)
     if (location.state) {
       return {
         idAccount: location.state.idAccount,
         idCustomer: location.state.idCustomer,
         accountType: location.state.type,
+        id: location.state.id || null,
       };
     }
     // Prioritas 2: Fallback ke sessionStorage (setelah reload)
@@ -151,10 +157,11 @@ const CreateCustomerServiceRequest = (props) => {
         idAccount: parsedData.idAccount,
         idCustomer: parsedData.idCustomer,
         accountType: parsedData.type,
+        id: parsedData.id || null,
       };
     }
     // Default jika tidak ada data sama sekali
-    return { idAccount: null, idCustomer: null, accountType: null };
+    return { idAccount: null, idCustomer: null, accountType: null, id: null };
   }, [location.state]);
 
   //declare
@@ -324,6 +331,49 @@ const CreateCustomerServiceRequest = (props) => {
 
     setApprovalTableData([]);
   }, [data_approval_hierarchy_detail]);
+
+  // Load detail + detail-draft when in update mode
+  useEffect(() => {
+    if (isUpdate && id && idAccount) {
+      dispatch(getServiceRequestDetailByAccount({ accountId: idAccount, id }));
+      dispatch(getDetailDraftServiceRequest({ accountId: idAccount, id }));
+    }
+  }, [dispatch, isUpdate, id, idAccount]);
+
+  // Populate form when update detail is loaded
+  useEffect(() => {
+    if (!isUpdate) return;
+
+    const status = serviceRequestDetail?.status || "";
+    const statusApproval = serviceRequestDetail?.statusApproval || "";
+    const isActive = status.toUpperCase() === "ACTIVE";
+    const isDraftApproval = statusApproval.toUpperCase() === "DRAFT";
+    const isRejectApproval = statusApproval.toUpperCase() === "REJECT";
+
+    // Use draft data if ACTIVE record has pending changes
+    const detail = (isActive && (isDraftApproval || isRejectApproval))
+      ? serviceRequestDetailDraft
+      : serviceRequestDetail;
+
+    if (!detail) return;
+
+    formCreate.setFieldsValue({
+      type: detail.requestType || detail.type,
+      category: detail.requestCategory || detail.category,
+      subCategory: detail.requestSubCategory || detail.subCategory,
+      priority: detail.priority,
+      description: detail.description,
+      requestDate: detail.requestedDate ? moment(detail.requestedDate) : null,
+      srr: detail.reference,
+      appHierId: detail.apphierId,
+      channel: detail.channel,
+      requestSource: detail.source,
+    });
+
+    if (detail.apphierId) {
+      dispatch(getServiceRequestApprovalHierarchyDetail(detail.apphierId));
+    }
+  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectHiararchy = (value, label) => {
     formCreate.setFieldsValue({
@@ -555,11 +605,21 @@ const CreateCustomerServiceRequest = (props) => {
   ];
 
   const navigate = useNavigate();
+  // Field yang divalidasi FE saat klik Next (submit mode — semua required)
   const stepFieldMap = [
-    ["category", "priority", "requestSource", "type", "channel", "requestDate"],
+    ["category", "priority", "requestSource", "type", "subCategory", "channel", "requestDate"],
     [],
     [],
     ["appHierId"],
+    [],
+  ];
+
+  // Field yang divalidasi FE saat Save as Draft — approval tidak required untuk draft
+  const stepFieldMapDraft = [
+    ["category", "priority", "requestSource", "type", "subCategory", "channel", "requestDate"],
+    [],
+    [],
+    [], // appHierId tidak wajib untuk draft
     [],
   ];
 
@@ -634,8 +694,10 @@ const CreateCustomerServiceRequest = (props) => {
     };
   };
 
-  const validateStep = async (stepIndex) => {
-    const fields = stepFieldMap[stepIndex] || [];
+  const validateStep = async (stepIndex, action = "SUBMIT") => {
+    const isDraft = action === "DRAFT";
+    const fieldMap = isDraft ? stepFieldMapDraft : stepFieldMap;
+    const fields = fieldMap[stepIndex] || [];
 
     if (fields.length > 0) {
       await formCreate.validateFields(fields);
@@ -646,7 +708,7 @@ const CreateCustomerServiceRequest = (props) => {
       return;
     }
 
-    const payload = buildPayload("SUBMIT", validationType);
+    const payload = buildPayload(action, validationType);
     await dispatch(
       validateCreateUpdate({
         body: payload,
@@ -668,27 +730,40 @@ const CreateCustomerServiceRequest = (props) => {
 
   const handleOpenConfirmation = async (submitType) => {
     try {
-      if (current < steps.length - 1) {
-        await validateStep(current);
+      if (submitType === "draft") {
+        // Draft: selalu validasi step 1 (prevent data kosong total)
+        await formCreate.validateFields(stepFieldMapDraft[0]);
+        // Jika sedang di step lain selain step 1, validasi step saat ini juga
+        if (current !== 0) {
+          await validateStep(current, "DRAFT");
+        }
+        const payload = buildPayload("DRAFT");
+        setDataSend(payload);
+        setConfirmationType("draft");
+        setModalConfirm(true);
       } else {
-        await validateStep(3);
+        // Submit: validasi step saat ini + validate-create keseluruhan
+        if (current < steps.length - 1) {
+          await validateStep(current);
+        } else {
+          await validateStep(3);
+        }
+
+        const payload = buildPayload("SUBMIT");
+
+        await dispatch(
+          validateCreateUpdate({
+            body: payload,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-create`,
+            type: "create",
+          }),
+        ).unwrap();
+
+        setDataSend(payload);
+        setConfirmationType("submit");
+        setModalConfirm(true);
       }
-
-      const action = submitType === "draft" ? "DRAFT" : "SUBMIT";
-      const payload = buildPayload(action);
-
-      await dispatch(
-        validateCreateUpdate({
-          body: payload,
-          services: accountManagementService,
-          endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-create`,
-          type: "create",
-        }),
-      ).unwrap();
-
-      setDataSend(payload);
-      setConfirmationType(submitType);
-      setModalConfirm(true);
     } catch (error) {
       return;
     }
@@ -698,13 +773,24 @@ const CreateCustomerServiceRequest = (props) => {
     setModalConfirm(false);
     setLoadingForm(true);
     try {
-      await dispatch(
-        createCompleteServiceRequest({
-          accountId: idAccount,
-          body: dataSend,
-          successBodyExtra: { return: false },
-        })
-      ).unwrap();
+      if (isUpdate && id) {
+        await dispatch(
+          updateCompleteServiceRequest({
+            accountId: idAccount,
+            id,
+            body: { ...dataSend, serviceRequestId: id },
+            successBodyExtra: { return: false },
+          })
+        ).unwrap();
+      } else {
+        await dispatch(
+          createCompleteServiceRequest({
+            accountId: idAccount,
+            body: dataSend,
+            successBodyExtra: { return: false },
+          })
+        ).unwrap();
+      }
       navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
         state: { idAccount, idCustomer, type: accountType, section: "Service Request" },
       });
@@ -803,7 +889,6 @@ const CreateCustomerServiceRequest = (props) => {
               <Button
                 onClick={() => handleOpenConfirmation("draft")}
                 type={"secondary"}
-                disabled={current !== steps.length - 1}
               >
                 Save as Draft
               </Button>

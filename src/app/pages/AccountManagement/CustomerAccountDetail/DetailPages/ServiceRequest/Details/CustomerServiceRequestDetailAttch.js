@@ -1,25 +1,10 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
+import React, { Fragment } from "react";
 import { Tooltip } from "antd";
 import TablePagination from "../../../../../../../components/TablePagination";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import { Fragment } from "react";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../../components/BaseContainer";
-import { 
-  CloseOutlined, 
-  PauseCircleOutlined, 
-  PlayCircleOutlined, 
-  LockOutlined, 
-  PlusOutlined, 
-  CheckCircleOutlined,
-  FilterOutlined,
-  DownloadOutlined,
-  EyeOutlined,
-  EditOutlined,
-  MoreOutlined
-} from "@ant-design/icons";
+import { FilterOutlined, DownloadOutlined } from "@ant-design/icons";
 
 
 const CustomerServiceRequestDetailAttch = ({
@@ -44,8 +29,6 @@ const CustomerServiceRequestDetailAttch = ({
   data_customerDetail,
 }) => {
   // State
-  const [modalDetail, setModalDetail] = useState(false);
-  const [dataDetail, setDataDetail] = useState({});
 
   // Dummy data
   const dummyData = [
@@ -80,9 +63,6 @@ const CustomerServiceRequestDetailAttch = ({
       fileSize: "1.2 MB"
     }
   ];
-  // nav
-  const navigate = useNavigate();
-
   // Use data_detail.attachments → data prop → dummyData
   const apiData = data_detail?.attachments;
   const tableData = (Array.isArray(apiData) && apiData.length > 0)
@@ -93,10 +73,6 @@ const CustomerServiceRequestDetailAttch = ({
   const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
   const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
   const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : tableData.length;
-
-  const handleDetail = (value) => {
-    setDataDetail(value);
-  };
 
   const handleViewFile = (fileData) => {
     // Placeholder for view file action
