@@ -46,6 +46,7 @@ import {
   Input,
   Menu,
   Modal,
+  Pagination,
   Select,
   Spin,
 } from "antd";
@@ -74,6 +75,20 @@ const MIN_COL_WIDTH     = 60;  // px — hard floor, never go below this
 const COL_PAD           = 24;  // px — 8px left + 8px right padding + 8px buffer
 const HEADER_FONT_SIZE  = 10;  // px — matches CSS font-size on header cells
 const CELL_FONT_SIZE    = 12;  // px — matches CSS font-size on data cells
+
+// ── Module-level style objects (stable references — never recreated per render) ──
+const HEADER_CELL_STYLE = {
+  background: HEADER_BG, display: "flex", alignItems: "center",
+  borderBottom: `1px solid ${BORDER_COL}`, padding: "4px 8px",
+  minHeight: 30, height: 30, boxSizing: "border-box", flexShrink: 0,
+  overflow: "hidden",
+};
+const CELL_BASE_STYLE = {
+  display: "flex", alignItems: "center",
+  borderBottom: `1px solid ${BORDER_COL}`,
+  fontSize: 12, fontFamily: FONT_FAMILY, color: "#111827",
+  padding: "4px 8px", minHeight: 30, height: 30, boxSizing: "border-box",
+};
 
 // ── Canvas text-width measurement ────────────────────────────────────────────
 // Measures the rendered pixel width of a string at a given font size.
@@ -234,10 +249,11 @@ const makePrefsWriter = (storageKey) => {
 const useColumnPreferences = ({ userId, idTable, fixedColumnsProp, childFixedColumnsProp }) => {
   const storageKey = buildStorageKey(userId, idTable);
 
-  const savedPrefsRef = useRef(undefined);
-  if (savedPrefsRef.current === undefined || savedPrefsRef._key !== storageKey) {
-    savedPrefsRef.current = readPrefs(storageKey);
-    savedPrefsRef._key = storageKey;
+  const savedPrefsRef    = useRef(undefined);
+  const savedPrefsKeyRef = useRef(null);
+  if (savedPrefsRef.current === undefined || savedPrefsKeyRef.current !== storageKey) {
+    savedPrefsRef.current    = readPrefs(storageKey);
+    savedPrefsKeyRef.current = storageKey;
   }
   const savedPrefs = savedPrefsRef.current;
 
@@ -245,9 +261,10 @@ const useColumnPreferences = ({ userId, idTable, fixedColumnsProp, childFixedCol
   if (!writerRef.current) writerRef.current = makePrefsWriter(storageKey);
   useEffect(() => {
     writerRef.current?.cancel?.();
-    writerRef.current = makePrefsWriter(storageKey);
-    savedPrefsRef.current = readPrefs(storageKey);
-    savedPrefsRef._key = storageKey;
+    writerRef.current            = makePrefsWriter(storageKey);
+    savedPrefsRef.current        = readPrefs(storageKey);
+    savedPrefsKeyRef.current     = storageKey;
+    return () => writerRef.current?.cancel?.();
   }, [storageKey]);
 
   const write = useCallback((patch) => { writerRef.current(patch); }, []);
@@ -377,7 +394,7 @@ const ResizableHeaderCell = React.memo(({
     const handleMouseMove = (mv) => {
       hasMoved = true;
       const newWidth = startWidth + (mv.pageX - startX);
-      if (newWidth > 50) onResize(newWidth);
+      if (newWidth >= MIN_COL_WIDTH) onResize(newWidth);
     };
 
     const handleMouseUp = () => {
@@ -444,6 +461,7 @@ const NxAdvanceSearch = ({ visible, onClose, onSearch, onClear, columns = [], mo
   const addFilterRule = () => setFilterRules([...filterRules, { id: Date.now(), filters: [{ id: Date.now() + 1, column: "", operator: "Equal to", value: "", logic: "AND" }], groupLogic: "OR" }]);
   const addFilterToRule = (ruleId) => setFilterRules(filterRules.map(r => r.id === ruleId ? { ...r, filters: [...r.filters, { id: Date.now(), column: "", operator: "Equal to", value: "", logic: "AND" }] } : r));
   const updateRuleFilter = (ruleId, filterId, field, value) => setFilterRules(filterRules.map(r => r.id === ruleId ? { ...r, filters: r.filters.map(f => f.id === filterId ? { ...f, [field]: value } : f) } : r));
+  const removeFilterFromRule = (ruleId, filterId) => setFilterRules(prev => prev.map(r => r.id === ruleId ? { ...r, filters: r.filters.filter(f => f.id !== filterId) } : r));
   const updateRuleLogic = (ruleId, logic) => setFilterRules(filterRules.map(r => r.id === ruleId ? { ...r, groupLogic: logic } : r));
   const removeRuleGroup = (ruleId) => setFilterRules(filterRules.filter(r => r.id !== ruleId));
 
@@ -466,7 +484,7 @@ const NxAdvanceSearch = ({ visible, onClose, onSearch, onClear, columns = [], mo
     <div key={filter.id} style={{ marginBottom: 16 }}>
       {!isFirst && (
         <div style={{ marginBottom: 12 }}>
-          <Dropdown menu={getLogicMenu(filter.logic, (l) => onUpdate(filter.id, "logic", l))} trigger={["click"]}>
+          <Dropdown overlay={getLogicMenu(filter.logic, (l) => onUpdate(filter.id, "logic", l))} trigger={["click"]}>
             <Button style={{ borderRadius: 8, minWidth: 100, height: 36 }}>{filter.logic} <DownOutlined /></Button>
           </Dropdown>
         </div>
@@ -493,12 +511,12 @@ const NxAdvanceSearch = ({ visible, onClose, onSearch, onClear, columns = [], mo
         {filterRules.map((rule) => (
           <div key={rule.id} style={{ border: `1px solid ${BORDER_COL}`, borderRadius: 8, padding: 12, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <Dropdown menu={getLogicMenu(rule.groupLogic, (l) => updateRuleLogic(rule.id, l))} trigger={["click"]}>
+              <Dropdown overlay={getLogicMenu(rule.groupLogic, (l) => updateRuleLogic(rule.id, l))} trigger={["click"]}>
                 <Button style={{ borderRadius: 8, minWidth: 60, height: 36 }}>{rule.groupLogic} <DownOutlined /></Button>
               </Dropdown>
               <Button danger size="small" onClick={() => removeRuleGroup(rule.id)}>Remove Group</Button>
             </div>
-            {rule.filters.map((f, i) => renderFilterRow(f, i === 0, (id, field, value) => updateRuleFilter(rule.id, id, field, value), (id) => { if (rule.filters.length > 1) updateRuleFilter(rule.id, id, "_remove", true); }))}
+            {rule.filters.map((f, i) => renderFilterRow(f, i === 0, (id, field, value) => updateRuleFilter(rule.id, id, field, value), (id) => { if (rule.filters.length > 1) removeFilterFromRule(rule.id, id); }))}
             <Button type="link" icon={<PlusOutlined />} onClick={() => addFilterToRule(rule.id)} style={{ padding: "4px 8px", color: "#1890ff", fontSize: 13, height: "auto", border: "1px dashed #d9d9d9", borderRadius: 6 }}>Add Filter</Button>
           </div>
         ))}
@@ -632,20 +650,6 @@ const ChildTable = React.memo(({
     );
   }
 
-  // ── Shared header-cell base style (mirrors parent headerCellBase) ──────────
-  const childHeaderCellBase = {
-    background:   HEADER_BG,
-    display:      "flex",
-    alignItems:   "center",
-    borderBottom: `1px solid ${BORDER_COL}`,
-    padding:      "4px 8px",
-    minHeight:    30,
-    height:       30,
-    boxSizing:    "border-box",
-    flexShrink:   0,
-    overflow:     "hidden",
-  };
-
   // ── Helper: render one header cell via ResizableHeaderCell ────────────────
   // Bug 1 & 5 fix: child headers MUST go through ResizableHeaderCell so the
   // resize handle and drag events are actually wired up.  Previously ChildTable
@@ -663,7 +667,7 @@ const ChildTable = React.memo(({
       onDrop={col._onDrop}
       onDragEnd={col._onDragEnd}
       style={{
-        ...childHeaderCellBase,
+        ...HEADER_CELL_STYLE,
         width:      col.width,
         flex:       "none",
         minWidth:   col.width,
@@ -748,7 +752,7 @@ const ChildTable = React.memo(({
                   const rawValue = row[col.dataIndex ?? col.key];
                   const cellValue = col.render ? col.render(rawValue, row, rowIdx) : (rawValue ?? "—");
                   return (
-                    <div key={rowIdx} style={dataCellStyle(col, rowIdx, false)}>
+                    <div key={row.id ?? row.key ?? rowIdx} style={dataCellStyle(col, rowIdx, false)}>
                       {highlightText(cellValue, searchValue)}
                     </div>
                   );
@@ -800,7 +804,7 @@ const ChildTable = React.memo(({
       </div>
       {/* Data rows */}
       {filteredRows.map((row, rowIdx) => (
-        <div key={rowIdx} style={{ display: "flex" }}>
+        <div key={row.id ?? row.key ?? rowIdx} style={{ display: "flex" }}>
           {orderedCols.map((col, colIdx) => {
             const isLastBorder = colIdx === lastOrderedIdx;
             const rawValue = row[col.dataIndex ?? col.key];
@@ -855,21 +859,16 @@ const ParentRow = React.memo(({
   const selectedBg = "#d1e6f9";
   const resolvedBg = isRowSelected ? selectedBg : bg;
 
+  const rowKey = record.id ?? record.key;
+
   const handleToggle = useCallback(() => {
-    if (!isExpanded) onExpand?.(record.id);
-    onToggleExpand?.(record.id);
-  }, [isExpanded, record.id, onExpand, onToggleExpand]);
+    if (!isExpanded) onExpand?.(rowKey);
+    onToggleExpand?.(rowKey);
+  }, [isExpanded, rowKey, onExpand, onToggleExpand]);
 
   const handleRowClick = useCallback(() => {
     if (enableRowClick) onRowClick?.(record);
   }, [enableRowClick, onRowClick, record]);
-
-  const cellBase = {
-    display: "flex", alignItems: "center",
-    borderBottom: `1px solid ${BORDER_COL}`,
-    fontSize: 12, fontFamily: FONT_FAMILY, color: "#111827",
-    padding: "4px 8px", minHeight: 30, height: 30, boxSizing: "border-box",
-  };
 
   const actionCol = useMemo(
     () => processedParentColumns.find(c => c.key === "__action__") ?? null,
@@ -877,10 +876,18 @@ const ParentRow = React.memo(({
   );
   const hasActionCol = actionCol !== null;
 
-  // Register / unregister this row's scroll band with the sync set
+  // Register / unregister this row's scroll band with the sync set.
+  // We capture the node in a local ref so that the unmount call (node=null)
+  // can still pass the real DOM node to the remove handler.
+  const scrollNodeRef = useRef(null);
   const rowScrollRef = useCallback((node) => {
-    if (node) onRegisterScroll?.(node, "add");
-    else       onRegisterScroll?.(node, "remove");
+    if (node) {
+      scrollNodeRef.current = node;
+      onRegisterScroll?.(node, "add");
+    } else if (scrollNodeRef.current) {
+      onRegisterScroll?.(scrollNodeRef.current, "remove");
+      scrollNodeRef.current = null;
+    }
   }, [onRegisterScroll]);
 
   return (
@@ -936,7 +943,7 @@ const ParentRow = React.memo(({
               <div
                 key={fieldKey || colIdx}
                 style={{
-                  ...cellBase,
+                  ...CELL_BASE_STYLE,
                   ...(col._fill
                     ? { flex: 1, minWidth: col.width, flexShrink: 1 }
                     : { flex: "none", width: col.width, minWidth: col.width, flexShrink: 0 }),
@@ -1549,8 +1556,8 @@ const NxTableNested = ({
     if (typeof ResizeObserver !== "undefined") {
       const ro = new ResizeObserver(compute);
       if (containerRef.current) ro.observe(containerRef.current);
-      window.addEventListener("resize", compute, { passive: true });
-      return () => { ro.disconnect(); window.removeEventListener("resize", compute); };
+      // ResizeObserver already fires on viewport changes — no window listener needed
+      return () => ro.disconnect();
     }
     window.addEventListener("resize", compute, { passive: true });
     return () => window.removeEventListener("resize", compute);
@@ -1560,18 +1567,19 @@ const NxTableNested = ({
   // ── onInitialLoad guarantee ────────────────────────────────────────────────
   const hasTriggeredInitialLoad = useRef(false);
   useEffect(() => {
-    if (!hasTriggeredInitialLoad.current && !loading && dataSource.length === 0 && !fetchFailed && typeof onInitialLoad === "function") {
+    if (hasTriggeredInitialLoad.current) return;
+    if (loading) return; // data still in-flight — wait for it to settle
+    if (!fetchFailed && dataSource.length === 0 && typeof onInitialLoad === "function") {
       hasTriggeredInitialLoad.current = true;
       onInitialLoad();
     }
-    // Only on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading, dataSource.length]);
 
   // ── Row-click controlled state ────────────────────────────────────────────
   useEffect(() => {
-    if (selectedRowKey !== null) setClickedRowKey(selectedRowKey);
-  }, [selectedRowKey]);
+    if (selectedRowKey !== null && selectedRowKey !== clickedRowKey) setClickedRowKey(selectedRowKey);
+  }, [selectedRowKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRowClick = useCallback((record) => {
     const key = record.id || record.key;
@@ -1635,16 +1643,20 @@ const NxTableNested = ({
       return;
     }
     if (!searchValue) return;
+    const toAutoExpand = [];
     setExpandedKeys(prev => {
       const next = new Set(prev);
       let changed = false;
       dataSource.forEach(row => {
         if (childMatchIds.has(row.id) && !next.has(row.id)) {
-          next.add(row.id); autoExpandedRef.current.add(row.id); changed = true;
+          next.add(row.id);
+          toAutoExpand.push(row.id);
+          changed = true;
         }
       });
       return changed ? next : prev;
     });
+    toAutoExpand.forEach(id => autoExpandedRef.current.add(id));
     // Trigger fetch for rows whose children haven't loaded yet
     childMatchIds.forEach(id => {
       const row = dataSource.find(r => r.id === id);
@@ -1672,8 +1684,10 @@ const NxTableNested = ({
   const isLoadingMoreRef    = useRef(false);
   const hasMoreRef          = useRef(hasMore);
   const onLoadMoreRef       = useRef(onLoadMore);
+  const isMountedRef        = useRef(true);
   useEffect(() => { hasMoreRef.current    = hasMore;    }, [hasMore]);
   useEffect(() => { onLoadMoreRef.current = onLoadMore; }, [onLoadMore]);
+  useEffect(() => { isMountedRef.current = true; return () => { isMountedRef.current = false; }; }, []);
 
   // ── Horizontal scroll sync (header ↔ parent rows) ─────────────────────────
   // The header and every parent data-row band each have overflowX:"hidden".
@@ -1691,7 +1705,7 @@ const NxTableNested = ({
   const handleRegisterRowScroll = useCallback((node, action) => {
     if (!node) return;
     if (action === "add")    scrollSyncNodesRef.current.add(node);
-    if (action === "remove") scrollSyncNodesRef.current.delete(node);
+    if (action === "remove") scrollSyncNodesRef.current.delete(node); // node is always real (captured via scrollNodeRef in ParentRow)
   }, []);
 
   const handleSyncScroll = useCallback((e) => {
@@ -1720,7 +1734,7 @@ const NxTableNested = ({
         setIsLoadingMore(true);
         Promise.resolve(onLoadMoreRef.current())
           .catch(() => {})
-          .finally(() => { isLoadingMoreRef.current = false; setIsLoadingMore(false); });
+          .finally(() => { isLoadingMoreRef.current = false; if (isMountedRef.current) setIsLoadingMore(false); });
       }
     };
     scrollRoot.addEventListener("scroll", onScroll, { passive: true });
@@ -1759,14 +1773,6 @@ const NxTableNested = ({
   // ── Derived values ─────────────────────────────────────────────────────────
   const resolvedTotalData = (totalData != null) ? totalData : dataSource.length;
   const hasRightControls  = showExport || showAdvanceSearch || showSearchBar || showRefresh;
-
-  // ── Header cell base style ─────────────────────────────────────────────────
-  const headerCellBase = {
-    background: HEADER_BG, display: "flex", alignItems: "center",
-    borderBottom: `1px solid ${BORDER_COL}`, padding: "4px 8px",
-    minHeight: 30, height: 30, boxSizing: "border-box", flexShrink: 0,
-    overflow: "hidden",
-  };
 
   // ─────────────────────────────────────────────────────────────────────────
   // Render
@@ -1914,7 +1920,7 @@ const NxTableNested = ({
         >
           <div style={{ display: "flex", alignItems: "stretch", width: "100%", minWidth: "max-content", background: HEADER_BG }}>
             {/* Toggle header (blank) */}
-            <div style={{ ...headerCellBase, width: EXPAND_COL_WIDTH, flexShrink: 0, borderRight: "1px solid rgba(255,255,255,0.2)" }} />
+            <div style={{ ...HEADER_CELL_STYLE, width: EXPAND_COL_WIDTH, flexShrink: 0, borderRight: "1px solid rgba(255,255,255,0.2)" }} />
 
             {/* Parent data column headers — all explicit widths, no flex:1 */}
             {processedParentColumns.map((col) => {
@@ -1931,7 +1937,7 @@ const NxTableNested = ({
                   onDrop={col._onDrop}
                   onDragEnd={col._onDragEnd}
                   style={{
-                    ...headerCellBase,
+                    ...HEADER_CELL_STYLE,
                     ...(col._fill
                       ? { flex: 1, minWidth: col.width }
                       : { flex: "none", width: col.width, minWidth: col.width }),
@@ -1954,7 +1960,7 @@ const NxTableNested = ({
             {/* Action column header */}
             {actionColumn && (
               <div style={{
-                ...headerCellBase,
+                ...HEADER_CELL_STYLE,
                 width: actionColumn.width || 120,
                 flexShrink: 0,
                 justifyContent: "center",
@@ -2062,8 +2068,7 @@ const NxTableNested = ({
               {resolvedTotalData === 0 ? "Showing 0 entries" : `Showing ${(current - 1) * pageSize + 1} to ${Math.min(current * pageSize, resolvedTotalData)} of ${resolvedTotalData} entries`}
             </span>
           </div>
-          {/* Import Pagination from antd at the top if you use this mode */}
-          {/* <Pagination total={resolvedTotalData} current={current} pageSize={pageSize} onChange={onChange} showSizeChanger={false} size="small" /> */}
+          <Pagination total={resolvedTotalData} current={current} pageSize={pageSize} onChange={onChange} showSizeChanger={false} size="small" />
         </div>
       ) : (
         <div style={{ position: "relative", zIndex: 1, marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, width: "100%" }}>
