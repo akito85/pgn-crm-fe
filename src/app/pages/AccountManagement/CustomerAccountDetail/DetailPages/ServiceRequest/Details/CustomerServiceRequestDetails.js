@@ -160,7 +160,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
           )}
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

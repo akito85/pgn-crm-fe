@@ -21,6 +21,8 @@ import ApproveOrRejectTOS from "../../app/pages/AccountManagement/CustomerAccoun
 import CustomerDetail from "../../app/pages/AccountManagement/Customer/CustomerDetail";
 import UpdateCustomer from "../../app/pages/AccountManagement/Customer/Update/UpdateCustomer";
 import CreateTosSubmission from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/TosSubmission/CreateTosSubmission";
+import CreateWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/CreateWarrantyTerm";
+import DetailWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/DetailWarrantyTerm";
 import UpdateServiceAgreement from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/UpdateServiceAgreement";
 import ViewMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/ViewMeterReadingCode";
 import FormMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/FormMeterReadingCode";
@@ -60,6 +62,7 @@ import MultiDestinationDetails from "../../app/pages/AccountManagement/CustomerA
 import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/CreateUpdate/CreateUpdateMultiDestination";
 import CreateUpdateRelationship from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/CreateUpdate/CreateUpdateRelationship";
 import GasDeposit from "../../app/pages/AccountManagement/GasDeposit/GasDeposit";
+import GasDepositDetail from "../../app/pages/AccountManagement/GasDeposit/Detail/GasDepositDetail";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -140,17 +143,17 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Gas Deposit Stand Alone
   VIEW_GAS_DEPOSIT_SA_PAGE: <GasDeposit moduleType="sa" />,
-  VIEW_DETAIL_GAS_DEPOSIT_SA_PAGE: "/account-management/gas-deposit/view",
+  VIEW_DETAIL_GAS_DEPOSIT_SA_PAGE: <GasDepositDetail moduleType="sa" />,
   RECALCULATE_GAS_DEPOSIT_SA_PAGE: "/account-management/gas-deposit/recalculate",
   EXPIRE_GAS_DEPOSIT_SA_PAGE: "/account-management/gas-deposit/expire",
   
   // Gas Deposit Account Standard
-  VIEW_DETAIL_GAS_DEPOSIT_PAGE: "/account-management/account-standard/gas-deposit/view",
+  VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail moduleType="sa" accountType="standard" />,
   RECALCULATE_GAS_DEPOSIT_PAGE: "/account-management/account-standard/gas-deposit/recalculate",
   EXPIRE_GAS_DEPOSIT_PAGE: "/account-management/account-standard/gas-deposit/expire",
 
   // Gas Deposit Account One Time
-  VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: "/account-management/account-onetime/gas-deposit/view",
+  VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail moduleType="sa" accountType="oneTime" />,
   RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: "/account-management/account-onetime/gas-deposit/recalculate",
   EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: "/account-management/account-onetime/gas-deposit/expire",
 
@@ -195,6 +198,11 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   CREATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"create"} />,
   UPDATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"update"} />,
   DETAIL_TOS_SUBMISSION_PAGE: <ApproveOrRejectTOS />,
+
+  // WARRANTY TERM
+  CREATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'create'} />,
+  UPDATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'update'} />,
+  DETAIL_WARRANTY_TERM_PAGE: <DetailWarrantyTerm />,
 
   // RAW MATERIAL SOURCE
   CREATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"create"}/>,

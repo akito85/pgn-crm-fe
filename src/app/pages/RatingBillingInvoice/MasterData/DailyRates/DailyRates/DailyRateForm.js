@@ -10,7 +10,6 @@ import {
   FormStepper,
   FormFooter,
 } from "../../../../../../components/FormStepNavigation";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import DailyRateCreate from "./DailyRateCreate";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -626,7 +625,7 @@ const DailyRateForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -771,7 +770,7 @@ const DailyRateForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

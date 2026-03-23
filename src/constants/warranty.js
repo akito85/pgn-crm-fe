@@ -26,3 +26,8 @@ export const WARRANTY_APPROVAL_STATUS = {
     DRAFT: 'Draft',
 };
 
+export const CLAIM_PERIOD_TERM_TYPES = {
+    DATE: 'DATE',
+    AFTER: 'AFTER',
+};
+

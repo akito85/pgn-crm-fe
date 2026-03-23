@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../../components/RadioTabs";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -558,7 +557,7 @@ const AdjustmentInvoiceDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingDetail}>
         <BreadCrumb routes={routes} />
 
@@ -624,7 +623,7 @@ const AdjustmentInvoiceDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

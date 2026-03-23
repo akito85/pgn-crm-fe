@@ -10,7 +10,15 @@ import NxTable from "../../../../../../../../components/Nx/NxTable";
 import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
 import { nxApplyFixedColumns } from "../../../../../../../../utils/Nx/nxApplyFixedColumns";
 
+/**
+ * Presentational attachment panel for an invoice relation record.
+ * Displays, previews, and downloads file attachments.
+ *
+ * @param {object}   props
+ * @param {object[]} [props.attachments=[]] - List of attachment records
+ */
 const InvoiceRelationDetailAttch = ({ attachments = [] }) => {
+  // --- State ---
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
@@ -25,6 +33,13 @@ const InvoiceRelationDetailAttch = ({ attachments = [] }) => {
 
   const searchInput = useRef(null);
 
+  // --- Handlers ---
+  /**
+   * Previews or downloads a file attachment.
+   * Downloads directly if the file type is an Office document (application/vnd);
+   * otherwise fetches the file, converts it to base64, and opens a preview.
+   * @param {object} r - Attachment record containing urlFile1 and fileType/type
+   */
   const handleShow = async (r) => {
     if ((r.fileType || r.type).includes("application/vnd")) {
       accountManagementService.downloadData(r.urlFile1);
@@ -49,9 +64,10 @@ const InvoiceRelationDetailAttch = ({ attachments = [] }) => {
   };
 
   /**
+   * Confirms a column search and updates the active search state.
    * @param {string[]} selectedKeys
    * @param {() => {}} confirm
-   * @param {string} dataIndex
+   * @param {string}   dataIndex
    */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();

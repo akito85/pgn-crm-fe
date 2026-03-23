@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Row, Col, Select, Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import BaseContainer from "../../../../components/BaseContainer";
 import StatCard from "../../../../components/StatCard";
@@ -183,7 +182,7 @@ const MonitoringCustomerPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -511,7 +510,7 @@ const MonitoringCustomerPage = () => {
           />
         </CardContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -6,7 +6,6 @@ import { getMaintenanceMode } from "../../../../redux/slices/system_setup/mainte
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import TablePagination from "../../../../components/TablePagination";
 import Toolbar from "../../../../components/Toolbar";
 import ModalDetailMaintenanceMode from "./Modal/ModalDetailMaintenanceMode";
@@ -154,7 +153,7 @@ const MaintenanceModePage = () => {
     },
   ];
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"MAINTENANCE MODE"}>
@@ -207,7 +206,7 @@ const MaintenanceModePage = () => {
 
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

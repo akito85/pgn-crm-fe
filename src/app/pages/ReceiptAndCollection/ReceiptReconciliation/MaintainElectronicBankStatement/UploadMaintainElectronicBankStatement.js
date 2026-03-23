@@ -15,7 +15,6 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import { bytesConverter } from "../../../../../utils/bytesConverter";
 import { getBase64 } from "../../../../../utils/getBase64";
 import SVGIcon from "../../../../../assets/Icon/index";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -240,7 +239,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
     },
   ];
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer>
@@ -465,7 +464,7 @@ const UploadMaintainElectronicBankStatement = (updateData = () => { }) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

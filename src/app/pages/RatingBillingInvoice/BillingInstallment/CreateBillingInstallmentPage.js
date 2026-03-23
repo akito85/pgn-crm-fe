@@ -14,7 +14,6 @@ import {
 } from "antd";
 import { SearchOutlined, WarningOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -176,7 +175,7 @@ const CreateInstallmentBillingPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer
@@ -517,7 +516,7 @@ const CreateInstallmentBillingPage = () => {
           )}
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

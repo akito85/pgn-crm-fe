@@ -60,6 +60,7 @@ import lateReducer from "../slices/receipt_collection/lateCharge";
 import accountServiceAgreementReducer from "../slices/account_management/detailAccount/serviceAgreementSlice";
 import postOfSalesReducer from "../slices/rating_billing_invoice/PointOfSales";
 import tosSubmissionReducer from "../slices/account_management/detailAccount/tosSubmissionSlice";
+import saWarrantyReducer from "../slices/account_management/detailAccount/warrantySlice";
 import invoiceReducer from "../slices/rating_billing_invoice/invoice";
 import attachmentReducer from "../slices/attachmentSlice";
 import locationReducer from "../slices/account_management/MasterData/location_slice";
@@ -136,6 +137,7 @@ import invoiceRelationReducer from "../slices/account_management/detailAccount/I
 import globalPropReducer from "../slices/globalPropSlice";
 import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentWarrantyPartner";
 import liborRateReducer from "../slices/receipt_collection/liborRate";
+import caCiMappingReducer from "../slices/receipt_collection/caCiMapping";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
@@ -143,11 +145,17 @@ import billingItemCategoryReducer from "../slices/system_setup/master_data/billi
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
+import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
+import taskQueueReducer from "../slices/job_management/taskQueueSlice";
+import { jobApiSlice } from "../slices/job_management/jobApiSlice";
+import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
   jobGroup: jobGroupReducer,
   jobExecution: jobExecutionReducer,
+  oracleMetadata: oracleMetadataReducer,
+  taskQueue: taskQueueReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -203,6 +211,7 @@ const reducer = combineReducers({
   distributionMedia: distributionMediaReducer,
   accountServiceAgreement: accountServiceAgreementReducer,
   tosSubmission: tosSubmissionReducer,
+  saWarranty: saWarrantyReducer,
   rawMaterialSource: rawMaterialSourceReducer,
   productDistribution: productDistributionReducer,
   accountGasUtilization: accountGasUtilizationReducer,
@@ -291,6 +300,7 @@ const reducer = combineReducers({
   paymentCycle: paymentCycleReducer,
   paymentPeriod: paymentPeriodReducer,
   billingItemCategory: billingItemCategoryReducer,
+  caCiMapping: caCiMappingReducer,
 
   // Attachment
   attachment: attachmentReducer,
@@ -305,6 +315,10 @@ const reducer = combineReducers({
 
   // tasklist
   [tasklistSlice.reducerPath]: tasklistSlice.reducer,
+
+  // job management API (RTK Query)
+  [jobApiSlice.reducerPath]: jobApiSlice.reducer,
+  [jobGroupApiSlice.reducerPath]: jobGroupApiSlice.reducer,
 
   // debt and collection
   gracePeriod: gracePeriodReducer,
@@ -330,7 +344,9 @@ const store = configureStore({
     getDefaultMiddleware()
       .concat(reportCustomerSlice.middleware)
       .concat(reportCustomerAgreementSlice.middleware)
-      .concat(tasklistSlice.middleware),
+      .concat(tasklistSlice.middleware)
+      .concat(jobApiSlice.middleware)
+      .concat(jobGroupApiSlice.middleware),
 });
 
 setupListeners(store.dispatch);

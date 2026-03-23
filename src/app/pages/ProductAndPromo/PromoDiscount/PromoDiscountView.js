@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useMemo, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { Spin } from "antd";
@@ -236,7 +235,7 @@ const PromoDiscountView = () => {
   };
   // console.log(itemsActionView(), "item");
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -310,7 +309,7 @@ const PromoDiscountView = () => {
           </div>
         </ModalError>
       ) : null}
-    </LayoutMenu>
+    </>
   );
 };
 

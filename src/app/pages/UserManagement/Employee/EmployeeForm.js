@@ -5,7 +5,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import GridLayout from "../../../../components/GridLayout";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -470,7 +469,7 @@ const EmployeeForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
@@ -685,7 +684,7 @@ const EmployeeForm = (props) => {
 
       {/* try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

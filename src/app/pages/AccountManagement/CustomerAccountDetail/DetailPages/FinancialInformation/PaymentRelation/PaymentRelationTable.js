@@ -34,7 +34,7 @@ const PaymentRelationTable = ({
   const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    handleView: (id) => navigate(
+    handleView: ({ id }) => navigate(
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION :
       isOneTime ?
@@ -61,7 +61,7 @@ const PaymentRelationTable = ({
         }
       }
     ),
-    handleUpdate: (id) => navigate(
+    handleUpdate: ({ id }) => navigate(
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION :
       isOneTime ?
@@ -76,9 +76,9 @@ const PaymentRelationTable = ({
       }
     ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal,
+    handleInactivate: ({ id, accountNumber}) => handleInactivateModal(true, id, accountNumber),
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({

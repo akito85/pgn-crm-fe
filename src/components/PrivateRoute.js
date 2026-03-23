@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import moment from "moment";
 import { clearBodyMessage } from "../redux/slices/general_slice";
+import ProtectedLayout from "./ProtectedLayout";
 
 const PrivateRoute = () => {
   //   const { level } = useSelector((state) => state.user_level);
@@ -46,7 +47,9 @@ const PrivateRoute = () => {
   };
   return type_token?.type === "TRUE TOKEN" ||
     type_token?.type === "EXISTING TOKEN" ? (
-    <Outlet />
+    <ProtectedLayout>
+      <Outlet />
+    </ProtectedLayout>
   ) : (
     <Navigate to={navigator()} />
   );

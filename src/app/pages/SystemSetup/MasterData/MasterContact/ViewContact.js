@@ -1,5 +1,4 @@
 import React from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Alert, Checkbox, Form, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -48,7 +47,7 @@ const expandedRowRender = (record) => {
         },
     ];
     return (
-        <div>
+        <>
             <p className="text-primary text-xs font-bold uppercase">CONTACT DETAIL</p>
             <TablePaginationNew
                 type='FE'
@@ -69,7 +68,7 @@ const expandedRowRender = (record) => {
                     x: 1000,
                 }}
             /> */}
-        </div>
+        </>
     );
 };
 
@@ -510,7 +509,7 @@ const ViewContact = () => {
         }
     ]
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
 
@@ -560,6 +559,7 @@ const ViewContact = () => {
                     header={'contact detail'}
                     footer={[
                         <ButtonComponent
+                            key="back"
                             onClick={handleCancel}
                         >
                             Back
@@ -678,7 +678,7 @@ const ViewContact = () => {
                     <p className="pl-[70px]">Please try again.</p>
                 </div>
             </ModalError>
-        </LayoutMenu>
+        </>
     );
 }
 

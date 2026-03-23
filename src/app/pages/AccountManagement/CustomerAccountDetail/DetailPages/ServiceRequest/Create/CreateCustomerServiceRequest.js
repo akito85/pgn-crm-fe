@@ -5,7 +5,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
@@ -833,7 +832,7 @@ const CreateCustomerServiceRequest = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Form
         id="accountForm"
@@ -959,7 +958,7 @@ const CreateCustomerServiceRequest = (props) => {
         title={bodyError?.title || "Failed"}
         description={bodyError?.description || "Failed to create service request. Please try again."}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

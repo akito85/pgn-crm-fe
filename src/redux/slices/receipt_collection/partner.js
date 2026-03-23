@@ -8,7 +8,6 @@ import {
   validateError,
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
-import { data } from "autoprefixer";
 
 const initialState = {
   loading: false,

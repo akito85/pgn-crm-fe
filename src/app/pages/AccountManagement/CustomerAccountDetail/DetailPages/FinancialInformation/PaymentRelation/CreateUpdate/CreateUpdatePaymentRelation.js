@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
-import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import InfoPaymentRelation from "./StepContents/InformationForm/InfoPaymentRelation";
 import ApprovalSectionForm from "./StepContents/ApprovalForm/ApprovalPaymentRelation";
 import AttachmentSectionForm from "./StepContents/AttachmentForm/AttachmentPaymentRelation";
@@ -629,7 +628,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   };
 
   return (
-    <LayoutMenu>
+    <>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
         <HeaderDetail
@@ -756,7 +755,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           </Form>
         </Spin>
       </div>
-    </LayoutMenu>
+    </>
   );
 };
 

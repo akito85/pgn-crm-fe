@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getInvoiceRelation,
   downloadInvoiceRelation
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 
 /**
  * Invoice relation list table (container + presentational component).
@@ -42,7 +42,7 @@ const InvoiceRelationTable = ({
     list_invoiceRelation: dataSource,
     pagination_invoiceRelation: pagination,
     loading_listIr: loading
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.invoiceRelation);
 
   // --- Derived values ---
   const isStandard = location.pathname.includes("account-standard");
@@ -178,7 +178,7 @@ const InvoiceRelationTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: (id) =>
+    handleView: ({ id }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION
@@ -207,7 +207,7 @@ const InvoiceRelationTable = ({
           }
         }
       ),
-    handleUpdate: (id) =>
+    handleUpdate: ({ id }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION
@@ -223,9 +223,9 @@ const InvoiceRelationTable = ({
         }
       ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber)
   });
 
   const actionCols = useColumnActionPermission(

@@ -31,13 +31,12 @@ import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 import { configApp, API_ENDPOINTS } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllCustomerInfoPaginate,
-  getAllWarrantyInfoPaginate,
-  getAllHoldInfoPaginate,
+  getHoldListPaginate,
+  getHoldDetailList,
+  submitHold,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-  submitWarrantyRequest,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -53,23 +52,22 @@ const ModalHold = ({
 }) => {
   // Selector
   const {
-    data_customer_info,
-    data_warranty_info,
-    data_hold_info,
+    dataHoldList,
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
-    loading,
+    loadingHoldList,
   } = useSelector((state) => state.warranty);
+
 
   // Declaration
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceHoldInfo = data_hold_info?.result || [];
+  const dataSourceCustomerInfo = []; // Not used anymore in this modal logic
+  const dataSourceWarrantyInfo = dataHoldList?.result || [];
+  const dataSourceHoldInfo = []; // Derived from selection
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -169,12 +167,6 @@ const ModalHold = ({
       if (!remarkHoldInformation) {
         return message.warning("Please input your Remark!");
       }
-      const isTableIncomplete = dataSourceHoldInfoWithKeys.some(
-        (item) => !holdAmountData[item.key]
-      );
-      if (isTableIncomplete) {
-        return message.warning("Please input Hold Amount for all items!");
-      }
     }
     if (current === 2 && !selectedHierarchy) {
       return message.warning("Please select Approval Hierarchy!");
@@ -240,8 +232,6 @@ const ModalHold = ({
       setCurrent(0);
     }
 
-    setHoldAmountData({});
-    setHoldDateData({});
     setRemarkHoldInformation("");
     setListDataAttachment([]);
     setSelectedHierarchy(null);
@@ -301,21 +291,26 @@ const ModalHold = ({
       const submitBody = {
         type: WARRANTY_TRANSACTION_NAMES.HOLD,
         appHierId: selectedHierarchy,
-        items: dataWarrantyInfoSelect.map((item, index) => ({
+        items: dataWarrantyInfoSelect.map((item) => ({
           payWarrantyId: item.id,
-          amount: holdAmountData[dataSourceHoldInfoWithKeys[index]?.key] || 0,
+          amount: item.currencyBalance || 0,
           currency: item.currency || "IDR",
         })),
         remark: remarkHoldInformation,
       };
 
-      // 2. Dispatch the unified thunk
-      const submitRes = await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
-      const transIds = submitRes?.data?.transIds || [];
-
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitHold(submitBody)).unwrap();
       // 3. Upload new attachments per transId
+      const transIds = Array.isArray(submitRes?.data?.transIds) ? submitRes.data.transIds : [];
+      if (transIds.length === 0) {
+        message.warning('Transaction ID tidak ditemukan, attachment tidak dapat diupload');
+        setLoadingSave(false);
+        return;
+      }
+
       const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-      if (newAttachments.length > 0 && transIds.length > 0) {
+      if (newAttachments.length > 0) {
         for (const transId of transIds) {
           for (const element of newAttachments) {
             const uploadBody = {
@@ -365,12 +360,11 @@ const ModalHold = ({
         : "";
 
       dispatch(
-        getAllWarrantyInfoPaginate({
+        getHoldListPaginate({
           search: finalSearch,
           page,
           pageSize,
           sort,
-          transTypeName: "HOLD",
         })
       );
     }
@@ -522,15 +516,6 @@ const ModalHold = ({
   };
 
   // Hold Information Step
-  const [holdAmountData, setHoldAmountData] = useState({});
-  const handleHoldAmountChange = (value, recordKey) => {
-    setHoldAmountData(prev => ({ ...prev, [recordKey]: value }));
-  };
-
-  const [holdDateData, setHoldDateData] = useState({});
-  const handleHoldDateChange = (value, recordKey) => {
-    setHoldDateData(prev => ({ ...prev, [recordKey]: value }));
-  }; 
 
   const [remarkHoldInformation, setRemarkHoldInformation] = useState("");
 
@@ -556,14 +541,9 @@ const ModalHold = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        holdAmountData,
-        handleHoldAmountChange,
-        holdDateData,
-        handleHoldDateChange,
-        false
+        handleSearch
       ),
-    [searchedColumn, searchText, holdAmountData, holdDateData]
+    [searchedColumn, searchText]
   );
 
   const baseColumnsHoldInfoConfirmation = useMemo(
@@ -574,14 +554,9 @@ const ModalHold = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        holdAmountData,
-        handleHoldAmountChange,
-        holdDateData,
-        handleHoldDateChange,
-        true
+        handleSearch
       ),
-    [searchedColumn, searchText, holdAmountData, holdDateData]
+    [searchedColumn, searchText]
   );
 
   const processedColumnsHoldInfoConfirmation = useMemo(() => {
@@ -727,13 +702,13 @@ const ModalHold = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={selectedRow ? 1 : (data_warranty_info?.page?.totalElements || 0)}
+                totalData={selectedRow ? 1 : (dataHoldList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingHoldList}
                 showExport={false}
                 rowSelection={rowSelectionWarrantyInfo}
               />
@@ -760,7 +735,7 @@ const ModalHold = ({
                 columnDefinitions={columnDefinitionsHoldInfo}
                 fixedColumns={fixedHoldColumns}
                 setFixedColumns={setFixedHoldColumns}
-                loading={loading}
+                loading={loadingHoldList}
                 showExport={false}
               />
               

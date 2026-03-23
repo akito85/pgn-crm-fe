@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Select, message, Empty } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
@@ -159,7 +158,7 @@ const DetailGapRatingBilling = ({
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -269,7 +268,7 @@ const DetailGapRatingBilling = ({
           </div>
         </CardContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

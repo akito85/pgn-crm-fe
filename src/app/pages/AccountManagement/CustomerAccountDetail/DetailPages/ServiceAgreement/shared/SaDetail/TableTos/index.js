@@ -13,6 +13,24 @@ const TableTos = ({
   setModalChooseTos,
   dataTosFromProductVersion,
 }) => {
+  const getTosDetailRowKey = (item, index) => {
+    if (item?.key !== undefined && item?.key !== null && item?.key !== "") {
+      return String(item.key);
+    }
+
+    if (item?.id !== undefined && item?.id !== null && item?.id !== "") {
+      return String(item.id);
+    }
+
+    if (item?.detailId !== undefined && item?.detailId !== null && item?.detailId !== "") {
+      return String(item.detailId);
+    }
+
+    const attributeName = item?.attributeName || "attr";
+    const value = item?.value || "value";
+    return `${attributeName}-${value}-${index}`;
+  };
+
   const searchInput = useRef(null);
   const [displayData, setDisplayData] = useState([]);
   const [loadedCount, setLoadedCount] = useState(20);
@@ -151,7 +169,7 @@ const TableTos = ({
           columns={detailColumns}
           pagination={false}
           className="mb-4"
-          rowKey={(record, index) => index}
+          rowKey={getTosDetailRowKey}
         />
       </div>
     );
@@ -173,6 +191,7 @@ const TableTos = ({
 
       <NxTable
         idTable="tos-table"
+        rowKey="key"
         dataSource={displayData}
         columns={columns}
         totalData={processedData.length}

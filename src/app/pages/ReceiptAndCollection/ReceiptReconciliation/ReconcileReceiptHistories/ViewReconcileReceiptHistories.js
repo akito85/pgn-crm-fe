@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { Spin, Tooltip } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
@@ -534,7 +533,7 @@ const ViewReconcileReceiptHistories = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -567,7 +566,7 @@ const ViewReconcileReceiptHistories = () => {
         </CardContainer>
       </Spin>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 
