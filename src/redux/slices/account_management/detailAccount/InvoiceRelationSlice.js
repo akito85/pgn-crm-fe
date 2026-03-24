@@ -12,14 +12,9 @@ const initialState = {
   loading_detailIr: false,
   loading_detailDraftIr: false,
   loading_createUpdateIr: false,
-  loading_listIrAccountStandard: false,
   loading_detailIrDetailAttachment: false,
-  loading_approveRejectIr: false,
-  loading_listIrApprovalOption: false,
   loading_detailIrApprovalHierarchyDetails: false,
   loading_listIrApproval: false,
-  loading_approveIr: false,
-  loading_rejectIr: false,
   list_irDetailAttachment: [],
   pagination_irDetailAttachment: {
     totalPage: 0,
@@ -489,13 +484,13 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
       // Process active invoice relations
       if (body && body.length > 0) {
         const approveUrl = "/v1/dbs/api/invoice-relation/approve";
-        await accountManagementService.activationWithRemark(approveUrl, body[0]);
+        await accountManagementService.activationWithRemark(approveUrl, body);
       }
 
       // Process inactive invoice relations
       if (inactiveBody && inactiveBody.length > 0) {
         const approveInactiveUrl = "/v1/dbs/api/invoice-relation/approve-inactive";
-        await accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody[0]);
+        await accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody);
       }
 
       const successBody = {
@@ -701,15 +696,15 @@ const invoiceRelationSlice = createSlice({
       state.loading_approveRejectIr = false;
     },
 
-    /** Inactivate Invoice Relation Attachment */
+    /** Inactivate Invoice Relation */
     [inactivateInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_inactivateIr = true;
     },
     [inactivateInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_inactivateIr = false;
     },
     [inactivateInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_inactivateIr = false;
     },
 
     /** Get Invoice Relation Column API  */
