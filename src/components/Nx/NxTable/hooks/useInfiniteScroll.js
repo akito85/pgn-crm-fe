@@ -1,5 +1,5 @@
 // src/components/Nx/NxTable/hooks/useInfiniteScroll.js
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SCROLL_THRESHOLD_PX } from '../constants';
 
 const useInfiniteScroll = ({
