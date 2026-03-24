@@ -52,8 +52,19 @@ const useColumnLayout = ({
   // Fix 4.2: merge the two separate setInternalFixedColumns effects into one.
   // Previously a parent prop change caused two effects to fire in the same
   // commit, triggering two re-renders with stale intermediate state.
-  const prevFixedColsSigRef = React.useRef('');
-  const prevStaticFixedRef  = React.useRef('');
+  //
+  // Fix: initialise both refs to the actual mount-time values so the effect is
+  // a no-op on the first render.  Without this, the effect always sees a
+  // "change" on mount ('' !== real sig) and resets internalFixedColumns to the
+  // prop value, discarding any preferences loaded from localStorage.
+  const prevFixedColsSigRef = React.useRef(null);
+  const prevStaticFixedRef  = React.useRef(null);
+  if (prevFixedColsSigRef.current === null) {
+    prevFixedColsSigRef.current = (fixedColumnsProp?.left ?? []).join(',') + '|' + (fixedColumnsProp?.right ?? []).join(',');
+  }
+  if (prevStaticFixedRef.current === null) {
+    prevStaticFixedRef.current = JSON.stringify(staticFixedKeys);
+  }
   React.useEffect(() => {
     // Fix 5.4: join-based sig instead of JSON.stringify for performance.
     const propSig    = (fixedColumnsProp?.left ?? []).join(',') + '|' + (fixedColumnsProp?.right ?? []).join(',');
@@ -90,7 +101,16 @@ const useColumnLayout = ({
   }, [fixedColumnsProp, staticFixedKeys]);
 
   // ── Column order sync ─────────────────────────────────────────────────────
-  const prevColumnKeysRef = React.useRef('');
+  // Fix: initialise to the mount-time keys so the effect is a no-op on the
+  // first render, preserving the column order loaded from localStorage.
+  // Without this the effect always fires on mount ('' !== current keys) and
+  // resets columnOrder to the definition order, losing the saved preference.
+  const prevColumnKeysRef = React.useRef(null);
+  if (prevColumnKeysRef.current === null) {
+    prevColumnKeysRef.current = resolvedColumns && resolvedColumns.length > 0
+      ? getAllColumnKeys(resolvedColumns).join(',')
+      : '';
+  }
   React.useEffect(() => {
     if (!resolvedColumns || resolvedColumns.length === 0) return;
     const allKeys  = getAllColumnKeys(resolvedColumns);
