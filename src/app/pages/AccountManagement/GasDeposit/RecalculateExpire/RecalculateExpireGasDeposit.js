@@ -77,11 +77,11 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   const status = detail_gasDeposit.status || "DRAFT";
   const statusApproval = detail_gasDeposit.statusApproval || "DRAFT";
 
-  const isDraft = location.state?.isDraft || status === "DRAFT";
-  const isActive = status === "ACTIVE";
+  const isDraft = location.state?.status === "DRAFT" || status === "DRAFT";
+  const isActive = location.state?.status === "ACTIVE" || status === "ACTIVE";
   
-  const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectApproval = statusApproval === "REJECT";
+  const isDraftApproval = location.state?.statusApproval === "DRAFT" || statusApproval === "DRAFT";
+  const isRejectApproval = location.state?.statusApproval === "REJECT" || statusApproval === "REJECT";
 
   //state
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
@@ -109,10 +109,10 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
 
   useEffect(() => {
     if (idGd) {
-      if (!isDraft)
-        dispatch(getDetailGasDeposit(idGd));
-      else  
+      if (isActive && (isDraftApproval || isRejectApproval))
         dispatch(getDetailDraftGasDeposit(idGd));
+      else  
+        dispatch(getDetailGasDeposit(idGd));
     }
   }, [idGd]);
 
@@ -188,46 +188,46 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (submitType === "submit") {
-          if (current === 2) {
-            if (attachmentIsRequired && !attachmentDataSource.length) {
-              const errorBody = {
-                title: "Failed",
-                description: `Please upload at least one attachment`
-              };
-              dispatch(showModalError(errorBody));
-  
-              throw new Error("There was no file attached");
-            }
-          } else {
-            await form.validateFields(formFields[current]);
-  
-            const {
-              appHierId
-            } = form.getFieldsValue(true);
-  
-            const body = {
-              stepNumber: current + 1,
-              type: formType.toUpperCase(),
-              id: idGd,
-              data : {
-                accountId, 
-                appHierId,
+        if (["submit", "draft"].includes(submitType)) {
+          if (submitType === "submit") {
+            if (current === 2) {
+              if (attachmentIsRequired && !attachmentDataSource.length) {
+                const errorBody = {
+                  title: "Failed",
+                  description: `Please upload at least one attachment`
+                };
+                dispatch(showModalError(errorBody));
+    
+                throw new Error("There was no file attached");
               }
+            } else {
+              await form.validateFields(formFields[current]);
+    
+              const {
+                appHierId
+              } = form.getFieldsValue(true);
+    
+              const body = {
+                stepNumber: current + 1,
+                type: formType.toUpperCase(),
+                id: idGd,
+                data : {
+                  accountId, 
+                  appHierId,
+                }
+              }
+    
+              await dispatch(
+                validateCreateUpdate({
+                  body,
+                  services: accountManagementService,
+                  endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+                  type: formType
+                })
+              ).unwrap();
             }
-  
-            await dispatch(
-              validateCreateUpdate({
-                body,
-                services: accountManagementService,
-                endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
-                type: formType
-              })
-            ).unwrap();
           }
-        } else if (submitType === "draft")
-          await form.validateFields(["accountNumber", "accountName"]);
-        else
+        } else
           return;
       } catch (err) {
         return;
