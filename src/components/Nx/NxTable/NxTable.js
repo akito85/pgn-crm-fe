@@ -39,7 +39,7 @@ const NxTable = ({
   totalData = 0,
   onDelete,            // eslint-disable-line no-unused-vars
   rowSelection,
-  onRowClicked = () => {}, // eslint-disable-line no-unused-vars
+  onRowClicked, // eslint-disable-line no-unused-vars
   tableScrolled = { y: 380 },
   expandable,          // kept in signature only for the deprecation warning
   className,
@@ -77,9 +77,6 @@ const NxTable = ({
   if (process.env.NODE_ENV !== 'production') {
     if (expandable !== undefined) {
       console.warn('[NxTable] `expandable` is not supported — use NxTableNested for expandable rows. AntD virtual rendering is incompatible with expandable rows.');
-    }
-    if (setFixedColumns !== undefined) {
-      console.warn('[NxTable] `setFixedColumns` prop is ignored — NxTable manages fixed-column state internally.');
     }
     if (onDelete !== undefined) {
       console.warn('[NxTable] `onDelete` prop is unused and will be removed in a future version.');

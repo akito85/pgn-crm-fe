@@ -28,7 +28,7 @@ const AccountStandard = () => {
   const dispatch = useDispatch();
 
   // State
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(30);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [advancedSearch, setAdvancedSearch] = useState(null);
@@ -54,18 +54,23 @@ const AccountStandard = () => {
     return encodeURIComponent(JSON.stringify(combined));
   }, []);
 
-  // Fetch a specific page and append (or replace) results locally
-  const fetchPage = useCallback(async (page, replace = false) => {
+  // Fetch a specific page and append (or replace) results locally.
+  // The optional `signal` object ({ aborted: false }) lets the caller cancel
+  // a stale fetch (e.g. StrictMode cleanup or rapid filter changes) without
+  // touching isFetchingRef so the guard stays coherent.
+  const fetchPage = useCallback(async (page, replace = false, signal = null) => {
     if (isFetchingRef.current) return;
+    if (signal?.aborted) return;
     isFetchingRef.current = true;
     try {
       const reqSearch = buildSearch(search, advancedSearch);
-      const result = await dispatch(getAllAccountStandardPaginate({ 
+      const result = await dispatch(getAllAccountStandardPaginate({
         page, // 0-based, matches Spring API directly
-        pageSize, 
-        sort, 
-        search: reqSearch 
+        pageSize,
+        sort,
+        search: reqSearch
       })).unwrap();
+      if (signal?.aborted) return; // discard result from the superseded fetch
       const rows = result?.result ?? [];
       const pageInfo = result?.page ?? {};
       const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
@@ -77,18 +82,25 @@ const AccountStandard = () => {
       // pitfall where a valid 0 from the API overrides the actual page index.
       pageRef.current = page;
     } catch (e) {
-      console.error('fetchPage error', e);
+      if (!signal?.aborted) console.error('fetchPage error', e);
     } finally {
       isFetchingRef.current = false;
     }
   }, [search, advancedSearch, sort, pageSize, dispatch, buildSearch]);
 
-  // Initial load + reload when filters/sort/pageSize change
+  // Initial load + reload when filters/sort/pageSize change.
+  // The signal is marked aborted on cleanup so StrictMode double-mounts and
+  // rapid filter changes don't commit stale results into component state.
   useEffect(() => {
+    const signal = { aborted: false };
     pageRef.current = 0;
     setAllData([]);
     setHasMore(false);
-    fetchPage(0, true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false; // unblock the next effect so it can fetch
+    };
   }, [search, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
 
   const handleDownload = () => {
