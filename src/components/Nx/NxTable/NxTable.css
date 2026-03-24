@@ -1,0 +1,342 @@
+/* src/components/Nx/NxTable/NxTable.css */
+/* Scope: .nx-table  (replaces runtime #${safeId} scoping)               */
+/* nestedAlignConfig overrides are applied as inline style on the         */
+/* container div — see NxTable.js. These are default fallback values.    */
+
+.nx-table .ant-table-content {
+  position: relative;
+  z-index: 1;
+}
+
+.nx-table .ant-table-body {
+  position: relative;
+  z-index: 1;
+}
+
+.nx-table .ant-table-tbody > tr {
+  position: relative;
+  z-index: 1;
+}
+
+.nx-table .ant-table-tbody > tr:hover {
+  z-index: 2;
+}
+
+.nx-table .ant-table-tbody > tr.row-selected {
+  z-index: 2;
+}
+
+.nx-table .ant-table-tbody .ant-table-cell-fix-left,
+.nx-table .ant-table-tbody .ant-table-cell-fix-right {
+  z-index: 3;
+}
+
+.nx-table .ant-table-tbody > tr:hover .ant-table-cell-fix-left,
+.nx-table .ant-table-tbody > tr:hover .ant-table-cell-fix-right,
+.nx-table .ant-table-tbody > tr.row-selected .ant-table-cell-fix-left,
+.nx-table .ant-table-tbody > tr.row-selected .ant-table-cell-fix-right {
+  z-index: 3;
+}
+
+.nx-table .ant-table-thead > tr > th {
+  position: relative;
+  z-index: 4;
+}
+
+.nx-table .ant-table-thead .ant-table-cell-fix-left,
+.nx-table .ant-table-thead .ant-table-cell-fix-right {
+  z-index: 5 !important;
+}
+
+.nx-table .ant-table-filter-trigger,
+.nx-table .ant-table-filter-trigger-container,
+.nx-table .ant-table-column-sorter {
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+}
+
+/* ── Scrollbar styling ──────────────────────────────────────────────────── */
+.nx-table .ant-table-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  z-index: 10;
+}
+
+.nx-table .ant-table-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  z-index: 10;
+}
+
+.nx-table .ant-table-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.nx-table .ant-table-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.nx-table .ant-table-body {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+  padding-bottom: 0;
+}
+
+@supports (-moz-appearance: none) {
+  .nx-table .ant-table-body {
+    padding-bottom: 0;
+  }
+
+  .nx-table .ant-table-content {
+    padding-bottom: 0;
+  }
+}
+
+/* ── Sort / Filter cursor ────────────────────────────────────────────────── */
+.nx-table .ant-table-column-sorter,
+.nx-table .ant-table-filter-trigger,
+.nx-table .ant-table-column-sorter-up,
+.nx-table .ant-table-column-sorter-down,
+.nx-table .ant-table-filter-trigger-container {
+  cursor: pointer;
+}
+
+.nx-table th[draggable="true"] {
+  cursor: move;
+}
+
+.nx-table th[draggable="true"] .ant-table-column-sorter,
+.nx-table th[draggable="true"] .ant-table-filter-trigger,
+.nx-table th[draggable="true"] .ant-table-column-sorter-up,
+.nx-table th[draggable="true"] .ant-table-column-sorter-down,
+.nx-table th[draggable="true"] .ant-table-filter-trigger-container,
+.nx-table th[draggable="true"] .ant-table-column-sorters {
+  cursor: pointer;
+}
+
+.nx-table .ant-table-column-sorter {
+  margin-left: 4px;
+  margin-right: 0;
+}
+
+.nx-table .ant-table-filter-trigger {
+  margin-right: 6px;
+}
+
+.nx-table .ant-table-column-sorters {
+  padding-right: 0;
+}
+
+/* Active sorter icon color — override primary color back to white */
+.nx-table .ant-table-thead .ant-table-column-sorter-up.active .anticon,
+.nx-table .ant-table-thead .ant-table-column-sorter-down.active .anticon {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ── Table shape & borders ───────────────────────────────────────────────── */
+.nx-table .ant-table {
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.nx-table .ant-table-container {
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  border: none;
+}
+
+.nx-table .ant-table-container table > thead > tr:first-child > *:first-child {
+  border-start-start-radius: 8px;
+}
+
+.nx-table .ant-table-container table > thead > tr:first-child > *:last-child {
+  border-start-end-radius: 8px;
+}
+
+.nx-table .ant-table-tbody > tr:last-child > *:first-child {
+  border-end-start-radius: 0;
+}
+
+.nx-table .ant-table-tbody > tr:last-child > *:last-child {
+  border-end-end-radius: 0;
+}
+
+.nx-table .ant-table-bordered .ant-table-cell,
+.nx-table .ant-table-bordered .ant-table-thead > tr > th,
+.nx-table .ant-table-bordered .ant-table-tbody > tr > td,
+.nx-table .ant-table-bordered .ant-table-container {
+  border-color: #C8CDD4 !important;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.nx-table .ant-table-thead > tr > th {
+  background-color: #2C6FAD !important;
+  color: #fff !important;
+  padding: 4px 8px !important;
+  height: 30px !important;
+  line-height: 22px !important;
+  font-size: 10px !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-bottom: 1px solid #C8CDD4 !important;
+  font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+}
+
+.nx-table .ant-table-thead > tr:first-child > th {
+  border-top: 1px solid #C8CDD4 !important;
+}
+
+/* ── Alternating row colors ──────────────────────────────────────────────── */
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row):not(.ant-table-placeholder):nth-child(odd) > td {
+  background-color: #FFFFFF !important;
+}
+
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row):not(.ant-table-placeholder):nth-child(even) > td {
+  background-color: #EBF2FA !important;
+}
+
+/* ── Hover and selected ──────────────────────────────────────────────────── */
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row):hover > td {
+  background-color: #EBF2FA !important;
+}
+
+.nx-table .ant-table-tbody > tr.row-selected > td {
+  background-color: #d1e6f9 !important;
+}
+
+.nx-table .ant-table-tbody > tr.row-selected:hover > td {
+  background-color: #bad9f5 !important;
+}
+
+/* ── Body cells ──────────────────────────────────────────────────────────── */
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td,
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td.ant-table-cell,
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td.ant-table-cell-ellipsis {
+  padding: 0 8px !important;
+  height: 30px !important;
+  max-height: 30px !important;
+  line-height: 30px !important;
+  font-size: 12px !important;
+  border-right: 1px solid #C8CDD4 !important;
+  border-bottom: 1px solid #C8CDD4 !important;
+  font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+}
+
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
+  border-left: 1px solid #C8CDD4 !important;
+}
+
+.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  vertical-align: middle;
+}
+
+.nx-table .ant-table-thead > tr > th:first-child {
+  border-left: 1px solid #C8CDD4 !important;
+}
+
+.nx-table .ant-table-thead > tr > th.ant-table-cell-fix-right-first,
+.nx-table .ant-table-tbody > tr > td.ant-table-cell-fix-right-first {
+  border-left: 1px solid #C8CDD4 !important;
+}
+
+/* ── Measure row ─────────────────────────────────────────────────────────── */
+.nx-table .ant-table-measure-row > td {
+  padding: 0 !important;
+  height: 0 !important;
+  line-height: 0;
+  font-size: 0;
+  overflow: hidden;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.nx-table .ant-table-placeholder > td {
+  background-color: #FFFFFF !important;
+  border-left: 1px solid #C8CDD4 !important;
+  border-right: 1px solid #C8CDD4 !important;
+  border-bottom: 1px solid #C8CDD4 !important;
+}
+
+.nx-table .ant-table-placeholder:hover > td {
+  background-color: #FFFFFF !important;
+}
+
+/* ── Nested table alignment ──────────────────────────────────────────────── */
+/* Default CSS variable values. Override via nestedAlignConfig prop        */
+/* which sets inline style on the container div.                           */
+.nx-table {
+  --nx-expand-cell-width: 32px;
+  --nx-parent-col1-width: 60px;
+  --nx-child-offset: calc(var(--nx-expand-cell-width) + var(--nx-parent-col1-width));
+}
+
+.nx-table .ant-table-expanded-row > td {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: var(--nx-child-offset) !important;
+  padding-right: 0 !important;
+  overflow: hidden !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-wrapper,
+.nx-table .ant-table-expanded-row > td > div {
+  margin-left: 0 !important;
+  overflow: hidden !important;
+}
+
+/* ── Nested (child) table styling ────────────────────────────────────────── */
+.nx-table .ant-table-expanded-row .ant-table {
+  border-left: 1px solid #C8CDD4 !important;
+  border-radius: 0 !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-container {
+  border-radius: 0 !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-wrapper {
+  border-radius: 0 !important;
+}
+
+.nx-table .ant-table-expanded-row > td > div {
+  border-radius: 0 !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-thead > tr > th {
+  background-color: #2C6FAD !important;
+  color: #fff !important;
+  font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+  border-color: #C8CDD4 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-tbody > tr > td {
+  border-color: #C8CDD4 !important;
+  font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
+  font-size: 12px !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-tbody > tr:nth-child(odd) > td {
+  background-color: #FFFFFF !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-tbody > tr:nth-child(even) > td {
+  background-color: #EBF2FA !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-tbody > tr:hover > td {
+  background-color: #EBF2FA !important;
+}
+
+.nx-table .ant-table-expanded-row .ant-table-thead > tr > th:first-child,
+.nx-table .ant-table-expanded-row .ant-table-tbody > tr > td:first-child {
+  border-left: 1px solid #C8CDD4 !important;
+}
