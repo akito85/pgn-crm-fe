@@ -983,7 +983,7 @@ const Product = () => {
     return text;
   };
   return (
-    <div>
+    <>
       <Spin
         spinning={loadingProduct || false}
         className={"w-full top-20"}
@@ -1104,7 +1104,7 @@ const Product = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

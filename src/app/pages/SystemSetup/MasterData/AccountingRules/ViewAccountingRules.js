@@ -521,168 +521,170 @@ const ViewAccountingRules = () => {
 
   return (
     <Spin spinning={loading}>
-      <BreadCrumb routes={routes} />
+      <>
+        <BreadCrumb routes={routes} />
 
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">ACCOUNTING RULES LIST</p>
-            <div className="mt-[15px] flex gap-[20px]">
-              <Toolbar items={itemActions} />
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold">ACCOUNTING RULES LIST</p>
+              <div className="mt-[15px] flex gap-[20px]">
+                <Toolbar items={itemActions} />
+              </div>
             </div>
-          </div>
-        }
-      >
-        <div className="my-0">
-          <TableRBI
-            dataSource={data?.result}
-            columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={data?.page?.totalElements || 0}
-            tableScrolled={{ x: 2000, y: 525 }}
-            onSort={onSort}
-            columnDefinitions={columnDefinitions}
-            handleDownload={handleDownload}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
-          />
-        </div>
-      </CardContainer>
-
-      <ModalCustom
-        isOpen={openModal}
-        type={"detail"}
-        header={"accounting rules detail"}
-        width={850}
-        handleCancel={handleCancel}
-        footer={
-          <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
-        }
-      >
-        <CardComponent header={"Accounting rules information"}>
-          <div className="w-full grid grid-cols-4">
-            <DetailText label={"Classification Type"}>
-              {data_detail?.classificationTypeName}
-            </DetailText>
-            <DetailText label={"Code"}>{data_detail?.code}</DetailText>
-            <DetailText label={"Receivable Account"}>
-              {data_detail?.receivableAccount}
-            </DetailText>
-            <DetailText label={"Revenue Account"}>
-              {data_detail?.revenueAccount}
-            </DetailText>
-          </div>
-          <DetailText label={"Status"}>
-            {toTitleCase(data_detail?.status)}
-          </DetailText>
-          <div className="w-full">
-            <DetailText label={"Description"}>
-              {data_detail?.description}
-            </DetailText>
-          </div>
-        </CardComponent>
-        <CardComponent header={"history log information"} cols={5}>
-          <DetailText label={"Record ID"}>
-            {data_detail?.masterAccountingRuleId}
-          </DetailText>
-          <DetailText label={"Created Date"}>
-            {hasValue(data_detail?.createdDate) &&
-              moment(data_detail?.createdDate)?.format(
-                dateFormatting?.dateTime
-              )}
-          </DetailText>
-          <DetailText label={"Created By"}>
-            {data_detail?.createdBy}
-          </DetailText>
-          <DetailText label={"Updated Date"}>
-            {hasValue(data_detail?.updatedDate) &&
-              moment(data_detail?.updatedDate).format(
-                dateFormatting?.dateTime
-              )}
-          </DetailText>
-          <DetailText label={"Updated By"}>
-            {data_detail?.updatedBy}
-          </DetailText>
-        </CardComponent>
-      </ModalCustom>
-
-      <ModalCustom
-        isOpen={openModalActivation}
-        header={`${
-          typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"
-        } INFORMATION`}
-        width={700}
-        type={"confirmation"}
-        handleCancel={handleCancel}
-        footer={
-          <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-            <ButtonComponent onClick={handleCancel} type="default">
-              Cancel
-            </ButtonComponent>
-            <ButtonComponent
-              form="inactivateForm"
-              type="submit"
-              htmlType="submit"
-            >
-              Confirm
-            </ButtonComponent>
-          </div>
-        }
-      >
-        <Form
-          id="inactivateForm"
-          form={form}
-          onFinish={handleSaveActivation}
-          layout="vertical"
+          }
         >
-          <div className="flex flex-col gap-6">
-            <Alert
-              message={`Are you sure want to ${
-                typeStatus === "ACTIVE" ? "inactivate" : "activate"
-              } accounting rule named ${accountingName}?`}
-              icon={<InfoCircleOutlined />}
-              type={"warning"}
-              showIcon
-              className="inactivate-alert"
+          <div className="my-0">
+            <TableRBI
+              dataSource={data?.result}
+              columns={processedColumns}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
+              totalData={data?.page?.totalElements || 0}
+              tableScrolled={{ x: 2000, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              handleDownload={handleDownload}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
             />
-            <Form.Item
-              name={"remark"}
-              label={"Remark"}
-              rules={formMessageRequired("remark")}
-              className="w-full"
-            >
-              <InputComponent
-                group
-                rows={1}
-                type="textarea"
-                placeholder={"Type your remark"}
-              />
-            </Form.Item>
           </div>
-        </Form>
-      </ModalCustom>
+        </CardContainer>
 
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        <ModalCustom
+          isOpen={openModal}
+          type={"detail"}
+          header={"accounting rules detail"}
+          width={850}
+          handleCancel={handleCancel}
+          footer={
+            <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
+          }
+        >
+          <CardComponent header={"Accounting rules information"}>
+            <div className="w-full grid grid-cols-4">
+              <DetailText label={"Classification Type"}>
+                {data_detail?.classificationTypeName}
+              </DetailText>
+              <DetailText label={"Code"}>{data_detail?.code}</DetailText>
+              <DetailText label={"Receivable Account"}>
+                {data_detail?.receivableAccount}
+              </DetailText>
+              <DetailText label={"Revenue Account"}>
+                {data_detail?.revenueAccount}
+              </DetailText>
+            </div>
+            <DetailText label={"Status"}>
+              {toTitleCase(data_detail?.status)}
+            </DetailText>
+            <div className="w-full">
+              <DetailText label={"Description"}>
+                {data_detail?.description}
+              </DetailText>
+            </div>
+          </CardComponent>
+          <CardComponent header={"history log information"} cols={5}>
+            <DetailText label={"Record ID"}>
+              {data_detail?.masterAccountingRuleId}
+            </DetailText>
+            <DetailText label={"Created Date"}>
+              {hasValue(data_detail?.createdDate) &&
+                moment(data_detail?.createdDate)?.format(
+                  dateFormatting?.dateTime
+                )}
+            </DetailText>
+            <DetailText label={"Created By"}>
+              {data_detail?.createdBy}
+            </DetailText>
+            <DetailText label={"Updated Date"}>
+              {hasValue(data_detail?.updatedDate) &&
+                moment(data_detail?.updatedDate).format(
+                  dateFormatting?.dateTime
+                )}
+            </DetailText>
+            <DetailText label={"Updated By"}>
+              {data_detail?.updatedBy}
+            </DetailText>
+          </CardComponent>
+        </ModalCustom>
+
+        <ModalCustom
+          isOpen={openModalActivation}
+          header={`${
+            typeStatus === "ACTIVE" ? "INACTIVATE" : "ACTIVATE"
+          } INFORMATION`}
+          width={700}
+          type={"confirmation"}
+          handleCancel={handleCancel}
+          footer={
+            <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+              <ButtonComponent onClick={handleCancel} type="default">
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                form="inactivateForm"
+                type="submit"
+                htmlType="submit"
+              >
+                Confirm
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <Form
+            id="inactivateForm"
+            form={form}
+            onFinish={handleSaveActivation}
+            layout="vertical"
+          >
+            <div className="flex flex-col gap-6">
+              <Alert
+                message={`Are you sure want to ${
+                  typeStatus === "ACTIVE" ? "inactivate" : "activate"
+                } accounting rule named ${accountingName}?`}
+                icon={<InfoCircleOutlined />}
+                type={"warning"}
+                showIcon
+                className="inactivate-alert"
+              />
+              <Form.Item
+                name={"remark"}
+                label={"Remark"}
+                rules={formMessageRequired("remark")}
+                className="w-full"
+              >
+                <InputComponent
+                  group
+                  rows={1}
+                  type="textarea"
+                  placeholder={"Type your remark"}
+                />
+              </Form.Item>
+            </div>
+          </Form>
+        </ModalCustom>
+
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">
+              {bodyError?.response?.data?.message?.toString()}
+            </p>
+            <p className="pl-[70px]">Please try again.</p>
           </div>
-          <p className="pl-[70px]">
-            {bodyError?.response?.data?.message?.toString()}
-          </p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
+        </ModalError>
+      </>
     </Spin>
   );
 };

@@ -1,6 +1,16 @@
-import React, { useState, useMemo } from "react";
-import { Spin } from "antd";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { Spin, Modal, Select, Input, Button, Dropdown, Menu, Divider, Input as AntInput } from "antd";
+import { 
+  PlusOutlined, 
+  DownOutlined, 
+  SearchOutlined, 
+  FilterOutlined, 
+  ReloadOutlined 
+} from "@ant-design/icons";
+import { debounce } from 'lodash';
+import TextArea from "antd/lib/input/TextArea";
 import PropTypes from 'prop-types';
+import ColumnSettings from "../ColumnSettings/ColumnSettings";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -18,6 +28,610 @@ const ExpandIcon = ({ expanded }) => (
     <line x1="4"   y1="0.5" x2="4" y2="7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 );
+
+// ── Advance Search Component ───────────────────────────────────────────────
+const NxAdvanceSearch = ({
+  visible,
+  onClose,
+  onSearch,
+  onClear,
+  columns = [],
+  modalWidth = 1100,
+}) => {
+  const [filters, setFilters] = useState([
+    {
+      id: Date.now(),
+      column: "",
+      operator: "Equal to",
+      value: "",
+      logic: "AND",
+    },
+  ]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [limitData, setLimitData] = useState("");
+
+  const getColumnKey = (col, index) =>
+    col?.key || col?.dataIndex || `${col?.title || "column"}-${index}`;
+
+  // Available operators
+  const operators = [
+    "Equal to",
+    "Not equal to",
+    "Contains",
+    "Does not contain",
+    "Greater than",
+    "Less than",
+    "Greater than or equal",
+    "Less than or equal",
+    "Is empty",
+    "Is not empty",
+  ];
+
+  // Add new filter to main group
+  const addFilter = () => {
+    const newFilter = {
+      id: Date.now(),
+      column: "",
+      operator: "Equal to",
+      value: "",
+      logic: "AND",
+    };
+    setFilters([...filters, newFilter]);
+  };
+
+  // Remove filter from main group
+  const removeFilter = (id) => {
+    if (filters.length > 1) {
+      setFilters(filters.filter((f) => f.id !== id));
+    }
+  };
+
+  // Update filter in main group
+  const updateFilter = (id, field, value) => {
+    setFilters(
+      filters.map((f) => (f.id === id ? { ...f, [field]: value } : f))
+    );
+  };
+
+  // Add filter rule group
+  const addFilterRule = () => {
+    setFilterRules([
+      ...filterRules,
+      {
+        id: Date.now(),
+        filters: [
+          {
+            id: Date.now() + 1,
+            column: "",
+            operator: "Equal to",
+            value: "",
+            logic: "AND",
+          },
+        ],
+        groupLogic: "OR",
+      },
+    ]);
+  };
+
+  // Add filter within a rule group
+  const addFilterToRule = (ruleId) => {
+    setFilterRules(
+      filterRules.map((rule) =>
+        rule.id === ruleId
+          ? {
+              ...rule,
+              filters: [
+                ...rule.filters,
+                {
+                  id: Date.now(),
+                  column: "",
+                  operator: "Equal to",
+                  value: "",
+                  logic: "AND",
+                },
+              ],
+            }
+          : rule
+      )
+    );
+  };
+
+  // Update filter in rule group
+  const updateRuleFilter = (ruleId, filterId, field, value) => {
+    setFilterRules(
+      filterRules.map((rule) =>
+        rule.id === ruleId
+          ? {
+              ...rule,
+              filters: rule.filters.map((f) =>
+                f.id === filterId ? { ...f, [field]: value } : f
+              ),
+            }
+          : rule
+      )
+    );
+  };
+
+  // Update rule group logic
+  const updateRuleLogic = (ruleId, logic) => {
+    setFilterRules(
+      filterRules.map((rule) =>
+        rule.id === ruleId ? { ...rule, groupLogic: logic } : rule
+      )
+    );
+  };
+
+  // Remove rule group
+  const removeRuleGroup = (ruleId) => {
+    setFilterRules(filterRules.filter((rule) => rule.id !== ruleId));
+  };
+
+  // Handle search
+  const handleSearch = () => {
+    const searchData = {
+      filters: filters,
+      filterRules: filterRules,
+      limitData: limitData,
+    };
+    onSearch?.(searchData);
+  };
+
+  // Handle clear
+  const handleClear = () => {
+    setFilters([
+      {
+        id: Date.now(),
+        column: "",
+        operator: "Equal to",
+        value: "",
+        logic: "AND",
+      },
+    ]);
+    setFilterRules([]);
+    setLimitData("");
+    onClear?.();
+  };
+
+  // Logic dropdown menu
+  const getLogicMenu = (currentLogic, onChange) => (
+    <Menu
+      selectedKeys={[currentLogic]}
+      onClick={({ key }) => onChange(key)}
+      style={{ minWidth: 30 }}
+    >
+      <Menu.Item key="AND">AND</Menu.Item>
+      <Menu.Item key="OR">OR</Menu.Item>
+    </Menu>
+  );
+
+  return (
+    <Modal
+      visible={visible}
+      footer={null}
+      onCancel={onClose}
+      width={modalWidth}
+      bodyStyle={{ padding: "0px" }}
+      closable={false}
+    >
+      <div className="space-y-6">
+        {/* Main Filter Group */}
+        <div className="flex p-5 gap-[50px]">
+          <div className="text-base font-normal text-gray-800">Where</div>
+          <div className="flex flex-col w-full">
+            <div className="flex items-center gap-4 mb-4">
+              {/* First Filter Row */}
+              <div className="flex-1 flex gap-3">
+                <Select
+                  placeholder="Select Column"
+                  value={filters[0]?.column || undefined}
+                  onChange={(value) =>
+                    updateFilter(filters[0].id, "column", value)
+                  }
+                  className="flex-1"
+                  showSearch
+                  size="large"
+                  style={{
+                    borderRadius: 8,
+                  }}
+                >
+                  {columns.map((col, index) => {
+                    const columnKey = getColumnKey(col, index);
+                    return (
+                    <Select.Option key={columnKey} value={columnKey}>
+                      {col.title || col.dataIndex || "Column"}
+                    </Select.Option>
+                    );
+                  })}
+                </Select>
+
+                <Select
+                  value={filters[0]?.operator}
+                  onChange={(value) =>
+                    updateFilter(filters[0].id, "operator", value)
+                  }
+                  style={{ width: 200 }}
+                  size="large"
+                >
+                  {operators.map((op) => (
+                    <Select.Option key={op} value={op}>
+                      {op}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+
+            {/* First Filter Value Input */}
+            <div className="mb-4">
+              <TextArea
+                placeholder="Input Value or Formula"
+                value={filters[0]?.value}
+                onChange={(e) =>
+                  updateFilter(filters[0].id, "value", e.target.value)
+                }
+                size="large"
+                style={{ borderRadius: 8 }}
+              />
+            </div>
+            {/* Additional Filters in Main Group */}
+            {filters.slice(1).map((filter, index) => (
+              <div key={filter.id} className="mb-4">
+                <div className="mb-3">
+                  <Dropdown
+                    menu={getLogicMenu(filter.logic, (logic) =>
+                      updateFilter(filter.id, "logic", logic)
+                    )}
+                    trigger={["click"]}
+                  >
+                    <Button
+                      style={{
+                        borderRadius: 8,
+                        minWidth: 100,
+                        height: 36,
+                      }}
+                    >
+                      {filter.logic} <DownOutlined />
+                    </Button>
+                  </Dropdown>
+                </div>
+
+                <div className="flex gap-3 mb-3">
+                  <Select
+                    placeholder="Select Column"
+                    value={filter.column || undefined}
+                    onChange={(value) =>
+                      updateFilter(filter.id, "column", value)
+                    }
+                    className="flex-1"
+                    showSearch
+                    size="large"
+                  >
+                    {columns.map((col, index) => {
+                      const columnKey = getColumnKey(col, index);
+                      return (
+                      <Select.Option key={columnKey} value={columnKey}>
+                        {col.title || col.dataIndex || "Column"}
+                      </Select.Option>
+                      );
+                    })}
+                  </Select>
+
+                  <Select
+                    value={filter.operator}
+                    onChange={(value) =>
+                      updateFilter(filter.id, "operator", value)
+                    }
+                    style={{ width: 200 }}
+                    size="large"
+                  >
+                    {operators.map((op) => (
+                      <Select.Option key={op} value={op}>
+                        {op}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </div>
+
+                <TextArea
+                  placeholder="Input Value or Formula"
+                  value={filter.value}
+                  onChange={(e) =>
+                    updateFilter(filter.id, "value", e.target.value)
+                  }
+                  size="large"
+                  style={{ borderRadius: 8 }}
+                />
+              </div>
+            ))}
+
+            {/* Add Linear Filter Button */}
+            <Button
+              type="link"
+              icon={<PlusOutlined />}
+              onClick={addFilter}
+              style={{
+                padding: "4px 8px",
+                color: "#1890ff",
+                fontSize: 15,
+                height: "auto",
+                border: "1px dashed #d9d9d9",
+                borderRadius: 6,
+              }}
+            >
+              Add Linear Filter
+            </Button>
+          </div>
+        </div>
+
+        <Divider />
+        {/* Filter Rule Groups */}
+        {filterRules.map((rule, ruleIndex) => (
+          <div key={rule.id} className="flex flex-col gap-5 px-5 border-t ">
+            <div className="flex gap-5">
+              <div className="mb-4">
+                <Dropdown
+                  menu={getLogicMenu(rule.groupLogic, (logic) =>
+                    updateRuleLogic(rule.id, logic)
+                  )}
+                  trigger={["click"]}
+                >
+                  <Button
+                    style={{
+                      borderRadius: 8,
+                      minWidth: 50,
+                      height: 36,
+                    }}
+                  >
+                    {rule.groupLogic} <DownOutlined />
+                  </Button>
+                </Dropdown>
+              </div>
+
+              <div className="flex flex-col w-full">
+                {rule.filters.map((filter, filterIndex) => (
+                  <div key={filter.id} className="mb-4 ">
+                    {filterIndex > 0 && (
+                      <div className="mb-3">
+                        <Dropdown
+                          menu={getLogicMenu(filter.logic, (logic) =>
+                            updateRuleFilter(rule.id, filter.id, "logic", logic)
+                          )}
+                          trigger={["click"]}
+                        >
+                          <Button
+                            style={{
+                              borderRadius: 8,
+                              minWidth: 100,
+                              height: 36,
+                            }}
+                          >
+                            {filter.logic} <DownOutlined />
+                          </Button>
+                        </Dropdown>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3 mb-3 ">
+                      <Select
+                        placeholder="Select Column"
+                        value={filter.column || undefined}
+                        onChange={(value) =>
+                          updateRuleFilter(rule.id, filter.id, "column", value)
+                        }
+                        className="flex-1"
+                        showSearch
+                        size="large"
+                      >
+                        {columns.map((col, index) => {
+                          const columnKey = getColumnKey(col, index);
+                          return (
+                          <Select.Option key={columnKey} value={columnKey}>
+                            {col.title || col.dataIndex || "Column"}
+                          </Select.Option>
+                          );
+                        })}
+                      </Select>
+
+                      <Select
+                        value={filter.operator}
+                        onChange={(value) =>
+                          updateRuleFilter(
+                            rule.id,
+                            filter.id,
+                            "operator",
+                            value
+                          )
+                        }
+                        style={{ width: 200 }}
+                        size="large"
+                      >
+                        {operators.map((op) => (
+                          <Select.Option key={op} value={op}>
+                            {op}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </div>
+
+                    <TextArea
+                      placeholder="Input Value or Formula"
+                      value={filter.value}
+                      onChange={(e) =>
+                        updateRuleFilter(
+                          rule.id,
+                          filter.id,
+                          "value",
+                          e.target.value
+                        )
+                      }
+                      size="large"
+                      style={{ borderRadius: 8 }}
+                    />
+                  </div>
+                ))}
+                <Button
+                  type="link"
+                  icon={<PlusOutlined />}
+                  onClick={() => addFilterToRule(rule.id)}
+                  style={{
+                    padding: "4px 8px",
+                    color: "#1890ff",
+                    fontSize: 15,
+                    height: "auto",
+                    border: "1px dashed #d9d9d9",
+                    borderRadius: 6,
+                  }}
+                >
+                  Add Linear Filter
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <Divider />
+        {/* Add Filter Rules Button */}
+        <div className="border-t px-5">
+          <Button
+            type="text"
+            icon={<PlusOutlined />}
+            onClick={addFilterRule}
+            style={{
+              padding: "4px 0",
+              fontSize: 15,
+              height: "auto",
+            }}
+          >
+            Add Filter Rules
+          </Button>
+        </div>
+
+        {/* Set Limit Data */}
+        <div className="border border-[#0000] pt-6 bg-[#F5F5F5] px-5">
+          <div className="text-base font-normal text-gray-800 mb-3">
+            Set Limit Data
+          </div>
+          <Input
+            placeholder="No Limitation"
+            value={limitData}
+            onChange={(e) => setLimitData(e.target.value)}
+            type="number"
+            size="large"
+            style={{ borderRadius: 8 }}
+          />
+          {/* Footer Actions */}
+          <div className="flex justify-between bg-[#F5F5F5] border-t py-[20px]">
+            <Button
+              onClick={onClose}
+              size="large"
+              style={{
+                borderColor: "#BDBDBD",
+                borderRadius: 8,
+                backgroundColor: "white",
+                minWidth: 100,
+                height: 42,
+                fontSize: 15,
+                color: "black",
+              }}
+            >
+              Cancel
+            </Button>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={handleClear}
+                size="large"
+                style={{
+                  color: "#ff4d4f",
+                  borderColor: "#ff4d4f",
+                  backgroundColor: "#FFEBEE",
+                  borderRadius: 8,
+                  width: "fit-content",
+                  height: 42,
+                  fontSize: 15,
+                }}
+              >
+                Clear Filter
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleSearch}
+                size="large"
+                style={{
+                  borderRadius: 8,
+                  width: "fit-content",
+                  height: 42,
+                  fontSize: 15,
+                }}
+              >
+                Search
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+// ── SearchBar Component ────────────────────────────────────────────────────
+// KEY ARCHITECTURE: This component owns its own local input state.
+// It only propagates the committed value upward via a debounced callback,
+// so the parent's re-render (which triggers filtering) never causes the
+// input to lose focus or re-mount.
+const SearchBar = React.memo(({ placeholder = "Search content here ....", onSearch }) => {
+  const [localValue, setLocalValue] = useState('');
+  const inputRef = useRef(null);
+
+  // Stable debounced notifier — recreated only when onSearch identity changes
+  const debouncedNotify = useCallback(
+    debounce((val) => { onSearch?.(val); }, 220),
+    [onSearch]
+  );
+
+  const handleChange = useCallback((e) => {
+    const val = e.target.value;
+    setLocalValue(val);        // local state → no parent re-render, no focus loss
+    debouncedNotify(val);      // deferred → triggers parent filter after typing pauses
+  }, [debouncedNotify]);
+
+  const handleClear = useCallback(() => {
+    setLocalValue('');
+    onSearch?.('');
+  }, [onSearch]);
+
+  return (
+    <div style={{ position: "relative" }}>
+      <SearchOutlined
+        style={{
+          position: "absolute",
+          left: "8px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          fontSize: "14px",
+          color: "#9CA3AF",
+          zIndex: 30,
+        }}
+      />
+      <AntInput
+        ref={inputRef}
+        placeholder={placeholder}
+        value={localValue}
+        style={{
+          height: "32px",
+          paddingLeft: "28px",
+          border: `1px solid ${BORDER_COL}`,
+          borderRadius: "8px",
+          fontSize: "12px",
+          fontFamily: FONT_FAMILY,
+        }}
+        onChange={handleChange}
+        allowClear
+        onClear={handleClear}
+      />
+    </div>
+  );
+});
 
 // ── Constants ──────────────────────────────────────────────────────────────
 const HEADER_BG        = "#2C6FAD";
@@ -117,7 +731,25 @@ const calculateFirst3ColumnWidths = (parentColumns, childColumns, dataSource) =>
 
 // ── ChildTable Component ───────────────────────────────────────────────────
 
-const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
+const ChildTable = ({ children: rows, columns = [], isLoading = false, searchValue = "", highlightText = (text) => text }) => {
+  // Filter rows based on search value — exact or fuzzy
+  const processedRows = useMemo(() => {
+    if (!searchValue) return rows;
+    const sq = searchValue.toLowerCase();
+    return rows.filter(row => {
+      return columns.some(col => {
+        const val = String(row[col.dataIndex || col.key] || "").toLowerCase();
+        if (val.includes(sq)) return true;
+        // fuzzy inline
+        let qi = 0;
+        for (let i = 0; i < val.length && qi < sq.length; i++) {
+          if (val[i] === sq[qi]) qi++;
+        }
+        return qi === sq.length;
+      });
+    });
+  }, [rows, columns, searchValue]);
+
   if (isLoading) {
     return (
       <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 8, color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
@@ -127,7 +759,7 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
     );
   }
 
-  if (!rows || rows.length === 0) {
+  if (!processedRows || processedRows.length === 0) {
     return (
       <div style={{ padding: "20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
         No data
@@ -191,7 +823,7 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
               </span>
             </div>
             {/* rows */}
-            {rows.map((row, rowIdx) => {
+            {processedRows.map((row, rowIdx) => {
               let cellValue = "—";
               if (col.render) {
                 cellValue = col.render(row[col.dataIndex ?? col.key], row, rowIdx);
@@ -200,6 +832,9 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
               } else {
                 cellValue = row[col.key] ?? "—";
               }
+
+              // Highlight the cell value if it matches the search term
+              const highlightedValue = highlightText(cellValue, searchValue);
 
               const isNoColumn = (col.key || col.dataIndex) === "no";
               return (
@@ -221,7 +856,7 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
                     whiteSpace:     "nowrap",
                   }}
                 >
-                  {cellValue}
+                  {highlightedValue}
                 </div>
               );
             })}
@@ -237,7 +872,7 @@ const ChildTable = ({ children: rows, columns = [], isLoading = false }) => {
 // Security Note: The render functions in parentColumns and childColumns must return
 // React elements or strings. Never pass raw HTML strings. If you need to render HTML,
 // use dangerouslySetInnerHTML only with sanitized content.
-const ParentRow = ({
+const ParentRow = React.memo(({
   no,
   record,
   parentColumns,
@@ -250,14 +885,18 @@ const ParentRow = ({
   first3Widths,
   columnWidths = {},
   isChildLoading = false,
+  searchValue = "",
+  highlightText = (text) => text
 }) => {
   const bg = isEven ? ROW_HOVER : ROW_WHITE;
 
   const handleToggle = () => {
-    if (!isExpanded && (!record.children || record.children.length === 0)) {
-      onExpand?.();
+    if (!isExpanded) {
+      // Always call onExpand when opening — let the caller decide if a fetch
+      // is needed (idempotent: skip if already loading or already loaded).
+      onExpand?.(record.id);
     }
-    onToggleExpand?.();
+    onToggleExpand?.(record.id);
   };
 
   const cellBase = {
@@ -326,6 +965,8 @@ const ParentRow = ({
             value = col.render(value, record, no - 1);
           }
 
+          const highlightedValue = highlightText(value, searchValue);
+
           const width = columnWidths[fieldKey] || first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
           const isLastDataCol = colIdx === parentColumns.length - 1;
           const showActionBorder = actionColumn && isLastDataCol;
@@ -347,7 +988,7 @@ const ParentRow = ({
                 whiteSpace: "nowrap",
               }}
             >
-              {value || "—"}
+              {highlightedValue || "—"}
             </div>
           );
         })}
@@ -385,13 +1026,15 @@ const ParentRow = ({
                 return { ...wrappedCol, width };
               })}
               isLoading={isChildLoading}
+              searchValue={searchValue}
+              highlightText={highlightText}
             />
           </div>
         </div>
       )}
     </>
   );
-};
+});
 
 // ── Main NxTableNested Component ───────────────────────────────────────────
 
@@ -404,8 +1047,77 @@ const NxTableNested = ({
   actionColumn     = null,
   loadingKeys      = new Set(),
   columnWidths     = {}, // Optional: { fieldKey: width, ... }
+  useSelect = true,
+  showAdvanceSearch = true,
+  showSearchBar = true,
+  showRefresh = false,
+  onRefresh,
+  columnDefinitions,
+  fixedColumns = { left: [], right: [] },
+  setFixedColumns = () => { },
+  onAdvanceSearch = () => { },
+  useInfiniteScroll = false,
+  onLoadMore = () => { },
+  hasMore = false,
+  customHeaderLeft,
 }) => {
   const [expandedKeys, setExpandedKeys] = useState(new Set());
+  const [optionSelectedCol, setOptionSelectedCol] = useState([]);
+  const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  // ── Fuzzy match helpers ────────────────────────────────────────────────
+  // Returns true when every character of `query` appears in `text` in order.
+  const fuzzyMatch = useCallback((text, query) => {
+    if (!query) return true;
+    const t = String(text).toLowerCase();
+    const q = query.toLowerCase();
+    let qi = 0;
+    for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+      if (t[ti] === q[qi]) qi++;
+    }
+    return qi === q.length;
+  }, []);
+
+  // Highlight function: exact substring match gets yellow, fuzzy characters get underline.
+  const highlightText = useCallback((text, search) => {
+    if (!search || text === null || text === undefined) return text;
+    const str = String(text);
+    const lower = str.toLowerCase();
+    const sq = search.toLowerCase();
+
+    // Prefer exact substring highlighting
+    const idx = lower.indexOf(sq);
+    if (idx !== -1) {
+      return (
+        <>
+          {str.slice(0, idx)}
+          <span style={{ backgroundColor: '#fde047', padding: '1px 2px', borderRadius: '2px', fontWeight: 600 }}>
+            {str.slice(idx, idx + sq.length)}
+          </span>
+          {str.slice(idx + sq.length)}
+        </>
+      );
+    }
+
+    // Fuzzy: highlight individual matched characters
+    const chars = [];
+    let qi = 0;
+    for (let i = 0; i < str.length; i++) {
+      if (qi < sq.length && str[i].toLowerCase() === sq[qi]) {
+        chars.push(
+          <span key={i} style={{ color: '#1976D2', fontWeight: 700, textDecoration: 'underline' }}>
+            {str[i]}
+          </span>
+        );
+        qi++;
+      } else {
+        chars.push(str[i]);
+      }
+    }
+    return <>{chars}</>;
+  }, []);
 
   // Calculate first 3 column widths with initial default values to prevent layout shift
   const first3Widths = useMemo(() => {
@@ -425,15 +1137,201 @@ const NxTableNested = ({
     return calculateFirst3ColumnWidths(parentColumns, childColumns, dataSource);
   }, [parentColumns, childColumns, dataSource, loading]);
 
-  const toggleExpand = (rowId) => {
-    const newSet = new Set(expandedKeys);
-    if (newSet.has(rowId)) {
-      newSet.delete(rowId);
-    } else {
-      newSet.add(rowId);
+  // Filter data based on search value — supports exact substring AND fuzzy match
+  const filteredDataSource = useMemo(() => {
+    if (!searchValue) return dataSource;
+    
+    return dataSource.filter(row => {
+      // Check parent row — exact substring first, then fuzzy
+      const parentMatch = parentColumns.some(col => {
+        const value = row[col.dataIndex || col.key];
+        const str = String(value || "").toLowerCase();
+        const sq = searchValue.toLowerCase();
+        return str.includes(sq) || fuzzyMatch(str, sq);
+      });
+      
+      if (parentMatch) return true;
+      
+      // Check child rows if they exist
+      if (row.children && Array.isArray(row.children)) {
+        return row.children.some(child => {
+          return childColumns.some(col => {
+            const value = child[col.dataIndex || col.key];
+            const str = String(value || "").toLowerCase();
+            const sq = searchValue.toLowerCase();
+            return str.includes(sq) || fuzzyMatch(str, sq);
+          });
+        });
+      }
+      
+      return false;
+    });
+  }, [dataSource, parentColumns, childColumns, searchValue, fuzzyMatch]);
+
+  const handleToggleExpand = useCallback((rowId) => {
+    setExpandedKeys(prev => {
+      const next = new Set(prev);
+      if (next.has(rowId)) {
+        next.delete(rowId);
+        // User explicitly closed this row — remove from auto-tracked set so
+        // clearing search won't try to collapse it again.
+        autoExpandedRef.current.delete(rowId);
+      } else {
+        next.add(rowId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleExpand = useCallback((rowId) => {
+    onExpand(rowId);
+  }, [onExpand]);
+
+  // ── Search-driven expand / collapse (runs once in parent, not per-row) ────
+  // Compute which row IDs have a child match. Pure derivation — no side effects.
+  const childMatchIds = useMemo(() => {
+    if (!searchValue) return new Set();
+    const sq = searchValue.toLowerCase();
+    const ids = new Set();
+    dataSource.forEach(row => {
+      if (!row.children || row.children.length === 0) return;
+      const matches = row.children.some(child =>
+        childColumns.some(col => {
+          const val = String(child[col.dataIndex || col.key] || "").toLowerCase();
+          if (val.includes(sq)) return true;
+          let qi = 0;
+          for (let i = 0; i < val.length && qi < sq.length; i++) {
+            if (val[i] === sq[qi]) qi++;
+          }
+          return qi === sq.length;
+        })
+      );
+      if (matches) ids.add(row.id);
+    });
+    return ids;
+  }, [searchValue, dataSource, childColumns]);
+
+  // Track which rows were expanded by the search auto-expand, so we never
+  // collapse rows the user manually opened.
+  const autoExpandedRef = useRef(new Set());
+
+  const prevSearchRef = useRef("");
+  useEffect(() => {
+    const searchCleared = !searchValue && prevSearchRef.current;
+    prevSearchRef.current = searchValue;
+
+    if (searchCleared) {
+      // Collapse only rows the search auto-opened, leave manually-opened rows alone
+      const toCollapse = autoExpandedRef.current;
+      autoExpandedRef.current = new Set();
+      if (toCollapse.size > 0) {
+        setExpandedKeys(prev => {
+          const next = new Set(prev);
+          toCollapse.forEach(id => next.delete(id));
+          return next;
+        });
+      }
+      return;
     }
-    setExpandedKeys(newSet);
+    if (!searchValue) return;
+
+    // Expand rows whose loaded children match
+    setExpandedKeys(prev => {
+      const next = new Set(prev);
+      let changed = false;
+      dataSource.forEach(row => {
+        if (childMatchIds.has(row.id) && !next.has(row.id)) {
+          next.add(row.id);
+          autoExpandedRef.current.add(row.id);
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+
+    // For matched rows whose children haven't loaded yet, trigger the fetch.
+    // Once data arrives, dataSource updates → childMatchIds recomputes →
+    // this effect re-runs → the row gets expanded.
+    childMatchIds.forEach(id => {
+      const row = dataSource.find(r => r.id === id);
+      if (row && (!row.children || row.children.length === 0) && !loadingKeys.has(id)) {
+        onExpand(id);
+      }
+    });
+  }, [childMatchIds, searchValue, dataSource, onExpand, loadingKeys]);
+
+  const handleRefresh =
+    onRefresh ||
+    (() => {
+      window.location.reload();
+    });
+
+  const handleAdvanceSearch = (searchData) => {
+    onAdvanceSearch(searchData);
+    setIsAdvanceOpen(false);
   };
+
+  const handleClearFilter = () => {
+    onAdvanceSearch(null);
+  };
+
+  // ── Infinite scroll via IntersectionObserver ──────────────────────────────
+  // The sentinel sits inside the .nx-table-nested-body scroll container; using
+  // that container as the observer root makes infinite scroll work correctly
+  // both standalone and when rendered inside a Modal (root:null / viewport
+  // would never fire inside a modal because the modal clips the sentinel).
+  const sentinelRef = useRef(null);
+  const scrollContainerRef = useRef(null); // ref to the scrollable body div
+  const isLoadingMoreRef = useRef(false);
+
+  useEffect(() => {
+    if (!useInfiniteScroll || !hasMore) return;
+    const sentinel = sentinelRef.current;
+    const scrollRoot = scrollContainerRef.current;
+    if (!sentinel || !scrollRoot) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMoreRef.current) {
+          isLoadingMoreRef.current = true;
+          setIsLoadingMore(true);
+          Promise.resolve(onLoadMore())
+            .catch(() => {})
+            .finally(() => {
+              isLoadingMoreRef.current = false;
+              setIsLoadingMore(false);
+            });
+        }
+      },
+      {
+        // Use the table's own scroll container as root — works in modals too.
+        root: scrollRoot,
+        rootMargin: "0px 0px 80px 0px",
+        threshold: 0,
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [useInfiniteScroll, hasMore, onLoadMore]);
+
+  // Filter columns based on hidden columns
+  const visibleParentColumns = useMemo(() => {
+    return parentColumns.filter(col => {
+      const colKey = col.key || col.dataIndex;
+      return !optionSelectedCol.includes(colKey);
+    });
+  }, [parentColumns, optionSelectedCol]);
+
+  const visibleChildColumns = useMemo(() => {
+    return childColumns.filter(col => {
+      const colKey = col.key || col.dataIndex;
+      return !optionSelectedCol.includes(colKey);
+    });
+  }, [childColumns, optionSelectedCol]);
+
+  const hasRightControls =
+    showAdvanceSearch || showSearchBar || showRefresh;
 
   const headerSpanBase = {
     color:         "#fff",
@@ -456,154 +1354,260 @@ const NxTableNested = ({
     flexShrink:   0,
   };
 
+  // Stable callback: passed down to SearchBar so it never changes identity
+  // between renders. SearchBar owns the input DOM state; this only updates
+  // the filter value after the debounce fires.
+  const handleSearchChange = useCallback((val) => {
+    setSearchValue(val);
+  }, []);
+
   return (
-    <div
-      style={{
-        borderRadius: 8,
-        border:       `1px solid ${BORDER_COL}`,
-        overflow:     "hidden",
-        display:      "flex",
-        flexDirection: "column",
-        background:   "#fff",
-        fontFamily:   FONT_FAMILY,
-        width:        "100%",
-      }}
-    >
-      <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; max-height: 0; }
-          to   { opacity: 1; max-height: 2000px; }
-        }
-
-        @keyframes nxSpin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-
-        .nx-child-spinner {
-          display: inline-block;
-          width: 14px;
-          height: 14px;
-          border: 2px solid #e0e7ef;
-          border-top-color: #1976D2;
-          border-radius: 50%;
-          animation: nxSpin 0.65s linear infinite;
-          flex-shrink: 0;
-        }
-
-        .nx-child-scroll::-webkit-scrollbar        { height: 6px; }
-        .nx-child-scroll::-webkit-scrollbar-track  { background: #f1f1f1; }
-        .nx-child-scroll::-webkit-scrollbar-thumb  { background: #888; border-radius: 3px; }
-        .nx-child-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
-        .nx-child-scroll { scrollbar-width: thin; scrollbar-color: #888 #f1f1f1; }
-      `}</style>
-
-      {/* Header row */}
-      <div style={{ display: "flex", alignItems: "stretch", width: "100%" }}>
-        {/* Toggle header (blank) */}
-        <div style={{ ...headerCellBase, width: EXPAND_COL_WIDTH, borderRight: `1px solid rgba(255,255,255,0.2)` }} />
-
-        {/* Parent column headers */}
-        {parentColumns.map((col, colIdx) => {
-          const fieldKey = col.key || col.dataIndex;
-          const width = columnWidths[fieldKey] || first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
-          const isLastCol = colIdx === parentColumns.length - 1;
-
-          return (
-            <div
-              key={fieldKey || colIdx}
-              style={{
-                ...headerCellBase,
-                width: isLastCol ? undefined : width,
-                flex: isLastCol ? 1 : "none",
-                minWidth: isLastCol ? undefined : width,
-                justifyContent: "center",
-                borderRight: isLastCol ? (actionColumn ? `1px solid rgba(255,255,255,0.2)` : "none") : `1px solid rgba(255,255,255,0.2)`,
-              }}
-            >
-              <span style={headerSpanBase}>{col.title}</span>
-            </div>
-          );
-        })}
-
-        {/* ACTIONS header */}
-        {actionColumn && (
-          <div style={{ ...headerCellBase, width: actionColumn.width || 120, justifyContent: "center" }}>
-            <span style={headerSpanBase}>{actionColumn.title || "ACTIONS"}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Data rows */}
-      <div style={{ position: "relative" }}>
-        {loading ? (
-          <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
-            <Spin />
-          </div>
-        ) : dataSource.length === 0 ? (
-          <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
-            No data
-          </div>
-        ) : (
-          dataSource.map((row, i) => (
-            <ParentRow
-              key={row.id}
-              no={i + 1}
-              record={row}
-              parentColumns={parentColumns}
-              childColumns={childColumns}
-              isEven={i % 2 !== 0}
-              isExpanded={expandedKeys.has(row.id)}
-              onToggleExpand={() => toggleExpand(row.id)}
-              onExpand={() => onExpand(row.id)}
-              actionColumn={actionColumn}
-              first3Widths={first3Widths}
-              columnWidths={columnWidths}
-              isChildLoading={loadingKeys.has(row.id)}
+    <div style={{ width: "100%" }}>
+      {useSelect && (
+        <div className={"w-full flex mb-3 justify-between items-center"}>
+          <div className="flex items-center gap-4">
+            <ColumnSettings
+              columns={columnDefinitions || [...parentColumns, ...childColumns]}
+              hiddenColumns={optionSelectedCol}
+              onHiddenColumnsChange={setOptionSelectedCol}
+              fixedColumns={fixedColumns}
+              onFixedColumnsChange={setFixedColumns}
+              buttonText="Column Settings"
+              buttonStyle={{ height: "32px", fontSize: "12px" }}
             />
-          ))
-        )}
-        
-        {loading && (
-          <div style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "33px", /* Same as NxTable footer height */
-            background: "rgba(255, 255, 255, 0.65)",
-            zIndex: 10,
-            borderRadius: "0 0 8px 8px",
-          }} />
-        )}
-      </div>
+            {customHeaderLeft && customHeaderLeft}
+          </div>
 
-      {/* Footer */}
+          {hasRightControls && (
+            <div className="flex justify-end gap-2">
+              {showRefresh && (
+                <Button
+                  icon={<ReloadOutlined style={{ fontSize: "14px" }} />}
+                  onClick={handleRefresh}
+                  loading={loading}
+                  style={{
+                    border: "1px solid #BDBDBD",
+                    color: "black",
+                    borderRadius: "8px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Refresh
+                </Button>
+              )}
+
+              {showAdvanceSearch && (
+                <Button
+                  onClick={() => setIsAdvanceOpen(true)}
+                  style={{
+                    border: "1px solid #BDBDBD",
+                    color: "black",
+                    borderRadius: "8px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  <FilterOutlined style={{ fontSize: "14px" }} />
+                  Advanced Search
+                </Button>
+              )}
+
+              {showSearchBar && (
+                <div style={{ width: "200px" }}>
+                  {/* SearchBar owns its own DOM input state — no focus loss on parent re-render */}
+                  <SearchBar
+                    placeholder="Search content here ..."
+                    onSearch={handleSearchChange}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      
       <div
         style={{
-          padding:        "6px 12px",
-          background:     "#fff",
-          display:        "flex",
-          justifyContent: "flex-end",
-          alignItems:     "center",
-          gap:            8,
-          borderTop:      `1px solid ${BORDER_COL}`,
-          fontFamily:     FONT_FAMILY,
-          position:       "relative", 
-          zIndex:         "1",
-          marginTop:      "-1px",
+          borderRadius: 8,
+          border:       `1px solid ${BORDER_COL}`,
+          overflow:     "hidden",
+          display:      "flex",
+          flexDirection: "column",
+          background:   "#fff",
+          fontFamily:   FONT_FAMILY,
+          width:        "100%",
         }}
       >
-        <span style={{ fontSize: 12, color: "#6B7280" }}>
-          Showing {dataSource.length} of {dataSource.length} entries
-        </span>
-        {dataSource.length > 0 && (
-          <>
-            <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
-            <span style={{ fontSize: 12, color: "#22c55e", fontWeight: 500 }}>All data showed</span>
-          </>
-        )}
+        <style>{`
+          @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to   { opacity: 1; max-height: 2000px; }
+          }
+
+          @keyframes nxSpin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+          }
+
+          .nx-child-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #e0e7ef;
+            border-top-color: #1976D2;
+            border-radius: 50%;
+            animation: nxSpin 0.65s linear infinite;
+            flex-shrink: 0;
+          }
+
+          .nx-child-scroll::-webkit-scrollbar        { height: 6px; }
+          .nx-child-scroll::-webkit-scrollbar-track  { background: #f1f1f1; }
+          .nx-child-scroll::-webkit-scrollbar-thumb  { background: #888; border-radius: 3px; }
+          .nx-child-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
+          .nx-child-scroll { scrollbar-width: thin; scrollbar-color: #888 #f1f1f1; }
+          
+          .nx-table-nested-body::-webkit-scrollbar        { width: 8px; }
+          .nx-table-nested-body::-webkit-scrollbar-track  { background: #f1f1f1; }
+          .nx-table-nested-body::-webkit-scrollbar-thumb  { background: #888; border-radius: 6px; }
+          .nx-table-nested-body::-webkit-scrollbar-thumb:hover { background: #555; }
+          .nx-table-nested-body { scrollbar-width: thin; scrollbar-color: #888 #f1f1f1; }
+        `}</style>
+
+        {/* Header row */}
+        <div style={{ display: "flex", alignItems: "stretch", width: "100%" }}>
+          {/* Toggle header (blank) */}
+          <div style={{ ...headerCellBase, width: EXPAND_COL_WIDTH, borderRight: `1px solid rgba(255,255,255,0.2)` }} />
+
+          {/* Parent column headers */}
+          {visibleParentColumns.map((col, colIdx) => {
+            const fieldKey = col.key || col.dataIndex;
+            const width = columnWidths[fieldKey] || first3Widths[fieldKey] || col.width || DEFAULT_COL_WIDTH;
+            const isLastCol = colIdx === visibleParentColumns.length - 1;
+
+            return (
+              <div
+                key={fieldKey || colIdx}
+                style={{
+                  ...headerCellBase,
+                  width: isLastCol ? undefined : width,
+                  flex: isLastCol ? 1 : "none",
+                  minWidth: isLastCol ? undefined : width,
+                  justifyContent: "center",
+                  borderRight: isLastCol ? (actionColumn ? `1px solid rgba(255,255,255,0.2)` : "none") : `1px solid rgba(255,255,255,0.2)`,
+                }}
+              >
+                <span style={headerSpanBase}>{col.title}</span>
+              </div>
+            );
+          })}
+
+          {/* ACTIONS header */}
+          {actionColumn && (
+            <div style={{ ...headerCellBase, width: actionColumn.width || 120, justifyContent: "center" }}>
+              <span style={headerSpanBase}>{actionColumn.title || "ACTIONS"}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Data rows */}
+        <div 
+          ref={scrollContainerRef}
+          className="nx-table-nested-body"
+          style={{ 
+            position: "relative", 
+            maxHeight: useInfiniteScroll ? "400px" : "none",
+            overflowY: useInfiniteScroll ? "auto" : "visible"
+          }}
+        >
+          {loading ? (
+            <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
+              <Spin />
+            </div>
+          ) : filteredDataSource.length === 0 ? (
+            <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
+              No data
+            </div>
+          ) : (
+            filteredDataSource.map((row, i) => (
+              <ParentRow
+                key={row.id}
+                no={i + 1}
+                record={row}
+                parentColumns={visibleParentColumns}
+                childColumns={visibleChildColumns}
+                isEven={i % 2 !== 0}
+                isExpanded={expandedKeys.has(row.id)}
+                onToggleExpand={handleToggleExpand}
+                onExpand={handleExpand}
+                actionColumn={actionColumn}
+                first3Widths={first3Widths}
+                columnWidths={columnWidths}
+                isChildLoading={loadingKeys.has(row.id)}
+                searchValue={searchValue}
+                highlightText={highlightText}
+              />
+            ))
+          )}
+
+          {isLoadingMore && (
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              padding: "10px 0",
+              color: "#6B7280",
+              fontSize: 12,
+              fontFamily: FONT_FAMILY,
+            }}>
+              <span className="nx-child-spinner" />
+              Loading more...
+            </div>
+          )}
+
+          {/* Sentinel: observed by IntersectionObserver to trigger next page load */}
+          {useInfiniteScroll && hasMore && (
+            <div ref={sentinelRef} style={{ height: 1 }} aria-hidden="true" />
+          )}
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            padding:        "6px 12px",
+            background:     "#fff",
+            display:        "flex",
+            justifyContent: "flex-end",
+            alignItems:     "center",
+            gap:            8,
+            borderTop:      `1px solid ${BORDER_COL}`,
+            fontFamily:     FONT_FAMILY,
+            position:       "relative",
+            zIndex:         "1",
+            marginTop:      "-1px",
+          }}
+        >
+          <span style={{ fontSize: 12, color: "#6B7280" }}>
+            Showing {filteredDataSource.length} of {dataSource.length} entries
+          </span>
+          {!loading && filteredDataSource.length > 0 && !hasMore && (
+            <>
+              <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+              <span style={{ fontSize: 12, color: "#22c55e", fontWeight: 500 }}>All data loaded</span>
+            </>
+          )}
+        </div>
       </div>
+
+      <NxAdvanceSearch
+        visible={isAdvanceOpen}
+        onClose={() => setIsAdvanceOpen(false)}
+        onSearch={handleAdvanceSearch}
+        onClear={handleClearFilter}
+        columns={[...parentColumns, ...childColumns]}
+        modalWidth={600}
+      />
     </div>
   );
 };
@@ -638,6 +1642,22 @@ NxTableNested.propTypes = {
   }),
   loadingKeys: PropTypes.instanceOf(Set),
   columnWidths: PropTypes.objectOf(PropTypes.number),
+  useSelect: PropTypes.bool,
+  showAdvanceSearch: PropTypes.bool,
+  showSearchBar: PropTypes.bool,
+  showRefresh: PropTypes.bool,
+  onRefresh: PropTypes.func,
+  columnDefinitions: PropTypes.array,
+  fixedColumns: PropTypes.shape({
+    left: PropTypes.array,
+    right: PropTypes.array,
+  }),
+  setFixedColumns: PropTypes.func,
+  onAdvanceSearch: PropTypes.func,
+  useInfiniteScroll: PropTypes.bool,
+  onLoadMore: PropTypes.func,
+  hasMore: PropTypes.bool,
+  customHeaderLeft: PropTypes.node,
 };
 
 NxTableNested.defaultProps = {
@@ -646,6 +1666,19 @@ NxTableNested.defaultProps = {
   actionColumn: null,
   loadingKeys: new Set(),
   columnWidths: {},
+  useSelect: true,
+  showAdvanceSearch: true,
+  showSearchBar: true,
+  showRefresh: false,
+  onRefresh: undefined,
+  columnDefinitions: undefined,
+  fixedColumns: { left: [], right: [] },
+  setFixedColumns: () => {},
+  onAdvanceSearch: () => {},
+  useInfiniteScroll: false,
+  onLoadMore: () => {},
+  hasMore: false,
+  customHeaderLeft: null,
 };
 
 export default NxTableNested;

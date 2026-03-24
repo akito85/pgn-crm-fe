@@ -115,87 +115,89 @@ const DetailLateCharges = () => {
   }, [id, data_detail]);
 
   return (
-    <Spin spinning={loading}>
-      <BreadCrumb routes={routes} />
-      <div className="flex flex-col">
-        <BaseContainer header={"late charge information"}>
-          <div className="grid grid-cols-3 gap-2">
-            <DetailText label={"Late Charge Name"}>
-              {dataLateCharge.lateChargeName}
-            </DetailText>
-            <DetailText label={"Currency"}>
-              {dataLateCharge.currency}
-            </DetailText>
-            <DetailText label={"Status"} classTextAdditional="capitalize">
-              {dataLateCharge?.status?.charAt(0).toUpperCase() + dataLateCharge?.status?.slice(1).toLowerCase()}
-            </DetailText>
-            <div className="col-span-3">
-              <DetailText label={"Criteria"}>
-                {dataLateCharge.criteriaName}
+    <>
+      <Spin spinning={loading}>
+        <BreadCrumb routes={routes} />
+        <div className="flex flex-col">
+          <BaseContainer header={"late charge information"}>
+            <div className="grid grid-cols-3 gap-2">
+              <DetailText label={"Late Charge Name"}>
+                {dataLateCharge.lateChargeName}
               </DetailText>
-            </div>
-            <div className="col-span-3">
-              <DetailText label={"Description"}>
-                {dataLateCharge.description}
+              <DetailText label={"Currency"}>
+                {dataLateCharge.currency}
               </DetailText>
+              <DetailText label={"Status"} classTextAdditional="capitalize">
+                {dataLateCharge?.status?.charAt(0).toUpperCase() + dataLateCharge?.status?.slice(1).toLowerCase()}
+              </DetailText>
+              <div className="col-span-3">
+                <DetailText label={"Criteria"}>
+                  {dataLateCharge.criteriaName}
+                </DetailText>
+              </div>
+              <div className="col-span-3">
+                <DetailText label={"Description"}>
+                  {dataLateCharge.description}
+                </DetailText>
+              </div>
             </div>
-          </div>
-        </BaseContainer>
-        <BaseContainer header={"late charge criteria"}>
-          <LateChargeTableCriteria
-            type={"detail"}
-            data={dataListCriteria}
-            dataCriteria={criteriaValues}
-            updateData={setDataListCriteria}
-            dispatch={dispatch}
-          />
-        </BaseContainer>
-        <BaseContainer header={"history log information"}>
-          <div className="grid grid-cols-5 w-full">
-            <DetailText label={'Record ID'}>{data_detail?.lateChargeId}</DetailText>
-            <DetailText label={"Created Date"}>
-              {dataLateCharge.createdDate}
-            </DetailText>
-            <DetailText label={"Created By"}>
-              {dataLateCharge.createdBy}
-            </DetailText>
-            <DetailText label={"Updated Date"}>
-              {dataLateCharge.updatedDate}
-            </DetailText>
-            <DetailText label={"Updated By"}>
-              {dataLateCharge.updatedBy}
-            </DetailText>
-          </div>
-        </BaseContainer>
-        {
-          Array?.isArray(access_account?.actionList) &&
-          <BaseContainer header={"late charge rule"}>
-            <LateChargesRuleTable
-              id={id}
-              isRuleActive={dataLateCharge.isRuleActive}
-              access={filteredArray}
+          </BaseContainer>
+          <BaseContainer header={"late charge criteria"}>
+            <LateChargeTableCriteria
+              type={"detail"}
+              data={dataListCriteria}
+              dataCriteria={criteriaValues}
+              updateData={setDataListCriteria}
+              dispatch={dispatch}
             />
           </BaseContainer>
-        }
-      </div>
-      <div className={`flex w-full align-middle my-3`}>
-        <ButtonComponent
-          type={"submit"}
-          onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES)}
-          icon={
-            <LeftOutlined
-              style={{
-                color: "#fff",
-                fontSize: 24,
-                justifyItems: "center",
-              }}
-            />
+          <BaseContainer header={"history log information"}>
+            <div className="grid grid-cols-5 w-full">
+              <DetailText label={'Record ID'}>{data_detail?.lateChargeId}</DetailText>
+              <DetailText label={"Created Date"}>
+                {dataLateCharge.createdDate}
+              </DetailText>
+              <DetailText label={"Created By"}>
+                {dataLateCharge.createdBy}
+              </DetailText>
+              <DetailText label={"Updated Date"}>
+                {dataLateCharge.updatedDate}
+              </DetailText>
+              <DetailText label={"Updated By"}>
+                {dataLateCharge.updatedBy}
+              </DetailText>
+            </div>
+          </BaseContainer>
+          {
+            Array?.isArray(access_account?.actionList) &&
+            <BaseContainer header={"late charge rule"}>
+              <LateChargesRuleTable
+                id={id}
+                isRuleActive={dataLateCharge.isRuleActive}
+                access={filteredArray}
+              />
+            </BaseContainer>
           }
-        >
-          Back
-        </ButtonComponent>
-      </div>
-    </Spin>
+        </div>
+        <div className={`flex w-full align-middle my-3`}>
+          <ButtonComponent
+            type={"submit"}
+            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES)}
+            icon={
+              <LeftOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 24,
+                  justifyItems: "center",
+                }}
+              />
+            }
+          >
+            Back
+          </ButtonComponent>
+        </div>
+      </Spin>
+    </>
   );
 };
 

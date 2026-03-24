@@ -251,7 +251,7 @@ const ListDetailTransferToReceipt = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -308,7 +308,7 @@ const ListDetailTransferToReceipt = () => {
           </div>
         ) : null}
       </div>
-    </div>
+    </>
   );
 };
 

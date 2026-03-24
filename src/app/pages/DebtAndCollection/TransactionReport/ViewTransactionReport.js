@@ -69,7 +69,7 @@ const ViewTransactionReport = () => {
   
 
   return (
-    <div>
+    <>
       <Spin spinning={loading } className="w-full top-20" tip="Loading...">
         <BreadCrumb routes={routes} />
 
@@ -106,7 +106,7 @@ const ViewTransactionReport = () => {
           </BaseContainer>
         </div>
       </Spin>
-    </div>
+    </>
   );
 };
 

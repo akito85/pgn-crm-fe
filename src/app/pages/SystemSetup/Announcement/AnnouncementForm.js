@@ -261,7 +261,7 @@ const AnnouncementForm = ({ type }) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Form
@@ -515,7 +515,7 @@ const AnnouncementForm = ({ type }) => {
         {/* Modal Retry */}
         {renderModal()}
       </Spin>
-    </div>
+    </>
   );
 };
 

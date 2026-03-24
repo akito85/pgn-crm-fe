@@ -269,7 +269,7 @@ const BillingCycleDetail = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div className="flex flex-col w-full gap-4">
         {bodyApproval.isApprover &&
@@ -370,7 +370,7 @@ const BillingCycleDetail = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

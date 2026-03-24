@@ -255,7 +255,7 @@ const BillingItemDetail = () => {
 
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") &&
@@ -352,7 +352,7 @@ const BillingItemDetail = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

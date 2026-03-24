@@ -432,7 +432,7 @@ const PricingDetail = (props) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loadingPricing}>
         <BreadCrumb routes={routes} />
         <div className="flex flex-col gap-4">
@@ -626,7 +626,7 @@ const PricingDetail = (props) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

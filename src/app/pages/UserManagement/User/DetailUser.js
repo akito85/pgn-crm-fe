@@ -307,7 +307,7 @@ const DetailUser = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <div>
         <BreadCrumb routes={routes} />
         <Spin spinning={loading}>
@@ -456,7 +456,7 @@ const DetailUser = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

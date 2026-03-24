@@ -809,7 +809,7 @@ const FormDataAccessHierarchy = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinnish}>
@@ -1080,7 +1080,7 @@ const FormDataAccessHierarchy = (props) => {
 
       {/* render try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

@@ -677,7 +677,7 @@ const TermOfServiceView = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -760,7 +760,7 @@ const TermOfServiceView = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

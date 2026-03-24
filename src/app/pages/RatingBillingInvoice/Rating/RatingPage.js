@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tabs } from "antd";
+import { Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -28,8 +28,10 @@ const RatingPage = () => {
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
-  const [page, setPage] = useState(1);
+  const initialPageSize = 100;
   const [loadMoreSize] = useState(20);
+
+  const [page, setPage] = useState(1);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -52,10 +54,12 @@ const RatingPage = () => {
 
   const detailRef = useRef(null);
 
+  // Fetch billing period saat mount
   useEffect(() => {
     dispatch(getListBillingPeriodForRating());
   }, [dispatch]);
 
+  // Set default billing period ke bulan & tahun sekarang
   useEffect(() => {
     if (
       list_billing_period &&
@@ -74,12 +78,12 @@ const RatingPage = () => {
       if (currentPeriod) {
         setSelectedBillingPeriod(currentPeriod.name);
       } else {
-        const latestPeriod = list_billing_period[0];
-        setSelectedBillingPeriod(latestPeriod.name);
+        setSelectedBillingPeriod(list_billing_period[0].name);
       }
     }
   }, [list_billing_period, selectedBillingPeriod]);
 
+  // Scroll ke detail saat row dipilih
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
       setTimeout(() => {
@@ -98,7 +102,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: 100,
+          pageSize: initialPageSize, // load pertama 100
           sort,
           period: selectedBillingPeriod,
           isLoadMore: false,
@@ -109,28 +113,13 @@ const RatingPage = () => {
   }, [dispatch, search, sort, selectedBillingPeriod]);
 
   const tabItems = [
-    {
-      key: "Rating Gas",
-      label: "Rating Gas",
-      children: null,
-    },
-    {
-      key: "Rating Non Gas",
-      label: "Rating Non Gas",
-      disabled: true,
-      children: null,
-    },
+    { key: "Rating Gas", label: "Rating Gas", children: null },
+    { key: "Rating Non Gas", label: "Rating Non Gas", disabled: true, children: null },
   ];
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "Rating & Billing",
-    },
-    {
-      path: RBI_ROUTES.RATING_VIEW,
-      breadcrumbName: "Rating",
-    },
+    { path: "", breadcrumbName: "Rating & Billing" },
+    { path: RBI_ROUTES.RATING_VIEW, breadcrumbName: "Rating" },
   ];
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -141,22 +130,15 @@ const RatingPage = () => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
       }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
+      return { ...prevState, [dataIndex]: selectedKeys[0] };
     });
   };
-
-  const initialPageSize = 100;
 
   const handleLoadMore = async () => {
     const totalElements = data?.page?.totalElements || 0;
     const currentDataLength = dataSource?.length || 0;
 
-    if (currentDataLength >= totalElements) {
-      return;
-    }
+    if (currentDataLength >= totalElements) return;
 
     const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
 
@@ -165,7 +147,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
-          pageSize: loadMoreSize,
+          pageSize: loadMoreSize, // load more 20
           sort,
           period: selectedBillingPeriod,
           isLoadMore: true,
@@ -181,7 +163,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: initialPageSize,
+          pageSize: initialPageSize, // refresh balik ke 100
           sort,
           period: selectedBillingPeriod,
           isLoadMore: false,
@@ -191,15 +173,12 @@ const RatingPage = () => {
     }
   };
 
+  // ✅ Sama persis seperti Billing
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
-    const fieldMapping = {
-      mreadingCode: "mReadingCode",
-    };
-
+    const fieldMapping = { mreadingCode: "mReadingCode" };
     const field = fieldMapping[sorter.field] || sorter.field;
-
     const dataSort =
       sorter.order !== undefined
         ? `${field}~${sorter.order === "ascend" ? "asc" : "desc"}`
@@ -293,11 +272,10 @@ const RatingPage = () => {
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess);
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+    return [...baseColumns, ...actionCols].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
   const processedColumns = useMemo(() => {
@@ -312,7 +290,7 @@ const RatingPage = () => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -355,7 +333,7 @@ const RatingPage = () => {
             hasMore={hasMore}
             showRefresh={true}
             onRefresh={handleRefresh}
-            loadMoreThreshold={20}
+            loadMoreThreshold={15}
             customHeaderLeft={
               <div className="flex items-center gap-1">
                 <SelectComponent
@@ -385,6 +363,7 @@ const RatingPage = () => {
             ratingCode={ratingCode}
             saType={saType}
             accountNumber={accountNumber}
+            billPeriod={selectedBillingPeriod}
             onClose={() => {
               setPageDetail(false);
               setActiveRowKey(null);
@@ -397,7 +376,7 @@ const RatingPage = () => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

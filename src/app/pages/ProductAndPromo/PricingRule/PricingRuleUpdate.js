@@ -728,7 +728,7 @@ const PricingRuleUpdate = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -898,7 +898,7 @@ const PricingRuleUpdate = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

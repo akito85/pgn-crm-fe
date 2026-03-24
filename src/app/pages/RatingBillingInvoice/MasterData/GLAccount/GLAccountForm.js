@@ -368,7 +368,7 @@ const GLAccountForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -462,7 +462,7 @@ const GLAccountForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

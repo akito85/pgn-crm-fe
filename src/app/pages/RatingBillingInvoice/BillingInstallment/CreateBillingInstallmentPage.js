@@ -175,7 +175,7 @@ const CreateInstallmentBillingPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer
@@ -516,7 +516,7 @@ const CreateInstallmentBillingPage = () => {
           )}
         </BaseContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

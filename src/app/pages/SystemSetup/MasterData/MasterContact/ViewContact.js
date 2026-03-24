@@ -47,7 +47,7 @@ const expandedRowRender = (record) => {
         },
     ];
     return (
-        <div>
+        <>
             <p className="text-primary text-xs font-bold uppercase">CONTACT DETAIL</p>
             <TablePaginationNew
                 type='FE'
@@ -68,7 +68,7 @@ const expandedRowRender = (record) => {
                     x: 1000,
                 }}
             /> */}
-        </div>
+        </>
     );
 };
 

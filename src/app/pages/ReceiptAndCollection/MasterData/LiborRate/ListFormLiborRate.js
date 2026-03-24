@@ -260,7 +260,7 @@ const ListFormLiborRate = (props) => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -341,7 +341,7 @@ const ListFormLiborRate = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

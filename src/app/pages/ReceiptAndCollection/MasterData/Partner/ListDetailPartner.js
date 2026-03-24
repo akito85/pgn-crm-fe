@@ -146,7 +146,7 @@ const ListDetailPartner = () => {
 
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <div>
@@ -207,7 +207,7 @@ const ListDetailPartner = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </div>
+    </>
   );
 };
 

@@ -281,7 +281,7 @@ const FormActivities = (props) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form
@@ -655,7 +655,7 @@ const FormActivities = (props) => {
 
       {/* render modal try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

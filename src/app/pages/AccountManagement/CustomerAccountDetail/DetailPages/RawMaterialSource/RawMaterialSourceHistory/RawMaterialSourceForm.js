@@ -310,186 +310,188 @@ const RawMaterialSourceForm = ({ type }) => {
   };
 
   return (
-    <Spin spinning={loading}>
-      <BreadCrumbAdvanced routes={routes(id)} />
+    <>
+      <Spin spinning={loading}>
+        <BreadCrumbAdvanced routes={routes(id)} />
 
-      <HeaderDetail
-        data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-        dispatch={dispatch}
-        idAccount={id}
-        idCustomer={idCustomer}
-        type="standard"
-      />
+        <HeaderDetail
+          data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+          dispatch={dispatch}
+          idAccount={id}
+          idCustomer={idCustomer}
+          type="standard"
+        />
 
-      <Form id="form" form={form} layout="vertical" onFinish={handleSubmit}>
-        <div className="flex flex-col gap-y-4 mt-4">
-          <NxCardContainer header={"RAW MATERIAL SOURCE INFORMATION"}>
-            <NxBaseContainer border>
-              <div className="w-full grid grid-cols-3 gap-3">
-                <Form.Item
-                  label={"Effective Date"}
-                  name={"effectiveDate"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Effective Date!",
-                    },
-                  ]}
-                >
-                  <DateComponent
-                    disabled={type !== "create" ? true : false}
-                    onChange={(e) => handleStartDate(e)}
-                    dateDisable={disabledDate}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={"Local (%)"}
-                  name={"value1"}
-                  dependencies={["value2"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Local (%)!",
-                    },
-                    { validator: validatePercentage }
-                  ]}
-                >
-                  <InputComponent
-                    type={"number"}
-                    onChange={(e) => {
-                      const val = Number(e.target.value || 0);
-                      setLocalVal(val);
-                      form.setFieldValue("value1", val);
-                    }}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label={"Import (%)"}
-                  name={"value2"}
-                  dependencies={["value1"]}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Import (%)!",
-                    },
-                    { validator: validatePercentage }
-                  ]}
-                >
-                  <InputComponent
-                    type={"number"}
-                    onChange={(e) => {
-                      const val = Number(e.target.value || 0);
-                      setImportVal(val);
-                      form.setFieldValue("value2", val);
-                    }}
-                  />
-                </Form.Item>
-
-                <div className="col-span-3">
+        <Form id="form" form={form} layout="vertical" onFinish={handleSubmit}>
+          <div className="flex flex-col gap-y-4 mt-4">
+            <NxCardContainer header={"RAW MATERIAL SOURCE INFORMATION"}>
+              <NxBaseContainer border>
+                <div className="w-full grid grid-cols-3 gap-3">
                   <Form.Item
-                    label={"Description"}
-                    name={"description"}
-                    className={"w-full"}
+                    label={"Effective Date"}
+                    name={"effectiveDate"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Effective Date!",
+                      },
+                    ]}
                   >
-                    <InputComponent
-                      type="textarea"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                    <DateComponent
+                      disabled={type !== "create" ? true : false}
+                      onChange={(e) => handleStartDate(e)}
+                      dateDisable={disabledDate}
                     />
                   </Form.Item>
+
+                  <Form.Item
+                    label={"Local (%)"}
+                    name={"value1"}
+                    dependencies={["value2"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Local (%)!",
+                      },
+                      { validator: validatePercentage }
+                    ]}
+                  >
+                    <InputComponent
+                      type={"number"}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        setLocalVal(val);
+                        form.setFieldValue("value1", val);
+                      }}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label={"Import (%)"}
+                    name={"value2"}
+                    dependencies={["value1"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Import (%)!",
+                      },
+                      { validator: validatePercentage }
+                    ]}
+                  >
+                    <InputComponent
+                      type={"number"}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        setImportVal(val);
+                        form.setFieldValue("value2", val);
+                      }}
+                    />
+                  </Form.Item>
+
+                  <div className="col-span-3">
+                    <Form.Item
+                      label={"Description"}
+                      name={"description"}
+                      className={"w-full"}
+                    >
+                      <InputComponent
+                        type="textarea"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              </NxBaseContainer>
+            </NxCardContainer>
+
+            <NxCardContainer header={"Raw Material Source Import Detail"}>
+              <NxBaseContainer border>
+                <FunctionalRMSDetail
+                  type={type}
+                  data={listDataDetail}
+                  updateData={setListDataDetail}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  required={{ required: true, message: "Please input your" }}
+                  localValue={localVal}
+                  importValue={importVal}
+                />
+              </NxBaseContainer>
+            </NxCardContainer>
+            
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <ButtonComponent
+                  type={"menu"}
+                  onClick={()=>{navigate(-1)}}
+                >
+                  Cancel
+                </ButtonComponent>
+                <div className="flex w-full justify-end gap-x-4">
+                  <ButtonComponent
+                    disabled={storedDataInline ? true : false}
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update"
+                            ? `IconButtonReset`
+                            : `IconButtonClear`
+                        }
+                        width={20}
+                      />
+                    }
+                    type="reject"
+                    onClick={() => {
+                      handleClear();
+                    }}
+                  >
+                    {type === "update" ? "Reset" : "Clear"}
+                  </ButtonComponent>
+                  <ButtonComponent type="submit" htmlType={"submit"} form={"form"}>
+                    Save
+                  </ButtonComponent>
                 </div>
               </div>
             </NxBaseContainer>
-          </NxCardContainer>
-
-          <NxCardContainer header={"Raw Material Source Import Detail"}>
-            <NxBaseContainer border>
-              <FunctionalRMSDetail
-                type={type}
-                data={listDataDetail}
-                updateData={setListDataDetail}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-                required={{ required: true, message: "Please input your" }}
-                localValue={localVal}
-                importValue={importVal}
-              />
-            </NxBaseContainer>
-          </NxCardContainer>
-          
-          <NxBaseContainer border>
-            <div className="flex justify-between">
-              <ButtonComponent
-                type={"menu"}
-                onClick={()=>{navigate(-1)}}
-              >
-                Cancel
-              </ButtonComponent>
-              <div className="flex w-full justify-end gap-x-4">
-                <ButtonComponent
-                  disabled={storedDataInline ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={20}
-                    />
-                  }
-                  type="reject"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-                <ButtonComponent type="submit" htmlType={"submit"} form={"form"}>
-                  Save
-                </ButtonComponent>
-              </div>
-            </div>
-          </NxBaseContainer>
-        </div>
-      </Form>
-
-      {/* Modal Confirmation */}
-      <ModalConfirmationRMS
-        isOpen={modalConfirm}
-        handleCancel={() => setModalConfirm(false)}
-        handleConfirm={() => handleConfirm()}
-        data={processData(bodyData)}
-        dataDetail={listDataDetail}
-      />
-
-      {/* Modal Back */}
-      <ModalBack
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-      />
-
-      {/* Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not created.
-          ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-    </Spin>
+        </Form>
+
+        {/* Modal Confirmation */}
+        <ModalConfirmationRMS
+          isOpen={modalConfirm}
+          handleCancel={() => setModalConfirm(false)}
+          handleConfirm={() => handleConfirm()}
+          data={processData(bodyData)}
+          dataDetail={listDataDetail}
+        />
+
+        {/* Modal Back */}
+        <ModalBack
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+        />
+
+        {/* Modal Retry */}
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not created.
+            ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+      </Spin>
+    </>
   );
 };
 

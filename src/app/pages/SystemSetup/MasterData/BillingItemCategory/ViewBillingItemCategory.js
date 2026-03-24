@@ -65,7 +65,7 @@ const ViewBillingItemCategory = () => {
   }, [navigate]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <DetailSection header={"TRANSACTION MAPPING CATEGORY INFORMATION"}>
@@ -105,7 +105,7 @@ const ViewBillingItemCategory = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -151,7 +151,7 @@ const DetailPage = () => {
     ];
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
 
@@ -261,7 +261,7 @@ const DetailPage = () => {
                     />
                 </Form>
             </Spin>
-        </div>
+        </>
     );
 }
 

@@ -344,7 +344,7 @@ const BillingPage = () => {
   );
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -374,7 +374,7 @@ const BillingPage = () => {
           hasMore={hasMore}
           showRefresh={true}
           onRefresh={handleRefresh}
-          loadMoreThreshold={20}
+          loadMoreThreshold={15}
           enableRowClick={true}
           selectedRowKey={activeRowKey}
           onRowClick={handleDetail}
@@ -429,7 +429,7 @@ const BillingPage = () => {
         handleRefresh={handleRefresh}
         handleOpenModal={() => setModalApproval(true)}
       />
-    </div>
+    </>
   );
 };
 

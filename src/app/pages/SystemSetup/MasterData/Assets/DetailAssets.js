@@ -487,7 +487,7 @@ const DetailAssets = () => {
 
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <BaseContainer header={'asset information'}>
@@ -595,7 +595,7 @@ const DetailAssets = () => {
                     Back
                 </ButtonComponent>
             </div>
-        </div>
+        </>
     );
 }
 

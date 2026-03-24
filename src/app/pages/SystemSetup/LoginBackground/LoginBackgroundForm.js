@@ -246,224 +246,226 @@ const LoginBackgroundForm = ({ type }) => {
   };
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <Spin spinning={loading || isLoading}>
-      <BreadCrumb routes={routes} />
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-      // onFinishFailed={handleError}
-      >
-        <BaseContainer
-          header={
-            type === "create"
-              ? "Create Login Background"
-              : "Update Login Background"
-          }
+    <>
+      <Spin spinning={loading || isLoading}>
+        <BreadCrumb routes={routes} />
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+        // onFinishFailed={handleError}
         >
-          <div className={"w-full flex flex-col"}>
-            <div className="w-auto grid grid-cols-2 gap-10">
-              <Form.Item
-                name={"backgroundName"}
-                rules={formMessageRequired("Background Name")}
-                label={"Login Background Name"}
-                className={"w-full"}
-              >
-                <InputComponent type="text" disabled={type === "update"} />
-              </Form.Item>
-              <Form.Item
-                label={"Upload File:"}
-                name={"image"}
-                rules={formMessageRequired(
-                  "logo",
-                  fileList?.length > 0 && detail_Background?.data?.logo !== null
-                    ? false
-                    : true
-                )}
-                className={"w-full"}
-              // getValueFromEvent={getFile}
-              >
-                <Upload
-                  fileList={fileList}
-                  accept={acceptExtension}
-                  listType="picture"
-                  beforeUpload={async (file) => {
-                    const allowed_file = allow_file?.data?.fileExt
-                      ?.toLowerCase()
-                      ?.split(",");
-                    const file_extension = getFileExtension(file?.name);
-                    const max_allowed_file = allow_file?.data?.size;
-                    const fileInMb = file.size / (1024 * 1024);
-                    if (
-                      allowed_file?.includes(file_extension) &&
-                      fileInMb < max_allowed_file
-                    ) {
-                      setValidateFile(true);
-                      setFileName(file?.name);
-                      const base64 = await getBase64(file);
-                      const regex = "";
-                      setBase64Image(base64.replace(regex, ""));
-                      setFileList([...fileList, { ...file, percent: 0 }]);
-                    } else {
-                      if (allowed_file?.includes(file_extension) === false) {
-                        setValidateFile(false);
-                        const errorBody = {
-                          title: "Failed",
-                          description: `Format file not valid`,
-                        };
-                        dispatch(showModalError(errorBody));
-                      }
-                      if (
-                        allowed_file?.includes(file_extension) === true &&
-                        fileInMb > max_allowed_file
-                      ) {
-                        setValidateFile(false);
-                        const errorBody = {
-                          title: "Failed",
-                          description: `File size not valid, file too large!`,
-                        };
-                        dispatch(showModalError(errorBody));
-                      }
-                    }
-                    return false;
-                  }}
-                  onChange={handleChange}
-                  onRemove={handleRemove}
-                  className="w-full"
-                  maxCount={1}
-                >
-                  <div className="w-full">
-                    <Button
-                      icon={<UploadOutlined style={{ fontSize: "24px" }} />}
-                    >
-                      Choose File
-                    </Button>
-                    {fileList.length === 0 &&
-                      detail_Background?.imageBackground === null ? (
-                      <span className={"text-gray-500 text-xs ml-2"}>
-                        {" "}
-                        No Image Choosen
-                      </span>
-                    ) : (
-                      <span className={"text-gray-500 text-xs ml-2"}>
-                        {type === "update" ? (
-                          <Image
-                            src={detail_Background?.urlLogo2}
-                            width={80}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        ) : null}
-                      </span>
-                    )}
-                  </div>
-                </Upload>
-              </Form.Item>
-              <Form.Item hidden name={"urlImage"} />
-            </div>
-            <div className="w-auto grid grid-cols-2 gap-10">
-              <Form.Item
-                label={"Start Date"}
-                name={"startDate"}
-                rules={formMessageRequired("Start Date")}
-              >
-                <DateComponent
-                  onChange={(e) => handleStartDate(e)}
-                  disabled={type === "update"}
-                />
-              </Form.Item>
-              <Form.Item
-                label={"End Date"}
-                name={"endDate"}
-                rules={[
-                  {
-                    validator: (_, value) =>
-                      (value && moment(startDate) <= moment(value)) || !value
-                        ? Promise.resolve()
-                        : Promise.reject(
-                          new Error(
-                            "The end date must be greater than or equal to the start date!"
-                          )
-                        ),
-                  },
-                ]}
-              >
-                <DateComponent
-                  disabled={startDate === null}
-                  dateDisable={handleDisableEndDate}
-                />
-              </Form.Item>
-            </div>
-            <div className={"w-full flex-col"}></div>
-            <Form.Item
-              label={"Description"}
-              name={"description"}
-              className={"w-full"}
-            >
-              <InputComponent type="textarea" />
-            </Form.Item>
-          </div>
-        </BaseContainer>
-        <div className="mt-[30px] flex">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => setModalBack(true)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
+          <BaseContainer
+            header={
+              type === "create"
+                ? "Create Login Background"
+                : "Update Login Background"
             }
           >
-            Back
-          </ButtonComponent>
-
-          <div className="w-full flex justify-end gap-5">
+            <div className={"w-full flex flex-col"}>
+              <div className="w-auto grid grid-cols-2 gap-10">
+                <Form.Item
+                  name={"backgroundName"}
+                  rules={formMessageRequired("Background Name")}
+                  label={"Login Background Name"}
+                  className={"w-full"}
+                >
+                  <InputComponent type="text" disabled={type === "update"} />
+                </Form.Item>
+                <Form.Item
+                  label={"Upload File:"}
+                  name={"image"}
+                  rules={formMessageRequired(
+                    "logo",
+                    fileList?.length > 0 && detail_Background?.data?.logo !== null
+                      ? false
+                      : true
+                  )}
+                  className={"w-full"}
+                // getValueFromEvent={getFile}
+                >
+                  <Upload
+                    fileList={fileList}
+                    accept={acceptExtension}
+                    listType="picture"
+                    beforeUpload={async (file) => {
+                      const allowed_file = allow_file?.data?.fileExt
+                        ?.toLowerCase()
+                        ?.split(",");
+                      const file_extension = getFileExtension(file?.name);
+                      const max_allowed_file = allow_file?.data?.size;
+                      const fileInMb = file.size / (1024 * 1024);
+                      if (
+                        allowed_file?.includes(file_extension) &&
+                        fileInMb < max_allowed_file
+                      ) {
+                        setValidateFile(true);
+                        setFileName(file?.name);
+                        const base64 = await getBase64(file);
+                        const regex = "";
+                        setBase64Image(base64.replace(regex, ""));
+                        setFileList([...fileList, { ...file, percent: 0 }]);
+                      } else {
+                        if (allowed_file?.includes(file_extension) === false) {
+                          setValidateFile(false);
+                          const errorBody = {
+                            title: "Failed",
+                            description: `Format file not valid`,
+                          };
+                          dispatch(showModalError(errorBody));
+                        }
+                        if (
+                          allowed_file?.includes(file_extension) === true &&
+                          fileInMb > max_allowed_file
+                        ) {
+                          setValidateFile(false);
+                          const errorBody = {
+                            title: "Failed",
+                            description: `File size not valid, file too large!`,
+                          };
+                          dispatch(showModalError(errorBody));
+                        }
+                      }
+                      return false;
+                    }}
+                    onChange={handleChange}
+                    onRemove={handleRemove}
+                    className="w-full"
+                    maxCount={1}
+                  >
+                    <div className="w-full">
+                      <Button
+                        icon={<UploadOutlined style={{ fontSize: "24px" }} />}
+                      >
+                        Choose File
+                      </Button>
+                      {fileList.length === 0 &&
+                        detail_Background?.imageBackground === null ? (
+                        <span className={"text-gray-500 text-xs ml-2"}>
+                          {" "}
+                          No Image Choosen
+                        </span>
+                      ) : (
+                        <span className={"text-gray-500 text-xs ml-2"}>
+                          {type === "update" ? (
+                            <Image
+                              src={detail_Background?.urlLogo2}
+                              width={80}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          ) : null}
+                        </span>
+                      )}
+                    </div>
+                  </Upload>
+                </Form.Item>
+                <Form.Item hidden name={"urlImage"} />
+              </div>
+              <div className="w-auto grid grid-cols-2 gap-10">
+                <Form.Item
+                  label={"Start Date"}
+                  name={"startDate"}
+                  rules={formMessageRequired("Start Date")}
+                >
+                  <DateComponent
+                    onChange={(e) => handleStartDate(e)}
+                    disabled={type === "update"}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label={"End Date"}
+                  name={"endDate"}
+                  rules={[
+                    {
+                      validator: (_, value) =>
+                        (value && moment(startDate) <= moment(value)) || !value
+                          ? Promise.resolve()
+                          : Promise.reject(
+                            new Error(
+                              "The end date must be greater than or equal to the start date!"
+                            )
+                          ),
+                    },
+                  ]}
+                >
+                  <DateComponent
+                    disabled={startDate === null}
+                    dateDisable={handleDisableEndDate}
+                  />
+                </Form.Item>
+              </div>
+              <div className={"w-full flex-col"}></div>
+              <Form.Item
+                label={"Description"}
+                name={"description"}
+                className={"w-full"}
+              >
+                <InputComponent type="textarea" />
+              </Form.Item>
+            </div>
+          </BaseContainer>
+          <div className="mt-[30px] flex">
             <ButtonComponent
+              type={"submit"}
+              onClick={() => setModalBack(true)}
               icon={
-                <SVGIcon
-                  name={
-                    type === "update" ? "IconButtonReset" : "IconButtonClear"
-                  }
-                  width={24}
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
                 />
               }
-              type="submit"
-              onClick={() => {
-                handleClear();
-              }}
             >
-              {type === "update" ? "Reset" : "Clear"}
+              Back
             </ButtonComponent>
-            <ButtonComponent
-              htmlType="submit"
-              type="submit"
-              onClick={() => setFlag(true)}
-            >
-              Save
-            </ButtonComponent>
+
+            <div className="w-full flex justify-end gap-5">
+              <ButtonComponent
+                icon={
+                  <SVGIcon
+                    name={
+                      type === "update" ? "IconButtonReset" : "IconButtonClear"
+                    }
+                    width={24}
+                  />
+                }
+                type="submit"
+                onClick={() => {
+                  handleClear();
+                }}
+              >
+                {type === "update" ? "Reset" : "Clear"}
+              </ButtonComponent>
+              <ButtonComponent
+                htmlType="submit"
+                type="submit"
+                onClick={() => setFlag(true)}
+              >
+                Save
+              </ButtonComponent>
+            </div>
           </div>
-        </div>
-      </Form>
-      {/* Modal Confirmation */}
-      <ModalConfirmationLoginBackground
-        isOpen={modalConfirm}
-        data={bodyData}
-        handleCancel={() => setModalConfirm(false)}
-        handleConfirm={() => handleConfirm()}
-        type={type}
-      />
-      {/* Modal Back */}
-      <ModalBack
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-      />
-      {/* Modal Retry */}
-      {renderModal()}
-    </Spin>
+        </Form>
+        {/* Modal Confirmation */}
+        <ModalConfirmationLoginBackground
+          isOpen={modalConfirm}
+          data={bodyData}
+          handleCancel={() => setModalConfirm(false)}
+          handleConfirm={() => handleConfirm()}
+          type={type}
+        />
+        {/* Modal Back */}
+        <ModalBack
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+        />
+        {/* Modal Retry */}
+        {renderModal()}
+      </Spin>
+    </>
   );
 };
 

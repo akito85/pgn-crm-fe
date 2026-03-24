@@ -251,7 +251,7 @@ const UploadUser = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"w-full flex justify-end"}>
@@ -402,7 +402,7 @@ const UploadUser = () => {
           </div>
         </ModalConfirm>
       </Spin>
-    </div>
+    </>
   );
 };
 

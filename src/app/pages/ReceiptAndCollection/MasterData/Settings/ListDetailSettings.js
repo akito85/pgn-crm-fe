@@ -9,7 +9,6 @@ import DetailSection from "../../../../../components/DetailSection";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
 import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectSetting,
   approveOrRejectInactive,
@@ -157,7 +156,7 @@ const ListDetailSettings = () => {
 
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <Tabs
@@ -217,7 +216,7 @@ const ListDetailSettings = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </div>
+    </>
   );
 };
 

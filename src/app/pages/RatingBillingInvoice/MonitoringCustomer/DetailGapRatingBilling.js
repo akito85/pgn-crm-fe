@@ -158,7 +158,7 @@ const DetailGapRatingBilling = ({
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -268,7 +268,7 @@ const DetailGapRatingBilling = ({
           </div>
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

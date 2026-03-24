@@ -1004,290 +1004,292 @@ const FormTaxImplicationRule = ({ type }) => {
   };
 
   return (
-    <Spin spinning={isLoading}>
-      <BreadCrumbAdvanced routes={routes(type, taxImplicationId)} />
-      <div className="flex flex-col gap-4">
-        <BaseContainer header={"tax implication information"}>
-          <div className="grid grid-cols-3 gap-2">
-            <DetailText label={"Tax Implication Name"}>
-              {dataTaxImplication?.taxImplicationName}
-            </DetailText>
-            <DetailText label={"Category"}>
-              {dataTaxImplication?.category}
-            </DetailText>
-            <DetailText label={"Service Type"}>
-              {dataTaxImplication?.serviceType}
-            </DetailText>
-            <DetailText label={"Criteria"}>
-              {dataTaxImplication?.criteriaName}
-            </DetailText>
-            <div className="col-span-3">
-              <DetailText label={"Description"}>
-                {dataTaxImplication?.description}
+    <>
+      <Spin spinning={isLoading}>
+        <BreadCrumbAdvanced routes={routes(type, taxImplicationId)} />
+        <div className="flex flex-col gap-4">
+          <BaseContainer header={"tax implication information"}>
+            <div className="grid grid-cols-3 gap-2">
+              <DetailText label={"Tax Implication Name"}>
+                {dataTaxImplication?.taxImplicationName}
               </DetailText>
-            </div>
-          </div>
-        </BaseContainer>
-        <Form
-          id="taxImplicationRuleForm"
-          form={form}
-          layout={"vertical"}
-          onFinish={handleSubmitForm}
-          // onFinishFailed={handleErrorSubmit}
-          scrollToFirstError={true}
-        >
-          <div className="flex flex-col w-full gap-4 mt-8">
-            <div className="grid grid-cols-10 gap-4 w-full">
-              <span className="mt-[10px]">
-                <LeftCircleOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                  onClick={scrollLeftHandler}
-                />
-              </span>
-              <div
-                ref={containerRef}
-                className="overflow-x-scroll scrollStepsCstm col-span-8"
-              >
-                <Steps
-                  current={current}
-                  items={steps()}
-                  labelPlacement="vertical"
-                />
+              <DetailText label={"Category"}>
+                {dataTaxImplication?.category}
+              </DetailText>
+              <DetailText label={"Service Type"}>
+                {dataTaxImplication?.serviceType}
+              </DetailText>
+              <DetailText label={"Criteria"}>
+                {dataTaxImplication?.criteriaName}
+              </DetailText>
+              <div className="col-span-3">
+                <DetailText label={"Description"}>
+                  {dataTaxImplication?.description}
+                </DetailText>
               </div>
-              <span className="mt-[10px] flex justify-end">
-                <RightCircleOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                  onClick={scrollRightHandler}
-                />
-              </span>
             </div>
-            {steps()[current].content}
-            <div className="flex w-full justify-between align-middle gap-4 mb-4">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setModalBack(true)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
+          </BaseContainer>
+          <Form
+            id="taxImplicationRuleForm"
+            form={form}
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            // onFinishFailed={handleErrorSubmit}
+            scrollToFirstError={true}
+          >
+            <div className="flex flex-col w-full gap-4 mt-8">
+              <div className="grid grid-cols-10 gap-4 w-full">
+                <span className="mt-[10px]">
+                  <LeftCircleOutlined
+                    style={{ fontSize: "24px", color: "#0075bf" }}
+                    onClick={scrollLeftHandler}
                   />
-                }
-              >
-                Back
-              </ButtonComponent>
-              <div className="flex align-middle gap-3">
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={handleClear}
+                </span>
+                <div
+                  ref={containerRef}
+                  className="overflow-x-scroll scrollStepsCstm col-span-8"
                 >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-                {current > 0 && (
-                  <ButtonComponent
-                    onClick={handleButtonPrev}
-                    type={"submit"}
-                    disabled={storedDataInline}
-                  >
+                  <Steps
+                    current={current}
+                    items={steps()}
+                    labelPlacement="vertical"
+                  />
+                </div>
+                <span className="mt-[10px] flex justify-end">
+                  <RightCircleOutlined
+                    style={{ fontSize: "24px", color: "#0075bf" }}
+                    onClick={scrollRightHandler}
+                  />
+                </span>
+              </div>
+              {steps()[current].content}
+              <div className="flex w-full justify-between align-middle gap-4 mb-4">
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => setModalBack(true)}
+                  icon={
                     <LeftOutlined
                       style={{
-                        justifyItems: "center",
-                        fontSize: 18,
                         color: "#fff",
+                        fontSize: 24,
+                        justifyItems: "center",
                       }}
                     />
-                    Previous
+                  }
+                >
+                  Back
+                </ButtonComponent>
+                <div className="flex align-middle gap-3">
+                  <ButtonComponent
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update"
+                            ? `IconButtonReset`
+                            : `IconButtonClear`
+                        }
+                        width={24}
+                      />
+                    }
+                    type="submit"
+                    onClick={handleClear}
+                  >
+                    {type === "update" ? "Reset" : "Clear"}
                   </ButtonComponent>
-                )}
-                {current < steps().length - 1 && (
-                  <Form.Item>
+                  {current > 0 && (
                     <ButtonComponent
-                      onClick={handleButtonNext}
-                      // disabled={steps()[current].disabled}
+                      onClick={handleButtonPrev}
                       type={"submit"}
+                      disabled={storedDataInline}
                     >
-                      Next
-                      <RightOutlined
+                      <LeftOutlined
                         style={{
                           justifyItems: "center",
                           fontSize: 18,
                           color: "#fff",
                         }}
                       />
+                      Previous
                     </ButtonComponent>
-                  </Form.Item>
-                )}
-                {current === steps().length - 1 ? (
-                  <>
-                    <ButtonComponent
-                      htmlType="submit"
-                      type="submit"
-                      onClick={() => setTypeSubmit(listTypeSubmit[1])}
-                      form="taxImplicationRuleForm"
-                    >
-                      Save as Draft
-                    </ButtonComponent>
-                    <ButtonComponent
-                      htmlType="submit"
-                      type="submit"
-                      onClick={() => setTypeSubmit(listTypeSubmit[0])}
-                      form="taxImplicationRuleForm"
-                    >
-                      Save & Submit
-                    </ButtonComponent>
-                  </>
-                ) : null}
+                  )}
+                  {current < steps().length - 1 && (
+                    <Form.Item>
+                      <ButtonComponent
+                        onClick={handleButtonNext}
+                        // disabled={steps()[current].disabled}
+                        type={"submit"}
+                      >
+                        Next
+                        <RightOutlined
+                          style={{
+                            justifyItems: "center",
+                            fontSize: 18,
+                            color: "#fff",
+                          }}
+                        />
+                      </ButtonComponent>
+                    </Form.Item>
+                  )}
+                  {current === steps().length - 1 ? (
+                    <>
+                      <ButtonComponent
+                        htmlType="submit"
+                        type="submit"
+                        onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                        form="taxImplicationRuleForm"
+                      >
+                        Save as Draft
+                      </ButtonComponent>
+                      <ButtonComponent
+                        htmlType="submit"
+                        type="submit"
+                        onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                        form="taxImplicationRuleForm"
+                      >
+                        Save & Submit
+                      </ButtonComponent>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
-          </div>
-        </Form>
-      </div>
+          </Form>
+        </div>
 
-      {/** Modal Confirm */}
-      {modalConfirm ? (
-        <ModalCustom
-          isOpen={modalConfirm}
-          handleCancel={handleCancelModalConfirm}
-          header={"Confirmation"}
-          width={1000}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent
-                onClick={handleCancelModalConfirm}
-                type="default"
-              >
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                type="submit"
-                onClick={handleProcessModalConfirm}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <ContentModalConfirmTaxImplicationRule
-            data={transactionCodeData}
-            dataTaxImplication={dataTaxImplication}
-            dataTaxImplicationRule={dataTaxImplicationRule}
-            listSectionInfo={steps().map((item) => ({
-              value: item.title,
-            }))}
-            listDataDetailCondition={listDataDetailCondition}
-            listDataAttachment={listDataAttachment}
-            listDataDetailFormula={listDataDetailFormula}
-            listDataAppHierDetail={appHierDataDetail}
-            dataOption={appHierOptions}
-            selectedHierarchy={selectedHierarchy}
-            listDataDetailOverride={listDataDetailOverride}
-          />
-        </ModalCustom>
-      ) : null}
-
-      {modalSuccessCreate ?
-        <Modal
-          open={modalSuccessCreate}
-          onCancel={() => setModalSuccessCreate(false)}
-          className={"modal-custom"}
-          centered={true}
-          width={400}
-          maskClosable={false}
-          footer={
-            <div className="w-full flex justify-end gap-5 p-4">
-              <Link
-                // to={from === "create" ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TAX_IMPLICATION : ACCOUNT_MANAGEMENT_ROUTES.VIEW_TAX_IMPLICATION}
-                // state={from === "create" ? {id:taxImplicationId} : null}
-                to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TAX_IMPLICATION}
-                state={{ id: taxImplicationId }}
-              >
-                <ButtonComponent type="submit">
-                  OK
+        {/** Modal Confirm */}
+        {modalConfirm ? (
+          <ModalCustom
+            isOpen={modalConfirm}
+            handleCancel={handleCancelModalConfirm}
+            header={"Confirmation"}
+            width={1000}
+            type={"confirmation"}
+            footer={
+              <div className="w-full flex justify-end gap-5 p-4">
+                <ButtonComponent
+                  onClick={handleCancelModalConfirm}
+                  type="default"
+                >
+                  Cancel
                 </ButtonComponent>
-              </Link>
-            </div>
-          }
-        >
-          <div className={"flex flex-col w-full"}>
-            <div className="px-5 pt-5 pb-[10px] justify-center">
-              <div className="w-full flex gap-[20px]">
-                <SVGIcon name="IconSuccess" width={48} />
-                <p className="text-[18px] font-bold">Successful</p>
+                <ButtonComponent
+                  type="submit"
+                  onClick={handleProcessModalConfirm}
+                >
+                  Confirm
+                </ButtonComponent>
               </div>
-              <p className="pl-[70px]">{`Your data has been ${typeSubmit == 'draft' ? 'created' : 'submitted'}.`}</p>
+            }
+          >
+            <ContentModalConfirmTaxImplicationRule
+              data={transactionCodeData}
+              dataTaxImplication={dataTaxImplication}
+              dataTaxImplicationRule={dataTaxImplicationRule}
+              listSectionInfo={steps().map((item) => ({
+                value: item.title,
+              }))}
+              listDataDetailCondition={listDataDetailCondition}
+              listDataAttachment={listDataAttachment}
+              listDataDetailFormula={listDataDetailFormula}
+              listDataAppHierDetail={appHierDataDetail}
+              dataOption={appHierOptions}
+              selectedHierarchy={selectedHierarchy}
+              listDataDetailOverride={listDataDetailOverride}
+            />
+          </ModalCustom>
+        ) : null}
+
+        {modalSuccessCreate ?
+          <Modal
+            open={modalSuccessCreate}
+            onCancel={() => setModalSuccessCreate(false)}
+            className={"modal-custom"}
+            centered={true}
+            width={400}
+            maskClosable={false}
+            footer={
+              <div className="w-full flex justify-end gap-5 p-4">
+                <Link
+                  // to={from === "create" ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TAX_IMPLICATION : ACCOUNT_MANAGEMENT_ROUTES.VIEW_TAX_IMPLICATION}
+                  // state={from === "create" ? {id:taxImplicationId} : null}
+                  to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TAX_IMPLICATION}
+                  state={{ id: taxImplicationId }}
+                >
+                  <ButtonComponent type="submit">
+                    OK
+                  </ButtonComponent>
+                </Link>
+              </div>
+            }
+          >
+            <div className={"flex flex-col w-full"}>
+              <div className="px-5 pt-5 pb-[10px] justify-center">
+                <div className="w-full flex gap-[20px]">
+                  <SVGIcon name="IconSuccess" width={48} />
+                  <p className="text-[18px] font-bold">Successful</p>
+                </div>
+                <p className="pl-[70px]">{`Your data has been ${typeSubmit == 'draft' ? 'created' : 'submitted'}.`}</p>
+              </div>
             </div>
-          </div>
-        </Modal> : null
-      }
+          </Modal> : null
+        }
 
-      {/* Modal Back */}
-      <ModalBack
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-      />
-      {/** Modal Override must one data */}
-      <ModalError
-        isOpen={modalOverrideWarning}
-        handleOk={() => setModalOverrideWarning(false)}
-        handleCancel={() => setModalOverrideWarning(false)}
-        customText={"Oke"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal.icon_error_default}
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        {/* Modal Back */}
+        <ModalBack
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+        />
+        {/** Modal Override must one data */}
+        <ModalError
+          isOpen={modalOverrideWarning}
+          handleOk={() => setModalOverrideWarning(false)}
+          handleCancel={() => setModalOverrideWarning(false)}
+          customText={"Oke"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              {IconModal.icon_error_default}
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">Please fill condition at least 1 data!</p>
           </div>
-          <p className="pl-[70px]">Please fill condition at least 1 data!</p>
-        </div>
-      </ModalError>
-      {/** Modal Override must Fill Field tax impli type and code */}
-      <ModalError
-        isOpen={modalFormTaxImpliRuleError}
-        handleOk={() => setModalFormTaxImpliRuleError(false)}
-        handleCancel={() => setModalFormTaxImpliRuleError(false)}
-        customText={"Oke"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal.icon_error_default}
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        </ModalError>
+        {/** Modal Override must Fill Field tax impli type and code */}
+        <ModalError
+          isOpen={modalFormTaxImpliRuleError}
+          handleOk={() => setModalFormTaxImpliRuleError(false)}
+          handleCancel={() => setModalFormTaxImpliRuleError(false)}
+          customText={"Oke"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              {IconModal.icon_error_default}
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">You can't create Tax Implication Rule Override. Please fill out the Implication Type and Transaction Code field first.</p>
           </div>
-          <p className="pl-[70px]">You can't create Tax Implication Rule Override. Please fill out the Implication Type and Transaction Code field first.</p>
-        </div>
-      </ModalError>
+        </ModalError>
 
-      {/** Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal.icon_error_default}
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        {/** Modal Retry */}
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              {IconModal.icon_error_default}
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${type === "update" ? "updated" : "created"
+              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${type === "update" ? "updated" : "created"
-            }. ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-    </Spin>
+        </ModalError>
+      </Spin>
+    </>
   )
 }
 

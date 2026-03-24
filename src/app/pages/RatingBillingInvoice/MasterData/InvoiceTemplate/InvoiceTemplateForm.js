@@ -910,7 +910,7 @@ const InvoiceTemplateForm = ({ type }) => {
   }, [form, listDataCriteria]);
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -1088,7 +1088,7 @@ const InvoiceTemplateForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

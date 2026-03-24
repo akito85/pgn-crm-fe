@@ -173,7 +173,7 @@ const ViewTransferToCustomer = () => {
     );
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
@@ -202,7 +202,7 @@ const ViewTransferToCustomer = () => {
                     />
                 </CardContainer>
             </Spin>
-        </div>
+        </>
     );
 };
 

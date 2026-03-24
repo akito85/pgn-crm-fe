@@ -447,7 +447,7 @@ const ListFormCollectingAgent = (props) => {
     };
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading || loadingForm}>
                 <FormStepper
@@ -573,7 +573,7 @@ const ListFormCollectingAgent = (props) => {
                     </p>
                 </div>
             </ModalConfirm>
-        </div>
+        </>
     );
 };
 

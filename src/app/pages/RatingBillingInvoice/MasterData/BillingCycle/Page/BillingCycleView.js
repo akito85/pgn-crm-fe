@@ -499,7 +499,7 @@ const BillingCycleView = ({ type }) => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -570,7 +570,7 @@ const BillingCycleView = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

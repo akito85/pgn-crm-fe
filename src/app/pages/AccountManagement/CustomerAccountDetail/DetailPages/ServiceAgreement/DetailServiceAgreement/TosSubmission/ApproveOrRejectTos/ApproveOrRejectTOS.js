@@ -292,7 +292,7 @@ const ApproveOrRejectTOS = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <div className="flex flex-col gap-4">
           <BreadCrumbAdvanced routes={routes(location?.state)} />
@@ -390,7 +390,7 @@ const ApproveOrRejectTOS = () => {
             </div>
           </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 export default ApproveOrRejectTOS;

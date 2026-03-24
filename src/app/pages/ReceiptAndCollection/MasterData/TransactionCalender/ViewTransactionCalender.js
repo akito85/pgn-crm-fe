@@ -672,7 +672,7 @@ const ViewTransactionCalender = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
@@ -732,7 +732,7 @@ const ViewTransactionCalender = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

@@ -266,98 +266,100 @@ const BillingItemCategoryDetail = () => {
   };
 
   return (
-    <Spin spinning={loading}>
-      <BreadCrumb routes={routes} />
-      <RadioTabs
-        data={listSectionInfo}
-        onChange={(e) => setValuePage(e.target.value)}
-        currentPosition={valuePage}
-      />
-      <div className="flex flex-col w-full">
-        {bodyApproval.isApprover &&
-          bodyApproval.approvalType &&
-          bodyApproval.approvalType === "INACTIVE_BILLING_ITEM_CATEGORY" && (
-            <CardContainer header={"inactive request information"}>
-              <div className="w-full grid grid-cols-4 gap-3">
-                <DetailText label={"Requested Date"}>
-                  {bodyApproval.approvalDetail.requestedDate
-                    ? moment(
-                        bodyApproval.approvalDetail.requestedDate,
-                      ).format(dateFormatting.date)
-                    : ""}
-                </DetailText>
-                <DetailText label={"Requested By"}>
-                  {bodyApproval.approvalDetail.requestedBy}
-                </DetailText>
-                <DetailText label={"Remark"}>
-                  {bodyApproval.approvalDetail.remarks}
-                </DetailText>
-              </div>
-            </CardContainer>
-          )}
+    <>
+      <Spin spinning={loading}>
+        <BreadCrumb routes={routes} />
+        <RadioTabs
+          data={listSectionInfo}
+          onChange={(e) => setValuePage(e.target.value)}
+          currentPosition={valuePage}
+        />
+        <div className="flex flex-col w-full">
+          {bodyApproval.isApprover &&
+            bodyApproval.approvalType &&
+            bodyApproval.approvalType === "INACTIVE_BILLING_ITEM_CATEGORY" && (
+              <CardContainer header={"inactive request information"}>
+                <div className="w-full grid grid-cols-4 gap-3">
+                  <DetailText label={"Requested Date"}>
+                    {bodyApproval.approvalDetail.requestedDate
+                      ? moment(
+                          bodyApproval.approvalDetail.requestedDate,
+                        ).format(dateFormatting.date)
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Requested By"}>
+                    {bodyApproval.approvalDetail.requestedBy}
+                  </DetailText>
+                  <DetailText label={"Remark"}>
+                    {bodyApproval.approvalDetail.remarks}
+                  </DetailText>
+                </div>
+              </CardContainer>
+            )}
 
-        {layout(valuePage)}
-      </div>
-
-      <div className="flex mt-[10px] w-full p-3 rounded-md bg-white">
-        <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
-          Back
-        </ButtonComponent>
-
-        {showButtonApproval ? (
-          <div className={"w-full flex justify-end gap-2"}>
-            <ButtonComponent
-              type="reject"
-              onClick={() => {
-                setModalConfirm(true);
-                setApproveOrReject("Reject");
-              }}
-            >
-              Reject
-            </ButtonComponent>
-            <ButtonComponent
-              type="approve"
-              onClick={() => {
-                setModalConfirm(true);
-                setApproveOrReject("Approve");
-              }}
-            >
-              Approve
-            </ButtonComponent>
-          </div>
-        ) : null}
-      </div>
-
-      {/* Modal Approve/Reject */}
-      <ModalApproveOrReject
-        isOpen={modalConfirm}
-        handleCloseModal={handleCancel}
-        onFinish={handleConfirm}
-        header={approveOrReject}
-        approveOrReject={approveOrReject}
-        menu={"Billing Item Category"}
-        named={dataDetail?.name}
-      />
-
-      {/* Modal Retry */}
-      <ModalError
-        isOpen={modalErrorServer}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
-          </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            approveOrReject === "Approve" ? "Approved" : "Rejected"
-          }. ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
+          {layout(valuePage)}
         </div>
-      </ModalError>
-    </Spin>
+
+        <div className="flex mt-[10px] w-full p-3 rounded-md bg-white">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
+            Back
+          </ButtonComponent>
+
+          {showButtonApproval ? (
+            <div className={"w-full flex justify-end gap-2"}>
+              <ButtonComponent
+                type="reject"
+                onClick={() => {
+                  setModalConfirm(true);
+                  setApproveOrReject("Reject");
+                }}
+              >
+                Reject
+              </ButtonComponent>
+              <ButtonComponent
+                type="approve"
+                onClick={() => {
+                  setModalConfirm(true);
+                  setApproveOrReject("Approve");
+                }}
+              >
+                Approve
+              </ButtonComponent>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Modal Approve/Reject */}
+        <ModalApproveOrReject
+          isOpen={modalConfirm}
+          handleCloseModal={handleCancel}
+          onFinish={handleConfirm}
+          header={approveOrReject}
+          approveOrReject={approveOrReject}
+          menu={"Billing Item Category"}
+          named={dataDetail?.name}
+        />
+
+        {/* Modal Retry */}
+        <ModalError
+          isOpen={modalErrorServer}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${
+              approveOrReject === "Approve" ? "Approved" : "Rejected"
+            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+      </Spin>
+    </>
   );
 };
 

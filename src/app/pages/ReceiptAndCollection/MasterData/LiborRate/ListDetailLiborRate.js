@@ -80,7 +80,7 @@ const ListDetailLiborRate = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="mt-5">
@@ -136,7 +136,7 @@ const ListDetailLiborRate = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </div>
+    </>
   );
 };
 

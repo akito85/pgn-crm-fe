@@ -471,7 +471,7 @@ const TermOfServiceUpdate = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -679,7 +679,7 @@ const TermOfServiceUpdate = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -137,7 +137,7 @@ const ListDetailPaymentChannel = () => {
 
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <Tabs
@@ -198,7 +198,7 @@ const ListDetailPaymentChannel = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </div>
+    </>
   );
 };
 

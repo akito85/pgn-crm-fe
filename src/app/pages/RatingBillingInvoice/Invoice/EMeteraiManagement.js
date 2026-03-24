@@ -248,7 +248,7 @@ const EMeteraiManagement = () => {
   });
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -358,7 +358,7 @@ const EMeteraiManagement = () => {
           handleRefresh();
         }}
       />
-    </div>
+    </>
   );
 };
 

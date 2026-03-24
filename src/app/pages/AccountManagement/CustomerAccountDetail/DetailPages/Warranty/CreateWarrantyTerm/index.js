@@ -414,7 +414,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <NxBreadCrumb
           routes={routes({ idAccount, idCustomer, type, idSA, typeForm })}
@@ -591,7 +591,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -396,7 +396,7 @@ const TaxCodeDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -496,7 +496,7 @@ const TaxCodeDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 export default TaxCodeDetail;

@@ -7,7 +7,7 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { PlusOutlined } from "@ant-design/icons";
+import { LeftOutlined, PlusOutlined } from "@ant-design/icons";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
@@ -266,7 +266,7 @@ const CreateJobPage = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={breadcrumbRoutes} />
       <Form form={form} layout="vertical" onFinish={onFinish} onFinishFailed={onFinishFailed} autoComplete="off">
 
@@ -554,7 +554,7 @@ const CreateJobPage = () => {
         </footer>
 
       </Form>
-    </div>
+    </>
   );
 };
 

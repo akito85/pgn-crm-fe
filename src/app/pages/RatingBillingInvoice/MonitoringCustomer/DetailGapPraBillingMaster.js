@@ -236,7 +236,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -325,7 +325,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
           </div>
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -791,7 +791,7 @@ const CustomerList = () => {
       //   });
     };
     return (
-      <div>
+      <>
         <p className="text-primary text-xs font-bold uppercase">
           ACCOUNT INFORMATION
         </p>
@@ -805,7 +805,7 @@ const CustomerList = () => {
             y: 300,
           }}
         />
-      </div>
+      </>
     );
   };
 
@@ -1077,7 +1077,7 @@ const CustomerList = () => {
   ]
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -1298,7 +1298,7 @@ const CustomerList = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -728,7 +728,7 @@ const ListFormPaymentItem = (props) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <RadioTabs
         data={tabData}
@@ -897,7 +897,7 @@ const ListFormPaymentItem = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

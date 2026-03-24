@@ -7,6 +7,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import CardContainer from "../../../../../components/CardContainer";
+import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
 import DetailText from "../../../../../components/DetailText";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
@@ -27,7 +28,6 @@ import {
   createBillingItemColumns,
   createSAColumns,
 } from "./columns";
-import BaseContainer from "../../../../../components/BaseContainer";
 import StatusComponent from "../../../../../components/StatusComponent";
 import PrabillSaDetailSection from "./ServiceAgreement/PrabillSaDetailSection";
 import PrabillSaCalcRuleSection from "./ServiceAgreement/PrabillSaCalcRuleSection";
@@ -148,10 +148,7 @@ const AccountDetailPage = () => {
       size: 10,
     };
 
-    // Load header data
     dispatch(getCustomerHeaderData(baseParams));
-
-    // Load SA data dengan parameter berbeda (tanpa inSor, accNumber, saNumber)
     dispatch(
       getCustomerSaData({
         customerNumber,
@@ -160,8 +157,6 @@ const AccountDetailPage = () => {
         size: 10,
       })
     );
-
-    // Load all other tab data immediately
     dispatch(getCustomerUsageData({ ...baseParams, sort: "measDate~desc" }));
     dispatch(getCustomerTaxData(baseParams));
     dispatch(getCustomerBillingBucketData(baseParams));
@@ -185,7 +180,6 @@ const AccountDetailPage = () => {
     }
   }, [showSaDetail, selectedPrabillSaId]);
 
-  // Function to fetch data for a specific tab when pagination changes
   const fetchTabData = useCallback(
     (tabKey, page = 1, pageSize = 10) => {
       const tabConfig = TAB_CONFIGS.find((t) => t.key === tabKey);
@@ -232,12 +226,10 @@ const AccountDetailPage = () => {
     [dispatch, customerNumber, billPeriod, inSor, accNumber, saNumber]
   );
 
-  // Handle tab change
   const handleTabChange = useCallback((key) => {
     setActiveTab(key);
   }, []);
 
-  // Handle pagination change
   const handlePaginationChange = useCallback(
     (tabKey, page, pageSize) => {
       setPagination((prev) => ({
@@ -249,7 +241,6 @@ const AccountDetailPage = () => {
     [fetchTabData]
   );
 
-  // Handler untuk view SA detail
   const handleViewSaDetail = useCallback((record) => {
     setSelectedPrabillSaId(record.prabillSaId);
     setSelectedSaNumber(record.saNumber || "");
@@ -257,7 +248,6 @@ const AccountDetailPage = () => {
     setSaDetailTab("Detail");
   }, []);
 
-  // Handler untuk close SA detail
   const handleCloseSaDetail = useCallback(() => {
     setShowSaDetail(false);
     setSelectedPrabillSaId(null);
@@ -272,15 +262,11 @@ const AccountDetailPage = () => {
   const usagePage = customer_account_detail?.usageData?.page || {};
   const taxData = customer_account_detail?.taxData?.result || [];
   const taxPage = customer_account_detail?.taxData?.page || {};
-  const billingBucketData =
-    customer_account_detail?.billingBucketData?.result || [];
-  const billingBucketPage =
-    customer_account_detail?.billingBucketData?.page || {};
-  const billingItemData =
-    customer_account_detail?.billingItemData?.result || [];
+  const billingBucketData = customer_account_detail?.billingBucketData?.result || [];
+  const billingBucketPage = customer_account_detail?.billingBucketData?.page || {};
+  const billingItemData = customer_account_detail?.billingItemData?.result || [];
   const billingItemPage = customer_account_detail?.billingItemData?.page || {};
 
-  // Get first item for customer/account info display
   const firstHeaderData = useMemo(() => {
     if (Array.isArray(headerData) && headerData.length > 0) {
       return headerData[0];
@@ -292,16 +278,9 @@ const AccountDetailPage = () => {
   const saColumnsBase = useMemo(() => createSAColumns(renderValue), []);
   const usageColumns = useMemo(() => createUsageColumns(renderValue), []);
   const taxColumns = useMemo(() => createTaxColumns(renderValue), []);
-  const billingBucketColumns = useMemo(
-    () => createBillingBucketColumns(renderValue),
-    []
-  );
-  const billingItemColumns = useMemo(
-    () => createBillingItemColumns(renderValue),
-    []
-  );
+  const billingBucketColumns = useMemo(() => createBillingBucketColumns(renderValue), []);
+  const billingItemColumns = useMemo(() => createBillingItemColumns(renderValue), []);
 
-  // SA Columns dengan Action Button
   const saColumnsWithAction = useMemo(() => {
     return [
       ...saColumnsBase,
@@ -315,10 +294,10 @@ const AccountDetailPage = () => {
           <div className="flex w-full justify-center gap-6">
             <Tooltip title="Detail">
               <div className="pt-1 cursor-pointer">
-                <SVGIcon 
-                  name="IconDetail" 
-                  width={20} 
-                  onClick={() => handleViewSaDetail(record)} 
+                <SVGIcon
+                  name="IconDetail"
+                  width={20}
+                  onClick={() => handleViewSaDetail(record)}
                 />
               </div>
             </Tooltip>
@@ -328,7 +307,6 @@ const AccountDetailPage = () => {
     ];
   }, [saColumnsBase, handleViewSaDetail]);
 
-  // Processed columns with fixed
   const processedColumns = {
     sa: useMemo(
       () => applyFixedColumns(saColumnsWithAction, fixedColumnsSA),
@@ -352,11 +330,9 @@ const AccountDetailPage = () => {
     ),
   };
 
-  // Column definitions
   const columnDefs = {
     sa: useMemo(
-      () =>
-        saColumnsWithAction.map((col) => ({ key: col.key, title: col.title })),
+      () => saColumnsWithAction.map((col) => ({ key: col.key, title: col.title })),
       [saColumnsWithAction]
     ),
     usage: useMemo(
@@ -368,18 +344,15 @@ const AccountDetailPage = () => {
       [taxColumns]
     ),
     billingBucket: useMemo(
-      () =>
-        billingBucketColumns.map((col) => ({ key: col.key, title: col.title })),
+      () => billingBucketColumns.map((col) => ({ key: col.key, title: col.title })),
       [billingBucketColumns]
     ),
     billingItem: useMemo(
-      () =>
-        billingItemColumns.map((col) => ({ key: col.key, title: col.title })),
+      () => billingItemColumns.map((col) => ({ key: col.key, title: col.title })),
       [billingItemColumns]
     ),
   };
 
-  // Mapping untuk data, columns, dan setters
   const tabDataMapping = {
     0: {
       data: saData,
@@ -428,7 +401,6 @@ const AccountDetailPage = () => {
     },
   };
 
-  // Tab items untuk SA Detail
   const saDetailTabItems = useMemo(
     () => [
       {
@@ -439,16 +411,12 @@ const AccountDetailPage = () => {
       {
         key: "Pricing",
         label: "Pricing",
-        children: (
-          <PrabillSaPricingSection prabillSaId={selectedPrabillSaId} />
-        ),
+        children: <PrabillSaPricingSection prabillSaId={selectedPrabillSaId} />,
       },
       {
         key: "Calculation Rule",
         label: "Calculation Rule",
-        children: (
-          <PrabillSaCalcRuleSection prabillSaId={selectedPrabillSaId} />
-        ),
+        children: <PrabillSaCalcRuleSection prabillSaId={selectedPrabillSaId} />,
       },
       {
         key: "Term Of Service",
@@ -459,118 +427,98 @@ const AccountDetailPage = () => {
     [selectedPrabillSaId]
   );
 
-  const renderInfoCard = (title, children) => (
-    <CardContainer
-      header={
-        <div className="flex -my-4 justify-between items-center">
-          <p className="mt-[15px]">{title}</p>
-        </div>
-      }
-    >
-      {children}
-    </CardContainer>
-  );
-
-  const renderDetailGrid = (items) => (
-    <div className="grid grid-cols-4 gap-0">
-      {items.map(({ label, value, key }) => (
-        <DetailText key={key || label} label={label}>
-          {value}
-        </DetailText>
-      ))}
-    </div>
-  );
-
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
-      {/* Customer & Account Info */}
-      {renderInfoCard(
-        "INIT / CUSTOMER & ACCOUNT INFORMATION",
-        <div className="flex flex-col gap-2">
-          <BaseContainer border header={<p>Customer Information</p>}>
-            {renderDetailGrid([
-              {
-                label: "Init Code",
-                value: renderValue(firstHeaderData.initCode),
-              },
-              {
-                label: "Billing Cycle",
-                value: renderValue(firstHeaderData.billingCycle),
-              },
-              {
-                label: "Bill Period",
-                value: renderValue(firstHeaderData.billPeriod),
-              },
-              {
-                label: "Customer Number",
-                value: renderValue(firstHeaderData.customerNumber),
-              },
-              {
-                label: "Customer Name",
-                value: renderValue(firstHeaderData.customerName),
-              },
-              {
-                label: "Customer Type",
-                value: renderValue(firstHeaderData.customerType),
-              },
-            ])}
-          </BaseContainer>
+      {/* INIT / CUSTOMER & ACCOUNT INFORMATION */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary">
+              INIT / CUSTOMER & ACCOUNT INFORMATION
+            </p>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-1">
+          {/* Customer Information - CollapsibleContainer */}
+          <CollapsibleContainer header={"Customer Information"} border className="mt-2">
+            <div className="grid grid-cols-4 gap-0">
+              <DetailText label="Init Code">
+                {renderValue(firstHeaderData.initCode)}
+              </DetailText>
+              <DetailText label="Billing Cycle">
+                {renderValue(firstHeaderData.billingCycle)}
+              </DetailText>
+              <DetailText label="Bill Period">
+                {renderValue(firstHeaderData.billPeriod)}
+              </DetailText>
+              <DetailText label="Customer Number">
+                {renderValue(firstHeaderData.customerNumber)}
+              </DetailText>
+              <DetailText label="Customer Name">
+                {renderValue(firstHeaderData.customerName)}
+              </DetailText>
+              <DetailText label="Customer Type">
+                {renderValue(firstHeaderData.customerType)}
+              </DetailText>
+            </div>
+          </CollapsibleContainer>
 
-          <BaseContainer border header={<p>Account Information</p>}>
-            {renderDetailGrid([
-              {
-                label: "Account Number",
-                value: renderValue(firstHeaderData.accountNumber),
-              },
-              {
-                label: "Account Name",
-                value: renderValue(firstHeaderData.accountName),
-              },
-              {
-                label: "Account Status",
-                value: firstHeaderData.accountStatus ? (
+          {/* Account Information - CollapsibleContainer */}
+          <CollapsibleContainer header={"Account Information"} border className="mt-1">
+            <div className="grid grid-cols-4 gap-0">
+              <DetailText label="Account Number">
+                {renderValue(firstHeaderData.accountNumber)}
+              </DetailText>
+              <DetailText label="Account Name">
+                {renderValue(firstHeaderData.accountName)}
+              </DetailText>
+              <DetailText label="Account Status">
+                {firstHeaderData.accountStatus ? (
                   <StatusComponent colour={firstHeaderData.accountStatus}>
                     {firstHeaderData.accountStatus}
                   </StatusComponent>
                 ) : (
                   ""
-                ),
-              },
-              {
-                label: "Account Group",
-                value: renderValue(firstHeaderData.accountGroup),
-              },
-              { label: "SOR", value: renderValue(firstHeaderData.sor) },
-              {
-                label: "Cost Center",
-                value: renderValue(firstHeaderData.costCenter),
-              },
-              {
-                label: "Meter Reading Code",
-                value: renderValue(firstHeaderData.meterReadingCode),
-              },
-              {
-                label: "Account Segment",
-                value: renderValue(firstHeaderData.accountSegment),
-              },
-              {
-                label: "Account Group Type",
-                value: renderValue(firstHeaderData.accountGroupType),
-              },
-              {
-                label: "Account Type",
-                value: renderValue(firstHeaderData.accountType),
-              },
-            ])}
-          </BaseContainer>
+                )}
+              </DetailText>
+              <DetailText label="Account Group">
+                {renderValue(firstHeaderData.accountGroup)}
+              </DetailText>
+              <DetailText label="SOR">
+                {renderValue(firstHeaderData.sor)}
+              </DetailText>
+              <DetailText label="Cost Center">
+                {renderValue(firstHeaderData.costCenter)}
+              </DetailText>
+              <DetailText label="Meter Reading Code">
+                {renderValue(firstHeaderData.meterReadingCode)}
+              </DetailText>
+              <DetailText label="Account Segment">
+                {renderValue(firstHeaderData.accountSegment)}
+              </DetailText>
+              <DetailText label="Account Group Type">
+                {renderValue(firstHeaderData.accountGroupType)}
+              </DetailText>
+              <DetailText label="Account Type">
+                {renderValue(firstHeaderData.accountType)}
+              </DetailText>
+            </div>
+          </CollapsibleContainer>
         </div>
-      )}
+      </CardContainer>
 
-      {/* Detailed Data Tabs */}
-      {renderInfoCard(
-        "DETAILED DATA",
+      {/* DETAILED DATA */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary">DETAILED DATA</p>
+          </div>
+        }
+        className="mt-1"
+      >
         <Tabs activeKey={activeTab} onChange={handleTabChange} type="card">
           {TAB_CONFIGS.map((tab) => {
             const tabData = tabDataMapping[tab.key];
@@ -611,15 +559,15 @@ const AccountDetailPage = () => {
             );
           })}
         </Tabs>
-      )}
+      </CardContainer>
 
       {/* SA Detail Section */}
       {showSaDetail && selectedPrabillSaId && (
-        <div ref={saDetailRef} className="mt-8">
+        <div ref={saDetailRef} className="mt-1">
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px]">
+                <p className="mt-[15px] font-bold text-primary">
                   SERVICE AGREEMENT DETAIL
                   {selectedSaNumber && ` - ${selectedSaNumber}`}
                 </p>
@@ -642,7 +590,8 @@ const AccountDetailPage = () => {
         </div>
       )}
 
-      <div className="w-full flex justify-start my-5">
+      {/* Back Button */}
+      <div className="bg-white rounded-md w-full flex justify-start mb-4 p-3 mt-1">
         <ButtonComponent
           type="submit"
           border={false}
@@ -652,7 +601,7 @@ const AccountDetailPage = () => {
           Back
         </ButtonComponent>
       </div>
-    </div>
+    </>
   );
 };
 

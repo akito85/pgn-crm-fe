@@ -563,143 +563,145 @@ const BillingItemCategoryForm = ({ type }) => {
   };
 
   return (
-    <Spin spinning={isLoading}>
-      <BreadCrumb routes={routes} />
+    <>
+      <Spin spinning={isLoading}>
+        <BreadCrumb routes={routes} />
 
-      {/* FormStepper menggantikan RadioTabs */}
-      <FormStepper
-        steps={steps}
-        current={current}
-        onPrev={prev}
-        onNext={next}
-      />
-
-      <Form
-        layout="vertical"
-        form={form}
-        onFinish={handleSave}
-        onFinishFailed={handleError}
-      >
-        {/* Billing Item Category Section */}
-        <div
-          style={{
-            display:
-              valuePage !== listSectionInfo[0].value ? "none" : undefined,
-          }}
-        >
-          <BillingItemCategorySectionForm
-            type={type}
-            form={form}
-            status={status}
-            statusApproval={statusApproval}
-            startDate={startDate}
-            endDate={endDate}
-            handleStartDate={handleStartDate}
-            handleEndDate={handleEndDate}
-          />
-        </div>
-
-        <div
-          style={{
-            display:
-              valuePage !== listSectionInfo[1].value ? "none" : undefined,
-          }}
-        >
-          <BaseContainer header={"Approval Information"}>
-            <ApprovalComponentGeneral
-              type={type}
-              dataTable={appHierDataDetail}
-              dataOption={appHierOptions}
-              selectedHierarchy={selectedHierarchy}
-              updateSelectedHierarchy={setSelectedHierarchy}
-            />
-          </BaseContainer>
-        </div>
-
-        <div
-          style={{
-            display:
-              valuePage !== listSectionInfo[2].value ? "none" : undefined,
-          }}
-        >
-          <BaseContainer header={"Attachment Information"}>
-            <AttachmentComponent
-              type={type}
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
-              dispatch={dispatch}
-              getAPICategory={getAttachmentCategory}
-              typeSelector="billing_bucket"
-              service={ratingBillingHttpService}
-              configApplication={configApp.RATING_BILLING_SERVICE}
-              getAPIGuard={getConfigFileRBIData}
-              typeRBI={"data"}
-              mandatory={true}
-            />
-          </BaseContainer>
-        </div>
-
-        {/* FormFooter menggantikan manual footer buttons */}
-        <FormFooter
+        {/* FormStepper menggantikan RadioTabs */}
+        <FormStepper
+          steps={steps}
           current={current}
-          totalSteps={steps.length}
           onPrev={prev}
           onNext={next}
-          onCancel={handleBack}
-          onClear={handleClear}
-          onSaveDraft={handleSaveDraft}
-          onSubmit={handleSubmit}
-          type={type}
-          disabled={false}
         />
-      </Form>
 
-      {/* Modal Confirmation */}
-      <ConfirmationBillingItemCategory
-        isOpen={modalConfirm}
-        data={bodyData}
-        selectedHierarchy={selectedHierarchy}
-        listDataAppHierDetail={appHierDataDetail}
-        listDataAttachment={listDataAttachment}
-        dataOption={appHierOptions}
-        handleCancel={() => setModalConfirm(false)}
-        handleConfirm={() => handleConfirm()}
-      />
-
-      {/* Modal Back */}
-      <ModalConfirm
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-        width={400}
-      >
-        <div className="flex justify-center mt-5 gap-[20px]">
-          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
-            Are you sure you want to back?
-          </p>
-        </div>
-      </ModalConfirm>
-
-      {/* Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={handleSave}
+          onFinishFailed={handleError}
+        >
+          {/* Billing Item Category Section */}
+          <div
+            style={{
+              display:
+                valuePage !== listSectionInfo[0].value ? "none" : undefined,
+            }}
+          >
+            <BillingItemCategorySectionForm
+              type={type}
+              form={form}
+              status={status}
+              statusApproval={statusApproval}
+              startDate={startDate}
+              endDate={endDate}
+              handleStartDate={handleStartDate}
+              handleEndDate={handleEndDate}
+            />
           </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            flag === 1 ? "created" : "submitted"
-          }. ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-    </Spin>
+
+          <div
+            style={{
+              display:
+                valuePage !== listSectionInfo[1].value ? "none" : undefined,
+            }}
+          >
+            <BaseContainer header={"Approval Information"}>
+              <ApprovalComponentGeneral
+                type={type}
+                dataTable={appHierDataDetail}
+                dataOption={appHierOptions}
+                selectedHierarchy={selectedHierarchy}
+                updateSelectedHierarchy={setSelectedHierarchy}
+              />
+            </BaseContainer>
+          </div>
+
+          <div
+            style={{
+              display:
+                valuePage !== listSectionInfo[2].value ? "none" : undefined,
+            }}
+          >
+            <BaseContainer header={"Attachment Information"}>
+              <AttachmentComponent
+                type={type}
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                dispatch={dispatch}
+                getAPICategory={getAttachmentCategory}
+                typeSelector="billing_bucket"
+                service={ratingBillingHttpService}
+                configApplication={configApp.RATING_BILLING_SERVICE}
+                getAPIGuard={getConfigFileRBIData}
+                typeRBI={"data"}
+                mandatory={true}
+              />
+            </BaseContainer>
+          </div>
+
+          {/* FormFooter menggantikan manual footer buttons */}
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+            disabled={false}
+          />
+        </Form>
+
+        {/* Modal Confirmation */}
+        <ConfirmationBillingItemCategory
+          isOpen={modalConfirm}
+          data={bodyData}
+          selectedHierarchy={selectedHierarchy}
+          listDataAppHierDetail={appHierDataDetail}
+          listDataAttachment={listDataAttachment}
+          dataOption={appHierOptions}
+          handleCancel={() => setModalConfirm(false)}
+          handleConfirm={() => handleConfirm()}
+        />
+
+        {/* Modal Back */}
+        <ModalConfirm
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
+
+        {/* Modal Retry */}
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${
+              flag === 1 ? "created" : "submitted"
+            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+      </Spin>
+    </>
   );
 };
 

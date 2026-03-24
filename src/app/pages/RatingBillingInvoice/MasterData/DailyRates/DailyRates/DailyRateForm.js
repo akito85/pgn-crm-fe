@@ -625,7 +625,7 @@ const DailyRateForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -770,7 +770,7 @@ const DailyRateForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -50,10 +50,10 @@ const ServiceAgreementTable = ({
                     state: { idSA, idAccount, idCustomer, type }
                 });
             },
-            handleUpdate: ({ id: idSa }) => {
+            handleUpdate: (record) => {
                 navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_AGREEMENT, {
                     state: {
-                        idSa,
+                        idSa: record.id,
                         idAccount: record.accountId,
                         approvalStatus: record.approvalStatus,
                         status: record.status,

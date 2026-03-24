@@ -242,7 +242,7 @@ const ViewWarranty = () => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -289,7 +289,7 @@ const ViewWarranty = () => {
           handleOpenModal={() => setRefundModal(true)}
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

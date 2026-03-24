@@ -4,9 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import {
   addDeletedData,
   addUpdatedData,
@@ -19,7 +18,8 @@ import {
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../components/CardContainer";
-import BaseContainer from "../../../../../components/BaseContainer";
+import { FormFooter } from "../../../../../components/FormStepNavigation";
+import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -476,7 +476,7 @@ const DetailMonitoringUsage = () => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSave}>
@@ -502,7 +502,7 @@ const DetailMonitoringUsage = () => {
                 key="Upload"
                 className="flex flex-col gap-3"
               >
-                <BaseContainer header={"Batch List"} border className="-mt-4">
+                <CollapsibleContainer header={"Batch List"} border className="mt-4">
                   {/* Two Column Layout */}
                   <div className="grid grid-cols-5 gap-x-8 gap-y-0">
                     <DetailText label="Batch ID">
@@ -536,9 +536,9 @@ const DetailMonitoringUsage = () => {
                       </StatusComponent>
                     </DetailText>
                   </div>
-                </BaseContainer>
+                </CollapsibleContainer>
 
-                <BaseContainer header={"Usage List"} border className="mt-1">
+                <CollapsibleContainer header={"Usage List"} border className="mt-1">
                   <div className="my-5">
                     <TableRBI
                       idTable="monitoring-usage-detail-table"
@@ -558,11 +558,31 @@ const DetailMonitoringUsage = () => {
                       loadMoreThreshold={20}
                     />
                   </div>
-                </BaseContainer>
-                <BaseContainer
-                  header={"History Log Information"}
+                </CollapsibleContainer>
+              </Tabs.TabPane>
+
+              <Tabs.TabPane tab="Approval" key="Approval">
+                <div className="bg-white mt-1">
+                  <ApprovalComponentGeneral
+                    dataTable={appHierDataDetail}
+                    dataOption={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    updateSelectedHierarchy={setSelectedHierarchy}
+                  />
+                </div>
+              </Tabs.TabPane>
+            </Tabs>
+          </CardContainer>
+
+                          <CardContainer
+                  header={
+                    <div className="flex justify-between items-center -my-4">
+                      <p className="mt-[15px] font-bold text-primary">
+                        HISTORY LOG INFORMATION
+                      </p>
+                    </div>
+                  }
                   className="mt-1"
-                  border
                 >
                   <div className="grid grid-cols-5 gap-x-8 gap-y-4">
                     <DetailText label="Record ID">
@@ -585,65 +605,32 @@ const DetailMonitoringUsage = () => {
                       {detail_batch?.batchInformation?.updatedBy}
                     </DetailText>
                   </div>
-                </BaseContainer>
-              </Tabs.TabPane>
+                </CardContainer>
 
-              <Tabs.TabPane tab="Approval" key="Approval">
-                <div className="bg-white mt-1">
-                  <ApprovalComponentGeneral
-                    dataTable={appHierDataDetail}
-                    dataOption={appHierOptions}
-                    selectedHierarchy={selectedHierarchy}
-                    updateSelectedHierarchy={setSelectedHierarchy}
-                  />
-                </div>
-              </Tabs.TabPane>
-            </Tabs>
-          </CardContainer>
-
-          {/* Action Buttons */}
-          <div className="w-full flex mt-5">
-            <div className="w-fit">
-              <ButtonComponent
-                htmlType="button"
-                type={"submit"}
-                onClick={handleBack}
-              >
-                Back
-              </ButtonComponent>
-            </div>
-            {detail_batch?.batchInformation?.status !== "COMPLETE" && (
-              <div className="w-full flex justify-end gap-5">
-                <Form.Item>
-                  <ButtonComponent
-                    icon={<SVGIcon name={`IconButtonClear`} width={24} />}
-                    type="submit"
-                    onClick={handleClear}
-                  >
-                    Clear
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(1)}
-                  >
-                    Save as Draft
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(2)}
-                  >
-                    Save & Submit
-                  </ButtonComponent>
-                </Form.Item>
-              </div>
-            )}
-          </div>
+          {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
+            <FormFooter
+              onCancel={handleBack}
+              onClear={handleClear}
+              onSaveDraft={() => {
+                setFlag(2);
+                form.submit();
+              }}
+              saveDraftLabel="Save & Submit"
+              saveDraftStyle={{
+                backgroundColor: "#388E3C",
+                borderColor: "#388E3C",
+                color: "#fff",
+              }}
+              useNavigation={false}
+            />
+          ) : (
+            <FormFooter
+              onCancel={handleBack}
+              useClearData={false}
+              useSaveDraft={false}
+              useNavigation={false}
+            />
+          )}
         </Form>
 
         <ModalUpdateUsage
@@ -702,7 +689,7 @@ const DetailMonitoringUsage = () => {
           />
         </ModalConfirm>
       </Spin>
-    </div>
+    </>
   );
 };
 

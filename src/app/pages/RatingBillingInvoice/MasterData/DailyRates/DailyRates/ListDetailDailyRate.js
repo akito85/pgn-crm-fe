@@ -209,7 +209,7 @@ const ListDetailDailyRate = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -307,7 +307,7 @@ const ListDetailDailyRate = () => {
           </Form.Item>
         </Form>
       </ModalApproveOrReject> */}
-    </div>
+    </>
   );
 };
 

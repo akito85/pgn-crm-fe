@@ -6,7 +6,6 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
@@ -693,7 +692,7 @@ const ViewSettings = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {/* <Toolbar items={itemActions} /> */}
@@ -762,7 +761,7 @@ const ViewSettings = () => {
       </Spin>
       {/* modal try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

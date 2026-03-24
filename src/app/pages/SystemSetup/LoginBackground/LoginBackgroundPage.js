@@ -268,7 +268,7 @@ const LoginBackgroundPage = () => {
 
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar  items={itemActions} />
@@ -328,7 +328,7 @@ const LoginBackgroundPage = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

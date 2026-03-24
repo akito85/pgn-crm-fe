@@ -578,7 +578,7 @@ const CalculationForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -1228,7 +1228,7 @@ const CalculationForm = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

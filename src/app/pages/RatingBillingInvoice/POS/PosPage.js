@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Alert, Spin, Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { WarningOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -679,7 +678,7 @@ const PosPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -796,7 +795,7 @@ const PosPage = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

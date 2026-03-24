@@ -40,7 +40,7 @@ const ListDetailTemplateReminding = () => {
     },
   ];
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"Detail Template Reminding"}>
@@ -72,7 +72,7 @@ const ListDetailTemplateReminding = () => {
           Back
         </ButtonComponent>
       </div>
-    </div>
+    </>
   );
 };
 

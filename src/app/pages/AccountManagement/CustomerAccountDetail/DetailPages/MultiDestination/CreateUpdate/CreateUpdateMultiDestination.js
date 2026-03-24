@@ -726,128 +726,130 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   };
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <NxBreadCrumb routes={routes} />
-      <HeaderDetail
-        data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-        dispatch={dispatch}
-        idAccount={idAccount}
-        idCustomer={idCustomer}
-        type={accountType}
-      />
-      <Spin
-        spinning={loading}
-      >
-        <Form
-          id="multiDestinationForm"
-          form={form}
-          layout={"vertical"}
-          onFinish={handleSubmitForm}
-          scrollToFirstError={true}
-          className="flex flex-col gap-y-4"
+    <>
+      <div className="flex flex-col gap-y-4">
+        <NxBreadCrumb routes={routes} />
+        <HeaderDetail
+          data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+          dispatch={dispatch}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={accountType}
+        />
+        <Spin
+          spinning={loading}
         >
-          {/* Step Contents */}
-          <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
-
-          {steps.map((step, stepIndex) =>
-            step.cards.map((card, cardIndex) =>
-              card.directRender ? (
-                <div
-                  key={`${stepIndex}-${cardIndex}`}
-                  className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
-                >
-                  {card.content}
-                </div>
-              ) : (
-                <NxCardContainer
-                  header={card.header}
-                  className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
-                  key={`${stepIndex}-${cardIndex}`}
-                >
-                  <NxBaseContainer border>{card.content}</NxBaseContainer>
-                </NxCardContainer>
-              )
-            )
-          )}
-
-          {/* Section Action Steps */}
-          <NxBaseContainer border>
-            <div className="flex justify-between">
-              <Button
-                type={"menu"}
-                onClick={() => { navigate(-1); }}
-              >
-                Cancel
-              </Button>
-              <div className="flex w-full justify-end gap-x-2">
-                <Button
-                  onClick={handleClear}
-                  type={"reject"}
-                  icon={<SVGIcon name="IconButtonClear" width={14} />}
-                >
-                  { isUpdate ? "Reset" : "Clear" }
-                </Button>
-                <Button
-                  onClick={() => handleSetShowConfirmationModal(true, "draft")}
-                  type={"secondary"}
-                  disabled={current !== steps.length - 1}
-                >
-                  Save as Draft
-                </Button>
-                <Button
-                  onClick={() => {
-                    prev();
-                    scrollLeftHandler();
-                  }}
-                  type={"menu"}
-                  disabled={current < 1}
-                >
-                  Previous
-                </Button>
-                {current < steps.length - 1 && (
-                  <Button
-                    onClick={handleButtonNext}
-                    type={"submit"}
-                    disabled={steps[current].disabled}
-                  >
-                    Next
-                  </Button>
-                )}
-                {current === steps.length - 1 && (
-                  <>
-                    <Button
-                      onClick={() => handleSetShowConfirmationModal(true, "submit")}
-                      type={"submit"}
-                    >
-                      Save & Submit
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          </NxBaseContainer>
-          <ConfirmationModal
+          <Form
+            id="multiDestinationForm"
             form={form}
-            formId={"multiDestinationForm"}
-            isOpen={showConfirmationModal}
-            handleCancel={() => handleSetShowConfirmationModal(false)}
-            approvalData={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
-              ...detail,
-              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-                ...employeeDetail,
-                key: `employee-detail-${index}`
-              })),
-              key: `detail-detail-${index}`,
-            }))}
-            type={confirmationType}
-            dataAttachment={dataAttachment}
-            service={accountManagementService}
-            configApplication={configApp.ACCOUNT_SERVICE}
-            loading={loading_createUpdateMd}
-          />
-        </Form>
-      </Spin>
-    </div>
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            scrollToFirstError={true}
+            className="flex flex-col gap-y-4"
+          >
+            {/* Step Contents */}
+            <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
+
+            {steps.map((step, stepIndex) =>
+              step.cards.map((card, cardIndex) =>
+                card.directRender ? (
+                  <div
+                    key={`${stepIndex}-${cardIndex}`}
+                    className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                  >
+                    {card.content}
+                  </div>
+                ) : (
+                  <NxCardContainer
+                    header={card.header}
+                    className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                    key={`${stepIndex}-${cardIndex}`}
+                  >
+                    <NxBaseContainer border>{card.content}</NxBaseContainer>
+                  </NxCardContainer>
+                )
+              )
+            )}
+
+            {/* Section Action Steps */}
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <Button
+                  type={"menu"}
+                  onClick={() => { navigate(-1); }}
+                >
+                  Cancel
+                </Button>
+                <div className="flex w-full justify-end gap-x-2">
+                  <Button
+                    onClick={handleClear}
+                    type={"reject"}
+                    icon={<SVGIcon name="IconButtonClear" width={14} />}
+                  >
+                    { isUpdate ? "Reset" : "Clear" }
+                  </Button>
+                  <Button
+                    onClick={() => handleSetShowConfirmationModal(true, "draft")}
+                    type={"secondary"}
+                    disabled={current !== steps.length - 1}
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
+                    type={"menu"}
+                    disabled={current < 1}
+                  >
+                    Previous
+                  </Button>
+                  {current < steps.length - 1 && (
+                    <Button
+                      onClick={handleButtonNext}
+                      type={"submit"}
+                      disabled={steps[current].disabled}
+                    >
+                      Next
+                    </Button>
+                  )}
+                  {current === steps.length - 1 && (
+                    <>
+                      <Button
+                        onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                        type={"submit"}
+                      >
+                        Save & Submit
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </NxBaseContainer>
+            <ConfirmationModal
+              form={form}
+              formId={"multiDestinationForm"}
+              isOpen={showConfirmationModal}
+              handleCancel={() => handleSetShowConfirmationModal(false)}
+              approvalData={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
+                ...detail,
+                employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
+                  ...employeeDetail,
+                  key: `employee-detail-${index}`
+                })),
+                key: `detail-detail-${index}`,
+              }))}
+              type={confirmationType}
+              dataAttachment={dataAttachment}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+              loading={loading_createUpdateMd}
+            />
+          </Form>
+        </Spin>
+      </div>
+    </>
   );
 };
 

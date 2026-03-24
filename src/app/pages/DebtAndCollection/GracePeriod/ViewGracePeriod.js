@@ -196,7 +196,7 @@ const ViewGracePeriod = () => {
     setSort(dataSort);
   };
   return (
-    <div>
+    <>
       <Spin
         spinning={loading || false}
         className={"w-full top-20"}
@@ -262,7 +262,7 @@ const ViewGracePeriod = () => {
           </p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

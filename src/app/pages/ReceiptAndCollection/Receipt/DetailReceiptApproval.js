@@ -224,6 +224,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     ? moment(data_detail.receiptDate).format(dateFormatting.date)
                     : "",
                 balance: data_detail?.balance || data_detail?.unAppliedAmountReal,
+                amount: data_detail?.amount || 0,
                 holdAmount: data_detail?.holdAmount || data_detail?.unAppliedAmountReal,
                 account: data_detail?.account,
             },
@@ -256,6 +257,14 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 text ? text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0",
         },
         {
+            title: "AMOUNT",
+            dataIndex: "amount",
+            key: "amount",
+            align: "right",
+            render: (text) =>
+                text ? text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0",
+        },
+        {
             title: `${typeLabel.toUpperCase()} AMOUNT`,
             dataIndex: "holdAmount",
             key: "holdAmount",
@@ -266,7 +275,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
     ];
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
 
             <div className="text-xl font-bold text-primary mb-5">
@@ -494,7 +503,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 menu={`Receipt ${typeLabel}`}
                 named={data_detail?.receiptNumber}
             />
-        </div>
+        </>
     );
 };
 

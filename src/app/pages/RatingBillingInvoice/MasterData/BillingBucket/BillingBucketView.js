@@ -510,7 +510,7 @@ const BillingBucketView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -586,7 +586,7 @@ const BillingBucketView = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

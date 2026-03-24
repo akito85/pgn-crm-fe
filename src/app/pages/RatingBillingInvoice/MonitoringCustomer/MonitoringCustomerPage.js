@@ -182,7 +182,7 @@ const MonitoringCustomerPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -510,7 +510,7 @@ const MonitoringCustomerPage = () => {
           />
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -154,12 +154,14 @@ const AccountOnetime = () => {
 
   ]
   return (
-    <Spin spinning={loading}>
+    <>
+     <Spin spinning={loading}>
       <BreadCrumb routes={routes} />
 
       <Toolbar items={itemActions}/>
 
-      {/* <div className="w-full flex justify-end gap-[20px]">
+      {/*
+      <div className="w-full flex justify-end gap-[20px]">
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
           type="submit"
@@ -176,40 +178,41 @@ const AccountOnetime = () => {
             Create Account One Time
           </ButtonComponent>
         </NavLink>
-      </div> */}
-
-      <BaseContainer header={"ACCOUNT - ONE TIME LIST"}>
-        <div className="w-full">
-          <TablePagination
-            dataSource={data_accountOneTime?.result}
-            columns={[
-              ...columnsAccountOneTime(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-              ),
-              ...useColumnActionPermission(
-                ["Activate", "View", "Update"],
-                itemActions
-              )
-            ]}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            onShowSizeChange={handleChange}
-            onSort={onSort}
-            totalData={data_accountOneTime?.page?.totalElements}
-            tableScrolled={{
-              x: 9000,
-              y: 500,
-            }}
-          />
-        </div>
-      </BaseContainer>
-    </Spin>
+      </div> 
+      */}
+        <BaseContainer header={"ACCOUNT - ONE TIME LIST"}>
+          <div className="w-full">
+            <TablePagination
+              dataSource={data_accountOneTime?.result}
+              columns={[
+                ...columnsAccountOneTime(
+                  page,
+                  pageSize,
+                  searchInput,
+                  searchedColumn,
+                  searchText,
+                  handleSearch
+                ),
+                ...useColumnActionPermission(
+                  ["Activate", "View", "Update"],
+                  itemActions
+                )
+              ]}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              onShowSizeChange={handleChange}
+              onSort={onSort}
+              totalData={data_accountOneTime?.page?.totalElements}
+              tableScrolled={{
+                x: 9000,
+                y: 500,
+              }}
+            />
+          </div>
+        </BaseContainer>
+      </Spin>
+    </>
   );
 };
 

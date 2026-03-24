@@ -126,7 +126,7 @@ const ViewPayment = () => {
 
   
   return (
-    <div>
+    <>
       <Spin
         spinning={loading || false}
         className={"w-full top-20"}
@@ -176,7 +176,7 @@ const ViewPayment = () => {
         </div>
         
       </Spin>
-    </div>
+    </>
   );
 };
 

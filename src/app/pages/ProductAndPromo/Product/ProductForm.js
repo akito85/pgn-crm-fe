@@ -1887,7 +1887,7 @@ const ProductForm = (props) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes(type)} />
         <RadioTabs
@@ -2154,7 +2154,7 @@ const ProductForm = (props) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -1,17 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Spin, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import SVGIcon from "../../../../../assets/Icon/index";
-import BaseContainer from "../../../../../components/BaseContainer";
-import TablePagination from "../../../../../components/TablePagination";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadAccountStandard, getAllAccountStandardPaginate } from "../../../../../redux/slices/account_management/Account/accountSlice";
-import { columnsAccountStandard } from "./TableAccountStandard";
+import { TableAccountStandard, columnsAccountStandard } from "./TableAccountStandard";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../components/Toolbar";
+import ViewListIcon from "../../../../../assets/Icon/Nx/IconViewList";
+import { PlusOutlined } from "@ant-design/icons";
 
 const AccountStandard = () => {
   // Selector
@@ -21,21 +21,65 @@ const AccountStandard = () => {
 
   // Declaration
   const dispatch = useDispatch();
-  const searchInput = useRef(null);
 
   // State
-  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [advancedSearch, setAdvancedSearch] = useState(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const pageRef = useRef(0); // 0-based to match Spring API directly
+  const isFetchingRef = useRef(false);
 
-  // Use Effect
+  // Helper: build combined search string
+  const buildSearch = useCallback((basicSearch, advSearch) => {
+    let combined = { ...basicSearch };
+    if (advSearch?.filters) {
+      advSearch.filters.forEach(f => { if (f.column && f.value) combined[f.column] = f.value; });
+    }
+    if (advSearch?.filterRules) {
+      advSearch.filterRules.forEach(rule =>
+        rule.filters.forEach(f => { if (f.column && f.value) combined[f.column] = f.value; })
+      );
+    }
+    return encodeURIComponent(JSON.stringify(combined));
+  }, []);
+
+  // Fetch a specific page and append (or replace) results locally
+  const fetchPage = useCallback(async (page, replace = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    try {
+      const reqSearch = buildSearch(search, advancedSearch);
+      const result = await dispatch(getAllAccountStandardPaginate({ 
+        page, // 0-based, matches Spring API directly
+        pageSize, 
+        sort, 
+        search: reqSearch 
+      })).unwrap();
+      const rows = result?.result ?? [];
+      const pageInfo = result?.page ?? {};
+      setAllData(prev => replace ? rows : [...prev, ...rows]);
+      setTotalElements(pageInfo.totalElements ?? 0);
+      setHasMore(pageInfo.number < (pageInfo.totalPages ?? 0) - 1);
+      pageRef.current = pageInfo.number ?? page;
+    } catch (e) {
+      console.error('fetchPage error', e);
+    } finally {
+      isFetchingRef.current = false;
+    }
+  }, [search, advancedSearch, sort, pageSize, dispatch, buildSearch]);
+
+  // Initial load + reload when filters/sort/pageSize change
   useEffect(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getAllAccountStandardPaginate({ page, pageSize, sort, search: reqSearch }));
-  }, [page, pageSize, sort, search, dispatch]);
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    fetchPage(0, true);
+  }, [search, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
 
   const handleDownload = () => {
     let tempSearch = "";
@@ -48,7 +92,7 @@ const AccountStandard = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadAccountStandard({ page, pageSize, sort, search: tempSearch }));
+    dispatch(downloadAccountStandard({ page: pageRef.current, pageSize, sort, search: tempSearch }));
   };
 
   // Breadcrumbs
@@ -63,71 +107,51 @@ const AccountStandard = () => {
     },
   ];
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
+  const handleChange = (_, pageSizeChange) => {
     setPageSize(pageSizeChange);
   };
 
-  const onSort = (_, __, sort) => {
+  const onLoadMore = useCallback(() => {
+    if (!hasMore || isFetchingRef.current) return;
+    fetchPage(pageRef.current + 1, false);
+  }, [hasMore, fetchPage]);
+
+  const onSort = (_, __, sortInfo) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
 
-  const itemActions = [
-    //action toolbar
-    {
-      action: 'Download',
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      )
-    },
-    // {
-    //   action: 'Upload',
-    //   render: (
-    //     <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.UPLOAD_GAS_SOURCE}>
-    //       <ButtonComponent
-    //         icon={<UploadOutlined style={{ fontSize: "24px" }} />}
-    //         type="submit"
-    //       >
-    //         Upload
-    //       </ButtonComponent>
-    //     </NavLink>
+  const onAdvanceSearch = (searchData) => {
+    setAdvancedSearch(searchData);
+  };
 
+  const itemActions = [
+    // action toolbar
+    // this wont be necessary with export button
+    // {
+    //   action: 'Download',
+    //   render: (
+    //     <ButtonComponent
+    //       icon={<SVGIcon name="IconButtonDownload" width={24} />}
+    //       type="submit"
+    //       onClick={handleDownload}
+    //     >
+    //       Download List
+    //     </ButtonComponent>
     //   )
-    // },
+    // }, 
     {
       action: 'Create',
       render: (
         <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_STANDARD}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<PlusOutlined />}
             type="submit"
           >
-            Create Account Standard
+            Create
           </ButtonComponent>
         </Link>
       )
@@ -143,72 +167,45 @@ const AccountStandard = () => {
             <Link
               to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD}
               state={{ idAccount: record?.accountId, idCustomer: record?.customerId }}
+              className="flex flex-col justify-center items-center"
             >
-              <SVGIcon name="IconDetail" width={24} />
+              <ViewListIcon />
             </Link>
           </Tooltip>
         )
       }
     },
-
   ]
 
   return (
-    <Spin spinning={loading}>
+    <>
       <BreadCrumb routes={routes} />
 
-      <Toolbar items={itemActions}/>
-      {/* <div className="w-full flex justify-end gap-[20px]">
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-
-        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_STANDARD}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create Account Standard
-          </ButtonComponent>
-        </Link>
-      </div> */}
-
-      <BaseContainer header={"ACCOUNT - STANDARD LIST"}>
+      <NxCardContainer header={"ACCOUNT - STANDARD"} className="mt-4" actions={itemActions}>
         <div className="w-full">
-          <TablePagination
-            dataSource={data_accountStandard?.result}
-            columns={[
-              ...columnsAccountStandard(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-              ),
-              ...useColumnActionPermission(
-                ["Activate", "View", "Update"],
-                itemActions
-              ),
-            ]}
-            current={page}
+          <TableAccountStandard
+            dataSource={allData}
+            loading={loading}
+            totalData={totalElements}
+            current={pageRef.current + 1}
             pageSize={pageSize}
             onChange={handleChange}
-            onShowSizeChange={handleChange}
+            onSizeChanger={handleChange}
             onSort={onSort}
-            totalData={data_accountStandard?.page?.totalElements}
-            tableScrolled={{
-              x: 9000,
-              y: 500,
-            }}
+            onAdvanceSearch={onAdvanceSearch}
+            handleDownload={handleDownload}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true} // Enable infinite scrolling
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            itemActions={itemActions}
+            columnDefinitions={columnsAccountStandard} // Pass column definitions for advanced search
+            tableScrolled={{ x: 3000, y: 600 }}
           />
         </div>
-      </BaseContainer>
-    </Spin>
+      </NxCardContainer>
+    </>
   );
 };
 

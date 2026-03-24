@@ -503,7 +503,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <FormStepper
@@ -607,7 +607,7 @@ const AdjustmentInvoiceForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

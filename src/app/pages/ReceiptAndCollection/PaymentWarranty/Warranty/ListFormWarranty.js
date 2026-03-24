@@ -466,7 +466,7 @@ const ListFormWarranty = (props) => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routesBread} />
       <Spin spinning={loadingDetail || loadingApproval || loadingSave}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -606,7 +606,7 @@ const ListFormWarranty = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

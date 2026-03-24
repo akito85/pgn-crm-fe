@@ -553,7 +553,7 @@ const BillingCycleForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <FormStepper
@@ -692,7 +692,7 @@ const BillingCycleForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -462,7 +462,7 @@ const AdjustmentBillingPage = () => {
   }, [dataSource]);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -551,7 +551,7 @@ const AdjustmentBillingPage = () => {
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
       />
-    </div>
+    </>
   );
 };
 

@@ -134,7 +134,7 @@ const JobExecutionPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <NxCardContainer 
         header="JOB EXECUTION LIST"
@@ -182,7 +182,7 @@ const JobExecutionPage = () => {
           showRefresh={true}
         />
       </NxCardContainer>
-    </div>
+    </>
   );
 };
 

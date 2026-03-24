@@ -9,7 +9,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { configApp } from "../../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import {
@@ -306,7 +305,7 @@ const ListDetailTOP = () => {
   const isShowButton = data_detail?.approvalInformation?.isApprover;
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div className="w-full gap-5">
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -408,7 +407,7 @@ const ListDetailTOP = () => {
           </Form.Item>
         </Form>
       </ModalApproveOrReject> */}
-    </div>
+    </>
   );
 };
 

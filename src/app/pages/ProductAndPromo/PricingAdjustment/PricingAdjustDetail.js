@@ -390,7 +390,7 @@ const PricingAdjustDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin
         spinning={loadingPricingAdjust}
         className={"w-full top-20"}
@@ -521,7 +521,7 @@ const PricingAdjustDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

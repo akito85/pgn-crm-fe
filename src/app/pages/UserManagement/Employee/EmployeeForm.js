@@ -469,7 +469,7 @@ const EmployeeForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
@@ -684,7 +684,7 @@ const EmployeeForm = (props) => {
 
       {/* try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

@@ -153,7 +153,7 @@ const MaintenanceModePage = () => {
     },
   ];
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"MAINTENANCE MODE"}>
@@ -206,7 +206,7 @@ const MaintenanceModePage = () => {
 
 
       </Spin>
-    </div>
+    </>
   );
 };
 

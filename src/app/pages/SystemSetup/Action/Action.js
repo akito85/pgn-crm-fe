@@ -323,7 +323,7 @@ const Action = () => {
   // use hooks handle retry
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <Spin spinning={loading} className={"w-full top-20"}>
           <BreadCrumb routes={routes} />
           <Toolbar items={itemActions} />
@@ -461,7 +461,7 @@ const Action = () => {
 
         {/* modal try again */}
         {renderModal()}
-      </div>
+    </>
     );
 };
 

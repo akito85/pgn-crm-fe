@@ -109,7 +109,7 @@ const DelegationDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="mt-5">
@@ -235,7 +235,7 @@ const DelegationDetail = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </div>
+    </>
   );
 };
 

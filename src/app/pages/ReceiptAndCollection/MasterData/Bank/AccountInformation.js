@@ -492,7 +492,7 @@ console.log(data_list_gl, ' data list gl');
   };
 
   return (
-    <div>
+    <>
       <BreadCrumbAdvanced routes={routes(id)} />
       <Spin spinning={loading}>
         <RadioTabs
@@ -656,7 +656,7 @@ console.log(data_list_gl, ' data list gl');
           </div>
         </ModalConfirm>
       </Spin>
-    </div>
+    </>
   );
 };
 

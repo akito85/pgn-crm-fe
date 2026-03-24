@@ -654,7 +654,7 @@ const ViewReceipt = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
@@ -837,7 +837,7 @@ const ViewReceipt = () => {
         />
       </ModalConfirm>
       {renderModal()}
-    </div>
+    </>
   );
 };
 

@@ -166,7 +166,7 @@ const Pricing = () => {
   }
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"} tip={"Loading..."}>
         <BreadCrumb routes={routes(segmentedPage)} />
 
@@ -253,7 +253,7 @@ const Pricing = () => {
           </div>
         </BaseContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

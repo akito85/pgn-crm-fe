@@ -386,7 +386,7 @@ const EntityPage = () => {
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -462,7 +462,7 @@ const EntityPage = () => {
         </Form>
       </ModalCustom>
       {renderModal}
-    </div>
+    </>
   );
 };
 

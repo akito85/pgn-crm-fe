@@ -309,7 +309,7 @@ const ProductDistributionForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(id)} />
 
@@ -490,7 +490,7 @@ const ProductDistributionForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

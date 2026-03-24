@@ -530,7 +530,7 @@ const ViewCollectingAgent = () => {
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <CardContainer
                 header={
@@ -588,7 +588,7 @@ const ViewCollectingAgent = () => {
 
             {/* modal try again */}
             {renderModal()}
-        </div>
+        </>
     );
 };
 

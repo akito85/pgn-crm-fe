@@ -71,7 +71,7 @@ const UploadPage = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <div className={"w-full flex flex-col"}>
@@ -181,7 +181,7 @@ const UploadPage = () => {
           </div>
         </Form>
       </Spin>
-    </div>
+    </>
   );
 };
 

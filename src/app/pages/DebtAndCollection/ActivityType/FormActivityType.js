@@ -167,7 +167,7 @@ const FormActivityType = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form
@@ -305,7 +305,7 @@ const FormActivityType = (props) => {
 
       {/* render modal try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

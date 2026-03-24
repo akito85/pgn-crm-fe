@@ -292,7 +292,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -375,7 +375,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

@@ -485,7 +485,7 @@ const EmployeeDetail = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
 
         <div className="gap-5 w-full flex flex-col">
@@ -614,7 +614,7 @@ const EmployeeDetail = () => {
         {renderModal()}
       </Spin>
 
-    </div>
+    </>
   );
 };
 

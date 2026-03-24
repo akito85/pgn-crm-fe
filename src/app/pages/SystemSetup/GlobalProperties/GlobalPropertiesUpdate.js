@@ -542,223 +542,225 @@ const GlobalPropertiesUpdate = () => {
 
 
   return (
-    <Spin spinning={loading || isLoading}>
-      <BreadCrumb routes={routes} />
+    <>
+      <Spin spinning={loading || isLoading}>
+        <BreadCrumb routes={routes} />
 
-      <Form layout="vertical" form={form} onFinish={handleSave}>
-        <BaseContainer header={"global properties information"}>
-          <div className="w-full grid grid-cols-2 gap-2">
-            <Form.Item label={"Type"} name={"type"}>
-              <Select disabled>
-                {data_Type &&
-                  data_Type.map((ta, index) => (
-                    <Select.Option value={ta.value} key={index}>
-                      {ta.name}
-                    </Select.Option>
-                  ))}
-              </Select>
-            </Form.Item>
-            <Form.Item label={"Properties Name"} name={"name"}>
-              <Input
-                disabled
-                onInput={(e) =>
-                  (e.target.value = e.target.value.trimStart())
-                } />
-            </Form.Item>
-            <div className="col-span-2">
-              <Form.Item
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Description!",
-                  },
-                ]}
-                label={"Description"}
-                name={"desc"}
-                className={"w-full"}
-              >
-                <InputComponent type="textarea" />
+        <Form layout="vertical" form={form} onFinish={handleSave}>
+          <BaseContainer header={"global properties information"}>
+            <div className="w-full grid grid-cols-2 gap-2">
+              <Form.Item label={"Type"} name={"type"}>
+                <Select disabled>
+                  {data_Type &&
+                    data_Type.map((ta, index) => (
+                      <Select.Option value={ta.value} key={index}>
+                        {ta.name}
+                      </Select.Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item label={"Properties Name"} name={"name"}>
+                <Input
+                  disabled
+                  onInput={(e) =>
+                    (e.target.value = e.target.value.trimStart())
+                  } />
+              </Form.Item>
+              <div className="col-span-2">
+                <Form.Item
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Description!",
+                    },
+                  ]}
+                  label={"Description"}
+                  name={"desc"}
+                  className={"w-full"}
+                >
+                  <InputComponent type="textarea" />
+                </Form.Item>
+              </div>
+            </div>
+          </BaseContainer>
+
+          <div className="w-full">
+            <TableInlineGlobalProperties
+              header={"global properties item information"}
+              tableData={paginationTable("data")}
+              useSelect={true}
+              usePagination={true}
+              onDataChange={setTableData}
+              current={page}
+              pageSize={pageSize}
+              onChangePage={handleChangePage}
+              onSizeChanger={handleChangePage}
+              cols={column}
+              regex={{
+                pattern: new RegExp("^(?:[dA-Z0-9-_]+)$"),
+                message: "Please check your input!",
+              }}
+              required={{ required: true, message: "Please input your" }}
+              scrollTable={{
+                x: 1500,
+                y: 300,
+              }}
+              actionButton={["update", "delete", "inactive"]}
+              totalData={paginationTable("length")}
+              onInactive={handleActiveOrInactive}
+              checkInputBy={"keyName"}
+              checkNameColumn={"KEY"}
+              handleValidate={handleValidate}
+              messageValidate="Make sure input Value column"
+              actionFix={true}
+              setInserted={setInsertedTable}
+              setRule={setDataType}
+              setMaxLenght={setMaxLength}
+            />
+          </div>
+
+          <div className="mt-[30px] flex">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setModalBack(true)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+              disabled={insertedTable}
+            >
+              Back
+            </ButtonComponent>
+
+            <div className={"w-full flex justify-end gap-5"}>
+              <Form.Item>
+                <ButtonComponent
+                  icon={<SVGIcon name={`IconButtonReset`} width={24} />}
+                  type="submit"
+                  onClick={handleReset}
+                  disabled={insertedTable}
+                >
+                  Reset
+                </ButtonComponent>
+              </Form.Item>
+              <Form.Item>
+                <ButtonComponent type="submit" htmlType={"submit"} disabled={insertedTable}>
+                  Save
+                </ButtonComponent>
               </Form.Item>
             </div>
           </div>
-        </BaseContainer>
+        </Form>
 
-        <div className="w-full">
-          <TableInlineGlobalProperties
-            header={"global properties item information"}
-            tableData={paginationTable("data")}
-            useSelect={true}
-            usePagination={true}
-            onDataChange={setTableData}
-            current={page}
-            pageSize={pageSize}
-            onChangePage={handleChangePage}
-            onSizeChanger={handleChangePage}
-            cols={column}
-            regex={{
-              pattern: new RegExp("^(?:[dA-Z0-9-_]+)$"),
-              message: "Please check your input!",
-            }}
-            required={{ required: true, message: "Please input your" }}
-            scrollTable={{
-              x: 1500,
-              y: 300,
-            }}
-            actionButton={["update", "delete", "inactive"]}
-            totalData={paginationTable("length")}
-            onInactive={handleActiveOrInactive}
-            checkInputBy={"keyName"}
-            checkNameColumn={"KEY"}
-            handleValidate={handleValidate}
-            messageValidate="Make sure input Value column"
-            actionFix={true}
-            setInserted={setInsertedTable}
-            setRule={setDataType}
-            setMaxLenght={setMaxLength}
-          />
-        </div>
-
-        <div className="mt-[30px] flex">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => setModalBack(true)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-            disabled={insertedTable}
-          >
-            Back
-          </ButtonComponent>
-
-          <div className={"w-full flex justify-end gap-5"}>
-            <Form.Item>
+        {/* Modal Confirmation */}
+        <ModalCustom
+          isOpen={modalConfirm}
+          type={"confirmation"}
+          header={"CONFIRMATION"}
+          width={1000}
+          handleCancel={() => setModalConfirm(false)}
+          footer={
+            <div className={"w-full flex justify-end gap-5"}>
               <ButtonComponent
-                icon={<SVGIcon name={`IconButtonReset`} width={24} />}
-                type="submit"
-                onClick={handleReset}
-                disabled={insertedTable}
+                type={"default"}
+                onClick={() => setModalConfirm(false)}
               >
-                Reset
+                Cancel
               </ButtonComponent>
-            </Form.Item>
-            <Form.Item>
-              <ButtonComponent type="submit" htmlType={"submit"} disabled={insertedTable}>
-                Save
+              <ButtonComponent
+                type={"submit"}
+                border={false}
+                onClick={() => handleConfirm()}
+              >
+                Confirm
               </ButtonComponent>
-            </Form.Item>
-          </div>
-        </div>
-      </Form>
-
-      {/* Modal Confirmation */}
-      <ModalCustom
-        isOpen={modalConfirm}
-        type={"confirmation"}
-        header={"CONFIRMATION"}
-        width={1000}
-        handleCancel={() => setModalConfirm(false)}
-        footer={
-          <div className={"w-full flex justify-end gap-5"}>
-            <ButtonComponent
-              type={"default"}
-              onClick={() => setModalConfirm(false)}
-            >
-              Cancel
-            </ButtonComponent>
-            <ButtonComponent
-              type={"submit"}
-              border={false}
-              onClick={() => handleConfirm()}
-            >
-              Confirm
-            </ButtonComponent>
-          </div>
-        }
-      >
-        <div className="w-full p-5">
-          <span className="text-primary uppercase font-bold">
-            global properties information
-          </span>
-
-          <div className="grid grid-cols-2 gap-5 pt-[30px]">
-            <DetailText label="Type">{TypeConf}</DetailText>
-            <DetailText label="Properties Name">{data.name}</DetailText>
-            <div className="w-full col-span-2">
-              <DetailText label="Description">{data.desc}</DetailText>
             </div>
-
+          }
+        >
+          <div className="w-full p-5">
             <span className="text-primary uppercase font-bold">
-              properties item information
+              global properties information
             </span>
 
-            <div className="col-span-2 pt-[30px]">
-              <TablePagination
-                columns={column}
-                pageSize={pageSizeConfirm}
-                current={pageConfirm}
-                dataSource={paginationTableConfirm(
-                  pageConfirm,
-                  pageSizeConfirm
-                )}
-                totalData={data?.keyVal?.length}
-                onChange={handleChangeConfirm}
-                onSizeChanger={handleChangePage}
-              />
+            <div className="grid grid-cols-2 gap-5 pt-[30px]">
+              <DetailText label="Type">{TypeConf}</DetailText>
+              <DetailText label="Properties Name">{data.name}</DetailText>
+              <div className="w-full col-span-2">
+                <DetailText label="Description">{data.desc}</DetailText>
+              </div>
+
+              <span className="text-primary uppercase font-bold">
+                properties item information
+              </span>
+
+              <div className="col-span-2 pt-[30px]">
+                <TablePagination
+                  columns={column}
+                  pageSize={pageSizeConfirm}
+                  current={pageConfirm}
+                  dataSource={paginationTableConfirm(
+                    pageConfirm,
+                    pageSizeConfirm
+                  )}
+                  totalData={data?.keyVal?.length}
+                  onChange={handleChangeConfirm}
+                  onSizeChanger={handleChangePage}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </ModalCustom>
+        </ModalCustom>
 
-      {/* Modal Confirmation Active/Inactive */}
-      <ModalConfirm
-        isOpen={modalActiveOrInactive}
-        handleCancel={() => setModalActiveOrInactive(false)}
-        handleOk={() => handleOk(selectedData)}
-        width={activeOrInactive === "ACTIVE" ? 500 : 400}
-      >
-        <div className="w-full flex flex-col mt-10 justify-end">
-          <div className={"w-full flex flex-row items-center px-10"}>
-            <WarningOutlined
-              style={{ color: "red" }}
-              className={"text-4xl"}
-            />
-            <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-              {`Are you sure want to ${activeOrInactive === "ACTIVE" ? "inactivate" : "activate"
-                }?`}
-            </span>
+        {/* Modal Confirmation Active/Inactive */}
+        <ModalConfirm
+          isOpen={modalActiveOrInactive}
+          handleCancel={() => setModalActiveOrInactive(false)}
+          handleOk={() => handleOk(selectedData)}
+          width={activeOrInactive === "ACTIVE" ? 500 : 400}
+        >
+          <div className="w-full flex flex-col mt-10 justify-end">
+            <div className={"w-full flex flex-row items-center px-10"}>
+              <WarningOutlined
+                style={{ color: "red" }}
+                className={"text-4xl"}
+              />
+              <span className={"text-lg text-black font-bold h-auto mx-auto"}>
+                {`Are you sure want to ${activeOrInactive === "ACTIVE" ? "inactivate" : "activate"
+                  }?`}
+              </span>
+            </div>
           </div>
-        </div>
-      </ModalConfirm>
+        </ModalConfirm>
 
-      {/* Modal Back */}
-      <ModalConfirm
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-      >
-        <div className="flex justify-center mt-5 gap-[20px]">
-          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
-            Are you sure you want to back?
-          </p>
-        </div>
-      </ModalConfirm>
-      <ModalAttention
-        isOpen={globalPropertiesItemIsNull}
-        handleCancel={() => setGlobalPropertiesItemIsNull(false)}
-        handleOk={() => setGlobalPropertiesItemIsNull(false)}
-        textList={"global properties item"}
-      />
+        {/* Modal Back */}
+        <ModalConfirm
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
+        <ModalAttention
+          isOpen={globalPropertiesItemIsNull}
+          handleCancel={() => setGlobalPropertiesItemIsNull(false)}
+          handleOk={() => setGlobalPropertiesItemIsNull(false)}
+          textList={"global properties item"}
+        />
 
-      {/* render try again */}
-      {renderModal()}
-    </Spin>
+        {/* render try again */}
+        {renderModal()}
+      </Spin>
+    </>
   );
 };
 

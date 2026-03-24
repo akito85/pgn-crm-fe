@@ -615,7 +615,7 @@ const ViewCaPaymentChannel = () => {
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
@@ -674,7 +674,7 @@ const ViewCaPaymentChannel = () => {
             </Spin>
             {/* modal try again */}
             {renderModal()}
-        </div>
+        </>
     );
 };
 

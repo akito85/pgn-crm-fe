@@ -157,7 +157,7 @@ const RateTypeCreate = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSubmitForm}>
@@ -279,7 +279,7 @@ const RateTypeCreate = ({ type }) => {
           </p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

@@ -699,7 +699,7 @@ const ViewAssets = () => {
     ]
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
 
@@ -799,7 +799,7 @@ const ViewAssets = () => {
 
             {/* modal retry */}
             {renderModal()}
-        </div>
+        </>
     );
 }
 

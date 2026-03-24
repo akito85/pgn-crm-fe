@@ -245,7 +245,7 @@ const GeneralTemplateDetail = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {data_detail?.inactiveApproval?.isInactive &&
@@ -391,7 +391,7 @@ const GeneralTemplateDetail = () => {
           </ModalError>
         ) : null}
       </Spin>
-    </div>
+    </>
   );
 };
 

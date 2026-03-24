@@ -726,7 +726,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading || loadingForm}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -922,7 +922,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           </ModalConfirm>
         ) : null}
       </Spin>
-    </div>
+    </>
   );
 };
 

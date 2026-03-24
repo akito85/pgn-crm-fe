@@ -123,7 +123,7 @@ const ViewBridge = () => {
 
   
   return (
-    <div>
+    <>
       <Spin
         spinning={loading || false}
         className={"w-full top-20"}
@@ -171,7 +171,7 @@ const ViewBridge = () => {
         </div>
         
       </Spin>
-    </div>
+    </>
   );
 };
 

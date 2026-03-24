@@ -300,7 +300,7 @@ const MaintainUser = ({ dataTable }) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"CHANGE AUTHENTICATION TYPE"}>
@@ -449,7 +449,7 @@ const MaintainUser = ({ dataTable }) => {
         {/* render modal */}
         {renderModal()}
       </Spin>
-    </div>
+    </>
   );
 };
 

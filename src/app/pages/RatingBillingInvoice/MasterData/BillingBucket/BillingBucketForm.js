@@ -1011,7 +1011,7 @@ const BillingBucketForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -1155,7 +1155,7 @@ const BillingBucketForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

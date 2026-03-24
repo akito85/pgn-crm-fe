@@ -148,7 +148,7 @@ const ListDetailCollectingAgent = () => {
     };
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <div>
                 <Tabs
@@ -209,7 +209,7 @@ const ListDetailCollectingAgent = () => {
                 }}
                 showApproval={isShowButton === true}
             />
-        </div>
+        </>
     );
 };
 

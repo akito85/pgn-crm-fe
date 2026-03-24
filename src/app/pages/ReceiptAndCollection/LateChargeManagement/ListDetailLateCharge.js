@@ -102,7 +102,7 @@ const ListDetailLateCharge = () => {
     const historyColumns = getHistoryColumns({});
 
     return (
-        <div>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <div className="mt-5 pb-10">
@@ -207,7 +207,7 @@ const ListDetailLateCharge = () => {
                 menu={"Late Charge"}
                 named={lateCharge.id}
             />
-        </div>
+        </>
     );
 };
 

@@ -295,7 +295,7 @@ const ListDetailBank = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <div className="w-full gap-5">
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -357,7 +357,7 @@ const ListDetailBank = () => {
             : data_detail?.bank?.bankName
         }
       />
-    </div>
+    </>
   );
 };
 

@@ -257,7 +257,7 @@ const ForwardTaskForm = ({ type }) => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"Pending Task Information"}>
@@ -427,7 +427,7 @@ const ForwardTaskForm = ({ type }) => {
           ddl={{ dataFrom: data_pending?.fromPosition, dataTo: data_to }}
         />
       </Spin>
-    </div>
+    </>
   );
 };
 

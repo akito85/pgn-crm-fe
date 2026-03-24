@@ -141,7 +141,7 @@ const ViewInvoice = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin
         spinning={loading || false}
         className={"w-full top-20"}
@@ -198,7 +198,7 @@ const ViewInvoice = () => {
         </div>
 
       </Spin>
-    </div>
+    </>
   );
 };
 

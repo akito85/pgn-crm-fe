@@ -147,7 +147,7 @@ const ManagementBillingInstallmentPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -225,7 +225,7 @@ const ManagementBillingInstallmentPage = () => {
           />
         </BaseContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

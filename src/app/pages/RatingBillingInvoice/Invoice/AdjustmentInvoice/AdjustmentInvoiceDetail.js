@@ -557,7 +557,7 @@ const AdjustmentInvoiceDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading || loadingDetail}>
         <BreadCrumb routes={routes} />
 
@@ -623,7 +623,7 @@ const AdjustmentInvoiceDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

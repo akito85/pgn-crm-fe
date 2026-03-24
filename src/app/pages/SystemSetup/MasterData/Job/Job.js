@@ -390,55 +390,57 @@ const Job = () => {
     },
   ];
   return (
-    <Spin spinning={loading}>
-      <BreadCrumb routes={routes} />
-      <Toolbar items={itemActions} />
+    <>
+      <Spin spinning={loading}>
+        <BreadCrumb routes={routes} />
+        <Toolbar items={itemActions} />
 
-      <BaseContainer header={"JOB LIST"}>
-        <div className={"w-full"}>
-          <TablePagination
-            dataSource={dataSource}
-            columns={[
-              ...columns,
-              ...useColumnActionPermission(
-                ["view", "update", "activate"],
-                itemActions
-              ),
-            ]}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            totalData={data?.page?.totalElements}
-            onSort={onSort}
-            tableScrolled={{ x: 800, y: 525 }}
-          />
-        </div>
-      </BaseContainer>
+        <BaseContainer header={"JOB LIST"}>
+          <div className={"w-full"}>
+            <TablePagination
+              dataSource={dataSource}
+              columns={[
+                ...columns,
+                ...useColumnActionPermission(
+                  ["view", "update", "activate"],
+                  itemActions
+                ),
+              ]}
+              current={page}
+              pageSize={pageSize}
+              onChange={handleChange}
+              totalData={data?.page?.totalElements}
+              onSort={onSort}
+              tableScrolled={{ x: 800, y: 525 }}
+            />
+          </div>
+        </BaseContainer>
 
-      {/* Modal Detail */}
-      <JobDetail
-        data={data_detail}
-        openModal={modalDetail}
-        closeModal={handleCancelModal}
-      />
+        {/* Modal Detail */}
+        <JobDetail
+          data={data_detail}
+          openModal={modalDetail}
+          closeModal={handleCancelModal}
+        />
 
-      {/* Modal Active/Inactive */}
-      <ModalApproveOrReject
-        isOpen={modalConfirm}
-        handleCloseModal={handleCancelModal}
-        onFinish={handleConfirm}
-        header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
-        approveOrReject={
-          activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
-        }
-        menu={"Job"}
-        named={record?.jobName}
-        width={800}
-      />
+        {/* Modal Active/Inactive */}
+        <ModalApproveOrReject
+          isOpen={modalConfirm}
+          handleCloseModal={handleCancelModal}
+          onFinish={handleConfirm}
+          header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
+          approveOrReject={
+            activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
+          }
+          menu={"Job"}
+          named={record?.jobName}
+          width={800}
+        />
 
-      {/* modal try again */}
-      {renderModal()}
-    </Spin>
+        {/* modal try again */}
+        {renderModal()}
+      </Spin>
+    </>
   );
 };
 

@@ -482,7 +482,7 @@ const TaxCodeView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -553,7 +553,7 @@ const TaxCodeView = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

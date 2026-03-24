@@ -562,7 +562,7 @@ const NotificationHistory = () => {
 
 
   return (
-  <div>
+  <>
     <div className={transitionClass}>
     {/*
     <div class="w-full flex flex-col justify-end items-end mb-5">
@@ -914,7 +914,7 @@ const NotificationHistory = () => {
       </button>
     </div>
     </div>
-  </div>
+  </>
   );
 };
 

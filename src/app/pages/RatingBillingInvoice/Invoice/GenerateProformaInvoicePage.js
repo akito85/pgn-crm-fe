@@ -679,7 +679,7 @@ const GenerateProformaInvoicePage = () => {
   );
 
   return (
-    <div>
+    <>
       <Form layout="vertical" form={form}>
         <CardContainer header="GENERATE PROFORMA INFORMATION">
           <Form.Item label="Export Format" required>
@@ -746,7 +746,7 @@ const GenerateProformaInvoicePage = () => {
           </Button>
         </div>
       </Form>
-    </div>
+    </>
   );
 };
 

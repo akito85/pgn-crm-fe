@@ -112,7 +112,7 @@ const LoginBackgroundDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
 
@@ -212,7 +212,7 @@ const LoginBackgroundDetail = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </div>
+    </>
   );
 };
 

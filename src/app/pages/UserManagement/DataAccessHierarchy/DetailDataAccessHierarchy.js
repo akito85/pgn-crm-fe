@@ -200,7 +200,7 @@ const DetailDataAccessHierarchy = () => {
 
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <div className={"w-full flex flex-col gap-5 my-5"}>
@@ -313,7 +313,7 @@ const DetailDataAccessHierarchy = () => {
 
       {/* moda try again */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

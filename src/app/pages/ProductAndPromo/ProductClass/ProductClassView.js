@@ -572,7 +572,7 @@ const ProductClassView = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -669,7 +669,7 @@ const ProductClassView = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

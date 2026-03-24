@@ -116,7 +116,7 @@ const CreateCustomerAccount = (props) => {
   };
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Form
         id="accountForm"
@@ -210,7 +210,7 @@ const CreateCustomerAccount = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </div>
+    </>
   );
 };
 

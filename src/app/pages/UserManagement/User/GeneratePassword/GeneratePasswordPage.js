@@ -8,7 +8,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { USER_ROUTES } from "../../../../../routes/user_management/user_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
@@ -107,7 +106,7 @@ const GeneratePasswordPage = () => {
     setModalSuccess(false);
   };
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -235,7 +234,7 @@ const GeneratePasswordPage = () => {
           )}
         </div>
       </ModalSuccess>
-    </div>
+    </>
   );
 };
 

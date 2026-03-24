@@ -386,7 +386,7 @@ const ViewPaymentWarrantyPartner = () => {
   const { renderModal } = useTryAgainHooks(handleRetry);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer header={
@@ -435,7 +435,7 @@ const ViewPaymentWarrantyPartner = () => {
         />
       </Spin>
       {renderModal()}
-    </div>
+    </>
   );
 };
 

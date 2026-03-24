@@ -405,7 +405,7 @@ const BillingBucketDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -510,7 +510,7 @@ const BillingBucketDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -105,7 +105,7 @@ const AnnouncementDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"ANNOUNCEMENT INFORMATION"}>
@@ -215,7 +215,7 @@ const AnnouncementDetail = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </div>
+    </>
   );
 };
 

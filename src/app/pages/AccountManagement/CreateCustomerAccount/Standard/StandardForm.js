@@ -1919,322 +1919,265 @@ const StandardForm = () => {
   };
 
   return (
-    <Spin spinning={isLoading}>
-      <BreadCrumb routes={routes} />
+    <>
+      <Spin spinning={isLoading}>
+        <BreadCrumb routes={routes} />
 
-      {steps[current].title === "ACCOUNT INFORMATION" &&
-      data?.registered === true ? (
-        <BaseContainer header={"Customer Information"}>
-          <div className="w-full grid grid-cols-4 gap-5">
-            <DetailText label={"Customer Number"}>
-              {data?.customerInformation?.customerNumber}
-            </DetailText>
-            <DetailText label={"Identification Type"}>
-              {data?.customerInformation?.identificationType}
-            </DetailText>
-            <DetailText label={"Customer Identification Number"}>
-              {data?.customerInformation?.personalIdentificationNumber}
-            </DetailText>
-            <DetailText label={"Customer Name"}>
-              {data?.customerInformation?.customerName}
-            </DetailText>
-            <DetailText label={"Customer Type"}>
-              {data?.customerInformation?.customerType}
-            </DetailText>
-            <DetailText label={"Description"}>
-              {data?.customerInformation?.description}
-            </DetailText>
-            <DetailText label={"Status"}>
-              {data?.customerInformation?.status}
-            </DetailText>
-            <DetailText label={"Birth/Founded Place"}>
-              {data?.customerInformation?.placeOfBirth}
-            </DetailText>
-            <DetailText label={"Birth/Founded Date"}>
-              {moment(data?.customerInformation?.dateOfBirth).format(
-                dateFormatting.date
-              )
-                ? moment(data?.customerInformation?.dateOfBirth).format(
-                    dateFormatting.date
-                  )
-                : "-"}
-            </DetailText>
-            <DetailText label={"Sex"}>
-              {data?.customerInformation?.sex}
-            </DetailText>
-            <DetailText label={"Search Key"}>
-              {data?.customerInformation?.searchKey}
-            </DetailText>
-          </div>
-        </BaseContainer>
-      ) : null}
-
-      <Form layout="vertical" form={form} onFinish={handleSave} onFinishFailed={handleSaveFailed} >
-        <BaseContainer header={"Account - Standard Information"}>
-          <div className="flex flex-row gap-x-6 justify-center">
-            <span className="mt-[10px]">
-              <LeftCircleOutlined
-                style={{ fontSize: "24px", color: "#0075bf" }}
-                onClick={scrollLeftHandler}
-              />
-            </span>
-            <div
-              onScroll={handleScroll}
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-            >
-              <Steps
-                current={current}
-                items={items}
-                labelPlacement="vertical"
-              />
+        {steps[current].title === "ACCOUNT INFORMATION" &&
+        data?.registered === true ? (
+          <BaseContainer header={"Customer Information"}>
+            <div className="w-full grid grid-cols-4 gap-5">
+              <DetailText label={"Customer Number"}>
+                {data?.customerInformation?.customerNumber}
+              </DetailText>
+              <DetailText label={"Identification Type"}>
+                {data?.customerInformation?.identificationType}
+              </DetailText>
+              <DetailText label={"Customer Identification Number"}>
+                {data?.customerInformation?.personalIdentificationNumber}
+              </DetailText>
+              <DetailText label={"Customer Name"}>
+                {data?.customerInformation?.customerName}
+              </DetailText>
+              <DetailText label={"Customer Type"}>
+                {data?.customerInformation?.customerType}
+              </DetailText>
+              <DetailText label={"Description"}>
+                {data?.customerInformation?.description}
+              </DetailText>
+              <DetailText label={"Status"}>
+                {data?.customerInformation?.status}
+              </DetailText>
+              <DetailText label={"Birth/Founded Place"}>
+                {data?.customerInformation?.placeOfBirth}
+              </DetailText>
+              <DetailText label={"Birth/Founded Date"}>
+                {moment(data?.customerInformation?.dateOfBirth).format(
+                  dateFormatting.date
+                )
+                  ? moment(data?.customerInformation?.dateOfBirth).format(
+                      dateFormatting.date
+                    )
+                  : "-"}
+              </DetailText>
+              <DetailText label={"Sex"}>
+                {data?.customerInformation?.sex}
+              </DetailText>
+              <DetailText label={"Search Key"}>
+                {data?.customerInformation?.searchKey}
+              </DetailText>
             </div>
-            <span className="mt-[10px]">
-              <RightCircleOutlined
-                style={{ fontSize: "24px", color: "#0075bf" }}
-                onClick={scrollRightHandler}
-              />
-            </span>
-          </div>
-
-          <div className="steps-content my-[30px]">
-            {steps[current].content}
-          </div>
-        </BaseContainer>
-
-        {steps[current].title === "ADDRESS" ? (
-          <AddressOverview
-            addressTable={addressTable}
-            setAddressTable={setAddressTable}
-            type={"create"}
-            form={form}
-            setAddressObj={setAddressObj}
-            handleContactChangesByAddress={handleContactChangesByAddress}
-          />
+          </BaseContainer>
         ) : null}
 
-        {steps[current].title === "CONTACT" ? (
-          <ContactOverview
-            contactTable={contactTable}
-            setContactTable={setContactTable}
-            dataAddress={addressTable}
-            form={form}
-            type={"create"}
-            prefix1={prefix1}
-            prefix2={prefix2}
-            suffix={suffix}
-            value={value}
-            keyModal={keyModal}
-            setContactObj={setContactObj}
-          />
-        ) : null}
-
-        <div className="mt-[30px] flex">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => setModalBack(true)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Back
-          </ButtonComponent>
-
-          <div className="flex w-full justify-end gap-x-4">
-            <Form.Item>
-              <ButtonComponent
-                icon={<SVGIcon name={"IconButtonClear"} width={24} />}
-                type="submit"
-                onClick={() => handleClear()}
+        <Form layout="vertical" form={form} onFinish={handleSave} onFinishFailed={handleSaveFailed} >
+          <BaseContainer header={"Account - Standard Information"}>
+            <div className="flex flex-row gap-x-6 justify-center">
+              <span className="mt-[10px]">
+                <LeftCircleOutlined
+                  style={{ fontSize: "24px", color: "#0075bf" }}
+                  onClick={scrollLeftHandler}
+                />
+              </span>
+              <div
+                onScroll={handleScroll}
+                ref={containerRef}
+                className="overflow-x-scroll scrollStepsCstm"
               >
-                Clear
-              </ButtonComponent>
-            </Form.Item>
-            {current > 0 && (
-              <Form.Item>
-                <ButtonComponent
-                  onClick={() => {
-                    prev();
-                    scrollLeftHandler();
-                  }}
-                  type={"submit"}
-                  icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                >
-                  Previous
-                </ButtonComponent>
-              </Form.Item>
-            )}
-
-            {current < steps.length - 1 && (
-              <Form.Item>
-                <ButtonComponent
-                  onClick={() => {
-                    handleButtonNext();
-                  }}
-                  type={"submit"}
-                  className="ant-btn ant-btn-submit flex w-full justify-center"
-                  disabled={steps[current].disabled}
-                >
-                  <div className="flex gap-x-2 items-center">
-                    <span>Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
-                  </div>
-                </ButtonComponent>
-              </Form.Item>
-            )}
-            {current === steps.length - 1 && (
-              <Form.Item>
-                <ButtonComponent type={"submit"} htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
-            )}
-          </div>
-        </div>
-      </Form>
-
-      {/* Check Customer */}
-      <ModalCheckCustomer
-        data={data?.customerInformation}
-        dataTable={data?.accountList}
-        isOpen={modalCheckCustomer}
-        handleCancel={() => setModalCheckCustomer(false)}
-        handleConfirm={() => {
-          setModalCheckCustomer(false);
-          next();
-          scrollRightHandler();
-        }}
-      />
-
-      {/* Confirmation */}
-      <ModalConfirmationLayout
-        data={dataConfirm}
-        dataCustomer={data}
-        dataCheck={data?.registered}
-        dataFinancialInfo={data_financialInfo}
-        addressTable={addressTable}
-        contactTable={contactTable}
-        dataDM={dmArray}
-        prefix1={prefix1}
-        prefix2={prefix2}
-        suffix={suffix}
-        keyModal={keyModal}
-        value={value}
-        listAttachment={listDataAttachment}
-        isOpen={modalConfirm}
-        handleConfirm={() => handleCreateAccount()}
-        handleCancel={() => {
-          setDataConfirm({});
-          setModalConfirm(false);
-        }}
-      />
-
-      {/* Modal Back*/}
-      <ModalConfirm
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-        width={400}
-      >
-        <div className="flex justify-center mt-5 gap-[20px]">
-          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
-            Are you sure you want to back?
-          </p>
-        </div>
-      </ModalConfirm>
-
-      {/* Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
-          </div>
-          <p className="pl-[70px]">{`Your data was not inactivate ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-
-      <ModalError
-        isOpen={modalValidate}
-        handleOk={() => setModalValidate(false)}
-        handleCancel={() => setModalValidate(false)}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal["icon_error_default"]}
-            <p className="text-[18px] font-bold">{"Failed"}</p>
-          </div>
-          <p className="pl-[70px]">
-            {
-              "Please Input at least one or more distribution media!"
-            }
-          </p>
-        </div>
-      </ModalError>
-
-      {/* Modal Warning Lost Data */}
-      {
-        modalPrevLostData ? (
-          // <ModalConfirm
-          //   isOpen={modalPrevLostData}
-          //   handleCancel={() => setModalPrevLostData(false)}
-          //   handleOk={handleOkLostData}
-          //   width={400}
-          // >
-          //   <div className="flex justify-center mt-5 gap-[20px]">
-          //     <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          //     <p className="text-[18px] font-bold">
-          //     Are you sure you want to go to previous step? your data will be lost!
-          //     </p>
-          //   </div>
-          // </ModalConfirm>
-          <ModalConfirm
-            isOpen={modalPrevLostData}
-            handleCancel={() => setModalPrevLostData(false)}
-            handleOk={handleOkLostData}
-            width={500}
-          >
-            <div className="flex justify-center gap-[20px] mt-6">
-              <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-              <p className={"text-[18px] font-bold"}>
-                Are you sure want to go back?
-              </p>
+                <Steps
+                  current={current}
+                  items={items}
+                  labelPlacement="vertical"
+                />
+              </div>
+              <span className="mt-[10px]">
+                <RightCircleOutlined
+                  style={{ fontSize: "24px", color: "#0075bf" }}
+                  onClick={scrollRightHandler}
+                />
+              </span>
             </div>
-            <Alert
-              message="
-              If you go to previous step, your data will be lost!"
-              type={"error"}
-            />
-          </ModalConfirm>
-        )
-        : null 
-      }
 
-        {/* Modal premise already use */}
-        {modalAlreadyPremise ? 
+            <div className="steps-content my-[30px]">
+              {steps[current].content}
+            </div>
+          </BaseContainer>
+
+          {steps[current].title === "ADDRESS" ? (
+            <AddressOverview
+              addressTable={addressTable}
+              setAddressTable={setAddressTable}
+              type={"create"}
+              form={form}
+              setAddressObj={setAddressObj}
+              handleContactChangesByAddress={handleContactChangesByAddress}
+            />
+          ) : null}
+
+          {steps[current].title === "CONTACT" ? (
+            <ContactOverview
+              contactTable={contactTable}
+              setContactTable={setContactTable}
+              dataAddress={addressTable}
+              form={form}
+              type={"create"}
+              prefix1={prefix1}
+              prefix2={prefix2}
+              suffix={suffix}
+              value={value}
+              keyModal={keyModal}
+              setContactObj={setContactObj}
+            />
+          ) : null}
+
+          <div className="mt-[30px] flex">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => setModalBack(true)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
+
+            <div className="flex w-full justify-end gap-x-4">
+              <Form.Item>
+                <ButtonComponent
+                  icon={<SVGIcon name={"IconButtonClear"} width={24} />}
+                  type="submit"
+                  onClick={() => handleClear()}
+                >
+                  Clear
+                </ButtonComponent>
+              </Form.Item>
+              {current > 0 && (
+                <Form.Item>
+                  <ButtonComponent
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
+                    type={"submit"}
+                    icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
+                  >
+                    Previous
+                  </ButtonComponent>
+                </Form.Item>
+              )}
+
+              {current < steps.length - 1 && (
+                <Form.Item>
+                  <ButtonComponent
+                    onClick={() => {
+                      handleButtonNext();
+                    }}
+                    type={"submit"}
+                    className="ant-btn ant-btn-submit flex w-full justify-center"
+                    disabled={steps[current].disabled}
+                  >
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
+                  </ButtonComponent>
+                </Form.Item>
+              )}
+              {current === steps.length - 1 && (
+                <Form.Item>
+                  <ButtonComponent type={"submit"} htmlType={"submit"}>
+                    Save
+                  </ButtonComponent>
+                </Form.Item>
+              )}
+            </div>
+          </div>
+        </Form>
+
+        {/* Check Customer */}
+        <ModalCheckCustomer
+          data={data?.customerInformation}
+          dataTable={data?.accountList}
+          isOpen={modalCheckCustomer}
+          handleCancel={() => setModalCheckCustomer(false)}
+          handleConfirm={() => {
+            setModalCheckCustomer(false);
+            next();
+            scrollRightHandler();
+          }}
+        />
+
+        {/* Confirmation */}
+        <ModalConfirmationLayout
+          data={dataConfirm}
+          dataCustomer={data}
+          dataCheck={data?.registered}
+          dataFinancialInfo={data_financialInfo}
+          addressTable={addressTable}
+          contactTable={contactTable}
+          dataDM={dmArray}
+          prefix1={prefix1}
+          prefix2={prefix2}
+          suffix={suffix}
+          keyModal={keyModal}
+          value={value}
+          listAttachment={listDataAttachment}
+          isOpen={modalConfirm}
+          handleConfirm={() => handleCreateAccount()}
+          handleCancel={() => {
+            setDataConfirm({});
+            setModalConfirm(false);
+          }}
+        />
+
+        {/* Modal Back*/}
+        <ModalConfirm
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
+
+        {/* Modal Retry */}
         <ModalError
-          isOpen={modalAlreadyPremise}
-          handleOk={() => setModalAlreadyPremise(false)}
-          handleCancel={() => setModalAlreadyPremise(false)}
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not inactivate ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        <ModalError
+          isOpen={modalValidate}
+          handleOk={() => setModalValidate(false)}
+          handleCancel={() => setModalValidate(false)}
         >
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
@@ -2242,14 +2185,73 @@ const StandardForm = () => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">
-              {isPremiseAlready?.message}
+              {
+                "Please Input at least one or more distribution media!"
+              }
             </p>
           </div>
         </ModalError>
-        : null 
-      }
 
-    </Spin>
+        {/* Modal Warning Lost Data */}
+        {
+          modalPrevLostData ? (
+            // <ModalConfirm
+            //   isOpen={modalPrevLostData}
+            //   handleCancel={() => setModalPrevLostData(false)}
+            //   handleOk={handleOkLostData}
+            //   width={400}
+            // >
+            //   <div className="flex justify-center mt-5 gap-[20px]">
+            //     <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            //     <p className="text-[18px] font-bold">
+            //     Are you sure you want to go to previous step? your data will be lost!
+            //     </p>
+            //   </div>
+            // </ModalConfirm>
+            <ModalConfirm
+              isOpen={modalPrevLostData}
+              handleCancel={() => setModalPrevLostData(false)}
+              handleOk={handleOkLostData}
+              width={500}
+            >
+              <div className="flex justify-center gap-[20px] mt-6">
+                <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+                <p className={"text-[18px] font-bold"}>
+                  Are you sure want to go back?
+                </p>
+              </div>
+              <Alert
+                message="
+                If you go to previous step, your data will be lost!"
+                type={"error"}
+              />
+            </ModalConfirm>
+          )
+          : null 
+        }
+
+         {/* Modal premise already use */}
+         {modalAlreadyPremise ? 
+          <ModalError
+            isOpen={modalAlreadyPremise}
+            handleOk={() => setModalAlreadyPremise(false)}
+            handleCancel={() => setModalAlreadyPremise(false)}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                {IconModal["icon_error_default"]}
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">
+                {isPremiseAlready?.message}
+              </p>
+            </div>
+          </ModalError>
+          : null 
+        }
+
+      </Spin>
+    </>
   );
 };
 

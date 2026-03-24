@@ -144,7 +144,7 @@ const ListFormLateCharge = ({ type }) => {
     };
 
     return (
-        <div>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <RadioTabs
@@ -260,7 +260,7 @@ const ListFormLateCharge = ({ type }) => {
                     typeSelector="late"
                 />
             </ModalCustom>
-        </div>
+        </>
     );
 };
 

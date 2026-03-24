@@ -543,7 +543,7 @@ const GLAccountView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -627,7 +627,7 @@ const GLAccountView = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

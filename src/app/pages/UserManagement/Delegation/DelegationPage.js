@@ -190,7 +190,7 @@ const DelegationPage = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -257,7 +257,7 @@ const DelegationPage = () => {
           {renderModal()}
         </BaseContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

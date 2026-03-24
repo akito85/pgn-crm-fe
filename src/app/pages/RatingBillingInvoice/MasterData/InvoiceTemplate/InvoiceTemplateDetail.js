@@ -368,7 +368,7 @@ const InvoiceTemplateDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -474,7 +474,7 @@ const InvoiceTemplateDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

@@ -486,7 +486,7 @@ const GeneralTemplateView = () => {
   }, [allColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -569,7 +569,7 @@ const GeneralTemplateView = () => {
           />
         ) : null}
       </Spin>
-    </div>
+    </>
   );
 };
 

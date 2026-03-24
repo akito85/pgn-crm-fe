@@ -296,7 +296,7 @@ const ListFormDeduction = (props) => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <RadioTabs
@@ -469,7 +469,7 @@ const ListFormDeduction = (props) => {
         }}
       />
 
-    </div>
+    </>
   );
 };
 

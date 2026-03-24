@@ -244,7 +244,7 @@ const AnnouncementPage = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions}/>
@@ -292,7 +292,7 @@ const AnnouncementPage = () => {
 
       {/* Modal Error */}
       {renderModal()}
-    </div>
+    </>
   );
 };
 

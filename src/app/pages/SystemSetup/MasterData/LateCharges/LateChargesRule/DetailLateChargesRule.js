@@ -342,207 +342,209 @@ const DetailLateChargesRule = () => {
   };
 
   return (
-    <Spin spinning={loading}>
-      <BreadCrumbAdvanced routes={routes(lateChargeId)} />
-      <div className="flex flex-col">
-        <BaseContainer header={"late charge information"}>
-          <div className="grid grid-cols-3 gap-2">
-            <DetailText label={"Late Charge Name"}>
-              {dataLateCharge.lateChargeName}
-            </DetailText>
-            <DetailText label={"Currency"}>
-              {dataLateCharge.currency}
-            </DetailText>
-            <DetailText label={"Criteria"}>
-              {dataLateCharge.criteriaName}
-            </DetailText>
-            <div className="col-span-3">
-              <DetailText label={"Description"}>
-                {dataLateCharge.description}
+    <>
+      <Spin spinning={loading}>
+        <BreadCrumbAdvanced routes={routes(lateChargeId)} />
+        <div className="flex flex-col">
+          <BaseContainer header={"late charge information"}>
+            <div className="grid grid-cols-3 gap-2">
+              <DetailText label={"Late Charge Name"}>
+                {dataLateCharge.lateChargeName}
               </DetailText>
-            </div>
-          </div>
-        </BaseContainer>
-        {bodyApproval.isApprover && bodyApproval.approvalType === "INACTIVE_LATE_CHARGE_RULE" ? (
-          <BaseContainer header={`INACTIVE REQUEST INFORMATION`}>
-            <div className="grid grid-cols-4 w-full">
-              <DetailText label={"Requested Date"}>
-                {bodyApproval.approvalDetail.requestedDate
-                  ? moment(bodyApproval.approvalDetail.requestedDate).format(
-                      dateFormatting.dateTime
-                    )
-                  : ""}
+              <DetailText label={"Currency"}>
+                {dataLateCharge.currency}
               </DetailText>
-              <DetailText label={"Requested By"}>
-                {bodyApproval.approvalDetail.requestedBy}
+              <DetailText label={"Criteria"}>
+                {dataLateCharge.criteriaName}
               </DetailText>
-              <DetailText label={"Remark"}>
-                {bodyApproval.approvalDetail.remarks}
-              </DetailText>
+              <div className="col-span-3">
+                <DetailText label={"Description"}>
+                  {dataLateCharge.description}
+                </DetailText>
+              </div>
             </div>
           </BaseContainer>
-        ) : null}
-        <div className="my-4">
-          <RadioTabs
-            data={listSectionInfo}
-            onChange={handleLateChargeRuleInfo}
-            currentPosition={typeLateChargeInfo}
-          />
-        </div>
-        {typeLateChargeInfo === "Late Charge Rule" && (
-          <LayoutDetailLateChargeRule
-            key={"detail"}
-            dataLateChargeRule={dataLateChargeRule}
-            dispatch={dispatch}
-            listDataAttachment={listDataAttachment}
-            setListDataAttachment={setListDataAttachment}
-            listDataDetailCondition={listDataDetailCondition}
-            setListDataDetailCondition={setListDataDetailCondition}
-            listDataDetailFormula={listDataDetailFormula}
-            setListDataDetailFormula={setListDataDetailFormula}
-            type={type}
-            dataLogInformation={dataLogInformation}
-            description={dataLateChargeRule.description || ""}
-          />
-        )} 
-        {typeLateChargeInfo === "Draft" && (
-          <LayoutDetailLateChargeRule
-            key={"draft"}
-            dataLateChargeRule={dataLateChargeRule}
-            dispatch={dispatch}
-            listDataAttachment={listDataDraftAttachment}
-            setListDataAttachment={setListDataDraftAttachment}
-            listDataDetailCondition={listDataDetailCondition}
-            setListDataDetailCondition={setListDataDetailCondition}
-            listDataDetailFormula={listDataDetailFormula}
-            setListDataDetailFormula={setListDataDetailFormula}
-            type={type}
-            dataLogInformation={dataLogInformation}
-            description={dataDraftLateChargeRule.description || ""}
-          />
-        )}
-        {typeLateChargeInfo === "Attachment" && (
-          <AttachmentDetail
-            type={type}
-            listDataAttachment={listDataAttachment}
-            updateData={setListDataAttachment}
-            dispatch={dispatch}
-          />
-        )}
+          {bodyApproval.isApprover && bodyApproval.approvalType === "INACTIVE_LATE_CHARGE_RULE" ? (
+            <BaseContainer header={`INACTIVE REQUEST INFORMATION`}>
+              <div className="grid grid-cols-4 w-full">
+                <DetailText label={"Requested Date"}>
+                  {bodyApproval.approvalDetail.requestedDate
+                    ? moment(bodyApproval.approvalDetail.requestedDate).format(
+                        dateFormatting.dateTime
+                      )
+                    : ""}
+                </DetailText>
+                <DetailText label={"Requested By"}>
+                  {bodyApproval.approvalDetail.requestedBy}
+                </DetailText>
+                <DetailText label={"Remark"}>
+                  {bodyApproval.approvalDetail.remarks}
+                </DetailText>
+              </div>
+            </BaseContainer>
+          ) : null}
+          <div className="my-4">
+            <RadioTabs
+              data={listSectionInfo}
+              onChange={handleLateChargeRuleInfo}
+              currentPosition={typeLateChargeInfo}
+            />
+          </div>
+          {typeLateChargeInfo === "Late Charge Rule" && (
+            <LayoutDetailLateChargeRule
+              key={"detail"}
+              dataLateChargeRule={dataLateChargeRule}
+              dispatch={dispatch}
+              listDataAttachment={listDataAttachment}
+              setListDataAttachment={setListDataAttachment}
+              listDataDetailCondition={listDataDetailCondition}
+              setListDataDetailCondition={setListDataDetailCondition}
+              listDataDetailFormula={listDataDetailFormula}
+              setListDataDetailFormula={setListDataDetailFormula}
+              type={type}
+              dataLogInformation={dataLogInformation}
+              description={dataLateChargeRule.description || ""}
+            />
+          )} 
+          {typeLateChargeInfo === "Draft" && (
+            <LayoutDetailLateChargeRule
+              key={"draft"}
+              dataLateChargeRule={dataLateChargeRule}
+              dispatch={dispatch}
+              listDataAttachment={listDataDraftAttachment}
+              setListDataAttachment={setListDataDraftAttachment}
+              listDataDetailCondition={listDataDetailCondition}
+              setListDataDetailCondition={setListDataDetailCondition}
+              listDataDetailFormula={listDataDetailFormula}
+              setListDataDetailFormula={setListDataDetailFormula}
+              type={type}
+              dataLogInformation={dataLogInformation}
+              description={dataDraftLateChargeRule.description || ""}
+            />
+          )}
+          {typeLateChargeInfo === "Attachment" && (
+            <AttachmentDetail
+              type={type}
+              listDataAttachment={listDataAttachment}
+              updateData={setListDataAttachment}
+              dispatch={dispatch}
+            />
+          )}
 
-        <div
-          className={`flex w-full${
-            showButtonApproval ? " justify-between" : ""
-          } align-middle my-3`}
-        >
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
+          <div
+            className={`flex w-full${
+              showButtonApproval ? " justify-between" : ""
+            } align-middle my-3`}
           >
-            Back
-          </ButtonComponent>
-          {showButtonApproval ? (
-            <div className="flex align-middle gap-3">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate(-1)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
+            {showButtonApproval ? (
+              <div className="flex align-middle gap-3">
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => handleModalConfirmation("Reject")}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => handleModalConfirmation("Approve")}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            ) : null}
+          </div>
+        </div>
+        {/* Modal Approve/Reject*/}
+        {/* <ModalApproveOrReject
+          isOpen={modalConfirm}
+          header={`${approveOrReject} information`}
+          // message={`Are you sure you want to ${approveOrReject} late charge rule ${data_detail?.lateChargeName} - ${data_detail_late_charge_rule?.documentNumber}?`}
+          width={1000}
+          handleCancel={handleCloseModalApproveReject}
+          footer={
+            <div className={"w-full flex justify-end gap-5"}>
               <ButtonComponent
-                type="reject"
-                onClick={() => handleModalConfirmation("Reject")}
+                type={"default"}
+                onClick={handleCloseModalApproveReject}
               >
-                Reject
+                Cancel
               </ButtonComponent>
               <ButtonComponent
-                type="approve"
-                onClick={() => handleModalConfirmation("Approve")}
+                form={"formApproveRejcet"}
+                type={"submit"}
+                htmlType={"submit"}
+                border={false}
               >
-                Approve
+                Confirm
               </ButtonComponent>
             </div>
-          ) : null}
-        </div>
-      </div>
-      {/* Modal Approve/Reject*/}
-      {/* <ModalApproveOrReject
-        isOpen={modalConfirm}
-        header={`${approveOrReject} information`}
-        // message={`Are you sure you want to ${approveOrReject} late charge rule ${data_detail?.lateChargeName} - ${data_detail_late_charge_rule?.documentNumber}?`}
-        width={1000}
-        handleCancel={handleCloseModalApproveReject}
-        footer={
-          <div className={"w-full flex justify-end gap-5"}>
-            <ButtonComponent
-              type={"default"}
-              onClick={handleCloseModalApproveReject}
+          }
+        >
+          <Form form={form} name="formApproveRejcet" onFinish={handleConfirm} layout="vertical">
+            <Form.Item
+              label={"Remark"}
+              name={"remark"}
+              rules={[{ message: requiredMessage("Remark"), required: true }]}
             >
-              Cancel
-            </ButtonComponent>
-            <ButtonComponent
-              form={"formApproveRejcet"}
-              type={"submit"}
-              htmlType={"submit"}
-              border={false}
-            >
-              Confirm
-            </ButtonComponent>
+              <InputComponent
+                rows={1}
+                placeholder="Type your remark"
+                type="textarea"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+              />
+            </Form.Item>
+          </Form>
+        </ModalApproveOrReject> */}
+
+        <ModalApproveOrReject
+          isOpen={modalConfirm}
+          handleCloseModal={handleCloseModalApproveReject}
+          onFinish={handleConfirm}
+          header={approveOrReject}
+          approveOrReject={approveOrReject}
+          menu={"Late Charge Rule"}
+          named={`${data_detail?.lateChargeName} - ${data_detail_late_charge_rule?.documentNumber}`}
+          // customMessage={`Are you sure you want to ${approveOrReject} Late Charge Rule with document number ${data_detail_late_charge_rule?.documentNumber}?`}
+        />
+
+
+
+        {/** Modal Retry */}
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${
+              approveOrReject === "Approve" ? "approved" : "rejected"
+            } ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
           </div>
-        }
-      >
-        <Form form={form} name="formApproveRejcet" onFinish={handleConfirm} layout="vertical">
-          <Form.Item
-            label={"Remark"}
-            name={"remark"}
-            rules={[{ message: requiredMessage("Remark"), required: true }]}
-          >
-            <InputComponent
-              rows={1}
-              placeholder="Type your remark"
-              type="textarea"
-              value={remark}
-              onChange={(e) => setRemark(e.target.value)}
-            />
-          </Form.Item>
-        </Form>
-      </ModalApproveOrReject> */}
-
-      <ModalApproveOrReject
-        isOpen={modalConfirm}
-        handleCloseModal={handleCloseModalApproveReject}
-        onFinish={handleConfirm}
-        header={approveOrReject}
-        approveOrReject={approveOrReject}
-        menu={"Late Charge Rule"}
-        named={`${data_detail?.lateChargeName} - ${data_detail_late_charge_rule?.documentNumber}`}
-        // customMessage={`Are you sure you want to ${approveOrReject} Late Charge Rule with document number ${data_detail_late_charge_rule?.documentNumber}?`}
-      />
-
-
-
-      {/** Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
-          </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            approveOrReject === "Approve" ? "approved" : "rejected"
-          } ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-    </Spin>
+        </ModalError>
+      </Spin>
+    </>
   );
 };
 

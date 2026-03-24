@@ -363,7 +363,7 @@ const JobGroupPage = () => {
   ];
 
   return (
-    <div>
+    <>
       <BreadCrumb routes={routes} />
       <NxCardContainer
         header="JOB GROUP LIST"
@@ -438,7 +438,7 @@ const JobGroupPage = () => {
           </div>
         </div>
       </NxModal>
-    </div>
+    </>
   );
 };
 

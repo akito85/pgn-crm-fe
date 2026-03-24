@@ -420,7 +420,7 @@ const ProformaInvoice = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -527,7 +527,7 @@ const ProformaInvoice = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

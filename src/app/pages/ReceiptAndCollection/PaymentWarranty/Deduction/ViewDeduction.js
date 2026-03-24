@@ -147,7 +147,7 @@ const ViewDeduction = () => {
   ]);
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer header={
@@ -172,7 +172,7 @@ const ViewDeduction = () => {
           />
         </CardContainer>
       </Spin>
-    </div>
+    </>
   );
 };
 

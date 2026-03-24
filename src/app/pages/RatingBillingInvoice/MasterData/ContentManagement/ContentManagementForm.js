@@ -7,7 +7,6 @@ import moment from "moment";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
@@ -782,7 +781,7 @@ const ContentManagementForm = ({ type }) => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -929,7 +928,7 @@ const ContentManagementForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 

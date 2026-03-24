@@ -793,254 +793,256 @@ const FormLateChargesRule = ({ type }) => {
   };
 
   return (
-    <Spin spinning={isLoading}>
-      <BreadCrumbAdvanced routes={routes(type, lateChargeId)} />
-      <div className="flex flex-col gap-4">
-        <BaseContainer header={"late charge information"}>
-          <div className="grid grid-cols-3 gap-2">
-            <DetailText label={"Late Charge Name"}>
-              {dataLateCharge.lateChargeName}
-            </DetailText>
-            <DetailText label={"Currency"}>
-              {dataLateCharge.currency}
-            </DetailText>
-            <DetailText label={"Criteria"}>
-              {dataLateCharge.criteriaName}
-            </DetailText>
-            <div className="col-span-3">
-              <DetailText label={"Description"}>
-                {dataLateCharge.description}
+    <>
+      <Spin spinning={isLoading}>
+        <BreadCrumbAdvanced routes={routes(type, lateChargeId)} />
+        <div className="flex flex-col gap-4">
+          <BaseContainer header={"late charge information"}>
+            <div className="grid grid-cols-3 gap-2">
+              <DetailText label={"Late Charge Name"}>
+                {dataLateCharge.lateChargeName}
               </DetailText>
-            </div>
-          </div>
-        </BaseContainer>
-        <Form
-          id="lateChargeRuleForm"
-          form={form}
-          layout={"vertical"}
-          onFinish={handleSubmitForm}
-          // onFinishFailed={handleErrorSubmit}
-          scrollToFirstError={true}
-        >
-          <div className="flex flex-col w-full gap-4 mt-8">
-            <div className="grid grid-cols-10 gap-4 w-full">
-              <span className="mt-[10px]">
-                <LeftCircleOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                  onClick={scrollLeftHandler}
-                />
-              </span>
-              <div
-                ref={containerRef}
-                className="overflow-x-scroll scrollStepsCstm col-span-8"
-              >
-                <Steps
-                  current={current}
-                  items={steps()}
-                  labelPlacement="vertical"
-                />
+              <DetailText label={"Currency"}>
+                {dataLateCharge.currency}
+              </DetailText>
+              <DetailText label={"Criteria"}>
+                {dataLateCharge.criteriaName}
+              </DetailText>
+              <div className="col-span-3">
+                <DetailText label={"Description"}>
+                  {dataLateCharge.description}
+                </DetailText>
               </div>
-              <span className="mt-[10px] flex justify-end">
-                <RightCircleOutlined
-                  style={{ fontSize: "24px", color: "#0075bf" }}
-                  onClick={scrollRightHandler}
-                />
-              </span>
             </div>
-            {steps()[current].content}
-            <div className="flex w-full justify-between align-middle gap-4 mb-4">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setModalBack(true)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
+          </BaseContainer>
+          <Form
+            id="lateChargeRuleForm"
+            form={form}
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            // onFinishFailed={handleErrorSubmit}
+            scrollToFirstError={true}
+          >
+            <div className="flex flex-col w-full gap-4 mt-8">
+              <div className="grid grid-cols-10 gap-4 w-full">
+                <span className="mt-[10px]">
+                  <LeftCircleOutlined
+                    style={{ fontSize: "24px", color: "#0075bf" }}
+                    onClick={scrollLeftHandler}
                   />
-                }
-              >
-                Back
-              </ButtonComponent>
-              <div className="flex align-middle gap-3">
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={handleClear}
+                </span>
+                <div
+                  ref={containerRef}
+                  className="overflow-x-scroll scrollStepsCstm col-span-8"
                 >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-                {current > 0 && (
-                  <ButtonComponent
-                    onClick={handleButtonPrev}
-                    type={"submit"}
-                    disabled={storedDataInline}
-                  >
+                  <Steps
+                    current={current}
+                    items={steps()}
+                    labelPlacement="vertical"
+                  />
+                </div>
+                <span className="mt-[10px] flex justify-end">
+                  <RightCircleOutlined
+                    style={{ fontSize: "24px", color: "#0075bf" }}
+                    onClick={scrollRightHandler}
+                  />
+                </span>
+              </div>
+              {steps()[current].content}
+              <div className="flex w-full justify-between align-middle gap-4 mb-4">
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => setModalBack(true)}
+                  icon={
                     <LeftOutlined
                       style={{
-                        justifyItems: "center",
-                        fontSize: 18,
                         color: "#fff",
+                        fontSize: 24,
+                        justifyItems: "center",
                       }}
                     />
-                    Previous
-                  </ButtonComponent>
-                )}
-                {current < steps().length - 1 && (
+                  }
+                >
+                  Back
+                </ButtonComponent>
+                <div className="flex align-middle gap-3">
                   <ButtonComponent
-                    onClick={handleButtonNext}
-                    // disabled={steps()[current].disabled}
-                    type={"submit"}
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update"
+                            ? `IconButtonReset`
+                            : `IconButtonClear`
+                        }
+                        width={24}
+                      />
+                    }
+                    type="submit"
+                    onClick={handleClear}
                   >
-                    Next
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: 18,
-                        color: "#fff",
-                      }}
-                    />
+                    {type === "update" ? "Reset" : "Clear"}
                   </ButtonComponent>
-                )}
-                {current === steps().length - 1 ? (
-                  <>
+                  {current > 0 && (
                     <ButtonComponent
-                      htmlType="submit"
-                      type="submit"
-                      onClick={() => setTypeSubmit(listTypeSubmit[1])}
-                      form="lateChargeRuleForm"
+                      onClick={handleButtonPrev}
+                      type={"submit"}
+                      disabled={storedDataInline}
                     >
-                      Save as Draft
+                      <LeftOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: 18,
+                          color: "#fff",
+                        }}
+                      />
+                      Previous
                     </ButtonComponent>
+                  )}
+                  {current < steps().length - 1 && (
                     <ButtonComponent
-                      htmlType="submit"
-                      type="submit"
-                      onClick={() => setTypeSubmit(listTypeSubmit[0])}
-                      form="lateChargeRuleForm"
+                      onClick={handleButtonNext}
+                      // disabled={steps()[current].disabled}
+                      type={"submit"}
                     >
-                      Save & Submit
+                      Next
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: 18,
+                          color: "#fff",
+                        }}
+                      />
                     </ButtonComponent>
-                  </>
-                ) : null}
+                  )}
+                  {current === steps().length - 1 ? (
+                    <>
+                      <ButtonComponent
+                        htmlType="submit"
+                        type="submit"
+                        onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                        form="lateChargeRuleForm"
+                      >
+                        Save as Draft
+                      </ButtonComponent>
+                      <ButtonComponent
+                        htmlType="submit"
+                        type="submit"
+                        onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                        form="lateChargeRuleForm"
+                      >
+                        Save & Submit
+                      </ButtonComponent>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
-          </div>
-        </Form>
-      </div>
+          </Form>
+        </div>
 
-      {/** Modal Confirm */}
-      {modalConfirm ? (
-        <ModalCustom
-          isOpen={modalConfirm}
-          handleCancel={handleCancelModalConfirm}
-          header={"Confirmation"}
-          width={1000}
-          type={"confirmation"}
+        {/** Modal Confirm */}
+        {modalConfirm ? (
+          <ModalCustom
+            isOpen={modalConfirm}
+            handleCancel={handleCancelModalConfirm}
+            header={"Confirmation"}
+            width={1000}
+            type={"confirmation"}
+            footer={
+              <div className="w-full flex justify-end gap-5 p-4">
+                <ButtonComponent
+                  onClick={handleCancelModalConfirm}
+                  type="default"
+                >
+                  Cancel
+                </ButtonComponent>
+                <ButtonComponent
+                  type="submit"
+                  onClick={handleProcessModalConfirm}
+                >
+                  Confirm
+                </ButtonComponent>
+              </div>
+            }
+          >
+            <ContentModalConfirmLateChargeRule
+              dataRuleInfo={dataLateChargeRule}
+              data={dataLateChargeRule}
+              dataLateCharge={dataLateCharge}
+              listSectionInfo={steps().map((item) => ({
+                value: item.title,
+              }))}
+              listDataDetailCondition={listDataDetailCondition}
+              listDataAttachment={listDataAttachment}
+              listDataDetailFormula={listDataDetailFormula}
+              listDataAppHierDetail={appHierDataDetail}
+              dataOption={appHierOptions}
+              selectedHierarchy={selectedHierarchy}
+            />
+          </ModalCustom>
+        ) : null}
+
+      {modalSuccessCreate ?
+        <Modal
+          open={modalSuccessCreate}
+          onCancel={()=>setModalSuccessCreate(false)}
+          className={"modal-custom"}
+          centered={true}
+          width={400}
+          maskClosable={false}
           footer={
             <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent
-                onClick={handleCancelModalConfirm}
-                type="default"
+              <Link 
+                // to={from === "create" ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES : ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES}
+                // state={from === "create" ? {id:lateChargeId} : null}
+                to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES}
+                state={{id:lateChargeId}}
               >
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                type="submit"
-                onClick={handleProcessModalConfirm}
-              >
-                Confirm
-              </ButtonComponent>
+                <ButtonComponent type="submit">
+                  OK
+                </ButtonComponent>
+              </Link>
             </div>
           }
         >
-          <ContentModalConfirmLateChargeRule
-            dataRuleInfo={dataLateChargeRule}
-            data={dataLateChargeRule}
-            dataLateCharge={dataLateCharge}
-            listSectionInfo={steps().map((item) => ({
-              value: item.title,
-            }))}
-            listDataDetailCondition={listDataDetailCondition}
-            listDataAttachment={listDataAttachment}
-            listDataDetailFormula={listDataDetailFormula}
-            listDataAppHierDetail={appHierDataDetail}
-            dataOption={appHierOptions}
-            selectedHierarchy={selectedHierarchy}
-          />
-        </ModalCustom>
-      ) : null}
-
-    {modalSuccessCreate ?
-      <Modal
-        open={modalSuccessCreate}
-        onCancel={()=>setModalSuccessCreate(false)}
-        className={"modal-custom"}
-        centered={true}
-        width={400}
-        maskClosable={false}
-        footer={
-          <div className="w-full flex justify-end gap-5 p-4">
-            <Link 
-              // to={from === "create" ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES : ACCOUNT_MANAGEMENT_ROUTES.VIEW_LATE_CHARGES}
-              // state={from === "create" ? {id:lateChargeId} : null}
-              to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES}
-              state={{id:lateChargeId}}
-            >
-              <ButtonComponent type="submit">
-                OK
-              </ButtonComponent>
-            </Link>
+        <div className={"flex flex-col w-full"}>
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconSuccess" width={48} />
+              <p className="text-[18px] font-bold">Successful</p>
+            </div>
+            <p className="pl-[70px]">{`Your data has been ${typeSubmit === 'draft' ? 'created' : 'submitted'}.`}</p>
           </div>
-        }
-      >
-      <div className={"flex flex-col w-full"}>
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconSuccess" width={48} />
-            <p className="text-[18px] font-bold">Successful</p>
-          </div>
-          <p className="pl-[70px]">{`Your data has been ${typeSubmit === 'draft' ? 'created' : 'submitted'}.`}</p>
         </div>
-      </div>
-      </Modal> : null
-    }
+        </Modal> : null
+      }
 
-      {/* Modal Back */}
-      <ModalBack
-        isOpen={modalBack}
-        handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
-      />
-      {/** Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            {IconModal.icon_error_default}
-            <p className="text-[18px] font-bold">{"Failed"}</p>
+        {/* Modal Back */}
+        <ModalBack
+          isOpen={modalBack}
+          handleCancel={() => setModalBack(false)}
+          handleOk={() => navigate(-1)}
+        />
+        {/** Modal Retry */}
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              {IconModal.icon_error_default}
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${
+              type === "update" ? "updated" : "created"
+            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            type === "update" ? "updated" : "created"
-          }. ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
-        </div>
-      </ModalError>
-    </Spin>
+        </ModalError>
+      </Spin>
+    </>
   );
 };
 

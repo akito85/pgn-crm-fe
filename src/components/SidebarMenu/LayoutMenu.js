@@ -118,7 +118,7 @@ const LayoutMenu = ({ children }) => {
     location.pathname.includes(path),
   );
 
-  const { user, remember, data_switch, loading: authLoading } = useSelector((state) => state.auth);
+  const { user, remember, data_switch } = useSelector((state) => state.auth);
   const { data: data_profile } = useSelector((state) => state.profile);
   const {
     bodyError,
@@ -128,8 +128,20 @@ const LayoutMenu = ({ children }) => {
     data_grant_access,
   } = useSelector((state) => state.general);
   const [form] = Form.useForm();
-  const [collapsed, setCollapsed] = useState(false);
-  const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), []);
+  const [collapsed, setCollapsed] = useState(() => {
+    // Check if collapsed state is stored in localStorage
+    const savedCollapsed = localStorage.getItem('sidebar_collapsed');
+    return savedCollapsed ? JSON.parse(savedCollapsed) : false;
+  });
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const newState = !prev;
+      // Save the new state to localStorage
+      localStorage.setItem('sidebar_collapsed', JSON.stringify(newState));
+      return newState;
+    });
+  }, []);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token"),
@@ -193,10 +205,7 @@ const LayoutMenu = ({ children }) => {
 
   // use effect check grant access
   useEffect(() => {
-    // Skip permission check for dashboard route as it should be accessible by all authenticated users
-    if (location?.pathname !== '/') {
-      dispatch(checkGrantedAccess(location?.pathname));
-    }
+    dispatch(checkGrantedAccess(location?.pathname));
     dispatch(getProfile());
   }, [dispatch, location, data_switch]);
 
@@ -621,10 +630,12 @@ const LayoutMenu = ({ children }) => {
                 </div>
               </ModalError>
             ) : null}
-            {/* Show children while checking permissions or if granted access, only show unauthorized if explicitly denied */}
-            {data_grant_access?.response?.data?.data?.isGranted === false && 
-             data_grant_access?.response?.data && // Ensure the API response has been received
-             !isPublicPath ? (
+            {location.pathname === '/' ? (
+              // Always render dashboard regardless of permission check state
+              <div className="mt-[15px]">{children}</div>
+            ) :
+            (data_grant_access?.response?.data?.data?.isGranted === false &&
+              !isPublicPath) ? (
               <NotFound type={"unauthorized"} />
             ) : (
               <div className="mt-[15px]">{children}</div>
@@ -716,7 +727,13 @@ const LayoutMenu = ({ children }) => {
                   <Input.Password />
                 </Form.Item>
                 <div className={"w-full justify-end flex gap-2"}>
-                  <ButtonComponent type={"default"} onClick={handleLogout}>
+                  <ButtonComponent
+                    type={"default"}
+                    onClick={() => {
+                      setShowModalExtendToken(false);
+                      form.resetFields();
+                    }}
+                  >
                     Logout
                   </ButtonComponent>
                   <ButtonComponent type={"submit"} htmlType={"submit"}>

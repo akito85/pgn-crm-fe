@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import BaseContainer from '../../../../components/BaseContainer';
 import BreadCrumb from '../../../../components/BreadCrumb';
 import DetailText from '../../../../components/DetailText';
-import LayoutMenu from '../../../../components/SidebarMenu/LayoutMenu';
 import { ArrowLeftOutlined, UnorderedListOutlined, DeleteOutlined } from '@ant-design/icons';
 import ButtonComponent from '../../../../components/ButtonComponent';
 import ModalCustom from '../../../../components/Modal/ModalCustom';
@@ -585,7 +584,7 @@ const PositionHierarchyForm = (props) => {
 
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
     return (
-        <div>
+        <>
             <BreadCrumb routes={breadCrumbRoutes} />
             <Spin spinning={loading}>
                 {type === "update" &&
@@ -792,7 +791,7 @@ const PositionHierarchyForm = (props) => {
 
             {/* modal try again */}
             {renderModal()}
-        </div>
+        </>
     );
 }
 

@@ -159,7 +159,7 @@ const GLAccountDetail = () => {
   };
 
   return (
-    <div>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         
@@ -371,7 +371,7 @@ const GLAccountDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </div>
+    </>
   );
 };
 
