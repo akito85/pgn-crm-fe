@@ -18,13 +18,13 @@ import { getGasDeposit, downloadGasDeposit } from "../../../../redux/slices/acco
  * and the detail mutation table.
  *
  * @param {object}    props
- * @param {"sa"|"ua"} props.moduleType                   - Module context: standalone ("sa") or under-account ("ua")
+ * @param {"sa"|"ua"} props.moduleType                    - Module context: standalone ("sa") or under-account ("ua")
  * @param {Function}  [props.handleInactivateModal]       - Opens the inactivate confirmation modal
  * @param {Function}  [props.handleApprovalHistoryModal]  - Opens the approval history modal
  * @param {Function}  [props.handleApproval]              - Triggers the approval action
  * @param {Function}  [props.handleSelectDetail]          - Row click / select-detail handler
- * @param {number}    [props.idAccount=0]                 - Account ID (used when moduleType is "ua")
- * @param {number}    [props.idCustomer=0]                - Customer ID
+ * @param {number}    [props.accountId]                   - Account ID (used when moduleType is "ua")
+ * @param {number}    [props.cutomerId]                   - Customer ID
  * @param {number}    [props.refreshSignal=0]             - Increment to trigger a page-0 refresh from the parent
  */
 const GasDepositTable = ({
@@ -33,8 +33,8 @@ const GasDepositTable = ({
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
   handleSelectDetail = () => {},
-  idAccount = 0,
-  idCustomer = 0,
+  accountId,
+  cutomerId,
   refreshSignal = 0,
 }) => {
   // --- Hooks ---
@@ -89,7 +89,7 @@ const GasDepositTable = ({
 
     dispatch(
       getGasDeposit({
-        id: isUnderAccount ? idAccount : undefined,
+        id: isUnderAccount ? accountId : undefined,
         body,
         isLoadMore: false,
       })
@@ -148,7 +148,7 @@ const GasDepositTable = ({
 
       await dispatch(
         getGasDeposit({
-          id: isUnderAccount ? idAccount : undefined,
+          id: isUnderAccount ? accountId : undefined,
           body,
           isLoadMore: true,
         })
@@ -170,7 +170,7 @@ const GasDepositTable = ({
       searchs: search,
     };
 
-    dispatch(downloadGasDeposit({ body, id: idAccount }));
+    dispatch(downloadGasDeposit({ body, id: accountId }));
   };
 
   // --- Effects ---
@@ -186,7 +186,7 @@ const GasDepositTable = ({
     };
 
     setPage(0);
-    dispatch(getGasDeposit({ id: isUnderAccount ? idAccount : undefined, body, isLoadMore: false }));
+    dispatch(getGasDeposit({ id: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
@@ -196,7 +196,7 @@ const GasDepositTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: (id) => navigate(
+    handleView: ({ id }) => navigate(
       isStandAlone ?
         ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_SA :
       isStandard ?
@@ -206,16 +206,48 @@ const GasDepositTable = ({
         "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          accountId,
+          cutomerId,
+          id,
+        }
+      }
+    ),
+    handleRecalculate: ({ id, recordAccountId, recordCustomerId }) => navigate(
+      isStandAlone ?
+        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_SA :
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_ONETIME :
+        "",
+      {
+        state: {
+          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
+          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
+          id,
+        }
+      }
+    ),
+    handleExpire: ({ id, recordAccountId, recordCustomerId }) => navigate(
+      isStandAlone ?
+        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_SA :
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_ONETIME :
+        "",
+      {
+        state: {
+          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
+          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
           id,
         }
       }
     ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal,
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
   const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
@@ -227,13 +259,14 @@ const GasDepositTable = ({
   );
 
   const baseColumns = useMemo(() =>
-    getGasDepositColumns(
+    getGasDepositColumns({
       search,
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
-    ),
+      handleSearch,
+      isUnderAccount,
+    }),
   [search, searchInput, searchText, searchedColumn]);
 
   const columnDefinitions = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);

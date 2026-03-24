@@ -45,31 +45,27 @@ const ServiceAgreementTable = ({
     const itemActions = [
         ...nxGetAccountActions({
             handleDelete: handleOpenDeleteDraft,
-            handleView: (idSA) => {
+            handleView: ({ id: idSA }) => {
                 navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_AGREEMENT, {
                     state: { idSA, idAccount, idCustomer, type }
                 });
             },
-            handleUpdate: (idSa) => {
-                // Find record to get its state
-                const record = data.find(r => r.id === idSa);
-                if (record) {
-                    navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_AGREEMENT, {
-                        state: {
-                            idSa,
-                            idAccount: record.accountId,
-                            approvalStatus: record.approvalStatus,
-                            status: record.status,
-                            saType: record.saType?.value,
-                            isMain: record.isMain,
-                            saReferenceNumber: record.saReference,
-                            idCustomer,
-                            type
-                        }
-                    });
-                }
+            handleUpdate: (record) => {
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_AGREEMENT, {
+                    state: {
+                        idSa: record.id,
+                        idAccount: record.accountId,
+                        approvalStatus: record.approvalStatus,
+                        status: record.status,
+                        saType: record.saType?.value,
+                        isMain: record.isMain,
+                        saReferenceNumber: record.saReference,
+                        idCustomer,
+                        type
+                    }
+                });
             },
-            handleApprovalHistory,
+            handleApprovalHistory: ({ id }) => handleApprovalHistory(id),
         }).map(actionDef => {
             // Apply custom disable logic for SA Update/Delete that differ slightly from default generic ones
             if (actionDef.action === 'Update') {

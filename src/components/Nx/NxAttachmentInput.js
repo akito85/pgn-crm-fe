@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { Spin, Tooltip, Button } from "antd";
-import SVGIcon from "../../../../../../../../../../assets/Icon/index";
-import ModalAttachment from "./ModalAttachmentInvoiceRelation";
-import { useSelector } from "react-redux";
-import { previewFileAttachment } from "../../../../../../../../../../utils/previewFileAttachment";
-import { getColumnSearchPropsPaging } from "../../../../../../../../../../utils/getColumnSearchProps";
-import productPromoHttpService from "../../../../../../../../../../redux/services/productPromoHttpService";
-import { getBase64 } from "../../../../../../../../../../utils/getBase64";
-import { tokenHeader } from "../../../../../../../../../../utils/tokenHeader";
+import SVGIcon from "../../assets/Icon/index";
+import NxAttachmentModal from "./NxAttachmentModal";
+import { useSelector, useDispatch } from "react-redux";
+import { previewFileAttachment } from "../../utils/previewFileAttachment";
+import { getColumnSearchPropsPaging } from "../../utils/getColumnSearchProps";
+import productPromoHttpService from "../../redux/services/productPromoHttpService";
+import { getBase64 } from "../../utils/getBase64";
+import { tokenHeader } from "../../utils/tokenHeader";
 import axios from "axios";
 import FileSaver from "file-saver";
-import { configApp } from "../../../../../../../../../../constants/configApp";
-import { getGlobalPropertiesAttachment } from "../../../../../../../../../../redux/slices/product_promo/product";
-import NxTable from "../../../../../../../../../../components/Nx/NxTable";
-import NxDate from "../../../../../../../../../../components/Nx/NxDatePicker";
+import { configApp } from "../../constants/configApp";
+import { getGlobalPropertiesAttachment } from "../../redux/slices/product_promo/product";
+import NxTable from "./NxTable";
+import NxDate from "./NxDatePicker";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -29,20 +29,16 @@ const onFilter = (dataIndex, value, record) => {
   }
 };
 
-
-// extracting size 
 const extractSize = (fileSize) => {
-  if (fileSize.includes('KB')) {
-    return parseFloat(fileSize.replace(' KB', '')) * 1024;
-  } else if (fileSize.includes('MB')) {
-    return parseFloat(fileSize.replace(' MB', '')) * 1024 * 1024;
+  if (fileSize.includes("KB")) {
+    return parseFloat(fileSize.replace(" KB", "")) * 1024;
+  } else if (fileSize.includes("MB")) {
+    return parseFloat(fileSize.replace(" MB", "")) * 1024 * 1024;
   }
   return parseFloat(fileSize);
-
-}
+};
 
 const sorter = (fieldSort, a, b) => {
-  console.log(fieldSort, ' so');
   const handleDataSort = (obj) => {
     switch (fieldSort) {
       case "startDate":
@@ -57,7 +53,7 @@ const sorter = (fieldSort, a, b) => {
   };
   let fa = handleDataSort(a);
   let fb = handleDataSort(b);
-  if (fieldSort === 'fileSize') {
+  if (fieldSort === "fileSize") {
     return fa - fb;
   } else {
     return fa.localeCompare(fb);
@@ -68,8 +64,8 @@ const columnAttachmentData = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  handleDelete = () => { },
+  handleSearch = () => {},
+  handleDelete = () => {},
   type,
   handleShow,
 ) => {
@@ -201,41 +197,42 @@ const columnAttachmentData = (
   }
   return type !== "detail"
     ? res.filter(
-      (column) =>
-        column.dataIndex !== "createdBy" && column.dataIndex !== "createdDate"
-    )
+        (column) =>
+          column.dataIndex !== "createdBy" && column.dataIndex !== "createdDate"
+      )
     : res;
 };
-const AttachmentSectionForm = ({
-  dataSource = [],
-  setDataSource = () => {},
+
+const NxAttachmentInput = ({
+  data = [],
+  updateData = () => {},
   setDeleted = () => {},
   type,
-  dispatch = () => { },
-  getAPICategory = () => { },
+  getAPICategory = () => {},
+  categoryData = [],
   service = productPromoHttpService,
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
 }) => {
+  const dispatch = useDispatch();
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const { data_irAttachmentCategory, getConfigFile } = useSelector((state) => state.invoiceRelation);
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
   useEffect(() => {
-    if (data_irAttachmentCategory && data_irAttachmentCategory.length > 0) {
-      const tempCategory = data_irAttachmentCategory.map((category) => ({
+    if (categoryData && categoryData.length > 0) {
+      const tempCategory = categoryData.map((category) => ({
         id: category.id,
         text: category.text,
       }));
       setCategoryOptions(tempCategory);
     }
-  }, [data_irAttachmentCategory]);
+  }, [categoryData]);
 
   useEffect(() => {
     dispatch(getAPIGuard());
@@ -247,22 +244,21 @@ const AttachmentSectionForm = ({
     const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
     setSearchedColumn(tempSearchColumn);
   };
-  
+
   const handleDelete = (record) => {
-    setDataSource(
-      prevState => prevState.filter(
-        attachment => attachment.key !== record.key
-      )
+    updateData((prevState) =>
+      prevState.filter((attachment) => attachment.key !== record.key)
     );
 
-    if (record.dataType === "draft")
-      setDeleted(prevState => [
+    if (record.dataType === "draft") {
+      setDeleted((prevState) => [
         ...prevState,
         {
           ...record,
           isDeleted: true,
-        }
+        },
       ]);
+    }
   };
 
   const handleOpenModal = () => {
@@ -288,7 +284,7 @@ const AttachmentSectionForm = ({
             responseType: "blob",
           });
           const base64 = await getBase64(response.data);
-          previewFileAttachment(base64);  
+          previewFileAttachment(base64);
         } catch (error) {
           console.error("Failed to download file", error);
         } finally {
@@ -314,15 +310,16 @@ const AttachmentSectionForm = ({
                 <Button type="menu" onClick={handleOpenModal}>
                   Choose File
                 </Button>
-                {!dataSource.length && (
+                {!data.length && (
                   <span className="text-sm text-dg-grey-dark">No file choosen</span>
                 )}
               </div>
             </div>
           ) : null}
           <NxTable
-            dataSource={dataSource}
-            totalData={dataSource.length}
+            idTable={"attachment-table"}
+            dataSource={data}
+            totalData={data.length}
             tableScrolled={{ x: 1500 }}
             columns={columnAttachmentData(
               searchInput,
@@ -337,9 +334,9 @@ const AttachmentSectionForm = ({
           />
         </div>
       </Spin>
-      <ModalAttachment
+      <NxAttachmentModal
         openUpload={modalUpload}
-        updateData={setDataSource}
+        updateData={updateData}
         categoryOptions={categoryOptions}
         handleCancel={() => setModalUpload(false)}
         valueGuard={
@@ -353,4 +350,4 @@ const AttachmentSectionForm = ({
   );
 };
 
-export default AttachmentSectionForm;
+export default NxAttachmentInput;

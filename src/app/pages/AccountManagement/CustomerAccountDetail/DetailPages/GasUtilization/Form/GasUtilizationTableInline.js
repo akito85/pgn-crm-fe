@@ -290,8 +290,8 @@ const GasUtilizationTableInline = ({
   }, [dataTableGasUtilization, ddlUtilizationName])
 
   const itemActions = nxGetAccountActions({
-    handleUpdate: (record, _) => edit(record),
-    handleDelete: (record, _) => deleteRow(record),
+    handleUpdate: (record) => edit(record.key),
+    handleDelete: (record) => deleteRow(record.key),
   }).filter(action => action.action === "Delete" || action.action === "Update");
   
   const handleSearch = (selectedKeys, confirm, dataIndex) => {

@@ -1,6 +1,6 @@
 import { Button, Form, Modal, Progress, Select, Typography } from "antd";
 import { useState, useCallback, useEffect } from "react";
-import SelectComponent from "../../../../../../../../../../components/SelectComponent";
+import SelectComponent from "../SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import {
   CloseOutlined,
@@ -8,15 +8,16 @@ import {
   UndoOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import InputComponent from "../../../../../../../../../../components/InputComponent";
-import { bytesConverter } from "../../../../../../../../../../utils/bytesConverter";
-import { getBase64 } from "../../../../../../../../../../utils/getBase64";
-import SVGIcon from "../../../../../../../../../../assets/Icon/index";
-import ExtensionFile from "../../../../../../../../../../utils/ExtensionFile";
-import { nxGenerateRandomId } from "../../../../../../../../../../components/Nx/NxAddIds";
+import InputComponent from "../InputComponent";
+import { bytesConverter } from "../../utils/bytesConverter";
+import { getBase64 } from "../../utils/getBase64";
+import SVGIcon from "../../assets/Icon/index";
+import ExtensionFile from "../../utils/ExtensionFile";
+import { nxGenerateRandomId } from "./NxAddIds";
 
 const MAX_FILE_SIZE = 5000000;
-const ModalAttachment = ({
+
+const NxAttachmentModal = ({
   openUpload = false,
   updateData = () => {},
   handleCancel = () => {},
@@ -60,9 +61,11 @@ const ModalAttachment = ({
     form.resetFields();
     handleCancel();
   };
+
   const handleCategory = (value) => {
     setCategory(value);
   };
+
   const handleRemove = (index) => {
     setFileList((prevFileList) => {
       const updatedFileList = [...prevFileList];
@@ -73,6 +76,7 @@ const ModalAttachment = ({
       return updatedFileList;
     });
   };
+
   const property = {
     name: "file",
     multiple: true,
@@ -107,9 +111,9 @@ const ModalAttachment = ({
     ),
   };
 
-  const handleUpload = (value) => {
+  const handleUpload = () => {
     if (fileList.length > 0) {
-      updateData(prevState => {
+      updateData((prevState) => {
         let newData = fileList.map((file) => {
           return {
             ...file,
@@ -123,18 +127,9 @@ const ModalAttachment = ({
       });
     } else {
       updateData((prevState) => {
-        let key = prevState.reduce(
-          (current, next) => {
-            const nextKey = next.key || 0;
-            return current > nextKey
-              ? parseInt(current) + 1
-              : parseInt(nextKey) + 1;
-          },
-          [1]
-        );
         const data = {
           ...dataLink,
-          key: key++,
+          key: nxGenerateRandomId(),
           fileCategoryName: category.label,
           fileCategoryId: category.value,
         };
@@ -351,4 +346,4 @@ const ModalAttachment = ({
   );
 };
 
-export default ModalAttachment;
+export default NxAttachmentModal;

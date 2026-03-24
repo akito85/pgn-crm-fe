@@ -239,11 +239,11 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
   };
 
   const itemGrantAccess = nxGetAccountActions({
-    handleView: (record, _) => handleDetail(record),
-    handleUpdate: (record, _) => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RAW_MATERIAL_SOURCE, {
-      state: { idRMS: record, accountId: id, idCustomer: idCustomer },
+    handleView: ({ id: recordId }) => handleDetail(recordId),
+    handleUpdate: ({ id: recordId }) => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RAW_MATERIAL_SOURCE, {
+      state: { idRMS: recordId, accountId: id, idCustomer: idCustomer },
     }),
-    handleDelete: (record, _) => handleDelete(record),
+    handleDelete: ({ id: recordId }) => handleDelete(recordId),
   })
 
   // Handle Detail

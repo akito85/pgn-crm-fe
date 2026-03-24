@@ -16,6 +16,7 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
 import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import SVGIcon from "../../../../../../../../assets/Icon/index";
 
 /**
  * Invoice relation detail view (container + presentational component).
@@ -248,12 +249,16 @@ const InvoiceRelationDetail = ({
                 <div className={"w-full flex justify-end gap-5"}>
                   <Button
                     type="reject"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "reject")}
                   >
                     Reject
                   </Button>
                   <Button
                     type="approve"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "approve")}
                   >
                     Approve

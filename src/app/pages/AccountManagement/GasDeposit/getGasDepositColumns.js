@@ -18,14 +18,15 @@ import NxDate from "../../../../components/Nx/NxDatePicker";
  * @param {boolean} [includeStatus=true] - Whether to include the statusApproval and status columns.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
-const getGasDepositColumns = (
+const getGasDepositColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
   includeStatus = true,
-) => [
+  isUnderAccount = false,
+}) => [
   {
     key: "no",
     title: "NO",
@@ -34,7 +35,7 @@ const getGasDepositColumns = (
     width: 40,
     render: (_, __, index) => index + 1,
   },
-  {
+  isUnderAccount && {
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
@@ -52,7 +53,7 @@ const getGasDepositColumns = (
       true
     ),
   },
-  {
+  isUnderAccount && {
     key: "earnPeriodStart",
     title: "EARN PERIOD START",
     dataIndex: "earnPeriodStart",

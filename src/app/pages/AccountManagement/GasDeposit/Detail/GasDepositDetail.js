@@ -51,8 +51,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const isStandard = isUnderAccount && accountType === "standard";
   const isOneTime = isUnderAccount && accountType === "oneTime";
   const isLoading = loading || loadingAccount;
-  const idAccount = location.state?.idAccount;
-  const idCustomer = location.state?.idCustomer;
+  const accountId = location.state?.accountId;
+  const customerId = location.state?.customerId;
   const idGd = location.state?.id;
 
   const tabOptions = [
@@ -238,18 +238,18 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isUnderAccount && idCustomer) dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
+    if (isUnderAccount && customerId) dispatch(getCustomerDetail(customerId));
+  }, [customerId]);
 
   useEffect(() => {
-    if (isUnderAccount && idAccount && idCustomer) {
+    if (isUnderAccount && accountId && customerId) {
       if (isStandard) {
-        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+        dispatch(getAccountStandardDetail({ accountId, customerId }));
       } else if (isOneTime) {
-        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
+        dispatch(getAccountOneTimeDetail({ accountId, customerId }));
       }
     }
-  }, [idAccount, idCustomer]);
+  }, [accountId, customerId]);
 
   useEffect(() => {
     if (idGd)
@@ -270,8 +270,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
             <HeaderDetail
               data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
               dispatch={dispatch}
-              idAccount={idAccount}
-              idCustomer={idCustomer}
+              idAccount={accountId}
+              idCustomer={customerId}
               type={accountType}
             />
           )}
