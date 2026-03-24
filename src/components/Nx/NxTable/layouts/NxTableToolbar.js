@@ -2,7 +2,7 @@
 import React, { useCallback } from 'react';
 import { Button } from 'antd';
 import { DownloadOutlined, FilterOutlined, ReloadOutlined } from '@ant-design/icons';
-import ColumnSettings from '../../ColumnSettings/ColumnSettings';
+import ColumnSettings from '../../../ColumnSettings/ColumnSettings';
 import SearchBar from '../features/SearchBar';
 
 // Fix 4.5: onHiddenColumnsChange and onFixedColumnsChange extracted to

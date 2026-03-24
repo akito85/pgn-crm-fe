@@ -516,7 +516,6 @@ const NxTable = ({
           columns={displayedColumnsWithSearch}
           components={components}
           scroll={{ ...tableScrolled, y: tableScrollY }}
-          bordered
           pagination={false}
           className={`w-full${className ? ` ${className}` : ''}`}
           loading={loading}

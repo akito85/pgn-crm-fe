@@ -4,8 +4,9 @@
 // when the path is a directory, with zero changes to existing importers.
 
 import NxTable from './NxTable';
-export { clearPreferences } from './hooks/useColumnPreferences';
 import { clearPreferences } from './hooks/useColumnPreferences';
+
+export { clearPreferences };
 
 // Fix 9.2: also attach as a static method for backward compat with
 // NxTable.clearPreferences({ userId, idTable }) call sites.

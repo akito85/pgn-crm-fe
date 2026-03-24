@@ -221,12 +221,18 @@
   max-height: 30px !important;
   line-height: 30px !important;
   font-size: 12px !important;
-  border-right: 1px solid #C8CDD4 !important;
-  border-bottom: 1px solid #C8CDD4 !important;
   font-family: 'PlusJakartaSans', 'PublicSans', sans-serif;
 }
 
-.nx-table .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
+/* Only add borders to non-bordered tables to avoid double border effect */
+.nx-table:not(.ant-table-bordered) .ant-table-tbody > tr:not(.ant-table-measure-row) > td,
+.nx-table:not(.ant-table-bordered) .ant-table-tbody > tr:not(.ant-table-measure-row) > td.ant-table-cell,
+.nx-table:not(.ant-table-bordered) .ant-table-tbody > tr:not(.ant-table-measure-row) > td.ant-table-cell-ellipsis {
+  border-right: 1px solid #C8CDD4 !important;
+  border-bottom: 1px solid #C8CDD4 !important;
+}
+
+.nx-table:not(.ant-table-bordered) .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
   border-left: 1px solid #C8CDD4 !important;
 }
 
@@ -236,12 +242,12 @@
   vertical-align: middle;
 }
 
-.nx-table .ant-table-thead > tr > th:first-child {
+.nx-table:not(.ant-table-bordered) .ant-table-thead > tr > th:first-child {
   border-left: 1px solid #C8CDD4 !important;
 }
 
-.nx-table .ant-table-thead > tr > th.ant-table-cell-fix-right-first,
-.nx-table .ant-table-tbody > tr > td.ant-table-cell-fix-right-first {
+.nx-table:not(.ant-table-bordered) .ant-table-thead > tr > th.ant-table-cell-fix-right-first,
+.nx-table:not(.ant-table-bordered) .ant-table-tbody > tr > td.ant-table-cell-fix-right-first {
   border-left: 1px solid #C8CDD4 !important;
 }
 
