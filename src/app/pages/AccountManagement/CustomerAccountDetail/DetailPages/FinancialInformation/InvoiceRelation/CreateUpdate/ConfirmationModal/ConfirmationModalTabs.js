@@ -1,9 +1,8 @@
-import { useDispatch } from "react-redux";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
-import AttachmentSectionForm from "../StepContents/AttachmentForm/AttachmentInvoiceRelation";
-import ApprovalSectionForm from "../StepContents/ApprovalForm/ApprovalInvoiceRelation";
+import NxAttachmentInput from "../../../../../../../../../components/Nx/NxAttachmentInput";
+import NxApprovalInput from "../../../../../../../../../components/Nx/NxApprovalInput";
 import InfoInvoiceRelation from "../StepContents/InformationForm/InfoInvoiceRelation";
 
 const ConfirmationModalTabs = ({
@@ -17,8 +16,6 @@ const ConfirmationModalTabs = ({
   setActiveTab = () => {},
   disabled = false,
 }) => {
-  const dispatch = useDispatch();
-
   const tabOptions = [
     {
       key: 0,
@@ -30,7 +27,7 @@ const ConfirmationModalTabs = ({
       key: 1,
       label: "Approval",
       children: (
-        <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />
+        <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />
       ),
       disabled,
     },
@@ -38,9 +35,8 @@ const ConfirmationModalTabs = ({
       key: 2,
       label: "Attachment",
       children: (
-        <AttachmentSectionForm
-          dataSource={attachmentDataSource}
-          dispatch={dispatch}
+        <NxAttachmentInput
+          data={attachmentDataSource}
           service={service}
           configApplication={configApplication}
           type={"confirmation"}

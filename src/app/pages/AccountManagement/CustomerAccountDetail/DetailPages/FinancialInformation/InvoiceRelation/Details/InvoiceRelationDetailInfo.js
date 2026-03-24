@@ -19,6 +19,7 @@ const InvoiceRelationDetailInfo = ({
     startDate,
     endDate,
     status,
+    statusApproval,
     description,
   } = detail;
 
@@ -34,6 +35,11 @@ const InvoiceRelationDetailInfo = ({
           <NxDetailText label="Status">
             <StatusComponent colour={status} margin={false}>
               {status}
+            </StatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <StatusComponent colour={statusApproval} margin={false}>
+              {statusApproval}
             </StatusComponent>
           </NxDetailText>
         </div>

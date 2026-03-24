@@ -70,7 +70,7 @@ const ConfirmationModal = ({
             )}
             {activeTab === (tabLength - 1) && (
               <Button type={"submit"} form={formId} htmlType={isSubmit ? "submit" : "button"} onClick={isDraft ? handleSubmitForm : undefined} loading={loading_createUpdateIr}>
-                {isSubmit ? "Submit" : isDraft ? "Save as Draft" : ""}
+                Confirm
               </Button>
             )}
           </div>

@@ -437,17 +437,17 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
       setModalCreateUpdate(true);
       setType("create");
     },
-    handleView: (record) => {
-      handleDetail(record);
+    handleView: ({ id }) => {
+      handleDetail(id);
     },
-    handleUpdate: (record) => {
+    handleUpdate: ({ id }) => {
       setModalCreateUpdate(true);
       setType("update");
-      setIdEquipment(record);
-      dispatch(getDetailEquipment({ id: record }));
+      setIdEquipment(id);
+      dispatch(getDetailEquipment({ id }));
     },
-    handleDelete: (record) => {
-      handleDelete(record);
+    handleDelete: ({ id }) => {
+      handleDelete(id);
     },
   })
   // const itemActions = [

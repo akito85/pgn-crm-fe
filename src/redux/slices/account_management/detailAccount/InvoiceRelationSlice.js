@@ -27,9 +27,20 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
-  data_irApprovalHierarchy: [],
+
+  // --- Actions (approve / reject / inactivate) ---
+  loading_approveRejectIr: false,
+  loading_approveIr: false,
+  loading_rejectIr: false,
+  loading_inactivateIr: false,
+
+  // --- Supporting / Form Options ---
+  loading_listIrApprovalOption: false,
+  list_irApprovalHierarchy: [],
+  loading_listIrApprovalHierarchyEmployee: false,
   detail_irApprovalHierarchy: [],
-  data_irAttachmentCategory: [],
+  list_irAttachmentCategory: [],
+  loading_listIrAccountStandard: false,
   list_irAccountStandard: [],
   pagination_irAccountStandard: {
     totalPage: 0,
@@ -577,25 +588,25 @@ const invoiceRelationSlice = createSlice({
       state.loading_listIrApprovalOption = true;
     },
     [getIrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.data_irApprovalHierarchy = action.payload;
+      state.list_irApprovalHierarchy = action.payload;
       state.loading_listIrApprovalOption = false;
     },
     [getIrApprovalHierarchy.rejected]: (state) => {
-      state.data_irApprovalHierarchy = [];
+      state.list_irApprovalHierarchy = [];
       state.loading_listIrApprovalOption = false;
     },
 
     /** Get Invoice Relation Detail Approval Hierarchy */
     [getDetailIrApprovalHierarchy.pending]: (state) => {
-      state.loading_detailIrApprovalHierarchyDetails = true;
+      state.loading_listIrApprovalHierarchyEmployee = true;
     },
     [getDetailIrApprovalHierarchy.fulfilled]: (state, action) => {
       state.detail_irApprovalHierarchy = action.payload;
-      state.loading_detailIrApprovalHierarchyDetails = false;
+      state.loading_listIrApprovalHierarchyEmployee = false;
     },
     [getDetailIrApprovalHierarchy.rejected]: (state) => {
       state.detail_irApprovalHierarchy = [];
-      state.loading_detailIrApprovalHierarchyDetails = false;
+      state.loading_listIrApprovalHierarchyEmployee = false;
     },
 
     /** Get Invoice Relation Attachment Category */
@@ -603,11 +614,11 @@ const invoiceRelationSlice = createSlice({
       state.loading = true;
     },
     [getIrAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_irAttachmentCategory = action.payload;
+      state.list_irAttachmentCategory = action.payload;
       state.loading = false;
     },
     [getIrAttachmentCategory.rejected]: (state) => {
-      state.data_irAttachmentCategory = [];
+      state.list_irAttachmentCategory = [];
       state.loading = false;
     },
 

@@ -66,6 +66,9 @@ import IconPlusCircle from "./IconPlusCircle";
 import IconJobList from "./IconJobList";
 import IconJobGroup from "./IconJobGroup";
 import IconJobExecution from "./IconJobExecution";
+import IconExpire from "./IconExpire";
+import IconSquareX from "./IconSquareX";
+import IconSquareCheck from "./IconSquareCheck";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
@@ -211,6 +214,12 @@ const Icon = (props) => {
       return <IconJobGroup {...props} />;
     case "IconJobExecution":
       return <IconJobExecution {...props} />;
+    case "IconExpire":
+      return <IconExpire {...props} />
+    case "IconSquareX":
+      return <IconSquareX {...props} />
+    case "IconSquareCheck":
+      return <IconSquareCheck {...props} />
     default:
       return;
   }
