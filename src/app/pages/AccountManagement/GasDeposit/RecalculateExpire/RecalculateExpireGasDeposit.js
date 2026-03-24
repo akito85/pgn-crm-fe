@@ -109,8 +109,10 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
 
   useEffect(() => {
     if (idGd) {
-      dispatch(getDetailGasDeposit(idGd));
-      dispatch(getDetailDraftGasDeposit(idGd));
+      if (!isDraft)
+        dispatch(getDetailGasDeposit(idGd));
+      else  
+        dispatch(getDetailDraftGasDeposit(idGd));
     }
   }, [idGd]);
 
@@ -322,11 +324,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
           header: "Gas Deposit Information",
           content: (
             <InfoGasDeposit
-              form={form}
-              setAccount={setAccount}
-              accountId={accountId}
-              isExpire={isExpire}
-              isDraft={isDraft}
+              detail={detail}
               key="tab-0-card-0"
             />
           )
@@ -336,6 +334,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
           content: (
             <GasDepositDetailTable
               dataSource={details}
+              handleView={({ id }) => setSelectedDetailId(id)}
               key="tab-0-card-1"
             />
           )
@@ -633,6 +632,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_recalculateExpireGd}
+              detail={detail}
               handleSubmitForm={handleSubmitForm}
             />
           </Form>
