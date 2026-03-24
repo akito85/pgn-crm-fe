@@ -46,15 +46,18 @@ const useInfiniteScroll = ({
       });
   }, []);
 
-  // ── Full teardown when safeId or tableScrollY changes ──────────────────
+  // ── Full teardown when enabled/safeId/tableScrollY changes ─────────────
+  // Cleanup runs unconditionally so the scroll listener is removed when
+  // enabled becomes false (e.g. fuzzy search active). Without this the
+  // Phase B listener stays live on the DOM and fires on horizontal scroll.
   useEffect(() => {
-    if (!enabled) return;
     if (infiniteObserverRef.current) {
       infiniteObserverRef.current.disconnect();
       infiniteObserverRef.current = null;
     }
     infiniteScrollRootRef.current = null;
     infinitePhaseRef.current = 'fill';
+    if (!enabled) return;
   }, [enabled, safeId, tableScrollY]);
 
 

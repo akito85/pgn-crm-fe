@@ -39,7 +39,7 @@ const NxTable = ({
   totalData = 0,
   onDelete,            // eslint-disable-line no-unused-vars
   rowSelection,
-  onRowClicked = () => {}, // eslint-disable-line no-unused-vars
+  onRowClicked, // eslint-disable-line no-unused-vars
   tableScrolled = { y: 380 },
   expandable,          // kept in signature only for the deprecation warning
   className,
@@ -77,9 +77,6 @@ const NxTable = ({
   if (process.env.NODE_ENV !== 'production') {
     if (expandable !== undefined) {
       console.warn('[NxTable] `expandable` is not supported — use NxTableNested for expandable rows. AntD virtual rendering is incompatible with expandable rows.');
-    }
-    if (setFixedColumns !== undefined) {
-      console.warn('[NxTable] `setFixedColumns` prop is ignored — NxTable manages fixed-column state internally.');
     }
     if (onDelete !== undefined) {
       console.warn('[NxTable] `onDelete` prop is unused and will be removed in a future version.');
@@ -296,13 +293,18 @@ const NxTable = ({
   }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch]);
 
   // ── Infinite scroll ───────────────────────────────────────────────────────
+  // Disabled while fuzzy search is active: the search bar is a client-side
+  // quick filter for already-loaded data. Fewer visible rows make Phase B's
+  // scroll threshold fire immediately, causing an infinite load loop.
+  // When search is cleared the hook re-enables and Phase A resumes from fill.
+  // For searching across all server data, users should use Advanced Search.
   const { isLoadingMore } = useInfiniteScroll({
-    useInfiniteScroll: useInfiniteScrollProp,
+    useInfiniteScroll: useInfiniteScrollProp && !searchValue,
     safeId,
     containerRef,
     hasMore,
     onLoadMore,
-    filteredDataLength: filteredDataSource.length,
+    filteredDataLength: resolvedDataSourceWithKeys.length,
     tableScrollY,
     virtual: true,
   });
@@ -547,6 +549,8 @@ const NxTable = ({
           isLoadingMore={isLoadingMore}
           hasMore={hasMore}
           resolvedDataSource={resolvedDataSource}
+          filteredCount={filteredDataSource.length}
+          isFiltering={!!searchValue}
           resolvedTotalData={resolvedTotalData}
           current={current}
           pageSize={pageSize}

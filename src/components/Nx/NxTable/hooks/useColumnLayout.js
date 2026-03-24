@@ -16,12 +16,6 @@ const useColumnLayout = ({
   // ── Column widths ────────────────────────────────────────────────────────
   const [columnWidths, setColumnWidths] = useState(() => initColumnWidths);
 
-  // Fix 9.3: columnWidthsRef lets processColumn read widths without including
-  // columnWidths in its useCallback dep array. A resize no longer invalidates
-  // the entire displayedColumns memo.
-  const columnWidthsRef = React.useRef(columnWidths);
-  React.useEffect(() => { columnWidthsRef.current = columnWidths; }, [columnWidths]);
-
   // ── Column order ─────────────────────────────────────────────────────────
   // Fix 4.3: lazy-initialise from resolvedColumns when initColumnOrder is empty,
   // avoiding the mount-time state update that triggered a 3-render cascade.
@@ -169,8 +163,6 @@ const useColumnLayout = ({
   }, [resolvedColumns]);
 
   // ── processColumn ─────────────────────────────────────────────────────────
-  // Fix 9.3: reads widths from columnWidthsRef so columnWidths state is NOT
-  // in the dep array. Resizing a column does not rebuild displayedColumns.
   const processColumn = useCallback(
     (col, fixedPos = null) => {
       const colKey = col.key || col.dataIndex || col.title;
@@ -188,7 +180,7 @@ const useColumnLayout = ({
       else if (col.isClassification)              textAlign = 'center';
 
       const isDraggable = !fixedPos && !col.fixed;
-      const width = columnWidthsRef.current[colKey] || col.width || DEFAULT_COL_WIDTH;
+      const width = columnWidths[colKey] || col.width || DEFAULT_COL_WIDTH;
 
       const newCol = {
         ...col,
@@ -207,7 +199,7 @@ const useColumnLayout = ({
             baseStyle.backgroundColor = '#f0f0f0';
           }
           return {
-            width: columnWidthsRef.current[colKey] || col.width || DEFAULT_COL_WIDTH,
+            width: columnWidths[colKey] || col.width || DEFAULT_COL_WIDTH,
             onResize: handleResize(colKey),
             style: baseStyle,
             draggable: isDraggable,
@@ -238,8 +230,7 @@ const useColumnLayout = ({
 
       return newCol;
     },
-    [handleResize, handleDragStart, handleDragOver, handleDrop, handleDragEnd]
-    // columnWidths intentionally excluded — read via columnWidthsRef (Fix 9.3)
+    [columnWidths, handleResize, handleDragStart, handleDragOver, handleDrop, handleDragEnd]
   );
 
   // ── displayedColumns memo ─────────────────────────────────────────────────

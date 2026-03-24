@@ -592,6 +592,7 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDeposit.rejected]: (state, action) => {
+      if (action.meta.aborted) return;
       state.loading_listGd = false;
 
       if (!action.meta.arg?.isLoadMore) {
