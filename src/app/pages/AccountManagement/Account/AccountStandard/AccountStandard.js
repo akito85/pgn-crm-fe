@@ -14,8 +14,8 @@ import ViewListIcon from "../../../../../assets/Icon/Nx/IconViewList";
 import { PlusOutlined } from "@ant-design/icons";
 
 const AccountStandard = () => {
-  // Selector
-  const { data_accountStandard, loading } = useSelector(
+  // Selector — loading is NOT used for the table spinner; see isLoading below.
+  const { data_accountStandard } = useSelector(
     (state) => state.account
   );
   const rawToken = useSelector((state) => state.auth?.token);
@@ -36,6 +36,11 @@ const AccountStandard = () => {
   const [allData, setAllData] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  // Local loading flag: set true before each fetch, cleared in the finally block
+  // AFTER setAllData so React 18 batches both updates into one render.
+  // This prevents the "spinner gone, table still empty" flash that occurs when
+  // using the Redux loading flag (which goes false before local state is updated).
+  const [isLoading, setIsLoading] = useState(false);
   const pageRef = useRef(0); // 0-based to match Spring API directly
   const isFetchingRef = useRef(false);
   const hasMoreRef = useRef(false);
@@ -62,6 +67,7 @@ const AccountStandard = () => {
     if (isFetchingRef.current) return;
     if (signal?.aborted) return;
     isFetchingRef.current = true;
+    setIsLoading(true);
     try {
       const reqSearch = buildSearch(search, advancedSearch);
       const result = await dispatch(getAllAccountStandardPaginate({
@@ -85,6 +91,7 @@ const AccountStandard = () => {
       if (!signal?.aborted) console.error('fetchPage error', e);
     } finally {
       isFetchingRef.current = false;
+      setIsLoading(false); // batched with setAllData above — no loading→empty flash
     }
   }, [search, advancedSearch, sort, pageSize, dispatch, buildSearch]);
 
@@ -96,6 +103,7 @@ const AccountStandard = () => {
     pageRef.current = 0;
     setAllData([]);
     setHasMore(false);
+    setIsLoading(true);
     fetchPage(0, true, signal);
     return () => {
       signal.aborted = true;
@@ -209,7 +217,7 @@ const AccountStandard = () => {
         <div className="w-full">
           <TableAccountStandard
             dataSource={allData}
-            loading={loading}
+            loading={isLoading}
             totalData={totalElements}
             current={pageRef.current + 1}
             pageSize={pageSize}
