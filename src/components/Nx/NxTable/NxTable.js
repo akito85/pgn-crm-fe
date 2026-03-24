@@ -296,13 +296,15 @@ const NxTable = ({
   }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch]);
 
   // ── Infinite scroll ───────────────────────────────────────────────────────
+  // Phase A fill uses the full loaded count (not filtered) so client-side fuzzy
+  // search does not trigger additional API loads just to fill the container.
   const { isLoadingMore } = useInfiniteScroll({
     useInfiniteScroll: useInfiniteScrollProp,
     safeId,
     containerRef,
     hasMore,
     onLoadMore,
-    filteredDataLength: filteredDataSource.length,
+    filteredDataLength: resolvedDataSourceWithKeys.length,
     tableScrollY,
     virtual: true,
   });
@@ -547,6 +549,8 @@ const NxTable = ({
           isLoadingMore={isLoadingMore}
           hasMore={hasMore}
           resolvedDataSource={resolvedDataSource}
+          filteredCount={filteredDataSource.length}
+          isFiltering={!!searchValue}
           resolvedTotalData={resolvedTotalData}
           current={current}
           pageSize={pageSize}

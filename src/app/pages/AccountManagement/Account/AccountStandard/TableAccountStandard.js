@@ -278,6 +278,7 @@ export const columnsAccountStandard = [
 // Enhanced Account Standard Table Component with NxTable
 export const TableAccountStandard = ({
   idTable = "account-standard-table",
+  userId,
   dataSource,
   loading,
   totalData,
@@ -312,6 +313,7 @@ export const TableAccountStandard = ({
   return (
     <NxTable
       idTable={idTable}
+      userId={userId}
       dataSource={dataSource}
       columns={allColumns}
       loading={loading}

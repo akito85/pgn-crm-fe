@@ -30,6 +30,8 @@ const NxTableFooter = ({
   isLoadingMore,
   hasMore,
   resolvedDataSource,
+  filteredCount,
+  isFiltering,
   resolvedTotalData,
   current,
   pageSize,
@@ -39,13 +41,21 @@ const NxTableFooter = ({
   onRefresh,
 }) => {
   if (useInfiniteScroll) {
+    const loadedCount = resolvedDataSource?.length || 0;
+    const displayCount = isFiltering ? (filteredCount ?? loadedCount) : loadedCount;
+    const totalCount = isFiltering
+      ? loadedCount
+      : Math.max(resolvedTotalData, loadedCount);
+    const entriesLabel = isFiltering
+      ? `${displayCount} matches of ${totalCount} loaded entries`
+      : `${displayCount} of ${totalCount} entries`;
     return (
       <div style={{ ...footerBase, justifyContent: 'flex-end', gap: '8px' }}>
         <span style={{ fontSize: '12px', color: '#6B7280' }}>
-          Showing {resolvedDataSource?.length || 0} of {Math.max(resolvedTotalData, resolvedDataSource?.length || 0)} entries
+          Showing {entriesLabel}
           {isLoadingMore && hasMore && ' · Loading...'}
         </span>
-        {!hasMore && resolvedDataSource?.length > 0 && (
+        {!hasMore && loadedCount > 0 && (
           <>
             <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#D1D5DB', display: 'inline-block' }} />
             <span style={{ fontSize: '12px', color: '#22c55e', fontWeight: '500' }}>All data showed</span>

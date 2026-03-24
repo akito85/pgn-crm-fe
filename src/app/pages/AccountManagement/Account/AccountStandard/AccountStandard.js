@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Spin, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -18,6 +18,11 @@ const AccountStandard = () => {
   const { data_accountStandard, loading } = useSelector(
     (state) => state.account
   );
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try { const t = JSON.parse(rawToken || '{}'); return t?.userId || t?.id || t?.username || null; }
+    catch { return null; }
+  }, [rawToken]);
 
   // Declaration
   const dispatch = useDispatch();
@@ -196,12 +201,13 @@ const AccountStandard = () => {
             handleDownload={handleDownload}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
-            useInfiniteScroll={true} // Enable infinite scrolling
+            useInfiniteScroll={true}
             onLoadMore={onLoadMore}
             hasMore={hasMore}
             itemActions={itemActions}
-            columnDefinitions={columnsAccountStandard} // Pass column definitions for advanced search
+            columnDefinitions={columnsAccountStandard}
             tableScrolled={{ x: 3000, y: 600 }}
+            userId={userId}
           />
         </div>
       </NxCardContainer>
