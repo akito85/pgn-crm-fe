@@ -76,7 +76,7 @@ const InvoiceRelationDetail = ({
 
   const {
     approvalType,
-    relatedAccountNumber,
+    accountNumber,
     id,
     createdDate,
     createdBy,
@@ -273,7 +273,7 @@ const InvoiceRelationDetail = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${accountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
         loading={loading_approveRejectIr}
       />
