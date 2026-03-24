@@ -57,15 +57,6 @@ const useInfiniteScroll = ({
     infinitePhaseRef.current = 'fill';
   }, [enabled, safeId, tableScrollY]);
 
-  // Fix 1.3: Phase A fill check moved into useLayoutEffect for tableScrollY
-  // so it reads clientHeight after the new layout has been committed, not
-  // from the previous render cycle's stale snapshot.
-  useLayoutEffect(() => {
-    if (!enabled) return;
-    // Intentionally re-run when tableScrollY changes to re-evaluate fill with
-    // the new container height. Observer teardown is handled by the sibling
-    // effect above.
-  }, [enabled, tableScrollY]);
 
   // ── Phase A + Phase B effect ────────────────────────────────────────────
   useEffect(() => {

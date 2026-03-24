@@ -78,13 +78,13 @@ const NxTable = ({
     if (expandable !== undefined) {
       console.warn('[NxTable] `expandable` is not supported — use NxTableNested for expandable rows. AntD virtual rendering is incompatible with expandable rows.');
     }
-    if (setFixedColumns !== undefined && setFixedColumns !== (() => {})) {
+    if (setFixedColumns !== undefined) {
       console.warn('[NxTable] `setFixedColumns` prop is ignored — NxTable manages fixed-column state internally.');
     }
     if (onDelete !== undefined) {
       console.warn('[NxTable] `onDelete` prop is unused and will be removed in a future version.');
     }
-    if (onRowClicked !== undefined && onRowClicked !== (() => {})) {
+    if (onRowClicked !== undefined) {
       console.warn('[NxTable] `onRowClicked` is deprecated — use `onRowClick` instead.');
     }
     if (loadMoreThreshold !== 20) {

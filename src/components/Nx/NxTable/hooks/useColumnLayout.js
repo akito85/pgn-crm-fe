@@ -1,6 +1,6 @@
 // src/components/Nx/NxTable/hooks/useColumnLayout.js
 import React, { useState, useCallback, useMemo } from 'react';
-import { DEFAULT_COL_WIDTH, MIN_COL_WIDTH_PX } from '../constants';
+import { DEFAULT_COL_WIDTH } from '../constants';
 
 const useColumnLayout = ({
   resolvedColumns,
@@ -9,10 +9,6 @@ const useColumnLayout = ({
   initFixedColumns,
   initColumnWidths,
   initColumnOrder,
-  handleDragStart: externalDragStart,
-  handleDragOver: externalDragOver,
-  handleDrop: externalDrop,
-  handleDragEnd: externalDragEnd,
 }) => {
   // ── Column visibility ────────────────────────────────────────────────────
   const [optionSelectedCol, setOptionSelectedCol] = useState(() => initHiddenColumns);
