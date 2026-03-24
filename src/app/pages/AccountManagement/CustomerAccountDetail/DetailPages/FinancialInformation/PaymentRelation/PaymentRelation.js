@@ -3,10 +3,9 @@ import { useState } from "react";
 import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
-import { getPrApprovalHierarchy, getDetailPrApprovalHierarchy } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { getPrApprovalHierarchy, getDetailPrApprovalHierarchy, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 const PaymentRelation = ({
@@ -16,7 +15,7 @@ const PaymentRelation = ({
   const dispatch = useDispatch();
 
   const { data_prApprovalHistory } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.paymentRelation
   );
 
   const [refreshSignal, setRefreshSignal] = useState(0);

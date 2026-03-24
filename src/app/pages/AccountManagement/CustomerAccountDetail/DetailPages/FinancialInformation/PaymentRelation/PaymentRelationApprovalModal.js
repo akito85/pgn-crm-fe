@@ -4,7 +4,7 @@ import { Steps, Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
@@ -19,7 +19,7 @@ const PaymentRelationApprovalModal = ({
 }) => {
   // Selector
   const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approveRejectPr } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.paymentRelation
   );
 
   // Declaration
@@ -42,7 +42,8 @@ const PaymentRelationApprovalModal = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
@@ -53,11 +54,12 @@ const PaymentRelationApprovalModal = ({
   useEffect(() => {
     if (isOpen) {
       const body = {
-        inputFields: tempFilters,
         page,
         size: loadMoreSize,
         sort,
         searchs: search,
+        filters,
+        filterRules,
       }
 
       dispatch(
@@ -95,11 +97,12 @@ const PaymentRelationApprovalModal = ({
     // Check if there's more data to load
     if (nextPage <= totalPages) {
       const body = {
-        inputFields: tempFilters,
         page: nextPage,
         size: loadMoreSize,
         sort,
         searchs: search,
+        filters,
+        filterRules,
       }
 
       dispatch(

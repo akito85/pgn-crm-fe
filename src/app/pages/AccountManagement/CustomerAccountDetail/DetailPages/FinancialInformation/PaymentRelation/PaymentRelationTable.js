@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getPaymentRelation,
   downloadPaymentRelation,
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 
 const PaymentRelationTable = ({
   idAccount = 0,
@@ -29,7 +29,7 @@ const PaymentRelationTable = ({
     list_paymentRelation: dataSource,
     pagination_paymentRelation: pagination,
     loading_listPr: loading,
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.paymentRelation);
 
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
