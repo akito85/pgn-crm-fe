@@ -296,10 +296,13 @@ const NxTable = ({
   }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch]);
 
   // ── Infinite scroll ───────────────────────────────────────────────────────
-  // Phase A fill uses the full loaded count (not filtered) so client-side fuzzy
-  // search does not trigger additional API loads just to fill the container.
+  // Disabled while fuzzy search is active: the search bar is a client-side
+  // quick filter for already-loaded data. Fewer visible rows make Phase B's
+  // scroll threshold fire immediately, causing an infinite load loop.
+  // When search is cleared the hook re-enables and Phase A resumes from fill.
+  // For searching across all server data, users should use Advanced Search.
   const { isLoadingMore } = useInfiniteScroll({
-    useInfiniteScroll: useInfiniteScrollProp,
+    useInfiniteScroll: useInfiniteScrollProp && !searchValue,
     safeId,
     containerRef,
     hasMore,
