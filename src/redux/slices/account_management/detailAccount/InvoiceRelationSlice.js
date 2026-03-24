@@ -430,7 +430,12 @@ export const getInvoiceRelationApproval = createAsyncThunk(
   "GET_INVOICE_RELATION_APPROVAL",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/invoice-relation/list-approval/${id}`;
+      body = {
+        ...body,
+        listType: "approval"
+      }
+
+      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(
         url,
         body
