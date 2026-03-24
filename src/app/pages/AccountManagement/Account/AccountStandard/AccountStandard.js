@@ -76,7 +76,10 @@ const AccountStandard = () => {
         sort,
         search: reqSearch
       })).unwrap();
-      if (signal?.aborted) return; // discard result from the superseded fetch
+      // If the signal was aborted after the await (StrictMode cleanup or rapid
+      // filter change), discard the result AND leave isLoading=true so the
+      // spinner stays visible while the superseding fetch is still in-flight.
+      if (signal?.aborted) return;
       const rows = result?.result ?? [];
       const pageInfo = result?.page ?? {};
       const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
@@ -91,7 +94,10 @@ const AccountStandard = () => {
       if (!signal?.aborted) console.error('fetchPage error', e);
     } finally {
       isFetchingRef.current = false;
-      setIsLoading(false); // batched with setAllData above — no loading→empty flash
+      // Only clear loading when we committed a result (or hit a real error).
+      // If the signal was aborted the superseding fetch is still running —
+      // clearing loading here would cause a spinner-gone + empty-table flash.
+      if (!signal?.aborted) setIsLoading(false);
     }
   }, [search, advancedSearch, sort, pageSize, dispatch, buildSearch]);
 
