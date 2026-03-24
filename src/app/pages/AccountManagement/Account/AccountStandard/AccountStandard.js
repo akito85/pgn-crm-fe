@@ -38,6 +38,7 @@ const AccountStandard = () => {
   const [hasMore, setHasMore] = useState(false);
   const pageRef = useRef(0); // 0-based to match Spring API directly
   const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
 
   // Helper: build combined search string
   const buildSearch = useCallback((basicSearch, advSearch) => {
@@ -67,10 +68,14 @@ const AccountStandard = () => {
       })).unwrap();
       const rows = result?.result ?? [];
       const pageInfo = result?.page ?? {};
+      const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
       setAllData(prev => replace ? rows : [...prev, ...rows]);
       setTotalElements(pageInfo.totalElements ?? 0);
-      setHasMore(pageInfo.number < (pageInfo.totalPages ?? 0) - 1);
-      pageRef.current = pageInfo.number ?? page;
+      setHasMore(nextHasMore);
+      hasMoreRef.current = nextHasMore;
+      // Use the page we requested, not pageInfo.number — avoids the 0 ?? page
+      // pitfall where a valid 0 from the API overrides the actual page index.
+      pageRef.current = page;
     } catch (e) {
       console.error('fetchPage error', e);
     } finally {
@@ -117,9 +122,11 @@ const AccountStandard = () => {
   };
 
   const onLoadMore = useCallback(() => {
-    if (!hasMore || isFetchingRef.current) return;
-    fetchPage(pageRef.current + 1, false);
-  }, [hasMore, fetchPage]);
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    // Return the promise so useInfiniteScroll's triggerLoad waits for
+    // the fetch to complete before clearing its isLoadingMoreRef gate.
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
 
   const onSort = (_, __, sortInfo) => {
     const dataSort =
