@@ -163,7 +163,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: initialPageSize, // refresh balik ke 100
+          pageSize: initialPageSize,
           sort,
           period: selectedBillingPeriod,
           isLoadMore: false,
@@ -173,7 +173,6 @@ const RatingPage = () => {
     }
   };
 
-  // ✅ Sama persis seperti Billing
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
