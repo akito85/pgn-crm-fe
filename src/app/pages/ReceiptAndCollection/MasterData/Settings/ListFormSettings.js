@@ -1,7 +1,7 @@
 import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -67,6 +67,7 @@ const ListFormSettings = (props) => {
   const [loadingSave, setLoadingSave] = useState(false);
   const [current, setCurrent] = useState(0);
   const [sendBody, setSendBody] = useState();
+  const isSubmittingRef = useRef(false);
 
   const [tabData, setTabData] = useState([
     {
@@ -77,11 +78,7 @@ const ListFormSettings = (props) => {
     { value: "Attachment" },
   ]);
 
-  const [valuePage, setValuePage] = useState(steps[0].value);
-
-  useEffect(() => {
-    setValuePage(steps[current].value);
-  }, [current, steps]);
+  const valuePage = useMemo(() => steps[current]?.value, [current]);
 
   useEffect(() => {
     dispatch(getAllApprovalListPayChannelConfig());
@@ -133,12 +130,19 @@ const ListFormSettings = (props) => {
   useEffect(() => {
     if (id && data_detail) {
       const entity = data_detail?.payChannelConfig;
+      if (!entity) {
+        return;
+      }
+      const formatCodeName = (code, name) => {
+        if (code && name) return `${code} - ${name}`;
+        return code || name || "";
+      };
       form.setFieldsValue({
         id: entity?.id,
         mappingId: entity?.mappingId,
-        partnerCode: entity?.partnerCode,
-        caCode: entity?.caCode,
-        dcCode: entity?.deliveryChannelCode,
+        partnerCode: formatCodeName(entity?.partnerCode, entity?.partnerName),
+        caCode: formatCodeName(entity?.caCode, entity?.collectingAgentName),
+        dcCode: formatCodeName(entity?.deliveryChannelCode, entity?.deliveryChannelName),
         type: entity?.type,
         startDate: entity?.startDate ? moment(entity?.startDate).clone() : null,
         endDate: entity?.endDate ? moment(entity?.endDate).clone() : null,
@@ -279,6 +283,8 @@ const ListFormSettings = (props) => {
   };
 
   const handleSave = async () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setLoadingSave(true);
     const successMessage = {
       title: "Successfull",
@@ -341,6 +347,7 @@ const ListFormSettings = (props) => {
       setLoadingForm(false);
       setModalConfirm(false);
     } finally {
+      isSubmittingRef.current = false;
       setLoadingSave(false);
     }
   };

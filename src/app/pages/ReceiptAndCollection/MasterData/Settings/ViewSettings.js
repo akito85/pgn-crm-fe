@@ -46,6 +46,17 @@ const COLUMN_WIDTH = {
   NO: 60,
 };
 
+const sanitizeText = (value) => {
+  if (typeof value !== "string") return value;
+  return value.replaceAll(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;",
+  }[char]));
+};
+
 const ViewSettings = () => {
   const { loading, data, dataApprovalHistory } = useSelector(
     (state) => state.receiptSetting
@@ -76,7 +87,7 @@ const ViewSettings = () => {
   const initialPageSize = 100;
 
   useEffect(() => {
-    let isMounted = true;
+    let isCancelled = false;
 
     const fetchData = async () => {
       try {
@@ -89,18 +100,20 @@ const ViewSettings = () => {
             isLoadMore: false,
           })
         )?.unwrap?.();
-        if (isMounted) {
+        if (!isCancelled) {
           setPage(1);
         }
       } catch (error) {
-        console.error("Failed to fetch pay channel config list", error);
+        if (!isCancelled) {
+          console.error("Failed to fetch pay channel config list", error);
+        }
       }
     };
 
     fetchData();
 
     return () => {
-      isMounted = false;
+      isCancelled = true;
     };
   }, [dispatch, search, sort]);
 
@@ -108,18 +121,22 @@ const ViewSettings = () => {
 
   const handleLoadMore = async () => {
     if (!hasMore) return;
-    const currentDataLength = data?.result?.length || 0;
-    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
-    await dispatch(
-      getPaginatePayChannelConfig({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: nextPage,
-        pageSize: loadMoreSize,
-        sort,
-        isLoadMore: true,
-      })
-    );
-    setPage(nextPage);
+    try {
+      const currentDataLength = data?.result?.length || 0;
+      const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+      await dispatch(
+        getPaginatePayChannelConfig({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true,
+        })
+      ).unwrap();
+      setPage(nextPage);
+    } catch (error) {
+      console.error("Failed to load more pay channel config", error);
+    }
   };
 
   const handleRefresh = () => {
@@ -173,7 +190,7 @@ const ViewSettings = () => {
   }, []);
 
   useEffect(() => {
-    if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+    if (dataApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PAY_CHANNEL_CONFIG || [],
@@ -194,7 +211,7 @@ const ViewSettings = () => {
     try {
       await dispatch(getApprovalHistoryPayChannelConfig(data))?.unwrap();
       setOpenModalHistory(true);
-    } catch (error) {
+    } catch {
       setOpenModalHistory(false);
     }
   };
@@ -208,12 +225,12 @@ const ViewSettings = () => {
         width: COLUMN_WIDTH.NAME,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.mappingName !== undefined ? [search.mappingName] : null,
+        filteredValue: search?.mappingName == null ? null : [search.mappingName],
         ...getColumnSearchPropsUseFilteredValue(
           search, "mappingName", searchInput, searchedColumn, searchText, handleSearch, true, "input", [], handleReset
         ),
         render: (text) =>
-          renderColumn("mappingName", hasValue(search["mappingName"]), searchText, text, true, "input", search),
+          renderColumn("mappingName", hasValue(search["mappingName"]), searchText, sanitizeText(text), true, "input", search),
       },
       {
         key: "partnerName",
@@ -222,13 +239,13 @@ const ViewSettings = () => {
         width: COLUMN_WIDTH.PARTNER,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.partnerName !== undefined ? [search.partnerName] : null,
+        filteredValue: search?.partnerName == null ? null : [search.partnerName],
         ...getColumnSearchPropsUseFilteredValue(
           search, "partnerName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
         render: (text, record) =>
           renderColumn("partnerName", hasValue(search["partnerName"]), searchText,
-            record.partnerCode ? `${record.partnerCode} - ${record.partnerName}` : text, true, "input", search),
+            sanitizeText(record.partnerCode ? `${record.partnerCode} - ${record.partnerName}` : text), true, "input", search),
       },
       {
         key: "collectingAgentName",
@@ -237,13 +254,13 @@ const ViewSettings = () => {
         width: COLUMN_WIDTH.COLLECTING_AGENT,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.collectingAgentName !== undefined ? [search.collectingAgentName] : null,
+        filteredValue: search?.collectingAgentName == null ? null : [search.collectingAgentName],
         ...getColumnSearchPropsUseFilteredValue(
           search, "collectingAgentName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
         render: (text, record) =>
           renderColumn("collectingAgentName", hasValue(search["collectingAgentName"]), searchText,
-            record.caCode ? `${record.caCode} - ${record.collectingAgentName}` : text, true, "input", search),
+            sanitizeText(record.caCode ? `${record.caCode} - ${record.collectingAgentName}` : text), true, "input", search),
       },
       {
         key: "deliveryChannelName",
@@ -252,13 +269,13 @@ const ViewSettings = () => {
         width: COLUMN_WIDTH.DELIVERY_CHANNEL,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.deliveryChannelName !== undefined ? [search.deliveryChannelName] : null,
+        filteredValue: search?.deliveryChannelName == null ? null : [search.deliveryChannelName],
         ...getColumnSearchPropsUseFilteredValue(
           search, "deliveryChannelName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
         render: (text, record) =>
           renderColumn("deliveryChannelName", hasValue(search["deliveryChannelName"]), searchText,
-            record.deliveryChannelCode ? `${record.deliveryChannelCode} - ${record.deliveryChannelName}` : text, true, "input", search),
+            sanitizeText(record.deliveryChannelCode ? `${record.deliveryChannelCode} - ${record.deliveryChannelName}` : text), true, "input", search),
       },
       {
         key: "type",
@@ -267,12 +284,12 @@ const ViewSettings = () => {
         width: COLUMN_WIDTH.TYPE,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.type !== undefined ? [search.type] : null,
+        filteredValue: search?.type == null ? null : [search.type],
         ...getColumnSearchPropsUseFilteredValue(
           search, "type", searchInput, searchedColumn, searchText, handleSearch, true, "input", [], handleReset
         ),
         render: (text) =>
-          renderColumn("type", hasValue(search["type"]), searchText, text, true, "input", search),
+          renderColumn("type", hasValue(search["type"]), searchText, sanitizeText(text), true, "input", search),
       },
       {
         key: "startDate",
@@ -282,7 +299,7 @@ const ViewSettings = () => {
         sorter: true,
         isClassification: true,
         align: "center",
-        filteredValue: search?.startDate !== undefined ? [search.startDate] : null,
+        filteredValue: search?.startDate == null ? null : [search.startDate],
         ...getColumnSearchPropsUseFilteredValue(
           search, "startDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
         ),
@@ -297,7 +314,7 @@ const ViewSettings = () => {
         sorter: true,
         isClassification: true,
         align: "center",
-        filteredValue: search?.endDate !== undefined ? [search.endDate] : null,
+        filteredValue: search?.endDate == null ? null : [search.endDate],
         ...getColumnSearchPropsUseFilteredValue(
           search, "endDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
         ),
@@ -311,7 +328,7 @@ const ViewSettings = () => {
         width: COLUMN_WIDTH.HOUR,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.startHour !== undefined ? [search.startHour] : null,
+        filteredValue: search?.startHour == null ? null : [search.startHour],
         ...getColumnSearchPropsUseFilteredValue(
           search, "startHour", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -326,7 +343,7 @@ const ViewSettings = () => {
         width: COLUMN_WIDTH.HOUR,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.endHour !== undefined ? [search.endHour] : null,
+        filteredValue: search?.endHour == null ? null : [search.endHour],
         ...getColumnSearchPropsUseFilteredValue(
           search, "endHour", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -342,7 +359,7 @@ const ViewSettings = () => {
         sorter: true,
         isClassification: true,
         fixed: "right",
-        filteredValue: search?.status !== undefined ? [search.status] : null,
+        filteredValue: search?.status == null ? null : [search.status],
         ...getColumnSearchPropsUseFilteredValue(
           search, "status", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -357,7 +374,7 @@ const ViewSettings = () => {
         sorter: true,
         isClassification: true,
         fixed: "right",
-        filteredValue: search?.statusApproval !== undefined ? [search.statusApproval] : null,
+        filteredValue: search?.statusApproval == null ? null : [search.statusApproval],
         ...getColumnSearchPropsUseFilteredValue(
           search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -369,10 +386,8 @@ const ViewSettings = () => {
   );
 
   const onSort = (_, __, sorter) => {
-    const dataSort =
-      sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-        : "";
+    const direction = sorter.order === "ascend" ? "asc" : "desc";
+    const dataSort = sorter.order == null ? "" : `${sorter.field}~${direction}`;
     setSort(dataSort);
   };
 
@@ -471,7 +486,7 @@ const ViewSettings = () => {
           <Link
             to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS}
             state={{ id: record?.id }}
-            className={!isEditable ? "pointer-events-none" : ""}
+            className={isEditable ? "" : "pointer-events-none"}
           >
             <ButtonComponent
               className="gap-5"
@@ -485,18 +500,26 @@ const ViewSettings = () => {
           </Link>
         ) : (
           <Tooltip title="Update">
-            <div
-              onClick={(e) => { if (!isEditable) e.preventDefault(); }}
-              className={!isEditable ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+            <button
+              type="button"
+              disabled={!isEditable}
+              onClick={(e) => {
+                if (!isEditable) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }}
+              className={isEditable ? "cursor-pointer" : "cursor-not-allowed opacity-50"}
+              style={{ background: "transparent", border: "none", padding: 0 }}
             >
               <Link
                 to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS}
                 state={{ id: record?.id }}
-                className={!isEditable ? "pointer-events-none" : ""}
+                className={isEditable ? "" : "pointer-events-none"}
               >
                 <SVGIcon name="IconEdit" color={isEditable ? "#ACC424" : "#8D91A0"} width={20} />
               </Link>
-            </div>
+            </button>
           </Tooltip>
         );
       },
@@ -553,9 +576,15 @@ const ViewSettings = () => {
           </ButtonComponent>
         ) : (
           <Tooltip title={"Approval History"}>
-            <div onClick={() => handleApprovalHistory(record?.id)} className="cursor-pointer">
+            <button
+              type="button"
+              onClick={() => handleApprovalHistory(record?.id)}
+              className="cursor-pointer"
+              style={{ background: "transparent", border: "none", padding: 0 }}
+              aria-label="Approval History"
+            >
               <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-            </div>
+            </button>
           </Tooltip>
         )
       ),
@@ -569,7 +598,7 @@ const ViewSettings = () => {
         handleDownload();
       }
       handleRefresh();
-    } catch (error) {
+    } catch {
       handleRefresh();
     }
   };

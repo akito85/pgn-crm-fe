@@ -72,10 +72,8 @@ export const createValidasiPayChannelConfig = createAsyncThunk(
       return data.data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        error.response?.data?.message || error.message || error.toString();
+      if (Math.floor(((error.response?.data?.code || 0) / 100)) === 4) {
         const errorBody = { title: "Failed", description: `${message}.` };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -94,15 +92,15 @@ export const getDownloadPayChannelConfig = createAsyncThunk(
       const url = `/v1/dbs/api/settings/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
-    } catch (response) {
+    } catch (error_) {
       thunkAPI.dispatch(
         validateError({
-          error: response,
+          error: error_,
           action: "DOWNLOAD_PAY_CHANNEL_CONFIG",
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(response.response);
+      return thunkAPI.rejectWithValue(error_?.response);
     }
   }
 );
@@ -124,15 +122,15 @@ export const inactivePayChannelConfig = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
-    } catch (response) {
+    } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(response), status, errorMessage(response)),
+          error: errorBody(errorCode(error), status, errorMessage(error)),
           action: "INACTIVE_PAY_CHANNEL_CONFIG",
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(response.response?.data || response);
+      return thunkAPI.rejectWithValue(error.response?.data || error);
     }
   }
 );
@@ -147,9 +145,7 @@ export const createPayChannelConfig = createAsyncThunk(
       return data.data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || error.toString();
       const errorBody = {
         title: "Failed",
         data: error.response?.data?.data,
@@ -170,9 +166,7 @@ export const updatePayChannelConfig = createAsyncThunk(
       return data.data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || error.toString();
       const errorBody = {
         title: "Failed",
         data: error.response?.data?.data,
@@ -200,9 +194,7 @@ export const saveDraftPayChannelConfig = createAsyncThunk(
       return data.data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || error.toString();
       const errorBody = {
         title: "Failed",
         data: error.response?.data?.data,
@@ -315,9 +307,7 @@ export const approveOrRejectPayChannelConfig = createAsyncThunk(
       return response.data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || error.toString();
       if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
@@ -393,9 +383,7 @@ export const approveOrRejectInactivePayChannelConfig = createAsyncThunk(
       return response.data;
     } catch (error) {
       const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || error.toString();
       if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
@@ -408,6 +396,13 @@ export const approveOrRejectInactivePayChannelConfig = createAsyncThunk(
     }
   }
 );
+
+// Naming aliases for consistency without breaking existing imports.
+export const fetchPayChannelConfigList = getPaginatePayChannelConfig;
+export const fetchMappingDDL = getListMappingDDL;
+export const validatePayChannelConfig = createValidasiPayChannelConfig;
+export const fetchPayChannelConfigDetail = getDetailPayChannelConfig;
+export const fetchPayChannelConfigDraft = getDetailDraftPayChannelConfig;
 
 const settingSlice = createSlice({
   name: "setting",

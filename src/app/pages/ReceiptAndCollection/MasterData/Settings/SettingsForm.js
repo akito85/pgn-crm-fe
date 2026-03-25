@@ -5,9 +5,14 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import moment from "moment";
 import DateComponent from "../../../../../components/DateComponent";
 import InputComponent from "../../../../../components/InputComponent";
+import PropTypes from "prop-types";
 
 const SettingsForm = (props) => {
   const { form, dataMappingList } = props;
+  const formatCodeName = (code, name) => {
+    if (code && name) return `${code} - ${name}`;
+    return code || name || "";
+  };
 
   const disabledEndDate = (current) => {
     const startDate = form.getFieldValue("startDate");
@@ -36,7 +41,7 @@ const SettingsForm = (props) => {
 
   return (
     <div>
-      <CardContainer header={"PAYMENT CHANNEL CONFIGURATION INFORMATION"}>
+      <CardContainer header={"PARTNER INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-5 mb-5">
           <Form.Item
             label="CA CI Mapping Name"
@@ -44,7 +49,7 @@ const SettingsForm = (props) => {
             rules={formMessageRequired("CA CI Mapping")}
           >
             <SelectComponent
-              placeholder="Select CA CI Mapping"
+              placeholder="Select CA CI Mapping Code - Name"
               showSearch
               optionFilterProp="children"
               filterOption={(input, option) =>
@@ -54,9 +59,18 @@ const SettingsForm = (props) => {
                 const selectedItem = dataMappingList?.data?.find((item) => item.id === val);
                 if (selectedItem) {
                   form.setFieldsValue({
-                    partnerCode: selectedItem.partner?.partnerCode || "",
-                    caCode: selectedItem.collectingAgent?.code || "",
-                    dcCode: selectedItem.deliveryChannel?.code || "",
+                    partnerCode: formatCodeName(
+                      selectedItem.partner?.partnerCode,
+                      selectedItem.partner?.partnerName
+                    ),
+                    caCode: formatCodeName(
+                      selectedItem.collectingAgent?.code,
+                      selectedItem.collectingAgent?.name
+                    ),
+                    dcCode: formatCodeName(
+                      selectedItem.deliveryChannel?.code,
+                      selectedItem.deliveryChannel?.name
+                    ),
                     type: selectedItem.type || "",
                   });
                 } else {
@@ -72,16 +86,16 @@ const SettingsForm = (props) => {
             </SelectComponent>
           </Form.Item>
           <Form.Item label="Partner Code" name="partnerCode">
-            <InputComponent disabled={true} placeholder="{value}" />
+            <InputComponent disabled={true} placeholder="(value)" />
           </Form.Item>
           <Form.Item label="Collecting Agent" name="caCode">
-            <InputComponent disabled={true} placeholder="{value}" />
+            <InputComponent disabled={true} placeholder="(value)" />
           </Form.Item>
           <Form.Item label="Delivery Channel" name="dcCode">
-            <InputComponent disabled={true} placeholder="{value}" />
+            <InputComponent disabled={true} placeholder="(value)" />
           </Form.Item>
           <Form.Item label="Type" name="type">
-            <InputComponent disabled={true} placeholder="{value}" />
+            <InputComponent disabled={true} placeholder="(value)" />
           </Form.Item>
         </div>
 
@@ -106,6 +120,9 @@ const SettingsForm = (props) => {
                 validator: (_, value) => {
                   const startDate = form.getFieldValue("startDate");
                   if (value && startDate) {
+                    if (moment(value).isBefore(moment(startDate), "day")) {
+                      return Promise.reject(new Error("End Date cannot be before Start Date"));
+                    }
                     const diffYears = moment(value).diff(moment(startDate), 'years');
                     if (diffYears > 10) {
                       return Promise.reject(new Error("End Date cannot exceed 10 years from Start Date"));
@@ -124,7 +141,7 @@ const SettingsForm = (props) => {
             name="startHour"
             rules={formMessageRequired("Start Hour")}
           >
-            <SelectComponent placeholder="HH" showSearch>
+            <SelectComponent placeholder="Input Start Hour" showSearch>
               {hourOptions}
             </SelectComponent>
           </Form.Item>
@@ -134,7 +151,7 @@ const SettingsForm = (props) => {
             name="endHour"
             rules={formMessageRequired("End Hour")}
           >
-            <SelectComponent placeholder="HH" showSearch>
+            <SelectComponent placeholder="Input End Hour" showSearch>
               {hourOptions}
             </SelectComponent>
           </Form.Item>
@@ -144,7 +161,7 @@ const SettingsForm = (props) => {
             name="startMinute"
             rules={formMessageRequired("Start Minute")}
           >
-            <SelectComponent placeholder="mm" showSearch>
+            <SelectComponent placeholder="Input Start Minute" showSearch>
               {minuteOptions}
             </SelectComponent>
           </Form.Item>
@@ -156,7 +173,7 @@ const SettingsForm = (props) => {
             name="endMinute"
             rules={formMessageRequired("End Minute")}
           >
-            <SelectComponent placeholder="mm" showSearch>
+            <SelectComponent placeholder="Input End Minute" showSearch>
               {minuteOptions}
             </SelectComponent>
           </Form.Item>
@@ -164,6 +181,34 @@ const SettingsForm = (props) => {
       </CardContainer>
     </div>
   );
+};
+
+SettingsForm.propTypes = {
+  form: PropTypes.shape({
+    getFieldValue: PropTypes.func,
+    setFieldsValue: PropTypes.func,
+  }).isRequired,
+  dataMappingList: PropTypes.shape({
+    data: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        name: PropTypes.string,
+        type: PropTypes.string,
+        partner: PropTypes.shape({
+          partnerCode: PropTypes.string,
+          partnerName: PropTypes.string,
+        }),
+        collectingAgent: PropTypes.shape({
+          code: PropTypes.string,
+          name: PropTypes.string,
+        }),
+        deliveryChannel: PropTypes.shape({
+          code: PropTypes.string,
+          name: PropTypes.string,
+        }),
+      })
+    ),
+  }),
 };
 
 export default SettingsForm;
