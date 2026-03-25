@@ -37,6 +37,8 @@ import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import { nxRemoveKeys } from "../../../../../../../../components/Nx/NxRemoveKeys";
 
 const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "standard" }) => {
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
@@ -49,12 +51,13 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     (state) => state.accountManagement
   );
 
+  const accountId = data_accountDetail?.accountInformation?.accountId;
+
   const {
     loading_listPrApprovalOption,
     loading_detailPrApprovalHierarchyDetails,
     loading_detailPr,
     loading_detailDraftPr,
-    loading_detailPrDetailAttachment,
     loading_createUpdatePr,
     list_prApprovalOptions,
     list_prApprovalHierarchyDetail,
@@ -68,8 +71,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     loading_listPrApprovalOption ||
     loading_detailPrApprovalHierarchyDetails ||
     loading_detailPr ||
-    loading_detailDraftPr ||
-    loading_detailPrDetailAttachment;
+    loading_detailDraftPr;
 
   //declare
   const location = useLocation();
@@ -77,8 +79,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idPr = location?.state?.id;
-  const isStandard = accountType === "standard";
-  const isOneTime = accountType === "oneTime";
 
   const status = detail_paymentRelation.status || "DRAFT";
   const statusApproval = detail_paymentRelation.statusApproval || "DRAFT";
@@ -112,8 +112,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     ["appHierId"],
     []
   ];
-
-  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
 
   useEffect(() => {
     if (idCustomer) dispatch(getCustomerDetail(idCustomer));
@@ -192,21 +190,15 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
       breadcrumbName: "Account"
     },
     {
-      path: 
-        isStandard ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
-        isOneTime ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
-          "",
+      path: isStandard
+        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
+        : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
       breadcrumbName: isStandard ? "Account - Standard" : "Account - One Time"
     },
     {
-      path:
-        isStandard ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
-        isOneTime ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
-          "",
+      path: isStandard
+        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+        : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
       state: {
         idAccount,
@@ -231,49 +223,57 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (current === 2) {
-          if (attachmentIsRequired && !attachmentDataSource.length) {
-            const errorBody = {
-              title: "Failed",
-              description: `Please upload at least one attachment`
+        if (submitType === "submit") {
+          if (current === 2) {
+            if (attachmentIsRequired && !attachmentDataSource.length) {
+              const errorBody = {
+                title: "Failed",
+                description: `Please upload at least one attachment`
+              };
+              dispatch(showModalError(errorBody));
+
+              throw new Error("There was no file attached");
+            }
+          } else {
+            await form.validateFields(formFields[current]);
+
+            const {
+              objectId,
+              priority,
+              description,
+              startDate,
+              endDate,
+              appHierId
+            } = form.getFieldsValue(true);
+
+            const body = {
+              stepNumber: current + 1,
+              type: formType.toUpperCase(),
+              id: isUpdate ? idPr : undefined,
+              data: {
+                accountId,
+                objectId,
+                priority,
+                description,
+                startDate: NxDate.formatForAPI(startDate),
+                endDate: NxDate.formatForAPI(endDate),
+                appHierId,
+              }
             };
-            dispatch(showModalError(errorBody));
 
-            throw new Error("There was no file attached");
+            await dispatch(
+              validateCreateUpdate({
+                body,
+                services: accountManagementService,
+                endPoint: `/v1/dbs/api/payment-relation/validate-step`,
+                type: formType
+              })
+            ).unwrap();
           }
-        } else {
-          await form.validateFields(formFields[current]);
-
-          const {
-            objectId,
-            priority,
-            description,
-            startDate,
-            endDate,
-            appHierId
-          } = form.getFieldsValue(true);
-
-          const body = {
-            id: isUpdate ? idPr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId,
-            objectId,
-            priority,
-            description,
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
-            appHierId,
-            validationType: validationTypes[current]
-          };
-
-          await dispatch(
-            validateCreateUpdate({
-              body,
-              services: accountManagementService,
-              endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
-              type: formType
-            })
-          ).unwrap();
-        }
+        } else if (submitType === "draft")
+          await form.validateFields(["accountNumber", "accountName", "priority"]);
+        else
+          return;
       } catch (err) {
         return;
       }
@@ -283,7 +283,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
 
       const body = {
         id: isUpdate ? idPr : undefined,
-        subjectId: data_accountDetail?.accountInformation?.accountId,
+        subjectId: accountId,
         objectId,
         priority,
         description,
@@ -413,22 +413,25 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         } = form.getFieldsValue(true);
 
         const body = {
+          stepNumber: current + 1,
+          type: formType.toUpperCase(),
           id: isUpdate ? idPr : undefined,
-          subjectId: data_accountDetail?.accountInformation?.accountId,
-          objectId,
-          priority,
-          description,
-          startDate: NxDate.formatForAPI(startDate),
-          endDate: NxDate.formatForAPI(endDate),
-          appHierId,
-          validationType: validationTypes[current]
+          data: {
+            accountId,
+            objectId,
+            priority,
+            description,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
+            appHierId,
+          }
         };
 
         await dispatch(
           validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+            endPoint: `/v1/dbs/api/payment-relation/validate-step`,
             type: formType
           })
         ).unwrap();
@@ -469,22 +472,25 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           } = form.getFieldsValue(true);
 
           const body = {
+            stepNumber: i + 1,
+            type: formType.toUpperCase(),
             id: isUpdate ? idPr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId,
-            objectId,
-            priority,
-            description,
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
-            appHierId,
-            validationType: validationTypes[i]
+            data: {
+              accountId,
+              objectId,
+              priority,
+              description,
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
+              appHierId,
+            }
           };
 
           await dispatch(
             validateCreateUpdate({
               body,
               services: accountManagementService,
-              endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+              endPoint: `/v1/dbs/api/payment-relation/validate-step`,
               type: formType
             })
           ).unwrap();
@@ -534,7 +540,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
 
     const body = {
       id: idPr,
-      subjectId: data_accountDetail?.accountInformation?.accountId,
+      subjectId: accountId,
       objectId,
       priority,
       description,
@@ -556,7 +562,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         : "";
 
     if (isCreate)
-      dispatch(createPaymentRelation({ body, attachments: newAttachments }))
+      dispatch(createPaymentRelation({ body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
         .unwrap()
         .then((data) => {
           setTimeout(() => {
