@@ -8,31 +8,52 @@ import {
 } from "../../general_slice";
 
 const initialState = {
+  // --- Shared ---
   loading: false,
-  loading_detailIr: false,
-  loading_detailDraftIr: false,
-  loading_createUpdateIr: false,
-  loading_detailIrDetailAttachment: false,
-  loading_detailIrApprovalHierarchyDetails: false,
-  loading_listIrApproval: false,
-  list_irDetailAttachment: [],
-  pagination_irDetailAttachment: {
+
+  // --- List ---
+  loading_listIr: false,
+  list_invoiceRelation: [],
+  pagination_invoiceRelation: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
     pageSize: 10
   },
 
-  // --- Actions (approve / reject / inactivate) ---
+  // --- Detail ---
+  loading_detailIr: false,
+  detail_invoiceRelation: {},
+  loading_detailDraftIr: false,
+  detailDraft_invoiceRelation: {},
+  loading_detailIrDetailAttachment: false,
+
+  // --- Create / Update ---
+  loading_createUpdateIr: false,
+
+  // --- Approval List ---
+  loading_listIrApproval: false,
+  list_invoiceRelationApproval: [],
+  pagination_invoiceRelationApproval: {
+    totalPage: 0,
+    totalElement: 0,
+    currentPage: 0,
+    pageSize: 10
+  },
+
+  // --- Approve / Reject ---
   loading_approveRejectIr: false,
   loading_approveIr: false,
   loading_rejectIr: false,
+
+  // --- Inactivate ---
   loading_inactivateIr: false,
 
-  // --- Supporting / Form Options ---
+  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
   loading_listIrApprovalOption: false,
   list_irApprovalHierarchy: [],
   loading_listIrApprovalHierarchyEmployee: false,
+  loading_detailIrApprovalHierarchyDetails: false,
   detail_irApprovalHierarchy: [],
   list_irAttachmentCategory: [],
   loading_listIrAccountStandard: false,
@@ -43,25 +64,20 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
-  list_invoiceRelation: [],
-  pagination_invoiceRelation: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10
-  },
-  list_invoiceRelationApproval: [],
-  pagination_invoiceRelationApproval: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10
-  },
-  detail_invoiceRelation: {},
-  detailDraft_invoiceRelation: {},
+
+  // --- History ---
   data_irApprovalHistory: {}
 };
 
+/**
+ * Creates a new invoice relation record, then uploads any attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object}   arg.body                - Request body for the create API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after creation.
+ * @param {string}   arg.action              - `"draft"` or `"submit"` — used in the upload payload.
+ */
 export const createInvoiceRelation = createAsyncThunk(
   "CREATE_INVOICE_RELATION",
   async ({ body: createBody, attachments = [], action }, thunkAPI) => {
@@ -102,7 +118,7 @@ export const createInvoiceRelation = createAsyncThunk(
         error.message ||
         error.toString();
 
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured";
 
       const errorBody = {
@@ -117,6 +133,16 @@ export const createInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Updates an existing invoice relation record, then uploads any attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {number}   arg.id                  - ID of the invoice relation to update.
+ * @param {object}   arg.body                - Request body for the update API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after update.
+ * @param {string}   arg.action              - `"draft"` or `"submit"` — used in the upload payload.
+ */
 export const updateInvoiceRelation = createAsyncThunk(
   "UPDATE_INVOICE_RELATION",
   async ({ id, body: updateBody, attachments = [], action }, thunkAPI) => {
@@ -156,7 +182,7 @@ export const updateInvoiceRelation = createAsyncThunk(
         error.message ||
         error.toString();
 
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured";
 
       const errorBody = {
@@ -166,11 +192,16 @@ export const updateInvoiceRelation = createAsyncThunk(
 
       thunkAPI.dispatch(showModalError(errorBody));
 
-      return thunkAPI.rejectWithValue(error?.response);
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
+/**
+ * Fetches the current (non-draft) detail of an invoice relation record.
+ *
+ * @param {number} id - Invoice relation ID.
+ */
 export const getDetailInvoiceRelation = createAsyncThunk(
   "GET_DETAIL_INVOICE_RELATION",
   async (id, thunkAPI) => {
@@ -184,6 +215,11 @@ export const getDetailInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the draft detail of an invoice relation record.
+ *
+ * @param {number} id - Invoice relation ID.
+ */
 export const getDetailDraftInvoiceRelation = createAsyncThunk(
   "GET_DETAIL_DRAFT_INVOICE_RELATION",
   async (id, thunkAPI) => {
@@ -197,9 +233,12 @@ export const getDetailDraftInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the list of approval hierarchy options for invoice relations.
+ */
 export const getIrApprovalHierarchy = createAsyncThunk(
   "GET_IR_APPROVAL_HIERARCHY",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
@@ -210,6 +249,11 @@ export const getIrApprovalHierarchy = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the employee list for a specific approval hierarchy.
+ *
+ * @param {number} id - Approval hierarchy ID.
+ */
 export const getDetailIrApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_IR_APPROVAL_HIERARCHY",
   async (id, thunkAPI) => {
@@ -223,9 +267,12 @@ export const getDetailIrApprovalHierarchy = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the list of attachment categories for invoice relations.
+ */
 export const getIrAttachmentCategory = createAsyncThunk(
   "GET_IR_ATTACHMENT_CATEGORY",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/attachment-category`;
       const response = await accountManagementService.getAll(url);
@@ -236,6 +283,15 @@ export const getIrAttachmentCategory = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches a paginated list of account standards eligible for invoice relation.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID used to scope the list.
+ * @param {object}  arg.body        - Pagination / search body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getIrAccountStandard = createAsyncThunk(
   "GET_IR_ACCOUNT_STANDARD",
   async ({ id, body, isLoadMore }, thunkAPI) => {
@@ -256,6 +312,14 @@ export const getIrAccountStandard = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an active invoice relation record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectInvoiceRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_INVOICE_RELATION",
   async ({ body, action }, thunkAPI) => {
@@ -280,7 +344,7 @@ export const approveOrRejectInvoiceRelation = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`
@@ -298,6 +362,14 @@ export const approveOrRejectInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an inactive invoice relation record (inactivation request).
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_INVOICE_RELATION",
   async ({ body, action }, thunkAPI) => {
@@ -322,7 +394,7 @@ export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`
@@ -340,6 +412,13 @@ export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Submits an inactivation request for an invoice relation record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body - Request body (ID, remark, hierarchy).
+ */
 export const inactivateInvoiceRelation = createAsyncThunk(
   "INACTIVATE_INVOICE_RELATION",
   async ({ body }, thunkAPI) => {
@@ -364,7 +443,7 @@ export const inactivateInvoiceRelation = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not submitted. ${message}.`
@@ -382,45 +461,16 @@ export const inactivateInvoiceRelation = createAsyncThunk(
   }
 );
 
-export const getIrColumnApi = createAsyncThunk(
-  "GET_IR_COLUMN_API",
-  async (thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/invoice-relation/list-search-column";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-export const getIrConditionApi = createAsyncThunk(
-  "GET_IR_CONDITION_API",
-  async (thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/invoice-relation/list-search-condition";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-export const getIrOperatorApi = createAsyncThunk(
-  "GET_IR_OPERATOR_API",
-  async (thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/invoice-relation/list-search-operator";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
+/**
+ * Fetches the paginated approval list for a given account's invoice relations.
+ * Always injects `listType: "approval"` into the request body.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getInvoiceRelationApproval = createAsyncThunk(
   "GET_INVOICE_RELATION_APPROVAL",
   async ({ id, body, isLoadMore }, thunkAPI) => {
@@ -445,6 +495,15 @@ export const getInvoiceRelationApproval = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated invoice relation list for a given account.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getInvoiceRelation = createAsyncThunk(
   "GET_INVOICE_RELATION",
   async ({ id, body, isLoadMore }, thunkAPI) => {
@@ -464,6 +523,13 @@ export const getInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Downloads the invoice relation list as a file for a given account.
+ *
+ * @param {object} arg
+ * @param {number} arg.id   - Account ID.
+ * @param {object} arg.body - Search / sort / filter body.
+ */
 export const downloadInvoiceRelation = createAsyncThunk(
   "DOWNLOAD_INVOICE_RELATION",
   async ({ id, body }, thunkAPI) => {
@@ -477,6 +543,16 @@ export const downloadInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Batch-approves or batch-rejects a mixed set of active and inactive invoice relations.
+ * Calls the active-approve and inactive-approve endpoints independently based on which arrays are populated.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object[]} arg.body          - Active invoice relation records to process.
+ * @param {object[]} arg.inactiveBody  - Inactive invoice relation records to process.
+ * @param {string}   arg.action        - `"approved"` or `"rejected"` — drives the loading state and modal message.
+ */
 export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_INVOICE_RELATION",
   async ({ body, inactiveBody, action }, thunkAPI) => {
@@ -499,7 +575,7 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
         return: false
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
-      
+
       return { body, inactiveBody, action };
     } catch (error) {
       const message =
@@ -518,6 +594,13 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the approval history for a given invoice relation record.
+ * The raw response is reshaped in `InvoiceRelation.js` into `{ create, inactive }` buckets
+ * before being stored in `dataApprovalHistoryFix`.
+ *
+ * @param {number} id - Invoice relation ID.
+ */
 export const getIrApprovalHistory = createAsyncThunk(
   "GET_IR_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
@@ -707,42 +790,6 @@ const invoiceRelationSlice = createSlice({
       state.loading_inactivateIr = false;
     },
 
-    /** Get Invoice Relation Column API  */
-    [getIrColumnApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getIrColumnApi.fulfilled]: (state, action) => {
-      state.data_globalTypeColumn = action.payload;
-      state.loading = false;
-    },
-    [getIrColumnApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Invoice Relation Condition API  */
-    [getIrConditionApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getIrConditionApi.fulfilled]: (state, action) => {
-      state.data_globalTypeCondition = action.payload;
-      state.loading = false;
-    },
-    [getIrConditionApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Invoice Relation Operator API  */
-    [getIrOperatorApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getIrOperatorApi.fulfilled]: (state, action) => {
-      state.data_globalTypeOperator = action.payload;
-      state.loading = false;
-    },
-    [getIrOperatorApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
     /** Get Invoice Relation Approval */
     [getInvoiceRelationApproval.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
@@ -839,17 +886,23 @@ const invoiceRelationSlice = createSlice({
     },
 
     /** Approve or Reject All Invoice Relation */
-    [approveOrRejectAllInvoiceRelation.pending]: (state) => {
-      state.loading_approveIr = true;
-      state.loading_rejectIr = true;
+    [approveOrRejectAllInvoiceRelation.pending]: (state, action) => {
+      if (action.meta.arg?.action === "approved")
+        state.loading_approveIr = true;
+      else if (action.meta.arg?.action === "rejected")
+        state.loading_rejectIr = true;
     },
-    [approveOrRejectAllInvoiceRelation.fulfilled]: (state) => {
-      state.loading_approveIr = false;
-      state.loading_rejectIr = false;
+    [approveOrRejectAllInvoiceRelation.fulfilled]: (state, action) => {
+      if (action.meta.arg?.action === "approved")
+        state.loading_approveIr = false;
+      else if (action.meta.arg?.action === "rejected")
+        state.loading_rejectIr = false;
     },
-    [approveOrRejectAllInvoiceRelation.rejected]: (state) => {
-      state.loading_approveIr = false;
-      state.loading_rejectIr = false;
+    [approveOrRejectAllInvoiceRelation.rejected]: (state, action) => {
+      if (action.meta.arg?.action === "approved")
+        state.loading_approveIr = false;
+      else if (action.meta.arg?.action === "rejected")
+        state.loading_rejectIr = false;
     },
 
     /** Get Invoice Relation Approval History */
@@ -868,4 +921,3 @@ const invoiceRelationSlice = createSlice({
 });
 const { reducer } = invoiceRelationSlice;
 export default reducer;
-
