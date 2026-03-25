@@ -137,22 +137,20 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   useEffect(() => {
     if (isUpdate && list_prApprovalOptions.length) {
       const {
-        subjectId,
-        objectId,
+        accountId,
         priority,
         startDate,
         endDate,
         description,
         appHierId,
-        relatedAccountNumber,
-        relatedAccountName
+        accountNumber,
+        accountName
       } = detail;
 
       form.setFieldsValue({
-        subjectId,
-        objectId,
-        accountName: relatedAccountName,
-        accountNumber: relatedAccountNumber,
+        accountId,
+        accountName,
+        accountNumber,
         priority,
         startDate,
         endDate,
@@ -238,7 +236,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             await form.validateFields(formFields[current]);
 
             const {
-              objectId,
+              accountId: relatedAccountId,
               priority,
               description,
               startDate,
@@ -252,8 +250,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
               id: isUpdate ? idPr : undefined,
               data: {
                 accountId,
-                objectId,
-                priority,
+                relatedAccountId,
+                priority: Number.parseInt(priority),
                 description,
                 startDate: NxDate.formatForAPI(startDate),
                 endDate: NxDate.formatForAPI(endDate),
@@ -278,14 +276,14 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         return;
       }
 
-      const { objectId, priority, description, startDate, endDate, appHierId } =
+      const { accountId: relatedAccountId, priority, description, startDate, endDate, appHierId } =
         form.getFieldsValue(true);
 
       const body = {
         id: isUpdate ? idPr : undefined,
-        subjectId: accountId,
-        objectId,
-        priority,
+        accountId,
+        relatedAccountId,
+        priority: Number.parseInt(priority),
         description,
         startDate: NxDate.formatForAPI(startDate),
         endDate: NxDate.formatForAPI(endDate),
@@ -313,8 +311,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     }
   };
 
-  const setAccount = (objectId, accountNumber, accountName) => {
-    form.setFieldValue("objectId", objectId);
+  const setAccount = ({ accountId, accountNumber, accountName }) => {
+    form.setFieldValue("accountId", accountId);
     form.setFieldValue("accountNumber", accountNumber);
     form.setFieldValue("accountName", accountName);
   };
@@ -404,7 +402,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         await form.validateFields(formFields[current]);
 
         const {
-          objectId,
+          accountId: relatedAccountId,
           priority,
           description,
           startDate,
@@ -418,8 +416,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           id: isUpdate ? idPr : undefined,
           data: {
             accountId,
-            objectId,
-            priority,
+            relatedAccountId,
+            priority: Number.parseInt(priority),
             description,
             startDate: NxDate.formatForAPI(startDate),
             endDate: NxDate.formatForAPI(endDate),
@@ -463,7 +461,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           await form.validateFields(formFields[i]);
 
           const {
-            objectId,
+            accountId: relatedAccountId,
             priority,
             description,
             startDate,
@@ -477,8 +475,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             id: isUpdate ? idPr : undefined,
             data: {
               accountId,
-              objectId,
-              priority,
+              relatedAccountId,
+              priority: Number.parseInt(priority),
               description,
               startDate: NxDate.formatForAPI(startDate),
               endDate: NxDate.formatForAPI(endDate),
@@ -522,7 +520,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
 
   const handleSubmitForm = () => {
     const {
-      objectId,
+      accountId: relatedAccountId,
       priority,
       description,
       startDate,
@@ -540,9 +538,9 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
 
     const body = {
       id: idPr,
-      subjectId: accountId,
-      objectId,
-      priority,
+      accountId,
+      relatedAccountId,
+      priority: Number.parseInt(priority),
       description,
       startDate: NxDate.formatForAPI(startDate),
       endDate: NxDate.formatForAPI(endDate),
@@ -607,22 +605,20 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     } else if (isUpdate) {
       if (list_prApprovalOptions?.length) {
         const {
-          subjectId,
-          objectId,
+          accountId,
           priority,
           startDate,
           endDate,
           description,
           appHierId,
-          relatedAccountNumber,
-          relatedAccountName
+          accountNumber,
+          accountName
         } = detail;
 
         form.setFieldsValue({
-          subjectId,
-          objectId,
-          accountName: relatedAccountName,
-          accountNumber: relatedAccountNumber,
+          accountId,
+          accountName,
+          accountNumber,
           priority,
           startDate,
           endDate,

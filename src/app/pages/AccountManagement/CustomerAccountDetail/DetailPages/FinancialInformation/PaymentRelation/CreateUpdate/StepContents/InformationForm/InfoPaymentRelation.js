@@ -46,13 +46,10 @@ export default function InfoPaymentRelation({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { list_prAccountStandard, pagination_prAccountStandard } = useSelector(
-    (state) => state.paymentRelation
-  );
-
-  const handleOk = () => {
-    console.log("ok")
-  }
+  const {
+    list_prAccountStandard: prAccountStandards,
+    pagination_prAccountStandard: pagination
+  } = useSelector((state) => state.paymentRelation);
 
   const handleCancel = () => {
     setIsOpen(false)
@@ -79,78 +76,65 @@ export default function InfoPaymentRelation({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_prAccountStandard?.totalPage || 0;
+    const totalPages = pagination?.totalPage || 0;
 
     if (nextPage <= totalPages) {
+      const body = {
+        searchs: search,
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+      };
+
       await dispatch(
         getPrAccountStandard({
           id: accountId,
-          body: {
-            searchs: JSON.stringify(search),
-            page: nextPage,
-            size: loadMoreSize,
-            sort,
-          },
+          body,
           isLoadMore: true,
         })
-      );
+      ).unwrap();
+
+      setPage(nextPage);
     }
-    setPage(nextPage);
   };
 
   useEffect(() => {
-    if (formView)
-      dispatch(getPrAccountStandard({
-        id: accountId,
-        body: {
-          page,
-          size: loadMoreSize,
-          sort,
-          searchs: JSON.stringify(search),
-        },
-        isLoadMore: false,
-      }));
-  }, [ sort, search ]);
+    if (formView) {
+      const body = {
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+      };
 
-  const baseColumns = useMemo(() =>
-    getAccountStandardColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      setAccount,
-      setIsOpen
-    ),
-  [search, searchText, searchedColumn]);
+      dispatch(
+        getPrAccountStandard({
+          id: accountId,
+          body,
+          isLoadMore: false,
+        })
+      );
+    }
+  }, [sort, search]);
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
+  const columnDefinitions = useMemo(
+    () =>
+      getAccountStandardColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        setAccount,
+        setIsOpen
+      ),
+    [search, searchInput, searchText, searchedColumn]
+  );
 
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
 
-  const currentData = useMemo(() => list_prAccountStandard, [list_prAccountStandard]);
-
-  const hasMore = currentData.length < (pagination_prAccountStandard?.totalElement || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
+  const totalElement = pagination.totalElement;
+  const hasMore = prAccountStandards.length < totalElement;
 
   if (!formView) {
     return (
@@ -227,7 +211,7 @@ export default function InfoPaymentRelation({
           ]}
           className="no-margin-form"
         >
-          <InputComponent disabled={!isDraft && isUpdate} />
+          <InputComponent disabled={!isDraft && isUpdate} typeNumber={"number"} />
         </Form.Item>
 
         <Form.Item
@@ -277,7 +261,6 @@ export default function InfoPaymentRelation({
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        handleOk={handleOk}
         title={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}
@@ -291,12 +274,12 @@ export default function InfoPaymentRelation({
           <NxBaseContainer border>
             <NxTable
               idTable="payment-relation-account-standard"
-              dataSource={dataSourceWithKeys}
-              totalData={pagination_prAccountStandard.totalElement || 0}
+              dataSource={prAccountStandards}
+              totalData={totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
               onSort={onSort}
-              columns={allColumns}
+              columns={columns}
               usePagination={false}
               useInfiniteScroll
               hasMore={hasMore}
