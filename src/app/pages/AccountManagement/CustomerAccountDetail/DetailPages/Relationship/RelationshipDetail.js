@@ -169,7 +169,12 @@ const RelationshipDetail = () => {
           handleClear();
           handleApprovalModal(false);
         })
-        .catch(() => {});
+        .catch((error) => {
+          dispatch(showModalError({
+            title: "Failed",
+            description: error.message || "An error occurred"
+          }));
+        });
       } else if (data_relationshipDetail.approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP") {
         dispatch(approveOrRejectInactiveRelationship({
           idAccount,
@@ -185,7 +190,12 @@ const RelationshipDetail = () => {
           handleClear();
           handleApprovalModal(false);
         })
-        .catch(() => {});
+        .catch((error) => {
+          dispatch(showModalError({
+            title: "Failed",
+            description: error.message || "An error occurred"
+          }));
+        });
       } else {
         const errorBody = {
           title: "Failed",

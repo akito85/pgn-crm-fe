@@ -41,16 +41,6 @@ const ModalChooseRelated = ({
   const isAccountType = normalizedRelationType && ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
   const isCustomerType = normalizedRelationType && ["BRANCH_OF", "HEAD_QUARTER_OF", "COMPANY_GROUP"].includes(normalizedRelationType);
 
-  // Debug logging
-  useEffect(() => {
-    console.log("DEBUG - ModalChooseRelated Props:", {
-      relationshipType,
-      normalizedRelationType,
-      isCustomerType,
-      isAccountType
-    });
-  }, [relationshipType, normalizedRelationType, isCustomerType, isAccountType]);
-
   useEffect(() => {
     if (isOpen && idAccount && relationshipType && relationshipCategory) {
       dispatch(getRelatedObjectData({

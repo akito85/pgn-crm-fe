@@ -149,7 +149,7 @@ const columns = (
       render: (text) => renderColumn("gasConvValue", hasValue(search['gasConvValue']), searchText, text, false, 'input', search),
     },
     {
-      title: "OPERATIOIN HOURS/DAY",
+      title: "OPERATION HOURS/DAY",
       dataIndex: "noh",
       align: "right",
       sorter: true,
@@ -164,7 +164,7 @@ const columns = (
       render: (text) => renderColumn("noh", hasValue(search['noh']), searchText, text, false, 'input', search),
     },
     {
-      title: "OPERATIOIN DAYS/WEEK",
+      title: "OPERATION DAYS/WEEK",
       dataIndex: "nod",
       align: "right",
       sorter: true,
