@@ -3,8 +3,7 @@ import accountManagementService from "../../../services/account_management/accou
 import {
   setBodyError,
   showModalError,
-  showModalSuccess,
-  validateError
+  showModalSuccess
 } from "../../general_slice";
 
 const initialState = {
@@ -26,8 +25,6 @@ const initialState = {
   detail_invoiceRelation: {},
   loading_detailDraftIr: false,
   detailDraft_invoiceRelation: {},
-  loading_detailIrDetailAttachment: false,
-
   // --- Create / Update ---
   loading_createUpdateIr: false,
 
@@ -571,7 +568,7 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${action === "APPROVE" ? "approved" : body.action === "REJECT" ? "rejected" : ""}.`,
+        description: `Your data has been ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}.`,
         return: false
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -586,7 +583,7 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Your data was not ${action === "APPROVE" ? "approved" : body.action === "REJECT" ? "rejected" : ""}. ${message}.`
+        description: `Your data was not ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}. ${message}.`
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
@@ -802,9 +799,11 @@ const invoiceRelationSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
+          const currentIds = new Set(state.list_invoiceRelationApproval.map((item) => item.id));
+          const filteredResult = result.filter((item) => !currentIds.has(item.id));
           state.list_invoiceRelationApproval = [
             ...state.list_invoiceRelationApproval,
-            ...result
+            ...filteredResult
           ];
         } else {
           state.list_invoiceRelationApproval = result;
@@ -844,9 +843,11 @@ const invoiceRelationSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
+          const currentIds = new Set(state.list_invoiceRelation.map((item) => item.id));
+          const filteredResult = result.filter((item) => !currentIds.has(item.id));
           state.list_invoiceRelation = [
             ...state.list_invoiceRelation,
-            ...result
+            ...filteredResult
           ];
         } else {
           state.list_invoiceRelation = result;
