@@ -5,11 +5,10 @@ import { useState } from "react";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
 const InvoiceRelationDetailTabs = ({
-  subjectAccountNumber,
-  idIr = 0,
-  dataDetail = {},
-  dispatch = () => {},
+  detail = {},
 }) => {
+  const attachments = detail.attachments;
+
   // Use provided options or fall back to default tabs
   const tabOptions = [
     {
@@ -17,8 +16,7 @@ const InvoiceRelationDetailTabs = ({
       label: "Invoice Relation Information",
       children: (
         <InvoiceRelationDetailInfo
-          subjectAccountNumber={subjectAccountNumber}
-          dataDetail={dataDetail}
+          detail={detail}
         />
       )
     },
@@ -27,8 +25,7 @@ const InvoiceRelationDetailTabs = ({
       label: "Attachment",
       children: (
         <InvoiceRelationDetailAttch
-          dispatch={dispatch}
-          idIr={idIr}
+          attachments={attachments}
         />
       )
     },

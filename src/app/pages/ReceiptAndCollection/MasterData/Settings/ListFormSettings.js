@@ -1,47 +1,46 @@
-import {
-  LeftOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
-  getTypeDDL,
-  createSetting,
-  createValidasiSetting,
-  getAllApprovalList,
-  getDetailSetting,
-  getListApprovalById,
-  getListCategory,
-  updateSetting,
-  getPartnerListByCa,
-  getCollectionAgentList,
-  getPaymentChannelListByCa
+  createPayChannelConfig,
+  createValidasiPayChannelConfig,
+  getAllApprovalListPayChannelConfig,
+  getDetailPayChannelConfig,
+  getDetailDraftPayChannelConfig,
+  getListApprovalByIdPayChannelConfig,
+  updatePayChannelConfig,
+  saveDraftPayChannelConfig,
+  getListMappingDDL,
+  getListCategoryPayChannelConfig,
 } from "../../../../../redux/slices/receipt_collection/setting";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
 import SettingsForm from "./SettingsForm";
-import SVGIcon from "../../../../../assets/Icon/index";
-import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import BaseContainer from "../../../../../components/BaseContainer";
-import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ContentModalConfirm from "./ContentModalConfirm";
+import CardContainer from "../../../../../components/CardContainer";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import {
-  showModalError,
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
-import { saveDraftSetting } from "../../../../../redux/slices/receipt_collection/setting";
+
+const steps = [
+  { title: "PAYMENT CHANNEL CONFIGURATION", value: "Setting" },
+  { title: "APPROVAL", value: "Approval" },
+  { title: "ATTACHMENT", value: "Attachment" },
+];
 
 const ListFormSettings = (props) => {
   const { type } = props;
@@ -50,19 +49,14 @@ const ListFormSettings = (props) => {
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
-    dataType,
-    dataPartnerList,
-    dataCollectionAgentList,
-    dataPaymentChannelList
+    dataMappingList,
   } = useSelector((state) => state.receiptSetting);
 
-  // Declaration
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
   const location = useLocation();
-  const { id } = location?.state || {};
+  const { id, status } = location?.state || {};
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -70,29 +64,36 @@ const ListFormSettings = (props) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [sendBody, setSendBody] = useState();
+  const isSubmittingRef = useRef(false);
 
+  const [tabData, setTabData] = useState([
+    {
+      value: "Setting",
+      paramValue: ["mappingId", "startDate", "endDate", "startHour", "startMinute", "endHour", "endMinute"],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
 
+  const valuePage = useMemo(() => steps[current]?.value, [current]);
 
-
-
-
+  useEffect(() => {
+    dispatch(getAllApprovalListPayChannelConfig());
+    dispatch(getListMappingDDL());
+  }, [dispatch]);
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailSetting(id));
+      if (status === "Draft") {
+        dispatch(getDetailDraftPayChannelConfig(id));
+      } else {
+        dispatch(getDetailPayChannelConfig(id));
+      }
     }
-  }, [dispatch, id, type]);
-
-
-
-
-  useEffect(() => {
-    dispatch(getAllApprovalList());
-    dispatch(getTypeDDL());
-    // dispatch(getPartnerList());
-    dispatch(getCollectionAgentList());
-    // dispatch(getPaymentChannelList());
-  }, [dispatch]);
+  }, [dispatch, id, type, status]);
 
   useEffect(() => {
     if (dataListAppHierId && dataListAppHierId.length > 0) {
@@ -106,7 +107,7 @@ const ListFormSettings = (props) => {
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getListApprovalById({ id: selectedHierarchy }));
+      dispatch(getListApprovalByIdPayChannelConfig({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
@@ -127,37 +128,31 @@ const ListFormSettings = (props) => {
   }, [dataListAppHierDetail]);
 
   useEffect(() => {
-    if (
-      formValue.approvalHierarchy &&
-      !appHierOptions
-        .map((item) => item.value)
-        .includes(formValue.approvalHierarchy)
-    ) {
-      form.setFieldsValue({ approvalHierarchy: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
-
-  useEffect(() => {
     if (id && data_detail) {
-
+      const entity = data_detail?.payChannelConfig;
+      if (!entity) {
+        return;
+      }
+      const formatCodeName = (code, name) => {
+        if (code && name) return `${code} - ${name}`;
+        return code || name || "";
+      };
       form.setFieldsValue({
-        id: data_detail?.settings.id,
-        dateStart: data_detail?.settings?.dateStart ?? "",
-        dateEnd: data_detail?.settings?.dateEnd ?? "",
-        hourStart: data_detail?.settings?.hourStart ?? "",
-        hourEnd: data_detail?.settings?.hourEnd ?? "",
-        minuteStart: data_detail?.settings?.minuteStart ?? "",
-        minuteEnd: data_detail?.settings?.minuteEnd ?? "",
-        caCode: data_detail?.settings?.caCode ?? "",
-        partnerCode: data_detail?.settings?.partnerCode ?? "",
-        ciCode: data_detail?.settings?.ciCode ?? "",
-        type: data_detail?.settings?.type,
-        apphierId: data_detail?.settings?.appHierId,
+        id: entity?.id,
+        mappingId: entity?.mappingId,
+        partnerCode: formatCodeName(entity?.partnerCode, entity?.partnerName),
+        caCode: formatCodeName(entity?.caCode, entity?.collectingAgentName),
+        dcCode: formatCodeName(entity?.deliveryChannelCode, entity?.deliveryChannelName),
+        type: entity?.type,
+        startDate: entity?.startDate ? moment(entity?.startDate).clone() : null,
+        endDate: entity?.endDate ? moment(entity?.endDate).clone() : null,
+        startHour: entity?.startHour,
+        startMinute: entity?.startMinute,
+        endHour: entity?.endHour,
+        endMinute: entity?.endMinute,
+        apphierId: entity?.apphierId,
       });
-
-      setSelectedHierarchy(data_detail?.settings?.appHierId);
-
+      setSelectedHierarchy(entity?.apphierId);
       setListDataAttachment(
         (data_detail?.attachmentDtoList || []).map((attachData) => ({
           ...attachData,
@@ -166,110 +161,92 @@ const ListFormSettings = (props) => {
         }))
       );
     }
-  }, [data_detail, id]);
+  }, [data_detail, id, form]);
 
-  const [tabData, setTabData] = useState([
-    {
-      title: "Payment Channel Configuration",
-      value: "Setting",
-      paramValue: [
-        "dateStart",
-        "dateEnd",
-        "hourStart",
-        "hourEnd",
-        "minuteStart",
-        "minuteEnd",
-        "caCode",
-        "partnerCode",
-        "ciCode",
-        "type",
-      ],
-    },
-    { title: "Approval", value: "Approval", paramValue: ["apphierId"] },
-    { title: "Attachment", value: "Attachment" },
-  ]);
-
-  const [current, setCurrent] = useState(0);
-  const [loadingSave, setLoadingSave] = useState(false);
-
-  const next = async () => {
-    try {
-      await form.validateFields(tabData[current].paramValue);
-      setCurrent(current + 1);
-    } catch (error) {
-      console.log(error);
+  const next = () => {
+    const fieldsToValidate = tabData[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) setCurrent(current + 1);
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) setCurrent(current + 1);
     }
   };
 
   const prev = () => {
-    setCurrent(current - 1);
+    if (current > 0) setCurrent(current - 1);
   };
-
-  const [sendBody, setSendBody] = useState();
-
-  useEffect(() => {
-    if (
-      formValue.apphierId &&
-      !appHierOptions.map((item) => item.value).includes(formValue.apphierId)
-    ) {
-      form.setFieldsValue({ apphierId: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
-
-
 
   const handleSubmitForm = (formValue) => {
     const dataValue = {
-      dateStart: formValue.dateStart,
-      dateEnd: formValue.dateEnd,
-      hourStart: formValue.hourStart,
-      hourEnd: formValue.hourEnd,
-      minuteStart: formValue.minuteStart,
-      minuteEnd: formValue.minuteEnd,
-      caCode: formValue.caCode,
-      partnerCode: formValue.partnerCode,
-      ciCode: formValue.ciCode,
-      type: formValue.type,
+      mappingId: formValue.mappingId,
+      startDate: moment(formValue.startDate).format(dateFormatting.date),
+      endDate: formValue.endDate
+        ? moment(formValue.endDate).format(dateFormatting.date)
+        : null,
+      startHour: formValue.startHour,
+      startMinute: formValue.startMinute,
+      endHour: formValue.endHour,
+      endMinute: formValue.endMinute,
       apphierId: formValue.apphierId,
     };
 
     setSendBody(dataValue);
-    const bodyValidasiUpdate = {
-      ...dataValue,
-      id: data_detail?.settings?.id,
-    };
+    const bodyValidasiUpdate = { ...dataValue, id: data_detail?.payChannelConfig?.id };
+
     if (type !== "update") {
-      dispatch(createValidasiSetting(dataValue))
+      dispatch(createValidasiPayChannelConfig(dataValue))
         .unwrap()
-        .then(async (data) => {
-          const sukses = data?.success;
-          if (sukses === false) {
-            setModalConfirm(false);
-          }
-          setModalConfirm(true);
+        .then((data) => {
+          if (data?.success !== false) setModalConfirm(true);
         });
     } else {
-      dispatch(createValidasiSetting(bodyValidasiUpdate))
+      dispatch(createValidasiPayChannelConfig(bodyValidasiUpdate))
         .unwrap()
-        .then(async (data) => {
-          const sukses = data?.success;
-          if (sukses === false) {
-            setModalConfirm(false);
+        .then((data) => {
+          if (data?.success !== false) {
+            setModalConfirm(true);
+            setSendBody(bodyValidasiUpdate);
           }
-          setModalConfirm(true);
-          setSendBody(bodyValidasiUpdate)
         });
     }
-
   };
 
+  const handleSaveDraft = () => {
+    const values = form.getFieldsValue();
+    const dataValue = {
+      id,
+      mappingId: values.mappingId,
+      startDate: values.startDate
+        ? moment(values.startDate).format(dateFormatting.date)
+        : null,
+      endDate: values.endDate
+        ? moment(values.endDate).format(dateFormatting.date)
+        : null,
+      startHour: values.startHour,
+      startMinute: values.startMinute,
+      endHour: values.endHour,
+      endMinute: values.endMinute,
+      apphierId: values.apphierId,
+    };
+
+    dispatch(saveDraftPayChannelConfig(dataValue))
+      .unwrap()
+      .then(() => {
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS);
+      });
+  };
 
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
 
-  // Validation Button Back
   const handleBack = () => {
     if (
       form.getFieldValue() === null ||
@@ -281,253 +258,161 @@ const ListFormSettings = (props) => {
     }
   };
 
-  const handleSaveDraft = () => {
-    const formValue = form.getFieldsValue();
-    const dataValue = {
-      dateStart: formValue.dateStart,
-      dateEnd: formValue.dateEnd,
-      hourStart: formValue.hourStart,
-      hourEnd: formValue.hourEnd,
-      minuteStart: formValue.minuteStart,
-      minuteEnd: formValue.minuteEnd,
-      caCode: formValue.caCode,
-      partnerCode: formValue.partnerCode,
-      ciCode: formValue.ciCode,
-      type: formValue.type,
-      apphierId: formValue.apphierId,
-      id: data_detail?.settings?.id,
-    };
-    dispatch(saveDraftSetting(dataValue))
-      .unwrap()
-      .then(() => {
-        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS);
-      });
-  };
-
   const handleClear = () => {
     if (type === "create") {
       form.resetFields();
       setSelectedHierarchy("");
       setListDataAttachment([]);
-      setCurrent(0);
     } else {
-      dispatch(getDetailSetting(id));
-      setCurrent(0);
+      dispatch(getDetailPayChannelConfig(id));
     }
   };
 
-  //handle Error
-  const handleError = ({ values, errorFields, outOfDate }) => {
+  const handleError = ({ errorFields }) => {
     setTabData((prevState) => {
-      const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length < 0) {
-          return {
-            value: item.value,
-            paramValue: item.paramValue,
-          };
-        }
+      return prevState.map((item) => {
+        if (!item.paramValue || item.paramValue.length < 0) return item;
         const errorBadge = errorFields.reduce(
           (current, next) =>
             item.paramValue.includes(next.name[0]) ? current + 1 : current,
           0
         );
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
+        return { ...item, errorBadge };
       });
-      return res;
     });
   };
 
-  // Breadcrumbs
+  const handleSave = async () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    setLoadingSave(true);
+    const successMessage = {
+      title: "Successfull",
+      description: "Your data has been submitted",
+      return: true,
+    };
+
+    try {
+      if (type === "update") {
+        await dispatch(updatePayChannelConfig(sendBody)).unwrap();
+        setLoadingForm(true);
+        const filterDataAttach = listDataAttachment.filter(
+          (item) => item.dataType !== "exist"
+        );
+        const uploadedFiles = [];
+        for (const element of filterDataAttach) {
+          const body = {
+            referensiId: data_detail?.payChannelConfig?.id,
+            files: element.file,
+            category: "RECEIPT_SETTING",
+            fileCategoryId: element.fileCategoryId,
+          };
+          await receiptCollectionHttpService.uploadImage(
+            `/v1/dbs/api/attachment/upload/v1`,
+            body
+          );
+          uploadedFiles.push(element);
+        }
+        setLoadingForm(false);
+        handleCancelModalConfirm();
+        form.resetFields();
+        setSelectedHierarchy("");
+        setListDataAttachment([]);
+        dispatch(showModalSuccess(successMessage));
+        handleClear();
+      } else {
+        const data = await dispatch(createPayChannelConfig(sendBody)).unwrap();
+        setLoadingForm(true);
+        const uploadedFiles = [];
+        for (const element of listDataAttachment) {
+          const body = {
+            files: element.file,
+            fileCategoryId: element.fileCategoryId,
+            referensiId: data?.data?.id || data.id,
+            category: "RECEIPT_SETTING",
+          };
+          await receiptCollectionHttpService.uploadImage(
+            `/v1/dbs/api/attachment/upload/v1`,
+            body
+          );
+          uploadedFiles.push(element);
+        }
+        setLoadingForm(false);
+        handleCancelModalConfirm();
+        handleClear();
+        dispatch(showModalSuccess(successMessage));
+      }
+    } catch (error) {
+      console.error("Upload failed, uploaded files:", error);
+      setLoadingForm(false);
+      setModalConfirm(false);
+    } finally {
+      isSubmittingRef.current = false;
+      setLoadingSave(false);
+    }
+  };
+
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
       breadcrumbName: "Payment Channel Configuration",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_SETTINGS,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      path: type === "create"
+        ? RECEIPT_AND_COLLECTION_ROUTES.CREATE_SETTINGS
+        : RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS,
+      breadcrumbName: type === "create" ? "Create" : "Update",
     },
   ];
-
-
-  //kriim bodyy
-  const handleSave = async () => {
-    setLoadingSave(true);
-    const successMessageCreate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
-    };
-
-    const successMessageUpdate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
-    };
-
-    if (type === "update") {
-      dispatch(updateSetting(sendBody))
-        .unwrap()
-        .then(async () => {
-          const id = data_detail?.settings?.id;
-          setLoadingForm(true);
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
-          for (let icon = 0; icon < filterDataAttach.length; icon++) {
-            const element = filterDataAttach[icon];
-            const body = {
-              referensiId: data_detail?.settings?.id,
-              files: element.file,
-              category: "RECEIPT_SETTING",
-              fileCategoryId: element.fileCategoryId,
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          form.resetFields();
-          setSelectedHierarchy("");
-          setListDataAttachment([]);
-          dispatch(showModalSuccess(successMessageUpdate));
-          handleClear();
-          setLoadingSave(false);
-        })
-        .catch((error) => {
-          setLoadingSave(false);
-          setModalConfirm(false);
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
-    } else {
-      dispatch(createSetting(sendBody))
-        .unwrap()
-        .then(async (data) => {
-          let id = data.id;
-          setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
-            const element = listDataAttachment[icon];
-
-            const body = {
-              files: element.file,
-              fileCategoryId: element.fileCategoryId,
-              referensiId: id,
-              category: "RECEIPT_SETTING",
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          handleClear();
-          dispatch(showModalSuccess(successMessageCreate));
-          setLoadingSave(false);
-        })
-        .catch((error) => {
-          setLoadingSave(false);
-          setModalConfirm(false);
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
-    }
-  };
 
   return (
     <LayoutMenu>
       <BreadCrumb routes={routes} />
-      <Spin spinning={loadingForm}>
-        <FormStepper
-          current={current}
-          steps={tabData}
-          onPrev={prev}
-          onNext={next}
-        />
+      <Spin spinning={loading || loadingForm}>
+        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         <Form
           layout="vertical"
           form={form}
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
         >
-          <div
-            style={{
-              display: current !== 0 ? "none" : undefined,
-            }}
-          >
+          <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
             <SettingsForm
-              dataType={dataType}
               form={form}
-              dataPartnerList={dataPartnerList}
-              dataCollectionAgentList={dataCollectionAgentList}
-              dataPaymentChannelList={dataPaymentChannelList}
+              dataMappingList={dataMappingList}
             />
           </div>
-          <div
-            style={{
-              display: current !== 1 ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+          <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
+            <CardContainer header="APPROVAL INFORMATION">
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
-          <div
-            style={{
-              display: current !== 2 ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+          <div style={{ display: valuePage !== tabData[2].value ? "none" : undefined }}>
+            <CardContainer header="ATTACHMENT INFORMATION">
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 typeSelector="receiptSetting"
                 dispatch={dispatch}
-                getAPICategory={getListCategory}
+                getAPICategory={getListCategoryPayChannelConfig}
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
-                typeRBI={"data"}
+                typeRBI="data"
+                mandatory
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
           <FormFooter
             current={current}
-            totalSteps={tabData.length}
+            totalSteps={steps.length}
             onPrev={prev}
             onNext={next}
             onCancel={handleBack}
@@ -538,25 +423,24 @@ const ListFormSettings = (props) => {
           />
         </Form>
       </Spin>
+
       <ModalCustom
         isOpen={modalConfirm}
         handleCancel={handleCancelModalConfirm}
-        header={"Confirmation"}
+        header="Confirmation"
         width={1000}
-        type={"confirmation"}
+        type="confirmation"
         footer={
-          <div className="w-full flex justify-end gap-3 p-4">
-            <ButtonComponent
-              onClick={handleCancelModalConfirm}
-              className="!border-[#0075BF] !text-[#0075BF]"
-            >
+          <div className="w-full flex justify-between gap-5 p-4">
+            <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>
             <ButtonComponent
-              type="submit"
-              onClick={handleSave}
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
               isPrimary
-              loading={loadingSave}
+              onClick={handleSave}
+              loading={loadingSave || loadingForm}
+              disabled={loadingSave || loadingForm}
             >
               Confirm
             </ButtonComponent>
@@ -570,10 +454,10 @@ const ListFormSettings = (props) => {
           listDataAppHierDetail={appHierDataDetail}
           dataOption={appHierOptions}
           selectedHierarchy={selectedHierarchy}
+          dataMappingList={dataMappingList}
         />
       </ModalCustom>
 
-      {/* Modal Back*/}
       <ModalConfirm
         isOpen={modalBack}
         handleCancel={() => setModalBack(false)}
@@ -582,9 +466,7 @@ const ListFormSettings = (props) => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px] font-bold">
-            Are you sure you want to back?
-          </p>
+          <p className="text-[18px] font-bold">Are you sure you want to go back?</p>
         </div>
       </ModalConfirm>
     </LayoutMenu>

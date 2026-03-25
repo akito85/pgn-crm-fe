@@ -34,8 +34,6 @@ const PaymentRelationTable = ({
   const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
     handleView: (id) => navigate(
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION :

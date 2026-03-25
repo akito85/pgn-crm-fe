@@ -1,11 +1,8 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Spin, Form } from "antd";
+import { Spin } from "antd";
 import moment from "moment";
-import BaseContainer from "../../../../../../../../../components/BaseContainer";
-import DetailText from "../../../../../../../../../components/DetailText";
-import { LeftOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../../../../components/BreadCrumbAdvanced";
@@ -15,7 +12,6 @@ import {
   dateFormatting,
 } from "../../../../../../../../../utils";
 import ModalApproveOrReject from "../../../../../../../../../components/Modal/ModalApproveOrReject";
-import AttachmentSectionForm from "../../../../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import { useDispatch, useSelector } from "react-redux";
 import TableDetailTos from "../../../../TosSubmission/CreateTosSubmission/TableDetailTos";
 import { ModalError } from "../../../../../../../../../components/Modal/ModalPopUp";
@@ -27,8 +23,12 @@ import {
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/tosSubmissionSlice";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 import { bytesConverter } from "../../../../../../../../../utils/bytesConverter";
-import accountManagementService from "../../../../../../../../../redux/services/account_management/accountManagementService";
-import { configApp } from "../../../../../../../../../constants/configApp";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
+import ServiceAgreementAttachmentInformation from "../../../shared/AttachmentInformation";
+import ServiceAgreementHistoryLogInformation from "../../../shared/HistoryLogInformation";
 
 const routes = (item) => {
   return [
@@ -71,11 +71,11 @@ const ApproveOrRejectTOS = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { idAccount, idCustomer, type, id, idSA } = location?.state || {};
+  const { idAccount, idCustomer, type, id } = location?.state || {};
   const [tosSubmissionObj, setTosSubmissionObj] = useState({});
   const [dataDetailTosSubmission, setDatatDetailTosSubmission] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [form] = Form.useForm();
+  const [activeDetailTab, setActiveDetailTab] = useState("tosSubmissionInfo");
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
     tappId: null,
@@ -85,7 +85,6 @@ const ApproveOrRejectTOS = () => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [approveOrReject, setApproveOrReject] = useState("");
-  const [remark, setRemark] = useState("");
   const [modalConfirm, setModalConfirm] = useState(false);
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
@@ -193,26 +192,10 @@ const ApproveOrRejectTOS = () => {
       action: approveOrReject === "Approve" ? "APPROVE" : "REJECT",
     };
     if (bodyApproval.approvalType === "INACTIVE_TOS_SUBMISSION") {
-      dispatch(approvalInactiveTosSubmission(obj))
+      return dispatch(approvalInactiveTosSubmission(obj))
         .unwrap()
-        .then((res) => {
-          handleClear()
-          handleCloseModalApproveReject();
-        })
-        .catch((error) => {
-          if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-            const message =
-              error?.response?.data?.message ||
-              error?.message ||
-              error?.toString();
-            setBodyError({ message, formValue });
-            setModalError(true);
-          }
-        });
-    } else {
-      dispatch(approvalCreateTosSubmission(obj))
-        .unwrap()
-        .then((res) => {
+        .then(() => {
+          handleClear();
           handleCloseModalApproveReject();
         })
         .catch((error) => {
@@ -226,6 +209,23 @@ const ApproveOrRejectTOS = () => {
           }
         });
     }
+
+    return dispatch(approvalCreateTosSubmission(obj))
+        .unwrap()
+        .then(() => {
+          handleClear();
+          handleCloseModalApproveReject();
+        })
+        .catch((error) => {
+          if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
+            const message =
+              error?.response?.data?.message ||
+              error?.message ||
+              error?.toString();
+            setBodyError({ message, formValue });
+            setModalError(true);
+          }
+        });
   };
 
   const handleCloseModalError = () => {
@@ -237,13 +237,66 @@ const ApproveOrRejectTOS = () => {
     setModalError(false);
     setBodyError({});
   };
-console.log('lll');
+
+  const approvalAction = approveOrReject?.toLowerCase();
+
+  const tabItems = [
+    {
+      key: "tosSubmissionInfo",
+      label: "TOS Submission Information",
+      children: (
+        <div className="flex flex-col gap-4">
+          <NxBaseContainer border header="TERM OF SERVICE SUBMISSION INFORMATION">
+            <div className="w-full grid grid-cols-3 gap-4">
+              <NxDetailText label="Term of Service Name">
+                {tosSubmissionObj?.tosName || "-"}
+              </NxDetailText>
+              <NxDetailText label="Start Date">
+                {tosSubmissionObj?.startDate
+                  ? moment(tosSubmissionObj?.startDate).format(dateFormatting.date)
+                  : "-"}
+              </NxDetailText>
+              <NxDetailText label="End Date">
+                {tosSubmissionObj?.endDate
+                  ? moment(tosSubmissionObj?.endDate).format(dateFormatting.date)
+                  : "-"}
+              </NxDetailText>
+              <NxDetailText label="Applied Date">{tosSubmissionObj?.appliedDate || "-"}</NxDetailText>
+              <NxDetailText label="Status">{tosSubmissionObj?.status || "-"}</NxDetailText>
+            </div>
+            <div className="w-full grid grid-cols-1 gap-4">
+              <NxDetailText label="Description">{tosSubmissionObj?.remark || "-"}</NxDetailText>
+            </div>
+          </NxBaseContainer>
+
+          <NxBaseContainer border header="TERM OF SERVICE DETAIL">
+            <TableDetailTos
+              type="preview"
+              dataTable={dataDetailTosSubmission}
+              updateTable={setDatatDetailTosSubmission}
+              editDetail={false}
+            />
+          </NxBaseContainer>
+        </div>
+      ),
+    },
+    {
+      key: "attachment",
+      label: "Attachment",
+      children: (
+        <ServiceAgreementAttachmentInformation
+          dataSource={listDataAttachment}
+          tableId="approve-reject-tos-attachment-table"
+        />
+      ),
+    },
+  ];
 
   return (
     <LayoutMenu>
       <Spin spinning={loading}>
-      <BreadCrumbAdvanced routes={routes(location?.state)} />
-        <div className="w-full">
+        <div className="flex flex-col gap-4">
+          <BreadCrumbAdvanced routes={routes(location?.state)} />
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
@@ -251,203 +304,92 @@ console.log('lll');
             idCustomer={idCustomer}
             type={type}
           />
-        </div>
 
-        {bodyApproval.isApprover &&
-        bodyApproval.approvalType &&
-        bodyApproval.approvalType === "INACTIVE_TOS_SUBMISSION" ? (
-          <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
-            <PricingInactiveRequest
-              data={
-                bodyApproval.approvalDetail !== null
-                  ? bodyApproval.approvalDetail
-                  : {}
-              }
-            />
-          </BaseContainer>
-        ) : null}
-        <div className="drop-shadow-lg bg-white rounded-lg w-full mt-[30px] p-[20px]">
-          <div className="flex flex-col w-full gap-4">
-            <div className="py-4">
-              <div className="text-primary text-xs font-bold uppercase">
-                TERM OF SERVICE SUBMISSION
-              </div>
-            </div>
-            <div className="w-full grid grid-cols-4 gap-4">
-              <DetailText label="Start Date">
-                {moment(tosSubmissionObj?.startDate).format(dateFormatting.date)}
-              </DetailText>
-              <DetailText label="End Date">
-                {moment(tosSubmissionObj?.endDate).format(dateFormatting.date)}
-              </DetailText>
-              <DetailText label="Applied Date">
-                {tosSubmissionObj?.appliedDate && moment(tosSubmissionObj?.appliedDate).format(dateFormatting.date)}
-              </DetailText>
-              <DetailText label="Status">{tosSubmissionObj?.status}</DetailText>
-              <DetailText label="Status Approval">{tosSubmissionObj?.approvalStatus}</DetailText>
-              <div className="col-span-4">
-                <DetailText label="Remark">{tosSubmissionObj?.remark}</DetailText>
-              </div>
-            </div>
-            <div className="py-4">
-              <div className="text-primary text-xs font-bold uppercase">
-                TERM OF SERVICE INFORMATION
-              </div>
-            </div>
-            <div className="w-full grid grid-cols-4 gap-4">
-              <DetailText label="Term of Service Name">
-                {tosSubmissionObj?.tosName}
-              </DetailText>
-            </div>
-            <div className="py-4">
-              <div className="text-primary text-xs font-bold uppercase">
-                TERM OF SERVICE DETAIL
-              </div>
-            </div>
-            <div className="w-full">
-              <TableDetailTos
-                type={"preview"}
-                dataTable={dataDetailTosSubmission}
-                updateTable={setDatatDetailTosSubmission}
+          {bodyApproval.isApprover &&
+          bodyApproval.approvalType &&
+          bodyApproval.approvalType === "INACTIVE_TOS_SUBMISSION" ? (
+            <NxCardContainer header="INACTIVE REQUEST INFORMATION">
+              <PricingInactiveRequest
+                data={
+                  bodyApproval.approvalDetail !== null
+                    ? bodyApproval.approvalDetail
+                    : {}
+                }
               />
-            </div>
-          </div>
-        </div>
-
-        <BaseContainer header={"ATTACHMENT"}>
-          <AttachmentSectionForm
-            type={"detail"}
-            data={listDataAttachment}
-            updateData={setListDataAttachment}
-            service={accountManagementService}
-            configApplication={configApp.ACCOUNT_SERVICE}
-          />
-        </BaseContainer>
-
-        <BaseContainer header={"History Log Information"}>
-          <div className="w-full grid grid-cols-4 gap-5">
-            <DetailText label="Created Date">
-              {tosSubmissionObj?.createdDate}
-            </DetailText>
-            <DetailText label="Created By">
-              {tosSubmissionObj?.createdBy}
-            </DetailText>
-            <DetailText label="Updated Date">
-              {tosSubmissionObj?.updatedDate}
-            </DetailText>
-            <DetailText label="Updated By">
-              {tosSubmissionObj?.updatedBy}
-            </DetailText>
-          </div>
-        </BaseContainer>
-
-        <div
-          className={`flex w-full${
-            showButtonApproval ? " justify-between" : ""
-          } align-middle my-3`}
-        >
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Back
-          </ButtonComponent>
-          {showButtonApproval ? (
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                type="reject"
-                onClick={() => handleModalConfirmation("Reject")}
-              >
-                Reject
-              </ButtonComponent>
-              <ButtonComponent
-                type="approve"
-                onClick={() => handleModalConfirmation("Approve")}
-              >
-                Approve
-              </ButtonComponent>
-            </div>
+            </NxCardContainer>
           ) : null}
+
+          <NxCardContainer header="DETAIL INFORMATION" withoutPadding>
+            <NxTabs
+              activeKey={activeDetailTab}
+              onChange={(tabKey) => setActiveDetailTab(tabKey)}
+              items={tabItems}
+            />
+          </NxCardContainer>
+
+          <ServiceAgreementHistoryLogInformation historyData={tosSubmissionObj} />
+
+          <NxBaseContainer border>
+            <div
+              className={`w-full flex items-center ${
+                showButtonApproval ? "justify-between" : "justify-start"
+              }`}
+            >
+              <ButtonComponent
+                type="menu"
+                className="!w-fit"
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </ButtonComponent>
+              {showButtonApproval ? (
+                <div className="flex items-center gap-5">
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleModalConfirmation("Reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleModalConfirmation("Approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
+              ) : null}
+            </div>
+          </NxBaseContainer>
         </div>
 
-        {/* Modal Approve/Reject*/}
-        {/* <ModalApproveOrReject
-          isOpen={modalConfirm}
-          header={`${approveOrReject} information`}
-          message={`Are you sure you want to ${approveOrReject} Term of Submission?`}
-          width={1000}
-          handleCancel={handleCloseModalApproveReject}
-          footer={
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                type={"default"}
-                onClick={handleCloseModalApproveReject}
-              >
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                form={"formApproveRejcet"}
-                type={"submit"}
-                htmlType={"submit"}
-                border={false}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <Form name="formApproveRejcet" form={form} onFinish={handleConfirm}>
-            <Form.Item
-              name={"remark"}
-              rules={[{ message: requiredMessage("Remark"), required: true }]}
-            >
-              <InputComponent
-                rows={1}
-                placeholder="Type your remark"
-                type="textarea"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-              />
-            </Form.Item>
-          </Form>
-        </ModalApproveOrReject> */}
+        {/** Modal Approve or Reject */}
 
-        <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCloseModalApproveReject}
-          onFinish={handleConfirm}
-          header={approveOrReject}
-          approveOrReject={approveOrReject}
-          menu={"Tos Submission"}
-          named={`${dataDetail?.saTosName}`}
-        />
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+          <ModalApproveOrReject
+            isOpen={modalConfirm}
+            handleCloseModal={handleCloseModalApproveReject}
+            onFinish={handleConfirm}
+            header={approveOrReject}
+            approveOrReject={approveOrReject}
+            customMessage={`Are you sure you want to ${approvalAction} TOS Submission - ${dataDetail?.saTosName || "-"}?`}
+          />
+          {/** Modal Retry */}
+          <ModalError
+            isOpen={modalError}
+            handleOk={handleRetry}
+            handleCancel={handleCloseModalError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{`Your data was not ${
+                approveOrReject === "Approve" ? "approved" : "rejected"
+              } ${bodyError.message}.`}</p>
+              <p className="pl-[70px]">Please try again.</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "approved" : "rejected"
-            } ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
-          </div>
-        </ModalError>
+          </ModalError>
       </Spin>
     </LayoutMenu>
   );

@@ -11,7 +11,7 @@ const DetailEquipment = ({ isOpen, setIsOpen, dataDetail }) => {
     <>
       <NxModal
         isOpen={isOpen}
-        header={"DETAIL EQUIPMENT"}
+        title={"DETAIL EQUIPMENT"}
         handleCancel={() => {
           setIsOpen(false);
         }}

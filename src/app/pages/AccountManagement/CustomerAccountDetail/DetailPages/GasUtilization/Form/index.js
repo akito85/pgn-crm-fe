@@ -234,7 +234,7 @@ const GasUtilizationForm = ({type}) => {
 
           {/* Modal Confirmation */}
           <NxModal
-            header={`CONFIRMATION`}
+            title={`CONFIRMATION`}
             isOpen={openConfirmation}
             type={"confirmation"}
             handleCancel={() => {

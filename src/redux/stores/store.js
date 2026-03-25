@@ -125,6 +125,7 @@ import transferToCustomerReducer from "../slices/receipt_collection/transferToCu
 import restructureReducer from "../slices/receipt_collection/restructure";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
+import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice"
 import deductionReducer from "../slices/receipt_collection/deduction";
 import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
@@ -210,7 +211,9 @@ const reducer = combineReducers({
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
   relationship: relationshipReducer,
-
+  multiDestination: multiDestinationReducer,
+  gasDeposit: gasDepositReducer,
+  
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
 
@@ -223,7 +226,7 @@ const reducer = combineReducers({
   accounting_rules: accountingRulesReducer,
   tax_implication: taxImplicationReducer,
   assets: assetsReducer,
-
+  
   // Global reducer
   globalProp: globalPropReducer,
 
@@ -317,7 +320,6 @@ const reducer = combineReducers({
 
   // notifications
   notifications: notificationsReducer,
-  multiDestination: multiDestinationReducer,
 });
 
 // add throttle middlewares
