@@ -60,7 +60,7 @@ const getPaymentRelationColumns = (
     width: 150,
     align: "center",
     sorter: true,
-    filteredValue: [search?.relatedAccountNumber] || null,
+    filteredValue: [search?.priority] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "priority",
@@ -77,7 +77,7 @@ const getPaymentRelationColumns = (
     dataIndex: "startDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.relatedAccountNumber] || null,
+    filteredValue: [search?.startDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -95,7 +95,7 @@ const getPaymentRelationColumns = (
     dataIndex: "endDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.relatedAccountNumber] || null,
+    filteredValue: [search?.endDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
