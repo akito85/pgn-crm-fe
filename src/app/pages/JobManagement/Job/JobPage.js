@@ -14,7 +14,7 @@ import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
 

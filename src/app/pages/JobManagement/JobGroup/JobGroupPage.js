@@ -370,6 +370,7 @@ const JobGroupPage = () => {
         header="JOB GROUP LIST"
         actionElement={
           <div className="flex gap-2">
+            {/*
             <ButtonComponent
               type="primary"
               icon={<DownloadOutlined />}
@@ -379,6 +380,8 @@ const JobGroupPage = () => {
             >
               <span className="text-xs font-medium tracking-tight">Download List</span>
             </ButtonComponent>
+            */}
+
             <ButtonComponent
               type="primary"
               icon={<PlusOutlined />}
@@ -401,11 +404,12 @@ const JobGroupPage = () => {
           onExpand={handleExpandRow}
           actionColumn={actionColumn}
           loadingKeys={loadingKeys}
-          showRefresh
-          onRefresh={handleRefresh}
+          // showRefresh
+          // onRefresh={handleRefresh}
           useInfiniteScroll
           onLoadMore={handleLoadMore}
           hasMore={hasMore}
+          showExport={true}
         />
       </NxCardContainer>
 

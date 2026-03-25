@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { DownloadOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined } from "@ant-design/icons";
 import { Dropdown, Form, Radio, Input, InputNumber, Select, Tag, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -8,6 +8,7 @@ import NxTable from "../../../../components/Nx/NxTable";
 import NxModal from "../../../../components/Nx/NxModal";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
+import { useSearchJobsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 import {
   getAllJobExecutionPaginate,
   startExecution,
@@ -19,7 +20,6 @@ import {
 } from "../../../../redux/slices/job_management/jobExecutionSlice";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
-import IconStart from "../../../../assets/Icon/Nx/IconStart";
 import IconStop from "../../../../assets/Icon/Nx/IconStop";
 import IconRestart from "../../../../assets/Icon/Nx/IconRestart";
 import IconOnHold from "../../../../assets/Icon/Nx/IconOnHold";
@@ -53,7 +53,7 @@ const STATUS_COLORS = {
   SUSPENDED:  "gold",
 };
 
-// ─── Start Job Modal ──────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const TRIGGER_TYPES = ["IMMEDIATE", "ONCE", "PERIODICALLY", "SPECIFIC_DAYS"];
 
@@ -62,97 +62,240 @@ const TIMEZONES = [
   "America/New_York", "Europe/London", "Asia/Tokyo",
 ];
 
-const ModalStartJob = ({ open, jobId, onClose, onSubmit, loading }) => {
-  const [form] = Form.useForm();
+// ─── Select Job Modal ─────────────────────────────────────────────────────────
+
+const MODAL_PAGE_SIZE = 20;
+
+const JOB_SELECT_COLUMNS = [
+  { title: "NO", width: 60, align: "center", render: (_, __, index) => index + 1 },
+  { title: "NAME", dataIndex: "name", key: "name", align: "left" },
+  { title: "CODE", dataIndex: "code", key: "code", align: "left", width: 140 },
+  { title: "TYPE", dataIndex: "type", key: "type", align: "left", width: 120 },
+  { title: "DESC", dataIndex: "desc", key: "desc", align: "left", ellipsis: true },
+];
+
+const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
+  const [step, setStep] = useState("select");
+  const [selectedJob, setSelectedJob] = useState(null);
   const [triggerType, setTriggerType] = useState("IMMEDIATE");
+  const [modalPage, setModalPage] = useState(0);
+  const [allJobs, setAllJobs] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const isResetRef = React.useRef(false);
+  const [form] = Form.useForm();
 
-  const handleOk = () => {
-    form.validateFields().then((values) => {
-      onSubmit({ jobId, ...values, triggerType });
-    });
-  };
-
+  // Reset state when modal closes
   useEffect(() => {
     if (!open) {
-      form.resetFields();
+      setStep("select");
+      setSelectedJob(null);
       setTriggerType("IMMEDIATE");
+      setModalPage(0);
+      setAllJobs([]);
+      setHasMore(true);
+      isResetRef.current = false;
+      form.resetFields();
     }
   }, [open, form]);
 
-  const handleCancel = () => {
+  // Fetch jobs for modal
+  const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery({
+    page: modalPage,
+    size: MODAL_PAGE_SIZE,
+  }, { skip: !open });
+
+  // Accumulate pages; replace when modal opens
+  useEffect(() => {
+    if (!allJobsData) return;
+    if (isResetRef.current) {
+      isResetRef.current = false;
+      setAllJobs(allJobsData.result);
+    } else {
+      setAllJobs(prev => [...prev, ...allJobsData.result]);
+    }
+    setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
+  }, [allJobsData]);
+
+  // Returns a Promise for NxTable's IntersectionObserver
+  const loadMoreData = useCallback(() => {
+    return new Promise((resolve) => {
+      if (!hasMore || allJobsLoading) { resolve(); return; }
+      setModalPage(prev => prev + 1);
+      setTimeout(resolve, 0);
+    });
+  }, [hasMore, allJobsLoading]);
+
+  // Function to open the modal (called from parent)
+  const handleOpenModal = useCallback(() => {
+    isResetRef.current = true;
+    setModalPage(0);
+    setHasMore(true);
+  }, []);
+
+  // Function to add selected job to the form
+  const handleAddJobToTable = useCallback((job) => {
+    setSelectedJob({ id: job.id, name: job.name, code: job.code });
+    setStep("schedule");
+  }, []);
+
+  // Function to close the modal
+  const handleCloseModal = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const actionColumn = {
+    title: "",
+    key: "select-action",
+    width: 60,
+    align: "center",
+    render: (_, record) => (
+      <button
+        type="button"
+        style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", color: "#1976D2" }}
+        onClick={() => {
+          setSelectedJob({ id: record.id, name: record.name, code: record.code });
+          setStep("schedule");
+        }}
+      >
+        <PlusCircleOutlined style={{ fontSize: 20 }} />
+      </button>
+    ),
+  };
+
+  const jobColumns = [...JOB_SELECT_COLUMNS, actionColumn];
+  const jobColumnDefs = JOB_SELECT_COLUMNS.map((c) => ({ key: c.key, title: c.title }));
+
+  const handleBack = () => {
+    setStep("select");
+    setSelectedJob(null);
     form.resetFields();
     setTriggerType("IMMEDIATE");
-    onClose();
   };
+
+  const handleStart = () => {
+    form.validateFields().then((values) => {
+      onSubmit({ jobId: selectedJob.id, triggerType, ...values });
+    });
+  };
+
+  const renderStep2 = () => (
+    <div style={{ padding: "16px 24px" }}>
+      <div style={{
+        background: "#f5f5f5", border: "1px solid #e0e0e0",
+        borderRadius: 8, padding: "12px 16px", marginBottom: 20,
+        display: "grid", gridTemplateColumns: "80px 1fr", gap: "4px 0", fontSize: 13,
+      }}>
+        <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Name</span>
+        <span style={{ fontWeight: 600, color: "#222" }}>{selectedJob?.name ?? "—"}</span>
+        <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Code</span>
+        <span style={{ fontWeight: 500, color: "#555" }}>{selectedJob?.code ?? "—"}</span>
+      </div>
+
+      <Form form={form} layout="vertical">
+        <Form.Item label="Trigger Type" required>
+          <Radio.Group
+            value={triggerType}
+            disabled={loading}
+            onChange={(e) => {
+              setTriggerType(e.target.value);
+              form.resetFields(["scheduledAt", "intervalSeconds", "cronExpression", "timezone"]);
+            }}
+          >
+            {TRIGGER_TYPES.map((t) => (
+              <Radio key={t} value={t} style={{ marginBottom: 4 }}>{t}</Radio>
+            ))}
+          </Radio.Group>
+        </Form.Item>
+
+        {triggerType === "ONCE" && (
+          <>
+            <Form.Item name="scheduledAt" label="Scheduled At" rules={[{ required: true, message: "Required" }]}>
+              <Input placeholder="2026-03-24T10:00:00" disabled={loading} />
+            </Form.Item>
+            <Form.Item name="timezone" label="Timezone" initialValue="UTC">
+              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} />
+            </Form.Item>
+          </>
+        )}
+
+        {triggerType === "PERIODICALLY" && (
+          <>
+            <Form.Item name="intervalSeconds" label="Interval (seconds)" rules={[{ required: true, message: "Required" }]}>
+              <InputNumber min={1} placeholder="3600" style={{ width: "100%" }} disabled={loading} />
+            </Form.Item>
+            <Form.Item name="timezone" label="Timezone" initialValue="UTC">
+              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} />
+            </Form.Item>
+          </>
+        )}
+
+        {triggerType === "SPECIFIC_DAYS" && (
+          <>
+            <Form.Item name="cronExpression" label="Cron Expression" rules={[{ required: true, message: "Required" }]}>
+              <Input placeholder="0 0 * * MON-FRI" disabled={loading} />
+            </Form.Item>
+            <Form.Item name="timezone" label="Timezone" initialValue="UTC">
+              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} />
+            </Form.Item>
+          </>
+        )}
+
+        <Form.Item name="inputPayload" label="Input Payload (optional JSON)">
+          <Input.TextArea rows={3} placeholder='{"key": "value"}' disabled={loading} />
+        </Form.Item>
+      </Form>
+    </div>
+  );
+
+  const modalTitle = step === "select" ? "Select Job" : "Schedule Job";
+  const modalWidth = step === "select" ? 1100 : 520;
+
+  const footer = [
+    <ButtonComponent key="cancel" onClick={onClose} disabled={loading}>
+      Cancel
+    </ButtonComponent>,
+    ...(step === "select"
+      ? []
+      : [
+          <ButtonComponent key="back" onClick={handleBack} disabled={loading}>
+            Back
+          </ButtonComponent>,
+          <ButtonComponent key="start" type="primary" isPrimary onClick={handleStart} loading={loading}>
+            Start
+          </ButtonComponent>,
+        ]),
+  ];
 
   return (
     <NxModal
       isOpen={open}
-      title="Start Job Execution"
-      width={520}
+      title={modalTitle}
+      width={modalWidth}
       loading={loading}
       closeable
-      handleCancel={handleCancel}
-      handleOk={handleOk}
-      footer={[
-        <ButtonComponent key="cancel" onClick={handleCancel} disabled={loading}>
-          Cancel
-        </ButtonComponent>,
-        <ButtonComponent key="submit" type="primary" isPrimary onClick={handleOk} loading={loading}>
-          Start
-        </ButtonComponent>,
-      ]}
+      handleCancel={onClose}
+      footer={footer}
     >
-      <div style={{ padding: "16px 24px" }}>
-        <Form form={form} layout="vertical">
-          <Form.Item label="Trigger Type" required>
-            <Radio.Group
-              value={triggerType}
-              onChange={(e) => { setTriggerType(e.target.value); form.resetFields(["scheduledAt","intervalSeconds","cronExpression","timezone"]); }}
-            >
-              {TRIGGER_TYPES.map((t) => (
-                <Radio key={t} value={t} style={{ marginBottom: 4 }}>{t}</Radio>
-              ))}
-            </Radio.Group>
-          </Form.Item>
-
-          {triggerType === "ONCE" && (
-            <>
-              <Form.Item name="scheduledAt" label="Scheduled At" rules={[{ required: true, message: "Required" }]}>
-                <Input placeholder="2026-03-24T10:00:00" />
-              </Form.Item>
-              <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-                <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} />
-              </Form.Item>
-            </>
-          )}
-
-          {triggerType === "PERIODICALLY" && (
-            <>
-              <Form.Item name="intervalSeconds" label="Interval (seconds)" rules={[{ required: true, message: "Required" }]}>
-                <InputNumber min={1} placeholder="3600" style={{ width: "100%" }} />
-              </Form.Item>
-              <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-                <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} />
-              </Form.Item>
-            </>
-          )}
-
-          {triggerType === "SPECIFIC_DAYS" && (
-            <>
-              <Form.Item name="cronExpression" label="Cron Expression" rules={[{ required: true, message: "Required" }]}>
-                <Input placeholder="0 0 * * MON-FRI" />
-              </Form.Item>
-              <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-                <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} />
-              </Form.Item>
-            </>
-          )}
-
-          <Form.Item name="inputPayload" label="Input Payload (optional JSON)">
-            <Input.TextArea rows={3} placeholder='{"key": "value"}' />
-          </Form.Item>
-        </Form>
+      <div className="p-4">
+        {step === "select" && (
+          <div>
+            <NxTable
+              idTable="modal-job-select-table"
+              dataSource={allJobs}
+              loading={allJobsLoading}
+              columns={jobColumns}
+              useInfiniteScroll={true}
+              useSearch={true}
+              useAdvanceSearch={true}
+              useColumnSettings={true}
+              tableScrolled={{ y: 400, x: "max-content" }}
+              rowKey="id"
+              onLoadMore={loadMoreData}
+              hasMore={hasMore}
+            />
+          </div>
+        )}
+        {step === "schedule" && renderStep2()}
       </div>
     </NxModal>
   );
@@ -168,8 +311,7 @@ const JobExecutionPage = () => {
   const [sort, setSort] = useState("");
   const [accumulatedData, setAccumulatedData] = useState([]);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
-  const [startModalOpen, setStartModalOpen] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [selectJobModalOpen, setSelectJobModalOpen] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
 
   const handleFetch = useCallback(() => {
@@ -238,15 +380,6 @@ const JobExecutionPage = () => {
       const isRecurring = triggerType === "PERIODICALLY" || triggerType === "SPECIFIC_DAYS";
 
       const menuItems = [
-        {
-          key: "start",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconStart width="16" height="16" /> Start
-            </span>
-          ),
-          onClick: () => { setSelectedJobId(record.jobId); setStartModalOpen(true); },
-        },
         {
           key: "stop",
           label: (
@@ -404,12 +537,16 @@ const JobExecutionPage = () => {
           <div className="flex gap-2">
             <ButtonComponent
               type="primary"
-              icon={<DownloadOutlined />}
+              icon={<PlusCircleOutlined />}
               isPrimary={true}
               className="px-2 py-2 rounded-lg min-h-[32px]"
-              onClick={() => {}}
+              onClick={() => {
+                // Reset modal state before opening
+                setSelectJobModalOpen(false);
+                setTimeout(() => setSelectJobModalOpen(true), 0);
+              }}
             >
-              <span className="text-xs font-medium tracking-tight">Download List</span>
+              <span className="text-xs font-medium tracking-tight">Select Job</span>
             </ButtonComponent>
           </div>
         }
@@ -436,21 +573,21 @@ const JobExecutionPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
-          onRefresh={handleRefresh}
-          showRefresh={true}
+          // onRefresh={handleRefresh}
+          // showRefresh={true}
+          showExport={true}
+          handleDownload={() => {}}
         />
       </NxCardContainer>
 
-      <ModalStartJob
-        open={startModalOpen}
-        jobId={selectedJobId}
+      <ModalSelectJob
+        open={selectJobModalOpen}
         loading={actionLoading}
-        onClose={() => { setStartModalOpen(false); setSelectedJobId(null); }}
+        onClose={() => setSelectJobModalOpen(false)}
         onSubmit={(values) => {
           dispatch(startExecution(values)).then((res) => {
             if (!res.error) {
-              setStartModalOpen(false);
-              setSelectedJobId(null);
+              setSelectJobModalOpen(false);
               afterAction();
             }
           });

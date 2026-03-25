@@ -408,23 +408,22 @@ const CreateJobPage = () => {
 
                 {selectedProcedure && (
                   <div className="md:col-span-3">
-                    <NxBaseContainer border={false} minHeight="250px" padding={false}>
-                      <NxTableInlineEdit
-                        idTable="sp-parameters-info-table"
-                        dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
-                        onDataChange={() => {}}
-                        columns={SP_PARAM_COLUMNS}
-                        emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
-                      />
-                    </NxBaseContainer>
+                    <NxTableInlineEdit
+                      idTable="sp-parameters-info-table"
+                      dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
+                      onDataChange={() => {}}
+                      columns={SP_PARAM_COLUMNS}
+                      emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
+                      editMode="deleteOnly"
+                   />
                   </div>
                 )}
               </>)}
             </div>
           </NxBaseContainer>
 
-          {/* CONFIGURATION */}
-          <NxBaseContainer border header="CONFIGURATION" className="mt-4">
+          {/* RETRY POLICY */}
+          <NxBaseContainer border header="RETRY POLICY" className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
               <Form.Item
                 label="Timeout (seconds)"
@@ -474,7 +473,7 @@ const CreateJobPage = () => {
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Access Group" name="accessGroupId" {...formItemProps}>
+              <Form.Item label="Group" name="accessGroupId" {...formItemProps}>
                 <Select
                   placeholder="Select access group"
                   style={fieldStyle}
