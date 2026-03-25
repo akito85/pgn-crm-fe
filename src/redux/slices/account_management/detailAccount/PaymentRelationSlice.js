@@ -585,9 +585,9 @@ export const getPrApprovalHistory = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-relation/approval-history/${id}`;
       const response = await accountManagementService.getDetail(url);
-      return Array.isArray(response.data) ? null : response.data;
+      return Array.isArray(response.data) ? {} : response.data;
     } catch (error) {
-      if (error.response.data.code === 419) {
+      if (error.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
