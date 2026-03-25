@@ -29,6 +29,10 @@ const useInfiniteScroll = ({
   // simultaneously mounted NxTable instances have independent counters.
   const loadGenRef = React.useRef(0);
 
+  // Fix 7.2: track the last scroll position where we triggered a load.
+  // This prevents re-triggering on the same scroll position after data loads.
+  const lastTriggerScrollTopRef = React.useRef(0);
+
   // ── Shared trigger ──────────────────────────────────────────────────────
   const triggerLoad = React.useCallback(() => {
     if (!hasMoreRef.current || isLoadingMoreRef.current) return;
@@ -42,6 +46,9 @@ const useInfiniteScroll = ({
         if (loadGenRef.current === gen) {
           isLoadingMoreRef.current = false;
           setIsLoadingMore(false);
+          // Fix 7.2: reset the trigger position after load completes so
+          // subsequent scrolls can fire again.
+          lastTriggerScrollTopRef.current = 0;
         }
       });
   }, []);
@@ -76,7 +83,13 @@ const useInfiniteScroll = ({
       const onScroll = () => {
         if (!hasMoreRef.current || isLoadingMoreRef.current) return;
         const { scrollTop, clientHeight, scrollHeight } = scrollRoot;
-        if (scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD_PX) {
+        // Fix 7.2: with virtual scrolling, scrollHeight stays constant. Track
+        // the last trigger position to ensure we only fire when scrolling
+        // beyond the previous trigger point.
+        const nearBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD_PX;
+        const hasScrolledPastLastTrigger = scrollTop > lastTriggerScrollTopRef.current + 10;
+        if (nearBottom && hasScrolledPastLastTrigger) {
+          lastTriggerScrollTopRef.current = scrollTop;
           triggerLoad();
         }
       };
