@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import InfoPaymentRelation from "./StepContents/InformationForm/InfoPaymentRelation";
-import ApprovalSectionForm from "./StepContents/ApprovalForm/ApprovalPaymentRelation";
-import AttachmentSectionForm from "./StepContents/AttachmentForm/AttachmentPaymentRelation";
+import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
@@ -34,6 +34,7 @@ import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
+import { nxRemoveKeys } from "../../../../../../../../components/Nx/NxRemoveKeys";
 
 const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "standard" }) => {
   const containerRef = useRef(null);
@@ -59,7 +60,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     list_prApprovalHierarchyDetail,
     detail_paymentRelation,
     detailDraft_paymentRelation,
-    list_prDetailAttachment
+    list_prDetailAttachment,
+    data_prAttachmentCategory
   } = useSelector((state) => state.paymentRelation);
 
   const loading =
@@ -88,7 +90,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const isRejectApproval = statusApproval === "REJECT";
 
   //state
-  const [dataAttachment, setDataAttachment] = useState([]);
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
@@ -175,7 +178,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         key: `payment-relation-attachment-${item.id}`,
         dataType: "exist"
       }));
-      setDataAttachment([...result]);
+      setAttachmentDataSource([...result]);
     }
   }, [list_prDetailAttachment]);
 
@@ -229,7 +232,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     if (show) {
       try {
         if (current === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
+          if (attachmentIsRequired && !attachmentDataSource.length) {
             const errorBody = {
               title: "Failed",
               description: `Please upload at least one attachment`
@@ -347,21 +350,10 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         {
           header: "Approval",
           content: (
-            <ApprovalSectionForm
+            <NxApprovalInput
               form={form}
-              dataTable={(list_prApprovalHierarchyDetail || []).map(
-                (detail, index) => ({
-                  ...detail,
-                  employeeDetail: detail.employeeDetail.map(
-                    (employeeDetail, index) => ({
-                      ...employeeDetail,
-                      key: `employee-detail-${index}`
-                    })
-                  ),
-                  key: `detail-detail-${index}`
-                })
-              )}
-              dataOption={list_prApprovalOptions}
+              hierarchyDetails={list_prApprovalHierarchyDetail}
+              options={list_prApprovalOptions}
               handleSelectHiararchy={handleSelectHiararchy}
               key={`payment-relation-tab-1`}
             />
@@ -376,11 +368,13 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         {
           header: "Attachment",
           content: (
-            <AttachmentSectionForm
-              data={dataAttachment}
-              updateData={setDataAttachment}
+            <NxAttachmentInput
+              data={attachmentDataSource}
+              updateData={setAttachmentDataSource}
+              setDeleted={setDeletedAttachments}
               key={`payment-relation-tab-2`}
               getAPICategory={getPrAttachmentCategory}
+              categoryData={data_prAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               mandatory={attachmentIsRequired}
@@ -397,7 +391,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const next = async () => {
     try {
       if (current === 2) {
-        if (attachmentIsRequired && !dataAttachment.length) {
+        if (attachmentIsRequired && !attachmentDataSource.length) {
           const errorBody = {
             title: "Failed",
             description: `Please upload at least one attachment`
@@ -453,7 +447,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     for (let i = current; i < newCurrent; i++) {
       try {
         if (i === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
+          if (attachmentIsRequired && !attachmentDataSource.length) {
             const errorBody = {
               title: "Failed",
               description: `Please upload at least one attachment`
@@ -531,6 +525,13 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
       remark
     } = form.getFieldsValue(true);
 
+    const attachments = nxRemoveKeys([
+      ...attachmentDataSource.filter(
+        (attachment) => ["exist", "draft"].includes(attachment.dataType)
+      ),
+      ...deletedAttachments
+    ]);
+
     const body = {
       id: idPr,
       subjectId: data_accountDetail?.accountInformation?.accountId,
@@ -541,18 +542,30 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
       endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
-      remark
+      remark,
+      attachments
     };
 
     // Filter only new attachments (not existing ones)
-    const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
+
+    const navigateTarget = isStandard
+      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+      : isOneTime
+        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
+        : "";
 
     if (isCreate)
       dispatch(createPaymentRelation({ body, attachments: newAttachments }))
         .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(-1);
+            navigate(navigateTarget, {
+              state: {
+                idAccount,
+                idCustomer
+              }
+            });
           }, 2000);
         })
         .catch((error) => {});
@@ -561,15 +574,19 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         updatePaymentRelation({
           id: idPr,
           body,
-          attachments: dataAttachment.filter(
-            (attachment) => attachment.dataType !== "exist"
-          )
+          attachments: newAttachments,
+          action: confirmationType.toUpperCase()
         })
       )
         .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(-1);
+            navigate(navigateTarget, {
+              state: {
+                idAccount,
+                idCustomer
+              }
+            });
           }, 2000);
         })
         .catch((error) => {});
@@ -577,7 +594,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
 
   const handleClear = () => {
     if (isCreate) {
-      setDataAttachment([]);
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
@@ -619,7 +637,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         key: `payment-relation-attachment-${item.id}`,
         dataType: "exist"
       }));
-      setDataAttachment([...result]);
+      setAttachmentDataSource([...result]);
+      setDeletedAttachments([]);
 
       setCurrent(0);
     }
@@ -732,23 +751,13 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
               formId={"paymentRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(list_prApprovalHierarchyDetail || []).map(
-                (detail, index) => ({
-                  ...detail,
-                  employeeDetail: detail.employeeDetail.map(
-                    (employeeDetail, index) => ({
-                      ...employeeDetail,
-                      key: `employee-detail-${index}`
-                    })
-                  ),
-                  key: `detail-detail-${index}`
-                })
-              )}
+              approvalData={list_prApprovalHierarchyDetail}
               type={confirmationType}
-              dataAttachment={dataAttachment}
+              attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_createUpdatePr}
+              handleSubmitForm={handleSubmitForm}
             />
           </Form>
         </Spin>

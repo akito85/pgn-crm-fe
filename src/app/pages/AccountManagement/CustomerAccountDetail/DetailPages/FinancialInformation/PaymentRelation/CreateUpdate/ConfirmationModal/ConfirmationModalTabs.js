@@ -1,14 +1,14 @@
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
-import AttachmentSectionForm from "../StepContents/AttachmentForm/AttachmentPaymentRelation";
-import ApprovalSectionForm from "../StepContents/ApprovalForm/ApprovalPaymentRelation";
+import NxApprovalInput from "../../../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../../../components/Nx/NxAttachmentInput";
 import InfoPaymentRelation from "../StepContents/InformationForm/InfoPaymentRelation";
 
 const ConfirmationModalTabs = ({
   form,
   approvalData,
-  dataAttachment,
+  attachmentDataSource,
   service,
   type = "",
   configApplication,
@@ -28,7 +28,7 @@ const ConfirmationModalTabs = ({
       label: "Approval",
       disabled,
       children: (
-        <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />
+        <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />
       )
     },
     {
@@ -36,8 +36,8 @@ const ConfirmationModalTabs = ({
       label: "Attachment",
       disabled,
       children: (
-        <AttachmentSectionForm
-          data={dataAttachment}
+        <NxAttachmentInput
+          data={attachmentDataSource}
           service={service}
           configApplication={configApplication}
           type={"confirmation"}
