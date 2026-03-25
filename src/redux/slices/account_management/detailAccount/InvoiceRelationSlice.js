@@ -571,7 +571,7 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${action}.`,
+        description: `Your data has been ${action === "APPROVE" ? "approved" : body.action === "REJECT" ? "rejected" : ""}.`,
         return: false
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -586,7 +586,7 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Your data was not ${action}. ${message}.`
+        description: `Your data was not ${action === "APPROVE" ? "approved" : body.action === "REJECT" ? "rejected" : ""}. ${message}.`
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
@@ -887,21 +887,21 @@ const invoiceRelationSlice = createSlice({
 
     /** Approve or Reject All Invoice Relation */
     [approveOrRejectAllInvoiceRelation.pending]: (state, action) => {
-      if (action.meta.arg?.action === "approved")
+      if (action.meta.arg?.action === "APPROVE")
         state.loading_approveIr = true;
-      else if (action.meta.arg?.action === "rejected")
+      else if (action.meta.arg?.action === "REJECT")
         state.loading_rejectIr = true;
     },
     [approveOrRejectAllInvoiceRelation.fulfilled]: (state, action) => {
-      if (action.meta.arg?.action === "approved")
+      if (action.meta.arg?.action === "APPROVE")
         state.loading_approveIr = false;
-      else if (action.meta.arg?.action === "rejected")
+      else if (action.meta.arg?.action === "REJECT")
         state.loading_rejectIr = false;
     },
     [approveOrRejectAllInvoiceRelation.rejected]: (state, action) => {
-      if (action.meta.arg?.action === "approved")
+      if (action.meta.arg?.action === "APPROVE")
         state.loading_approveIr = false;
-      else if (action.meta.arg?.action === "rejected")
+      else if (action.meta.arg?.action === "REJECT")
         state.loading_rejectIr = false;
     },
 

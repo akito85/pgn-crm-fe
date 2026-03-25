@@ -284,7 +284,7 @@ const InvoiceRelationApprovalModal = ({
         approveOrRejectAllInvoiceRelation({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected"
+          action,
         })
       )
         .unwrap()
