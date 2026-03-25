@@ -1,6 +1,5 @@
 import { memo, useEffect } from "react";
 import { useState } from "react";
-import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
@@ -8,10 +7,16 @@ import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateMo
 import { getPrApprovalHierarchy, getDetailPrApprovalHierarchy, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
+/**
+ * Payment relation list table module
+ * @param {{ id?: number; idCustomer?: number }} props
+ * @returns
+ */
 const PaymentRelation = ({
   id = 0,
   idCustomer = 0,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
 
   const { data_prApprovalHistory } = useSelector(
@@ -20,14 +25,13 @@ const PaymentRelation = ({
 
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivatePrId, setInactivatePrId] = useState(0);
   const [inactivatePrAccountNumber, setInactivatePrAccountNumber] = useState(0);
-
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
+  // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
@@ -69,6 +73,10 @@ const PaymentRelation = ({
       .catch(() => {});
   };
 
+  /**
+   * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
+   * @returns {{ key: string, value: string, label: string }[]}
+   */
   const handleApprovalHistoryOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -92,6 +100,8 @@ const PaymentRelation = ({
     }
   };
 
+  // --- Effects ---
+  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
     if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
       const temp = {
@@ -112,7 +122,7 @@ const PaymentRelation = ({
   }, [data_prApprovalHistory]);
 
   return (
-    <Fragment>
+    <>
       <PaymentRelationTable
         idAccount={id}
         idCustomer={idCustomer}
@@ -143,6 +153,7 @@ const PaymentRelation = ({
         sliceName="paymentRelation"
         approvalOptionsStateName="list_prApprovalOptions"
         approvalHierarchtDetailsStateName="list_prApprovalHierarchyDetail"
+        loadingInactivateName={"loading_inactivatePr"}
         getApprovalOptions={getPrApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailPrApprovalHierarchy}
       />
@@ -156,7 +167,7 @@ const PaymentRelation = ({
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
-    </Fragment>
+    </>
   );
 };
 
