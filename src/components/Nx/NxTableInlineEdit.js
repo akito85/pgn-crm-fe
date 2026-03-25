@@ -413,7 +413,7 @@ const NxTableInlineEdit = ({
       style: { textAlign, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "12px" },
     });
 
-    const processed = columns.map((col) => {
+    const processed = columns.map((col, colIndex) => {
       let textAlign = "left";
       if (col.isNumber || col.align === "right") textAlign = "right";
       else if (col.isClassification) textAlign = "center";
@@ -421,6 +421,7 @@ const NxTableInlineEdit = ({
       return {
         ...col,
         key: col.key || col.dataIndex,
+        fixed: colIndex === 0 ? "left" : col.fixed,
         onHeaderCell: onHeaderCellDefault,
         onCell: makeOnCell(textAlign),
         render: (text, record, index) => {
@@ -487,6 +488,7 @@ const NxTableInlineEdit = ({
 
     const actionsColumn = {
       title: "ACTION",
+      fixed: "right",
       key: "__actions__",
       width: 200,
       onHeaderCell: onActionHeaderCell,
@@ -588,7 +590,7 @@ const NxTableInlineEdit = ({
           dataSource={dataSource}
           rowKey={rowKey}
           columns={tableColumns}
-          scroll={{ y: 380 }}
+          scroll={{ x: "max-content", y: 380 }}
           bordered
           pagination={false}
           size="small"
