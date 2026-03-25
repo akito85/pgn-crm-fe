@@ -9,6 +9,7 @@ import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined, PlusOutlined } from "@ant-design/icons";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
+import NxTableBase from "../../../../components/Nx/NxTableBase";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
 import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
@@ -68,6 +69,17 @@ const PARAMETER_COLUMNS = [
   },
   { title: 'Length',      dataIndex: 'length',      editable: true, inputType: 'number', placeholder: 'Length',      width: 110, min: 0 },
   { title: 'Description', dataIndex: 'description', editable: true, inputType: 'text',   placeholder: 'Description' },
+  {
+    title: 'Required',
+    dataIndex: 'required',
+    editable: true,
+    inputType: 'select',
+    width: 110,
+    selectOptions: [
+      { value: true,  label: 'Yes' },
+      { value: false, label: 'No'  },
+    ],
+  },
 ];
 
 const SP_PARAM_COLUMNS = [
@@ -214,7 +226,7 @@ const CreateJobPage = () => {
 
   const handleAddParameter = () => {
     const newKey = parameters.length > 0 ? Math.max(...parameters.map(p => p.key)) + 1 : 1;
-    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', length: null, description: '' }]);
+    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', length: null, description: '', required: false }]);
   };
 
   const onFinish = async (values) => {
@@ -259,9 +271,9 @@ const CreateJobPage = () => {
   const handleLoadSample = () => {
     form.setFieldsValue(SAMPLE_JOB);
     setParameters([
-      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   length: 10, description: 'Report start date (YYYY-MM-DD)' },
-      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   length: 10, description: 'Report end date (YYYY-MM-DD)' },
-      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', length: 50, description: 'Target region code' },
+      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   length: 10, description: 'Report start date (YYYY-MM-DD)', required: false },
+      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   length: 10, description: 'Report end date (YYYY-MM-DD)',   required: false },
+      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', length: 50, description: 'Target region code',            required: false },
     ]);
   };
 
@@ -408,13 +420,15 @@ const CreateJobPage = () => {
 
                 {selectedProcedure && (
                   <div className="md:col-span-3">
-                    <NxTableInlineEdit
+                    <div className="justify-start">
+                      <span class="text-black/85 text-md font-normal leading-[21.98px]">Parameters</span>
+                    </div>
+                    <NxTableBase
                       idTable="sp-parameters-info-table"
                       dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
                       onDataChange={() => {}}
                       columns={SP_PARAM_COLUMNS}
                       emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
-                      editMode="deleteOnly"
                    />
                   </div>
                 )}
@@ -473,7 +487,9 @@ const CreateJobPage = () => {
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Group" name="accessGroupId" {...formItemProps}>
+              <Form.Item label="Group" name="accessGroupId" {...formItemProps}  rules={[
+                { required: true, message: "Please select group" },
+              ]}>
                 <Select
                   placeholder="Select access group"
                   style={fieldStyle}

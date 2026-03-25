@@ -1,295 +1,304 @@
-import { Table } from 'antd';
-import { useState } from 'react';
+import { Table, Empty } from 'antd';
 
-/**
- * NxTableBase - A simplified, reliable table component built on Ant Design
- *
- * Features:
- * - Multiple fixed columns support (left/right)
- * - Bordered table with configurable padding
- * - Built-in checkbox selection via column definition
- * - Automatic width calculation for proper fixed column positioning
- *
- * Key differences from NxTable:
- * - No custom component overrides (uses Ant Design defaults)
- * - Simpler implementation focusing on core functionality
- * - Better fixed column handling out of the box
- */
-const NxTableBase = ({
-  // Data props
-  dataSource,
-  columns,
-  rowKey = 'key',
+// ── Shared visual constants (identical to NxTableInlineEdit / NxTable) ────────
+const HEADER_BG   = '#2C6FAD';
+const BORDER_COL  = '#C8CDD4';
+const ROW_WHITE   = '#FFFFFF';
+const ROW_HOVER   = '#EBF2FA';
+const FONT_FAMILY = "'PlusJakartaSans', 'PublicSans', sans-serif";
 
-  // Pagination props
-  pagination = false,
-
-  // Table props
-  loading = false,
-  bordered = true,
-  tableLayout = 'fixed',
-  scroll,
-
-  // Selection props
-  useCheckbox = false,
-  selectedRowKeys: controlledSelectedKeys,
-  onSelectionChange = () => {},
-  checkboxFixed = 'left',
-  checkboxColumnWidth = 50,
-  preserveSelectedRowKeys = false,
-  getCheckboxProps = () => ({}),
-
-  // Styling props
-  padding = '6px 8px',
-  headerBackgroundColor = '#0075BF',
-  headerTextColor = '#ffffff',
-  stripedRows = true,
-  rowOddColor = '#E6F1F9',
-  rowEvenColor = '#ffffff',
-  hoverColor = '#fafafa',
-
-  // Event handlers
-  onChange = () => {},
-  onRow = () => {},
-
-  // Other Ant Design Table props
-  ...restTableProps
-}) => {
-  // Explicitly exclude expandable to prevent empty row issues
-  // NxTableBase does not support expandable rows - use TablePagination or NxTable instead
-  const { expandable: _excluded, ...safeTableProps } = restTableProps;
-
-  // Warn if expandable prop was passed
-  if (_excluded !== undefined) {
-    console.warn(
-      '[NxTableBase] expandable prop is not supported in NxTableBase. ' +
-      'This component was designed without expandable rows to avoid empty row issues. ' +
-      'Please use TablePagination or NxTable if you need expandable functionality.'
-    );
+// ── Shared CSS factory (scoped by idTable, mirrors NxTableInlineEdit exactly) ─
+const buildTableStyles = (idTable) => `
+  #${idTable} .ant-table-content {
+    position: relative;
+    z-index: 1;
   }
 
-  // Internal state for checkbox selection
-  const [internalSelectedKeys, setInternalSelectedKeys] = useState([]);
+  #${idTable} .ant-table-body {
+    position: relative;
+    z-index: 1;
+  }
 
-  // Use controlled keys if provided, otherwise use internal state
-  const selectedKeys = controlledSelectedKeys !== undefined
-    ? controlledSelectedKeys
-    : internalSelectedKeys;
+  #${idTable} .ant-table-tbody > tr {
+    position: relative;
+    z-index: 1;
+  }
 
-  // Helper to get row key value
-  const getRowKeyValue = (record) => {
-    if (typeof rowKey === 'function') {
-      return rowKey(record);
-    }
-    return record[rowKey] || record.key || record.id;
-  };
+  #${idTable} .ant-table-tbody > tr:hover {
+    z-index: 2;
+  }
 
-  // Process columns to ensure proper widths for fixed columns
-  const processedColumns = columns.map(col => {
-    // For fixed columns without width, warn and set default
-    if (col.fixed && !col.width) {
-      console.warn(
-        `[NxTableBase] Column "${col.title || col.dataIndex || col.key}" ` +
-        `has fixed="${col.fixed}" but no width specified. ` +
-        `Fixed columns MUST have explicit widths for proper positioning.`
-      );
-      return { ...col, width: 150 };
-    }
-    return col;
+  #${idTable} .ant-table-body::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  #${idTable} .ant-table-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
+  }
+
+  #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+  #${idTable} .ant-table-body {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+    padding-bottom: 0;
+  }
+
+  #${idTable} .ant-table {
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    border: none;
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  #${idTable} .ant-table-container {
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    border: none;
+  }
+
+  #${idTable} .ant-table-container table > thead > tr:first-child > *:first-child {
+    border-start-start-radius: 8px;
+  }
+
+  #${idTable} .ant-table-container table > thead > tr:first-child > *:last-child {
+    border-start-end-radius: 8px;
+  }
+
+  #${idTable} .ant-table-tbody > tr:last-child > *:first-child {
+    border-end-start-radius: 0;
+  }
+
+  #${idTable} .ant-table-tbody > tr:last-child > *:last-child {
+    border-end-end-radius: 0;
+  }
+
+  #${idTable} .ant-table-bordered .ant-table-cell,
+  #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
+  #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
+  #${idTable} .ant-table-bordered .ant-table-container {
+    border-color: ${BORDER_COL} !important;
+  }
+
+  #${idTable} .ant-table-thead > tr > th {
+    padding: 4px 8px !important;
+    height: 30px !important;
+    border-right: 1px solid ${BORDER_COL} !important;
+    border-bottom: 1px solid ${BORDER_COL} !important;
+    font-family: ${FONT_FAMILY};
+    background-color: ${HEADER_BG} !important;
+    color: #fff !important;
+  }
+
+  #${idTable} .ant-table-thead > tr:first-child > th {
+    border-top: 1px solid ${BORDER_COL} !important;
+  }
+
+  #${idTable} .ant-table-thead > tr > th:first-child {
+    border-left: 1px solid ${BORDER_COL} !important;
+  }
+
+  /* Active sorter icon — keep white on blue header */
+  #${idTable} .ant-table-thead .ant-table-column-sorter-up.active .anticon,
+  #${idTable} .ant-table-thead .ant-table-column-sorter-down.active .anticon {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
+    padding: 4px 8px !important;
+    min-height: 30px;
+    font-size: 12px;
+    border-right: 1px solid ${BORDER_COL} !important;
+    border-bottom: 1px solid ${BORDER_COL} !important;
+    font-family: ${FONT_FAMILY};
+  }
+
+  #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
+    border-left: 1px solid ${BORDER_COL} !important;
+  }
+
+  /* ── Alternating row colors — exclude placeholder & measure rows ── */
+  #${idTable} .ant-table-tbody > tr:not(.ant-table-placeholder):not(.ant-table-measure-row):nth-child(odd) > td {
+    background-color: ${ROW_WHITE} !important;
+  }
+
+  #${idTable} .ant-table-tbody > tr:not(.ant-table-placeholder):not(.ant-table-measure-row):nth-child(even) > td {
+    background-color: ${ROW_HOVER} !important;
+  }
+
+  #${idTable} .ant-table-tbody > tr:not(.ant-table-placeholder):not(.ant-table-measure-row):hover > td {
+    background-color: ${ROW_HOVER} !important;
+  }
+
+  /* ── Empty / placeholder row — always white ── */
+  #${idTable} .ant-table-placeholder > td {
+    background-color: ${ROW_WHITE} !important;
+    border-left: 1px solid ${BORDER_COL} !important;
+    border-right: 1px solid ${BORDER_COL} !important;
+    border-bottom: 1px solid ${BORDER_COL} !important;
+  }
+
+  #${idTable} .ant-table-placeholder:hover > td {
+    background-color: ${ROW_WHITE} !important;
+  }
+
+  /* ── Measure row (Ant internal) — fully hidden ── */
+  #${idTable} .ant-table-measure-row > td {
+    padding: 0 !important;
+    height: 0 !important;
+    line-height: 0;
+    font-size: 0;
+    overflow: hidden;
+  }
+`;
+
+/**
+ * NxTableBase
+ *
+ * A fast, sort-only base table that shares the exact visual style of
+ * NxTableInlineEdit and NxTable. No selection, no inline editing —
+ * just clean data display with column sorting and a footer entry count.
+ *
+ * Props:
+ *   idTable     {string}    — unique DOM id for CSS scoping (required)
+ *   dataSource  {Array}     — row data
+ *   columns     {Array}     — Ant Design column definitions
+ *                             Extra per-column flags:
+ *                               isNumber        {boolean} — right-align
+ *                               isClassification{boolean} — center-align
+ *   rowKey      {string}    — key field name (default: 'key')
+ *   loading     {boolean}
+ *   scroll      {object}    — Ant Design scroll prop, e.g. { y: 380 }
+ *   emptyText   {string}    — empty state message
+ *   onChange    {Function}  — table onChange (sorter, filters, pagination)
+ *   onRow       {Function}  — Ant Design onRow handler
+ */
+const NxTableBase = ({
+  idTable = 'nx-table-base',
+  dataSource = [],
+  columns = [],
+  rowKey = 'key',
+  loading = false,
+  scroll = { y: 380 },
+  emptyText = 'No data available.',
+  onChange,
+  onRow,
+}) => {
+  // ── Column processing ───────────────────────────────────────────────────────
+  const processedColumns = columns.map((col) => {
+    let textAlign = 'left';
+    if (col.isNumber || col.align === 'right') textAlign = 'right';
+    else if (col.isClassification || col.align === 'center') textAlign = 'center';
+
+    return {
+      ...col,
+      key: col.key || col.dataIndex,
+      onHeaderCell: () => ({
+        style: {
+          textTransform: 'uppercase',
+          fontSize: '10px',
+          cursor: col.sorter ? 'pointer' : 'default',
+        },
+      }),
+      onCell: () => ({
+        style: {
+          textAlign,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          fontSize: '12px',
+        },
+      }),
+    };
   });
 
-  // Calculate total width for scroll.x
-  // This is CRITICAL for multiple fixed columns to position correctly
-  const calculateTotalWidth = () => {
-    if (scroll?.x) return scroll.x; // Use provided scroll.x if exists
-
-    let total = 0;
-
-    // Add checkbox column width if enabled
-    if (useCheckbox) {
-      total += checkboxColumnWidth;
-    }
-
-    // Add all column widths
-    processedColumns.forEach(col => {
-      total += col.width || 150; // Default 150px if no width
-    });
-
-    // Add small buffer for borders (2px per column)
-    total += processedColumns.length * 2;
-
-    return total;
-  };
-
-  // Checkbox selection configuration
-  const rowSelection = useCheckbox ? {
-    type: 'checkbox',
-    selectedRowKeys: selectedKeys,
-    onChange: (newSelectedRowKeys, selectedRows) => {
-      if (controlledSelectedKeys === undefined) {
-        setInternalSelectedKeys(newSelectedRowKeys);
-      }
-      onSelectionChange(newSelectedRowKeys, selectedRows);
-    },
-    fixed: checkboxFixed,
-    columnWidth: checkboxColumnWidth,
-    preserveSelectedRowKeys,
-    getCheckboxProps: (record) => ({
-      ...getCheckboxProps(record),
-      'data-row-key': getRowKeyValue(record),
-    }),
-  } : undefined;
-
-  // Effective scroll configuration
-  // When tableLayout='fixed', use numeric scroll.x for proper fixed column positioning
-  const effectiveScroll = scroll || (
-    tableLayout === 'fixed'
-      ? { x: calculateTotalWidth(), y: scroll?.y }
-      : { x: 'max-content', y: scroll?.y }
+  // ── Footer bar (same pattern as NxTableInlineEdit) ──────────────────────────
+  const footerBar = (
+    <div
+      style={{
+        position: 'relative',
+        zIndex: 1,
+        marginTop: '-1px',
+        borderLeft: `1px solid ${BORDER_COL}`,
+        borderRight: `1px solid ${BORDER_COL}`,
+        borderBottom: `1px solid ${BORDER_COL}`,
+        borderTop: `1px solid ${BORDER_COL}`,
+        borderRadius: '0 0 8px 8px',
+        background: '#fff',
+        padding: '6px 12px',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+    >
+      <span style={{ fontSize: '12px', color: '#6B7280' }}>
+        Showing {dataSource.length} of {dataSource.length} entries
+      </span>
+      {!loading && dataSource.length > 0 && (
+        <>
+          <span
+            style={{
+              width: '4px',
+              height: '4px',
+              borderRadius: '50%',
+              background: '#D1D5DB',
+              display: 'inline-block',
+            }}
+          />
+          <span style={{ fontSize: '12px', color: '#22c55e', fontWeight: '500' }}>
+            All data showed
+          </span>
+        </>
+      )}
+    </div>
   );
 
-  // Row className for striped pattern
-  const getRowClassName = (record, index) => {
-    if (!stripedRows) return '';
-    return index % 2 === 0 ? 'nx-table-base-row-even' : 'nx-table-base-row-odd';
-  };
-
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <>
-      {/* Scoped styles for this table */}
-      <style>{`
-        /* Custom padding for all cells */
-        .nx-table-base-container .ant-table-thead > tr > th,
-        .nx-table-base-container .ant-table-tbody > tr > td {
-          padding: ${padding} !important;
-        }
+    <div id={idTable}>
+      <style>{buildTableStyles(idTable)}</style>
 
-        /* Header styling */
-        .nx-table-base-container .ant-table-thead > tr > th {
-          background-color: ${headerBackgroundColor} !important;
-          color: ${headerTextColor} !important;
-          font-weight: bold;
-          text-transform: uppercase;
-          border-bottom: 0.5px solid #d4d4d8;
-        }
-
-        /* Body cell styling */
-        .nx-table-base-container .ant-table-tbody > tr > td {
-          border-bottom: 0.5px solid #d4d4d8;
-        }
-
-        /* Striped rows */
-        .nx-table-base-container .ant-table-tbody > tr.nx-table-base-row-odd > td {
-          background-color: ${rowOddColor};
-        }
-        .nx-table-base-container .ant-table-tbody > tr.nx-table-base-row-even > td {
-          background-color: ${rowEvenColor};
-        }
-
-        /* Hover effect */
-        .nx-table-base-container .ant-table-tbody > tr:hover > td {
-          background-color: ${hoverColor} !important;
-        }
-
-        /* Fixed column specific styling */
-        .nx-table-base-container .ant-table-cell-fix-left,
-        .nx-table-base-container .ant-table-cell-fix-right {
-          position: sticky !important;
-          z-index: 2;
-          background: inherit;
-        }
-
-        .nx-table-base-container .ant-table-thead .ant-table-cell-fix-left,
-        .nx-table-base-container .ant-table-thead .ant-table-cell-fix-right {
-          z-index: 3;
-        }
-
-        /* Maintain stripe colors for fixed columns */
-        .nx-table-base-container .ant-table-tbody > tr.nx-table-base-row-odd > td.ant-table-cell-fix-left,
-        .nx-table-base-container .ant-table-tbody > tr.nx-table-base-row-odd > td.ant-table-cell-fix-right {
-          background-color: ${rowOddColor};
-        }
-
-        .nx-table-base-container .ant-table-tbody > tr.nx-table-base-row-even > td.ant-table-cell-fix-left,
-        .nx-table-base-container .ant-table-tbody > tr.nx-table-base-row-even > td.ant-table-cell-fix-right {
-          background-color: ${rowEvenColor};
-        }
-
-        /* Ensure fixed columns maintain background color on hover */
-        .nx-table-base-container .ant-table-tbody > tr:hover > td.ant-table-cell-fix-left,
-        .nx-table-base-container .ant-table-tbody > tr:hover > td.ant-table-cell-fix-right {
-          background-color: ${hoverColor} !important;
-        }
-
-        /* Fixed column shadows for visual separation */
-        .nx-table-base-container .ant-table-cell-fix-left-last::after {
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: -1px;
-          width: 30px;
-          transform: translateX(100%);
-          transition: box-shadow 0.3s;
-          content: '';
-          pointer-events: none;
-        }
-
-        .nx-table-base-container .ant-table-ping-left .ant-table-cell-fix-left-last::after {
-          box-shadow: inset 10px 0 8px -8px rgba(0, 0, 0, 0.15);
-        }
-
-        .nx-table-base-container .ant-table-cell-fix-right-first::after {
-          position: absolute;
-          top: 0;
-          bottom: -1px;
-          left: 0;
-          width: 30px;
-          transform: translateX(-100%);
-          transition: box-shadow 0.3s;
-          content: '';
-          pointer-events: none;
-        }
-
-        .nx-table-base-container .ant-table-ping-right .ant-table-cell-fix-right-first::after {
-          box-shadow: inset -10px 0 8px -8px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Checkbox column styling */
-        .nx-table-base-container .ant-table-selection-column {
-          text-align: center !important;
-          vertical-align: middle !important;
-        }
-
-        .nx-table-base-container .ant-table-selection-column .ant-checkbox-wrapper {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        /* Hide Ant Design measure row to prevent empty first row */
-        .nx-table-base-container .ant-table-measure-row {
-          display: none !important;
-        }
-      `}</style>
-
-      <div className="nx-table-base-container">
+      <div style={{ position: 'relative' }}>
         <Table
           dataSource={dataSource}
           columns={processedColumns}
           rowKey={rowKey}
-          pagination={pagination}
           loading={loading}
-          bordered={bordered}
-          tableLayout={tableLayout}
-          scroll={effectiveScroll}
-          rowSelection={rowSelection}
+          scroll={scroll}
+          bordered
+          pagination={false}
+          size="small"
+          tableLayout="fixed"
           onChange={onChange}
           onRow={onRow}
-          rowClassName={getRowClassName}
-          {...safeTableProps}
+          locale={{
+            emptyText: (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <span style={{ fontFamily: FONT_FAMILY, fontSize: '12px', color: '#999' }}>
+                    {emptyText}
+                  </span>
+                }
+              />
+            ),
+          }}
+          style={{ margin: 0 }}
         />
       </div>
-    </>
+
+      {footerBar}
+    </div>
   );
 };
 
