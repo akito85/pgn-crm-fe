@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PlusCircleOutlined } from "@ant-design/icons";
-import { Dropdown, Form, Radio, Input, InputNumber, Select, Tag, Spin } from "antd";
+import { PlusCircleOutlined, CheckOutlined, ClockCircleOutlined, ThunderboltOutlined, CalendarOutlined, SyncOutlined, SettingOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { Dropdown, Form, Radio, Input, InputNumber, Select, Tag, Spin, Typography } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -26,7 +26,7 @@ import IconOnHold from "../../../../assets/Icon/Nx/IconOnHold";
 import IconSuspend from "../../../../assets/Icon/Nx/IconSuspend";
 import IconCancel from "../../../../assets/Icon/Nx/IconCancel";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const formatDate = (val) => {
@@ -62,6 +62,182 @@ const TIMEZONES = [
   "America/New_York", "Europe/London", "Asia/Tokyo",
 ];
 
+// ─── Trigger type metadata for beautiful cards ────────────────────────────────
+
+const TRIGGER_META = {
+  IMMEDIATE: {
+    icon: <ThunderboltOutlined />,
+    label: "Immediate",
+    desc: "Run the job right now",
+    color: "#f97316",
+    bg: "#fff7ed",
+    border: "#fed7aa",
+  },
+  ONCE: {
+    icon: <ClockCircleOutlined />,
+    label: "Once",
+    desc: "Schedule for a specific date & time",
+    color: "#3b82f6",
+    bg: "#eff6ff",
+    border: "#bfdbfe",
+  },
+  PERIODICALLY: {
+    icon: <SyncOutlined />,
+    label: "Periodically",
+    desc: "Repeat at a fixed interval",
+    color: "#8b5cf6",
+    bg: "#f5f3ff",
+    border: "#ddd6fe",
+  },
+  SPECIFIC_DAYS: {
+    icon: <CalendarOutlined />,
+    label: "Specific Days",
+    desc: "Use a cron expression for complex schedules",
+    color: "#10b981",
+    bg: "#ecfdf5",
+    border: "#a7f3d0",
+  },
+};
+
+// ─── Wizard Step Indicator ────────────────────────────────────────────────────
+
+const WizardSteps = ({ current }) => {
+  const steps = [
+    { key: "select", label: "Select Job", icon: <SettingOutlined /> },
+    { key: "schedule", label: "Configure", icon: <CalendarOutlined /> },
+  ];
+
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 0,
+      padding: "16px 24px 0",
+      borderBottom: "1px solid #f0f0f0",
+      marginBottom: 0,
+    }}>
+      {steps.map((step, idx) => {
+        const isActive = step.key === current;
+        const isDone = (current === "schedule" && step.key === "select");
+
+        return (
+          <React.Fragment key={step.key}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              paddingBottom: 14,
+              borderBottom: isActive ? "2px solid #1976D2" : "2px solid transparent",
+              marginBottom: -1,
+              transition: "all 0.2s ease",
+            }}>
+              {/* Circle */}
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 13,
+                fontWeight: 600,
+                transition: "all 0.2s ease",
+                background: isDone ? "#1976D2" : isActive ? "#e3f0fb" : "#f5f5f5",
+                color: isDone ? "#fff" : isActive ? "#1976D2" : "#bbb",
+                border: isActive ? "2px solid #1976D2" : isDone ? "2px solid #1976D2" : "2px solid #e0e0e0",
+              }}>
+                {isDone ? <CheckOutlined style={{ fontSize: 12 }} /> : idx + 1}
+              </div>
+
+              {/* Label */}
+              <span style={{
+                fontSize: 13,
+                fontWeight: isActive ? 600 : 500,
+                color: isActive ? "#1976D2" : isDone ? "#555" : "#aaa",
+                letterSpacing: "0.01em",
+              }}>
+                {step.label}
+              </span>
+            </div>
+
+            {idx < steps.length - 1 && (
+              <div style={{
+                flex: 1,
+                height: 1,
+                background: isDone ? "#1976D2" : "#e0e0e0",
+                margin: "0 12px",
+                marginBottom: 14,
+                transition: "background 0.3s ease",
+              }} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
+// ─── Trigger Type Card ────────────────────────────────────────────────────────
+
+const TriggerCard = ({ type, selected, onClick, disabled }) => {
+  const meta = TRIGGER_META[type];
+  const isSelected = selected === type;
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => onClick(type)}
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10,
+        padding: "10px 14px",
+        borderRadius: 8,
+        border: isSelected ? `1.5px solid ${meta.color}` : "1.5px solid #e8e8e8",
+        background: isSelected ? meta.bg : "#fafafa",
+        cursor: disabled ? "not-allowed" : "pointer",
+        textAlign: "left",
+        transition: "all 0.18s ease",
+        opacity: disabled ? 0.6 : 1,
+        boxShadow: isSelected ? `0 0 0 3px ${meta.color}18` : "none",
+        width: "100%",
+      }}
+    >
+      <div style={{
+        width: 32,
+        height: 32,
+        borderRadius: 7,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 15,
+        flexShrink: 0,
+        background: isSelected ? meta.color : "#ebebeb",
+        color: isSelected ? "#fff" : "#999",
+        transition: "all 0.18s ease",
+      }}>
+        {meta.icon}
+      </div>
+      <div>
+        <div style={{
+          fontWeight: 600,
+          fontSize: 12.5,
+          color: isSelected ? meta.color : "#333",
+          letterSpacing: "0.01em",
+          lineHeight: "1.3",
+          transition: "color 0.18s",
+        }}>
+          {meta.label}
+        </div>
+        <div style={{ fontSize: 11.5, color: "#888", marginTop: 1, lineHeight: "1.4" }}>
+          {meta.desc}
+        </div>
+      </div>
+    </button>
+  );
+};
+
 // ─── Select Job Modal ─────────────────────────────────────────────────────────
 
 const MODAL_PAGE_SIZE = 20;
@@ -73,6 +249,18 @@ const JOB_SELECT_COLUMNS = [
   { title: "TYPE", dataIndex: "type", key: "type", align: "left", width: 120 },
   { title: "DESC", dataIndex: "desc", key: "desc", align: "left", ellipsis: true },
 ];
+
+const buildInputPayload = (paramValues, parameters) => {
+  if (!parameters || parameters.length === 0) return undefined;
+  const payload = {};
+  parameters.forEach((p) => {
+    const val = paramValues?.[p.code];
+    if (val !== undefined && val !== null && val !== '') {
+      payload[p.code] = val;
+    }
+  });
+  return Object.keys(payload).length > 0 ? JSON.stringify(payload) : undefined;
+};
 
 const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
   const [step, setStep] = useState("select");
@@ -98,13 +286,11 @@ const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
     }
   }, [open, form]);
 
-  // Fetch jobs for modal
   const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery({
     page: modalPage,
     size: MODAL_PAGE_SIZE,
   }, { skip: !open });
 
-  // Accumulate pages; replace when modal opens
   useEffect(() => {
     if (!allJobsData) return;
     if (isResetRef.current) {
@@ -116,7 +302,6 @@ const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
     setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
   }, [allJobsData]);
 
-  // Returns a Promise for NxTable's IntersectionObserver
   const loadMoreData = useCallback(() => {
     return new Promise((resolve) => {
       if (!hasMore || allJobsLoading) { resolve(); return; }
@@ -124,46 +309,6 @@ const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
       setTimeout(resolve, 0);
     });
   }, [hasMore, allJobsLoading]);
-
-  // Function to open the modal (called from parent)
-  const handleOpenModal = useCallback(() => {
-    isResetRef.current = true;
-    setModalPage(0);
-    setHasMore(true);
-  }, []);
-
-  // Function to add selected job to the form
-  const handleAddJobToTable = useCallback((job) => {
-    setSelectedJob({ id: job.id, name: job.name, code: job.code });
-    setStep("schedule");
-  }, []);
-
-  // Function to close the modal
-  const handleCloseModal = useCallback(() => {
-    onClose();
-  }, [onClose]);
-
-  const actionColumn = {
-    title: "",
-    key: "select-action",
-    width: 60,
-    align: "center",
-    render: (_, record) => (
-      <button
-        type="button"
-        style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", color: "#1976D2" }}
-        onClick={() => {
-          setSelectedJob({ id: record.id, name: record.name, code: record.code });
-          setStep("schedule");
-        }}
-      >
-        <PlusCircleOutlined style={{ fontSize: 20 }} />
-      </button>
-    ),
-  };
-
-  const jobColumns = [...JOB_SELECT_COLUMNS, actionColumn];
-  const jobColumnDefs = JOB_SELECT_COLUMNS.map((c) => ({ key: c.key, title: c.title }));
 
   const handleBack = () => {
     setStep("select");
@@ -174,97 +319,337 @@ const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
 
   const handleStart = () => {
     form.validateFields().then((values) => {
-      onSubmit({ jobId: selectedJob.id, triggerType, ...values });
+      const { params: _params, ...scheduleValues } = values;
+      const inputPayload = buildInputPayload(_params, selectedJob.parameters);
+      onSubmit({ jobId: selectedJob.id, triggerType, ...scheduleValues, inputPayload });
     });
   };
 
+  const actionColumn = {
+    title: "",
+    key: "select-action",
+    width: 80,
+    align: "center",
+    render: (_, record) => (
+      <button
+        type="button"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 5,
+          padding: "4px 10px",
+          borderRadius: 6,
+          background: "#1976D2",
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+          fontSize: 12,
+          fontWeight: 500,
+          transition: "background 0.15s",
+        }}
+        onClick={() => {
+          setSelectedJob({ id: record.id, name: record.name, code: record.code, parameters: record.parameters ?? [] });
+          setStep("schedule");
+        }}
+      >
+        Select <ArrowRightOutlined style={{ fontSize: 10 }} />
+      </button>
+    ),
+  };
+
+  const jobColumns = [...JOB_SELECT_COLUMNS, actionColumn];
+
+  // ── Step 2: Schedule & Params ─────────────────────────────────────────────
+
   const renderStep2 = () => (
-    <div style={{ padding: "16px 24px" }}>
+    <div style={{ padding: "20px 24px 4px" }}>
+
+      {/* Selected Job Info Card */}
       <div style={{
-        background: "#f5f5f5", border: "1px solid #e0e0e0",
-        borderRadius: 8, padding: "12px 16px", marginBottom: 20,
-        display: "grid", gridTemplateColumns: "80px 1fr", gap: "4px 0", fontSize: 13,
+        background: "linear-gradient(135deg, #f0f7ff 0%, #e8f4ff 100%)",
+        border: "1px solid #c8e0fa",
+        borderRadius: 10,
+        padding: "12px 16px",
+        marginBottom: 22,
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
       }}>
-        <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Name</span>
-        <span style={{ fontWeight: 600, color: "#222" }}>{selectedJob?.name ?? "—"}</span>
-        <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Code</span>
-        <span style={{ fontWeight: 500, color: "#555" }}>{selectedJob?.code ?? "—"}</span>
+        <div style={{
+          width: 40,
+          height: 40,
+          borderRadius: 8,
+          background: "#1976D2",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <SettingOutlined style={{ color: "#fff", fontSize: 18 }} />
+        </div>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: "#1a2a3a", lineHeight: 1.3 }}>
+            {selectedJob?.name ?? "—"}
+          </div>
+          <div style={{ fontSize: 12, color: "#5a7a99", marginTop: 2, fontFamily: "monospace", letterSpacing: "0.03em" }}>
+            {selectedJob?.code ?? "—"}
+          </div>
+        </div>
       </div>
 
-      <Form form={form} layout="vertical">
-        <Form.Item label="Trigger Type" required>
-          <Radio.Group
-            value={triggerType}
-            disabled={loading}
-            onChange={(e) => {
-              setTriggerType(e.target.value);
-              form.resetFields(["scheduledAt", "intervalSeconds", "cronExpression", "timezone"]);
-            }}
-          >
+      <Form form={form} layout="vertical" requiredMark={false}>
+
+        {/* Trigger Type — card grid */}
+        <Form.Item
+          label={
+            <span style={{ fontWeight: 600, fontSize: 12.5, color: "#444", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              Trigger Type
+            </span>
+          }
+          style={{ marginBottom: 20 }}
+        >
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 8,
+          }}>
             {TRIGGER_TYPES.map((t) => (
-              <Radio key={t} value={t} style={{ marginBottom: 4 }}>{t}</Radio>
+              <TriggerCard
+                key={t}
+                type={t}
+                selected={triggerType}
+                disabled={loading}
+                onClick={(val) => {
+                  setTriggerType(val);
+                  form.resetFields(["scheduledAt", "intervalSeconds", "cronExpression", "timezone"]);
+                }}
+              />
             ))}
-          </Radio.Group>
+          </div>
         </Form.Item>
 
+        {/* Conditional fields */}
         {triggerType === "ONCE" && (
-          <>
-            <Form.Item name="scheduledAt" label="Scheduled At" rules={[{ required: true, message: "Required" }]}>
-              <Input placeholder="2026-03-24T10:00:00" disabled={loading} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Form.Item
+              name="scheduledAt"
+              label={<FieldLabel>Scheduled At</FieldLabel>}
+              rules={[{ required: true, message: "Required" }]}
+            >
+              <Input placeholder="2026-03-24T10:00:00" disabled={loading} style={inputStyle} />
             </Form.Item>
-            <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} />
+            <Form.Item name="timezone" label={<FieldLabel>Timezone</FieldLabel>} initialValue="UTC">
+              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} style={inputStyle} />
             </Form.Item>
-          </>
+          </div>
         )}
 
         {triggerType === "PERIODICALLY" && (
-          <>
-            <Form.Item name="intervalSeconds" label="Interval (seconds)" rules={[{ required: true, message: "Required" }]}>
-              <InputNumber min={1} placeholder="3600" style={{ width: "100%" }} disabled={loading} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Form.Item
+              name="intervalSeconds"
+              label={<FieldLabel>Interval (seconds)</FieldLabel>}
+              rules={[{ required: true, message: "Required" }]}
+            >
+              <InputNumber min={1} placeholder="3600" style={{ width: "100%", ...inputStyle }} disabled={loading} />
             </Form.Item>
-            <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} />
+            <Form.Item name="timezone" label={<FieldLabel>Timezone</FieldLabel>} initialValue="UTC">
+              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} style={inputStyle} />
             </Form.Item>
-          </>
+          </div>
         )}
 
         {triggerType === "SPECIFIC_DAYS" && (
-          <>
-            <Form.Item name="cronExpression" label="Cron Expression" rules={[{ required: true, message: "Required" }]}>
-              <Input placeholder="0 0 * * MON-FRI" disabled={loading} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Form.Item
+              name="cronExpression"
+              label={<FieldLabel>Cron Expression</FieldLabel>}
+              rules={[{ required: true, message: "Required" }]}
+            >
+              <Input placeholder="0 0 * * MON-FRI" disabled={loading} style={inputStyle} />
             </Form.Item>
-            <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} />
+            <Form.Item name="timezone" label={<FieldLabel>Timezone</FieldLabel>} initialValue="UTC">
+              <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} disabled={loading} style={inputStyle} />
             </Form.Item>
-          </>
+          </div>
         )}
 
-        <Form.Item name="inputPayload" label="Input Payload (optional JSON)">
-          <Input.TextArea rows={3} placeholder='{"key": "value"}' disabled={loading} />
-        </Form.Item>
+        {/* Parameters */}
+        {selectedJob?.parameters?.length > 0 ? (
+          <>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 12,
+              marginTop: 4,
+            }}>
+              <div style={{ flex: 1, height: 1, background: "#eee" }} />
+              <span style={{
+                fontWeight: 600,
+                fontSize: 11,
+                color: "#888",
+                textTransform: "uppercase",
+                letterSpacing: "0.07em",
+                whiteSpace: "nowrap",
+              }}>
+                Parameters
+              </span>
+              <div style={{ flex: 1, height: 1, background: "#eee" }} />
+            </div>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}>
+              {selectedJob.parameters.map((param) => (
+                <Form.Item
+                  key={param.code}
+                  name={['params', param.code]}
+                  label={<FieldLabel required={param.required}>{param.name}</FieldLabel>}
+                  rules={
+                    (param.required ?? false)
+                      ? [{ required: true, message: `${param.name} is required` }]
+                      : []
+                  }
+                  style={{ marginBottom: 14 }}
+                >
+                  {param.type === 'Number' && (
+                    <InputNumber style={{ width: '100%', ...inputStyle }} disabled={loading} />
+                  )}
+                  {param.type === 'Boolean' && (
+                    <Select disabled={loading} style={inputStyle}>
+                      <Select.Option value={true}>True</Select.Option>
+                      <Select.Option value={false}>False</Select.Option>
+                    </Select>
+                  )}
+                  {(param.type === 'Date' || param.type === 'String' || !param.type) && (
+                    <Input
+                      placeholder={param.type === 'Date' ? 'YYYY-MM-DD' : ''}
+                      disabled={loading}
+                      style={inputStyle}
+                    />
+                  )}
+                </Form.Item>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 14px",
+            borderRadius: 8,
+            background: "#f9f9f9",
+            border: "1px dashed #e0e0e0",
+            marginTop: 4,
+          }}>
+            <CheckOutlined style={{ color: "#10b981", fontSize: 13 }} />
+            <Typography.Text type="secondary" style={{ fontSize: 12.5 }}>
+              This job requires no additional parameters.
+            </Typography.Text>
+          </div>
+        )}
       </Form>
     </div>
   );
 
-  const modalTitle = step === "select" ? "Select Job" : "Schedule Job";
-  const modalWidth = step === "select" ? 1100 : 520;
+  // ── Modal title ───────────────────────────────────────────────────────────
 
-  const footer = [
-    <ButtonComponent key="cancel" onClick={onClose} disabled={loading}>
-      Cancel
-    </ButtonComponent>,
-    ...(step === "select"
-      ? []
-      : [
-          <ButtonComponent key="back" onClick={handleBack} disabled={loading}>
-            Back
-          </ButtonComponent>,
-          <ButtonComponent key="start" type="primary" isPrimary onClick={handleStart} loading={loading}>
-            Start
-          </ButtonComponent>,
-        ]),
-  ];
+  const modalTitle = (
+    <div style={{ paddingBottom: 0 }}>
+      <div style={{ fontWeight: 700, fontSize: 16, color: "#1a2a3a" }}>
+        {step === "select" ? "Run Job" : "Configure Schedule"}
+      </div>
+      <div style={{ fontSize: 12.5, color: "#888", marginTop: 2, fontWeight: 400 }}>
+        {step === "select"
+          ? "Select a job from the list to queue for execution"
+          : "Set trigger type and parameters for your job"}
+      </div>
+    </div>
+  );
+
+  const modalWidth = step === "select" ? 1100 : 600;
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+
+  const footer = (
+    <div style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "12px 24px",
+      borderTop: "1px solid #f0f0f0",
+      background: "#fafafa",
+      borderRadius: "0 0 12px 12px",
+    }}>
+      {/* Left: Cancel */}
+      <ButtonComponent
+        key="cancel"
+        onClick={onClose}
+        disabled={loading}
+        style={{
+          minWidth: 88,
+          height: 36,
+          borderRadius: 7,
+          border: "1px solid #d9d9d9",
+          background: "#fff",
+          color: "#555",
+          fontWeight: 500,
+          fontSize: 13,
+        }}
+      >
+        Cancel
+      </ButtonComponent>
+
+      {/* Right: Back + Start (step 2 only) */}
+      <div style={{ display: "flex", gap: 8 }}>
+        {step === "schedule" && (
+          <ButtonComponent
+            key="back"
+            onClick={handleBack}
+            disabled={loading}
+            style={{
+              minWidth: 80,
+              height: 36,
+              borderRadius: 7,
+              border: "1px solid #d9d9d9",
+              background: "#fff",
+              color: "#555",
+              fontWeight: 500,
+              fontSize: 13,
+            }}
+          >
+            ← Back
+          </ButtonComponent>
+        )}
+        {step === "schedule" && (
+          <ButtonComponent
+            key="start"
+            type="primary"
+            isPrimary
+            onClick={handleStart}
+            loading={loading}
+            style={{
+              minWidth: 100,
+              height: 36,
+              borderRadius: 7,
+              background: "#1976D2",
+              border: "none",
+              color: "#fff",
+              fontWeight: 600,
+              fontSize: 13,
+              boxShadow: "0 2px 8px rgba(25, 118, 210, 0.3)",
+            }}
+          >
+            {loading ? "Starting…" : "Start Job"}
+          </ButtonComponent>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <NxModal
@@ -276,9 +661,12 @@ const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
       handleCancel={onClose}
       footer={footer}
     >
-      <div className="p-4">
+      {/* Step indicator */}
+      <WizardSteps current={step} />
+
+      <div style={{ paddingBottom: 4 }}>
         {step === "select" && (
-          <div>
+          <div style={{ padding: "16px 16px 0" }}>
             <NxTable
               idTable="modal-job-select-table"
               dataSource={allJobs}
@@ -299,6 +687,20 @@ const ModalSelectJob = ({ open, loading, onClose, onSubmit }) => {
       </div>
     </NxModal>
   );
+};
+
+// ─── Small helpers ─────────────────────────────────────────────────────────────
+
+const FieldLabel = ({ children, required }) => (
+  <span style={{ fontWeight: 500, fontSize: 12.5, color: "#555" }}>
+    {children}
+    {required && <span style={{ color: "#ff4d4f", marginLeft: 3 }}>*</span>}
+  </span>
+);
+
+const inputStyle = {
+  borderRadius: 6,
+  fontSize: 13,
 };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -541,12 +943,11 @@ const JobExecutionPage = () => {
               isPrimary={true}
               className="px-2 py-2 rounded-lg min-h-[32px]"
               onClick={() => {
-                // Reset modal state before opening
                 setSelectJobModalOpen(false);
                 setTimeout(() => setSelectJobModalOpen(true), 0);
               }}
             >
-              <span className="text-xs font-medium tracking-tight">Select Job</span>
+              <span className="text-xs font-medium tracking-tight">Run Job</span>
             </ButtonComponent>
           </div>
         }
@@ -573,8 +974,6 @@ const JobExecutionPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
-          // onRefresh={handleRefresh}
-          // showRefresh={true}
           showExport={true}
           handleDownload={() => {}}
         />
