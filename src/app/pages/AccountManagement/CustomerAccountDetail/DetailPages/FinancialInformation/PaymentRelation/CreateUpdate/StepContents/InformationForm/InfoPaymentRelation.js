@@ -79,17 +79,19 @@ export default function InfoPaymentRelation({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_prAccountStandard?.totalPages || 0;
+    const totalPages = pagination_prAccountStandard?.totalPage || 0;
 
     if (nextPage <= totalPages) {
       await dispatch(
         getPrAccountStandard({
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          isLoadMore: true,
           id: accountId,
+          body: {
+            searchs: JSON.stringify(search),
+            page: nextPage,
+            size: loadMoreSize,
+            sort,
+          },
+          isLoadMore: true,
         })
       );
     }
@@ -99,11 +101,13 @@ export default function InfoPaymentRelation({
   useEffect(() => {
     if (formView)
       dispatch(getPrAccountStandard({
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
         id: accountId,
+        body: {
+          page,
+          size: loadMoreSize,
+          sort,
+          searchs: JSON.stringify(search),
+        },
         isLoadMore: false,
       }));
   }, [ sort, search ]);
@@ -137,7 +141,7 @@ export default function InfoPaymentRelation({
 
   const currentData = useMemo(() => list_prAccountStandard, [list_prAccountStandard]);
 
-  const hasMore = currentData.length < (pagination_prAccountStandard?.totalElements || 0);
+  const hasMore = currentData.length < (pagination_prAccountStandard?.totalElement || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
@@ -288,7 +292,7 @@ export default function InfoPaymentRelation({
             <NxTable
               idTable="payment-relation-account-standard"
               dataSource={dataSourceWithKeys}
-              totalData={pagination_prAccountStandard.totalElements || 0}
+              totalData={pagination_prAccountStandard.totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
               onSort={onSort}

@@ -34,7 +34,7 @@ const PaymentRelationTable = ({
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
-  const totalElement = pagination.totalElements;
+  const totalElement = pagination.totalElement;
   const hasMore = dataSource.length < (totalElement || 0);
 
   const searchInput = useRef(null);
@@ -77,7 +77,7 @@ const PaymentRelationTable = ({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination.totalPages || 0;
+    const totalPages = pagination.totalPage || 0;
     if (nextPage <= totalPages) {
       const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules };
       await dispatch(getPaymentRelation({ id: idAccount, body, isLoadMore: true })).unwrap();

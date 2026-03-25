@@ -18,7 +18,7 @@ const PaymentRelationApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approveRejectPr } = useSelector(
+  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approvePr, loading_rejectPr } = useSelector(
     (state) => state.paymentRelation
   );
 
@@ -92,7 +92,7 @@ const PaymentRelationApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_paymentRelationApproval?.totalPages || 0;
+    const totalPages = pagination_paymentRelationApproval?.totalPage || 0;
 
     // Check if there's more data to load
     if (nextPage <= totalPages) {
@@ -117,7 +117,7 @@ const PaymentRelationApprovalModal = ({
   };
 
   const hasMore =
-    dataSource.length < (pagination_paymentRelationApproval?.totalElements || 0);
+    dataSource.length < (pagination_paymentRelationApproval?.totalElement || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -356,14 +356,14 @@ const PaymentRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading_approveRejectPr}
+                    loading={loading_rejectPr}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading_approveRejectPr}
+                    loading={loading_approvePr}
                   >
                     Approve
                   </Button>
@@ -411,7 +411,7 @@ const PaymentRelationApprovalModal = ({
                     className={"[&_.ant-checkbox]:scale-90"}
                     dataSource={dataSourceWithKeys}
                     columns={processedColumns}
-                    totalData={pagination_paymentRelationApproval?.totalElements || 0}
+                    totalData={pagination_paymentRelationApproval?.totalElement || 0}
                     tableScrolled={{ x: "max-content" }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
@@ -459,7 +459,7 @@ const PaymentRelationApprovalModal = ({
                 <NxTable
                   dataSource={selectedRows}
                   columns={processedColumns}
-                  totalData={pagination_paymentRelationApproval?.totalElements || 0}
+                  totalData={pagination_paymentRelationApproval?.totalElement || 0}
                   tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}

@@ -18,7 +18,6 @@ import {
   getDetailDraftPaymentRelation,
   getDetailPaymentRelation,
   getDetailPrApprovalHierarchy,
-  getPaymentRelationAttachment,
   getPrApprovalHierarchy,
   getPrAttachmentCategory,
   updatePaymentRelation
@@ -131,7 +130,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     if (isUpdate && idPr) {
       dispatch(getDetailPaymentRelation(idPr));
       dispatch(getDetailDraftPaymentRelation(idPr));
-      dispatch(getPaymentRelationAttachment({ id: idPr }));
     }
   }, [formType, idPr]);
 

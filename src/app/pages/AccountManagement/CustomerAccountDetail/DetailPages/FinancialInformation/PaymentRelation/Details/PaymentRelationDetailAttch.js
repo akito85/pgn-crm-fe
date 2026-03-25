@@ -145,30 +145,11 @@ const PaymentRelationDetailAttch = ({
     const totalPages = pagination_prDetailAttachment?.totalPages || 0;
 
     if (nextPage <= totalPages) {
-      await dispatch(
-        getPaymentRelationAttachment({
-          id: idPr,
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          isLoadMore: true,
-        })
-      );
     }
     setPage(nextPage);
   };
 
   useEffect(() => {
-    if (idPr)
-      dispatch(getPaymentRelationAttachment({
-        id: idPr,
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        isLoadMore: false
-      }));
   }, [sort, search, tempFilters]);
 
   return (
