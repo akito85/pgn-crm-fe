@@ -3,7 +3,10 @@ import accountManagementService from "../../../services/account_management/accou
 import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
 
 const initialState = {
+  // --- Shared ---
   loading: false,
+
+  // --- List ---
   loading_listMd: false,
   list_multiDestination: [],
   pagination_multiDestination: {
@@ -12,6 +15,8 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+
+  // --- Approval List ---
   loading_listMdApproval: false,
   list_multiDestinationApproval: [],
   pagination_multiDestinationApproval: {
@@ -20,6 +25,20 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+
+  // --- Detail ---
+  loading_detailMd: false,
+  detail_multiDestination: {},
+  loading_detailDraftMd: false,
+  detailDraft_multiDestination: {},
+
+  // --- Create / Update ---
+  loading_createUpdateMd: false,
+
+  // --- Approve / Reject ---
+  loading_approveRejectMd: false,
+
+  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
   loading_listMdApprovalOption: false,
   list_mdApprovalOptions: [],
   loading_listMdApprovalHierarchyDetail: false,
@@ -33,10 +52,8 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
-  loading_detailMd: false,
-  detail_multiDestination: {},
-  loading_detailDraftMd: false,
-  detailDraft_multiDestination: {},
+
+  // --- Attachment ---
   loading_detailMdDetailAttachment: false,
   list_mdDetailAttachment: [],
   pagination_mdDetailAttachment: {
@@ -45,9 +62,11 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+
+  // --- History ---
   data_mdApprovalHistory: {},
-  loading_approveRejectMd: false,
-  loading_createUpdateMd: false,
+
+  // --- Dynamic Search ---
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
   data_globalTypeColumn: [],
@@ -139,25 +158,21 @@ export const createMultiDestination = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -191,25 +206,21 @@ export const updateMultiDestination = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -265,7 +276,7 @@ export const getDetailDraftMultiDestination = createAsyncThunk(
 
 export const getMdApprovalHierarchy = createAsyncThunk(
   "GET_MD_APPROVAL_HIERARCHY",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
@@ -291,7 +302,7 @@ export const getDetailMdApprovalHierarchy = createAsyncThunk(
 
 export const getMdAttachmentCategory = createAsyncThunk(
   "GET_MD_ATTACHMENT_CATEGORY",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/attachment-category`;
       const response = await accountManagementService.getAll(url);
@@ -340,7 +351,7 @@ export const approveOrRejectMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -379,7 +390,7 @@ export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -432,7 +443,7 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured"
 
       const errorBody = {
@@ -468,7 +479,7 @@ export const inactivateMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not submitted. ${message}.`,
@@ -518,7 +529,7 @@ export const getMdApprovalHistory = createAsyncThunk(
 
 export const getMdColumnApi = createAsyncThunk(
   "GET_MD_COLUMN_API",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/multi-destination/list-search-column";
       const response = await accountManagementService.getAll(url);
@@ -531,7 +542,7 @@ export const getMdColumnApi = createAsyncThunk(
 
 export const getMdConditionApi = createAsyncThunk(
   "GET_MD_CONDITION_API",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/multi-destination/list-search-condition";
       const response = await accountManagementService.getAll(url);
@@ -544,7 +555,7 @@ export const getMdConditionApi = createAsyncThunk(
 
 export const getMdOperatorApi = createAsyncThunk(
   "GET_MD_OPERATOR_API",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/multi-destination/list-search-operator";
       const response = await accountManagementService.getAll(url);
