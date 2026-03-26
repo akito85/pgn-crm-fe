@@ -4,9 +4,8 @@ import { Button, Spin } from "antd";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentRelationDetailTabs from "./PaymentRelationDetailTabs";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { getAccountStandardDetail, getAccountOneTimeDetail, getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
+import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
 import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation, getDetailDraftPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
@@ -17,18 +16,31 @@ import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxAppr
 import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
+import SVGIcon from "../../../../../../../../assets/Icon/index";
 
+/**
+ * Payment relation detail view (container + presentational component).
+ * Fetches original and draft records, supports approve/reject workflow.
+ *
+ * @param {object}                    props
+ * @param {"standard"|"oneTime"}      [props.accountType="standard"] - Account type context.
+ */
 const PaymentRelationDetail = ({
   accountType = "standard"
 }) => {
-  const dispatch = useDispatch();
-
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
-  const { detail_paymentRelation, detailDraft_paymentRelation } = useSelector(
-    (state) => state.paymentRelation
-  );
+  // --- Hooks ---
+  const dispatch = useDispatch();
+
+  const {
+    detail_paymentRelation,
+    detailDraft_paymentRelation,
+    loading_detailPr,
+    loading_detailDraftPr,
+    loading_approveRejectPr,
+  } = useSelector((state) => state.paymentRelation);
 
   const { loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
@@ -37,10 +49,7 @@ const PaymentRelationDetail = ({
   const { data_accountDetail } = useSelector(
     (state) => state.accountManagement
   );
-  
-  const isLoading = loading || loadingAccount;
 
-  //declare
   const navigate = useNavigate();
   const location = useLocation();
   const idAccount = location?.state?.idAccount;
@@ -57,19 +66,35 @@ const PaymentRelationDetail = ({
       label: "Current",
     }
   ]
-
   const originalKey = tabOptions[0]?.key;
 
+  // --- State ---
   const [activeKey, setActiveKey] = useState(originalKey || "")
-
-  const detail = (activeKey === originalKey ? detail_paymentRelation : detailDraft_paymentRelation) || {}
-
-  const handleSetActiveKey = (newActiveKey) => {
-    setActiveKey(newActiveKey)
-  }
-
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
+
+  // --- Derived values ---
+  const isLoading = loading || loadingAccount || loading_detailPr || loading_detailDraftPr;
+  const detail = (activeKey === originalKey ? detail_paymentRelation : detailDraft_paymentRelation) || {}
+
+  const {
+    status,
+    statusApproval,
+  } = detail_paymentRelation;
+
+  const {
+    approvalType,
+    relatedAccountNumber,
+    id,
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy,
+    tappId,
+  } = detail;
+
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
+  const isApproval = ["PAYMENT_RELATION", "INACTIVE_PAYMENT_RELATION"].includes(approvalType);
 
   const routes = [
     {
@@ -82,11 +107,7 @@ const PaymentRelationDetail = ({
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
           : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME,
       breadcrumbName:
-        isStandard ?
-          "Account - Standard" :
-        isOneTime ?
-          "Account - One Time" :
-          "",
+        isStandard ? "Account - Standard" : "Account - One Time",
     },
     {
       path: isStandard
@@ -101,9 +122,19 @@ const PaymentRelationDetail = ({
     },
   ];
 
+  // --- Handlers ---
   /**
-   * @param {boolean} show
-   * @param {"approve"|"reject"} action 
+   * Switches the active detail tab between Original and Current.
+   * @param {string} newActiveKey
+   */
+  const handleSetActiveKey = (newActiveKey) => {
+    setActiveKey(newActiveKey)
+  }
+
+  /**
+   * Opens or closes the approval/rejection modal.
+   * @param {boolean}            show   - true to open, false to close
+   * @param {"approve"|"reject"} [action] - Which action to arm
    */
   const handleApprovalModal = (show, action) => {
     if (show) {
@@ -116,15 +147,11 @@ const PaymentRelationDetail = ({
   }
 
   /**
-   * @param {"approve"|"reject"} action 
+   * Dispatches approve or reject for the current payment relation record.
+   * @param {string}             description - Remark entered in the approval form
+   * @param {"approve"|"reject"} action
    */
-  const handleApproveOrReject = (description, action, handleClear) => {
-    const {
-      id,
-      approvalType,
-      tappId
-    } = detail_paymentRelation;
-
+  const handleApproveOrReject = (description, action) => {
     const body = [{
       id,
       approvalId: tappId,
@@ -138,12 +165,7 @@ const PaymentRelationDetail = ({
         action,
       }))
       .unwrap()
-      .then(() => {
-        dispatch(getDetailPaymentRelation(idPr));
-        dispatch(getDetailDraftPaymentRelation(idPr));
-        handleClear();
-        handleApprovalModal(false);
-      })
+      .then(() => navigate(-1))
       .catch(() => {});
     } else if (approvalType === "INACTIVE_PAYMENT_RELATION") {
       dispatch(approveOrRejectInactivePaymentRelation({
@@ -151,12 +173,7 @@ const PaymentRelationDetail = ({
         action,
       }))
       .unwrap()
-      .then(() => {
-        dispatch(getDetailPaymentRelation(idPr));
-        dispatch(getDetailDraftPaymentRelation(idPr));
-        handleClear();
-        handleApprovalModal(false);
-      })
+      .then(() => navigate(-1))
       .catch(() => {});
     } else {
       const errorBody = {
@@ -168,6 +185,7 @@ const PaymentRelationDetail = ({
     }
   }
 
+  // --- Effects ---
   useEffect(() => {
     if (isStandard) {
       dispatch(getGrantedAccessAccount(`/account-management/account-standard/financial-information/payment-relation`));
@@ -177,41 +195,14 @@ const PaymentRelationDetail = ({
   }, []);
 
   useEffect(() => {
-    if (idCustomer)
-      dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
-
-  useEffect(() => {
-    if (idAccount && idCustomer) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-      } else if (isOneTime) {
-        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
-      }
-    }
-  }, [idAccount, idCustomer]);
-
-  useEffect(() => {
-    if (idPr) {
+    if (idPr)
       dispatch(getDetailPaymentRelation(idPr));
+  }, [idPr]);
+
+  useEffect(() => {
+    if (idPr && draftExist)
       dispatch(getDetailDraftPaymentRelation(idPr));
-    }
-  }, [idPr])
-
-  const { status, statusApproval } = detail_paymentRelation;
-
-  const {
-    approvalType,
-    relatedAccountNumber,
-    id,
-    createdDate,
-    createdBy,
-    updatedDate,
-    updatedBy,
-  } = detail;
-
-  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED"
-  const isApproval = ["PAYMENT_RELATION", "INACTIVE_PAYMENT_RELATION"].includes(approvalType);
+  }, [idPr, draftExist]);
 
   return (
     <>
@@ -225,7 +216,7 @@ const PaymentRelationDetail = ({
             idCustomer={idCustomer}
             type={accountType}
           />
-          
+
           {draftExist && (
             <NxBaseContainer border padding={false}>
               <NxTabs
@@ -237,10 +228,7 @@ const PaymentRelationDetail = ({
           )}
 
           <PaymentRelationDetailTabs
-            dataDetail={detail}
-            subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
-            dispatch={dispatch}
-            idPr={idPr}
+            detail={detail}
           />
 
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
@@ -268,12 +256,16 @@ const PaymentRelationDetail = ({
                 <div className={"w-full flex justify-end gap-5"}>
                   <Button
                     type="reject"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "reject")}
                   >
                     Reject
                   </Button>
                   <Button
                     type="approve"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "approve")}
                   >
                     Approve
@@ -289,7 +281,8 @@ const PaymentRelationDetail = ({
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
         customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${relatedAccountNumber}?`}
-        onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
+        onFinish={({ remark }) => handleApproveOrReject(remark, approveOrReject)}
+        loading={loading_approveRejectPr}
       />
     </>
   );
