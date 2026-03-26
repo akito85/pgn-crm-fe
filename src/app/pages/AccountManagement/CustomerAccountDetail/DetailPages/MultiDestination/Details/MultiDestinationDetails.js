@@ -7,7 +7,7 @@ import MultiDestinationDetailTabs from "./MultiDestinationDetailTabs";
 import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { getAccountStandardDetail, getAccountOneTimeDetail, getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
-import { getDetailMultiDestination, getDetailDraftMultiDestination, getMultiDestinationAttachment, approveOrRejectMultiDestination, approveOrRejectInactiveMultiDestination } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { getDetailMultiDestination, getDetailDraftMultiDestination, approveOrRejectMultiDestination, approveOrRejectInactiveMultiDestination } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
@@ -168,7 +168,6 @@ const MultiDestinationDetails = ({
     if (idMd) {
       dispatch(getDetailMultiDestination({ id: idMd, subjectId, objectId }));
       dispatch(getDetailDraftMultiDestination({ id: idMd, subjectId, objectId }));
-      dispatch(getMultiDestinationAttachment({ id: idMd }));
     }
   }, [idMd])
 

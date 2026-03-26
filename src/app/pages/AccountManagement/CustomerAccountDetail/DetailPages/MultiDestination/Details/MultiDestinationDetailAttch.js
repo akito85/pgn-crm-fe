@@ -8,7 +8,6 @@ import { previewFileAttachment } from "../../../../../../../utils/previewFileAtt
 import { configApp } from "../../../../../../../constants/configApp";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
-import { getMultiDestinationAttachment } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { useSelector } from "react-redux";
 import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
 
@@ -143,32 +142,8 @@ const MultiDestinationDetailAttch = ({
     const nextPage = page + 1;
     const totalPages = pagination_mdDetailAttachment?.totalPages || 0;
 
-    if (nextPage <= totalPages) {
-      await dispatch(
-        getMultiDestinationAttachment({
-          id: idMd,
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          isLoadMore: true,
-        })
-      );
-    }
     setPage(nextPage);
   };
-
-  useEffect(() => {
-    if (idMd)
-      dispatch(getMultiDestinationAttachment({
-        id: idMd,
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        isLoadMore: false
-      }));
-  }, [sort, search, tempFilters]);
 
   return (
     <Spin spinning={loadingDownload}>

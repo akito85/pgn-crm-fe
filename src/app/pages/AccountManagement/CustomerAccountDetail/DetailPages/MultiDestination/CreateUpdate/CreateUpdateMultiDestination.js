@@ -17,7 +17,6 @@ import {
   getDetailMultiDestination,
   getDetailDraftMultiDestination,
   getDetailMdApprovalHierarchy,
-  getMultiDestinationAttachment,
   getMdApprovalHierarchy,
   getMdAttachmentCategory,
   updateMultiDestination,
@@ -52,18 +51,15 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     detail_multiDestination,
     loading_detailDraftMd,
     detailDraft_multiDestination,
-    loading_detailMdDetailAttachment,
-    list_mdDetailAttachment,
     loading_createUpdateMd,
-    data_mdAttachmentCategory,
+    list_mdAttachmentCategory,
   } = useSelector((state) => state.multiDestination);
 
   const loading =
     loading_listMdApprovalOption ||
     loading_listMdApprovalHierarchyDetail ||
     loading_detailMd ||
-    loading_detailDraftMd ||
-    loading_detailMdDetailAttachment;
+    loading_detailDraftMd;
 
   //declare
   const location = useLocation();
@@ -133,7 +129,6 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     if (isUpdate && idMd) {
       dispatch(getDetailMultiDestination(idMd, { subjectId, objectId }));
       dispatch(getDetailDraftMultiDestination(idMd, { subjectId, objectId }));
-      dispatch(getMultiDestinationAttachment({ id: idMd }));
     }
   }, [formType, idMd]);
 
@@ -198,15 +193,13 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   }, [detail, list_mdApprovalOptions]);
 
   useEffect(() => {
-    if (isUpdate) {
-      const result = list_mdDetailAttachment?.map((item) => ({
+    if (isUpdate && detail?.attachments)
+      setAttachmentDataSource([...detail.attachments.map((item) => ({
         ...item,
         key: item.id,
         dataType: "exist",
-      }));
-      setAttachmentDataSource([...result]);
-    }
-  }, [list_mdDetailAttachment]);
+      }))]);
+  }, [detail]);
 
   useEffect(() => {
     dispatch(getMdApprovalHierarchy());
@@ -446,7 +439,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             setDeleted={setDeletedAttachments}
             key={`multi-destination-tab-2`}
             getAPICategory={getMdAttachmentCategory}
-            categoryData={data_mdAttachmentCategory}
+            categoryData={list_mdAttachmentCategory}
             service={accountManagementService}
             configApplication={configApp.ACCOUNT_SERVICE}
             mandatory={attachmentIsRequired}
@@ -585,7 +578,6 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   const handleSubmitForm = () => {
     const {
       objectId,
-      priority,
       description,
       startDate,
       endDate,
@@ -602,7 +594,6 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       id: idMd,
       subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
-      priority,
       description,
       startDate: NxDate.formatForAPI(startDate),
       endDate: NxDate.formatForAPI(endDate),
@@ -612,7 +603,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       attachments,
     };
 
-    const newAttachments = attachmentDataSource.filter((a) => a.dataType !== "exist");
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
 
     const detailRoute = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
@@ -636,7 +627,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       })
       .catch((error) => {});
     else if (isUpdate)
-      dispatch(updateMultiDestination({ id: idMd, body, attachments: attachmentDataSource.filter((attachment) => attachment.dataType !== "exist") }))
+      dispatch(updateMultiDestination({ id: idMd, body, attachments: attachmentDataSource.filter((attachment) => attachment.dataType === "new") }))
       .unwrap()
         .then((data) => {
           setTimeout(() => {
@@ -718,12 +709,12 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
       }
 
-      const result = list_mdDetailAttachment?.map((item) => ({
-        ...item,
-        key: item.id,
-        dataType: "exist",
-      }));
-      setAttachmentDataSource([...result]);
+      if (detail?.attachments)
+        setAttachmentDataSource([...detail.attachments.map((item) => ({
+          ...item,
+          key: item.id,
+          dataType: "exist",
+        }))]);
       setDeletedAttachments([]);
 
       setCurrent(0);

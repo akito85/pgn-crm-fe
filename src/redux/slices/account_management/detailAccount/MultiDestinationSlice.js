@@ -43,7 +43,7 @@ const initialState = {
   list_mdApprovalOptions: [],
   loading_listMdApprovalHierarchyDetail: false,
   list_mdApprovalHierarchyDetail: [],
-  data_mdAttachmentCategory: [],
+  list_mdAttachmentCategory: [],
   loading_listMdAccountStandard: false,
   list_mdAccountStandard: [],
   pagination_mdAccountStandard: {
@@ -117,19 +117,6 @@ export const getMultiDestinationApproval = createAsyncThunk(
     }
   }
 );
-
-export const getMultiDestinationAttachment = createAsyncThunk(
-  "GET_MULTI_DESTINATION_ATTACHMENT",
-  async ({ id }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/multi-destination/list-attachment/${id}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
 
 export const createMultiDestination = createAsyncThunk(
   "CREATE_MULTI_DESTINATION",
@@ -743,11 +730,11 @@ const multiDestinationSlice = createSlice({
       state.loading = true;
     },
     [getMdAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_mdAttachmentCategory = action.payload;
+      state.list_mdAttachmentCategory = action.payload;
       state.loading = false;
     },
     [getMdAttachmentCategory.rejected]: (state) => {
-      state.data_mdAttachmentCategory = [];
+      state.list_mdAttachmentCategory = [];
       state.loading = false;
     },
 
@@ -788,51 +775,6 @@ const multiDestinationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_mdAccountStandard = [];
         state.pagination_mdAccountStandard = {
-          totalPages: 0,
-          totalElements: 0,
-          currentPage: 0,
-          pageSize: 10,
-        }
-      }
-    },
-
-    /** Get Multi Destination Attachment */
-    [getMultiDestinationAttachment.pending]: (state, action) => {
-      if (!action.meta.arg?.isLoadMore) {
-        state.loading_detailMdDetailAttachment = true;
-      }
-    },
-    [getMultiDestinationAttachment.fulfilled]: (state, action) => {
-      state.loading_detailMdDetailAttachment = false;
-      const { result, page, isLoadMore } = action.payload;
-
-      if (Array.isArray(result)) {
-        if (isLoadMore) {
-          const currentIds = new Set(state.list_mdDetailAttachment.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
-
-          state.list_mdDetailAttachment = [
-            ...state.list_mdDetailAttachment,
-            ...filteredResult,
-          ];
-        }
-        else
-          state.list_mdDetailAttachment = result;
-      }
-
-      state.pagination_mdDetailAttachment = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
-        currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
-    },
-    [getMultiDestinationAttachment.rejected]: (state, action) => {
-      state.loading_detailMdDetailAttachment = false;
-
-      if (!action.meta.arg?.isLoadMore) {
-        state.list_mdDetailAttachment = [];
-        state.pagination_mdDetailAttachment = {
           totalPages: 0,
           totalElements: 0,
           currentPage: 0,
