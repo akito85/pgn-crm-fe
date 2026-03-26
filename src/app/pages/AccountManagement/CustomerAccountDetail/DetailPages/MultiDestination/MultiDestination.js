@@ -16,7 +16,13 @@ import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
+/**
+ * Multi destination list table module
+ * @param {{ id?: number; idCustomer?: number }} props
+ * @returns
+ */
 const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
+  // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -25,7 +31,6 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
 
   const { data_mdApprovalHistory } = useSelector((state) => state.multiDestination);
 
-  // --- State ---
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
@@ -34,14 +39,14 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
-  // --- Handlers ---
+  // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
    * Open or close inactivate modal
    * @param {boolean} show
    * @param {number} mdId
-   * @param {number} mdAppHierId
+   * @param {string} mdAccountNumber
    */
   const handleInactivateModal = (
     show,
@@ -114,6 +119,7 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
     }
   }, []);
 
+  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
     if (data_mdApprovalHistory && data_mdApprovalHistory?.dataApprover) {
       const temp = {

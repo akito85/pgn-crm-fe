@@ -39,7 +39,7 @@ const MultiDestinationTable = ({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
-    list_multiDestination: rawData,
+    list_multiDestination: dataSource,
     pagination_multiDestination: pagination,
     loading_listMd: loading,
   } = useSelector((state) => state.multiDestination);
@@ -48,8 +48,8 @@ const MultiDestinationTable = ({
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
-  const totalElement = pagination.totalElements;
-  const hasMore = rawData.length < (totalElement || 0);
+  const totalElement = pagination.totalElement;
+  const hasMore = dataSource.length < (totalElement || 0);
 
   // --- State ---
   const searchInput = useRef(null);
@@ -66,15 +66,6 @@ const MultiDestinationTable = ({
     right: ["statusApproval", "status", "action"],
     left: [],
   }));
-
-  // --- Computed ---
-  const dataSource = useMemo(() => {
-    if (!rawData || rawData.length === 0) return [];
-    return rawData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [rawData]);
 
   // --- Handlers ---
   const handleRefresh = () => {
@@ -128,9 +119,9 @@ const MultiDestinationTable = ({
    */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
         page: nextPage,
         size: loadMoreSize,
@@ -152,8 +143,6 @@ const MultiDestinationTable = ({
    */
   const handleDownload = () => {
     const body = {
-      page,
-      size: loadMoreSize,
       sort,
       filters,
       filterRules,
@@ -186,7 +175,7 @@ const MultiDestinationTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id, subjectId, objectId }) => navigate(
+    handleView: ({ id }) => navigate(
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION :
       isOneTime ?
@@ -197,8 +186,6 @@ const MultiDestinationTable = ({
           idAccount,
           idCustomer,
           id,
-          subjectId,
-          objectId
         }
       }
     ),
@@ -215,7 +202,7 @@ const MultiDestinationTable = ({
         }
       }
     ),
-    handleUpdate: ({ id, subjectId, objectId }) => navigate(
+    handleUpdate: ({ id }) => navigate(
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION :
       isOneTime ?
@@ -226,8 +213,6 @@ const MultiDestinationTable = ({
           idAccount,
           idCustomer,
           id,
-          subjectId,
-          objectId,
         }
       }
     ),
@@ -255,24 +240,16 @@ const MultiDestinationTable = ({
     ),
   [search, searchText, searchedColumn]);
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+  const columnDefinitions = useMemo(() => {
+    return [...baseColumns, ...actionCols].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -284,7 +261,7 @@ const MultiDestinationTable = ({
         current={page}
         tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
         onSort={onSort}
-        columns={processedColumns}
+        columns={columns}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
