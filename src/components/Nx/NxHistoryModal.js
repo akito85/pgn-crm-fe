@@ -108,9 +108,9 @@ const NxHistoryModal = ({
 
   const handleTabs = (value) => {
     const tempTab = value.toLowerCase();
-    setTabActive(value);
-    setDataApproverFinal(tabActive ? dataApprover[tempTab] : dataApprover);
-    setDataHistoryFinal(tabActive ? dataHistory[tempTab] : dataHistory);
+    setTabActive(tempTab);
+    setDataApproverFinal(dataApprover?.[tempTab] ?? []);
+    setDataHistoryFinal(dataHistory?.[tempTab] ?? []);
   };
 
   const sliderLeft = () => {

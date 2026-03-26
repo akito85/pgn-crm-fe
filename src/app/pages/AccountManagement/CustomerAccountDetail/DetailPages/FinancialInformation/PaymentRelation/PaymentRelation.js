@@ -1,4 +1,4 @@
-import { memo, useEffect } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { useState } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
@@ -77,7 +77,7 @@ const PaymentRelation = ({
    * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
    * @returns {{ key: string, value: string, label: string }[]}
    */
-  const handleApprovalHistoryOptions = () => {
+  const approvalHistoryOptions = useMemo(() => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
     return keyData.map((item) => ({
@@ -85,7 +85,15 @@ const PaymentRelation = ({
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
       label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
-  };
+  }, [dataApprovalHistoryFix]);
+
+  useEffect(() => {
+    console.log("approvalHistoryOptions", approvalHistoryOptions);
+  }, [approvalHistoryOptions]);
+
+  useEffect(() => {
+    console.log("dataApprovalHistoryFix", dataApprovalHistoryFix)
+  }, [dataApprovalHistoryFix])
 
   /**
    * @param {boolean} show
@@ -163,7 +171,7 @@ const PaymentRelation = ({
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
-        tabOptions={handleApprovalHistoryOptions()}
+        tabOptions={approvalHistoryOptions}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
