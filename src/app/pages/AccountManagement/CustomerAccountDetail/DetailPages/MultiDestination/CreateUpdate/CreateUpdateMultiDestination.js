@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import InformationForm from "./StepContents/InformationForm/InfoMultiDestination";
-import AttachmentForm from "./StepContents/AttachmentForm/AttachmentMultiDestination";
-import ApprovalForm from "./StepContents/ApprovalForm/ApprovalMultiDestination";
+import NxApprovalInput from "../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import {
@@ -31,6 +31,7 @@ import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavi
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import { nxRemoveKeys } from "../../../../../../../components/Nx/NxRemoveKeys";
 
 const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "create" }) => {
   const containerRef = useRef(null);
@@ -54,6 +55,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     loading_detailMdDetailAttachment,
     list_mdDetailAttachment,
     loading_createUpdateMd,
+    data_mdAttachmentCategory,
   } = useSelector((state) => state.multiDestination);
 
   const loading =
@@ -91,7 +93,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     : detail_multiDestination;
 
   //state
-  const [dataAttachment, setDataAttachment] = useState([]);
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
@@ -196,14 +199,12 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   useEffect(() => {
     if (isUpdate) {
-      const result = list_mdDetailAttachment?.map((item, index) => ({
+      const result = list_mdDetailAttachment?.map((item) => ({
         ...item,
-        key: `multi-destination-attachment-${item.id}`,
-        dataType: "exist"
+        key: item.id,
+        dataType: "exist",
       }));
-      setDataAttachment([
-        ...result,
-      ]);
+      setAttachmentDataSource([...result]);
     }
   }, [list_mdDetailAttachment]);
 
@@ -257,7 +258,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     if (show) {
       try {
         if (current === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
+          if (attachmentIsRequired && !attachmentDataSource.length) {
             const errorBody = {
               title: "Failed",
               description: `Please upload at least one attachment`,
@@ -419,17 +420,14 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       cards: [{
         header: "Approval",
         content: (
-          <ApprovalForm
+          <NxApprovalInput
             form={form}
-            dataTable={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
-              ...detail,
-              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-                ...employeeDetail,
-                key: `employee-detail-${index}`
-              })),
-              key: `detail-detail-${index}`,
+            hierarchyDetails={(list_mdApprovalHierarchyDetail || []).map((d, i) => ({
+              ...d,
+              employeeDetail: d.employeeDetail.map((e, j) => ({ ...e, key: `employee-detail-${j}` })),
+              key: `detail-detail-${i}`,
             }))}
-            dataOption={list_mdApprovalOptions}
+            options={list_mdApprovalOptions}
             handleSelectHiararchy={handleSelectHiararchy}
             key={`multi-destination-tab-1`}
           />
@@ -440,14 +438,15 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     {
       title: "Attachment",
       cards: [{
-        directRender: true,
+        header: "Attachment",
         content: (
-          <AttachmentForm
-            type={formType}
-            data={dataAttachment}
-            updateData={setDataAttachment}
+          <NxAttachmentInput
+            data={attachmentDataSource}
+            updateData={setAttachmentDataSource}
+            setDeleted={setDeletedAttachments}
             key={`multi-destination-tab-2`}
             getAPICategory={getMdAttachmentCategory}
+            categoryData={data_mdAttachmentCategory}
             service={accountManagementService}
             configApplication={configApp.ACCOUNT_SERVICE}
             mandatory={attachmentIsRequired}
@@ -463,7 +462,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   const next = async () => {
     try {
       if (current === 2) {
-        if (attachmentIsRequired && !dataAttachment.length) {
+        if (attachmentIsRequired && !attachmentDataSource.length) {
           const errorBody = {
             title: "Failed",
             description: `Please upload at least one attachment`,
@@ -518,7 +517,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     for (let i = current; i < newCurrent; i++) {
       try {
         if (i === 2) {
-          if (attachmentIsRequired && !dataAttachment.length) {
+          if (attachmentIsRequired && !attachmentDataSource.length) {
             const errorBody = {
               title: "Failed",
               description: `Please upload at least one attachment`,
@@ -594,6 +593,11 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       remark,
     } = form.getFieldsValue(true);
 
+    const attachments = nxRemoveKeys([
+      ...attachmentDataSource.filter((a) => ["exist", "draft"].includes(a.dataType)),
+      ...deletedAttachments,
+    ]);
+
     const body = {
       id: idMd,
       subjectId: data_accountDetail?.accountInformation?.accountId,
@@ -605,9 +609,10 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       appHierId,
       action: confirmationType,
       remark,
+      attachments,
     };
 
-    const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType !== "exist");
 
     const detailRoute = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
@@ -631,7 +636,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       })
       .catch((error) => {});
     else if (isUpdate)
-      dispatch(updateMultiDestination({ id: idMd, body, attachments: dataAttachment.filter((attachment) => attachment.dataType !== "exist") }))
+      dispatch(updateMultiDestination({ id: idMd, body, attachments: attachmentDataSource.filter((attachment) => attachment.dataType !== "exist") }))
       .unwrap()
         .then((data) => {
           setTimeout(() => {
@@ -651,7 +656,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   const handleClear = () => {
     if (isCreate) {
-      setDataAttachment([]);
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
@@ -712,14 +718,13 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
       }
 
-      const result = list_mdDetailAttachment?.map((item, index) => ({
+      const result = list_mdDetailAttachment?.map((item) => ({
         ...item,
-        key: `multi-destination-attachment-${item.id}`,
-        dataType: "exist"
+        key: item.id,
+        dataType: "exist",
       }));
-      setDataAttachment([
-        ...result,
-      ]);
+      setAttachmentDataSource([...result]);
+      setDeletedAttachments([]);
 
       setCurrent(0);
     }
@@ -751,24 +756,15 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
             {steps.map((step, stepIndex) =>
-              step.cards.map((card, cardIndex) =>
-                card.directRender ? (
-                  <div
-                    key={`${stepIndex}-${cardIndex}`}
-                    className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
-                  >
-                    {card.content}
-                  </div>
-                ) : (
-                  <NxCardContainer
-                    header={card.header}
-                    className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
-                    key={`${stepIndex}-${cardIndex}`}
-                  >
-                    <NxBaseContainer border>{card.content}</NxBaseContainer>
-                  </NxCardContainer>
-                )
-              )
+              step.cards.map((card, cardIndex) => (
+                <NxCardContainer
+                  header={card.header}
+                  className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                  key={`${stepIndex}-${cardIndex}`}
+                >
+                  <NxBaseContainer border>{card.content}</NxBaseContainer>
+                </NxCardContainer>
+              ))
             )}
 
             {/* Section Action Steps */}
@@ -786,12 +782,11 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
                     type={"reject"}
                     icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    { isUpdate ? "Reset" : "Clear" }
+                    {isUpdate ? "Reset" : "Clear"} Data
                   </Button>
                   <Button
                     onClick={() => handleSetShowConfirmationModal(true, "draft")}
                     type={"secondary"}
-                    disabled={current !== steps.length - 1}
                   >
                     Save as Draft
                   </Button>
@@ -818,9 +813,9 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
                     <>
                       <Button
                         onClick={() => handleSetShowConfirmationModal(true, "submit")}
-                        type={"submit"}
+                        type={"approve"}
                       >
-                        Save & Submit
+                        Submit
                       </Button>
                     </>
                   )}
@@ -832,19 +827,17 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
               formId={"multiDestinationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(list_mdApprovalHierarchyDetail || []).map((detail, index) => ({
-                ...detail,
-                employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-                  ...employeeDetail,
-                  key: `employee-detail-${index}`
-                })),
-                key: `detail-detail-${index}`,
+              approvalData={(list_mdApprovalHierarchyDetail || []).map((d, i) => ({
+                ...d,
+                employeeDetail: d.employeeDetail.map((e, j) => ({ ...e, key: `employee-detail-${j}` })),
+                key: `detail-detail-${i}`,
               }))}
               type={confirmationType}
-              dataAttachment={dataAttachment}
+              attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_createUpdateMd}
+              handleSubmitForm={handleSubmitForm}
             />
           </Form>
         </Spin>
