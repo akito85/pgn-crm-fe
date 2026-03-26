@@ -84,7 +84,7 @@ const PaymentRelationDetail = ({
 
   const {
     approvalType,
-    relatedAccountNumber,
+    accountNumber,
     id,
     createdDate,
     createdBy,
@@ -280,7 +280,7 @@ const PaymentRelationDetail = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} payment relation - ${accountNumber}?`}
         onFinish={({ remark }) => handleApproveOrReject(remark, approveOrReject)}
         loading={loading_approveRejectPr}
       />
