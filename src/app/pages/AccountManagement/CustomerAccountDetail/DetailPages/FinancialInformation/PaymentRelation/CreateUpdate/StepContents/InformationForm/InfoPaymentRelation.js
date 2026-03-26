@@ -156,7 +156,7 @@ export default function InfoPaymentRelation({
   return(
     <div className="flex flex-col gap-y-4">
       <div className="w-full grid grid-cols-3 gap-4">
-        <div className="flex gap-2 items-end">
+        <div className="flex gap-2 items-start">
           <Form.Item
             label={"Account Number"}
             required
