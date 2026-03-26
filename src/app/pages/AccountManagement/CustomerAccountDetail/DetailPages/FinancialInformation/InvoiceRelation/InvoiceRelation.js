@@ -81,20 +81,6 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   };
 
   /**
-   * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
-   * @returns {{ key: string, value: string, label: string }[]}
-   */
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
-    }));
-  };
-
-  /**
    * @param {boolean} show
    * @param {number} irId
    */
@@ -170,7 +156,6 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
-        tabOptions={handleApprovalHistoryOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
