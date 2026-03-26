@@ -18,7 +18,7 @@ import HeaderDetail from "../../../HeaderDetail";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
-const MultiDestinationDetails = ({
+const MultiDestinationDetail = ({
   accountType = "standard"
 }) => {
   const dispatch = useDispatch();
@@ -249,4 +249,4 @@ const MultiDestinationDetails = ({
   );
 };
 
-export default MultiDestinationDetails;
+export default MultiDestinationDetail;
