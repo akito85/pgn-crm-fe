@@ -63,7 +63,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     list_prApprovalHierarchyDetail,
     detail_paymentRelation,
     detailDraft_paymentRelation,
-    list_prDetailAttachment,
     data_prAttachmentCategory
   } = useSelector((state) => state.paymentRelation);
 
@@ -99,6 +98,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const attachmentIsRequired = true;
 
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
+  const attachments = detail.attachments;
 
   const formFields = [
     [
@@ -168,15 +168,12 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   }, [detail, list_prApprovalOptions]);
 
   useEffect(() => {
-    if (isUpdate && list_prDetailAttachment) {
-      const result = list_prDetailAttachment.map((item, index) => ({
-        ...item,
-        key: `payment-relation-attachment-${item.id}`,
-        dataType: "exist"
-      }));
-      setAttachmentDataSource([...result]);
-    }
-  }, [list_prDetailAttachment]);
+    if (isUpdate && attachments)
+      setAttachmentDataSource([...attachments.map((attachment) => ({
+        ...attachment,
+        key: attachment.id,
+      }))]);
+  }, [detail]);
 
   useEffect(() => {
     dispatch(getPrApprovalHierarchy());
@@ -634,12 +631,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
       }
 
-      const result = list_prDetailAttachment.map((item, index) => ({
-        ...item,
-        key: `payment-relation-attachment-${item.id}`,
-        dataType: "exist"
-      }));
-      setAttachmentDataSource([...result]);
+      if (attachments)
+        setAttachmentDataSource([...attachments]);
       setDeletedAttachments([]);
 
       setCurrent(0);
