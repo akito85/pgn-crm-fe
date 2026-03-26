@@ -49,7 +49,7 @@ import GasUtilizationForm from "../../app/pages/AccountManagement/CustomerAccoun
 import EquipmentForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Equipment/Form/EquipmentForm";
 import RawMaterialSourceForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/RawMaterialSource/RawMaterialSourceHistory/RawMaterialSourceForm";
 import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ProductDistribution/ProductDistributionHistory/ProductDistributionForm";
-import PaymentRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetails"; 
+import PaymentRelationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetail"; 
 import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
 
 import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
@@ -115,12 +115,12 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   CREATE_SERVICE_REQUEST_PREREQUISITE_PAGE: <PreRequisiteCreateForm />,
 
   // Payment Relation Detail
-  VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails accountType="standard" />,
+  VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetail accountType="standard" />,
   CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"create"} accountType={"standard"} />,
   UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"standard"} />,
 
   // Payment Relation Account One Time
-  VIEW_DETAIL_PAYMENT_RELATION_ONETIME_PAGE: <PaymentRelationDetails accountType="oneTime" />,
+  VIEW_DETAIL_PAYMENT_RELATION_ONETIME_PAGE: <PaymentRelationDetail accountType="oneTime" />,
   CREATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"create"} accountType={"oneTime"} />,
   UPDATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"oneTime"} />,
 

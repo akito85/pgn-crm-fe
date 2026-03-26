@@ -18,7 +18,7 @@ import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
-const PaymentRelationDetails = ({
+const PaymentRelationDetail = ({
   accountType = "standard"
 }) => {
   const dispatch = useDispatch();
@@ -295,4 +295,4 @@ const PaymentRelationDetails = ({
   );
 };
 
-export default PaymentRelationDetails;
+export default PaymentRelationDetail;
