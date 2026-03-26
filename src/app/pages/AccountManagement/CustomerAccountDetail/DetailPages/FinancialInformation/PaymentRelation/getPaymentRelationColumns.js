@@ -151,7 +151,7 @@ const getPaymentRelationColumns = (
     filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "statusApproval",
+      "status",
       searchInput,
       searchedColumn,
       searchText,
