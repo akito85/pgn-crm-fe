@@ -19,16 +19,16 @@ import {
  * The parent (`InvoiceRelation`) is responsible only for modals and permissions.
  *
  * @param {object}   props
- * @param {number}   [props.idAccount=0]                  - Account ID
- * @param {number}   [props.idCustomer=0]                 - Customer ID
+ * @param {number}   props.accountId                  - Account ID
+ * @param {number}   props.customerId                 - Customer ID
  * @param {Function} [props.handleInactivateModal]        - Opens the inactivate confirmation modal
  * @param {Function} [props.handleApprovalHistoryModal]   - Opens the approval history modal
  * @param {Function} [props.handleApproval]               - Triggers the approval action
  * @param {number}   [props.refreshSignal=0]              - Increment to trigger a page-0 refresh from the parent
  */
 const InvoiceRelationTable = ({
-  idAccount = 0,
-  idCustomer = 0,
+  accountId,
+  customerId,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
@@ -81,7 +81,7 @@ const InvoiceRelationTable = ({
       filterRules
     };
 
-    dispatch(getInvoiceRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -135,7 +135,7 @@ const InvoiceRelationTable = ({
       };
 
       await dispatch(
-        getInvoiceRelation({ id: idAccount, body, isLoadMore: true })
+        getInvoiceRelation({ id: accountId, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -152,7 +152,7 @@ const InvoiceRelationTable = ({
       filterRules
     };
 
-    dispatch(downloadInvoiceRelation({ body, id: idAccount }));
+    dispatch(downloadInvoiceRelation({ body, id: accountId }));
   };
 
   // --- Effects ---
@@ -168,7 +168,7 @@ const InvoiceRelationTable = ({
     };
 
     setPage(0);
-    dispatch(getInvoiceRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
@@ -187,8 +187,8 @@ const InvoiceRelationTable = ({
             : "",
         {
           state: {
-            idAccount,
-            idCustomer,
+            idAccount: accountId,
+            idCustomer: customerId,
             id
           }
         }
@@ -202,8 +202,8 @@ const InvoiceRelationTable = ({
             : "",
         {
           state: {
-            idAccount,
-            idCustomer
+            idAccount: accountId,
+            idCustomer: customerId,
           }
         }
       ),
@@ -216,8 +216,8 @@ const InvoiceRelationTable = ({
             : "",
         {
           state: {
-            idAccount,
-            idCustomer,
+            idAccount: accountId,
+            idCustomer: customerId,
             id
           }
         }

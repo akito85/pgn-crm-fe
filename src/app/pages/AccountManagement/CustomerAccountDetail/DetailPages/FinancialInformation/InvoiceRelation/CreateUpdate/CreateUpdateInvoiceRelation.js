@@ -7,7 +7,6 @@ import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInp
 import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail
@@ -46,13 +45,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   const isCreate = formType === "create";
   const isUpdate = formType === "update";
-
-  const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
-  );
   
-  const accountId = data_accountDetail?.accountInformation?.accountId;
-
   const {
     loading_listIrApprovalOption,
     loading_listIrApprovalHierarchyEmployee,
@@ -75,8 +68,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idIr = location?.state?.id;
   
   const status = detail_invoiceRelation.status || "DRAFT";
@@ -105,10 +98,6 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     ["appHierId"],
     []
   ];
-
-  useEffect(() => {
-    if (idCustomer) dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
 
   useEffect(() => {
     if (isUpdate && idIr) {
@@ -177,8 +166,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
       state: {
-        idAccount,
-        idCustomer
+        idAccount: accountId,
+        idCustomer: customerId
       }
     },
     {
@@ -288,14 +277,14 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
-    if (idAccount && idCustomer && accountType) {
+    if (accountId && customerId && accountType) {
       if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
+        dispatch(getAccountStandardDetail({ customerId, accountId }));
       } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
+        dispatch(getAccountOneTimeDetail({ customerId, accountId }));
       }
     }
-  }, [dispatch, idAccount, idCustomer, accountType]);
+  }, [dispatch, accountId, customerId, accountType]);
 
   const setAccount = (accountId, accountNumber, accountName) => {
     form.setFieldValue("accountId", accountId);
@@ -318,7 +307,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
             <InfoInvoiceRelation
               form={form}
               setAccount={setAccount}
-              accountId={idAccount}
+              accountId={accountId}
               isUpdate={isUpdate}
               isDraft={isDraft}
               key={`invoice-relation-tab-0`}
@@ -546,8 +535,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount,
-                idCustomer
+                idAccount: accountId,
+                idCustomer: customerId
               }
             });
           }, 2000);
@@ -569,8 +558,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount,
-                idCustomer
+                idAccount: accountId,
+                idCustomer: customerId
               }
             });
           }, 2000);
@@ -630,8 +619,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         <HeaderDetail
           data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
           dispatch={dispatch}
-          idAccount={idAccount}
-          idCustomer={idCustomer}
+          idAccount={accountId}
+          idCustomer={customerId}
           type={accountType}
         />
         <Spin spinning={loading}>

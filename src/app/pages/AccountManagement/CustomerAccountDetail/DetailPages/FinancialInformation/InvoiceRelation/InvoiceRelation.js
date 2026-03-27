@@ -14,10 +14,10 @@ import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 /**
  * Invoice relation list table module
- * @param {{ id?: number; idCustomer?: number }} props
+ * @param {{ accountId: number; customerId: number }} props
  * @returns
  */
-const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
+const InvoiceRelation = ({ accountId, customerId }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
 
@@ -120,15 +120,15 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   return (
     <>
       <InvoiceRelationTable
-        idAccount={id}
-        idCustomer={idCustomer}
+        accountId={accountId}
+        customerId={customerId}
         handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
         handleApproval={setShowApprovalModal}
         refreshSignal={refreshSignal}
       />
       <InvoiceRelationApprovalModal
-        id={id}
+        accountId={accountId}
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={triggerRefresh}
