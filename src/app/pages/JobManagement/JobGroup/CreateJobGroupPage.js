@@ -390,6 +390,7 @@ const CreateJobGroupPage = () => {
               useSearch={true}
               useAdvanceSearch={true}
               useColumnSettings={true}
+              autoHeight={false}
               tableScrolled={{ y: 400, x: "max-content" }}
               rowKey="id"
               onLoadMore={loadMoreData}
