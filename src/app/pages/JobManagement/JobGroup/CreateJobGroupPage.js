@@ -380,7 +380,7 @@ const CreateJobGroupPage = () => {
             </button>,
           ]}
         >
-          <div className="p-4">
+          {modalVisible && <div className="p-4">
             <NxTable
               idTable="job-selection-table"
               dataSource={allJobs}
@@ -395,7 +395,7 @@ const CreateJobGroupPage = () => {
               onLoadMore={loadMoreData}
               hasMore={hasMore}
             />
-          </div>
+          </div>}
         </NxModal>
 
         <footer className="mt-4 flex justify-between items-center px-4 py-3 bg-white rounded-lg border border-solid border-[#C8CDD4]">
