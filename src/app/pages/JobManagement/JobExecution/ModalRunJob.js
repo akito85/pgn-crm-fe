@@ -163,8 +163,8 @@ const buildInputPayload = (paramValues, parameters) => {
 // ─── Job selection columns ────────────────────────────────────────────────────
 
 const JOB_COLS_BASE = [
-  { title:"NO",   width:60,  align:"center", render:(_, __, i) => i + 1 },
-  { title:"NAME", dataIndex:"name", key:"name",  align:"left" },
+  { title:"NO",   width:60,  align:"center", fixed:"left", render:(_, __, i) => i + 1 },
+  { title:"NAME", dataIndex:"name", key:"name",  align:"left", fixed:"left" },
   { title:"CODE", dataIndex:"code", key:"code",  align:"left", width:140 },
   { title:"TYPE", dataIndex:"type", key:"type",  align:"left", width:120 },
   { title:"DESC", dataIndex:"desc", key:"desc",  align:"left", ellipsis:true },
@@ -244,7 +244,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
 
   // Action column — AddJobIcon navigates to step 2
   const actionColumn = {
-    title: "ACTION", key: "select-action", width: 70, align: "center",
+    title: "ACTION", key: "select-action", width: 70, align: "center", fixed:"right",
     render: (_, record) => (
       <div style={{ display:"flex", alignItems:"center", justifyContent:"center" }}>
         <button
