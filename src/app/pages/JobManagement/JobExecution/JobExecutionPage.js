@@ -292,8 +292,7 @@ const JobExecutionPage = () => {
               isPrimary={true}
               className="px-2 py-2 rounded-lg min-h-[32px]"
               onClick={() => {
-                setSelectJobModalOpen(false);
-                setTimeout(() => setSelectJobModalOpen(true), 0);
+                setSelectJobModalOpen(true);
               }}
             >
               <span className="text-xs font-medium tracking-tight">Run Job</span>

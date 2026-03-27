@@ -68,7 +68,7 @@ const WizardStepBar = ({ current }) => {
       {/* Step 1 */}
       <div style={{ display:"flex", alignItems:"center", gap:10, paddingBottom:14, borderBottom:`2px solid #1976D2`, marginBottom:-1 }}>
         {stepCircle(1, !done, done)}
-        {stepLabel("Select Job", !done || done)}
+        {stepLabel("Select Job", !done)}
       </div>
 
       {/* Animated connector */}
