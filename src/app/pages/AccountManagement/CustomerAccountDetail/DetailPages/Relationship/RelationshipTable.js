@@ -113,13 +113,20 @@ const RelationshipTable = ({
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const isOneTime = location.pathname.includes("account-onetime");
-
   const {
     list_relationship,
     pagination_relationship,
     loading_listRelationship: loading,
   } = useSelector((state) => state.relationship);
+
+  // --- Derived values ---
+  const isOneTime = location.pathname.includes("account-onetime");
+  const totalElement = pagination_relationship?.totalElements || 0;
+  const hasMore = list_relationship.length < totalElement;
+
+  const dataSource = useMemo(() =>
+    list_relationship.map((item, index) => ({ ...item, key: `${item.id}-${index}` })),
+  [list_relationship]);
 
   // --- State ---
   const searchInput = useRef(null);
@@ -135,14 +142,6 @@ const RelationshipTable = ({
     right: ["statusApproval", "status", "action"],
     left: [],
   }));
-
-  // --- Derived values ---
-  const totalElement = pagination_relationship?.totalElements || 0;
-  const hasMore = list_relationship.length < totalElement;
-
-  const dataSource = useMemo(() =>
-    list_relationship.map((item, index) => ({ ...item, key: `${item.id}-${index}` })),
-  [list_relationship]);
 
   // --- Handlers ---
   const handleRefresh = () => {
