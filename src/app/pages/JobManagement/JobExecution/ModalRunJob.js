@@ -499,7 +499,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
       className="[&_.ant-modal-footer]:flex [&_.ant-modal-footer]:justify-between [&_.ant-modal-footer]:items-center">
       <WizardStepBar current={step} />
       <div style={{ paddingBottom:4 }}>
-        {step === "select" && (
+        {step === "select" && open && (
           <div style={{ padding:"16px 16px 0" }}>
             <NxTable
               idTable="modal-run-job-table"
