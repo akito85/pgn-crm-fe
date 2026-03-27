@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Tooltip, Checkbox } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
@@ -531,7 +530,7 @@ const ViewCollectingAgent = () => {
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <CardContainer
                 header={
@@ -589,7 +588,7 @@ const ViewCollectingAgent = () => {
 
             {/* modal try again */}
             {renderModal()}
-        </LayoutMenu>
+        </>
     );
 };
 

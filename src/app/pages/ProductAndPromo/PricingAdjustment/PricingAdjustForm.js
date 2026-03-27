@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Modal, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -1007,7 +1006,7 @@ const PricingAdjustForm = (props) => {
     }
   };
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"} tip={"Loading..."}>
         <BreadCrumb routes={routes(defineRoute())} />
         <Form
@@ -1328,7 +1327,7 @@ const PricingAdjustForm = (props) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

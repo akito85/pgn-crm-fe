@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Collapse, Spin } from "antd";
 import { UpOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import DetailText from "../../../../components/DetailText";
 import TablePagination from "../../../../components/TablePagination";
@@ -361,7 +360,7 @@ const CreateAccounting = () => {
     );
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer
@@ -420,7 +419,7 @@ const CreateAccounting = () => {
                     </div>
                 </CardContainer>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

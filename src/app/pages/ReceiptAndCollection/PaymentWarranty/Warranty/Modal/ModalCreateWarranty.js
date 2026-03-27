@@ -31,6 +31,8 @@ import {
     getListCategoryReceipt,
 } from "../../../../../../redux/slices/receipt_collection/receipt";
 
+import { CLAIM_PERIOD_TERM_TYPES } from "../../../../../../constants/warranty";
+
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 
@@ -121,7 +123,8 @@ const ModalCreateWarranty = ({
 
     // Format auto-filled Account Data
     useEffect(() => {
-        if (dataAccountNumber && dataAccountNumber.data) {
+        const currentAccountId = form.getFieldValue("accountId");
+        if (dataAccountNumber && dataAccountNumber.data && currentAccountId) {
             form.setFieldsValue({
                 accountName: dataAccountNumber.data.accountName,
                 cusNumber: dataAccountNumber.data.customerNumber,
@@ -142,11 +145,11 @@ const ModalCreateWarranty = ({
         } else {
             dispatch(getAllAccountNumberDDL());
             dispatch(resetDataAccountNumber());
-            form.resetFields([
-                "accountName", "cusNumber", "cusName",
-                "costCenterCode", "costCenterName", "segment",
-                "accountGroupType", "accountType", "classificationType"
-            ]);
+            form.setFieldsValue({
+                accountName: null, cusNumber: null, cusName: null,
+                costCenterCode: null, costCenterName: null, segment: null,
+                accountGroupType: null, accountType: null, classificationType: null
+            });
         }
     };
 
@@ -253,7 +256,7 @@ const ModalCreateWarranty = ({
                 rateDate: moment(values.rateDate).format("YYYY-MM-DD"),
                 effectiveStartDate: moment(values.effStartDate).format("YYYY-MM-DD"),
                 effectiveEndDate: moment(values.effEndDate).format("YYYY-MM-DD"),
-                claimPeriodTermType: (values.claimPeriodTermType || "Date").toUpperCase(),
+                claimPeriodTermType: values.claimPeriodTermType || CLAIM_PERIOD_TERM_TYPES.DATE,
                 claimPeriodTermValue: claimValue,
                 description: values.description,
                 isDraft: isDraft,
@@ -290,6 +293,8 @@ const ModalCreateWarranty = ({
             handleRefresh();
             handleBackForm();
         } catch (error) {
+            const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save warranty';
+            message.error(`Save failed: ${errorMsg}`);
             console.error(error);
         } finally {
             setLoadingSave(false);
@@ -335,17 +340,21 @@ const ModalCreateWarranty = ({
                             <Col span={8}>
                                 <Form.Item name="accountId" label="Account Number" rules={[{ required: true }]}>
                                     <Select
-                                        placeholder="Select Account"
+                                        placeholder="Select Account Number"
                                         onChange={handleAccountChange}
                                         showSearch
                                         optionFilterProp="children"
-                                        options={
-                                            dataAccNumber?.data?.map((item) => ({
+                                        allowClear={true}
+                                        filterOption={(input, option) =>
+                                            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    >
+                                        {dataAccNumber?.data?.map((item) => ({
                                                 label: item.name,
                                                 value: item.id,
                                             })) || []
                                         }
-                                    />
+                                    </Select>
                                 </Form.Item>
                             </Col>
                             <Col span={8}>
@@ -491,9 +500,9 @@ const ModalCreateWarranty = ({
                                 <Form.Item label="Term Of Claim Period" style={{ marginBottom: 0 }}>
                                     <Input.Group compact className="flex gap-2">
                                         <Form.Item name="claimPeriodTermType" style={{ width: '40%', marginBottom: 0 }}>
-                                            <Select placeholder="Type" defaultValue="Date">
-                                                <Option value="Date">Date</Option>
-                                                <Option value="Days">Days</Option>
+                                            <Select placeholder="Type" defaultValue={CLAIM_PERIOD_TERM_TYPES.DATE}>
+                                                <Option value={CLAIM_PERIOD_TERM_TYPES.DATE}>Date</Option>
+                                                <Option value={CLAIM_PERIOD_TERM_TYPES.AFTER}>After</Option>
                                             </Select>
                                         </Form.Item>
                                         <Form.Item name="claimPeriodTermValue" style={{ width: '60%', marginBottom: 0 }}>

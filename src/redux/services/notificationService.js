@@ -30,6 +30,11 @@ class NotificationService {
    * @param {function} callbacks.onDisconnect - Callback when disconnected
    */
   connect(userId, callbacks = {}) {
+    if (!userId) {
+      console.warn("[NotificationService] SSE connect skipped: userId is required");
+      return;
+    }
+
     const sseBaseUrl = NOTIFICATION_CONFIG.SSE_BASE_URL;
 
     this.userId = userId;

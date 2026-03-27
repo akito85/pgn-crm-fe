@@ -331,7 +331,7 @@ const RelationshipAttachment = ({
           <NxTable
             dataSource={data}
             totalData={data.length}
-            tableScrolled={{ y: 300, x: 1500 }}
+            tableScrolled={{ x: 1500 }}
             columns={columnAttachmentData(
               searchInput,
               searchedColumn,

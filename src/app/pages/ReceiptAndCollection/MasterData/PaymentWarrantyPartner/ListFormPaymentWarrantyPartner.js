@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import moment from "moment";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
@@ -293,13 +292,13 @@ const ListFormPaymentWarrantyPartner = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         <Form layout="vertical" form={form} onFinish={handleSubmitForm}>
           <div style={{ display: current !== 0 ? "none" : undefined }}>
-            <PaymentWarrantyPartnerForm dataType={dataType} form={form} isApprover={data_detail?.isApprover} />
+            <PaymentWarrantyPartnerForm dataType={type} form={form} isApprover={data_detail?.isApprover} />
           </div>
           <div style={{ display: current !== 1 ? "none" : undefined }}>
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -376,7 +375,7 @@ const ListFormPaymentWarrantyPartner = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

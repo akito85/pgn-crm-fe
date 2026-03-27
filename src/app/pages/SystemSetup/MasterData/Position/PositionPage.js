@@ -14,7 +14,6 @@ import { Link, NavLink } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   downloadMasterPosition,
   getDetailMasterPosition,
@@ -348,7 +347,7 @@ const PositionPage = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
 
         <BreadCrumb routes={routes} />
@@ -395,7 +394,7 @@ const PositionPage = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

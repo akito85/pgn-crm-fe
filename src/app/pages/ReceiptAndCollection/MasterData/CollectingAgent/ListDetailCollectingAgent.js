@@ -12,7 +12,6 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
 import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
     approveOrRejectCollectingAgent,
     approveOrRejectInactiveCollectingAgent,
@@ -149,7 +148,7 @@ const ListDetailCollectingAgent = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <div>
                 <Tabs
@@ -210,7 +209,7 @@ const ListDetailCollectingAgent = () => {
                 }}
                 showApproval={isShowButton === true}
             />
-        </LayoutMenu>
+        </>
     );
 };
 

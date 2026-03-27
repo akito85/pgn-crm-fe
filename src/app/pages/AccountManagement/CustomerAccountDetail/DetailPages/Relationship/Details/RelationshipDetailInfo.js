@@ -125,7 +125,7 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
         <NxTable
           idTable="relationship-related-detail-table"
           dataSource={dataSourceWithKeys}
-          tableScrolled={{ y: 400, x: listRelatedDetail.length ? "max-content" : 3000 }}
+          tableScrolled={{ x: listRelatedDetail.length ? "max-content" : 3000 }}
           columns={processedColumns}
           usePagination={false}
           useInfiniteScroll={false}

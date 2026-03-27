@@ -37,6 +37,7 @@ import ModalChooseProduct from "./ModalChoose";
 const SaDetail = ({
   modalChooseProduct,
   setModalChooseProduct,
+  loadingChooseProduct,
   type,
   handleSaDetailObj,
   saDetailObj,
@@ -138,7 +139,7 @@ const SaDetail = ({
 
     // Get SA Type VALUE (string like "ADDON" or "OTHERS")
     const saTypeValue = saInfoObj?.serviceAgreementTypeValue;
-    console.log("saTypeValue", saTypeValue);
+    // console.log("saTypeValue", saTypeValue);
     // Case 1: SA Type = ADDON → Input (disabled, auto-filled from product)
     if (saTypeValue === "ADDON") {
       return (
@@ -252,7 +253,7 @@ const SaDetail = ({
   }, [saDetailObj?.pricingRule]);
 
   useEffect(() => {
-    // if (saDetailObj.createFrom === 2) {
+    if (saDetailObj.createFrom === 2) {
     const selectedPriceCode = data_price_code?.filter(
       (item) => item.id === saDetailObj?.priceCode
     )[0];
@@ -272,7 +273,7 @@ const SaDetail = ({
         ? selectedPriceRule.name
         : "Custom Tiering",
     }));
-    // }
+    }
   }, [
     data_price_code,
     data_price_rule,
@@ -451,35 +452,42 @@ const SaDetail = ({
   };
 
   const handleGetDetailPricing = (id) => {
+    // Clear table first before fetching
+    setDataPricing([]);
+    setDataTableLateCharge([]);
+    setSendLateCharge({});
+
     if (id !== -1) {
       dispatch(getListPriceRuleById(id))
         .unwrap()
         .then((data) => {
           if (data) {
-            const res = data.map((item, index) => {
+            const res = data.filter(Boolean).map((item, index) => {
               return {
-                currency: item.currency ? item.currency : "",
-                currencyId: `${item.currency}`,
-                description: item.description,
+                currency: item?.currency,
+                currencyId: item?.currency,
+                description: item?.description,
                 flag: null,
-                id: item.priceCodeId,
-                idPricing: item.pricingRuleDetailId,
-                key: index + 1,
-                lineNumber: item.lineNumber,
-                max: item.max,
+                id: item?.priceCodeId,
+                idPricing: item?.pricingRuleDetailId,
+                key: `${item?.priceCodeId ?? 'pc'}-${item?.min ?? 0}-${item?.max ?? 'unlim'}-${index}`,
+                lineNumber: item?.lineNumber,
+                max: item?.max,
                 maximumName: null,
-                min: item.min,
-                priceCode: item.priceCodeId,
-                priceCodeName: item.priceCode,
-                priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
-                unlimited: item.isUnlim,
-                uom: item.uom ? item.uom : "",
-                uomName: item.uom ? item.uom : "",
-                value: item.value ? item.value : "",
+                min: item?.min,
+                priceCode: item?.priceCodeId,
+                priceCodeName: item?.priceCode,
+                priceDetail: `${item?.value}/${item?.currencyName}/${item?.uomName}`,
+                unlimited: item?.isUnlim,
+                uom: item?.uom,
+                uomName: item?.uom,
+                value: item?.value,
+                adjustment: item?.adjustment?.adjustmentText,
+                adjustmentId: item?.adjustment?.priceAdjustmentDetailId,
               };
             });
             setDataPricing(res);
-            let arrPriceId = data.map((item) => item.priceCodeId);
+            let arrPriceId = data.map((item) => item?.priceCodeId).filter(Boolean);
             const body = {
               accountId: idAccount,
               productVersionId:
@@ -492,24 +500,39 @@ const SaDetail = ({
               .unwrap()
               .then((data) => {
                 if (data) {
-                  const resultArray = Object.values(data).map((item) => ({
-                    createdDate: item.createdDate,
-                    createdBy: item.createdBy,
-                    updatedDate: item.updatedDate,
-                    updatedBy: item.updatedBy,
-                    status: item.status,
-                    lateChargeId: item.latechargeId,
-                    lateChargeName: item.latechargeName,
-                    currency: item.currency,
-                    maxAmount: item.maxAmount,
-                    formula: item.formula,
-                    description: item.description,
-                  }));
+                  const resultArray = Object.values(data ?? {})
+                      .filter(Boolean)
+                      .map(({
+                        createdDate,
+                        createdBy,
+                        updatedDate,
+                        updatedBy,
+                        status,
+                        lateChargeId,
+                        lateChargeName,
+                        currency,
+                        maxAmount,
+                        formula,
+                        description,
+                      }) => ({
+                        createdDate,
+                        createdBy,
+                        updatedDate,
+                        updatedBy,
+                        status,
+                        lateChargeId,
+                        lateChargeName,
+                        currency,
+                        maxAmount,
+                        formula,
+                        description,
+                      }));
                   setDataTableLateCharge(resultArray);
+                  setSendLateCharge(data);
                 }
               })
-              .catch(() => {
-                console.log("error");
+              .catch((e) => {
+                console.log("error", e);
               });
           }
         })
@@ -647,6 +670,7 @@ const SaDetail = ({
                         onClick={() => {
                           setModalChooseProduct(true);
                         }}
+                        loading={loadingChooseProduct}
                       >
                         Choose
                       </Button>
@@ -813,8 +837,8 @@ const SaDetail = ({
                           key: "pricing",
                           label: <BadgeLabel label="Pricing" count={getBadgeCount("Pricing")} />,
                           children: (
-                            <NxBaseContainer border header={"Pricing Information"}>
-                              <div className={"grid grid-cols-2 w-full gap-x-6"}>
+                            <NxBaseContainer border>
+                              <div className={"grid grid-cols-3 w-full gap-x-6"}>
                                 {/* DDL PRICE CODE */}
                                 <div>
                                   <Form.Item
@@ -832,8 +856,21 @@ const SaDetail = ({
                                   >
                                     <SelectComponent
                                       onChange={(e) => {
-                                        {
-                                          e !== undefined && getLateCharge(e);
+                                        if (e !== undefined) {
+                                          getLateCharge(e);
+                                          const selectedOption = ddlPriceCode?.find(
+                                            (item) => item.id === e
+                                          );
+                                          const fullPriceCodeText = selectedOption
+                                            ? `${selectedOption.priceCode || ""}${selectedOption?.mpricingDetail
+                                                ?.map((item) => `/${item.currency}/${item.value}/${item.uomName}`)
+                                                .join("") || ""}`.replace(/\n/g, "")
+                                            : "";
+                                          setSaDetailObj((prev) => ({
+                                            ...prev,
+                                            priceCode: e,
+                                            priceCodeText: fullPriceCodeText,
+                                          }));
                                         }
                                         handleLabelAdjustment(e);
                                       }}
@@ -866,12 +903,8 @@ const SaDetail = ({
                                     <InputComponent disabled={true} />
                                   </Form.Item>
                                 </div>
-                              </div>
 
-                              <div className={"grid grid-cols-1 w-full gap-x-6"}>
-                                {/* DDL PRICE RULE */}
                                 <div>
-
                                   <Form.Item
                                     name={"pricingRule"}
                                     label={"Pricing Rule"}
@@ -882,10 +915,39 @@ const SaDetail = ({
                                     <SelectComponent
                                       onChange={(e) => {
                                         if (e !== undefined) {
-                                          handleGetDetailPricing(e);
-                                          setIsCustomTiering(e === -1 ? true : false);
+                                          const isCustom = e === -1;
+                                          setIsCustomTiering(isCustom);
+                                          const selectedRule = ddlPriceRule?.find(
+                                            (item) => item.pricingRuleId === e
+                                          );
+
+                                          // Always clear table data first
+                                          // setDataPricing([]);
+                                          // setDataTableLateCharge([]);
+                                          // setSendLateCharge({});
+
+                                          // Sync saDetailObj 1:1
+                                          setSaDetailObj((prev) => ({
+                                            ...prev,
+                                            pricingRule: e,
+                                            pricingRuleText: isCustom ? "Custom Tiering" : (selectedRule?.name || ""),
+                                          }));
+
+                                          if (!isCustom) {
+                                            // Non-custom: fetch from API, data populated on response
+                                            handleGetDetailPricing(e);
+                                          }
                                         } else {
+                                          // Cleared: reset everything
                                           setDataPricing([]);
+                                          setDataTableLateCharge([]);
+                                          setSendLateCharge({});
+                                          setIsCustomTiering(false);
+                                          setSaDetailObj((prev) => ({
+                                            ...prev,
+                                            pricingRule: null,
+                                            pricingRuleText: null,
+                                          }));
                                         }
                                       }}
                                     >
@@ -901,7 +963,6 @@ const SaDetail = ({
                                   </Form.Item>
                                 </div>
                               </div>
-
                               <TablePricing
                                 setData={setDataPricing}
                                 data={dataPricing}
@@ -921,7 +982,7 @@ const SaDetail = ({
                           key: "calculationRule",
                           label: <BadgeLabel label="Calculation Rule" count={getBadgeCount("Calculation Rule")} />,
                           children: (
-                            <NxBaseContainer border header={"Calculation Rule"}>
+                            <NxBaseContainer border>
                               <TableCalcRule
                                 dispatch={dispatch}
                                 dataTable={dataTableCalcRule}
@@ -938,7 +999,7 @@ const SaDetail = ({
                           key: "termOfService",
                           label: <BadgeLabel label="Term of Service" count={getBadgeCount("Term of Service")} />,
                           children: (
-                            <NxBaseContainer border header={"Term of Service"}>
+                            <NxBaseContainer border>
                               <TableTos
                                 isProduct={saDetailObj?.createFrom}
                                 dataTermOfService={dataTermOfService}
@@ -955,7 +1016,7 @@ const SaDetail = ({
                           key: "lateCharge",
                           label: <BadgeLabel label="Late Charge" count={getBadgeCount("Late Charge")} />,
                           children: (
-                            <NxBaseContainer border header={"Late Charge"}>
+                            <NxBaseContainer border>
                               <TableLateCharge
                                 dataTableLateCharge={dataTableLateCharge}
                                 setDataTableLateCharge={setDataTableLateCharge}
@@ -967,7 +1028,7 @@ const SaDetail = ({
                           key: "taxImplication",
                           label: <BadgeLabel label="Tax Implication" count={getBadgeCount("Tax Implication")} />,
                           children: (
-                            <NxBaseContainer border header={"Tax Implication"}>
+                            <NxBaseContainer border>
                               <TableTaxImplication
                                 dataTaxImplication={dataTaxImplication}
                                 setDataTaxImplication={setDataTaxImplication}

@@ -4,7 +4,6 @@ import { message, Dropdown } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { DownOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -249,7 +248,7 @@ const EMeteraiManagement = () => {
   });
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -359,7 +358,7 @@ const EMeteraiManagement = () => {
           handleRefresh();
         }}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

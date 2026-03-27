@@ -1,4 +1,3 @@
-import { MoreOutlined } from "@ant-design/icons";
 import { Popover, Space } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
@@ -11,16 +10,27 @@ export const RenderContentActions = (
   itemRender = [],
   totalLength,
   permissions = [],
-  sliceColumn = "View"
+  sliceColumn = "View",
+  stopClickPropagation = false,
 ) => {
+
+  const ViewListIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5.625 5.625H18.125M5.625 10H18.125M5.625 14.375H18.125" stroke="#1976D2" strokeWidth="1.875" strokeLinejoin="round"/>
+      <path d="M2.5 5H3.75V6.25H2.5V5ZM2.5 9.375H3.75V10.625H2.5V9.375ZM2.5 13.75H3.75V15H2.5V13.75Z" stroke="#1976D2" strokeWidth="1.25" strokeLinecap="square" strokeLinejoin="round"/>
+    </svg>
+  );
+
   if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center py-1 gap-4">
+      <div className="w-full flex justify-center items-center gap-4">
         <Popover
           trigger={"click"}
           placement="bottomRight"
+          showArrow={false}
+          overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
           content={
-            <Space direction="vertical">
+            <div className="flex flex-col">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.map((item, index) => {
@@ -30,13 +40,16 @@ export const RenderContentActions = (
                     return null;
                   }
                 })}
-            </Space>
+            </div>
           }
         >
-          <div className="group">
-            <MoreOutlined
-              className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out"
-            />
+          <div
+            className="group"
+            onClick={(e) => {
+              if (stopClickPropagation) e.stopPropagation();
+            }}
+          >
+            <ViewListIcon />
           </div>
         </Popover>
         <div>
@@ -57,7 +70,7 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 py-1 items-center">
+      <div className="w-full flex justify-center gap-4 items-center">
         {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength, index);
@@ -75,17 +88,18 @@ export const useColumnActionPermission = (
   permissionList = [],
   itemsRender = [],
   sliceColumn = "View",
-  type = "page"
+  type = "page",
+  stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -95,13 +109,13 @@ export const useColumnActionPermission = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender
@@ -132,7 +146,8 @@ export const useColumnActionPermission = (
               lowerCaseItemsRender,
               arrayActions?.length,
               arrayActions,
-              sliceColumn
+              sliceColumn,
+              stopClickPropagation,
             ),
         },
       ];

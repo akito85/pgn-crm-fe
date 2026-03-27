@@ -164,6 +164,7 @@ const PointOfSalesPage = ({
             >
               <InputComponent
                 placeholder="Enter Registration Number"
+                maxLength={16}
                 onChange={(e) => setAccountNumber(e.target.value)}
               />
             </Form.Item>
@@ -263,8 +264,6 @@ const PointOfSalesPage = ({
                 )}
             </div>
 
-
-
             <Form.Item
               name="accountSegment"
               label="Account Segment"
@@ -292,7 +291,10 @@ const PointOfSalesPage = ({
               name="clasificationType"
               label="Classification Type"
               rules={[
-                { message: requiredMessage("Classification Type"), required: true },
+                {
+                  message: requiredMessage("Classification Type"),
+                  required: true,
+                },
               ]}
               style={{ marginBottom: 0 }}
             >
@@ -348,10 +350,7 @@ const PointOfSalesPage = ({
             >
               <SelectComponent
                 onChange={onMeterReadingCodeChange}
-                disabled={
-                  !mergedArrayMrc ||
-                  mergedArrayMrc.length === 0
-                }
+                disabled={!mergedArrayMrc || mergedArrayMrc.length === 0}
                 placeholder="Select Meter Reading Code"
                 options={(mergedArrayMrc || []).map((item) => ({
                   label: item?.name,
@@ -380,29 +379,12 @@ const PointOfSalesPage = ({
               ]}
               style={{ marginBottom: 0 }}
             >
-              <InputComponent placeholder="Enter Phone Number" />
+              <InputComponent placeholder="Enter Phone Number" maxLength={15} />
             </Form.Item>
-
-            <div className="col-span-5">
-              <Form.Item
-                name="address"
-                label="Address"
-                rules={[
-                  { message: requiredMessage("Address"), required: true },
-                ]}
-              >
-                <InputComponent
-                  type="textarea"
-                  rows={3}
-                  placeholder="Enter Address"
-                />
-              </Form.Item>
-            </div>
           </div>
         </CardContainer>
       );
     } else {
-      // Customer - TIDAK BERUBAH
       return (
         <CardContainer
           header={

@@ -1,9 +1,7 @@
-// components/ManagementDeliveryInvoice.js
 import React, { useEffect, useState, useMemo } from "react";
 import { Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SummaryStatistics from "./_components/ManagementDeliveryComponent/SummaryStatistics";
 import DetailInvoiceModal from "./_components/DetailnvoiceModal";
 import PreviewMessageModal from "./_components/ManagementDeliveryComponent/PreviewMessageModal";
@@ -14,117 +12,85 @@ import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-
 import {
   getDeliveryList,
   getDeliverySummary,
 } from "../../../../redux/slices/rating_billing_invoice/managementDeliveryInvoice";
 import ButtonComponent from "../../../../components/ButtonComponent";
 
+const PAGE_SIZE_INIT = 100;
+const PAGE_SIZE_MORE = 20;
+
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const d = new Date(dateString);
+  return [
+    String(d.getDate()).padStart(2, "0"),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    d.getFullYear(),
+  ].join(" ");
+};
+
 const ManagementDeliveryInvoice = () => {
   const dispatch = useDispatch();
-
-  // Redux state
   const { data_list, data_summary, loading } = useSelector(
-    (state) => state.managementDeliveryInvoice
+    (state) => state.managementDeliveryInvoice,
   );
 
-  // Modal & selection
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-
-  // Pagination for infinity scroll
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20);
-
-  // Fixed column settings
   const [fixedColumns, setFixedColumns] = useState({
     left: [],
     right: ["action", "status"],
   });
 
-  /* ----------------------------------------------------------
-     FORMAT DATE HELPER
-  ------------------------------------------------------------*/
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-  };
+  const fetchList = (params) =>
+    dispatch(
+      getDeliveryList({ search: "", sort: "createdDate~desc", ...params }),
+    );
 
-  /* ----------------------------------------------------------
-     FETCH DATA LIST + SUMMARY
-  ------------------------------------------------------------*/
-  // Initial fetch
   useEffect(() => {
     dispatch(
       getDeliveryList({
         page: 1,
-        pageSize: 100, // Initial load 100
+        pageSize: PAGE_SIZE_INIT,
+        isLoadMore: false,
         search: "",
         sort: "createdDate~desc",
-        isLoadMore: false,
-      })
+      }),
     );
-
     dispatch(getDeliverySummary());
-    setPage(1);
   }, [dispatch]);
 
-  // Load more handler
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data_list?.page?.totalPages || 0;
+  const hasMore =
+    (data_list?.result?.length || 0) < (data_list?.page?.totalElements || 0);
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
-      await dispatch(
-        getDeliveryList({
-          page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
-          search: "",
-          sort: "createdDate~desc",
-          isLoadMore: true,
-        })
-      );
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    if (nextPage <= (data_list?.page?.totalPages || 0)) {
+      fetchList({ page: nextPage, pageSize: PAGE_SIZE_MORE, isLoadMore: true });
       setPage(nextPage);
     }
   };
 
-  // Calculate if there's more data
-  const hasMore =
-    (data_list?.result?.length || 0) < (data_list?.page?.totalElements || 0);
-
-  // Refresh handler
   const handleRefresh = () => {
-    dispatch(
-      getDeliveryList({
-        page: 1,
-        pageSize: page * loadMoreSize || 100,
-        search: "",
-        sort: "createdDate~desc",
-        isLoadMore: false,
-      })
-    );
+    fetchList({
+      page: 1,
+      pageSize: page * PAGE_SIZE_MORE || PAGE_SIZE_INIT,
+      isLoadMore: false,
+    });
     setPage(1);
   };
 
-  /* ----------------------------------------------------------
-     TABLE COLUMNS
-  ------------------------------------------------------------*/
   const baseColumns = useMemo(
     () => [
       {
         key: "no",
         title: "NO",
         width: 60,
-        render: (_, __, index) => (
-          <div className="text-center">{index + 1}</div>
-        ),
+        render: (_, __, i) => <div className="text-center">{i + 1}</div>,
       },
       {
         key: "invoiceNumber",
@@ -156,12 +122,7 @@ const ManagementDeliveryInvoice = () => {
         dataIndex: "accountName",
         width: 220,
       },
-      {
-        key: "sor",
-        title: "SOR",
-        dataIndex: "sor",
-        width: 120,
-      },
+      { key: "sor", title: "SOR", dataIndex: "sor", width: 120 },
       {
         key: "costCenter",
         title: "COST CENTER",
@@ -227,14 +188,14 @@ const ManagementDeliveryInvoice = () => {
         title: "DELIVERY DATE",
         dataIndex: "deliveryDate",
         width: 150,
-        render: (date) => formatDate(date),
+        render: formatDate,
       },
       {
         key: "dateSent",
         title: "DATE SENT",
         dataIndex: "sentDtm",
         width: 150,
-        render: (date) => formatDate(date),
+        render: formatDate,
       },
       {
         key: "createdBy",
@@ -247,7 +208,7 @@ const ManagementDeliveryInvoice = () => {
         title: "CREATED AT",
         dataIndex: "createdAt",
         width: 180,
-        render: (date) => formatDate(date),
+        render: formatDate,
       },
       {
         key: "status",
@@ -261,25 +222,9 @@ const ManagementDeliveryInvoice = () => {
         ),
       },
     ],
-    []
+    [],
   );
 
-  /* ----------------------------------------------------------
-     HANDLERS
-  ------------------------------------------------------------*/
-  const handleViewDetail = (record) => {
-    setSelectedInvoice(record);
-    setDetailModalVisible(true);
-  };
-
-  const handlePreview = (record) => {
-    setSelectedInvoice(record);
-    setPreviewModalVisible(true);
-  };
-
-  /* ----------------------------------------------------------
-     ITEM GRANT ACCESS (Actions and Toolbar)
-  ------------------------------------------------------------*/
   const itemGrantAccess = [
     {
       action: "Create",
@@ -287,7 +232,7 @@ const ManagementDeliveryInvoice = () => {
         <NavLink to={INVOICE_ROUTES.CREATE_DELIVERY_JOB}>
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={20} />}
-            type={"submit"}
+            type="submit"
             border={false}
           >
             Create Delivery Job
@@ -301,8 +246,11 @@ const ManagementDeliveryInvoice = () => {
       render: (record) => (
         <Tooltip title="Detail">
           <div
-            onClick={() => handleViewDetail(record)}
-            style={{ cursor: "pointer", padding: 0, margin: 0 }}
+            onClick={() => {
+              setSelectedInvoice(record);
+              setDetailModalVisible(true);
+            }}
+            style={{ cursor: "pointer" }}
           >
             <SVGIcon name="IconDetail" width={15} />
           </div>
@@ -311,50 +259,30 @@ const ManagementDeliveryInvoice = () => {
     },
   ];
 
-  // Generate action columns using useColumnActionPermission
   const actionCols = useColumnActionPermission(["view"], itemGrantAccess).map(
-    (col) => ({
-      ...col,
-      width: 70,
-      align: "center",
-    })
+    (col) => ({ ...col, width: 70, align: "center" }),
   );
 
-  // Combine base columns with action columns
-  const allColumns = useMemo(() => {
-    return [...baseColumns, ...actionCols];
-  }, [baseColumns, actionCols]);
-
-  // Integrate fixed columns
   const columns = useMemo(() => {
-    const leftFixed = [];
-    const normal = [];
-    const rightFixed = [];
-
-    allColumns.forEach((col) => {
-      if (fixedColumns.left.includes(col.key)) leftFixed.push(col);
-      else if (fixedColumns.right.includes(col.key)) rightFixed.push(col);
-      else normal.push(col);
+    return [...baseColumns, ...actionCols].map((col) => {
+      if (fixedColumns.left.includes(col.key)) return { ...col, fixed: "left" };
+      if (fixedColumns.right.includes(col.key))
+        return { ...col, fixed: "right" };
+      return col;
     });
+  }, [baseColumns, actionCols, fixedColumns]);
 
-    return [...leftFixed, ...normal, ...rightFixed].map((col) => {
-      const newCol = { ...col };
-      if (fixedColumns.left.includes(col.key)) newCol.fixed = "left";
-      if (fixedColumns.right.includes(col.key)) newCol.fixed = "right";
-      return newCol;
-    });
-  }, [allColumns, fixedColumns]);
-
-  // Column definitions for TableRBI
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columnDefinitions = useMemo(
+    () =>
+      columns.map(({ key, dataIndex, title }) => ({
+        key: key || dataIndex || title,
+        title,
+      })),
+    [columns],
+  );
 
   return (
-    <LayoutMenu>
+    <>
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -365,7 +293,7 @@ const ManagementDeliveryInvoice = () => {
           </div>
         }
       >
-        {/* Summary from API */}
+        {/* GET /v1/dbs/api/rbi/delivery/summary */}
         <SummaryStatistics
           totalSent={data_summary?.success ?? 0}
           failed={data_summary?.failed ?? 0}
@@ -374,7 +302,7 @@ const ManagementDeliveryInvoice = () => {
           summaryChannel={data_summary?.summaryChannel}
         />
 
-        {/* Main Table */}
+        {/* GET /v1/dbs/api/rbi/delivery/list */}
         <TableRBI
           idTable="delivery-invoice-table"
           dataSource={data_list?.result || []}
@@ -395,7 +323,6 @@ const ManagementDeliveryInvoice = () => {
           loadMoreThreshold={20}
         />
 
-        {/* Detail Modal */}
         <DetailInvoiceModal
           visible={detailModalVisible}
           onCancel={() => {
@@ -405,7 +332,6 @@ const ManagementDeliveryInvoice = () => {
           invoiceData={selectedInvoice}
         />
 
-        {/* Preview Modal */}
         <PreviewMessageModal
           visible={previewModalVisible}
           onCancel={() => {
@@ -415,7 +341,7 @@ const ManagementDeliveryInvoice = () => {
           messageData={selectedInvoice}
         />
       </CardContainer>
-    </LayoutMenu>
+    </>
   );
 };
 

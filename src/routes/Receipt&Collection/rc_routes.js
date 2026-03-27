@@ -134,6 +134,7 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/view",
   CREATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/create",
   UPDATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/update",
+  UPLOAD_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/upload",
 
   // History Payment Warranty
   VIEW_HISTORY_PAYMENT_WARRANTY: "/receipt-and-collection/payment-warranty/history",
@@ -153,4 +154,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   CREATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/create",
   UPDATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/update",
   DETAIL_LIBOR_RATE: "/receipt-and-collection/libor-rate/view",
+
+  // CA CI Mapping
+  VIEW_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping",
+  DETAIL_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/view",
+  CREATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/create",
+  UPDATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/update",
 };

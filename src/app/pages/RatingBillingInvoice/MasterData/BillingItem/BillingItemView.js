@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -290,7 +289,7 @@ const BillingItemView = () => {
           >
             <Tooltip title="Detail">
               <div>
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -310,15 +309,15 @@ const BillingItemView = () => {
           data > 3 ? (
             isEditable ? (
               <ButtonComponent
-                icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
+                icon={<SVGIcon name="IconEdit" color="#0075bf" width={20} />}
                 border={false}
               >
                 <span className="text-black ml-3">Update</span>
               </ButtonComponent>
             ) : (
-              <div className="flex items-center px-1 py-1 cursor-not-allowed">
+              <div className="flex items-center px-1 py-0 cursor-not-allowed">
                 <span className="pointer-events-none">
-                  <SVGIcon name="IconEdit" color="#8D91A0" width={24} />
+                  <SVGIcon name="IconEdit" color="#8D91A0" width={20} />
                 </span>
                 <span className="text-[#8D91A0] ml-4 pointer-events-none">
                   Update
@@ -330,8 +329,8 @@ const BillingItemView = () => {
               <div>
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
-                  color={isEditable ? "#ACC424" : "#8D91A0"}
+                  width={20}
+                  color={isEditable ? "#ACC420" : "#8D91A0"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
               </div>
@@ -384,7 +383,7 @@ const BillingItemView = () => {
                 <span className="text-black ml-5">Inactivate</span>
               </ButtonComponent>
             ) : (
-              <div className="flex items-center px-2 py-1">
+              <div className="flex items-center px-2 py-0">
                 <Checkbox
                   className="inactive-check"
                   disabled={true}
@@ -421,7 +420,7 @@ const BillingItemView = () => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
@@ -434,7 +433,7 @@ const BillingItemView = () => {
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() => handleApprovalHistory(record.id)}
                 />
               </div>
@@ -487,7 +486,7 @@ const BillingItemView = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -572,7 +571,7 @@ const BillingItemView = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

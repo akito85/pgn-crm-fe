@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Form, Modal, Spin, Select, DatePicker } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
@@ -35,6 +34,7 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { IconModal } from "../../../../utils/Icon";
 import CardContainer from "../../../../components/CardContainer";
+import { FormFooter } from "../../../../components/FormStepNavigation";
 
 const PrabillingForm = ({ type }) => {
   const {
@@ -253,7 +253,6 @@ const PrabillingForm = ({ type }) => {
       "remark",
     ];
 
-    // Jangan reset field yang memiliki default data
     if (defaultData?.costCenter?.length > 0) {
       tempData = tempData.filter((item) => item !== "costCenter");
     }
@@ -261,10 +260,8 @@ const PrabillingForm = ({ type }) => {
       tempData = tempData.filter((item) => item !== "sor");
     }
 
-    // Reset form fields
     form.resetFields(tempData);
 
-    // Reset state-state yang terkait
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
@@ -604,7 +601,7 @@ const PrabillingForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -665,8 +662,7 @@ const PrabillingForm = ({ type }) => {
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-2 gap-2"}>
-              {/* SOR - Left column */}
+            <div className={"w-full grid grid-cols-5 gap-2"}>
               <Form.Item
                 label={"SOR"}
                 name={"sor"}
@@ -685,7 +681,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Cost Center - Right column */}
               <Form.Item
                 label={"Cost Center"}
                 name={"costCenter"}
@@ -704,7 +699,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Meter Reading Code - Right column */}
               <Form.Item
                 label={"Meter Reading Code"}
                 name={"meterReading"}
@@ -726,7 +720,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Account Segment - Left column */}
               <Form.Item
                 label={"Account Segment"}
                 name={"accountSegment"}
@@ -744,7 +737,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Account Group Type - Left column */}
               <Form.Item
                 label={"Account Group Type"}
                 name={"accountGroupType"}
@@ -766,7 +758,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Specific Customer Account - Right column */}
               <div>
                 <Form.Item
                   label={"Specific Customer Account"}
@@ -893,7 +884,6 @@ const PrabillingForm = ({ type }) => {
                 </Form.Item>
               </div>
 
-              {/* Specific Component Prabilling - Left column */}
               <Form.Item
                 label={"Specific Component Prabilling"}
                 name={"specificComponentPrabilling"}
@@ -983,36 +973,20 @@ const PrabillingForm = ({ type }) => {
               </div>
             </div>
           </CardContainer>
-          <div
-            className={
-              "flex justify-between items-center bg-white rounded-md p-3 w-full mb-4"
-            }
-          >
-            <div className={"w-full"}>
-              <ButtonComponent type={"submit"} onClick={handleBackPage}>
-                Back
-              </ButtonComponent>
-            </div>
-            <div className={"flex gap-2"}>
-              <ButtonComponent
-                type={"submit"}
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                onClick={handleReset}
-              >
-                {type === "create" ? "Clear" : "Reset"}
-              </ButtonComponent>
-              <ButtonComponent type={"submit"} htmlType={"submit"}>
-                Save
-              </ButtonComponent>
-            </div>
-          </div>
+
+          <FormFooter
+            onCancel={handleBackPage}
+            onClear={handleReset}
+            onSaveDraft={() => form.submit()}
+            type={type}
+            useNavigation={false}
+            saveDraftLabel="Save"
+            saveDraftStyle={{
+              backgroundColor: "#0075BF",
+              borderColor: "#0075BF",
+              color: "#fff",
+            }}
+          />
         </Form>
       </Spin>
 
@@ -1252,7 +1226,7 @@ const PrabillingForm = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

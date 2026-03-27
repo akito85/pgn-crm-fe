@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 import { useDispatch, useSelector } from "react-redux";
 
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import GridLayout from "../../../../../components/GridLayout";
 
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -172,7 +171,7 @@ const EditCostCenter = () => {
 		},
 	];
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading} className="w-full top-20" tip="Loading">
         <BreadCrumb routes={routes}/>
 
@@ -364,7 +363,7 @@ const EditCostCenter = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -1,7 +1,5 @@
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import moment from "moment";
 import { useEffect, useState, useRef } from "react";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useLocation, useNavigate } from "react-router-dom";
 import HeaderDetail from "../../../HeaderDetail";
 import BreadCrumb from "../../../../../../../components/BreadCrumb";
@@ -30,6 +28,7 @@ import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { configApp } from "../../../../../../../constants/configApp";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import { dateFormat, dateFormatting } from "../../../../../../../utils";
 
 const CreateUpdateRelationship = ({
   accountType = "standard",
@@ -130,8 +129,8 @@ const CreateUpdateRelationship = ({
       form.setFieldsValue({
         relationshipType: detail.relationshipType,
         relationshipCategory: detail.relationshipCategory,
-        startDate: detail.startDate ? moment(detail.startDate) : null,
-        endDate: detail.endDate ? moment(detail.endDate) : null,
+        startDate: NxDate.formatForAPI(detail.startDate),
+        endDate: NxDate.formatForAPI(detail.endDate),
         description: detail.description || "",
         appHierId: detail.appHierId,
       });
@@ -179,7 +178,7 @@ const CreateUpdateRelationship = ({
         fileType: item.fileType,
         urlFile1: item.urlFile1,
         createdBy: item.createdBy,
-        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
+        createdDate: item.createdDate,
         dataType: "exist",
       }));
       setListDataAttachment(mapped);
@@ -604,7 +603,7 @@ const CreateUpdateRelationship = ({
 
   return (
     <>
-      <LayoutMenu>
+      <div>
         <div className="flex flex-col gap-y-4">
           <BreadCrumb routes={routes} />
           <HeaderDetail
@@ -713,7 +712,7 @@ const CreateUpdateRelationship = ({
             </Form>
           </Spin>
         </div>
-      </LayoutMenu>
+      </div>
     </>
   );
 };

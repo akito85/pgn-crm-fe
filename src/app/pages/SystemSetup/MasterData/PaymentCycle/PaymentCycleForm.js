@@ -1,18 +1,20 @@
-import { Form, Spin, Input, DatePicker, Select } from "antd";
+import { Form, Spin, Select } from "antd";
 import PropTypes from "prop-types";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ConfirmModalPaymentCycle from "./Modal/ConfirmModalPaymentCycle";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import InputComponent from "../../../../../components/InputComponent";
+import SelectComponent from "../../../../../components/SelectComponent";
+import DateComponent from "../../../../../components/DateComponent";
 import {
     createPaymentCycle,
     getDetailPaymentCycle,
@@ -32,7 +34,7 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
 
 
-const { TextArea } = Input;
+
 
 const steps = [
     { title: "CREATE", value: "Payment Cycle" },
@@ -350,7 +352,7 @@ const PaymentCycleForm = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper
@@ -359,7 +361,7 @@ const PaymentCycleForm = ({ type }) => {
                     onPrev={prev}
                     onNext={next}
                 />
-                <BaseContainer header={isEdit ? "EDIT PAYMENT CYCLE" : "CREATE PAYMENT CYCLE"}>
+                <div className="w-full flex flex-col justify-start pb-5">
                     <Form
                         form={form}
                         layout="vertical"
@@ -368,24 +370,20 @@ const PaymentCycleForm = ({ type }) => {
                     >
                         {/* Tab 1: Payment Cycle Information */}
                         <div style={{ display: valuePage === "Payment Cycle" ? "block" : "none" }}>
+                            <CardContainer header="PAYMENT CYCLE INFORMATION">
                             <div className="grid grid-cols-5 gap-4">
                                 <Form.Item
                                     label="Period"
                                     name="period"
                                     rules={[{ required: true, message: "Please select period!" }]}
                                 >
-                                    <Select placeholder="Select Period"
-                                        showSearch
-                                        filterOption={(input, option) =>
-                                            String(option.children).toLowerCase().includes(input.toLowerCase())
-                                        }
-                                    >
+                                    <SelectComponent placeholder="Select Period">
                                         {dataPaymentPeriods?.map(item => (
                                             <Select.Option key={item.id} value={item.id}>
                                                 {item.periodName}
                                             </Select.Option>
                                         ))}
-                                    </Select>
+                                    </SelectComponent>
                                 </Form.Item>
 
                                 <Form.Item
@@ -393,13 +391,13 @@ const PaymentCycleForm = ({ type }) => {
                                     name="timeUnit"
                                     rules={[{ required: true, message: "Please select time unit!" }]}
                                 >
-                                    <Select placeholder="Select Time Unit">
+                                    <SelectComponent placeholder="Select Time Unit">
                                         {data_time_unit?.map(item => (
                                             <Select.Option key={item.id} value={item.code}>
                                                 {item.name}
                                             </Select.Option>
                                         ))}
-                                    </Select>
+                                    </SelectComponent>
                                 </Form.Item>
 
                                 <Form.Item
@@ -407,18 +405,13 @@ const PaymentCycleForm = ({ type }) => {
                                     name="beginCycle"
                                     rules={[{ required: true, message: "Please input begin cycle!" }]}
                                 >
-                                    <Select placeholder="Select Begin Cycle"
-                                        showSearch
-                                        filterOption={(input, option) =>
-                                            String(option.value).toLowerCase().includes(input.toLowerCase())
-                                        }
-                                    >
+                                    <SelectComponent placeholder="Select Begin Cycle">
                                         {dataEndBegin?.map(item => (
                                             <Select.Option key={item} value={item}>
                                                 {item}
                                             </Select.Option>
                                         ))}
-                                    </Select>
+                                    </SelectComponent>
                                 </Form.Item>
 
                                 <Form.Item
@@ -426,18 +419,13 @@ const PaymentCycleForm = ({ type }) => {
                                     name="endCycle"
                                     rules={[{ required: true, message: "Please input end cycle!" }]}
                                 >
-                                    <Select placeholder="Select End Cycle"
-                                        showSearch
-                                        filterOption={(input, option) =>
-                                            String(option.value).toLowerCase().includes(input.toLowerCase())
-                                        }
-                                    >
+                                    <SelectComponent placeholder="Select End Cycle">
                                         {dataEndBegin?.map(item => (
                                             <Select.Option key={item} value={item}>
                                                 {item}
                                             </Select.Option>
                                         ))}
-                                    </Select>
+                                    </SelectComponent>
                                 </Form.Item>
 
                                 <Form.Item
@@ -445,9 +433,7 @@ const PaymentCycleForm = ({ type }) => {
                                     name="startDate"
                                     rules={[{ required: true, message: "Please select start date!" }]}
                                 >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
+                                    <DateComponent
                                         placeholder="Select Start Date"
                                         onChange={(date) => {
                                             const endDate = form.getFieldValue("endDate");
@@ -457,6 +443,7 @@ const PaymentCycleForm = ({ type }) => {
                                                 });
                                             }
                                         }}
+                                        dateDisable={() => false}
                                     />
                                 </Form.Item>
 
@@ -465,11 +452,9 @@ const PaymentCycleForm = ({ type }) => {
                                     name="endDate"
                                     rules={[{ required: true, message: "Please select end date!" }]}
                                 >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
+                                    <DateComponent
                                         placeholder="Select End Date"
-                                        disabledDate={disabledEndDate}
+                                        dateDisable={disabledEndDate}
                                     />
                                 </Form.Item>
 
@@ -477,10 +462,10 @@ const PaymentCycleForm = ({ type }) => {
                                     label="Status Open"
                                     name="statusOpen"
                                 >
-                                    <Select placeholder="Select Status">
+                                    <SelectComponent placeholder="Select Status">
                                         <Select.Option value="OPEN">OPEN</Select.Option>
                                         <Select.Option value="CLOSE">CLOSE</Select.Option>
-                                    </Select>
+                                    </SelectComponent>
                                 </Form.Item>
 
                                 <Form.Item
@@ -488,13 +473,15 @@ const PaymentCycleForm = ({ type }) => {
                                     name="description"
                                     className="col-span-3"
                                 >
-                                    <TextArea rows={4} placeholder="Enter description" showCount maxLength={255} />
+                                    <InputComponent type="textarea" rows={4} placeholder="Enter description" showCount maxLength={255} />
                                 </Form.Item>
                             </div>
+                            </CardContainer>
                         </div>
 
                         {/* Tab 2: Approval */}
                         <div style={{ display: valuePage === "Approval" ? "block" : "none" }}>
+                            <CardContainer header="APPROVAL INFORMATION">
                             <ApprovalComponentGeneral
                                 parentForm={form}
                                 dataOption={appHierOptions}
@@ -504,10 +491,12 @@ const PaymentCycleForm = ({ type }) => {
                                 detailData={data_detail?.paymentCycleDetail}
                                 isEditing={isEdit}
                             />
+                            </CardContainer>
                         </div>
 
                         {/* Tab 3: Attachment */}
                         <div style={{ display: valuePage === "Attachment" ? "block" : "none" }}>
+                            <CardContainer header="ATTACHMENT INFORMATION">
                             <AttachmentComponent
                                 type="create"
                                 data={files}
@@ -518,6 +507,7 @@ const PaymentCycleForm = ({ type }) => {
                                 service={receiptCollectionHttpService}
                                 configApplication={configApp.PAYMENT_SERVICE}
                             />
+                            </CardContainer>
                         </div>
 
                         <FormFooter
@@ -532,7 +522,7 @@ const PaymentCycleForm = ({ type }) => {
                             onSubmit={() => form.submit()}
                         />
                     </Form>
-                </BaseContainer>
+                    </div>
                 {/* Confirmation Modal */}
                 <ModalCustom
                     title="Confirmation"
@@ -574,7 +564,7 @@ const PaymentCycleForm = ({ type }) => {
                     />
                 </ModalCustom>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

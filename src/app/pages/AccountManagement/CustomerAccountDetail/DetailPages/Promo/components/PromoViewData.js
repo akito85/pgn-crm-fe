@@ -313,29 +313,26 @@ const PromoViewData = ({
   );
 
   const loadMoreData = useCallback(
-    async (pageNumber = 0) => {
+    async (pageNumber = 0, overrideFilters, overrideKeyword) => {
       if (!accountId) return;
 
-      const validatedPage =
-        typeof pageNumber === "number"
-          ? pageNumber
-          : pageNumber === true
-            ? 1
-            : 0; // Handle boolean true
+      const validatedPage = typeof pageNumber === "number" ? pageNumber : 0;
+      const filters = overrideFilters !== undefined ? overrideFilters : activeFilters;
+      const keyword = overrideKeyword !== undefined ? overrideKeyword : searchKeyword;
 
       const payload = {
         page: validatedPage,
         size: pageSize,
         sort: "id~desc",
-        filters: [...activeFilters],
+        filters: [...filters],
         filterRules: [],
       };
 
-      if (searchKeyword) {
+      if (keyword) {
         payload.filters.push({
           column: "name",
           operator: "Contains",
-          value: searchKeyword,
+          value: keyword,
           logic: "OR",
         });
       }
@@ -349,7 +346,7 @@ const PromoViewData = ({
   useEffect(() => {
     if (accountId) {
       const timer = setTimeout(() => {
-        loadMoreData(true);
+        loadMoreData(0);
       }, 300);
 
       return () => clearTimeout(timer);
@@ -357,7 +354,7 @@ const PromoViewData = ({
   }, [searchKeyword, accountId]);
 
   const loadDataWithFilter = useCallback(
-    async (filters = [], reset = true) => {
+    (filters = [], reset = true) => {
       setActiveFilters(filters);
       setSearchKeyword("");
       if (reset) {
@@ -366,9 +363,7 @@ const PromoViewData = ({
         setDataSource([]);
         setTotalElements(0);
         setError(null);
-        setTimeout(() => {
-          loadMoreData(0);
-        }, 0);
+        loadMoreData(0, filters, "");
       }
     },
     [loadMoreData],
@@ -378,7 +373,7 @@ const PromoViewData = ({
   useEffect(() => {
     if (accountId) {
       console.log("Initializing with accountId:", accountId);
-      loadMoreData(true);
+      loadMoreData(0);
     }
   }, [accountId]);
 
@@ -480,7 +475,6 @@ const PromoViewData = ({
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         showSearchBar
-        onSearch={handleSearch}
         showAdvanceSearch
         onAdvanceSearch={handleAdvanceSearch}
         usePagination={false}

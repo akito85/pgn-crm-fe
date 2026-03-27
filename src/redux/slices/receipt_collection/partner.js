@@ -8,7 +8,6 @@ import {
   validateError,
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
-import { data } from "autoprefixer";
 
 const initialState = {
   loading: false,
@@ -23,14 +22,14 @@ const initialState = {
 
 export const getPaginatePartner = createAsyncThunk(
   "GET_ALL_PARTNER",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/partner/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore: !!isLoadMore };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
@@ -497,16 +496,24 @@ const partnerSlice = createSlice({
   initialState,
   extraReducers: {
     //get all employee paginate reducer
-    [getPaginatePartner.pending]: (state, action) => {
-      state.data = action.payload;
+    [getPaginatePartner.pending]: (state) => {
       state.loading = true;
     },
     [getPaginatePartner.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      const { isLoadMore, ...rest } = action.payload || {};
+      if (isLoadMore && state.data?.result) {
+        const existingIds = new Set(state.data.result.map((item) => item.id));
+        const newItems = (rest.result || []).filter((item) => !existingIds.has(item.id));
+        state.data = {
+          ...rest,
+          result: [...state.data.result, ...newItems],
+        };
+      } else {
+        state.data = rest;
+      }
       state.loading = false;
     },
     [getPaginatePartner.rejected]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
     },
 

@@ -19,7 +19,6 @@ const MOCK_CONTACT_SECONDARY = []
 export default function ModalInformationContactDetail({
   isOpen,
   onBack,
-  onClear,
   onSave,
   onOpenSelectContact,
 }) {
@@ -166,13 +165,37 @@ export default function ModalInformationContactDetail({
     console.log('Contact detail deleted successfully')
   }
 
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+      const contactData = {
+        primary: values.PrimaryContact ? "Primary" : "Non-Primary",
+        name: [values.FirstName, values.MiddleName, values.LastName].filter(Boolean).join(" ") || "-",
+        job: values.Job || "-",
+        position: values.Position || "-",
+        address: values.ContactAddress || "-",
+        note: values.ContactAddressAdditionalNote || "-",
+        description: values.Description || "-",
+        status: "Active",
+        contactDetails: contactSecondary,
+      };
+      onSave(contactData);
+      form.resetFields();
+      setContactSecondary([]);
+    } catch (_) {}
+  }
+
+  const handleClear = () => {
+    form.resetFields();
+    setContactSecondary([]);
+  }
+
   return (
     <NxModal
       id="ModalInformationContactDetail"
       isOpen={isOpen}
       handleCancel={onBack}
       handleOk={onSave}
-      header={"CONTACT INFORMATION"}
       width={1200}
       title={"CONTACT INFORMATION"}
       footer={[
@@ -217,7 +240,7 @@ export default function ModalInformationContactDetail({
           <div className="flex flex-row items-center gap-3">
             <ButtonComponent
               type={"button"}
-              onClick={onClear}
+              onClick={handleClear}
               icon={
                 <ClearOutlined
                   style={{
@@ -251,7 +274,7 @@ export default function ModalInformationContactDetail({
             </ButtonComponent>
             <ButtonComponent
               type={"submit"}
-              onClick={onSave}
+              onClick={handleSave}
               style={{
                 backgroundColor: "#0075bf",
                 color: "#fff",

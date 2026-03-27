@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
@@ -103,10 +103,14 @@ const RelationshipTable = ({
   loading = false,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    handleView: (id) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP,
+    handleView: ({ id }) => navigate(
+      isOneTime
+        ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP_ONETIME
+        : ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP,
       {
         state: {
           idAccount,
@@ -116,7 +120,9 @@ const RelationshipTable = ({
       }
     ),
     handleCreate: () => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP,
+      isOneTime
+        ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP_ONETIME
+        : ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP,
       {
         state: {
           idAccount,
@@ -124,8 +130,10 @@ const RelationshipTable = ({
         }
       }
     ),
-    handleUpdate: (id) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
+    handleUpdate: ({ id }) => navigate(
+      isOneTime
+        ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP_ONETIME
+        : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
       {
         state: {
           idAccount,
@@ -135,9 +143,9 @@ const RelationshipTable = ({
       }
     ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal,
+    handleInactivate: ({id, accountName}) => handleInactivateModal(true, id, accountName),
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
@@ -195,7 +203,7 @@ const RelationshipTable = ({
         dataSource={data}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: data.length ? "max-content" : 2000 }}
+        tableScrolled={{ x: data.length ? "max-content" : 2000 }}
         onSort={onSort}
         columns={processedColumns}
         usePagination={false}

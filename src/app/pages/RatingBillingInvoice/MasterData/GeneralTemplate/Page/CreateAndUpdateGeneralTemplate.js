@@ -5,7 +5,6 @@ import {
 } from "../../../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -576,7 +575,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingForm}>
         <BreadCrumb routes={routes} />
         
@@ -745,7 +744,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
           </ModalCustom>
         ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -36,8 +36,6 @@ const initialState = {
 
   data_select_criteria: [],
   dataListCurrency: [],
-  // dataListAppHierId: [],
-  // dataListAppHierDetail: [],
   data_province: [],
   data_city: [],
   data_cost_center: [],
@@ -54,11 +52,16 @@ const initialState = {
   data_budget: [],
   dataListAttachment: {},
   dataListCriteriaValue: {},
-  // dataApprovalHistory: {},
   message: "",
 
-  // GL Account
+  // GL Account (Existing)
   data_list_gl: null,
+  
+  // --- TAMBAHAN STATE BARU UNTUK BANK FORM ---
+  dataGLAccount: [],
+  dataGLType: [],
+  data_contactAddress: [],
+  // ------------------------------------------
 };
 
 export const createAccountInformation = createAsyncThunk(
@@ -532,12 +535,9 @@ export const getAllContactPaginate = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // if (hasValue(id)) {
-      // const url = `/v1/dbs/api/bank/contact-get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const url = `/v1/dbs/api/contact/bank/choose?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getPagination(url);
       return response;
-      // }
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -916,8 +916,6 @@ export const getTypeList = createAsyncThunk(
     }
   }
 );
-
-//criteriaaaa
 
 export const getListCriteria = createAsyncThunk(
   "GET_LIST_CRITERIA",
@@ -1452,7 +1450,7 @@ export const getApprovalHistoryBankAccount = createAsyncThunk(
   }
 );
 
-// get gl account
+// Existing get GL Account
 export const getGLAccount = createAsyncThunk(
   "GET_GL_ACCOUNT",
   async (_, thunkAPI) => {
@@ -1469,10 +1467,61 @@ export const getGLAccount = createAsyncThunk(
   }
 );
 
+// --- TAMBAHAN BARU UNTUK BANK FORM (GET ALL GL ACCOUNT & GET ALL GL TYPE) ---
+export const getAllGLAccount = createAsyncThunk(
+  "GET_ALL_GL_ACCOUNT",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/gl-account/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_ALL_GL_ACCOUNT", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getAllGLType = createAsyncThunk(
+  "GET_ALL_GL_TYPE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/gl-type/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_ALL_GL_TYPE", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getContactAddress = createAsyncThunk(
+  "GET_CONTACT_ADDRESS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/contact-address/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_CONTACT_ADDRESS", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+// ----------------------------------------------------------------------------
+
 const bankSlice = createSlice({
   name: "bank",
   initialState,
   extraReducers: {
+    
     /** Get Approval History */
     [getApprovalHistory.pending]: (state, action) => {
       state.loading = true;
@@ -1647,17 +1696,7 @@ const bankSlice = createSlice({
       state.dataListCategory = action.payload;
       state.loadingProduct = false;
     },
-    // //download
-    // [getDownloadReceipt.fulfilled]: (state, action) => {
-    //   state.data_download = action.payload;
-    //   // state.isSuccess = true;
-    //   state.loading = false;
-    // },
-    // [getDownloadReceipt.rejected]: (state, action) => {
-    //   state.isFailed = true;
-    //   state.data_download = action.payload;
-    //   state.loading = false;
-    // },
+
     // Approve Or Reject BANK
     [approveOrRejectInactiveBank.pending]: (state) => {
       state.loading = true;
@@ -2128,24 +2167,9 @@ const bankSlice = createSlice({
       state.data_type_detail = action.payload;
     },
 
-    /** Get All Criterias Value Paginate */
-    // [getAllCriteriaValuesPaginate.pending]: (state, action) => {
-    //   state.loadingPricing = true;
-    //   state.dataListCriteriaValue = action.payload;
-    // },
-    // [getAllCriteriaValuesPaginate.fulfilled]: (state, action) => {
-    //   state.loadingPricing = false;
-    //   state.dataListCriteriaValue = action.payload;
-    // },
-    // [getAllCriteriaValuesPaginate.rejected]: (state, action) => {
-    //   state.loadingPricing = false;
-    //   state.dataListCriteriaValue = action.payload;
-    // },
-
     //download
     [getDownloadBank.fulfilled]: (state, action) => {
       state.data_download = action.payload;
-      // state.isSuccess = true;
       state.loading = false;
     },
     [getDownloadBank.rejected]: (state, action) => {
@@ -2155,7 +2179,6 @@ const bankSlice = createSlice({
     },
     [getDownloadBankStatement.fulfilled]: (state, action) => {
       state.data_download_statement = action.payload;
-      // state.isSuccess = true;
       state.loading = false;
     },
     [getDownloadBankStatement.rejected]: (state, action) => {
@@ -2163,7 +2186,8 @@ const bankSlice = createSlice({
       state.data_download_statement = action.payload;
       state.loading = false;
     },
-    // update
+    
+    // Existing GL Account (Dibiarkan supaya gak merusak logic lain)
     [getGLAccount.pending]: (state) => {
       state.loading = true;
     },
@@ -2174,7 +2198,42 @@ const bankSlice = createSlice({
       state.loading = false;
       state.data_list_gl = action.payload;
     },
-    // activation
+
+    // --- TAMBAHAN REDUCER UNTUK BANK FORM ---
+    [getAllGLAccount.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllGLAccount.rejected]: (state) => {
+      state.loading = false;
+    },
+    [getAllGLAccount.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataGLAccount = action.payload; 
+    },
+
+    [getAllGLType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllGLType.rejected]: (state) => {
+      state.loading = false;
+    },
+    [getAllGLType.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataGLType = action.payload; 
+    },
+    [getContactAddress.pending]: (state) => {
+      state.loading = true;
+    },
+    [getContactAddress.fulfilled]: (state, action) => {
+      state.loading = false;
+      // Karena di thunk return-nya response?.data, action.payload ini bakal langsung berisi data balikan API
+      state.data_contactAddress = action.payload; 
+    },
+    [getContactAddress.rejected]: (state) => {
+      state.loading = false;
+      state.data_contactAddress = [];
+    },
+    // ----------------------------------------
   },
 });
 

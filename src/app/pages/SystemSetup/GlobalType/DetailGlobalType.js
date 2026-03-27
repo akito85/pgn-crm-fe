@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
   getDetailGlobalTypeValue,
   getViewDetailGlobalType,
@@ -285,7 +284,7 @@ const DetailGlobalType = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -419,7 +418,7 @@ const DetailGlobalType = () => {
       </Spin>
 
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

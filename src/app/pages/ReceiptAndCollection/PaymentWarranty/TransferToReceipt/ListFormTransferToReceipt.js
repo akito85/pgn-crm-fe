@@ -11,7 +11,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   submitTransferToReceipt,
   getAllApprovalList,
@@ -149,10 +148,8 @@ const ListFormTransferToReceipt = (props) => {
   const [tabData, setTabData] = useState([
     {
       value: "Transfer to Receipt",
-      paramValue: ["deductionPeriod", "type", "deductionDate"],
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
+      paramValue: ["accountId", "payWarrantyId", "amount", "remarks"],
+    }
   ]);
 
   const [valuePage, setValuePage] = useState(tabData[0].value);
@@ -162,11 +159,8 @@ const ListFormTransferToReceipt = (props) => {
   };
 
   const handleSubmitForm = (values) => {
-    const formattedBody = {
-      ...values,
-      deductionDate: values.deductionDate ? moment(values.deductionDate).format("DD MMM YYYY") : "-",
-    };
-    setSendBody(formattedBody);
+    // values sudah berisi accountId, payWarrantyId, amount, remarks dari form baru
+    setSendBody(values);
     setModalConfirm(true);
   };
 
@@ -227,7 +221,6 @@ const ListFormTransferToReceipt = (props) => {
     setModalConfirm(false);
     const payload = {
       ...sendBody,
-      receiptList: receiptList,
     };
 
     dispatch(submitTransferToReceipt(payload))
@@ -236,9 +229,16 @@ const ListFormTransferToReceipt = (props) => {
         dispatch(
           showModalSuccess({
             title: "Success",
-            description: "Success Submit Data",
+            description: "Receipt created and warranty balance updated successfully",
             onOk: () => {
-              navigate(-1);
+              // Redirect ke Allocation page / Receipt Detail menggunakan receiptId dari backend
+              if (response && response.data && response.data.receiptId) {
+                navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT, {
+                  state: { id: response.data.receiptId }
+                });
+              } else {
+                navigate(-1);
+              }
             }
           })
         );
@@ -270,7 +270,7 @@ const ListFormTransferToReceipt = (props) => {
   });
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <RadioTabs
@@ -290,64 +290,6 @@ const ListFormTransferToReceipt = (props) => {
             }}
           >
             <TransferToReceiptForm form={form} />
-            <div className="mt-5">
-              <BaseContainer header={
-                <div className="flex justify-between items-center w-full">
-                  <span>RECEIPT INFORMATION</span>
-                  <ButtonComponent
-                    type="primary"
-                    onClick={() => setShowSearchReceiptModal(true)}
-                  >
-                    Search Receipt
-                  </ButtonComponent>
-                </div>
-              }>
-                <TableRBI
-                  columns={columnsReceipt}
-                  dataSource={receiptList.slice((page - 1) * pageSize, page * pageSize)}
-                  pagination={false}
-                  tableScrolled={{ x: 1800 }}
-                  totalData={receiptList?.length || 0}
-                  current={page}
-                  pageSize={pageSize}
-                  onChange={handlePageChange}
-                  onSizeChanger={handleSizeChange}
-                />
-              </BaseContainer>
-            </div>
-          </div>
-          <div
-            style={{
-              display: valuePage !== tabData[1].value ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
-              <ApprovalComponentGeneral
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
-              />
-            </BaseContainer>
-          </div>
-          <div
-            style={{
-              display: valuePage !== tabData[2].value ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
-              <AttachmentComponent
-                type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                typeSelector="transferToReceipt"
-                dispatch={dispatch}
-                getAPICategory={getListCategory}
-                service={receiptCollectionHttpService}
-                configApplication={configApp.PAYMENT_SERVICE}
-                typeRBI={"data"}
-              />
-            </BaseContainer>
           </div>
           <div className="flex w-full justify-between align-middle my-3">
             <ButtonComponent
@@ -390,33 +332,18 @@ const ListFormTransferToReceipt = (props) => {
           </div>
         </Form>
       </Spin>
-      <ModalCustom
+      <ModalConfirm
         isOpen={modalConfirm}
         handleCancel={handleCancelModalConfirm}
-        header={"Confirmation"}
-        width={1000}
-        type={"confirmation"}
-        footer={
-          <div className="w-full flex justify-end gap-5 p-4">
-            <ButtonComponent onClick={handleCancelModalConfirm} type="default">
-              Cancel
-            </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleSave}>
-              Confirm
-            </ButtonComponent>
-          </div>
-        }
+        handleOk={handleSave}
+        width={500}
       >
-        <ContentModalConfirm
-          data={sendBody}
-          tabData={tabData}
-          listDataAttachment={listDataAttachment}
-          listDataAppHierDetail={appHierDataDetail}
-          dataOption={appHierOptions}
-          selectedHierarchy={selectedHierarchy}
-          receiptList={receiptList}
-        />
-      </ModalCustom>
+        <div className="flex flex-col justify-center items-center mt-5 gap-[20px]">
+          <p className="text-[18px] font-bold text-center">
+            Are you sure you want to submit this Transfer to Receipt?
+          </p>
+        </div>
+      </ModalConfirm>
 
       {/* Modal Back*/}
       <ModalConfirm
@@ -437,7 +364,7 @@ const ListFormTransferToReceipt = (props) => {
         onClose={() => setShowSearchReceiptModal(false)}
         onConfirm={handleConfirmSearchReceipt}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

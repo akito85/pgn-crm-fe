@@ -1,5 +1,5 @@
 import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import AccountInformation from "./DetailPages/AccountInformation/AccountInformation";
 import LastActivity from "./DetailPages/LastActivity";
 import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
@@ -20,10 +20,9 @@ import EquipmentPage from "./DetailPages/Equipment/Equipment";
 import ProductDistribution from "./DetailPages/ProductDistribution/ProductDistribution";
 import RawMaterialSource from "./DetailPages/RawMaterialSource/RawMaterialSource";
 import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
-import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
-import { Switch } from "antd";
 import AccountPromo from "./DetailPages/Promo/AccountPromo";
 import MultiDestination from "./DetailPages/MultiDestination/MultiDestination";
+import GasDeposit from "../GasDeposit/GasDeposit";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -42,6 +41,7 @@ const dataTabs = {
   dm: "Distribution Media",
   premise: "Premise",
   gs: "Gas Source",
+  gd: "Gas Deposit",
   adi: "Additional Information",
   fi: "Financial Information",
   eq: "Equipment",
@@ -326,6 +326,8 @@ const AccountDetailInformation = ({
         );
       case dataTabs.gs:
         return <GasSourceInformation />;
+      case dataTabs.gd:
+        return <GasDeposit moduleType="ua" accountId={id} customerId={idCustomer} />
       case dataTabs.rec:
         return (
           <AccountReceipt
@@ -383,8 +385,8 @@ const AccountDetailInformation = ({
       case dataTabs.md:
         return (
           <MultiDestination
-            id={id}
-            idCustomer={idCustomer}
+            accountId={id}
+            customerId={idCustomer}
           />
         )
       default:

@@ -3,9 +3,9 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
 
-export const NxFormStepper = ({ steps, current, onPrev, onNext }) => {
+export const NxFormStepper = ({ steps, current, onPrev, onNext, inModal = false }) => {
   return (
-    <div className="bg-white rounded-lg border border-[#D6E1F0] drop-shadow-lg p-4">
+    <div className={`bg-white border-solid border-[#C8CDD4] ${inModal ? "border-0 border-b" : "border rounded-lg drop-shadow-lg"} p-4`}>
       <div className="flex flex-row items-center justify-between w-full">
         <div
           style={{

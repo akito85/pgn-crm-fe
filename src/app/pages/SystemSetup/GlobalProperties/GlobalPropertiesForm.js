@@ -3,7 +3,6 @@ import { Form, Spin, Select, Input, Checkbox } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import {
   createGlobalProperties,
@@ -463,7 +462,7 @@ const GlobalPropertiesForm = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -672,7 +671,7 @@ const GlobalPropertiesForm = () => {
         {/** Modal Retry */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

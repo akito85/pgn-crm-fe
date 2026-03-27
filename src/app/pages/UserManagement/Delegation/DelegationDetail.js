@@ -15,7 +15,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import moment from "moment";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
@@ -110,7 +109,7 @@ const DelegationDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="mt-5">
@@ -236,7 +235,7 @@ const DelegationDetail = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

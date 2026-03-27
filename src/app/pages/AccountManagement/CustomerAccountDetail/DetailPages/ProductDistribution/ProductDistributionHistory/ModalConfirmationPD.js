@@ -20,7 +20,7 @@ const ModalConfirmationPD = ({
     <NxModal
       isOpen={isOpen}
       type={"confirmation"}
-      header={"confirmation"}
+      title={"CONFIRMATION"}
       width={700}
       handleCancel={handleCancel}
       handleConfirm={handleConfirm}

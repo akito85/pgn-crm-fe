@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
@@ -409,7 +408,7 @@ const Menu = () => {
   // use hooks handle retry
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -465,7 +464,7 @@ const Menu = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

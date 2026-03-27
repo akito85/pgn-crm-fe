@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Modal, Spin, Steps } from "antd";
@@ -794,7 +793,7 @@ const FormLateChargesRule = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumbAdvanced routes={routes(type, lateChargeId)} />
         <div className="flex flex-col gap-4">
@@ -1043,7 +1042,7 @@ const FormLateChargesRule = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

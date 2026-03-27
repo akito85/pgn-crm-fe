@@ -353,7 +353,7 @@ const ModalContact = ({
         header={"Contact Information"}
         handleCancel={handleCancelContact}
         footer={[
-          <div className="w-full flex">
+          <div key="footer" className="w-full flex">
             <ButtonComponent onClick={handleCancelContact} type={"submit"}>
               Back
             </ButtonComponent>

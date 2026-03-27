@@ -291,15 +291,15 @@ const getAccountStandardColumns = (
     ),
   },
   {
-    key: "subdistrict",
+    key: "subDistrict",
     title: "SUBDISTRICT",
-    dataIndex: "subdistrict",
+    dataIndex: "subDistrict",
     width: 200,
     sorter: true,
-    filteredValue: [search?.subdistrict] || null,
+    filteredValue: [search?.subDistrict] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "subdistrict",
+      "subDistrict",
       searchInput,
       searchedColumn,
       searchText,
@@ -426,7 +426,7 @@ const getAccountStandardColumns = (
                 width={20}
                 onClick={() => {
                   setAccount({
-                    objectId: r.accountId,
+                    accountId: r.accountId,
                     accountNumber: r.accountNumber,
                     accountName: r.accountName,
                     accountSor: r.sor,

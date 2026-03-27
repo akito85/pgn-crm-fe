@@ -1,8 +1,24 @@
-import moment from "moment";
-import { dateFormatting, toTitleCase } from "../../../../../../utils";
+import { toTitleCase } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../components/StatusComponent";
+import NxDate from "../../../../../../components/Nx/NxDatePicker";
 
+/**
+ * Returns the column definitions for the Multi Destination list table.
+ *
+ * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValue`
+ * for server-side filtering, with `filteredValue` set per column. Sorting is handled
+ * server-side via `sorter: true`. The two trailing columns (`statusApproval`, `status`)
+ * are conditionally included via the `includeStatus` flag.
+ *
+ * @param {Object}          search               - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} searchInput          - Ref to the search input element (used for focus).
+ * @param {string}          searchedColumn       - The dataIndex of the column currently being searched.
+ * @param {string}          searchText           - The current search text value.
+ * @param {Function}        handleSearch         - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [includeStatus=true] - When false, omits the statusApproval and status columns.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
 const getMultiDestinationColumns = (
   search,
   searchInput,
@@ -430,7 +446,7 @@ const getMultiDestinationColumns = (
       handleSearch,
       true
     ),
-    render: (startDate) => startDate ? moment(startDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
+    render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
   {
     key: "endDate",
@@ -448,7 +464,7 @@ const getMultiDestinationColumns = (
       handleSearch,
       true
     ),
-    render: (endDate) => endDate ? moment(endDate, "DD-MM-YYYY").format(dateFormatting.date) : "",
+    render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
   includeStatus && {
     key: "statusApproval",
