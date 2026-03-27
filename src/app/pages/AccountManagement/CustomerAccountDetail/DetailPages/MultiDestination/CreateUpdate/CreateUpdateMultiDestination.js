@@ -127,8 +127,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   useEffect(() => {
     if (isUpdate && idMd) {
-      dispatch(getDetailMultiDestination(idMd, { subjectId, objectId }));
-      dispatch(getDetailDraftMultiDestination(idMd, { subjectId, objectId }));
+      dispatch(getDetailMultiDestination(idMd));
+      dispatch(getDetailDraftMultiDestination(idMd));
     }
   }, [formType, idMd]);
 
@@ -610,7 +610,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME;
 
     if (isCreate)
-      dispatch(createMultiDestination({ body, attachments: newAttachments }))
+      dispatch(createMultiDestination({ body, attachments: newAttachments, action: confirmationType }))
       .unwrap()
       .then((data) => {
         setTimeout(() => {
@@ -627,7 +627,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       })
       .catch((error) => {});
     else if (isUpdate)
-      dispatch(updateMultiDestination({ id: idMd, body, attachments: attachmentDataSource.filter((attachment) => attachment.dataType === "new") }))
+      dispatch(updateMultiDestination({ id: idMd, body, attachments: attachmentDataSource.filter((attachment) => attachment.dataType === "new"), action: confirmationType }))
       .unwrap()
         .then((data) => {
           setTimeout(() => {

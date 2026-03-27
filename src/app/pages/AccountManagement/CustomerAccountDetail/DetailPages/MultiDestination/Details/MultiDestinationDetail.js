@@ -168,12 +168,12 @@ const MultiDestinationDetail = ({
 
   useEffect(() => {
     if (idMd)
-      dispatch(getDetailMultiDestination({ id: idMd }));
+      dispatch(getDetailMultiDestination(idMd));
   }, [idMd]);
 
   useEffect(() => {
     if (idMd && draftExist)
-      dispatch(getDetailDraftMultiDestination({ id: idMd }));
+      dispatch(getDetailDraftMultiDestination(idMd));
   }, [idMd, draftExist]);
 
   return (

@@ -114,9 +114,9 @@ const MultiDestinationApprovalModal = ({
    */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_multiDestinationApproval?.totalPages || 0;
+    const totalPage = pagination_multiDestinationApproval?.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
         page: nextPage,
         size: loadMoreSize,
@@ -140,7 +140,7 @@ const MultiDestinationApprovalModal = ({
   // --- Derived values ---
   const hasMore =
     list_multiDestinationApproval.length <
-    (pagination_multiDestinationApproval?.totalElements || 0);
+    (pagination_multiDestinationApproval?.totalElement || 0);
 
   /**
    * Handles table sort changes and updates the sort query string.
@@ -413,7 +413,7 @@ const MultiDestinationApprovalModal = ({
                     dataSource={dataSourceWithKeys}
                     columns={columns}
                     totalData={
-                      pagination_multiDestinationApproval?.totalElements || 0
+                      pagination_multiDestinationApproval?.totalElement || 0
                     }
                     tableScrolled={{
                       x: dataSourceWithKeys.length ? "max-content" : 5000
@@ -459,7 +459,7 @@ const MultiDestinationApprovalModal = ({
                   dataSource={selectedRows}
                   columns={columns}
                   totalData={
-                    pagination_multiDestinationApproval?.totalElements || 0
+                    pagination_multiDestinationApproval?.totalElement || 0
                   }
                   tableScrolled={{
                     x: selectedRows.length ? "max-content" : 5000
