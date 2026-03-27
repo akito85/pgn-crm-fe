@@ -28,6 +28,17 @@ const TimeColumn = ({ max, value, onChange, label }) => {
     }
   }, [value]);
 
+  useEffect(() => {
+    const el = colRef.current;
+    if (!el) return;
+    const handler = (e) => {
+      e.preventDefault();
+      onChange(Math.max(0, Math.min(max, value + (e.deltaY > 0 ? 1 : -1))));
+    };
+    el.addEventListener("wheel", handler, { passive: false });
+    return () => el.removeEventListener("wheel", handler);
+  }, [max, value, onChange]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 38 }}>
       <div style={{ fontSize: 10, fontWeight: 600, color: "#aaa", marginBottom: 5, letterSpacing: "0.05em" }}>
@@ -36,10 +47,6 @@ const TimeColumn = ({ max, value, onChange, label }) => {
       <div
         ref={colRef}
         style={{ height: DT_ITEM_H * 5, overflowY: "hidden", scrollBehavior: "smooth", borderRadius: 6, background: "#f8fafc" }}
-        onWheel={(e) => {
-          e.preventDefault();
-          onChange(Math.max(0, Math.min(max, value + (e.deltaY > 0 ? 1 : -1))));
-        }}
       >
         {Array.from({ length: max + 1 }, (_, i) => (
           <div
