@@ -63,8 +63,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
-  const accountId = location?.state?.accountId;
-  const customerId = location?.state?.customerId;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idMd = location?.state?.id;
 
   const isStandard = accountType === "standard";
@@ -224,8 +224,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           "",
       breadcrumbName: "Detail Account",
       state: {
-        accountId,
-        customerId,
+        idAccount: accountId,
+        idCustomer: customerId,
       }
     },
     {
@@ -610,8 +610,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             detailRoute,
             {
               state: {
-                accountId,
-                customerId,
+                idAccount: accountId,
+                idCustomer: customerId,
               }
             }
           );
@@ -627,8 +627,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
               detailRoute,
               {
                 state: {
-                  accountId,
-                  customerId,
+                  idAccount: accountId,
+                  idCustomer: customerId,
                 }
               }
             );

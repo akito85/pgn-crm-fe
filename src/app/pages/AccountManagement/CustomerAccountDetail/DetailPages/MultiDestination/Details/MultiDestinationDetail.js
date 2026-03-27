@@ -43,8 +43,8 @@ const MultiDestinationDetail = ({
 
   const navigate = useNavigate();
   const location = useLocation();
-  const accountId = location?.state?.accountId;
-  const customerId = location?.state?.customerId;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idMd = location?.state?.id;
 
   const tabOptions = [

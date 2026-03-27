@@ -183,8 +183,8 @@ const MultiDestinationTable = ({
         "",
       {
         state: {
-          accountId,
-          customerId,
+          idAccount: accountId,
+          idCustomer: customerId,
           id,
         }
       }
@@ -197,8 +197,8 @@ const MultiDestinationTable = ({
         "",
       {
         state: {
-          accountId,
-          customerId,
+          idAccount: accountId,
+          idCustomer: customerId,
         }
       }
     ),
@@ -210,8 +210,8 @@ const MultiDestinationTable = ({
         "",
       {
         state: {
-          accountId,
-          customerId,
+          idAccount: accountId,
+          idCustomer: customerId,
           id,
         }
       }
