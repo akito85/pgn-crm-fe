@@ -10,7 +10,7 @@ import Highlighter from "react-highlight-words";
 
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../../../components/TablePagination";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import { FilterOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { getListChooseContact } from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
@@ -39,9 +39,11 @@ const expandedRowRender = (record) => {
   return (
     <div>
       <p className="text-primary text-xs font-bold uppercase">CONTACT DETAIL</p>
-      <TablePagination
+      <NxTable
         useSelect={false}
         usePagination={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
         className="table-expand-custom"
         dataSource={contactDetail}
         columns={columns}
@@ -73,7 +75,7 @@ const ModalChooseContactComp = ({
 
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [totalElements, setTotalElement] = useState(0);
 
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -81,8 +83,8 @@ const ModalChooseContactComp = ({
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState("");
 
-  const [typeModal, setTypeModal] = useState("");
   const [dataTable, setDataTable] = useState([]);
+  const hasMore = dataTable.length < totalElements;
 
 
   useEffect(() => {
@@ -98,15 +100,29 @@ const ModalChooseContactComp = ({
       setTotalElement(dataChooseContact?.data?.page?.totalElements);
       const data = dataChooseContact?.data?.result?.map((a, index) => ({
         ...a,
-        key: index + 1,
+        key: a?.contactId || `${page}-${index + 1}`,
         contactDetail: a.contactDetail?.map((b, index) => ({
           ...b,
           key: index + 1,
         })),
       }));
-      setDataTable(data);
+      setDataTable((prevState) => {
+        if (page === 1) {
+          return data;
+        }
+        const existingKeys = new Set(prevState.map((item) => item.contactId));
+        const merged = [...prevState];
+        data.forEach((item) => {
+          if (!existingKeys.has(item.contactId)) {
+            merged.push(item);
+          }
+        });
+        return merged;
+      });
+    } else if (page === 1) {
+      setDataTable([]);
     }
-  }, [dataChooseContact]);
+  }, [dataChooseContact, page]);
 
   const handleCloseModal = () => {
     setModalChooseContact((prevState) => (prevState = false));
@@ -185,20 +201,11 @@ const ModalChooseContactComp = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    setPage(1);
+    setDataTable([]);
     setSearch(
       selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
     );
-  };
-
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
   };
 
   const onSort = (_, __, sort) => {
@@ -206,7 +213,16 @@ const ModalChooseContactComp = ({
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
+    setPage(1);
+    setDataTable([]);
     setSort(dataSort);
+  };
+
+  const handleLoadMore = async () => {
+    if (!loading && hasMore) {
+      setPage((prevState) => prevState + 1);
+    }
+    return Promise.resolve();
   };
 
 
@@ -215,7 +231,7 @@ const ModalChooseContactComp = ({
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "CONTACT NAME",
@@ -368,17 +384,21 @@ const ModalChooseContactComp = ({
             Create
           </ButtonComponent>
         </div>
-        <div className={"w-full"}>
-          <TablePagination
+        <div className="flex flex-col gap-y-4">
+          <NxTable
+            idTable="account-contact-choose-modal-table"
             dataSource={dataTable}
             columns={columns}
-            pageSize={pageSize}
-            current={page}
             expandable={{ expandedRowRender }}
             totalData={totalElements}
-            onChange={handleChange}
-            onSizeChanger={handleChangeSize}
-            tableScrolled={{ x: 2000, y: 300 }}
+            usePagination={false}
+            useInfiniteScroll={true}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+            loadMoreThreshold={20}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            tableScrolled={{ y: 300, x: "max-content" }}
             onSort={onSort}
           />
         </div>

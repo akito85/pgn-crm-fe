@@ -3,14 +3,16 @@ import { useState } from "react";
 import { Form, Select } from "antd";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import { requiredMessage } from "../../../../../../../../../utils";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 
 export default function InfoAccount(props) {
   const account = props.account
   const customer = props.customer
 
   return(
-    <NxPanel title={"ACCOUNT INFORMATION"}>
+    <NxCardContainer header={"ACCOUNT INFORMATION"}>
+      <NxBaseContainer border>
       <div className="w-full grid grid-cols-3 gap-3">
         {/* Column 1 */}
         <Form.Item
@@ -126,7 +128,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Premise Address"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -141,7 +143,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Subdistrict"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -157,7 +159,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("District"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -172,7 +174,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("City"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -187,7 +189,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Country"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -202,7 +204,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Latitude"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -217,7 +219,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Longitude"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -225,6 +227,7 @@ export default function InfoAccount(props) {
           <InputComponent disabled={true} />
         </Form.Item>
       </div>
-    </NxPanel>
+      </NxBaseContainer>
+    </NxCardContainer>
   )
 }

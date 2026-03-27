@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../../components/Toolbar";
@@ -29,16 +29,54 @@ const PaymentRelationTable = ({
   loading = false, 
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION,
-    updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION,
-    detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION,
-    navigate,
+    handleView: (id) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_PAYMENT_RELATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
+    handleCreate: () => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_PAYMENT_RELATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    ),
+    handleUpdate: (id) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+        }
+      }
+    ),
     handleApproval,
-    handleApprovalHistory: handleApprovalHistoryModal,
+    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
     handleInactivate: handleInactivateModal,
   });
@@ -93,7 +131,7 @@ const PaymentRelationTable = ({
         dataSource={data}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: "max-content" }}
+        tableScrolled={{ x: "max-content" }}
         onSort={onSort}
         columns={processedColumns}
         usePagination={false}

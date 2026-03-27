@@ -64,14 +64,15 @@ const ModalCustom = (props) => {
         return (
           <div className="">
             {/* header section */}
-            <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
-              <div className={"flex gap-x-1.5 items-center"}>
-                <span className="text-primary uppercase font-semibold">{header}</span>
-              </div>
+            <div
+              className="flex flex-col bg-[#F9F9F9] rounded-tl-[5px] rounded-tr-[5px] uppercase"
+              style={{ borderBottom: "1px solid #BDBDBD", padding: "16px" }}
+            >
+              <span className="text-[16px] text-primary">{header}</span>
             </div>
 
             {/* content section */}
-            <div className={"flex flex-col w-full p-6"}>{children}</div>
+            <div className={`flex flex-col w-full ${hidePadding ? "" : "p-6"}`}>{children}</div>
           </div>
         );
     }

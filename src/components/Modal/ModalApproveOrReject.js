@@ -20,6 +20,7 @@ const ModalApproveOrReject = ({
 }) => {
   const [form] = Form.useForm();
   const [remark, setRemark] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClear = () => {
     setRemark("");
@@ -31,8 +32,13 @@ const ModalApproveOrReject = ({
     handleCloseModal();
   };
 
-  const handleSaveModal = (data) => {
-    onFinish(data, handleClear);
+  const handleSaveModal = async (data) => {
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(onFinish(data, handleClear));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -43,14 +49,16 @@ const ModalApproveOrReject = ({
       width={width}
       type={"confirmation"}
       footer={
-        <div className="w-full flex justify-end gap-5 p-4">
-          <ButtonComponent onClick={handleCancelModalFinal} type="default">
+        <div className="w-full flex justify-end gap-2 p-4">
+          <ButtonComponent onClick={handleCancelModalFinal} type="default" disabled={isSubmitting}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             form="formApproveReject"
             type="submit"
             htmlType="submit"
+            disabled={isSubmitting}
+            loading={isSubmitting}
           >
             Confirm
           </ButtonComponent>

@@ -12,11 +12,11 @@ const NOTIFICATION_API_URL = NOTIFICATION_CONFIG.NOTIFICATION_SERVICE + "/v1/api
 
 const notificationApi = {
   /**
-   * Get user notification with pagination and filtering
+   * Get user notifications with pagination and filtering
    * GET /v1/api/notification
    * @param {Object} params - Query parameters (page, size, sort, status, type, priority)
    */
-  getUserNotification: async (params = {}) => {
+  getUserNotifications: async (params = {}) => {
     try {
       // Remove userId from params since it's passed in the X-User-Id header
       const { userId, ...otherParams } = params;
@@ -28,63 +28,77 @@ const notificationApi = {
       const response = await axios.get(NOTIFICATION_API_URL, config);
       return response?.data;
     } catch (error) {
-      console.error('Error fetching user notification:', error);
+      console.error('Error fetching user notifications:', error);
       throw error;
     }
   },
 
   /**
-   * Get all user notification (list endpoint)
+   * Get all user notifications (list endpoint)
    * GET /v1/api/notification/list
-   * @param {string} userId - User ID to fetch notification for
+   * @param {string} userId - User ID to fetch notifications for
    * @param {Object} params - Query parameters (page, size, sort, status, type, priority)
+   * @param {number} [positionId] - Position ID for position-based filtering
    */
-  getAllUserNotification: async (userId, params = {}) => {
+  getAllUserNotifications: async (userId, params = {}, positionId = null) => {
     try {
+      const queryParams = {
+        ...params,
+        toUserId: userId
+      };
+
+      // Include positionId in query params for position-based filtering
+      if (positionId) {
+        queryParams.positionId = positionId;
+      }
+
       const config = {
-        params: {
-          ...params,
-          toUserId: userId
-        },
+        params: queryParams,
         headers: notificationTokenHeader(),
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/list`, config);
       return response?.data;
     } catch (error) {
-      console.error('Error fetching all user notification:', error);
+      console.error('Error fetching all user notifications:', error);
       throw error;
     }
   },
 
   /**
-   * Get user's unread notification count
+   * Get user's unread notifications count
    * GET /v1/api/notification/unread-count
+   * @param {number} [positionId] - Position ID for position-based filtering
    */
-  getUnreadNotificationCount: async () => {
+  getUnreadNotificationsCount: async (positionId = null) => {
     try {
       const headers = {
         ...notificationTokenHeader(),
         'Content-Type': 'application/json',
       };
+      const params = {};
+      if (positionId) {
+        params.positionId = positionId;
+      }
       const config = {
         headers,
+        params,
         withCredentials: true,
       };
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread-count`, config);
       return response?.data;
     } catch (error) {
-      console.error('Error fetching unread notification count:', error);
+      console.error('Error fetching unread notifications count:', error);
       throw error;
     }
   },
 
   /**
-   * Get user's unread notification only
+   * Get user's unread notifications only
    * GET /v1/api/notification/unread
    * @param {Object} params - Query parameters (page, size, sort)
    */
-  getUnreadNotification: async (params = {}) => {
+  getUnreadNotifications: async (params = {}) => {
     try {
       // Remove userId from params since it's passed in the X-User-Id header
       const { userId, ...otherParams } = params;
@@ -97,7 +111,7 @@ const notificationApi = {
       const response = await axios.get(`${NOTIFICATION_API_URL}/unread`, config);
       return response?.data;
     } catch (error) {
-      console.error('Error fetching unread notification:', error);
+      console.error('Error fetching unread notifications:', error);
       throw error;
     }
   },

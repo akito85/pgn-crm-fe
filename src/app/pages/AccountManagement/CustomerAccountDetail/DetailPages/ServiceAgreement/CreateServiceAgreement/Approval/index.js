@@ -6,6 +6,7 @@ import SelectComponent from '../../../../../../../../components/SelectComponent'
 import { FilterOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
 import NxCardContainer from '../../../../../../../../components/Nx/NxCardContainer';
+import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer';
 
 const expandedRowRender = (record) => {
   const dataExpand = record?.employeeDetail
@@ -216,51 +217,54 @@ const Approval = ({
 
   return (
     <NxCardContainer header={"APPROVAL"}>
-      <div className="flex flex-col gap-y-4">
-        {/* APPROVAL HIERARCHY SELECTION */}
-            <Form.Item
-              className="no-margin-form w-1/3"
-              label={"Approval Hierarchy"}
-              name={"appHierId"}
-              getValueFromEvent={(e) => handleSaApprovalObj(e, "appHierId")}
-              rules={[
-                {
-                  message: "Please input your Approval Hierarchy",
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent onChange={(e) => handleDetailApproval(e)}>
-                {dataApprovalList?.map((data, index) => (
-                  <Select.Option key={index} value={data?.appHierId}>
-                    {data?.approvalName}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
+        <NxBaseContainer border >
+          <div className="flex flex-col gap-y-4">
 
-        {/* APPROVAL DETAIL TABLE */}
-        {isApprovalId && isApprovalId.appHierId !== undefined && (
-            <Spin spinning={loading}>
-              <div>
-                <TablePagination
-                  useSelect={false}
-                  usePagination={false}
-                  dataSource={appHierDataDetail}
-                  columns={columnApprovalData(
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                  )}
-                  expandable={{
-                    expandedRowRender,
-                  }}
-                />
-              </div>
-            </Spin>
-        )}
-      </div>
+              {/* APPROVAL HIERARCHY SELECTION */}
+                  <Form.Item
+                    className="no-margin-form w-1/3"
+                    label={"Approval Hierarchy"}
+                    name={"appHierId"}
+                    getValueFromEvent={(e) => handleSaApprovalObj(e, "appHierId")}
+                    rules={[
+                      {
+                        message: "Please input your Approval Hierarchy",
+                        required: true,
+                      },
+                    ]}
+                  >
+                    <SelectComponent onChange={(e) => handleDetailApproval(e)}>
+                      {dataApprovalList?.map((data, index) => (
+                        <Select.Option key={index} value={data?.appHierId}>
+                          {data?.approvalName}
+                        </Select.Option>
+                      ))}
+                    </SelectComponent>
+                  </Form.Item>
+
+              {/* APPROVAL DETAIL TABLE */}
+              {isApprovalId && isApprovalId.appHierId !== undefined && (
+                  <Spin spinning={loading}>
+                    <div>
+                      <TablePagination
+                        useSelect={false}
+                        usePagination={false}
+                        dataSource={appHierDataDetail}
+                        columns={columnApprovalData(
+                          searchInput,
+                          searchedColumn,
+                          searchText,
+                          handleSearch
+                        )}
+                        expandable={{
+                          expandedRowRender,
+                        }}
+                      />
+                    </div>
+                  </Spin>
+              )}
+          </div>
+        </NxBaseContainer>
     </NxCardContainer>
   )
 }

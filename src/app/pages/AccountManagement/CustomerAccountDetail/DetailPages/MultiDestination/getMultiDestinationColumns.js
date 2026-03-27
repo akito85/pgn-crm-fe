@@ -20,23 +20,6 @@ const getMultiDestinationColumns = (
     render: (_, __, index) => index + 1,
   },
   {
-    key: "id",
-    title: "MULTI DESTINATION",
-    dataIndex: "id",
-    width: 200,
-    sorter: true,
-    filteredValue: [search?.id] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "id",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-  },
-  {
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
@@ -126,16 +109,16 @@ const getMultiDestinationColumns = (
     ),
   },
   {
-    key: "accountNumber",
+    key: "relatedAccountNumber",
     title: "ACCOUNT NUMBER",
-    dataIndex: "accountNumber",
+    dataIndex: "relatedAccountNumber",
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.accountNumber] || null,
+    filteredValue: [search?.relatedAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "accountNumber",
+      "relatedAccountNumber",
       searchInput,
       searchedColumn,
       searchText,
@@ -144,16 +127,16 @@ const getMultiDestinationColumns = (
     ),
   },
   {
-    key: "accountName",
+    key: "relatedAccountName",
     title: "ACCOUNT NAME",
-    dataIndex: "accountName",
+    dataIndex: "relatedAccountName",
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.accountName] || null,
+    filteredValue: [search?.relatedAccountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "accountName",
+      "relatedAccountName",
       searchInput,
       searchedColumn,
       searchText,
@@ -490,7 +473,8 @@ const getMultiDestinationColumns = (
         "waitingApproval": "Waiting Approval",
         "pending": "Pending",
         "rejected": "Rejected",
-        "WAITING_APPROVAL": "Waiting Approval"
+        "WAITING_APPROVAL": "Waiting Approval",
+        "WAITING_FOR_APPROVAL": "Waiting Approval",
       };
       return (
         <div className="flex justify-center">

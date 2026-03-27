@@ -11,7 +11,8 @@ export const RenderContentActions = (
   itemRender = [],
   totalLength,
   permissions = [],
-  sliceColumn = "View"
+  sliceColumn = "View",
+  stopClickPropagation = false,
 ) => {
   if (totalLength > 3) {
     return (
@@ -33,14 +34,13 @@ export const RenderContentActions = (
             </Space>
           }
         >
-          <div>
-            <MoreOutlined
-              style={{
-                fontSize: "20px",
-                color: "#0075bf",
-                cursor: "pointer",
-              }}
-            />
+          <div
+            className="group"
+            onClick={(e) => {
+              if (stopClickPropagation) e.stopPropagation();
+            }}
+          >
+            <MoreOutlined className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out" />
           </div>
         </Popover>
         <div>
@@ -79,17 +79,18 @@ export const useColumnActionPermission = (
   permissionList = [],
   itemsRender = [],
   sliceColumn = "View",
-  type = "page"
+  type = "page",
+  stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -99,13 +100,13 @@ export const useColumnActionPermission = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender
@@ -136,7 +137,8 @@ export const useColumnActionPermission = (
               lowerCaseItemsRender,
               arrayActions?.length,
               arrayActions,
-              sliceColumn
+              sliceColumn,
+              stopClickPropagation,
             ),
         },
       ];

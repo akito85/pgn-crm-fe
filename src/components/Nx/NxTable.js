@@ -1,11 +1,11 @@
 // NxTable.js (with resizable columns + grouped columns support + customHeaderLeft + showExport control)
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import {
   DownloadOutlined,
   FilterOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
-import { Button, Pagination, Select, Table } from "antd";
+import { Button, Pagination, Select, Spin, Table } from "antd";
 import ColumnSettings from "../ColumnSettings/ColumnSettings";
 import SearchBar from "../SearchBar";
 import NxAdvanceSearch from "./NxAdvanceSearch";
@@ -107,33 +107,34 @@ const ResizableTitle = (props) => {
 const NxTable = ({
   idTable,
   dataSource,
+  rowKey = (record) => record.id,
   dataMain, // Alias for dataSource (backward compatibility)
   columns = [],
   columnMain, // Alias for columns (backward compatibility)
   pageSize = 10, // Default pagination size
   current = 1, // Default current page
   loading,
-  onChange = () => {},
-  onSizeChanger = () => {},
+  onChange = () => { },
+  onSizeChanger = () => { },
   totalData = 0, // Default total
   onDelete,
   rowSelection,
-  onRowClicked = () => {},
-  tableScrolled,
+  onRowClicked = () => { },
+  tableScrolled = { y: 37.7 },
   expandable,
   className,
   useSelect = true,
   usePagination = true,
   useInfiniteScroll = false,
-  onLoadMore = () => {},
+  onLoadMore = () => { },
   hasMore = false,
   loadMoreThreshold = 20,
-  onSort = () => {},
-  handleDownload = () => {},
+  onSort = () => { },
+  handleDownload = () => { },
   columnDefinitions,
   fixedColumns = { left: [], right: [] },
-  setFixedColumns = () => {},
-  onAdvanceSearch = () => {},
+  setFixedColumns = () => { },
+  onAdvanceSearch = () => { },
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -144,12 +145,23 @@ const NxTable = ({
   onRefresh,
   enableRowClick = false,
   selectedRowKey = null,
-  onRowClick = () => {},
+  onRowClick = () => { },
+  components: externalComponents,
 }) => {
   // Resolve aliases for backward compatibility
   const resolvedDataSource = dataSource || dataMain || [];
   const resolvedColumns = columns.length > 0 ? columns : (columnMain || []);
   const resolvedTotalData = totalData || resolvedDataSource.length || 0;
+
+  const resolvedDataSourceWithKeys = useMemo(() => {
+    if (!Array.isArray(resolvedDataSource))
+      return [];
+    else
+      return resolvedDataSource.map((item) => ({
+        ...item,
+        id: item.id || (crypto?.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2))
+      }))
+  }, [resolvedDataSource]);
 
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -206,9 +218,11 @@ const NxTable = ({
       const scrollHeight = target.scrollHeight;
       const clientHeight = target.clientHeight;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-      const pixelThreshold = loadMoreThreshold * 40;
+      // Use smaller multiplier for more responsive triggering
+      const pixelThreshold = Math.max(loadMoreThreshold * 20, 50);
 
-      if (distanceFromBottom < pixelThreshold && !isLoadingMore && !loading) {
+      // Only check isLoadingMore to prevent duplicate calls - don't wait for loading state
+      if (distanceFromBottom <= pixelThreshold && !isLoadingMore) {
         setIsLoadingMore(true);
         onLoadMore().finally(() => {
           setIsLoadingMore(false);
@@ -219,7 +233,8 @@ const NxTable = ({
     const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
 
     if (tableBody) {
-      tableBody.addEventListener("scroll", handleScroll);
+      // Use passive listener for better scroll performance
+      tableBody.addEventListener("scroll", handleScroll, { passive: true });
       return () => {
         tableBody.removeEventListener("scroll", handleScroll);
       };
@@ -228,7 +243,6 @@ const NxTable = ({
     useInfiniteScroll,
     hasMore,
     isLoadingMore,
-    loading,
     loadMoreThreshold,
     onLoadMore,
     idTable,
@@ -383,15 +397,20 @@ const NxTable = ({
             onDragEnd: isDraggable ? handleDragEnd : undefined,
           };
         },
-        onCell: () => ({
-          style: {
-            textAlign: textAlign,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontSize: "11px",
-          },
-        }),
+        onCell: (record, index) => {
+          const externalOnCell = col.onCell ? col.onCell(record, index) : {};
+          return {
+            ...externalOnCell,
+            style: {
+              textAlign: textAlign,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontSize: "11px",
+              ...(externalOnCell.style || {}),
+            },
+          };
+        },
       };
 
       if (fixedPos) {
@@ -424,7 +443,7 @@ const NxTable = ({
       return columns
         .map((col) => {
           const colKey = col.key || col.dataIndex || col.title;
-          
+
           // Jika kolom ini hidden, skip
           if (optionSelectedCol.includes(colKey)) {
             return null;
@@ -513,6 +532,11 @@ const NxTable = ({
     header: {
       cell: ResizableTitle,
     },
+    ...(externalComponents ? {
+      body: {
+        ...(externalComponents.body || {}),
+      },
+    } : {}),
   };
 
   const hasRightControls =
@@ -620,7 +644,7 @@ const NxTable = ({
 
             #${idTable} .ant-table-thead .ant-table-cell-fix-left,
             #${idTable} .ant-table-thead .ant-table-cell-fix-right {
-              z-index: 5;
+              z-index: 5 !important;
             }
 
             #${idTable} .ant-table-filter-trigger,
@@ -655,16 +679,17 @@ const NxTable = ({
             #${idTable} .ant-table-body {
               scrollbar-width: thin;
               scrollbar-color: #888 #f1f1f1;
-              padding-bottom: 8px;
+              padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "8px"};
+              ${(useInfiniteScroll || usePagination) ? "border-left: 0.5px solid #C8CDD4; border-right: 0.5px solid #C8CDD4;" : ""}
             }
 
             @supports (-moz-appearance:none) {
               #${idTable} .ant-table-body {
-                padding-bottom: 12px;
+                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "12px"};
               }
 
               #${idTable} .ant-table-content {
-                padding-bottom: 4px;
+                padding-bottom: ${(useInfiniteScroll || usePagination) ? "0" : "4px"};
               }
             }
 
@@ -700,6 +725,60 @@ const NxTable = ({
 
             #${idTable} .ant-table-column-sorters {
               padding-right: 0px;
+            }
+
+            #${idTable} .ant-table {
+              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              overflow: hidden;
+              border: 1px solid #C8CDD4;
+              ${(useInfiniteScroll || usePagination) ? "border-bottom: none;" : ""}
+            }
+
+            #${idTable} .ant-table-container {
+              border-radius: ${(useInfiniteScroll || usePagination) ? "8px 8px 0 0" : "8px"};
+              overflow: hidden;
+              border: none;
+            }
+
+            #${idTable} .ant-table-container table > thead > tr:first-child > *:first-child {
+              border-start-start-radius: 8px;
+            }
+
+            #${idTable} .ant-table-container table > thead > tr:first-child > *:last-child {
+              border-start-end-radius: 8px;
+            }
+
+            #${idTable} .ant-table-bordered .ant-table-cell,
+            #${idTable} .ant-table-bordered .ant-table-thead > tr > th,
+            #${idTable} .ant-table-bordered .ant-table-tbody > tr > td,
+            #${idTable} .ant-table-bordered .ant-table-container {
+              border-color: #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-thead {
+              border-left: 0.5px solid #C8CDD4;
+              border-right: 0.5px solid #C8CDD4;
+            }
+
+            #${idTable} .ant-table-thead > tr > th {
+              padding: 4px 8px !important;
+              height: 30px !important;
+              border: 0.5px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-tbody > tr:not(.ant-table-measure-row) > td {
+              padding: 4px 8px !important;
+              min-height: 30px;
+              font-size: 12px;
+              border: 0.5px solid #C8CDD4 !important;
+            }
+
+            #${idTable} .ant-table-measure-row > td {
+              padding: 0 !important;
+              height: 0 !important;
+              line-height: 0;
+              font-size: 0;
+              overflow: hidden;
             }
           `}
       </style>
@@ -780,70 +859,86 @@ const NxTable = ({
         </div>
       ) : null}
 
-      <Table
-        dataSource={resolvedDataSource}
-        columns={displayedColumns}
-        components={components}
-        scroll={tableScrolled}
-        bordered
-        pagination={false}
-        className={`w-full ${className}`}
-        loading={loading}
-        tableLayout="fixed"
-        expandable={expandable}
-        id={idTable}
-        onChange={onSort}
-        rowSelection={rowSelection}
-        onRow={customOnRow}
-        rowClassName={customRowClassName}
-      />
+      <div style={{ position: "relative" }}>
+        <Table
+          dataSource={resolvedDataSourceWithKeys}
+          rowKey={rowKey}
+          columns={displayedColumns}
+          components={components}
+          scroll={tableScrolled.y === undefined ? {...tableScrolled, y: 380} : tableScrolled}
+          bordered
+          pagination={false}
+          className={`w-full ${className}`}
+          loading={loading}
+          tableLayout="fixed"
+          expandable={expandable}
+          id={idTable}
+          onChange={onSort}
+          rowSelection={rowSelection}
+          onRow={customOnRow}
+          rowClassName={customRowClassName}
+        />
 
-      {useInfiniteScroll ? (
-        <div className={"w-full flex justify-end mt-3 items-center"}>
-          <span style={{ fontSize: "12px", color: "#666" }}>
-            Showing {resolvedDataSource?.length || 0} rows
-            {isLoadingMore && " | Loading..."}
-            {!hasMore && resolvedDataSource?.length > 0 && (
-              <span style={{ color: "#52c41a", fontWeight: "500" }}>
-                {" "}
-                | All data showed
-              </span>
-            )}
-          </span>
-        </div>
-      ) : usePagination ? (
-        <div className={"w-full flex justify-between mt-3 items-center"}>
-          <div className="flex items-center gap-3">
-            <Select
-              value={pageSize}
-              onChange={(value) => onSizeChanger(current, value)}
-              className="w-15"
-              style={{ fontSize: "12px" }}
-              size="small"
-            >
-              {[10, 20, 50, 100].map((size) => (
-                <Option key={size} value={size}>
-                  {size}
-                </Option>
-              ))}
-            </Select>
-            <span style={{ fontSize: "12px" }}>
-              Showing {(current - 1) * pageSize + 1} to{" "}
-              {Math.min(current * pageSize, resolvedTotalData)} of {resolvedTotalData} entries
+        {useInfiniteScroll ? (
+          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+            <span style={{ fontSize: "12px", color: "#6B7280" }}>
+              Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
+              {isLoadingMore && " · Loading..."}
             </span>
+            {!hasMore && resolvedDataSource?.length > 0 && (
+              <>
+                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+                <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+              </>
+            )}
           </div>
-          <Pagination
-            total={resolvedTotalData}
-            current={current}
-            pageSize={pageSize}
-            onChange={onChange}
-            showSizeChanger={false}
-            showTotal={false}
-            style={{ display: "flex", gap: "3px" }}
-            size="small"
-          />
-        </div>
-      ) : null}
+        ) : usePagination ? (
+          <div style={{ borderLeft: "1px solid #C8CDD4", borderRight: "1px solid #C8CDD4", borderBottom: "1px solid #C8CDD4", borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Select
+                value={pageSize}
+                onChange={(value) => onSizeChanger(current, value)}
+                className="w-15"
+                style={{ fontSize: "12px" }}
+                size="small"
+              >
+                {[10, 20, 50, 100].map((size) => (
+                  <Option key={size} value={size}>
+                    {size}
+                  </Option>
+                ))}
+              </Select>
+              <span style={{ fontSize: "12px" }}>
+                Showing {(current - 1) * pageSize + 1} to{" "}
+                {Math.min(current * pageSize, resolvedTotalData)} of {resolvedTotalData} entries
+              </span>
+            </div>
+            <Pagination
+              total={resolvedTotalData}
+              current={current}
+              pageSize={pageSize}
+              onChange={onChange}
+              showSizeChanger={false}
+              showTotal={false}
+              style={{ display: "flex", gap: "3px" }}
+              size="small"
+            />
+          </div>
+        ) : null}
+
+        {loading && (
+          <div style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: (useInfiniteScroll || usePagination) ? "33px" : 0,
+            background: "rgba(255, 255, 255, 0.65)",
+            zIndex: 10,
+            borderRadius: "0 0 8px 8px",
+          }} />
+        )}
+      </div>
 
       <NxAdvanceSearch
         visible={isAdvanceOpen}

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
@@ -28,20 +28,62 @@ const MultiDestinationTable = ({
   handleSearch = () => {},
   loading = false,
 }) => {
+  const location = useLocation();
   const navigate = useNavigate();
 
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
+
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
-    createRoute: ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION,
-    updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION,
-    detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION,
-    navigate,
+    handleView: (id, subjectId, objectId) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+          subjectId,
+          objectId
+        }
+      }
+    ),
+    handleCreate: () => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount,
+          idCustomer,
+        }
+      }
+    ),
+    handleUpdate: (id, subjectId, objectId) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount,
+          idCustomer,
+          id,
+          subjectId,
+          objectId,
+        }
+      }
+    ),
     handleApproval,
-    handleApprovalHistory: handleApprovalHistoryModal,
+    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
     handleDownload,
     handleInactivate: handleInactivateModal,
-    idKey: "idMd",
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
@@ -94,7 +136,7 @@ const MultiDestinationTable = ({
         dataSource={data}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: data.length ? "max-content" : 4000 }}
+        tableScrolled={{ x: data.length ? "max-content" : 4000 }}
         onSort={onSort}
         columns={processedColumns}
         usePagination={false}

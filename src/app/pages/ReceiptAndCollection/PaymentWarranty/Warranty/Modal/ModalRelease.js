@@ -1,6 +1,7 @@
+// VERIFICATION_TAG: 2026-02-17-001
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Select, Checkbox, Tooltip } from "antd";
+import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
@@ -30,26 +31,32 @@ import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllWarrantyInfoPaginate,
-  getAllReleaseInfoPaginate,
-  getAllAttachmentInfoPaginate,
+  getReleaseListPaginate,
+  getReleaseDetailList,
+  submitRelease,
+  getAllApprovalList,
+  getListApprovalById,
   getListCategory,
-  requestedRelease,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
+
+import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
+import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import { WARRANTY_TRANSACTION_NAMES} from "../../../../../../constants/warrantyTypes";
 
 const ModalRelease = ({
   isOpen,
   handleBack = () => {},
   handleRefresh = () => {},
   handleOpenModal = () => {},
+  selectedRow = null,
 }) => {
   // Selector
   const {
-    data_customer_info,
-    data_warranty_info,
-    data_release_info,
+    dataReleaseList,
     data_attachment_info,
-    loading,
+    dataListAppHierId,
+    dataListAppHierDetail,
+    loadingReleaseList,
   } = useSelector((state) => state.warranty);
 
   // Declaration
@@ -57,9 +64,9 @@ const ModalRelease = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceReleaseInfo = data_release_info?.result || [];
+  const dataSourceCustomerInfo = []; 
+  const dataSourceWarrantyInfo = dataReleaseList?.result || [];
+  const dataSourceReleaseInfo = []; 
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -82,6 +89,12 @@ const ModalRelease = ({
   const [dataWarrantyInfoSelect, setDataWarrantyInfoSelect] = useState([]);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+
+  // Approval State
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState(null);
+  const [approvalName, setApprovalName] = useState("-");
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
@@ -123,25 +136,39 @@ const ModalRelease = ({
   // Define Wizard Step
   const steps = [
     {
-      title: "Warranty Information",
-      disabled: false
+      title: "Guarantee Information",
+      key: "warrantyInfo",
     },
     {
       title: "Release Information",
-      disabled: false
+      key: "releaseInfo",
+    },
+    {
+      title: "Approval",
+      key: "approvalInfo",
     },
     {
       title: "Attachment Information",
-      disabled: false
+      key: "attachmentInfo",
     },
     {
       title: "Confirmation",
-      disabled: false
+      key: "confirmation",
     },
   ];
 
-  // Button Next
   const next = () => {
+    if (current === 0 && selectedWarrantyInfoRowKeys.length === 0) {
+      return message.warning("Please select Guarantee Information!");
+    }
+    if (current === 1) {
+      if (!remarkReleaseInformation) {
+        return message.warning("Please input your Remark!");
+      }
+    }
+    if (current === 2 && !selectedHierarchy) {
+      return message.warning("Please select Approval Hierarchy!");
+    }
     setCurrent(current + 1);
   };
 
@@ -188,32 +215,56 @@ const ModalRelease = ({
     setBoolean(true);
   };
 
-  // Handle Back Form
-  const handleBackForm = () => {
-    handleBack();
+  const clearAllState = (preSelectedRow) => {
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
-    setDataWarrantyInfoSelect([]);
-    setDataTable([]);
-    setBoolean(false);
+    
+    if (preSelectedRow) {
+      const rowKey = preSelectedRow.billingCode || preSelectedRow.invoiceNumber || preSelectedRow.id;
+      setSelectedWarrantyInfoRowKeys([rowKey]);
+      setDataWarrantyInfoSelect([{ ...preSelectedRow, key: rowKey }]);
+      setCurrent(0); // Start at Step 1 (Guarantee Info selection)
+    } else {
+      setSelectedWarrantyInfoRowKeys([]);
+      setDataWarrantyInfoSelect([]);
+      setCurrent(0);
+    }
+
     setRemarkReleaseInformation("");
-    setCurrent(0);
+    setListDataAttachment([]);
+    setSelectedHierarchy(null);
+    setApprovalName("-");
     setSearch({});
     setPage(1);
     setSort("");
     setSearchText("");
     setSearchedColumn("");
+    setValuePage("Release");
+    setBoolean(false);
     form.resetFields();
   };
 
-  const [tabData, setTabData] = useState([
-    { value: "Release"},
-    { value: "Attachment" },
-  ]);
+  useEffect(() => {
+    if (isOpen) {
+      clearAllState(selectedRow);
+    }
+  }, [isOpen, selectedRow]);
+
+  // Handle Back Form
+  const handleBackForm = () => {
+    handleBack();
+    clearAllState();
+  };
+
+  const tabItems = [
+    { key: "Release", label: "Release Info" },
+    { key: "Approval", label: "Approval" },
+    { key: "Attachment", label: "Attachment" },
+  ];
   
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  const [valuePage, setValuePage] = useState("Release");
+  const onChange = (key) => {
+    setValuePage(key);
   };
 
   const handleCloseModalError = () => {
@@ -228,64 +279,189 @@ const ModalRelease = ({
     setBodyError({});
   };
 
-  // Handle Save for Modal Confirmation
-  const handleSave = (formValue) => {
-    handleBack();
+  const [loadingSave, setLoadingSave] = useState(false);
 
-    const body = {
-    };
+  // Handle Save for Modal Confirmation
+  const handleSave = async (formValue) => {
+    setLoadingSave(true);
     
-    dispatch(requestedRelease({ body: body }))
-      .unwrap()
-      .then(() => {
-        handleRefresh();
-        handleBack();
-        setSelectedCustomerInfoRowKeys([]);
-        setDataCustomerInfoSelect([]);
-        setDataWarrantyInfoSelect([]);
-        setDataTable([]);
-        setBoolean(false);
-        setRemarkReleaseInformation("");
-        setCurrent(0);
-        setSearch({});
-        setPage(1);
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-        form.resetFields();
-      })
-      .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message, type: "requested" });
-          setModalError(true);
+    try {
+      // 1. Prepare unified submission body first
+      const submitBody = {
+        type: WARRANTY_TRANSACTION_NAMES.RELEASE,
+        appHierId: selectedHierarchy,
+        items: dataWarrantyInfoSelect.map((item) => ({
+          payWarrantyId: item.id,
+          amount: item.currencyBalance || 0,
+          currency: item.currency || "IDR",
+        })),
+        remark: remarkReleaseInformation,
+      };
+
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitRelease(submitBody)).unwrap();
+      const transIds = submitRes?.data?.transIds || [];
+
+      // 3. Upload new attachments per transId
+      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+      if (newAttachments.length > 0 && transIds.length > 0) {
+        for (const transId of transIds) {
+          for (const element of newAttachments) {
+            const uploadBody = {
+              referensiId: transId, // Link attachment to the returned transaction ID
+              files: element.file,
+              category: "PAYMENT_WARRANTY_TRANS",
+              fileCategoryId: element.fileCategoryId,
+            };
+            await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+          }
         }
-      });
+      }
+
+      // 4. Cleanup and close
+      handleRefresh();
+      handleBack();
+      clearAllState();
+      setLoadingSave(false);
+    } catch (error) {
+      setLoadingSave(false);
+      let message = error?.response?.data?.message || error?.message || error?.toString();
+
+      if (message && typeof message === "object") {
+        if (Array.isArray(message)) {
+          message = message.join(", ");
+        } else {
+          message = Object.values(message)
+            .map((val) => (typeof val === "object" ? JSON.stringify(val) : val))
+            .join(", ");
+        }
+      }
+
+      setBodyError({ message, type: "requested" });
+      setModalError(true);
+    }
   };
 
-  // Warranti Information Step
+
+  // Guarantee Information Step
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && current === 0) {
+      const finalSearch = Object.keys(search).length > 0 
+        ? Object.entries(search)
+            .filter(([_, value]) => value !== undefined && value !== "")
+            .map(([key, value]) => `${key}~${value}`)
+            .join("|") 
+        : "";
+
       dispatch(
-        getAllWarrantyInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
+        getReleaseListPaginate({
+          search: finalSearch,
           page,
           pageSize,
           sort,
         })
       );
     }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  }, [dispatch, isOpen, search, page, pageSize, sort, current]);
+
+  useEffect(() => {
+    if (isOpen && current === 2) {
+      dispatch(getAllApprovalList());
+    }
+  }, [dispatch, isOpen, current]);
+
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
+    }
+  }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (selectedHierarchy) {
+      dispatch(getListApprovalById({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
+
+  useEffect(() => {
+    if (dataListAppHierDetail?.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail?.map((b, idx) => ({
+          ...b,
+          key: idx + 1,
+        })) || [],
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  const dataSourceCustomerInfoWithKeys = useMemo(() => {
+    return dataSourceCustomerInfo?.map((item, index) => ({
+      ...item,
+      key: index + 1,
+    }));
+  }, [dataSourceCustomerInfo]);
+  
+  const baseColumnsCustomerInfo = useMemo(
+    () =>
+      columnsCustomerInfo(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumnsCustomerInfo = useMemo(() => {
+    const columnsWithKeys = baseColumnsCustomerInfo.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumnsCustomerInfo]);
+
+  const processedColumnsCustomerInfo = useMemo(() => {
+    return applyFixedColumns(allColumnsCustomerInfo, fixedColumns);
+  }, [allColumnsCustomerInfo, fixedColumns]);
+
+  const columnDefinitionsCustomerInfo = useMemo(() => {
+    return allColumnsCustomerInfo.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumnsCustomerInfo]);
+  
+  const onSelectChangeCustomerInfo = (newSelectedCustomerInfoRowKeys, newSelectedRow) => {
+    setDataCustomerInfoSelect(newSelectedRow);
+    setSelectedCustomerInfoRowKeys(newSelectedCustomerInfoRowKeys);
+  };
+
+  const rowSelectionCustomerInfo = {
+    fixed: true,
+    selectedRowKeys: selectedCustomerInfoRowKeys,
+    onChange: onSelectChangeCustomerInfo,
+  };
 
   const dataSourceWarrantyInfoWithKeys = useMemo(() => {
+    if (selectedRow) {
+      const rowKey = selectedRow.billingCode || selectedRow.invoiceNumber || selectedRow.id;
+      return [{ ...selectedRow, key: rowKey }];
+    }
     return dataSourceWarrantyInfo?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSourceWarrantyInfo]);
+  }, [dataSourceWarrantyInfo, selectedRow]);
   
   const baseColumnsWarrantyInfo = useMemo(
     () =>
@@ -326,64 +502,64 @@ const ModalRelease = ({
 
   const rowSelectionWarrantyInfo = {
     fixed: true,
-    selectedWarrantyInfoRowKeys,
+    selectedRowKeys: selectedWarrantyInfoRowKeys,
     onChange: onSelectChangeWarrantyInfo,
+    getCheckboxProps: (record) => ({
+      disabled: !!selectedRow,
+    }),
   };
 
   // Release Information Step
-  const [releaseAmountData, setReleaseAmountData] = useState({});
-  const handleReleaseAmountChange = (value, recordKey) => {
-    setReleaseAmountData(prev => ({ ...prev, [recordKey]: value }));
-  };
-
-  const [releaseDateData, setReleaseDateData] = useState({});
-  const handleReleaseDateChange = (value, recordKey) => {
-    setReleaseDateData(prev => ({ ...prev, [recordKey]: value }));
-  }; 
 
   const [remarkReleaseInformation, setRemarkReleaseInformation] = useState("");
 
   const [fixedReleaseColumns, setFixedReleaseColumns] = useState({
     left: ["no"],
-    right: ["date", "releaseAmount"] 
+    right: ["releaseDate", "releaseAmount"] 
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(
-        getAllReleaseInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  // Removed useEffect for getAllReleaseInfoPaginate as we use dataWarrantyInfoSelect
 
   const dataSourceReleaseInfoWithKeys = useMemo(() => {
-    return dataSourceReleaseInfo?.map((item, index) => ({
+    return dataWarrantyInfoSelect?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSourceReleaseInfo]);
+  }, [dataWarrantyInfoSelect]);
   
   const baseColumnsReleaseInfo = useMemo(
     () =>
       columnsReleaseInfo(
-        page,
-        pageSize,
+        1,
+        1000,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        releaseAmountData,
-        handleReleaseAmountChange,
-        releaseDateData,
-        handleReleaseDateChange
+        handleSearch
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [searchedColumn, searchText]
   );
+
+  const baseColumnsReleaseInfoConfirmation = useMemo(
+    () =>
+      columnsReleaseInfo(
+        1,
+        1000,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [searchedColumn, searchText]
+  );
+
+  const processedColumnsReleaseInfoConfirmation = useMemo(() => {
+    const columnsWithKeys = baseColumnsReleaseInfoConfirmation.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return applyFixedColumns(columnsWithKeys, fixedReleaseColumns);
+  }, [baseColumnsReleaseInfoConfirmation, fixedReleaseColumns]);
 
   const allColumnsReleaseInfo = useMemo(() => {
     const columnsWithKeys = baseColumnsReleaseInfo.map((col) => ({
@@ -407,18 +583,6 @@ const ModalRelease = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(
-        getAllAttachmentInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({
@@ -496,74 +660,20 @@ const ModalRelease = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Release"
-        handleBack={handleBackForm}
+        header="Guarantee Release"
+        handleCancel={handleBackForm}
         width={1000}
-        footer={
-          <div className="flex w-full justify-end gap-x-5">
-            {current < steps.length - 0 && (
-              <ButtonComponent type={"default"} onClick={handleBackForm}>
-                <span className="p-1 text-[18px] text-center">Back</span>
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-              >
-                <LeftOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-                <span className="p-1 text-[18px] text-center">Previous</span>
-              </ButtonComponent>
-            )}
-
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => {
-                  handleButtonNext();
-                }}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                form={"formRequest"}
-              >
-                <span className="p-1 text-[18px] text-center">Confirm</span>
-              </ButtonComponent>
-            )}
-          </div>
-        }
+        footer={null}
       >
-        <div className="flex flex-row justify-center">
-          <div
-            onScroll={handleScroll}
-            ref={containerRef}
-            className="overflow-x-scroll scrollStepsCstm"
-          >
-            <Steps current={current} items={items} labelPlacement="vertical" />
-          </div>
+        <div className="flex flex-col gap-y-5">
+          <FormStepper
+            steps={steps}
+            current={current}
+            onPrev={prev}
+            onNext={next}
+            onBack={handleBackForm}
+            onConfirm={handleSave}
+          />
         </div>
 
         <Form
@@ -572,7 +682,7 @@ const ModalRelease = ({
           id={"formRequest"}
           onFinish={handleSave}
         >
-          {/* STEP : WARRANTY INFORMATION */}
+          {/* STEP 1: WARRANTY INFORMATION */}
           <div className={`steps-content my-[30px] ${ current !== 0 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
@@ -586,19 +696,20 @@ const ModalRelease = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_warranty_info?.page?.totalElements || 0}
+                totalData={selectedRow ? 1 : (dataReleaseList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingReleaseList}
                 showExport={false}
                 rowSelection={rowSelectionWarrantyInfo}
               />
             </div>
           </div>
-          {/* STEP : RELEASE INFORMATION */}
+
+          {/* STEP 2: RELEASE INFORMATION */}
           <div className={`steps-content my-[30px] ${ current !== 1 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
               <p className="text-primary uppercase font-bold mb-4">
@@ -608,17 +719,18 @@ const ModalRelease = ({
               <TableRBI
                 dataSource={dataSourceReleaseInfoWithKeys}
                 columns={processedColumnsReleaseInfo}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={data_release_info?.page?.totalElements || 0}
-                tableScrolled={{ y: 525, x: 1000 }}
+                current={1}
+                pageSize={100}
+                onChange={() => {}}
+                onSizeChanger={() => {}}
+                totalData={dataSourceReleaseInfoWithKeys.length}
+                tableScrolled={{ y: 525, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsReleaseInfo}
                 fixedColumns={fixedReleaseColumns}
                 setFixedColumns={setFixedReleaseColumns}
-                loading={loading}
+                loading={loadingReleaseList}
+                showExport={false}
               />
               
               <div className="pt-[30px]">
@@ -641,8 +753,23 @@ const ModalRelease = ({
             </div>
           </div>
 
-          {/* STEP : ATTACHMENT INFORMATION */}
+          {/* STEP 3: APPROVAL */}
           <div className={`steps-content my-[30px] ${ current !== 2 ? "hidden" : "" }`} >
+             <div className="w-full grid grid-cols-1 gap-x-4">
+              <p className="text-primary uppercase font-bold mb-4">
+                APPROVAL INFORMATION
+              </p>
+              <ApprovalSectionForm
+                dataTable={appHierDataDetail}
+                dataOption={appHierOptions}
+                selectedHierarchy={selectedHierarchy}
+                updateSelectedHierarchy={setSelectedHierarchy}
+              />
+            </div>
+          </div>
+
+          {/* STEP 4: ATTACHMENT INFORMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 3 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
                 ATTACHMENT INFORMATION
@@ -656,33 +783,36 @@ const ModalRelease = ({
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
+                mandatory={false}
               />
             </div>
           </div>
 
-          {/* STEP : CONFIRMATION */}
-          <div className={`steps-content my-[30px] ${ current !== 3 ? "hidden" : "" }`} >
+          {/* STEP 5: CONFIRMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 4 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
-              <RadioTabs data={tabData} onChange={onChange} currentPosition={valuePage}/>
-              <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
+              <Tabs activeKey={valuePage} onChange={setValuePage} items={tabItems} className="mb-4" />
+              
+              <div style={{ display: valuePage !== "Release" ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
                     RELEASE INFORMATION
                   </p>
                   <TableRBI
                     dataSource={dataSourceReleaseInfoWithKeys}
-                    columns={processedColumnsReleaseInfo}
-                    current={page}
-                    pageSize={pageSize}
-                    onChange={handleChange}
-                    onSizeChanger={handleChange}
-                    totalData={dataSourceReleaseInfoWithKeys.length || 0}
-                    tableScrolled={{ y: 525, x: 1000 }}
+                    columns={processedColumnsReleaseInfoConfirmation}
+                    current={1}
+                    pageSize={100}
+                    onChange={() => {}}
+                    onSizeChanger={() => {}}
+                    totalData={dataSourceReleaseInfoWithKeys.length}
+                    tableScrolled={{ y: 525, x: 2000 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitionsReleaseInfo}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
+                    fixedColumns={fixedReleaseColumns}
+                    setFixedColumns={setFixedReleaseColumns}
                     loading={false}
+                    showExport={false}
                   />
                   <div>
                     <DetailText label={"Remark"}>
@@ -692,7 +822,24 @@ const ModalRelease = ({
                 </div>
               </div>
 
-              <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
+              <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    APPROVAL INFORMATION
+                  </p>
+                  <ApprovalSectionForm
+                    showSelect={false}
+                    disableSelect={true}
+                    approvalName={
+                      appHierOptions.find((opt) => opt.value === selectedHierarchy)?.name
+                    }
+                    dataTable={appHierDataDetail}
+                    selectedHierarchy={selectedHierarchy}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
                     ATTACHMENT INFORMATION
@@ -701,7 +848,7 @@ const ModalRelease = ({
                     type={"preview"}
                     data={listDataAttachment}
                     updateData={setListDataAttachment}
-                    typeSelector="partner"
+                    typeSelector="warranty"
                     dispatch={dispatch}
                     getAPICategory={getListCategory}
                     service={receiptCollectionHttpService}
@@ -712,6 +859,16 @@ const ModalRelease = ({
               </div>
             </div>
           </div>
+            <FormFooter
+              current={current}
+              totalSteps={steps.length}
+              onPrev={prev}
+              onNext={next}
+              onCancel={handleBackForm}
+              onSubmit={() => form.submit()}
+              useClearData={false}
+              useSaveDraft={false}
+            />
         </Form>
       </ModalCustom>
 

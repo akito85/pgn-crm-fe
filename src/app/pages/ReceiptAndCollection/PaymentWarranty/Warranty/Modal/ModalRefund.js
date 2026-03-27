@@ -1,6 +1,8 @@
+// VERIFICATION_TAG: 2026-02-17-001
 import React, { useRef, useState, useEffect, useMemo } from "react";
+import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Select, Checkbox, Tooltip } from "antd";
+import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
@@ -31,25 +33,32 @@ import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   getAllCustomerInfoPaginate,
-  getAllWarrantyInfoPaginate,
-  getAllRefundInfoPaginate,
-  getAllAttachmentInfoPaginate,
+  getRefundListPaginate,
+  getRefundDetailList,
+  submitRefund,
+  getAllApprovalList,
+  getListApprovalById,
   getListCategory,
-  requestedRefund,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
+
+import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
+import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import { WARRANTY_TRANSACTION_NAMES} from "../../../../../../constants/warrantyTypes";
 
 const ModalRefund = ({
   isOpen,
   handleBack = () => {},
   handleRefresh = () => {},
   handleOpenModal = () => {},
+  selectedRow = null,
 }) => {
   // Selector
   const {
     data_customer_info,
-    data_warranty_info,
-    data_refund_info,
+    dataRefundList,
     data_attachment_info,
+    dataListAppHierId,
+    dataListAppHierDetail,
     loading,
   } = useSelector((state) => state.warranty);
 
@@ -59,8 +68,8 @@ const ModalRefund = ({
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceRefundInfo = data_refund_info?.result || [];
+  const dataSourceWarrantyInfo = dataRefundList?.result || [];
+  const dataSourceRefundInfo = [];
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -84,10 +93,18 @@ const ModalRefund = ({
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
+  // Approval State
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState(null);
+  const [approvalName, setApprovalName] = useState("-");
+
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
     right: [] 
   });
+
+
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -125,28 +142,52 @@ const ModalRefund = ({
   const steps = [
     {
       title: "Customer Information",
-      disabled: false
+      key: "customerInfo",
     },
     {
-      title: "Warranty Information",
-      disabled: false
+      title: "Guarantee Information",
+      key: "warrantyInfo",
     },
     {
       title: "Refund Information",
-      disabled: false
+      key: "refundInfo",
+    },
+    {
+      title: "Approval",
+      key: "approvalInfo",
     },
     {
       title: "Attachment Information",
-      disabled: false
+      key: "attachmentInfo",
     },
     {
       title: "Confirmation",
-      disabled: false
+      key: "confirmation",
     },
   ];
 
   // Button Next
   const next = () => {
+    if (current === 0 && selectedCustomerInfoRowKeys.length === 0) {
+      return message.warning("Please select Customer Information!");
+    }
+    if (current === 1 && selectedWarrantyInfoRowKeys.length === 0) {
+      return message.warning("Please select Guarantee Information!");
+    }
+    if (current === 2) {
+      if (!remarkRefundInformation) {
+        return message.warning("Please input your Remark!");
+      }
+      const isTableIncomplete = dataSourceRefundInfoWithKeys.some(
+        (item) => !refundAmountData[item.key] || !refundDateData[item.key]
+      );
+      if (isTableIncomplete) {
+        return message.warning("Please input Refund Amount and Refund Date for all items!");
+      }
+    }
+    if (current === 3 && !selectedHierarchy) {
+      return message.warning("Please select Approval Hierarchy!");
+    }
     setCurrent(current + 1);
   };
 
@@ -155,71 +196,58 @@ const ModalRefund = ({
     setCurrent(current - 1);
   };
 
-  // Scroll Left Handler
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  // Scroll Right Handler
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Scroll Handler
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
-
-  // Handle Next
-  const handleButtonNext = () => {
-    next();
-    scrollRightHandler();
-  };
-
-  // Mapping Step
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
-  //  Handle Select Approval Hierarchy
-  const handleSelect = (e) => {
-    setBoolean(true);
-  };
-
-  // Handle Back Form
-  const handleBackForm = () => {
-    handleBack();
+  const clearAllState = (preSelectedRow) => {
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
-    setDataWarrantyInfoSelect([]);
-    setDataTable([]);
-    setBoolean(false);
+    
+    if (preSelectedRow) {
+      const rowKey = preSelectedRow.billingCode || preSelectedRow.invoiceNumber || preSelectedRow.id;
+      setSelectedWarrantyInfoRowKeys([rowKey]);
+      setDataWarrantyInfoSelect([{ ...preSelectedRow, key: rowKey }]);
+      setCurrent(0); // Start at Step 1 (Customer Info selection)
+    } else {
+      setSelectedWarrantyInfoRowKeys([]);
+      setDataWarrantyInfoSelect([]);
+      setCurrent(0);
+    }
+
+    setRefundAmountData({});
+    setRefundDateData({});
     setRemarkRefundInformation("");
-    setCurrent(0);
+    setListDataAttachment([]);
+    setSelectedHierarchy(null);
+    setApprovalName("-");
     setSearch({});
     setPage(1);
     setSort("");
     setSearchText("");
     setSearchedColumn("");
+    setValuePage("Customer");
+    setBoolean(false);
     form.resetFields();
   };
 
-  const [tabData, setTabData] = useState([
-    { value: "Customer"},
-    { value: "Refund"},
-    { value: "Attachment" },
-  ]);
-  
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  useEffect(() => {
+    if (isOpen) {
+      clearAllState(selectedRow);
+    }
+  }, [isOpen, selectedRow]);
+
+  // Handle Back Form
+  const handleBackForm = () => {
+    handleBack();
+    clearAllState();
+  };
+
+  const tabItems = [
+    { key: "Customer", label: "Cust. Info" },
+    { key: "Refund", label: "Refund Info" },
+    { key: "Approval", label: "Approval" },
+    { key: "Attachment", label: "Attachment" },
+  ];
+  const [valuePage, setValuePage] = useState("Customer");
+  const onChange = (key) => {
+    setValuePage(key);
   };
 
   const handleCloseModalError = () => {
@@ -234,57 +262,157 @@ const ModalRefund = ({
     setBodyError({});
   };
 
-  // Handle Save for Modal Confirmation
-  const handleSave = (formValue) => {
-    handleBack();
+  const [loadingSave, setLoadingSave] = useState(false);
 
-    const body = {
-    };
+  // Handle Save for Modal Confirmation
+  const handleSave = async (formValue) => {
+    setLoadingSave(true);
     
-    dispatch(requestedRefund({ body: body }))
-      .unwrap()
-      .then(() => {
-        handleRefresh();
-        handleBack();
-        setSelectedCustomerInfoRowKeys([]);
-        setDataCustomerInfoSelect([]);
-        setDataWarrantyInfoSelect([]);
-        setDataTable([]);
-        setBoolean(false);
-        setRemarkRefundInformation("");
-        setCurrent(0);
-        setSearch({});
-        setPage(1);
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-        form.resetFields();
-      })
-      .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message, type: "requested" });
-          setModalError(true);
+    try {
+      // 1. Prepare unified submission body first
+      const submitBody = {
+        type: WARRANTY_TRANSACTION_NAMES.REFUND,
+        appHierId: selectedHierarchy,
+        customerId: dataCustomerInfoSelect[0]?.id,
+        items: dataWarrantyInfoSelect.map((item, index) => ({
+          payWarrantyId: item.id,
+          amount: refundAmountData[dataSourceRefundInfoWithKeys[index]?.key] || 0,
+          currency: item.currency || "IDR",
+          refundDate: refundDateData[dataSourceRefundInfoWithKeys[index]?.key] 
+            ? moment(refundDateData[dataSourceRefundInfoWithKeys[index]?.key]).format("YYYY-MM-DDTHH:mm:ss") 
+            : null,
+        })),
+        remark: remarkRefundInformation,
+      };
+
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitRefund(submitBody)).unwrap();
+      const transIds = submitRes?.data?.transIds || [];
+
+      // 3. Upload new attachments per transId
+      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+      if (newAttachments.length > 0 && transIds.length > 0) {
+        for (const transId of transIds) {
+          for (const element of newAttachments) {
+            const uploadBody = {
+              referensiId: transId, // Link attachment to the returned transaction ID
+              files: element.file,
+              category: "PAYMENT_WARRANTY_TRANS",
+              fileCategoryId: element.fileCategoryId,
+            };
+            await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+          }
         }
-      });
+      }
+
+      // 4. Cleanup and close
+      handleRefresh();
+      handleBack();
+      clearAllState();
+      setLoadingSave(false);
+    } catch (error) {
+      setLoadingSave(false);
+      let message = error?.response?.data?.message || error?.message || error?.toString();
+
+      if (message && typeof message === "object") {
+        if (Array.isArray(message)) {
+          message = message.join(", ");
+        } else {
+          message = Object.values(message)
+            .map((val) => (typeof val === "object" ? JSON.stringify(val) : val))
+            .join(", ");
+        }
+      }
+
+      setBodyError({ message, type: "requested" });
+      setModalError(true);
+    }
   };
+
 
   // Customer Information Step
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && current === 0) {
+      const finalSearch = Object.keys(search).length > 0 
+        ? Object.entries(search)
+            .filter(([_, value]) => value !== undefined && value !== "")
+            .map(([key, value]) => `${key}~${value}`)
+            .join("|") 
+        : "";
       dispatch(
         getAllCustomerInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
+          search: finalSearch,
           page,
           pageSize,
           sort,
         })
       );
     }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  }, [dispatch, isOpen, search, page, pageSize, sort, current]);
+
+  // Guarantee Information Step
+  useEffect(() => {
+    if (isOpen && current === 1) {
+      // NOTE: For Refund, we currently don't filter warranties by the selected customer Number.
+      // Customer selection is done in Step 1, but Guarantee selection in Step 2 fetches all available warranties.
+      // This is as per current requirement, but might change in the future (e.g., adding back customerNumber filter).
+      
+      let finalSearch = "";
+      if (Object.keys(search).length > 0) {
+        finalSearch = Object.entries(search)
+          .filter(([_, value]) => value !== undefined && value !== "")
+          .map(([key, value]) => `${key}~${value}`)
+          .join("|");
+      }
+
+      dispatch(
+        getRefundListPaginate({
+          search: finalSearch,
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [dispatch, isOpen, search, page, pageSize, sort, current]);
+
+  useEffect(() => {
+    if (isOpen && current === 3) {
+      dispatch(getAllApprovalList());
+    }
+  }, [dispatch, isOpen, current]);
+
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
+    }
+  }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (selectedHierarchy) {
+      dispatch(getListApprovalById({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
+
+  useEffect(() => {
+    if (dataListAppHierDetail?.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail?.map((b, idx) => ({
+          ...b,
+          key: idx + 1,
+        })) || [],
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
 
   const dataSourceCustomerInfoWithKeys = useMemo(() => {
     return dataSourceCustomerInfo?.map((item, index) => ({
@@ -332,30 +460,20 @@ const ModalRefund = ({
 
   const rowSelectionCustomerInfo = {
     fixed: true,
-    selectedCustomerInfoRowKeys,
+    selectedRowKeys: selectedCustomerInfoRowKeys,
     onChange: onSelectChangeCustomerInfo,
   };
 
-  // Warranty Information Step
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(
-        getAllWarrantyInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
-
   const dataSourceWarrantyInfoWithKeys = useMemo(() => {
+    if (selectedRow) {
+      const rowKey = selectedRow.billingCode || selectedRow.invoiceNumber || selectedRow.id;
+      return [{ ...selectedRow, key: rowKey }];
+    }
     return dataSourceWarrantyInfo?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSourceWarrantyInfo]);
+  }, [dataSourceWarrantyInfo, selectedRow]);
   
   const baseColumnsWarrantyInfo = useMemo(
     () =>
@@ -396,13 +514,24 @@ const ModalRefund = ({
 
   const rowSelectionWarrantyInfo = {
     fixed: true,
-    selectedWarrantyInfoRowKeys,
+    selectedRowKeys: selectedWarrantyInfoRowKeys,
     onChange: onSelectChangeWarrantyInfo,
+    getCheckboxProps: (record) => ({
+      disabled: !!selectedRow,
+    }),
   };
 
   // Refund Information Step
   const [refundAmountData, setRefundAmountData] = useState({});
-  const handleRefundAmountChange = (value, recordKey) => {
+  const handleRefundAmountChange = (value, recordKey, maxAmount) => {
+    if (value > maxAmount) {
+      message.warning(`Refund amount cannot exceed balance: ${maxAmount.toLocaleString()}`);
+      return;
+    }
+    if (value <= 0) {
+      message.warning('Refund amount must be greater than 0');
+      return;
+    }
     setRefundAmountData(prev => ({ ...prev, [recordKey]: value }));
   };
 
@@ -418,31 +547,20 @@ const ModalRefund = ({
     right: ["date", "refundAmount"] 
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(
-        getAllRefundInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  // Removed useEffect for getAllRefundInfoPaginate as we use dataWarrantyInfoSelect
 
   const dataSourceRefundInfoWithKeys = useMemo(() => {
-    return dataSourceRefundInfo?.map((item, index) => ({
+    return dataWarrantyInfoSelect?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSourceRefundInfo]);
+  }, [dataWarrantyInfoSelect]);
   
   const baseColumnsRefundInfo = useMemo(
     () =>
       columnsRefundInfo(
-        page,
-        pageSize,
+        1,
+        1000,
         searchInput,
         searchedColumn,
         searchText,
@@ -450,22 +568,48 @@ const ModalRefund = ({
         refundAmountData,
         handleRefundAmountChange,
         refundDateData,
-        handleRefundDateChange
+        handleRefundDateChange,
+        false
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [searchedColumn, searchText, refundAmountData, refundDateData]
   );
 
-  const allColumnsRefundInfo = useMemo(() => {
-    const columnsWithKeys = baseColumnsRefundInfo.map((col) => ({
+  const baseColumnsRefundInfoConfirmation = useMemo(
+    () =>
+      columnsRefundInfo(
+        1,
+        1000,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        refundAmountData,
+        handleRefundAmountChange,
+        refundDateData,
+        handleRefundDateChange,
+        true
+      ),
+    [searchedColumn, searchText, refundAmountData, refundDateData]
+  );
+
+  const processedColumnsRefundInfoConfirmation = useMemo(() => {
+    const columnsWithKeys = baseColumnsRefundInfoConfirmation.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
     return columnsWithKeys;
+  }, [baseColumnsRefundInfoConfirmation]);
+
+  const allColumnsRefundInfo = useMemo(() => {
+    return baseColumnsRefundInfo.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
   }, [baseColumnsRefundInfo]);
 
   const processedColumnsRefundInfo = useMemo(() => {
-    return applyFixedColumns(allColumnsRefundInfo, fixedRefundColumns);
-  }, [allColumnsRefundInfo, fixedRefundColumns]);
+    return allColumnsRefundInfo;
+  }, [allColumnsRefundInfo]);
 
   const columnDefinitionsRefundInfo = useMemo(() => {
     return allColumnsRefundInfo.map((col) => ({
@@ -477,18 +621,6 @@ const ModalRefund = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(
-        getAllAttachmentInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({
@@ -566,74 +698,20 @@ const ModalRefund = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Refund"
-        handleBack={handleBackForm}
+        header="Guarantee Refund"
+        handleCancel={handleBackForm}
         width={1000}
-        footer={
-          <div className="flex w-full justify-end gap-x-5">
-            {current < steps.length - 0 && (
-              <ButtonComponent type={"default"} onClick={handleBackForm}>
-                <span className="p-1 text-[18px] text-center">Back</span>
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-              >
-                <LeftOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-                <span className="p-1 text-[18px] text-center">Previous</span>
-              </ButtonComponent>
-            )}
-
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => {
-                  handleButtonNext();
-                }}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                form={"formRequest"}
-              >
-                <span className="p-1 text-[18px] text-center">Confirm</span>
-              </ButtonComponent>
-            )}
-          </div>
-        }
+        footer={null}
       >
-        <div className="flex flex-row justify-center">
-          <div
-            onScroll={handleScroll}
-            ref={containerRef}
-            className="overflow-x-scroll scrollStepsCstm"
-          >
-            <Steps current={current} items={items} labelPlacement="vertical" />
-          </div>
+        <div className="flex flex-col gap-y-5">
+          <FormStepper
+            steps={steps}
+            current={current}
+            onPrev={prev}
+            onNext={next}
+            onBack={handleBackForm}
+            onConfirm={handleSave}
+          />
         </div>
 
         <Form
@@ -683,7 +761,7 @@ const ModalRefund = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_warranty_info?.page?.totalElements || 0}
+                totalData={selectedRow ? 1 : (dataRefundList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
@@ -709,7 +787,7 @@ const ModalRefund = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_refund_info?.page?.totalElements || 0}
+                totalData={dataSourceRefundInfoWithKeys.length}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsRefundInfo}
@@ -738,8 +816,23 @@ const ModalRefund = ({
             </div>
           </div>
 
-          {/* STEP 4: ATTACHMENT INFORMATION */}
+          {/* STEP 4: APPROVAL */}
           <div className={`steps-content my-[30px] ${ current !== 3 ? "hidden" : "" }`} >
+             <div className="w-full grid grid-cols-1 gap-x-4">
+              <p className="text-primary uppercase font-bold mb-4">
+                APPROVAL INFORMATION
+              </p>
+              <ApprovalSectionForm
+                dataTable={appHierDataDetail}
+                dataOption={appHierOptions}
+                selectedHierarchy={selectedHierarchy}
+                updateSelectedHierarchy={setSelectedHierarchy}
+              />
+            </div>
+          </div>
+
+          {/* STEP 5: ATTACHMENT INFORMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 4 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
                 ATTACHMENT INFORMATION
@@ -753,16 +846,17 @@ const ModalRefund = ({
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
+                mandatory={false}
               />
             </div>
           </div>
 
-          {/* STEP 5: CONFIRMATION */}
-          <div className={`steps-content my-[30px] ${ current !== 4 ? "hidden" : "" }`} >
+          {/* STEP 6: CONFIRMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 5 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
-              <RadioTabs data={tabData} onChange={onChange} currentPosition={valuePage}/>
+              <Tabs activeKey={valuePage} onChange={setValuePage} items={tabItems} className="mb-4" />
               
-              <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
+              <div style={{ display: valuePage !== "Customer" ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
                     CUSTOMER INFORMATION
@@ -785,14 +879,14 @@ const ModalRefund = ({
                 </div>
               </div>
 
-              <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
+              <div style={{ display: valuePage !== "Refund" ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
                     REFUND INFORMATION
                   </p>
                   <TableRBI
                     dataSource={dataSourceRefundInfoWithKeys}
-                    columns={processedColumnsRefundInfo}
+                    columns={processedColumnsRefundInfoConfirmation}
                     current={page}
                     pageSize={pageSize}
                     onChange={handleChange}
@@ -813,7 +907,24 @@ const ModalRefund = ({
                 </div>
               </div>
 
-              <div style={{ display: valuePage !== tabData[2].value ? "none" : undefined }}>
+              <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    APPROVAL INFORMATION
+                  </p>
+                  <ApprovalSectionForm
+                    showSelect={false}
+                    disableSelect={true}
+                    approvalName={
+                      appHierOptions.find((opt) => opt.value === selectedHierarchy)?.name
+                    }
+                    dataTable={appHierDataDetail}
+                    selectedHierarchy={selectedHierarchy}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
                     ATTACHMENT INFORMATION
@@ -822,7 +933,7 @@ const ModalRefund = ({
                     type={"preview"}
                     data={listDataAttachment}
                     updateData={setListDataAttachment}
-                    typeSelector="partner"
+                    typeSelector="warranty"
                     dispatch={dispatch}
                     getAPICategory={getListCategory}
                     service={receiptCollectionHttpService}
@@ -833,6 +944,16 @@ const ModalRefund = ({
               </div>
             </div>
           </div>
+            <FormFooter
+              current={current}
+              totalSteps={steps.length}
+              onPrev={prev}
+              onNext={next}
+              onCancel={handleBackForm}
+              onSubmit={() => form.submit()}
+              useClearData={false}
+              useSaveDraft={false}
+            />
         </Form>
       </ModalCustom>
 

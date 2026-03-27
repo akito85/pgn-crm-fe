@@ -1,87 +1,103 @@
-import { useEffect,  useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-
-import { Form, Spin } from "antd";
-
+import { Button, Form, Spin } from "antd";
 import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
-import StepContents from "./StepContents";
+import InfoPaymentRelation from "./StepContents/InformationForm/InfoPaymentRelation";
+import ApprovalSectionForm from "./StepContents/ApprovalForm/ApprovalPaymentRelation";
+import AttachmentSectionForm from "./StepContents/AttachmentForm/AttachmentPaymentRelation";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
-
-// you fucking nasty using bulky moment lazy as fuck
-import moment from "moment";
-
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-
-import {
-  getCustomerDetail,
-} from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
+import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import {
   getAccountStandardDetail,
-  getAccountOneTimeDetail,
+  getAccountOneTimeDetail
 } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { dateFormatting } from "../../../../../../../../utils";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createPaymentRelation,
+  getDetailDraftPaymentRelation,
   getDetailPaymentRelation,
   getDetailPrApprovalHierarchy,
   getPaymentRelationAttachment,
   getPrApprovalHierarchy,
   getPrAttachmentCategory,
-  updatePaymentRelation,
+  updatePaymentRelation
 } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
-import { showModalError, validateCreateUpdate } from "../../../../../../../../redux/slices/general_slice";
+import {
+  showModalError,
+  validateCreateUpdate
+} from "../../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../../../../constants/configApp";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
-import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
-import { FormStepper } from "../../../../../../../../components/FormStepNavigation";
 import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
 import HeaderDetail from "../../../../HeaderDetail";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 
-const CreateUpdatePaymentRelation = ({ type }) => {
+const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "standard" }) => {
   const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
 
   const dispatch = useDispatch();
-  const {
-    data_customerDetail,
-  } = useSelector((state) => state.customerAccount);
+
+  const isCreate = formType === "create";
+  const isUpdate = formType === "update";
+
+  const { data_accountDetail } = useSelector(
+    (state) => state.accountManagement
+  );
 
   const {
-    data_accountDetail,
-  } = useSelector((state) => state.accountManagement);
-
-  const {
-    loading,
-    data_prApprovalHierarchy,
-    detail_prApprovalHierarchy,
+    loading_listPrApprovalOption,
+    loading_detailPrApprovalHierarchyDetails,
+    loading_detailPr,
+    loading_detailDraftPr,
+    loading_detailPrDetailAttachment,
+    loading_createUpdatePr,
+    list_prApprovalOptions,
+    list_prApprovalHierarchyDetail,
     detail_paymentRelation,
-    data_paymentRelationAttachment,
+    detailDraft_paymentRelation,
+    list_prDetailAttachment
   } = useSelector((state) => state.paymentRelation);
+
+  const loading =
+    loading_listPrApprovalOption ||
+    loading_detailPrApprovalHierarchyDetails ||
+    loading_detailPr ||
+    loading_detailDraftPr ||
+    loading_detailPrDetailAttachment;
 
   //declare
   const location = useLocation();
-  const [formCreate] = Form.useForm();
+  const [form] = Form.useForm();
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idPr = location?.state?.id;
-  const accountType = location?.state?.type; // "standard" or "onetime"
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
+
+  const status = detail_paymentRelation.status || "DRAFT";
+  const statusApproval = detail_paymentRelation.statusApproval || "DRAFT";
+
+  const isDraft = status === "DRAFT";
+  const isActive = status === "ACTIVE";
+
+  const isDraftApproval = statusApproval === "DRAFT";
+  const isRejectApproval = statusApproval === "REJECT";
 
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
 
-  const [selectedAppHierId, setSelectedAppHierId] = useState();
-  const [selectedApprovalName, setSelectedApprovalName] = useState();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
   const attachmentIsRequired = true;
+
+  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
 
   const formFields = [
     [
@@ -90,41 +106,38 @@ const CreateUpdatePaymentRelation = ({ type }) => {
       "priority",
       "startDate",
       "endDate",
-      "description",
+      "description"
     ],
-    [
-      "appHierId",
-    ],
+    ["appHierId"],
     []
   ];
 
   const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
- 
-  const { InformationForm, AttachmentForm, ApprovalForm } = StepContents;
 
   useEffect(() => {
-    if (idCustomer)
-      dispatch(getCustomerDetail(idCustomer));
+    if (idCustomer) dispatch(getCustomerDetail(idCustomer));
   }, [idCustomer]);
 
   useEffect(() => {
-    if (idAccount)
-      dispatch(getAccountStandardDetail({idAccount, idCustomer}));
-  }, [idAccount]);
-
-  useEffect(() => {
-    if (type === "update" && idPr) {
-      dispatch(getDetailPaymentRelation(idPr));
-      dispatch(getPaymentRelationAttachment({ id: idPr }))
+    if (idAccount && idCustomer) {
+      if (isStandard) {
+        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+      } else if (isOneTime) {
+        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
+      }
     }
-  }, [type, idPr]);
+  }, [idAccount, idCustomer]);
 
   useEffect(() => {
-    if (
-      type === "update" &&
-      detail_paymentRelation?.result &&
-      data_prApprovalHierarchy?.length
-    ) {
+    if (isUpdate && idPr) {
+      dispatch(getDetailPaymentRelation(idPr));
+      dispatch(getDetailDraftPaymentRelation(idPr));
+      dispatch(getPaymentRelationAttachment({ id: idPr }));
+    }
+  }, [formType, idPr]);
+
+  useEffect(() => {
+    if (isUpdate && list_prApprovalOptions.length) {
       const {
         subjectId,
         objectId,
@@ -133,11 +146,11 @@ const CreateUpdatePaymentRelation = ({ type }) => {
         endDate,
         description,
         appHierId,
-      } = detail_paymentRelation.result;
+        relatedAccountNumber,
+        relatedAccountName
+      } = detail;
 
-      const { relatedAccountNumber, relatedAccountName } = detail_paymentRelation.result;
-
-      formCreate.setFieldsValue({
+      form.setFieldsValue({
         subjectId,
         objectId,
         accountName: relatedAccountName,
@@ -146,28 +159,28 @@ const CreateUpdatePaymentRelation = ({ type }) => {
         startDate,
         endDate,
         description,
-        appHierId,
+        appHierId
       });
 
-      const appHierOption = data_prApprovalHierarchy.find((option) => option.appHierId === appHierId)
+      const appHierOption = list_prApprovalOptions.find(
+        (option) => option.appHierId === appHierId
+      );
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail_paymentRelation, data_prApprovalHierarchy]);
+  }, [detail, list_prApprovalOptions]);
 
   useEffect(() => {
-    if (type === "update" && data_paymentRelationAttachment?.result) {
-      const result = data_paymentRelationAttachment.result?.map((item, index) => ({
+    if (isUpdate && list_prDetailAttachment) {
+      const result = list_prDetailAttachment.map((item, index) => ({
         ...item,
         key: `payment-relation-attachment-${item.id}`,
         dataType: "exist"
       }));
-      setDataAttachment([
-        ...result,
-      ])
+      setDataAttachment([...result]);
     }
-  }, [data_paymentRelationAttachment])
+  }, [list_prDetailAttachment]);
 
   useEffect(() => {
     dispatch(getPrApprovalHierarchy());
@@ -176,36 +189,43 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Account",
+      breadcrumbName: "Account"
     },
     {
-      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
-      breadcrumbName: "Account - Standard",
+      path: 
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
+          "",
+      breadcrumbName: isStandard ? "Account - Standard" : "Account - One Time"
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
+          "",
       breadcrumbName: "Detail Account",
       state: {
         idAccount,
-        idCustomer,
+        idCustomer
       }
     },
     {
       path: "",
-      breadcrumbName: (type === "create") ? "Create Payment Relation" : (type === "update") ? "Update Payment Relation" : "",
-    },
+      breadcrumbName:
+        isCreate
+          ? "Create Payment Relation"
+          : isUpdate
+            ? "Update Payment Relation"
+            : ""
+    }
   ];
 
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format(dateFormatting.dateTime);
-    } else {
-      return "";
-    }
-  };
-
   /**
-   * @param {boolean} show 
+   * @param {boolean} show
    * @param {"draft" | "submit"} submitType
    */
   const handleSetShowConfirmationModal = async (show, submitType) => {
@@ -215,216 +235,217 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length) {
             const errorBody = {
               title: "Failed",
-              description: `Please upload at least one attachment`,
+              description: `Please upload at least one attachment`
             };
             dispatch(showModalError(errorBody));
-            
+
             throw new Error("There was no file attached");
           }
-        }
-        else {
-          await formCreate.validateFields(formFields[current]);
+        } else {
+          await form.validateFields(formFields[current]);
 
           const {
             objectId,
             priority,
-            description, 
+            description,
             startDate,
             endDate,
-            appHierId,
-          } = formCreate.getFieldsValue();
+            appHierId
+          } = form.getFieldsValue(true);
 
           const body = {
-            id: type === "update" ? idPr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            id: isUpdate ? idPr : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId,
             objectId,
             priority,
-            description, 
-            startDate,
-            endDate,
+            description,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
-            validationType: validationTypes[current],
+            validationType: validationTypes[current]
           };
 
-          await dispatch(validateCreateUpdate({
-            body,
-            services: accountManagementService,
-            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-            type,
-          }))
-          .unwrap();
+          await dispatch(
+            validateCreateUpdate({
+              body,
+              services: accountManagementService,
+              endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+              type: formType
+            })
+          ).unwrap();
         }
       } catch (err) {
         return;
       }
 
-      const {
-        objectId,
-        priority,
-        description, 
-        startDate,
-        endDate,
-        appHierId,
-      } = formCreate.getFieldsValue();
+      const { objectId, priority, description, startDate, endDate, appHierId } =
+        form.getFieldsValue(true);
 
       const body = {
-        id: type === "update" ? idPr : undefined,
-        subjectId: data_accountDetail?.accountInformation?.accountId, 
+        id: isUpdate ? idPr : undefined,
+        subjectId: data_accountDetail?.accountInformation?.accountId,
         objectId,
         priority,
-        description, 
-        startDate,
-        endDate,
+        description,
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
 
-      dispatch(validateCreateUpdate({
-        body,
-        services: accountManagementService,
-        endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-        type,
-      }))
-      .unwrap()
-      .then((data) => {
-        setShowConfirmationModal(show);
-        setConfirmationType(submitType);
-      }).catch(() => {});
-    }
-    else {
+      dispatch(
+        validateCreateUpdate({
+          body,
+          services: accountManagementService,
+          endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+          type: formType
+        })
+      )
+        .unwrap()
+        .then((data) => {
+          setShowConfirmationModal(show);
+          setConfirmationType(submitType);
+        })
+        .catch(() => {});
+    } else {
       setShowConfirmationModal(show);
       setConfirmationType("");
     }
-  }
-
-  // Fetch Account Standard/OneTime Detail
-  useEffect(() => {
-    if (idAccount && idCustomer && accountType) {
-      if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
-      }
-    }
-  }, [dispatch, idAccount, idCustomer, accountType]);
+  };
 
   const setAccount = (objectId, accountNumber, accountName) => {
-    formCreate.setFieldValue("objectId", objectId)
-    formCreate.setFieldValue("accountNumber", accountNumber);
-    formCreate.setFieldValue("accountName", accountName);
-  }
+    form.setFieldValue("objectId", objectId);
+    form.setFieldValue("accountNumber", accountNumber);
+    form.setFieldValue("accountName", accountName);
+  };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailPrApprovalHierarchy({id: appHierId}));
-    setSelectedAppHierId(appHierId);
-    setSelectedApprovalName(approvalName);
-  }
+    dispatch(getDetailPrApprovalHierarchy(appHierId));
+    form.setFieldValue("appHierName", approvalName);
+  };
 
   const steps = [
     {
       title: "Payment Relation",
-      content: (
-        <InformationForm
-          setAccount={setAccount}
-          className={`${current !== 0 ? "hidden" : ""}`}
-          accountId={idAccount}
-          key={`payment-relation-tab-0`}
-        />
-      ),
+      cards: [
+        {
+          header: "Payment Relation Information",
+          content: (
+            <InfoPaymentRelation
+              form={form}
+              setAccount={setAccount}
+              accountId={idAccount}
+              isUpdate={isUpdate}
+              isDraft={isDraft}
+              key={`payment-relation-tab-0`}
+            />
+          )
+        }
+      ],
       disabled: false
     },
     {
       title: "Approval",
-      content: (
-        <ApprovalForm
-          dataTable={(detail_prApprovalHierarchy || []).map((detail, index) => ({
-            ...detail,
-            employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-              ...employeeDetail,
-              key: `employee-detail-${index}`
-            })),
-            key: `detail-detail-${index}`,
-          }))}
-          dataOption={data_prApprovalHierarchy}
-          selectedAppHierId={selectedAppHierId}
-          handleSelectHiararchy={handleSelectHiararchy}
-          className={`${current !== 1 ? "hidden" : ""}`}
-          key={`payment-relation-tab-1`}
-        />
-      ),
+      cards: [
+        {
+          header: "Approval",
+          content: (
+            <ApprovalSectionForm
+              form={form}
+              dataTable={(list_prApprovalHierarchyDetail || []).map(
+                (detail, index) => ({
+                  ...detail,
+                  employeeDetail: detail.employeeDetail.map(
+                    (employeeDetail, index) => ({
+                      ...employeeDetail,
+                      key: `employee-detail-${index}`
+                    })
+                  ),
+                  key: `detail-detail-${index}`
+                })
+              )}
+              dataOption={list_prApprovalOptions}
+              handleSelectHiararchy={handleSelectHiararchy}
+              key={`payment-relation-tab-1`}
+            />
+          )
+        }
+      ],
       disabled: false
     },
     {
       title: "Attachment",
-      content: (
-        <AttachmentForm
-          type={type}
-          data={dataAttachment}
-          updateData={setDataAttachment}
-          dispatch={dispatch}
-          className={`${current !== 2 ? "hidden" : ""}`}
-          key={`payment-relation-tab-2`}
-          getAPICategory={getPrAttachmentCategory}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-          mandatory={attachmentIsRequired}
-        />
-      ),
+      cards: [
+        {
+          header: "Attachment",
+          content: (
+            <AttachmentSectionForm
+              data={dataAttachment}
+              updateData={setDataAttachment}
+              key={`payment-relation-tab-2`}
+              getAPICategory={getPrAttachmentCategory}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+              mandatory={attachmentIsRequired}
+            />
+          )
+        }
+      ],
       disabled: false
-    },
+    }
   ];
 
   const navigate = useNavigate();
-  
+
   const next = async () => {
     try {
       if (current === 2) {
         if (attachmentIsRequired && !dataAttachment.length) {
           const errorBody = {
-              title: "Failed",
-              description: `Please upload at least one attachment`,
-            };
-            dispatch(showModalError(errorBody));
-            
-            throw new Error("There was no file attached");
+            title: "Failed",
+            description: `Please upload at least one attachment`
+          };
+          dispatch(showModalError(errorBody));
+
+          throw new Error("There was no file attached");
         }
-      }
-      else {
-        await formCreate.validateFields(formFields[current]);
+      } else {
+        await form.validateFields(formFields[current]);
 
         const {
           objectId,
           priority,
-          description, 
+          description,
           startDate,
           endDate,
-          appHierId,
-        } = formCreate.getFieldsValue();
+          appHierId
+        } = form.getFieldsValue(true);
 
         const body = {
-          id: type === "update" ? idPr : undefined,
-          subjectId: data_accountDetail?.accountInformation?.accountId, 
+          id: isUpdate ? idPr : undefined,
+          subjectId: data_accountDetail?.accountInformation?.accountId,
           objectId,
           priority,
-          description, 
-          startDate,
-          endDate,
+          description,
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
           appHierId,
-          validationType: validationTypes[current],
+          validationType: validationTypes[current]
         };
-        
-        await dispatch(validateCreateUpdate({
-          body,
-          services: accountManagementService,
-          endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-          type,
-        }))
-        .unwrap();
+
+        await dispatch(
+          validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+            type: formType
+          })
+        ).unwrap();
       }
     } catch (err) {
       return;
     }
-    
+
     setCurrent(current + 1);
   };
   const prev = () => {
@@ -438,44 +459,44 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           if (attachmentIsRequired && !dataAttachment.length) {
             const errorBody = {
               title: "Failed",
-              description: `Please upload at least one attachment`,
+              description: `Please upload at least one attachment`
             };
             dispatch(showModalError(errorBody));
-            
+
             throw new Error("There was no file attached");
           }
-        }
-        else {
-          await formCreate.validateFields(formFields[i]);
+        } else {
+          await form.validateFields(formFields[i]);
 
           const {
             objectId,
             priority,
-            description, 
+            description,
             startDate,
             endDate,
-            appHierId,
-          } = formCreate.getFieldsValue();
+            appHierId
+          } = form.getFieldsValue(true);
 
           const body = {
-            id: type === "update" ? idPr : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId, 
+            id: isUpdate ? idPr : undefined,
+            subjectId: data_accountDetail?.accountInformation?.accountId,
             objectId,
             priority,
-            description, 
-            startDate,
-            endDate,
+            description,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
             appHierId,
-            validationType: validationTypes[i],
+            validationType: validationTypes[i]
           };
-          
-          await dispatch(validateCreateUpdate({
-            body,
-            services: accountManagementService,
-            endPoint: `/v1/dbs/api/payment-relation/validate-${type}`,
-            type,
-          }))
-          .unwrap();
+
+          await dispatch(
+            validateCreateUpdate({
+              body,
+              services: accountManagementService,
+              endPoint: `/v1/dbs/api/payment-relation/validate-${formType}`,
+              type: formType
+            })
+          ).unwrap();
         }
       } catch (err) {
         setCurrent(i);
@@ -484,7 +505,7 @@ const CreateUpdatePaymentRelation = ({ type }) => {
     }
 
     setCurrent(newCurrent);
-  }
+  };
 
   const scrollRightHandler = () => {
     if (containerRef.current) {
@@ -493,8 +514,8 @@ const CreateUpdatePaymentRelation = ({ type }) => {
   };
   const handleButtonNext = async () => {
     await next();
-    scrollRightHandler()
-  }
+    scrollRightHandler();
+  };
 
   const scrollLeftHandler = () => {
     if (containerRef.current) {
@@ -506,74 +527,64 @@ const CreateUpdatePaymentRelation = ({ type }) => {
     const {
       objectId,
       priority,
-      description, 
+      description,
       startDate,
       endDate,
       appHierId,
-      remark,
-    } = formCreate.getFieldsValue();
+      remark
+    } = form.getFieldsValue(true);
 
     const body = {
       id: idPr,
-      subjectId: data_accountDetail?.accountInformation?.accountId, 
+      subjectId: data_accountDetail?.accountInformation?.accountId,
       objectId,
       priority,
-      description, 
-      startDate,
-      endDate,
+      description,
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
-      remarks: remark,
+      remark
     };
 
-    if (type === "create")
-      dispatch(createPaymentRelation({ body, attachments: dataAttachment }))
-      .unwrap()
-      .then((data) => {
-        setTimeout(() => {
-          navigate(
-            ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-            {
-              state: {
-                idAccount,
-                idCustomer,
-              }
-            }
-          );
-        }, 2000)
-      })
-      .catch((error) => {});
-    else if (type === "update")
-      dispatch(updatePaymentRelation({ id: idPr, body, attachments: dataAttachment.filter((attachment => attachment.dataType !== "exist")) }))
-      .unwrap()
+    // Filter only new attachments (not existing ones)
+    const newAttachments = dataAttachment.filter((a) => a.dataType !== "exist");
+
+    if (isCreate)
+      dispatch(createPaymentRelation({ body, attachments: newAttachments }))
+        .unwrap()
         .then((data) => {
           setTimeout(() => {
-            navigate(
-              ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-              {
-                state: {
-                  idAccount,
-                  idCustomer,
-                }
-              }
-            );
-          }, 2000)
+            navigate(-1);
+          }, 2000);
         })
-        .catch((error) => {});;
+        .catch((error) => {});
+    else if (isUpdate)
+      dispatch(
+        updatePaymentRelation({
+          id: idPr,
+          body,
+          attachments: dataAttachment.filter(
+            (attachment) => attachment.dataType !== "exist"
+          )
+        })
+      )
+        .unwrap()
+        .then((data) => {
+          setTimeout(() => {
+            navigate(-1);
+          }, 2000);
+        })
+        .catch((error) => {});
   };
 
   const handleClear = () => {
-    if (type === "create") {
+    if (isCreate) {
       setDataAttachment([]);
-      setSelectedAppHierId();
-      setSelectedApprovalName();
-      formCreate.resetFields();
+      form.resetFields();
       setCurrent(0);
-    } else if (type === "update") {
-      if (
-        detail_paymentRelation?.result &&
-        data_prApprovalHierarchy?.length
-      ) {
+    } else if (isUpdate) {
+      if (list_prApprovalOptions?.length) {
         const {
           subjectId,
           objectId,
@@ -582,11 +593,11 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           endDate,
           description,
           appHierId,
-        } = detail_paymentRelation.result;
+          relatedAccountNumber,
+          relatedAccountName
+        } = detail;
 
-        const { relatedAccountNumber, relatedAccountName } = detail_paymentRelation.result;
-
-        formCreate.setFieldsValue({
+        form.setFieldsValue({
           subjectId,
           objectId,
           accountName: relatedAccountName,
@@ -595,29 +606,27 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           startDate,
           endDate,
           description,
-          appHierId,
+          appHierId
         });
 
-        const appHierOption = data_prApprovalHierarchy.find((option) => option.appHierId === appHierId)
+        const appHierOption = list_prApprovalOptions.find(
+          (option) => option.appHierId === appHierId
+        );
 
         if (appHierOption)
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
       }
 
-      if (data_paymentRelationAttachment?.result) {
-        const result = data_paymentRelationAttachment.result?.map((item, index) => ({
-          ...item,
-          key: `payment-relation-attachment-${item.id}`,
-          dataType: "exist"
-        }));
-        setDataAttachment([
-          ...result,
-        ])
-      }
+      const result = list_prDetailAttachment.map((item, index) => ({
+        ...item,
+        key: `payment-relation-attachment-${item.id}`,
+        dataType: "exist"
+      }));
+      setDataAttachment([...result]);
 
       setCurrent(0);
     }
-  }
+  };
 
   return (
     <LayoutMenu>
@@ -628,102 +637,121 @@ const CreateUpdatePaymentRelation = ({ type }) => {
           dispatch={dispatch}
           idAccount={idAccount}
           idCustomer={idCustomer}
-          type={"standard"}
+          type={accountType}
         />
-
-        <Spin
-          spinning={loading}
-        >
+        <Spin spinning={loading}>
           <Form
             id="paymentRelationForm"
-            form={formCreate}
+            form={form}
             layout={"vertical"}
             onFinish={handleSubmitForm}
-            // onFinishFailed={handleErrorSubmit}
             scrollToFirstError={true}
             className="flex flex-col gap-y-4"
           >
-          {/* Step Contents */}
-          <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
+            {/* Step Contents */}
+            <NxFormStepper
+              steps={steps}
+              current={current}
+              onPrev={prev}
+              onNext={handleButtonNext}
+            />
 
-          {steps.map((step) => step.content)}
+            {steps.map((step, stepIndex) =>
+              step.cards.map((card, cardIndex) => (
+                <NxCardContainer
+                  header={card.header}
+                  className={`${current !== stepIndex || card.hidden ? "hidden" : ""}`}
+                  key={`${stepIndex}-${cardIndex}`}
+                >
+                  <NxBaseContainer border>{card.content}</NxBaseContainer>
+                </NxCardContainer>
+              ))
+            )}
 
-          {/* Section Action Steps */}
-          <NxBaseContainer border>
-            <div className="flex justify-between">
-              <ButtonComponent
-                type={"menu"}
-                onClick={()=>{navigate(-1)}}
-              >
-                Cancel
-              </ButtonComponent>
-              <div className="flex w-full justify-end gap-x-2">
-                <ButtonComponent
-                  onClick={handleClear}
-                  type={"reject"}
-                  icon={<SVGIcon name="IconButtonClear" width={24} />}
-                >
-                  { type === "update" ? "Reset" : "Clear" }
-                </ButtonComponent>
-                <ButtonComponent
-                  onClick={() => handleSetShowConfirmationModal(true, "draft")}
-                  type={"secondary"}
-                  disabled={current !== steps.length - 1}
-                >
-                  Save as Draft
-                </ButtonComponent>
-                <ButtonComponent
-                  onClick={() => {
-                    prev();
-                    scrollLeftHandler();
-                  }}
+            {/* Section Action Steps */}
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <Button
                   type={"menu"}
-                  disabled={current < 1}
+                  onClick={() => {
+                    navigate(-1);
+                  }}
                 >
-                  Previous
-                </ButtonComponent>
-                {current < steps.length - 1 && (
-                  <ButtonComponent
-                    onClick={handleButtonNext}
-                    type={"submit"}
-                    disabled={steps[current].disabled}
+                  Cancel
+                </Button>
+                <div className="flex w-full justify-end gap-x-2">
+                  <Button
+                    onClick={handleClear}
+                    type={"reject"}
+                    icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    Next
-                  </ButtonComponent>
-                )}
-                {current === steps.length - 1 && (
-                  <>
-                    <ButtonComponent
-                      onClick={() => handleSetShowConfirmationModal(true, "submit")}
+                    {isUpdate ? "Reset" : "Clear"}
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      handleSetShowConfirmationModal(true, "draft")
+                    }
+                    type={"secondary"}
+                    disabled={current !== steps.length - 1}
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
+                    type={"menu"}
+                    disabled={current < 1}
+                  >
+                    Previous
+                  </Button>
+                  {current < steps.length - 1 && (
+                    <Button
+                      onClick={handleButtonNext}
                       type={"submit"}
+                      disabled={steps[current].disabled}
                     >
-                      Save & Submit
-                    </ButtonComponent>
-                  </>
-                )}
+                      Next
+                    </Button>
+                  )}
+                  {current === steps.length - 1 && (
+                    <>
+                      <Button
+                        onClick={() =>
+                          handleSetShowConfirmationModal(true, "submit")
+                        }
+                        type={"submit"}
+                      >
+                        Save & Submit
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          </NxBaseContainer>
-          <ConfirmationModal
-            form={"paymentRelationForm"}
-            isOpen={showConfirmationModal}
-            handleCancel={() => handleSetShowConfirmationModal(false)}
-            selectedAppHierId={selectedAppHierId}
-            selectedApprovalName={selectedApprovalName}
-            hierarchyTableData={(detail_prApprovalHierarchy || []).map((detail, index) => ({
-              ...detail,
-              employeeDetail: detail.employeeDetail.map((employeeDetail, index) => ({
-                ...employeeDetail,
-                key: `employee-detail-${index}`
-              })),
-              key: `detail-detail-${index}`,
-            }))}
-            hieararchyOptionData={data_prApprovalHierarchy}
-            type={confirmationType}
-            dataAttachment={dataAttachment}
-            data={formCreate.getFieldsValue()}
-            service={accountManagementService}
-            configApplication={configApp.ACCOUNT_SERVICE}
+            </NxBaseContainer>
+            <ConfirmationModal
+              form={form}
+              formId={"paymentRelationForm"}
+              isOpen={showConfirmationModal}
+              handleCancel={() => handleSetShowConfirmationModal(false)}
+              approvalData={(list_prApprovalHierarchyDetail || []).map(
+                (detail, index) => ({
+                  ...detail,
+                  employeeDetail: detail.employeeDetail.map(
+                    (employeeDetail, index) => ({
+                      ...employeeDetail,
+                      key: `employee-detail-${index}`
+                    })
+                  ),
+                  key: `detail-detail-${index}`
+                })
+              )}
+              type={confirmationType}
+              dataAttachment={dataAttachment}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+              loading={loading_createUpdatePr}
             />
           </Form>
         </Spin>

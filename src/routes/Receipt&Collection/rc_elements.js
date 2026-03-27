@@ -1,5 +1,4 @@
 import ViewReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ViewReceipt";
-import ListDetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ListDetailReceipt";
 import DetailReceiptApproval from "../../app/pages/ReceiptAndCollection/Receipt/DetailReceiptApproval";
 import CreateAccounting from "../../app/pages/ReceiptAndCollection/Receipt/CreateAccounting";
 import ViewSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/ViewSynchronizeReceipt";
@@ -73,10 +72,11 @@ import ListDetailTransferToCustomer from "../../app/pages/ReceiptAndCollection/P
 import ListFormTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ListFormTransferToCustomer";
 
 import ViewWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
-import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
-import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListDetailWarranty";
+import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListFormWarranty";
 
 import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/History/ListHistoryPaymentWarranty";
+import UploadWarrantyPage from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/Upload/UploadWarrantyPage";
 
 import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
 import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
@@ -87,6 +87,10 @@ import ListFormPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection
 import ViewLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ViewLiborRate";
 import ListDetailLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListDetailLiborRate";
 import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListFormLiborRate";
+
+import ViewCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ViewCaCiMapping";
+import ListDetailCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListDetailCaCiMapping";
+import ListFormCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListFormCaCiMapping";
 
 
 
@@ -226,6 +230,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_WARRANTY: <ListDetailWarranty />,
   CREATE_WARRANTY: <ListFormWarranty type={"create"} />,
   UPDATE_WARRANTY: <ListFormWarranty type={"update"} />,
+  UPLOAD_WARRANTY: <UploadWarrantyPage />,
 
   // History Payment Warranty
   VIEW_HISTORY_PAYMENT_WARRANTY: <ListHistoryPaymentWarranty />,
@@ -245,4 +250,10 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_LIBOR_RATE: <ListDetailLiborRate />,
   CREATE_LIBOR_RATE: <ListFormLiborRate type={"create"} />,
   UPDATE_LIBOR_RATE: <ListFormLiborRate type={"update"} />,
+
+  // CA CI Mapping
+  VIEW_CA_CI_MAPPING: <ViewCaCiMapping />,
+  DETAIL_CA_CI_MAPPING: <ListDetailCaCiMapping />,
+  CREATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"create"} />,
+  UPDATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"update"} />,
 };

@@ -185,7 +185,7 @@ export const getExpandedColumns = () => [
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 60,
+    width: 48,
     render: (text, object, index) => index + 1,
   },
   {
@@ -224,6 +224,36 @@ export const getExpandedColumns = () => [
         render: (text) => usageFormatting(text),
       },
     ],
+  },
+  {
+    title: "Range Min",
+    dataIndex: "rangeMin",
+    key: "rangeMin",
+    width: 100,
+    align: "center",
+    render: (text) => {
+      // Jika null atau undefined, tampilkan kosong
+      if (text === null || text === undefined) return "";
+      // Jika 0, tampilkan 0
+      if (text === 0) return "0";
+      // Jika ada nilai lainnya, tampilkan nilai tersebut
+      return text;
+    },
+  },
+  {
+    title: "Range Max",
+    dataIndex: "rangeMax",
+    key: "rangeMax",
+    width: 100,
+    align: "center",
+    render: (text) => {
+      // Jika null atau undefined, tampilkan kosong
+      if (text === null || text === undefined) return "";
+      // Jika 0, tampilkan "Unlimited"
+      if (text === 0) return "Unlimited";
+      // Jika ada nilai lainnya, tampilkan nilai tersebut
+      return text;
+    },
   },
   {
     title: "PRICE",
@@ -317,34 +347,8 @@ export const renderExpandedRow = (record, expandData, loadingExpand) => {
     );
   }
 
-  const handleWheel = (e) => {
-    const expandedContainer = e.currentTarget;
-    const expandedTableWrapper =
-      expandedContainer.querySelector(".ant-table-body");
-    if (!expandedTableWrapper) {
-      return;
-    }
-
-    const { scrollWidth, clientWidth } = expandedTableWrapper;
-    const hasHorizontalScroll = scrollWidth > clientWidth;
-    const isHorizontalScrolling = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-
-    // Stop scroll chaining to parent table on horizontal scroll,
-    // even when at left/right edge.
-    if (hasHorizontalScroll && isHorizontalScrolling) {
-      e.stopPropagation();
-    }
-  };
-
   return (
-    <div
-      className="bg-white"
-      style={{
-        marginLeft: "45px",
-        overscrollBehaviorX: "contain",
-      }}
-      onWheel={handleWheel}
-    >
+    <div className="bg-white" style={{ marginLeft: 48 }}>
       <TableRBI
         idTable={`expanded-table-${rowKey}`}
         columns={expandedColumns}

@@ -1,16 +1,17 @@
 // ViewInvoice.js
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Form, Select, Tooltip } from "antd";
+import { Form, Tooltip } from "antd";
 import axios from "axios";
 import DocViewer from "react-doc-viewer";
-import SelectComponent from "../../../../components/SelectComponent";
+
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsInvoice } from "./TableViewInvoice";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import DetailInvoice from "./DetailInvoice";
 import {
   createRegenerate,
@@ -18,7 +19,6 @@ import {
   getBillingApproval,
   getDetailInvoice,
   getDownloadList,
-  getFormatType,
 } from "../../../../redux/slices/rating_billing_invoice/invoice";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
@@ -26,16 +26,17 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { configApp } from "../../../../constants/configApp";
 import { tokenHeader } from "../../../../utils/tokenHeader";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 const ViewInvoice = () => {
   // Selector
-  const { data, loading, data_detail, data_format } = useSelector(
-    (state) => state.invoice
+  const { data, loading, data_detail, loading_detail } = useSelector(
+    (state) => state.invoice,
   );
 
   // Declaration
   const dispatch = useDispatch();
+  const location = useLocation();
   const searchInput = useRef(null);
   const dataSource = data?.result || [];
 
@@ -50,10 +51,11 @@ const ViewInvoice = () => {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [bodyError, setBodyError] = useState({});
 
-  const [pageDetail, setPageDetail] = useState(false);
+  const [pageDetail, setPageDetail] = useState(false); // eslint-disable-line
+  const [modalDetail, setModalDetail] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [modalReGenerate, setModalReGenerate] = useState(false);
-  const [modalGenerate, setModalGenerate] = useState(false);
+  const [modalGenerate, setModalGenerate] = useState(false); // eslint-disable-line
 
   // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
@@ -102,18 +104,16 @@ const ViewInvoice = () => {
         pageSize: 100, // Initial load 100 data
         sort,
         isLoadMore: false, // Flag untuk initial load
-      })
+      }),
     );
     setPage(1);
-  }, [search, sort, dispatch]);
+  }, [search, sort, dispatch, location.key]);
 
   useEffect(() => {
-    if (modalReGenerate) {
-      dispatch(getFormatType());
-    } else if (modalGenerate) {
+    if (modalGenerate) {
       dispatch(getBillingApproval());
     }
-  }, [modalReGenerate, modalGenerate, dispatch]);
+  }, [modalGenerate, dispatch]);
 
   // Breadcrumbs
   const routes = [
@@ -171,7 +171,7 @@ const ViewInvoice = () => {
           pageSize: loadMoreSize, // Load 20 more
           sort,
           isLoadMore: true, // Flag untuk load more
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -198,15 +198,15 @@ const ViewInvoice = () => {
         pageSize: loadMoreSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
-      })
+      }),
     );
   };
 
   // Handle Detail
   const handleDetail = (record) => {
-    setPageDetail(true);
     dispatch(getDetailInvoice(record?.invoiceNumber));
     setInvoiceNumber(record?.invoiceNumber);
+    setModalDetail(true);
   };
 
   // Handle Re Generate
@@ -224,7 +224,7 @@ const ViewInvoice = () => {
         {
           headers: tokenHeader(),
           responseType: "arraybuffer",
-        }
+        },
       );
       const responseBlob = await response.data;
       const blobText =
@@ -243,7 +243,7 @@ const ViewInvoice = () => {
         // eslint-disable-next-line no-undef
         ReactDOM.render(
           <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer
+          viewerContainer,
         );
       }
     } catch (error) {
@@ -273,12 +273,12 @@ const ViewInvoice = () => {
       setModalReGenerate(false);
 
       const body = {
-        formatOption: res.formatOption,
+        formatOption: 627,
         action: "REGENERATE",
         remark: res.remark,
       };
       await dispatch(
-        createRegenerate({ id: invoiceNumber, body: body })
+        createRegenerate({ id: invoiceNumber, body: body }),
       )?.unwrap();
       await handleClear();
       await dispatch(
@@ -288,7 +288,7 @@ const ViewInvoice = () => {
           pageSize: 100,
           sort,
           isLoadMore: false,
-        })
+        }),
       )?.unwrap();
       setPage(1);
     } catch (error) {
@@ -308,7 +308,8 @@ const ViewInvoice = () => {
     }
   };
 
-  const refreshTable = () => {
+  const handleRefresh = () => {
+    let searchParam = undefined;
     let tempSearch = "";
     for (const dataIndex in search) {
       if (Object.hasOwnProperty.call(search, dataIndex)) {
@@ -318,118 +319,200 @@ const ViewInvoice = () => {
         }
       }
     }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    if (tempSearch) {
+      searchParam = encodeURIComponent(JSON.stringify(search));
+    }
     dispatch(
       getAllInvoicePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
+        search: searchParam,
         page: 1,
         pageSize: 100,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   };
 
   // ✅ Get base columns with key property including action column
   const baseColumns = useMemo(() => {
-    const invoiceCols = columnsInvoice(
+    return columnsInvoice(
       search,
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
-    );
-
-    // ✅ Single action column with multiple icons
-    const actionColumn = {
-      key: "action",
-      title: "ACTION",
-      width: 120,
-      align: "center",
-      isClassification: true,
-      render: (_, record) => (
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Tooltip title="Detail">
-            <div
-              onClick={() => {
-                handleDetail(record);
-                setTimeout(
-                  () =>
-                    window.scrollTo({
-                      top: document.body.scrollHeight,
-                      behavior: "smooth",
-                    }),
-                  100
-                );
-              }}
-              style={{
-                cursor: "pointer",
-                display: "inline-block",
-                lineHeight: 0,
-              }}
-            >
-              <SVGIcon name="IconDetail" width={20} />
-            </div>
-          </Tooltip>
-          <Tooltip title="Re-Generate">
-            <div
-              onClick={() => handleReGenerate(record)}
-              style={{
-                cursor: "pointer",
-                display: "inline-block",
-                lineHeight: 0,
-              }}
-            >
-              <SVGIcon name="IconReGenerate" width={20} />
-            </div>
-          </Tooltip>
-          <Tooltip title="Download">
-            <div
-              onClick={() => handlePreviewFile(record)}
-              style={{
-                cursor: "pointer",
-                display: "inline-block",
-                lineHeight: 0,
-              }}
-            >
-              <SVGIcon name="IconDownload" width={20} />
-            </div>
-          </Tooltip>
-        </div>
-      ),
-    };
-
-    // Add 'key' property to columns that don't have it
-    const columnsWithKeys = [...invoiceCols, actionColumn].map((col) => ({
+      handleSearch,
+    ).map((col) => ({
       ...col,
-      key: col.key || col.dataIndex || col.title, // Fallback to dataIndex or title if no key
+      key: col.key || col.dataIndex || col.title,
     }));
-
-    return columnsWithKeys;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, searchedColumn, searchText]);
 
+  const itemGrantAccess = [
+    {
+      action: "View",
+      type: "table",
+      render: (record, data) => {
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconDetail" width={20} />}
+              border={false}
+              onClick={() => handleDetail(record)}
+            >
+              <span className="text-black ml-3">Detail</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Detail" placement="left">
+              <div
+                onClick={() => handleDetail(record)}
+                style={{
+                  cursor: "pointer",
+                  display: "inline-block",
+                  lineHeight: 0,
+                }}
+              >
+                <SVGIcon name="IconDetail" width={20} />
+              </div>
+            </Tooltip>
+          );
+        return Content;
+      },
+    },
+    {
+      action: "Regenerate",
+      type: "table",
+      render: (record, data) => {
+        const isFailed = record?.status?.toLowerCase() === "failed";
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconReGenerate"
+                  width={20}
+                  color={isFailed ? undefined : "#8D91A0"}
+                />
+              }
+              border={false}
+              disabled={!isFailed}
+              onClick={isFailed ? () => handleReGenerate(record) : undefined}
+            >
+              <span
+                className={isFailed ? "text-black ml-3" : "text-gray-400 ml-3"}
+              >
+                Re-Generate
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={
+                isFailed
+                  ? "Re-Generate"
+                  : "Re-Generate (only available when status is Failed)"
+              }
+              placement="left"
+            >
+              <div
+                onClick={() => isFailed && handleReGenerate(record)}
+                style={{
+                  display: "inline-block",
+                  lineHeight: 0,
+                  cursor: isFailed ? "pointer" : "not-allowed",
+                  opacity: isFailed ? 1 : 0.4,
+                }}
+              >
+                <SVGIcon name="IconReGenerate" width={20} />
+              </div>
+            </Tooltip>
+          );
+        return Content;
+      },
+    },
+    {
+      action: "Download",
+      type: "table",
+      render: (record, data) => {
+        const isCompleted = record?.status?.toLowerCase() === "completed";
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconDownload"
+                  width={20}
+                  color={isCompleted ? undefined : "#8D91A0"}
+                />
+              }
+              border={false}
+              disabled={!isCompleted}
+              onClick={
+                isCompleted ? () => handlePreviewFile(record) : undefined
+              }
+            >
+              <span
+                className={
+                  isCompleted ? "text-black ml-3" : "text-gray-400 ml-3"
+                }
+              >
+                Download
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={
+                isCompleted
+                  ? "Download"
+                  : "Download (only available when status is Completed)"
+              }
+              placement="left"
+            >
+              <div
+                onClick={() => isCompleted && handlePreviewFile(record)}
+                style={{
+                  display: "inline-block",
+                  lineHeight: 0,
+                  cursor: isCompleted ? "pointer" : "not-allowed",
+                  opacity: isCompleted ? 1 : 0.4,
+                }}
+              >
+                <SVGIcon name="IconEye" width={20} />
+              </div>
+            </Tooltip>
+          );
+        return Content;
+      },
+    },
+  ];
+
+  const actionCols = useColumnActionPermission(
+    ["view", "regenerate", "download"],
+    itemGrantAccess,
+  ).map((col) => ({
+    ...col,
+    key: col.key || col.title,
+    width: 120,
+    align: "center",
+  }));
+
+  const allColumns = useMemo(() => {
+    return [...baseColumns, ...actionCols];
+  }, [baseColumns, actionCols]);
+
   const columnDefinitions = useMemo(() => {
-    return baseColumns.map((col) => ({
+    return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [baseColumns]);
+  }, [allColumns]);
 
   const columns = useMemo(() => {
     const leftFixed = [];
     const rightFixed = [];
     const normal = [];
 
-    baseColumns.forEach((col) => {
+    allColumns.forEach((col) => {
       const colKey = col.key || col.dataIndex || col.title;
 
       if (fixedColumns.left.includes(colKey)) {
@@ -457,116 +540,115 @@ const ViewInvoice = () => {
 
       return newCol;
     });
-  }, [baseColumns, fixedColumns]);
+  }, [allColumns, fixedColumns]);
 
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">Invoice List</p>
-              <div className="flex gap-2">
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px]">Invoice List</p>
+            <div className="flex gap-2">
+              <ButtonComponent
+                type={"submit"}
+                border={false}
+                icon={<SVGIcon name="IconButtonDownload" width={20} />}
+                onClick={() => {
+                  handleDownload();
+                }}
+              >
+                Download List
+              </ButtonComponent>
+              <NavLink to={INVOICE_ROUTES.GENERATE_INVOICE_FORM}>
                 <ButtonComponent
-                  type={"submit"}
-                  border={false}
-                  icon={<SVGIcon name="IconButtonDownload" width={20} />}
-                  onClick={() => {
-                    handleDownload();
-                  }}
+                  icon={<SVGIcon name="IconButtonCreate" width={20} />}
+                  type="submit"
                 >
-                  Download List
+                  Generate Invoice
                 </ButtonComponent>
-                <NavLink to={INVOICE_ROUTES.GENERATE_INVOICE_FORM}>
-                  <ButtonComponent
-                    icon={<SVGIcon name="IconButtonCreate" width={20} />}
-                    type="submit"
-                  >
-                    Generate Invoice
-                  </ButtonComponent>
-                </NavLink>
-              </div>
+              </NavLink>
             </div>
-          }
-        >
-          <div className="w-full -pt-3">
-            <TableRBI
-              idTable="invoice-table"
-              dataSource={dataSource}
-              columns={columns}
-              totalData={data?.page?.totalElements}
-              tableScrolled={{ y: 525, x: "max-content" }}
-              onSort={onSortApi}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              showExport={false}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-            />
           </div>
-        </CardContainer>
-
-        {/* Invoice Log */}
-        {pageDetail === true && data_detail ? (
-          <DetailInvoice
-            detail={data_detail?.logs}
-            invoiceNumber={invoiceNumber}
+        }
+      >
+        <div className="w-full -pt-3">
+          <TableRBI
+            idTable="invoice-table"
+            dataSource={dataSource}
+            columns={columns}
+            totalData={data?.page?.totalElements}
+            tableScrolled={{ y: 525, x: "max-content" }}
+            onSort={onSortApi}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            showExport={false}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
           />
-        ) : null}
+        </div>
+      </CardContainer>
 
-        {/* Modal Re-Generate */}
-        <ModalApproveOrReject
-          isOpen={modalReGenerate}
-          handleCloseModal={handleCancelReGenerate}
-          onFinish={handleConfirmReGenerate}
-          header={"REGENERATE"}
-          approveOrReject={"regenerate"}
-          menu={"Invoice"}
-          named={invoiceNumber}
-          children={
-            <Form.Item
-              label={"Format Option"}
-              name={"formatOption"}
-              rules={[
-                { required: true, message: "Please input your Format Option!" },
-              ]}
+      {/* Modal Detail */}
+      <DetailInvoice
+        isOpen={modalDetail}
+        onClose={() => setModalDetail(false)}
+        detail={data_detail}
+        loading={loading_detail}
+      />
+
+      {/* Modal Re-Generate */}
+      <ModalApproveOrReject
+        isOpen={modalReGenerate}
+        handleCloseModal={handleCancelReGenerate}
+        onFinish={handleConfirmReGenerate}
+        header={"REGENERATE"}
+        approveOrReject={"regenerate"}
+        menu={"Invoice"}
+        named={invoiceNumber}
+        children={
+          <Form.Item label={"Format Option"}>
+            <span
+              className="ant-input"
+              style={{
+                display: "inline-block",
+                padding: "4px 11px",
+                background: "#f5f5f5",
+                borderRadius: 4,
+                minWidth: 100,
+              }}
             >
-              <SelectComponent>
-                {data_format &&
-                  data_format?.map((data, index) => (
-                    <Select.Option value={data.glbTypeValId} key={index}>
-                      {data.name}
-                    </Select.Option>
-                  ))}
-              </SelectComponent>
-            </Form.Item>
-          }
-        />
+              PDF
+            </span>
+          </Form.Item>
+        }
+      />
 
-        {/* Modal Error */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not regenerate. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
+      {/* Modal Error */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-        </ModalError>
-      </Spin>
+          <p className="pl-[70px]">{`Your data was not regenerate. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
     </LayoutMenu>
   );
 };

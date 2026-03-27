@@ -79,11 +79,11 @@ const NxHistoryModal = ({
   isOpen,
   handleClose = () => {},
   header,
-  tabOptions,
+  tabOptions = [],
   dataApprover,
   dataHistory,
 }) => {
-  const [tabActive, setTabActive] = useState(tabOptions[0]);
+  const [tabActive, setTabActive] = useState("");
   const [dataApproverFinal, setDataApproverFinal] = useState([]);
   const [dataHistoryFinal, setDataHistoryFinal] = useState([]);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
@@ -93,7 +93,7 @@ const NxHistoryModal = ({
       const useTabs = tabOptions && (tabOptions?.length > 0 || false);
       if (useTabs) {
         const tempTab = tabOptions[0].value.toLowerCase();
-        setTabActive(tabOptions[0].value);
+        setTabActive(tempTab);
         setDataApproverFinal(dataApprover[tempTab]);
         setDataHistoryFinal(dataHistory[tempTab]);
       } else {
@@ -134,11 +134,11 @@ const NxHistoryModal = ({
     <NxModal
       isOpen={isOpen}
       centered={true}
-      width={550}
+      width={900}
       closable={false}
-      header={header}
+      title={header}
       footer={
-        <div className="w-full flex justify-end">
+        <div className="flex justify-end">
           <ButtonComponent onClick={handleClose} type="default">
             Back
           </ButtonComponent>

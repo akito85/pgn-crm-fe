@@ -280,10 +280,13 @@ const ApprovalPointOfSales = ({
           >
             <ApprovalPosFirstStep
               key={"first"}
-              dataTable={dataApprovalListPage?.map((a, index) => ({
-                ...a,
-                key: index + 1,
-              }))}
+              dataTable={Array.isArray(dataApprovalListPage)
+                ? dataApprovalListPage.map((a, index) => ({
+                    ...a,
+                    key: index + 1,
+                  }))
+                : []
+              }
               rowSelection={rowSelection}
               setRemark={setRemark}
             />

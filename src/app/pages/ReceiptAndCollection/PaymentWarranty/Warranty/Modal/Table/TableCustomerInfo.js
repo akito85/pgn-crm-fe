@@ -23,7 +23,7 @@ export const columnsCustomerInfo = (
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
-    width: 180,
+    width: 200,
     sorter: (a, b) => a?.costCenter?.localeCompare(b?.costCenter),
     ...getColumnSearchPropsPaging(
       "costCenter",
@@ -32,17 +32,12 @@ export const columnsCustomerInfo = (
       searchText,
       handleSearch
     ),
-    onFilter: (value, record) =>
-      record["costCenter"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
   },
   {
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
-    width: 150,
+    width: 200,
     sorter: (a, b) => a?.customerNumber?.localeCompare(b?.customerNumber),
     ...getColumnSearchPropsPaging(
       "customerNumber",
@@ -51,17 +46,13 @@ export const columnsCustomerInfo = (
       searchText,
       handleSearch
     ),
-    onFilter: (value, record) =>
-      record["customerNumber"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+    render: (_, record) => record.customerNumber || record.customerId
   },
   {
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
-    width: 180,
+    width: 250,
     sorter: (a, b) => a?.customerName?.localeCompare(b?.customerName),
     ...getColumnSearchPropsPaging(
       "customerName",
@@ -70,10 +61,32 @@ export const columnsCustomerInfo = (
       searchText,
       handleSearch
     ),
-    onFilter: (value, record) =>
-      record["customerName"]
-        ?.toString()
-        .toLowerCase()
-        .includes(value.toLowerCase()),
+  },
+  {
+    key: "accountNumber",
+    title: "ACCOUNT NUMBER",
+    dataIndex: "accountNumber",
+    width: 200,
+    sorter: (a, b) => a?.accountNumber?.localeCompare(b?.accountNumber),
+    ...getColumnSearchPropsPaging(
+      "accountNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (_, record) => record.accountNumber || record.accountId || "-"
+  },
+  {
+    key: "unAppliedAmount",
+    title: "TOTAL UNAPPLY AMOUNT",
+    dataIndex: "unAppliedAmount",
+    width: 200,
+    align: "right",
+    sorter: (a, b) => (a?.unAppliedAmount || 0) - (b?.unAppliedAmount || 0),
+    render: (_, record) => {
+      const amount = record.unAppliedAmount || record.totalUnAppliedAmount || record.totalUnapplyAmount || 0;
+      return amount ? amount.toLocaleString('id-ID') : '0';
+    }
   },
 ];

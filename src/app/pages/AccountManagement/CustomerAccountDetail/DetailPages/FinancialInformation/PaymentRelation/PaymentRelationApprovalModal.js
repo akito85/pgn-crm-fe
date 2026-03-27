@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect, useMemo, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";
+import { Steps, Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
@@ -19,7 +18,7 @@ const PaymentRelationApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading } = useSelector(
+  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approveRejectPr } = useSelector(
     (state) => state.financialInformation
   );
 
@@ -318,18 +317,18 @@ const PaymentRelationApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Payment Relation Information"
+        title="APPROVAL PAYMENT RELATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
         footer={
           <div className="flex justify-between">
-            <ButtonComponent type={"default"} onClick={handleCancelForm}>
+            <Button type={"default"} onClick={handleCancelForm}>
               Cancel
-            </ButtonComponent>
+            </Button>
 
-            <div className="flex gap-x-4">
-              <ButtonComponent
+            <div className="flex">
+              <Button
                 onClick={() => {
                   prev();
                   scrollLeftHandler();
@@ -338,33 +337,33 @@ const PaymentRelationApprovalModal = ({
                 disabled={current < 1}
               >
                 Previous
-              </ButtonComponent>
+              </Button>
 
               { current < steps.length - 1 && (
-                <ButtonComponent
+                <Button
                   onClick={() => handleButtonNext()}
                   type={"submit"}
                   disabled={current > steps.length - 1 || steps[current].disabled}
                 >
                   Next
-                </ButtonComponent>
+                </Button>
               )}
               {current === steps.length - 1 && (
                 <>
-                  <ButtonComponent
+                  <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading}
+                    loading={loading_approveRejectPr}
                   >
                     Reject
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading}
+                    loading={loading_approveRejectPr}
                   >
                     Approve
-                  </ButtonComponent>
+                  </Button>
                 </>
               )}
             </div>
@@ -410,12 +409,12 @@ const PaymentRelationApprovalModal = ({
                     dataSource={dataSourceWithKeys}
                     columns={processedColumns}
                     totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                    tableScrolled={{ y: 400, x: "max-content" }}
+                    tableScrolled={{ x: "max-content" }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_listPrApproval}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}
@@ -458,7 +457,7 @@ const PaymentRelationApprovalModal = ({
                   dataSource={selectedRows}
                   columns={processedColumns}
                   totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                  tableScrolled={{ y: 400, x: "max-content" }}
+                  tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}

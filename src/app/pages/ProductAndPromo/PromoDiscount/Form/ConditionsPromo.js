@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Select } from "antd";
+import { Button, Form, Select } from "antd";
 import moment from "moment";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../components/Nx/NxTable";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import SelectComponent from "../../../../../components/SelectComponent";
 import InputComponent from "../../../../../components/InputComponent";
@@ -39,8 +38,6 @@ const ConditionPromo = ({
   const dispatch = useDispatch();
 
   // Use State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState("");
@@ -54,6 +51,10 @@ const ConditionPromo = ({
 
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState(false);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
 
   // Use Effect
   useEffect(() => {
@@ -90,11 +91,6 @@ const ConditionPromo = ({
     return moment().add(-1, "days") >= current;
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
   const filterColumns = (data = []) => {
     return type === "preview"
       ? data.filter((item) => item.title !== "ACTION")
@@ -104,10 +100,6 @@ const ConditionPromo = ({
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       // if (prevState[dataIndex] !== selectedKeys[0]) {
@@ -336,28 +328,28 @@ const ConditionPromo = ({
     <div className="flex flex-col w-full gap-3">
       {type !== "detail" && type !== "preview" ? (
         <div className="w-full flex justify-end">
-          <ButtonComponent
+          <Button
             type={"submit"}
             onClick={handleCreate}
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={14} />}
           >
             Create
-          </ButtonComponent>
+          </Button>
         </div>
       ) : null}
 
-      <TablePaginationNew
-        type="FE"
+      <NxTable
+        idTable="condition-promo-table"
         dataSource={data || []}
-        totalData={data?.length || 0}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChange}
+        usePagination={false}
+        useInfiniteScroll={false}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
         columns={filterColumns(
           columnsTable(
             type,
-            page,
-            pageSize,
+            1,
+            data?.length || 0,
             searchInput,
             searchedColumn,
             searchText,
@@ -373,10 +365,7 @@ const ConditionPromo = ({
             storedData,
           )
         )}
-        tableScrolled={{
-          x: 1500,
-          y: 300,
-        }}
+        tableScrolled={{ x: 1500, y: 300 }}
       />
 
       <ModalCustom
@@ -387,16 +376,16 @@ const ConditionPromo = ({
         type={"confirmation"}
         footer={
           <div className="w-full flex justify-end gap-5 p-4">
-            <ButtonComponent onClick={handleCancelModalForm} type="default">
+            <Button onClick={handleCancelModalForm} type="menu">
               Cancel
-            </ButtonComponent>
-            <ButtonComponent
+            </Button>
+            <Button
               form="conditionForm"
               type="submit"
               htmlType="submit"
             >
               Save
-            </ButtonComponent>
+            </Button>
           </div>
         }
       >
@@ -522,14 +511,14 @@ const ConditionPromo = ({
         header="DETAIL INFORMATION"
         width={800}
         footer={
-          <ButtonComponent
-            type={"default"}
+          <Button
+            type={"menu"}
             onClick={() => {
               setModalHistory(false);
             }}
           >
             Back
-          </ButtonComponent>
+          </Button>
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>

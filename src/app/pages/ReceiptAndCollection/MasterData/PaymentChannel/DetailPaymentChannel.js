@@ -36,9 +36,7 @@ const DetailPaymentChannel = ({ data_detail, data_req }) => {
           <DetailText label="Category">
             {data_detail?.category}
           </DetailText>
-          <DetailText label="Type">
-            {data_detail?.type}
-          </DetailText>
+
           <DetailText label="Eff Start Date">
             {moment(data_detail?.effStartDate).format(dateFormatting.date)}
           </DetailText>

@@ -315,6 +315,16 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
         return false;
       }
 
+    case "update":
+      if (
+        lowerStatusApproval === "waiting approval" ||
+        lowerStatus === "inactive"
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+
     default:
       if (lowerStatusApproval === "waiting approval") {
         return true;

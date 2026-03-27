@@ -1,17 +1,5 @@
 export const SYSTEM_SETUP_ROUTES = {
-  
 
-  // job routes
-  LOGGING_VIEW_MENU: "/system-setup/logging",
-
-   // job routes
-  JOB_VIEW_MENU: "/system-setup/job-management",
-  JOB_CREATE_MENU : "/system-setup/job-management/create",
-  JOB_DETAIL_MENU : "/system-setup/job-management/view",
-
-  // job control
-  JOB_CONTROL_VIEW_MENU: "/system-setup/job-control",
-  
   // menus routes
   VIEW_MENU: "/system-setup/menu",
   CREATE_MENU: "/system-setup/menu/create",
@@ -76,11 +64,11 @@ export const SYSTEM_SETUP_ROUTES = {
   UPDATE_MASTER_POSITION: "/system-setup/master-data/position/update",
 
   // ASSETS
-  VIEW_MASTER_ASSETS:'/system-setup/assets',
-  CREATE_MASTER_ASSETS:'/system-setup/assets/create',
-  UPDATE_MASTER_ASSETS:'/system-setup/assets/update',
-  DETAIL_MASTER_ASSETS: '/system-setup/assets/view',
-  UPLOAD_MASTER_ASSETS:'/system-setup/assets/upload',
+  VIEW_MASTER_ASSETS: "/system-setup/assets",
+  CREATE_MASTER_ASSETS: "/system-setup/assets/create",
+  UPDATE_MASTER_ASSETS: "/system-setup/assets/update",
+  DETAIL_MASTER_ASSETS: "/system-setup/assets/view",
+  UPLOAD_MASTER_ASSETS: "/system-setup/assets/upload",
 
   // MAINTENANCE MODE
   VIEW_MAINTENANCE_MODE: "/system-setup/maintenance-mode",
@@ -90,4 +78,19 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_PAYMENT_CYCLE: "/system-setup/payment-cycle/view",
   CREATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/create",
   UPDATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/update",
+
+  // Payment Period
+  VIEW_PAYMENT_PERIOD: "/system-setup/payment-period",
+  DETAIL_PAYMENT_PERIOD: "/system-setup/payment-period/view",
+  CREATE_PAYMENT_PERIOD: "/system-setup/payment-period/create",
+  UPDATE_PAYMENT_PERIOD: "/system-setup/payment-period/update",
+
+  // Billing Item Category
+  VIEW_BILLING_ITEM_CATEGORY: "/system-setup/transaction-mapping-category",
+  DETAIL_BILLING_ITEM_CATEGORY:
+    "/system-setup/transaction-mapping-category/view",
+  CREATE_BILLING_ITEM_CATEGORY:
+    "/system-setup/transaction-mapping-category/create",
+  UPDATE_BILLING_ITEM_CATEGORY:
+    "/system-setup/transaction-mapping-category/update",
 };

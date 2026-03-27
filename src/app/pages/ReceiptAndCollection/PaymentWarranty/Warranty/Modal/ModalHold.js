@@ -1,6 +1,7 @@
+// VERIFICATION_TAG: 2026-02-17-001
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Select, Checkbox, Tooltip } from "antd";
+import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
@@ -27,39 +28,46 @@ import { columnsHoldInfo } from "./Table/TableHoldInfo";
 import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 
 // Redux / Service
-import { configApp } from "../../../../../../constants/configApp";
+import { configApp, API_ENDPOINTS } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllWarrantyInfoPaginate,
-  getAllHoldInfoPaginate,
-  getAllAttachmentInfoPaginate,
+  getHoldListPaginate,
+  getHoldDetailList,
+  submitHold,
+  getAllApprovalList,
+  getListApprovalById,
   getListCategory,
-  requestedHold,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
+
+import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
+import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
+import { WARRANTY_TRANSACTION_NAMES} from "../../../../../../constants/warrantyTypes";
 
 const ModalHold = ({
   isOpen,
   handleBack = () => {},
   handleRefresh = () => {},
   handleOpenModal = () => {},
+  selectedRow = null,
 }) => {
   // Selector
   const {
-    data_customer_info,
-    data_warranty_info,
-    data_hold_info,
+    dataHoldList,
     data_attachment_info,
-    loading,
+    dataListAppHierId,
+    dataListAppHierDetail,
+    loadingHoldList,
   } = useSelector((state) => state.warranty);
+
 
   // Declaration
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceHoldInfo = data_hold_info?.result || [];
+  const dataSourceCustomerInfo = []; // Not used anymore in this modal logic
+  const dataSourceWarrantyInfo = dataHoldList?.result || [];
+  const dataSourceHoldInfo = []; // Derived from selection
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -83,10 +91,17 @@ const ModalHold = ({
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
+  // Approval State
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState(null);
+  const [approvalName, setApprovalName] = useState("-");
+
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
     right: [] 
   });
+
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -123,25 +138,39 @@ const ModalHold = ({
   // Define Wizard Step
   const steps = [
     {
-      title: "Warranty Information",
-      disabled: false
+      title: "Guarantee Information",
+      key: "warrantyInfo",
     },
     {
       title: "Hold Information",
-      disabled: false
+      key: "holdInfo",
+    },
+    {
+      title: "Approval",
+      key: "approvalInfo",
     },
     {
       title: "Attachment Information",
-      disabled: false
+      key: "attachmentInfo",
     },
     {
       title: "Confirmation",
-      disabled: false
+      key: "confirmation",
     },
   ];
 
-  // Button Next
   const next = () => {
+    if (current === 0 && selectedWarrantyInfoRowKeys.length === 0) {
+      return message.warning("Please select Guarantee Information!");
+    }
+    if (current === 1) {
+      if (!remarkHoldInformation) {
+        return message.warning("Please input your Remark!");
+      }
+    }
+    if (current === 2 && !selectedHierarchy) {
+      return message.warning("Please select Approval Hierarchy!");
+    }
     setCurrent(current + 1);
   };
 
@@ -188,32 +217,55 @@ const ModalHold = ({
     setBoolean(true);
   };
 
-  // Handle Back Form
-  const handleBackForm = () => {
-    handleBack();
+  const clearAllState = (preSelectedRow) => {
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
-    setDataWarrantyInfoSelect([]);
-    setDataTable([]);
-    setBoolean(false);
+    
+    if (preSelectedRow) {
+      const rowKey = preSelectedRow.billingCode || preSelectedRow.invoiceNumber || preSelectedRow.id;
+      setSelectedWarrantyInfoRowKeys([rowKey]);
+      setDataWarrantyInfoSelect([{ ...preSelectedRow, key: rowKey }]);
+      setCurrent(0); // Start at Step 1 (Guarantee Info selection)
+    } else {
+      setSelectedWarrantyInfoRowKeys([]);
+      setDataWarrantyInfoSelect([]);
+      setCurrent(0);
+    }
+
     setRemarkHoldInformation("");
-    setCurrent(0);
+    setListDataAttachment([]);
+    setSelectedHierarchy(null);
     setSearch({});
     setPage(1);
     setSort("");
     setSearchText("");
     setSearchedColumn("");
+    setValuePage("Hold");
+    setBoolean(false);
     form.resetFields();
   };
 
-  const [tabData, setTabData] = useState([
-    { value: "Hold"},
-    { value: "Attachment" },
-  ]);
+  useEffect(() => {
+    if (isOpen) {
+      clearAllState(selectedRow);
+    }
+  }, [isOpen, selectedRow]);
+
+  // Handle Back Form
+  const handleBackForm = () => {
+    handleBack();
+    clearAllState();
+  };
+
+  const tabItems = [
+    { key: "Hold", label: "Hold Info" },
+    { key: "Approval", label: "Approval" },
+    { key: "Attachment", label: "Attachment" },
+  ];
   
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  const [valuePage, setValuePage] = useState("Hold");
+  const onChange = (key) => { // Changed to receive key directly
+    setValuePage(key);
   };
 
   const handleCloseModalError = () => {
@@ -228,64 +280,194 @@ const ModalHold = ({
     setBodyError({});
   };
 
-  // Handle Save for Modal Confirmation
-  const handleSave = (formValue) => {
-    handleBack();
+  const [loadingSave, setLoadingSave] = useState(false);
 
-    const body = {
-    };
+  // Handle Save for Modal Confirmation
+  const handleSave = async (formValue) => {
+    setLoadingSave(true);
     
-    dispatch(requestedHold({ body: body }))
-      .unwrap()
-      .then(() => {
-        handleRefresh();
-        handleBack();
-        setSelectedCustomerInfoRowKeys([]);
-        setDataCustomerInfoSelect([]);
-        setDataWarrantyInfoSelect([]);
-        setDataTable([]);
-        setBoolean(false);
-        setRemarkHoldInformation("");
-        setCurrent(0);
-        setSearch({});
-        setPage(1);
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-        form.resetFields();
-      })
-      .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message, type: "requested" });
-          setModalError(true);
+    try {
+      // 1. Prepare and submit the hold request first (before attachments)
+      const submitBody = {
+        type: WARRANTY_TRANSACTION_NAMES.HOLD,
+        appHierId: selectedHierarchy,
+        items: dataWarrantyInfoSelect.map((item) => ({
+          payWarrantyId: item.id,
+          amount: item.currencyBalance || 0,
+          currency: item.currency || "IDR",
+        })),
+        remark: remarkHoldInformation,
+      };
+
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitHold(submitBody)).unwrap();
+      // 3. Upload new attachments per transId
+      const transIds = Array.isArray(submitRes?.data?.transIds) ? submitRes.data.transIds : [];
+      if (transIds.length === 0) {
+        message.warning('Transaction ID tidak ditemukan, attachment tidak dapat diupload');
+        setLoadingSave(false);
+        return;
+      }
+
+      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+      if (newAttachments.length > 0) {
+        for (const transId of transIds) {
+          for (const element of newAttachments) {
+            const uploadBody = {
+              referensiId: transId, // Link attachment to the returned transaction ID
+              files: element.file,
+              category: "PAYMENT_WARRANTY_TRANS",
+              fileCategoryId: element.fileCategoryId,
+            };
+            await receiptCollectionHttpService.uploadImage(API_ENDPOINTS.UPLOAD_ATTACHMENT, uploadBody);
+          }
         }
-      });
+      }
+
+      // 4. Cleanup and close
+      handleRefresh();
+      handleBack();
+      clearAllState();
+      setLoadingSave(false);
+    } catch (error) {
+      setLoadingSave(false);
+      let message = error?.response?.data?.message || error?.message || error?.toString();
+
+      if (message && typeof message === "object") {
+        if (Array.isArray(message)) {
+          message = message.join(", ");
+        } else {
+          message = Object.values(message)
+            .map((val) => (typeof val === "object" ? JSON.stringify(val) : val))
+            .join(", ");
+        }
+      }
+
+      setBodyError({ message, type: "requested" });
+      setModalError(true);
+    }
   };
 
-  // Warranti Information Step
+
+  // Guarantee Information Step
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && current === 0) {
+      const finalSearch = Object.keys(search).length > 0 
+        ? Object.entries(search)
+            .filter(([_, value]) => value !== undefined && value !== "")
+            .map(([key, value]) => `${key}~${value}`)
+            .join("|") 
+        : "";
+
       dispatch(
-        getAllWarrantyInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
+        getHoldListPaginate({
+          search: finalSearch,
           page,
           pageSize,
           sort,
         })
       );
     }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  }, [dispatch, isOpen, search, page, pageSize, sort, current]);
+
+  useEffect(() => {
+    if (isOpen && current === 2) {
+      dispatch(getAllApprovalList());
+    }
+  }, [dispatch, isOpen, current]);
+
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
+    }
+  }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (selectedHierarchy) {
+      dispatch(getListApprovalById({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
+
+  useEffect(() => {
+    if (dataListAppHierDetail?.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail?.map((b, idx) => ({
+          ...b,
+          key: idx + 1,
+        })) || [],
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  const dataSourceCustomerInfoWithKeys = useMemo(() => {
+    return dataSourceCustomerInfo?.map((item, index) => ({
+      ...item,
+      key: index + 1,
+    }));
+  }, [dataSourceCustomerInfo]);
+  
+  const baseColumnsCustomerInfo = useMemo(
+    () =>
+      columnsCustomerInfo(
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [page, pageSize, searchedColumn, searchText]
+  );
+
+  const allColumnsCustomerInfo = useMemo(() => {
+    const columnsWithKeys = baseColumnsCustomerInfo.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumnsCustomerInfo]);
+
+  const processedColumnsCustomerInfo = useMemo(() => {
+    return applyFixedColumns(allColumnsCustomerInfo, fixedColumns);
+  }, [allColumnsCustomerInfo, fixedColumns]);
+
+  const columnDefinitionsCustomerInfo = useMemo(() => {
+    return allColumnsCustomerInfo.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumnsCustomerInfo]);
+  
+  const onSelectChangeCustomerInfo = (newSelectedCustomerInfoRowKeys, newSelectedRow) => {
+    setDataCustomerInfoSelect(newSelectedRow);
+    setSelectedCustomerInfoRowKeys(newSelectedCustomerInfoRowKeys);
+  };
+
+  const rowSelectionCustomerInfo = {
+    fixed: true,
+    selectedRowKeys: selectedCustomerInfoRowKeys,
+    onChange: onSelectChangeCustomerInfo,
+  };
 
   const dataSourceWarrantyInfoWithKeys = useMemo(() => {
+    if (selectedRow) {
+      const rowKey = selectedRow.billingCode || selectedRow.invoiceNumber || selectedRow.id;
+      return [{ ...selectedRow, key: rowKey }];
+    }
     return dataSourceWarrantyInfo?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSourceWarrantyInfo]);
+  }, [dataSourceWarrantyInfo, selectedRow]);
   
   const baseColumnsWarrantyInfo = useMemo(
     () =>
@@ -326,64 +508,64 @@ const ModalHold = ({
 
   const rowSelectionWarrantyInfo = {
     fixed: true,
-    selectedWarrantyInfoRowKeys,
+    selectedRowKeys: selectedWarrantyInfoRowKeys,
     onChange: onSelectChangeWarrantyInfo,
+    getCheckboxProps: (record) => ({
+      disabled: !!selectedRow,
+    }),
   };
 
   // Hold Information Step
-  const [holdAmountData, setHoldAmountData] = useState({});
-  const handleHoldAmountChange = (value, recordKey) => {
-    setHoldAmountData(prev => ({ ...prev, [recordKey]: value }));
-  };
-
-  const [holdDateData, setHoldDateData] = useState({});
-  const handleHoldDateChange = (value, recordKey) => {
-    setHoldDateData(prev => ({ ...prev, [recordKey]: value }));
-  }; 
 
   const [remarkHoldInformation, setRemarkHoldInformation] = useState("");
 
   const [fixedHoldColumns, setFixedHoldColumns] = useState({
     left: ["no"],
-    right: ["date", "holdAmount"] 
+    right: ["holdDate", "holdAmount"] 
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(
-        getAllHoldInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  // Removed useEffect for getAllHoldInfoPaginate as we use dataWarrantyInfoSelect
 
   const dataSourceHoldInfoWithKeys = useMemo(() => {
-    return dataSourceHoldInfo?.map((item, index) => ({
+    return dataWarrantyInfoSelect?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [dataSourceHoldInfo]);
+  }, [dataWarrantyInfoSelect]);
   
   const baseColumnsHoldInfo = useMemo(
     () =>
       columnsHoldInfo(
-        page,
-        pageSize,
+        1,
+        1000,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        holdAmountData,
-        handleHoldAmountChange,
-        holdDateData,
-        handleHoldDateChange
+        handleSearch
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [searchedColumn, searchText]
   );
+
+  const baseColumnsHoldInfoConfirmation = useMemo(
+    () =>
+      columnsHoldInfo(
+        1,
+        1000,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+    [searchedColumn, searchText]
+  );
+
+  const processedColumnsHoldInfoConfirmation = useMemo(() => {
+    const columnsWithKeys = baseColumnsHoldInfoConfirmation.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return applyFixedColumns(columnsWithKeys, fixedHoldColumns);
+  }, [baseColumnsHoldInfoConfirmation, fixedHoldColumns]);
 
   const allColumnsHoldInfo = useMemo(() => {
     const columnsWithKeys = baseColumnsHoldInfo.map((col) => ({
@@ -407,18 +589,6 @@ const ModalHold = ({
   // Attachment Information Step
   const [listDataAttachment, setListDataAttachment] = useState([]);
   
-  useEffect(() => {
-    if (isOpen) {
-      dispatch(
-        getAllAttachmentInfoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
 
   const dataSourceAttachmentInfoWithKeys = useMemo(() => {
     return dataSourceAttachmentInfo?.map((item, index) => ({
@@ -496,74 +666,20 @@ const ModalHold = ({
       <ModalCustom
         isOpen={isOpen}
         type="confirmation"
-        header="Warranty Hold"
-        handleBack={handleBackForm}
+        header="Guarantee Hold"
+        handleCancel={handleBackForm}
         width={1000}
-        footer={
-          <div className="flex w-full justify-end gap-x-5">
-            {current < steps.length - 0 && (
-              <ButtonComponent type={"default"} onClick={handleBackForm}>
-                <span className="p-1 text-[18px] text-center">Back</span>
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-              >
-                <LeftOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-                <span className="p-1 text-[18px] text-center">Previous</span>
-              </ButtonComponent>
-            )}
-
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => {
-                  handleButtonNext();
-                }}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                form={"formRequest"}
-              >
-                <span className="p-1 text-[18px] text-center">Confirm</span>
-              </ButtonComponent>
-            )}
-          </div>
-        }
+        footer={null}
       >
-        <div className="flex flex-row justify-center">
-          <div
-            onScroll={handleScroll}
-            ref={containerRef}
-            className="overflow-x-scroll scrollStepsCstm"
-          >
-            <Steps current={current} items={items} labelPlacement="vertical" />
-          </div>
+        <div className="flex flex-col gap-y-5">
+          <FormStepper
+            steps={steps}
+            current={current}
+            onPrev={prev}
+            onNext={next}
+            onBack={handleBackForm}
+            onConfirm={handleSave}
+          />
         </div>
 
         <Form
@@ -572,7 +688,7 @@ const ModalHold = ({
           id={"formRequest"}
           onFinish={handleSave}
         >
-          {/* STEP : WARRANTY INFORMATION */}
+          {/* STEP 1: WARRANTY INFORMATION */}
           <div className={`steps-content my-[30px] ${ current !== 0 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
@@ -586,19 +702,20 @@ const ModalHold = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_warranty_info?.page?.totalElements || 0}
+                totalData={selectedRow ? 1 : (dataHoldList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingHoldList}
                 showExport={false}
                 rowSelection={rowSelectionWarrantyInfo}
               />
             </div>
           </div>
-          {/* STEP : HOLD INFORMATION */}
+
+          {/* STEP 2: HOLD INFORMATION */}
           <div className={`steps-content my-[30px] ${ current !== 1 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
               <p className="text-primary uppercase font-bold mb-4">
@@ -608,17 +725,18 @@ const ModalHold = ({
               <TableRBI
                 dataSource={dataSourceHoldInfoWithKeys}
                 columns={processedColumnsHoldInfo}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={data_hold_info?.page?.totalElements || 0}
-                tableScrolled={{ y: 525, x: 1000 }}
+                current={1}
+                pageSize={100} // Show all selected items
+                onChange={() => {}} 
+                onSizeChanger={() => {}}
+                totalData={dataSourceHoldInfoWithKeys.length}
+                tableScrolled={{ y: 525, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsHoldInfo}
                 fixedColumns={fixedHoldColumns}
                 setFixedColumns={setFixedHoldColumns}
-                loading={loading}
+                loading={loadingHoldList}
+                showExport={false}
               />
               
               <div className="pt-[30px]">
@@ -641,8 +759,23 @@ const ModalHold = ({
             </div>
           </div>
 
-          {/* STEP : ATTACHMENT INFORMATION */}
+          {/* STEP 3: APPROVAL */}
           <div className={`steps-content my-[30px] ${ current !== 2 ? "hidden" : "" }`} >
+             <div className="w-full grid grid-cols-1 gap-x-4">
+              <p className="text-primary uppercase font-bold mb-4">
+                APPROVAL INFORMATION
+              </p>
+              <ApprovalSectionForm
+                dataTable={appHierDataDetail}
+                dataOption={appHierOptions}
+                selectedHierarchy={selectedHierarchy}
+                updateSelectedHierarchy={setSelectedHierarchy}
+              />
+            </div>
+          </div>
+
+          {/* STEP 4: ATTACHMENT INFORMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 3 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
                 ATTACHMENT INFORMATION
@@ -656,33 +789,36 @@ const ModalHold = ({
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
+                mandatory={false}
               />
             </div>
           </div>
 
-          {/* STEP : CONFIRMATION */}
-          <div className={`steps-content my-[30px] ${ current !== 3 ? "hidden" : "" }`} >
+          {/* STEP 5: CONFIRMATION */}
+          <div className={`steps-content my-[30px] ${ current !== 4 ? "hidden" : "" }`} >
             <div className="w-full grid grid-cols-1 gap-x-4">
-              <RadioTabs data={tabData} onChange={onChange} currentPosition={valuePage}/>
-              <div style={{ display: valuePage !== tabData[0].value ? "none" : undefined }}>
+              <Tabs activeKey={valuePage} onChange={setValuePage} items={tabItems} className="mb-4" />
+              
+              <div style={{ display: valuePage !== "Hold" ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
                     HOLD INFORMATION
                   </p>
                   <TableRBI
                     dataSource={dataSourceHoldInfoWithKeys}
-                    columns={processedColumnsHoldInfo}
-                    current={page}
-                    pageSize={pageSize}
-                    onChange={handleChange}
-                    onSizeChanger={handleChange}
-                    totalData={dataSourceHoldInfoWithKeys.length || 0}
-                    tableScrolled={{ y: 525, x: 1000 }}
+                    columns={processedColumnsHoldInfoConfirmation}
+                    current={1}
+                    pageSize={100}
+                    onChange={() => {}}
+                    onSizeChanger={() => {}}
+                    totalData={dataSourceHoldInfoWithKeys.length}
+                    tableScrolled={{ y: 525, x: 2000 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitionsHoldInfo}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
+                    fixedColumns={fixedHoldColumns}
+                    setFixedColumns={setFixedHoldColumns}
                     loading={false}
+                    showExport={false}
                   />
                   <div>
                     <DetailText label={"Remark"}>
@@ -692,7 +828,24 @@ const ModalHold = ({
                 </div>
               </div>
 
-              <div style={{ display: valuePage !== tabData[1].value ? "none" : undefined }}>
+              <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
+                <div className="w-full grid grid-cols-1 gap-[30px]">
+                  <p className="text-primary uppercase font-bold my-4">
+                    APPROVAL INFORMATION
+                  </p>
+                  <ApprovalSectionForm
+                    showSelect={false}
+                    disableSelect={true}
+                    approvalName={
+                      appHierOptions.find((opt) => opt.value === selectedHierarchy)?.name
+                    }
+                    dataTable={appHierDataDetail}
+                    selectedHierarchy={selectedHierarchy}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
                 <div className="w-full grid grid-cols-1 gap-[30px]">
                   <p className="text-primary uppercase font-bold my-4">
                     ATTACHMENT INFORMATION
@@ -701,7 +854,7 @@ const ModalHold = ({
                     type={"preview"}
                     data={listDataAttachment}
                     updateData={setListDataAttachment}
-                    typeSelector="partner"
+                    typeSelector="warranty"
                     dispatch={dispatch}
                     getAPICategory={getListCategory}
                     service={receiptCollectionHttpService}
@@ -712,6 +865,16 @@ const ModalHold = ({
               </div>
             </div>
           </div>
+            <FormFooter
+              current={current}
+              totalSteps={steps.length}
+              onPrev={prev}
+              onNext={next}
+              onCancel={handleBackForm}
+              onSubmit={() => form.submit()}
+              useClearData={false}
+              useSaveDraft={false}
+            />
         </Form>
       </ModalCustom>
 

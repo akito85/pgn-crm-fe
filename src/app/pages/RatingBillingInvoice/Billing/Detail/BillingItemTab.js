@@ -1,31 +1,16 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Tabs } from "antd";
 import TableRBI from "../../../../../components/TableRBI";
-import {
-  getAllBillingItemPaginate,
-  getAllRatingResultPaginate,
-} from "../../../../../redux/slices/rating_billing_invoice/billing";
+import { getAllBillingItemPaginate } from "../../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBillingItem } from "./Table/TableBillingItem";
-import { columnsRatingResult } from "./Table/TableRatingResult";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
-  const { data_billingItem, data_ratingResult } = useSelector(
-    (state) => state.billing
-  );
+const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
+  const { data_billingItem } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSourceBI = data_billingItem?.result;
-  const dataSourceRR = data_ratingResult?.result;
-
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
 
   const [pageBI, setPageBI] = useState(1);
   const [pageSizeBI, setPageSizeBI] = useState(10);
@@ -34,41 +19,22 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
   const [sortBI, setSortBI] = useState("");
   const [searchBI, setSearchBI] = useState({});
 
-  const [activeTab, setActiveTab] = useState("1");
-
   const [fixedColumnsBI, setFixedColumnsBI] = useState(() => ({
     left: ["no"],
     right: [],
   }));
 
-  const [fixedColumnsRR, setFixedColumnsRR] = useState(() => ({
-    left: ["no"],
-    right: [],
-  }));
-
-  useEffect(() => {
-    dispatch(
-      getAllRatingResultPaginate({
-        id: ratingCodeId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: page,
-        pageSize: pageSize,
-        sort: sort,
-      })
-    );
-  }, [dispatch, ratingCodeId, search, page, pageSize, sort]);
-
   useEffect(() => {
     dispatch(
       getAllBillingItemPaginate({
-        billingCodeId,
+        billHeaderId,
         searchBI: encodeURIComponent(JSON.stringify(searchBI)),
         pageBI,
         pageSizeBI,
         sortBI,
-      })
+      }),
     );
-  }, [dispatch, billingCodeId, searchBI, pageBI, pageSizeBI, sortBI]);
+  }, [dispatch, billHeaderId, searchBI, pageBI, pageSizeBI, sortBI]);
 
   const handleSearchBI = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -85,27 +51,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     });
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   const handleChangePageBI = (pageChange, pageSizeChange) => {
     const tempPage = pageSizeBI !== pageSizeChange ? 1 : pageChange;
     setPageBI(tempPage);
@@ -120,14 +65,6 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     setSortBI(dataSort);
   };
 
-  const onSort = (_, __, sorter) => {
-    const dataSort =
-      sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-
   const baseColumnsBI = useMemo(() => {
     return columnsBillingItem(
       pageBI,
@@ -136,7 +73,7 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      searchBI
+      searchBI,
     );
   }, [pageBI, pageSizeBI, searchedColumnBI, searchTextBI, searchBI]);
 
@@ -158,125 +95,44 @@ const BillingItemTab = ({ billingCodeId, ratingCodeId, calculationCodeId }) => {
     }));
   }, [allColumnsBI]);
 
-  const baseColumnsRR = useMemo(() => {
-    return columnsRatingResult(
-      page,
-      pageSize,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      search
-    );
-  }, [page, pageSize, searchedColumn, searchText, search]);
-
-  const allColumnsRR = useMemo(() => {
-    return baseColumnsRR.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
+  // Tambahkan key unik per row menggunakan id dari response
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSourceBI?.map((item) => ({
+      ...item,
+      key: item.id,
     }));
-  }, [baseColumnsRR]);
-
-  const processedColumnsRR = useMemo(() => {
-    return applyFixedColumns(allColumnsRR, fixedColumnsRR);
-  }, [allColumnsRR, fixedColumnsRR]);
-
-  const columnDefinitionsRR = useMemo(() => {
-    return allColumnsRR.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumnsRR]);
-
-  const ratingTabItems = [
-    {
-      key: "1",
-      label: "Rating Result",
-      children: (
-        <div className="pt-4">
-          <TableRBI
-            size="small"
-            dataSource={dataSourceRR}
-            columns={processedColumnsRR}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={data_ratingResult?.page?.totalElements || 0}
-            tableScrolled={{ x: 1200, y: 525 }}
-            onSort={onSort}
-            columnDefinitions={columnDefinitionsRR}
-            fixedColumns={fixedColumnsRR}
-            setFixedColumns={setFixedColumnsRR}
-            loading={false}
-          />
-        </div>
-      ),
-    },
-    {
-      key: "2",
-      label: "Promo",
-      disabled: true,
-      children: (
-        <div className="pt-4">
-          <p className="text-center text-gray-500">
-            Promo information coming soon
-          </p>
-        </div>
-      ),
-    },
-  ];
+  }, [dataSourceBI]);
 
   return (
-    <div className="space-y-6">
-      {/* Billing Item Information Section */}
-      <div>
-        <h3 className="text-sm text-primary uppercase mb-4">
-          Billing Item Information
-        </h3>
-
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
-          <div>
-            <p className="text-[13px] text-gray-600 mb-1">Calculation Code</p>
-            <p className="text-[15px] text-primary">
-              {calculationCodeId || "-"}
-            </p>
-          </div>
-          <div>
-            <p className="text-[13px] text-gray-600 mb-1">Billing Code</p>
-            <p className="text-[15px] text-primary">{billingCodeId || "-"}</p>
-          </div>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
+        <div>
+          <p className="text-[13px] text-gray-600 mb-1">Calculation Code</p>
+          <p className="text-[15px] text-primary">{calculationCodeId || "-"}</p>
         </div>
-
-        <TableRBI
-          size="small"
-          dataSource={dataSourceBI}
-          columns={processedColumnsBI}
-          current={pageBI}
-          pageSize={pageSizeBI}
-          onChange={handleChangePageBI}
-          onSizeChanger={handleChangePageBI}
-          totalData={data_billingItem?.page?.totalElements || 0}
-          tableScrolled={{ x: 4500, y: 525 }}
-          onSort={onSortBI}
-          columnDefinitions={columnDefinitionsBI}
-          fixedColumns={fixedColumnsBI}
-          showExport={false}
-          setFixedColumns={setFixedColumnsBI}
-          loading={false}
-        />
+        <div>
+          <p className="text-[13px] text-gray-600 mb-1">Source Number</p>
+          <p className="text-[15px] text-primary">{billHeaderId || "-"}</p>
+        </div>
       </div>
 
-      {/* Rating Result / Promo Section with Tabs */}
-      <div className="mt-6">
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={ratingTabItems}
-          type="line"
-          className="rating-result-tabs"
-        />
-      </div>
+      <TableRBI
+        size="small"
+        dataSource={dataSourceWithKeys}
+        columns={processedColumnsBI}
+        current={pageBI}
+        pageSize={pageSizeBI}
+        onChange={handleChangePageBI}
+        onSizeChanger={handleChangePageBI}
+        totalData={data_billingItem?.page?.totalElements || 0}
+        tableScrolled={{ x: 2200, y: 525 }}
+        onSort={onSortBI}
+        columnDefinitions={columnDefinitionsBI}
+        fixedColumns={fixedColumnsBI}
+        showExport={false}
+        setFixedColumns={setFixedColumnsBI}
+        loading={false}
+      />
     </div>
   );
 };

@@ -12,6 +12,7 @@ import {
   getAllBillingRequestPaginate,
   getListApprovalById,
   requestedBilling,
+  resetBillingRequestData,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import {
   columnsApproval,
@@ -49,7 +50,7 @@ const ModalRequestApproval = ({
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -65,7 +66,7 @@ const ModalRequestApproval = ({
   const [bodyError, setBodyError] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
+    left: [],
     right: [],
   });
 
@@ -74,19 +75,21 @@ const ModalRequestApproval = ({
     dispatch(getAllApprovalList());
   }, [dispatch]);
 
-  // Use Effect - Fetch billing request dengan pagination setiap ada perubahan
+  // Use Effect - Fetch billing request setiap ada perubahan search/sort
   useEffect(() => {
     if (isOpen) {
       dispatch(
         getAllBillingRequestPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 1,
+          pageSize: 100,
           sort,
-        })
+          isLoadMore: false,
+        }),
       );
+      setPage(1);
     }
-  }, [dispatch, isOpen, search, page, pageSize, sort]);
+  }, [dispatch, isOpen, search, sort]);
 
   useEffect(() => {
     if (boolean === true) {
@@ -120,12 +123,31 @@ const ModalRequestApproval = ({
     });
   };
 
-  // Handle Change Page
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const initialPageSize = 100;
+
+  const handleLoadMore = async () => {
+    const totalElements = data_list_billing_request_approval?.page?.totalElements || 0;
+    const currentDataLength = dataSource?.length || 0;
+
+    if (currentDataLength >= totalElements) return;
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    await dispatch(
+      getAllBillingRequestPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+    setPage(nextPage);
   };
+
+  const hasMore =
+    (dataSource?.length || 0) <
+    (data_list_billing_request_approval?.page?.totalElements || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -162,58 +184,39 @@ const ModalRequestApproval = ({
     },
   ];
 
-  // Button Next
-  const next = () => {
-    setCurrent(current + 1);
-  };
+  const next = () => setCurrent(current + 1);
+  const prev = () => setCurrent(current - 1);
 
-  // Button Previous
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  // Scroll Left Handler
   const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft -= 250;
   };
 
-  // Scroll Right Handler
   const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft += 250;
   };
 
-  // Scroll Handler
   const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
+    if (containerRef.current) setScrollLeft(containerRef.current.scrollLeft);
   };
 
-  // Handle Next
   const handleButtonNext = () => {
     next();
     scrollRightHandler();
   };
 
-  // Mapping Step
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
   }));
 
-  //  Handle Select Approval Hierarchy
   const handleSelect = (e) => {
     dispatch(getListApprovalById(e));
     setBoolean(true);
   };
 
-  // Handle Cancel Form
   const handleCancelForm = () => {
     handleCancel();
+    dispatch(resetBillingRequestData());
     setSelectedRowKeys([]);
     setDataTableSelect([]);
     setDataTable([]);
@@ -226,6 +229,7 @@ const ModalRequestApproval = ({
     setSearchText("");
     setSearchedColumn("");
     form.resetFields();
+    // Reset data request approval di Redux agar modal selanjutnya mulai fresh
   };
 
   const handleCloseModalError = () => {
@@ -245,8 +249,9 @@ const ModalRequestApproval = ({
     handleCancel();
 
     const body = {
-      ...formValue,
-      billingCodes: dataTableSelect.map((a) => a.billingCode),
+      apphierId: formValue.apphierId,
+      billCode: dataTableSelect.map((a) => a.billCode),
+      remark: formValue.remark,
       generateInvoice: generateInvoice,
     };
 
@@ -283,22 +288,22 @@ const ModalRequestApproval = ({
   const baseColumns = useMemo(
     () =>
       columnsRequestBilling(
-        page,
-        pageSize,
+        0,
+        0,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        search,
       ),
-    [page, pageSize, searchedColumn, searchText]
+    [searchedColumn, searchText, handleSearch, search],
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
@@ -313,9 +318,11 @@ const ModalRequestApproval = ({
   }, [allColumns]);
 
   const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
+    return dataSource?.map((item) => ({
       ...item,
-      key: index + 1,
+      // PERUBAHAN: Gunakan billCode sebagai row key
+      // billCode bisa null pada data Adjustment, fallback ke billHeaderId
+      key: item.billCode ?? item.billHeaderId,
     }));
   }, [dataSource]);
 
@@ -328,53 +335,48 @@ const ModalRequestApproval = ({
         handleCancel={handleCancelForm}
         width={1000}
         footer={
-          <div className="flex w-full justify-end gap-x-5">
-            {current < steps.length - 1 && (
-              <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                Cancel
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              >
-                Previous
-              </ButtonComponent>
-            )}
+          <div className="flex w-full justify-between items-center">
+            {/* Kiri: Tombol Cancel */}
+            <div>
+              {current < steps.length - 1 && (
+                <ButtonComponent type={"default"} onClick={handleCancelForm}>
+                  Cancel
+                </ButtonComponent>
+              )}
+            </div>
 
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => {
-                  handleButtonNext();
-                }}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
+            {/* Kanan: Tombol Previous, Next, Confirm */}
+            <div className="flex gap-x-3">
+              {current > 0 && (
+                <ButtonComponent
+                  onClick={() => {
+                    prev();
+                    scrollLeftHandler();
                   }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                form={"formRequest"}
-              >
-                Confirm
-              </ButtonComponent>
-            )}
+                  type={"default"}
+                >
+                  Previous
+                </ButtonComponent>
+              )}
+              {current < steps.length - 1 && (
+                <ButtonComponent
+                  onClick={handleButtonNext}
+                  type={"submit"}
+                  disabled={steps[current].disabled}
+                >
+                  Next
+                </ButtonComponent>
+              )}
+              {current === steps.length - 1 && (
+                <ButtonComponent
+                  type={"submit"}
+                  htmlType={"submit"}
+                  form={"formRequest"}
+                >
+                  Confirm
+                </ButtonComponent>
+              )}
+            </div>
           </div>
         }
       >
@@ -396,9 +398,7 @@ const ModalRequestApproval = ({
         >
           {/* STEP 1: BILLING INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${
-              current !== 0 ? "hidden" : ""
-            }`}
+            className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <div className="flex gap-2 justify-between">
@@ -413,16 +413,13 @@ const ModalRequestApproval = ({
                 )}
               </div>
               <TableRBI
+                idTable="billing-request-table"
                 dataSource={dataSourceWithKeys}
                 columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
                 totalData={
                   data_list_billing_request_approval?.page?.totalElements || 0
                 }
-                tableScrolled={{ y: 525, x: 15000 }}
+                tableScrolled={{ y: 525, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
@@ -430,6 +427,11 @@ const ModalRequestApproval = ({
                 loading={loading}
                 showExport={false}
                 rowSelection={rowSelection}
+                usePagination={false}
+                useInfiniteScroll={true}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadMoreThreshold={20}
               />
               <div className="pt-[30px]">
                 <Form.Item name={"generateInvoice"}>
@@ -463,134 +465,96 @@ const ModalRequestApproval = ({
 
           {/* STEP 2: APPROVAL INFORMATION */}
           <div
-            className={`steps-content my-[30px] ${
-              current !== 1 ? "hidden" : ""
-            }`}
+            className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}
           >
             <div className="w-full grid grid-cols-1 gap-x-4">
               <p className="text-primary uppercase font-bold mb-4">
                 Approval Information
               </p>
 
-              {/* Hidden Form.Item untuk validasi */}
-              <Form.Item
-                name="apphierId"
-                hidden
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Approval Hierarchy!",
-                  },
-                ]}
-              >
-                <input type="hidden" />
-              </Form.Item>
+              {/* Dropdown Approval Hierarchy sebagai Form.Item */}
+              <div className="w-1/3 mb-6">
+                <Form.Item
+                  label="Approval Hierarchy"
+                  name="apphierId"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select Approval Hierarchy!",
+                    },
+                  ]}
+                >
+                  <Select
+                    onChange={(value) => {
+                      handleSelect(value);
+                    }}
+                    placeholder="Select approval hierarchy"
+                    loading={loading}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.children ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                  >
+                    {data_approval?.map((data) => (
+                      <Select.Option
+                        value={data.appHierId}
+                        key={data.appHierId}
+                      >
+                        {data.approvalName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </div>
 
-              {/* Tabel dengan Dropdown di Header */}
-              <TableRBI
-                dataSource={dataTable}
-                columns={columnsApproval(
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                )}
-                expandable={{
-                  expandedRowRender: (record) => (
-                    <div>
-                      <p className="text-primary text-xs font-bold uppercase pt-4">
-                        EMPLOYEE INFORMATION
-                      </p>
-                      <TableRBI
-                        dataSource={record?.employeeDetail || []}
-                        columns={columnsExpandApproval(
-                          page,
-                          pageSize,
-                          searchInput,
-                          searchedColumn,
-                          searchText,
-                          handleSearch
-                        )}
-                        className={"mb-4"}
-                        useSelect={false}
-                        usePagination={false}
-                      />
-                    </div>
-                  ),
-                }}
-                usePagination={false}
-                loading={loading}
-                customHeaderLeft={
-                  <div style={{ position: "relative" }}>
-                    <style>{`
-            .approval-hierarchy-select .ant-select-selector {
-              display: flex !important;
-              align-items: center !important;
-              gap: 8px !important;
-              border: 1px solid #BDBDBD !important;
-              height: 40px !important;
-              color: black !important;
-              border-radius: 6px !important;
-              font-size: 14px !important;
-              font-weight: 500 !important;
-              padding: 0 11px !important;
-              background: white !important;
-            }
-            .approval-hierarchy-select .ant-select-selection-placeholder {
-              color: rgba(0, 0, 0, 0.25) !important;
-              line-height: 40px !important;
-              font-size: 14px !important;
-              font-weight: 500 !important;
-            }
-            .approval-hierarchy-select .ant-select-selection-item {
-              line-height: 40px !important;
-              font-size: 14px !important;
-              font-weight: 500 !important;
-              color: black !important;
-            }
-            .approval-hierarchy-select .ant-select-arrow {
-              color: black !important;
-              font-size: 12px !important;
-            }
-            .approval-hierarchy-select:not(.ant-select-disabled):hover .ant-select-selector {
-              border-color: #BDBDBD !important;
-            }
-            .approval-hierarchy-select.ant-select-focused .ant-select-selector {
-              border-color: #40a9ff !important;
-              box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
-            }
-          `}</style>
-                    <Select
-                      value={form.getFieldValue("apphierId")}
-                      onChange={(value) => {
-                        form.setFieldsValue({ apphierId: value });
-                        handleSelect(value);
-                      }}
-                      placeholder="Approval Hierarchy"
-                      suffixIcon={<DownOutlined style={{ fontSize: "12px" }} />}
-                      style={{ minWidth: 200 }}
-                      className="approval-hierarchy-select"
-                    >
-                      {data_approval?.map((data, index) => (
-                        <Select.Option value={data.appHierId} key={index}>
-                          {data.approvalName}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </div>
-                }
-              />
+              {/* Tabel Approval muncul setelah hierarchy dipilih */}
+              {boolean && dataTable.length > 0 && (
+                <TableRBI
+                  dataSource={dataTable}
+                  columns={columnsApproval(
+                    1,
+                    dataTable.length,
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                  )}
+                  expandable={{
+                    expandedRowRender: (record) => (
+                      <div>
+                        <p className="text-primary text-xs font-bold uppercase pt-4">
+                          EMPLOYEE INFORMATION
+                        </p>
+                        <TableRBI
+                          dataSource={record?.employeeDetail || []}
+                          columns={columnsExpandApproval(
+                            1,
+                            record?.employeeDetail?.length || 0,
+                            searchInput,
+                            searchedColumn,
+                            searchText,
+                            handleSearch,
+                          )}
+                          className={"mb-4"}
+                          useSelect={false}
+                          usePagination={false}
+                        />
+                      </div>
+                    ),
+                  }}
+                  useSelect={false}
+                  usePagination={false}
+                  loading={loading}
+                />
+              )}
             </div>
           </div>
           {/* STEP 3: CONFIRMATION */}
           <div
-            className={`steps-content my-[30px] ${
-              current !== 2 ? "hidden" : ""
-            }`}
+            className={`steps-content my-[30px] ${current !== 2 ? "hidden" : ""}`}
           >
-            {/* Billing Information Review */}
             <div className="w-full grid grid-cols-1 gap-x-4 mb-8">
               <p className="text-primary uppercase font-bold mb-4">
                 Billing List
@@ -598,10 +562,6 @@ const ModalRequestApproval = ({
               <TableRBI
                 dataSource={dataTableSelect}
                 columns={processedColumns}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
                 totalData={dataTableSelect.length || 0}
                 tableScrolled={{ y: 525, x: 15000 }}
                 onSort={onSort}
@@ -609,6 +569,7 @@ const ModalRequestApproval = ({
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
                 loading={false}
+                usePagination={false}
               />
               <div className="pt-[30px]">
                 <DetailText label={"Generate Invoice"}>
@@ -620,26 +581,23 @@ const ModalRequestApproval = ({
               </div>
             </div>
 
-            {/* Approval Information Review */}
             <div className="w-full grid grid-cols-1 gap-x-4 border-t pt-8">
               <p className="text-primary uppercase font-bold">
                 Approval Information
               </p>
-
               <div className="w-full grid grid-cols-1 gap-2">
                 <div className="w-1/3">
                   <DetailText label={"Approval Hierarchy"}>
                     {
                       data_approval
                         ?.filter(
-                          (a) => a.appHierId === form.getFieldValue().apphierId
+                          (a) => a.appHierId === form.getFieldValue().apphierId,
                         )
                         ?.find((b) => b.approvalName)?.approvalName
                     }
                   </DetailText>
                 </div>
               </div>
-
               <div className="w-full">
                 {boolean === true ? (
                   <TablePaginationNew
@@ -650,12 +608,12 @@ const ModalRequestApproval = ({
                         : dataTable
                     }
                     columns={columnsApproval(
-                      page,
-                      pageSize,
+                      1,
+                      dataTable.length,
                       searchInput,
                       searchedColumn,
                       searchText,
-                      handleSearch
+                      handleSearch,
                     )}
                     expandable={{
                       expandedRowRender: (record) => (
@@ -669,12 +627,12 @@ const ModalRequestApproval = ({
                             usePagination={false}
                             dataSource={record?.employeeDetail}
                             columns={columnsExpandApproval(
-                              page,
-                              pageSize,
+                              1,
+                              record?.employeeDetail?.length || 0,
                               searchInput,
                               searchedColumn,
                               searchText,
-                              handleSearch
+                              handleSearch,
                             )}
                             className={"mb-4"}
                           />

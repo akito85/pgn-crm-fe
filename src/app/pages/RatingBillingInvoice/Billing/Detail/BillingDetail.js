@@ -1,28 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Tabs } from "antd";
+import moment from "moment";
 import CardContainer from "../../../../../components/CardContainer";
 import BillingItemTab from "./BillingItemTab";
-import PaymentTab from "./PaymentTab";
-import PrevBillingTab from "./PrevBillingTab";
-import PrevPaymentTab from "./PrevPaymentTab";
+import RatingSummaryTab from "./RatingSummaryTab";
+import AdjustmentTab from "./AdjustmentTab";
+import DetailText from "../../../../../components/DetailText";
 
 const BillingDetail = ({
   billingCodeId,
   calculationCodeId,
-  ratingCodeId,
-  saNumberId,
-  accountNumberId,
+  billHeaderId,
+  selectedBillingData,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState("1");
   const detailRef = useRef(null);
 
-  // Use Effect untuk scroll otomatis saat komponen muncul
   useEffect(() => {
-    if (billingCodeId && detailRef.current) {
+    if (billHeaderId  && detailRef.current) {
       setActiveTab("1");
 
-      // Gunakan requestAnimationFrame untuk scroll lebih smooth
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           detailRef.current?.scrollIntoView({
@@ -42,36 +40,20 @@ const BillingDetail = ({
       children: (
         <BillingItemTab
           billingCodeId={billingCodeId}
-          ratingCodeId={ratingCodeId}
           calculationCodeId={calculationCodeId}
+          billHeaderId={billHeaderId} 
         />
       ),
     },
     {
       key: "2",
-      label: "Payment",
-      children: (
-        <PaymentTab
-          billingCodeId={billingCodeId}
-          calculationCodeId={calculationCodeId}
-        />
-      ),
+      label: "Rating Summary",
+      children: <RatingSummaryTab billHeaderId={billHeaderId} />,
     },
     {
       key: "3",
-      label: "Previous Billing",
-      children: (
-        <PrevBillingTab
-          billingCodeId={billingCodeId}
-          saNumberId={saNumberId}
-          accountNumberId={accountNumberId}
-        />
-      ),
-    },
-    {
-      key: "4",
-      label: "Previous Payment",
-      children: <PrevPaymentTab billingCodeId={billingCodeId} />,
+      label: "Adjustment",
+      children: <AdjustmentTab billHeaderId={billHeaderId} />,
     },
   ];
 
@@ -99,6 +81,31 @@ const BillingDetail = ({
           className="billing-detail-tabs"
           style={{ marginTop: -12, marginBottom: 0 }}
         />
+      </CardContainer>
+
+      <CardContainer header={"History Log Information"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <DetailText label={"Created Date"}>
+            {selectedBillingData?.createdDate
+              ? moment(selectedBillingData?.createdDate).format(
+                  "DD MMM YYYY HH:mm:ss",
+                )
+              : " "}
+          </DetailText>
+          <DetailText label={"Created By"}>
+            {selectedBillingData?.createdBy || " "}
+          </DetailText>
+          <DetailText label={"Updated Date"}>
+            {selectedBillingData?.updatedDate
+              ? moment(selectedBillingData?.updatedDate).format(
+                  "DD MMM YYYY HH:mm:ss",
+                )
+              : "-"}
+          </DetailText>
+          <DetailText label={"Updated By"}>
+            {selectedBillingData?.updatedBy || "-"}
+          </DetailText>
+        </div>
       </CardContainer>
     </div>
   );

@@ -26,7 +26,7 @@ const data = [
   { value: "Service Agreement" },
   { value: "Relationship" },
   { value: "Gas Source" },
-  { value: "Gas Deposit", disabled: true, },
+  { value: "Gas Deposit" },
   { value: "Compensation", disabled: true, },
   { value: "Promo" },
   { value: "Multi Destination" },
@@ -68,7 +68,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             item.value === "Account Statement" ||
             item.value === "Promo" ||
             item.value === "User Access" ||
-            item.value === "Multi Destination"
+            item.value === "Multi Destination" ||
+            item.value === "Gas Deposit"
         )
       );
     } else {

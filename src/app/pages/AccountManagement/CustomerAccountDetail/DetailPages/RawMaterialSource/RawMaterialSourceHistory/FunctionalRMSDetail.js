@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, Fragment } from "react";
 import {
   Form,
   Input,
   InputNumber,
   Select,
   Space,
-  Table,
   Tooltip,
   DatePicker,
+  Button,
 } from "antd";
 import Highlighter from "react-highlight-words";
 import { FilterOutlined } from "@ant-design/icons";
@@ -17,6 +17,9 @@ import { showModalError } from "../../../../../../../redux/slices/general_slice"
 import { useDispatch, useSelector } from "react-redux";
 import { getCountryRMS } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import InputComponent from "../../../../../../../components/InputComponent";
+import { getColumnSearchPropsCriteria } from "../../../../../ProductAndPromo/Product/columnTableCriteria";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const EditableCell = ({
   editing,
@@ -31,7 +34,8 @@ const EditableCell = ({
   dataEditRecord,
   required,
   formRMS,
-  validateBoolean,
+  validationError,
+  importVal,
   handleEditDataRecord = () => {},
   ...restProps
 }) => {
@@ -56,6 +60,11 @@ const EditableCell = ({
             showSearch
             allowClear
             labelInValue
+            size="small"
+            style={{
+              height: 24,
+              fontSize: 11,
+            }}
             filterOption={(input, option) =>
               (option?.children ?? "")
                 .toLowerCase()
@@ -64,7 +73,7 @@ const EditableCell = ({
           >
             {options?.map((option) => (
               <Select.Option key={option.value} value={option.value}>
-                {option.label}
+                <div className="text-xs">{option.label}</div>
               </Select.Option>
             ))}
           </Select>
@@ -74,8 +83,11 @@ const EditableCell = ({
           <InputNumber
             type={"number"}
             controls={false}
+            size="small"
             style={{
               width: "100%",
+              fontSize: 11,
+              height: 24,
             }}
           />
         );
@@ -107,11 +119,11 @@ const EditableCell = ({
             handleEditDataRecord(value, key, dataIndex)
           }
           validateStatus={
-            validateBoolean && inputType === "number" ? "error" : undefined
+            validationError && dataIndex === "percentage" ? "error" : undefined
           }
           help={
-            validateBoolean && inputType === "number"
-              ? "Please adjust value. Total Percentage must be 100%"
+            validationError && dataIndex === "percentage"
+              ? validationError
               : undefined
           }
           rules={
@@ -121,14 +133,14 @@ const EditableCell = ({
                   ...rules(),
                   {
                     validator: (_, value) => {
-                      const percentage = formRMS.getFieldValue().percentage;
-                      if (percentage >= 0 && percentage <= 100) {
+                      const max = importVal !== undefined ? Number(importVal) : 100;
+                      if (value >= 0 && value <= max) {
                         return Promise.resolve();
                       } else {
                         return Promise.reject(
                           new Error(
-                            "Please adjust value. Total Percentage must be 100%"
-                          )
+                            `Please adjust value. Value must be between 0 and ${max}`,
+                          ),
                         );
                       }
                     },
@@ -152,7 +164,7 @@ const getColumnSearchProps = (
   searchText,
   handleSearch,
   excludeRender = false,
-  typeFilter = "input"
+  typeFilter = "input",
 ) => {
   let obj = {
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -240,7 +252,17 @@ const FunctionalRMSDetail = ({
   updateData = [],
   storedData = false,
   setStoredData = () => {},
+  localValue,
+  importValue,
 }) => {
+
+  const [localVal, setLocalValue] = useState(localValue);
+  const [importVal, setImportValue] = useState(importValue);
+
+  useEffect(() => {
+    setLocalValue(localValue);
+    setImportValue(importValue);
+  }, [localValue, importValue]);
   // Selector
   const { data_country } = useSelector((state) => state.rawMaterialSource);
 
@@ -251,9 +273,29 @@ const FunctionalRMSDetail = ({
   const isEditing = (record) => record.key === editingKey;
   const dataItem = data?.length > 0 ? data?.map((item) => item?.country) : [];
 
+  const itemActions = nxGetAccountActions({
+    // nxGetAccountActions will call handlers with the record id (e.g. handleUpdate(record.id))
+    // so map the id back to the actual record object before calling edit/deleteRow
+    handleUpdate: (id) => {
+      const rec = data.find((d) => d.key === id || d.id === id);
+      if (rec) edit(rec);
+    },
+    handleDelete: (id) => {
+      const rec = data.find((d) => d.key === id || d.id === id);
+      if (rec) deleteRow(rec);
+    },
+  }).filter((action) => action.action === "Delete" || action.action === "Update");
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+
   const filterItem = () => {
     return dataItem?.length > 0
-      ? data_country?.filter((a) => !dataItem?.some((b) => b?.value === a?.value))
+      ? data_country?.filter(
+          (a) => !dataItem?.some((b) => b?.value === a?.value),
+        )
       : data_country;
   };
 
@@ -275,7 +317,7 @@ const FunctionalRMSDetail = ({
   const [statusAction, setStatusAction] = useState("");
   const [editDataRecord, setEditDataRecord] = useState({});
 
-  const [validateBoolean, setValidateBoolean] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   // Use Effect
   useEffect(() => {
@@ -374,15 +416,18 @@ const FunctionalRMSDetail = ({
           return sum + (currentItem.percentage || 0);
         }, 0);
 
-        // Check if the total percentage exceeds 100%
-        if (totalPercentage > 100) {
-          return setValidateBoolean(true);
+        // Check if the total percentage exceeds allowed importVal
+          if (totalPercentage > Number(importVal)) {
+            setValidationError(`Total Percentage must be ${Number(importVal)}%`);
+          return;
         }
+
+        setValidationError("");
 
         newData.splice(index, 1, updatedRow);
         updateData(newData);
         setEditingKey("");
-        setValidateBoolean(false);
+        
       }
 
       setStoredData(false);
@@ -396,10 +441,10 @@ const FunctionalRMSDetail = ({
   // Function Add Row Data
   const addRow = () => {
     let errorBody = {};
-    if (totalPercentage === 100) {
+    if (totalPercentage === Number(importVal)) {
       errorBody = {
         title: "Failed",
-        description: "Total percentage is 100%, you cannot add data again.",
+        description: `Total percentage is ${importVal}%, you cannot add data again.`,
       };
       dispatch(showModalError(errorBody));
     } else {
@@ -424,43 +469,139 @@ const FunctionalRMSDetail = ({
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
 
-  // Filter Table
+  // Filter Table (robust: handles primitive values, objects with label, and nulls)
   const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = value.toLowerCase();
-    switch (dataIndex) {
-      case "percentage":
-        const temp = record[dataIndex]?.toString();
-        return temp.toLowerCase().includes(fixSearchText);
-      default:
-        return record[dataIndex]?.label?.toLowerCase().includes(fixSearchText);
+    const fixSearchText = String(value || "").toLowerCase().trim();
+    const cell = record[dataIndex];
+
+    if (dataIndex === "percentage") {
+      const temp = cell !== undefined && cell !== null ? String(cell) : "";
+      return temp.toLowerCase().includes(fixSearchText);
+    }
+
+    // Special handling for country: support label (string or React element) and value
+    if (dataIndex === "country") {
+      if (cell === undefined || cell === null) return false;
+
+      // rawLabel may be cell.label or the cell itself
+      const rawLabel = cell?.label ?? cell ?? "";
+
+      // If label is a React element, try to extract text children
+      if (React.isValidElement(rawLabel)) {
+        const child = rawLabel.props?.children;
+        const childStr =
+          child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+            ? String(child).toLowerCase().trim()
+            : "";
+        if (childStr.includes(fixSearchText)) return true;
+      } else {
+        const labelStr = rawLabel !== undefined && rawLabel !== null ? String(rawLabel).toLowerCase().trim() : "";
+        if (labelStr.includes(fixSearchText)) return true;
+      }
+
+      // also check cell.value if present
+      const valStr = cell?.value !== undefined && cell?.value !== null ? String(cell.value).toLowerCase().trim() : "";
+      if (valStr.includes(fixSearchText)) return true;
+
+      return false;
+    }
+
+    // Generic handling for other columns
+    if (cell === undefined || cell === null) return false;
+
+    if (typeof cell === "string" || typeof cell === "number") {
+      return String(cell).toLowerCase().trim().includes(fixSearchText);
+    }
+
+    if (typeof cell === "object") {
+      const label = cell.label !== undefined && cell.label !== null ? String(cell.label).toLowerCase().trim() : "";
+      const val = cell.value !== undefined && cell.value !== null ? String(cell.value).toLowerCase().trim() : "";
+      const combined = `${label} ${val}`.trim();
+      return combined.includes(fixSearchText);
+    }
+
+    try {
+      return String(cell).toLowerCase().trim().includes(fixSearchText);
+    } catch (e) {
+      return false;
     }
   };
 
-  // Sorter Table
+  // Sorter Table (robust)
   const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
-      switch (fieldSort) {
-        case "percentage":
-          const temp = obj[fieldSort]?.toString();
-          return temp.toLowerCase();
-        default:
-          return obj[fieldSort].label?.toLowerCase();
+    const extractSortable = (obj) => {
+      const cell = obj ? obj[fieldSort] : undefined;
+      if (cell === undefined || cell === null) return "";
+
+      // For percentage: prefer numeric comparison
+      if (fieldSort === "percentage") {
+        const n = Number(cell);
+        return isNaN(n) ? String(cell).toLowerCase() : n;
       }
+
+      // Primitive types
+      if (typeof cell === "string" || typeof cell === "number") {
+        return String(cell).toLowerCase();
+      }
+
+      // Object: attempt to extract label or value; support React element in label
+      if (typeof cell === "object") {
+        const lbl = cell.label !== undefined ? cell.label : undefined;
+        const val = cell.value !== undefined ? cell.value : undefined;
+
+        if (lbl !== undefined) {
+          if (React.isValidElement(lbl)) {
+            const child = lbl.props?.children;
+            if (child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")) {
+              return String(child).toLowerCase();
+            }
+            try {
+              return String(lbl).toLowerCase();
+            } catch (e) {
+              // continue
+            }
+          }
+
+          if (typeof lbl === "string" || typeof lbl === "number") {
+            return String(lbl).toLowerCase();
+          }
+        }
+
+        if (val !== undefined && (typeof val === "string" || typeof val === "number")) {
+          return String(val).toLowerCase();
+        }
+
+        // fallback to JSON string
+        try {
+          return JSON.stringify(cell).toLowerCase();
+        } catch (e) {
+          return "";
+        }
+      }
+
+      return String(cell).toLowerCase();
     };
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-    return fa.localeCompare(fb);
+
+    const aVal = extractSortable(a);
+    const bVal = extractSortable(b);
+
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return aVal - bVal;
+    }
+
+    return String(aVal).localeCompare(String(bVal));
   };
 
   // Columns Table
   const columns = () => {
     const temp = [
       {
+        key: "no",
         title: "NO",
         width: 60,
         dataIndex: "no",
@@ -468,6 +609,7 @@ const FunctionalRMSDetail = ({
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "country",
         required: true,
         title: "COUNTRY",
         width: 240,
@@ -475,16 +617,58 @@ const FunctionalRMSDetail = ({
         sorter: (a, b) => sorter("country", a, b),
         dataIndex: "country",
         inputType: "select",
-        option: listOption,
-        ...getColumnSearchProps(
+        options: listOption,
+        ...getColumnSearchPropsCriteria(
           "country",
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
+        render: (data) => {
+          // support label as string, number, React element, or fallback
+          const rawLabel = data?.label ?? data ?? "";
+
+          // If it's a React element, try to extract children text or return element
+          if (React.isValidElement(rawLabel)) {
+            const child = rawLabel.props?.children;
+            const childStr =
+              child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+                ? String(child)
+                : null;
+
+            if (searchedColumn === "country" && searchText && childStr) {
+              return (
+                <Highlighter
+                  highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                  searchWords={[searchText]}
+                  autoEscape
+                  textToHighlight={childStr}
+                />
+              );
+            }
+
+            // fallback to rendering the element itself
+            return rawLabel;
+          }
+
+          const label = rawLabel !== undefined && rawLabel !== null ? String(rawLabel) : "";
+          if (searchedColumn === "country" && searchText) {
+            return (
+              <Highlighter
+                highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={label}
+              />
+            );
+          }
+
+          return label || "";
+        },
       },
       {
+        key: "percentage",
         required: true,
         title: "PERCENTAGE (%)",
         width: 240,
@@ -498,10 +682,11 @@ const FunctionalRMSDetail = ({
           searchInput,
           searchedColumn,
           searchText,
-          handleSearch
+          handleSearch,
         ),
       },
       {
+        key: "operation",
         title: "ACTION",
         dataIndex: "operation",
         width: 240,
@@ -509,57 +694,55 @@ const FunctionalRMSDetail = ({
         align: "center",
         render: (_, record) => {
           const editable = record.key === editingKey;
+          record.statusApproval = record.statusApproval || "DRAFT";
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="fleex w-full justify-center my-1 gap-2">
               {editable ? (
                 <>
-                  <ButtonComponent
+                  <Button
                     onClick={() => cancel(record)}
+                    className="flex w-full justify-center"
                     type="default"
+                    size="small"
+                    style={{
+                      borderColor: "var(--primary)",
+                      height: "22px",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      padding: "0px 6px",
+                      lineHeight: "20px",
+                    }}
                   >
-                    Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
+                    <div className="py-0.5 px-1 text-center">Cancel</div>
+                  </Button>
+                  <Button
                     onClick={() => save(record.key)}
-                    type="submit"
+                    className={"flex w-full justify-center"}
+                    type={"submit"}
+                    size={"small"}
+                    style={{
+                      borderColor: "#0075bf00",
+                      backgroundColor: "var(--primary)",
+                      color: "#fff",
+                      height: "22px",
+                      fontSize: "11px",
+                      cursor: "pointer",
+                      padding: "0 6px",
+                      lineHeight: "20px",
+                    }}
                   >
-                    Save
-                  </ButtonComponent>
+                    <div className="py-0.5 px-1 text-center">Save</div>
+                  </Button>
                 </>
               ) : (
-                <div className="flex w-full justify-center gap-4">
-                  <Tooltip title="Edit">
-                    <div>
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        className={
-                          editingKey ? "cursor-not-allowed" : undefined
-                        }
-                        width={24}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </div>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <div>
-                      <SVGIcon
-                        name="IconDelete"
-                        color={!editingKey ? "#D90000" : "#8D91A0"}
-                        width={24}
-                        className={
-                          !editingKey
-                            ? undefined
-                            : "disabled cursor-not-allowed"
-                        }
-                        onClick={
-                          !editingKey ? () => deleteRow(record) : undefined
-                        }
-                      />
-                    </div>
-                  </Tooltip>
-                </div>
+                <>
+                  {itemActions.map((action, index) => (
+                    <Fragment key={`table-action-${index}`}>
+                      {action.render(record, itemActions.length, index)}
+                    </Fragment>
+                  ))}
+                </>
               )}
             </Space>
           );
@@ -593,7 +776,9 @@ const FunctionalRMSDetail = ({
 
   return (
     <div className="flex flex-col w-full gap-4">
-      {type !== "detail" && type !== "preview" ? (
+  {type !== "detail" &&
+  type !== "preview" &&
+  Number(localVal) + Number(importVal) === 100 ? (
         <div className="flex w-full justify-end">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
@@ -606,42 +791,9 @@ const FunctionalRMSDetail = ({
       ) : null}
 
       <div className="relative flex flex-col w-full">
-        <div
-          className={`${
-            totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-          } w-1/4 flex`}
-        >
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-full"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns()
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    optionSelectedCol.length > 3
-                      ? optionSelectedCol.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
-        </div>
-
         <Form form={formRMS} component={false}>
-          <Table
-            bordered
-            className="w-full"
+          <NxTable
+            idTable="rmd-functional-rms-detail-table"
             dataSource={data}
             columns={filterColumn(
               columns().map((col) => ({
@@ -652,41 +804,37 @@ const FunctionalRMSDetail = ({
                   dataIndex: col.dataIndex,
                   title: col.title,
                   editing: isEditing(record),
-                  options: col.option,
+                  dependDataIndex: col.dependDataIndex,
+                  urlIndex: col.url,
+                  options: col.options,
                   dataEditRecord: editDataRecord,
                   handleEditDataRecord: handleEditDataRecord,
                   required: col.required,
-                  validateBoolean: validateBoolean,
+                  validationError: validationError,
                   formRMS: formRMS,
+                  importVal: importVal,
                 }),
-              }))
+              })),
             )}
-            pagination={{
-              position: ["topRight"],
-              current: page,
-              pageSize: pageSize,
-              onChange: handleChange,
-              className: "pr-1 w-3/4",
-              style: { marginLeft: "auto", marginRight: 0 },
-              showSizeChanger: true,
-              showTotal: (total, range) =>
-                `Showing ${range[0]} to ${range[1]} of ${total} records`,
-            }}
+            usePagination={false}
+            useInfiniteScroll={false}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
               body: {
                 cell: EditableCell,
               },
             }}
-            // scroll={scroll}
             onChange={onChange}
+            showAdvanceSearch={false}
           />
         </Form>
 
         {type !== "detail" && type !== "preview" ? (
           <div className={"w-full flex flex-col mt-5 gap-2 justify-start"}>
             <span className="font-bold">Total Percentage</span>
-            <span>{`${totalPercentage} / 100 %`}</span>
+            <span>{`${totalPercentage} / ${importVal} %`}</span>
           </div>
         ) : null}
       </div>

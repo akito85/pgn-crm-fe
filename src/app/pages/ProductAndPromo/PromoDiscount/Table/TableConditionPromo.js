@@ -1,6 +1,6 @@
 import SVGIcon from "../../../../../assets/Icon/index";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import { Space, Tooltip } from "antd";
+import { Button, Space, Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import { separatorCurrency } from "../../UtilsProduct/UtilsAllProduct";
 
@@ -23,12 +23,14 @@ export const tableConditionPromo = (
   storedData,
 ) => [
   {
+    key: "no",
     title: "NO",
     align: "center",
     width: 60,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
+    key: "name",
     title: "NAME",
     dataIndex: "name",
     // sorter: true,
@@ -67,6 +69,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "operator",
     title: "OPERATOR",
     dataIndex: "operator",
     // sorter: true,
@@ -106,6 +109,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "dataType",
     title: "DATA TYPE",
     dataIndex: "dataType",
     align: "center",
@@ -145,6 +149,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "value",
     title: "VALUE",
     dataIndex: "value",
     // sorter: true,
@@ -213,6 +218,7 @@ export const tableConditionPromo = (
     // },
   },
   {
+    key: "startDate",
     title: "START DATE",
     // sorter: true,
     align: "center",
@@ -272,6 +278,7 @@ export const tableConditionPromo = (
     //   ),
   },
   {
+    key: "endDate",
     title: "END DATE",
     // sorter: true,
     align: "center",
@@ -329,6 +336,7 @@ export const tableConditionPromo = (
       ),
   },
   {
+    key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
     filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -386,6 +394,7 @@ export const tableConditionPromo = (
     //   ),
   },
   {
+    key: "actions",
     title: "ACTION",
     fixed: "right",
     align: "center",
@@ -410,27 +419,28 @@ export const tableConditionPromo = (
           ) : (
             <div className="flex w-full justify-center gap-4">
               <Tooltip title="Update">
-                <div className="pt-1">
+                <Button
+                  onClick={() => handleUpdate(record)}
+                  type="table-action"
+                >
                   <SVGIcon
                     name="IconEdit"
-                    width={24}
-                    onClick={() => handleUpdate(record)}
+                    width={20}
                   />
-                </div>
+                </Button>
               </Tooltip>
 
               <Tooltip title="Delete">
-                <div className="pt-1">
+                <Button
+                  onClick={() => handleDelete(record)}
+                  type="table-action"
+                  disabled={!isDelete}
+                >
                   <SVGIcon
                     name="IconDelete"
-                    color={isDelete ? "#D90000" : "#8D91A0"}
-                    width={24}
-                    className={
-                      isDelete ? undefined : "disabled cursor-not-allowed"
-                    }
-                    onClick={isDelete ? () => handleDelete(record) : undefined}
+                    width={20}
                   />
-                </div>
+                </Button>
               </Tooltip>
             </div>
           )}

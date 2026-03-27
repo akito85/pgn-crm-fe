@@ -1,33 +1,35 @@
 import { useEffect, useState } from "react";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
-import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import NxModal from "../../../../../../../../components/Nx/NxModal";
+import { Button } from "antd";
+import { useSelector } from "react-redux";
 
 const ConfirmationModal = ({
   form,
+  formId,
   isOpen,
   handleCancel = () => {},
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
+  approvalData,
   dataAttachment,
   type = "",
-  data = {},
   service,
   configApplication,
+  loading = false,
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
   const [activeTab, setActiveTab] = useState(0);
 
+  const { loading_createUpdateMd } = useSelector((state) => state.multiDestination);
+
   /**
-   * @param {"next" | "prev"} type
+   * @param {"next" | "prev"} direction
    */
-  const handleChangeTab = (type) => {
-    if (type === "next" && activeTab < tabLength - 1) {
+  const handleChangeTab = (direction) => {
+    if (direction === "next" && activeTab < tabLength - 1) {
       setActiveTab((prev) => prev + 1);
     }
-    else if (type === "prev" && activeTab >= 0) {
+    else if (direction === "prev" && activeTab >= 0) {
       setActiveTab((prev) => prev - 1);
     }
   }
@@ -42,45 +44,45 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION MULTI DESTINATION"}
+      title={"CONFIRMATION MULTI DESTINATION"}
       type={"confirmation"}
       hidePadding={{
         top: true,
       }}
       footer={[
-        <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
-          <ButtonComponent type={"menu"} onClick={() => handleCancel()}>
+        <div className={"flex justify-between"} key={`footer-1`}>
+          <Button type={"menu"} disabled={loading_createUpdateMd} onClick={() => handleCancel()}>
             Cancel
-          </ButtonComponent>
-          <div className="flex gap-x-2">
-            <ButtonComponent type={"menu"} disabled={activeTab < 1} onClick={() => handleChangeTab("prev")}>
+          </Button>
+          <div className="flex">
+            <Button type={"menu"} disabled={loading_createUpdateMd || activeTab < 1} onClick={() => handleChangeTab("prev")} >
               Previous
-            </ButtonComponent>
-            {activeTab < (tabLength - 1)  && (
-              <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
+            </Button>
+            {activeTab < (tabLength - 1) && (
+              <Button type={"submit"} disabled={loading_createUpdateMd} onClick={() => handleChangeTab("next")}>
                 Next
-              </ButtonComponent>
+              </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <ButtonComponent type={"submit"} form={form} htmlType={"submit"} >
+              <Button type={"submit"} form={formId} htmlType={"submit"} loading={loading_createUpdateMd}>
                 {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
-              </ButtonComponent>
+              </Button>
             )}
           </div>
         </div>,
       ]}
+      loading={loading}
     >
       <ConfirmationModalTabs
-        selectedAppHierId={selectedAppHierId}
-        selectedApprovalName={selectedApprovalName}
-        hierarchyTableData={hierarchyTableData}
+        form={form}
+        approvalData={approvalData}
         dataAttachment={dataAttachment}
-        data={data}
         service={service}
         type={type}
         configApplication={configApplication}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        disabled={loading}
       />
     </NxModal>
   )

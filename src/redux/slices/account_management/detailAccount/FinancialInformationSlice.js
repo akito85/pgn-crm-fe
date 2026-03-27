@@ -4,6 +4,12 @@ import { setBodyError, showModalError, showModalSuccess, validateError } from ".
 
 const initialState = {
   loading: false,
+  loading_listPr: false,
+  loading_listPrApproval: false,
+  loading_listIr: false,
+  loading_listIrApproval: false,
+  loading_approveRejectPr: false,
+  loading_approveRejectIr: false,
   data_withHoldingTax: [],
   data_taxIdentifier: [],
   data_taxRelation: [],
@@ -31,15 +37,15 @@ const initialState = {
   },
   list_invoiceRelation: [],
   pagination_invoiceRelation: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
   list_invoiceRelationApproval: [],
   pagination_invoiceRelationApproval: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
@@ -479,25 +485,9 @@ export const getPaymentRelationApproval = createAsyncThunk(
 
 export const getInvoiceRelation = createAsyncThunk(
   "GET_INVOICE_RELATION",
-  async ({ id, body, page, size, sort, searchs, listType, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
-
-      if (page)
-        queryParams.append("page", page);
-      if (size)
-        queryParams.append("size", size);
-      if (sort)
-        queryParams.append("sort", sort);
-      if (searchs)
-        queryParams.append("searchs", searchs);
-      if (listType)
-        queryParams.append("listType", listType);
-
-      let url = `/v1/dbs/api/invoice-relation/list/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
+      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
 
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
         headers: { "Accept": "application/json, text/plain, */*" }
@@ -514,25 +504,14 @@ export const getInvoiceRelation = createAsyncThunk(
 
 export const getInvoiceRelationApproval = createAsyncThunk(
   "GET_INVOICE_RELATION_APPROVAL",
-  async ({ id, body, page, size, sort, searchs, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
+      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
 
-      if (page)
-        queryParams.append("page", page);
-      if (size)
-        queryParams.append("size", size);
-      if (sort)
-        queryParams.append("sort", sort);
-      if (searchs)
-        queryParams.append("searchs", searchs);
-
-      queryParams.append("listType", "approval");
-
-      let url = `/v1/dbs/api/invoice-relation/list/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
+      body = {
+        ...body,
+        listType: "approval",
+      }
 
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
         headers: { "Accept": "application/json, text/plain, */*" }
@@ -1065,11 +1044,11 @@ const financialInformationSlice = createSlice({
     /** Get Payment Relation */
     [getPaymentRelation.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listPr = true;
       }
     },
     [getPaymentRelation.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listPr = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1094,7 +1073,7 @@ const financialInformationSlice = createSlice({
       }
     },
     [getPaymentRelation.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listPr = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_paymentRelation = [];
@@ -1110,11 +1089,11 @@ const financialInformationSlice = createSlice({
     /** Get Payment Relation Approval */
     [getPaymentRelationApproval.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listPrApproval = true;
       }
     },
     [getPaymentRelationApproval.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listPrApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1139,7 +1118,7 @@ const financialInformationSlice = createSlice({
       }
     },
     [getPaymentRelationApproval.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listPrApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_paymentRelationApproval = [];
@@ -1153,11 +1132,13 @@ const financialInformationSlice = createSlice({
     },
 
     /** Get Invoice Relation */
-    [getInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+    [getInvoiceRelation.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listIr = true;
+      }
     },
     [getInvoiceRelation.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listIr = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1175,20 +1156,20 @@ const financialInformationSlice = createSlice({
       }
 
       state.pagination_invoiceRelation = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
     [getInvoiceRelation.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listIr = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelation = [];
         state.pagination_invoiceRelation = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -1198,11 +1179,11 @@ const financialInformationSlice = createSlice({
     /** Get Invoice Relation Approval */
     [getInvoiceRelationApproval.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listIrApproval = true;
       }
     },
     [getInvoiceRelationApproval.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_listIrApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -1220,20 +1201,20 @@ const financialInformationSlice = createSlice({
       }
 
       state.pagination_invoiceRelationApproval = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
     [getInvoiceRelationApproval.rejected]: (state, action) => {
-      state.loading = false;
+      state.loading_listIrApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelationApproval = [];
         state.pagination_invoiceRelationApproval = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -1270,24 +1251,24 @@ const financialInformationSlice = createSlice({
     
     /** Approve or Reject All Inactive Payment Relation */
     [approveOrRejectAllPaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectPr = true;
     },
     [approveOrRejectAllPaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
     [approveOrRejectAllPaymentRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
 
     /** Inactivate Payment Relation Attachment */
     [inactivatePaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectPr = true;
     },
     [inactivatePaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
     [inactivatePaymentRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectPr = false;
     },
 
     /** Get Payment Relation Approval History */
@@ -1304,46 +1285,46 @@ const financialInformationSlice = createSlice({
 
     /** Approve or Reject Invoice Relation */
     [approveOrRejectInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Approve or Reject Inactive Invoice Relation */
     [approveOrRejectInactiveInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectInactiveInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectInactiveInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Approve or Reject All Inactive Invoice Relation */
     [approveOrRejectAllInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [approveOrRejectAllInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [approveOrRejectAllInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Inactivate Invoice Relation Attachment */
     [inactivateInvoiceRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectIr = true;
     },
     [inactivateInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
     [inactivateInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectIr = false;
     },
 
     /** Get Invoice Relation Approval History */
