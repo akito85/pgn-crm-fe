@@ -4,6 +4,13 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 
+/**
+ * Presentational info panel for a multi destination record.
+ * Displays account details, address, geo, dates, status, and description.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Multi destination detail record
+ */
 const MultiDestinationDetailInfo = ({ detail = {} }) => {
   const {
     accountNumber,

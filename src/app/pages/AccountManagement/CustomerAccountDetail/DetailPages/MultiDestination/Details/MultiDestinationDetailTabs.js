@@ -4,6 +4,13 @@ import { useState } from "react";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 
+/**
+ * Tabbed detail view for a multi destination record.
+ * Renders "Multi Destination Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Multi destination detail record
+ */
 const MultiDestinationDetailTabs = ({
   detail = {},
 }) => {

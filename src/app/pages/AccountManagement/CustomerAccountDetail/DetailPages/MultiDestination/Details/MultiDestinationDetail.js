@@ -18,9 +18,17 @@ import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 
+/**
+ * Multi destination detail view (container + presentational component).
+ * Fetches original and draft records, supports approve/reject workflow.
+ *
+ * @param {object}                    props
+ * @param {"standard"|"oneTime"}      [props.accountType="standard"] - Account type context.
+ */
 const MultiDestinationDetail = ({
   accountType = "standard"
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
 
   const { detail_multiDestination, detailDraft_multiDestination, loading_detailMd, loading_detailDraftMd, loading_approveRejectMd } = useSelector(
@@ -31,13 +39,8 @@ const MultiDestinationDetail = ({
     (state) => state.customerAccount
   );
 
-  const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
-  );
-
   const isLoading = loading || loadingAccount || loading_detailMd || loading_detailDraftMd;
 
-  //declare
   const navigate = useNavigate();
   const location = useLocation();
   const idAccount = location?.state?.idAccount;
@@ -49,10 +52,12 @@ const MultiDestinationDetail = ({
     { key: "cur", label: "Current" },
   ];
   const originalKey = tabOptions[0]?.key;
+
+  // --- State ---
   const [activeKey, setActiveKey] = useState(originalKey || "");
   const detail = (activeKey === originalKey ? detail_multiDestination : detailDraft_multiDestination) || {};
-  const handleSetActiveKey = (newActiveKey) => setActiveKey(newActiveKey);
 
+  // --- Derived values ---
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
@@ -97,9 +102,11 @@ const MultiDestinationDetail = ({
     },
   ];
 
+  // --- Handlers ---
   /**
-   * @param {boolean} show
-   * @param {"approve"|"reject"} action
+   * Opens or closes the approval/rejection modal.
+   * @param {boolean}            show     - true to open, false to close
+   * @param {"approve"|"reject"} [action] - Which action to arm
    */
   const handleApprovalModal = (show, action) => {
     if (show) {
@@ -112,7 +119,10 @@ const MultiDestinationDetail = ({
   }
 
   /**
+   * Dispatches approve or reject for the current multi destination record.
+   * @param {string}             description - Remark entered in the approval form
    * @param {"approve"|"reject"} action
+   * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
     const { id, approvalType, tappId } = detail_multiDestination;
@@ -148,9 +158,13 @@ const MultiDestinationDetail = ({
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["MULTI_DESTINATION", "INACTIVE_MULTI_DESTINATION"].includes(approvalType);
 
+  // --- Effects ---
   useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/account-standard/multi-destination'))
-  }, [dispatch]);
+    if (isStandard)
+      dispatch(getGrantedAccessAccount('/account-management/account-standard/multi-destination'))
+    else if (isOneTime)
+      dispatch(getGrantedAccessAccount('/account-management/account-onetime/multi-destination'))
+  }, []);
 
   useEffect(() => {
     if (idMd)
@@ -177,7 +191,7 @@ const MultiDestinationDetail = ({
 
           {draftExist && (
             <NxBaseContainer border padding={false}>
-              <NxTabs items={tabOptions} activeKey={activeKey} onChange={handleSetActiveKey} />
+              <NxTabs items={tabOptions} activeKey={activeKey} onChange={setActiveKey} />
             </NxBaseContainer>
           )}
 
