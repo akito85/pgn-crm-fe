@@ -92,8 +92,8 @@ const expandedRowRender = (record) => {
  * The parent (`Relationship`) is responsible only for modals and permissions.
  *
  * @param {object}   props
- * @param {number}   [props.idAccount=0]                   - Account ID
- * @param {number}   [props.idCustomer=0]                  - Customer ID
+ * @param {number}   props.accountId                       - Account ID
+ * @param {number}   props.customerId                      - Customer ID
  * @param {string}   [props.type="standard"]               - Account type
  * @param {Function} [props.handleInactivateModal]         - Opens the inactivate confirmation modal
  * @param {Function} [props.handleApprovalHistoryModal]    - Opens the approval history modal
@@ -101,9 +101,8 @@ const expandedRowRender = (record) => {
  * @param {number}   [props.refreshSignal=0]               - Increment to trigger a page-0 refresh from the parent
  */
 const RelationshipTable = ({
-  idAccount,
-  idCustomer,
-  type = "standard",
+  accountId,
+  customerId,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
@@ -154,7 +153,7 @@ const RelationshipTable = ({
 
     dispatch(
       getRelationshipList({
-        idAccount,
+        accountId,
         page: 0,
         pageSize: loadMoreSize,
         sort,
@@ -216,7 +215,7 @@ const RelationshipTable = ({
 
       await dispatch(
         getRelationshipList({
-          idAccount,
+          accountId,
           page: nextPage,
           pageSize: loadMoreSize,
           sort,
@@ -239,7 +238,7 @@ const RelationshipTable = ({
       searchs: search,
     };
 
-    dispatch(downloadRelationship({ idAccount, body }));
+    dispatch(downloadRelationship({ accountId, body }));
   };
 
   // --- Effects ---
@@ -257,7 +256,7 @@ const RelationshipTable = ({
     setPage(0);
     dispatch(
       getRelationshipList({
-        idAccount,
+        accountId,
         page: 0,
         pageSize: loadMoreSize,
         sort,
@@ -282,8 +281,8 @@ const RelationshipTable = ({
         : "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          idAccount: accountId,
+          idCustomer: customerId,
           id,
         }
       }
@@ -296,8 +295,8 @@ const RelationshipTable = ({
         : "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          idAccount: accountId,
+          idCustomer: customerId,
         }
       }
     ),
@@ -309,8 +308,8 @@ const RelationshipTable = ({
         : "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          idAccount: accountId,
+          idCustomer: customerId,
           id,
         }
       }
