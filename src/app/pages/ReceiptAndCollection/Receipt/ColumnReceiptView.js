@@ -556,7 +556,7 @@ export const columnsReceipt = (
 
     },
     {
-      title: "AMOUNT EQUIVALENT",
+      title: "EQV AMOUNT",
       dataIndex: "equivalentAmount",
       key: "equivalentAmount",
       sorter: true,
@@ -672,7 +672,7 @@ export const columnsReceipt = (
       ),
     },
     {
-      title: "APPLIED AMOUNT EQUIVALENT",
+      title: "EQV APPLIED AMOUNT",
       dataIndex: "equivalentAppliedAmount",
       key: "equivalentAppliedAmount",
       isNumber: true,
@@ -724,7 +724,7 @@ export const columnsReceipt = (
       ),
     },
     {
-      title: "UNAPPLIED AMOUNT EQUIVALENT",
+      title: "EQV UNAPPLIED AMOUNT",
       dataIndex: "equivalentUnAppliedAmount",
       key: "equivalentUnAppliedAmount",
       isNumber: true,

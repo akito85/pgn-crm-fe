@@ -313,6 +313,38 @@ const AllocationSection = ({
     });
   };
 
+  // Fungsi untuk update amount tiap baris
+  const handleEditAmount = (rowKey, newValue) => {
+    // 1. Update data di tabel modal
+    setDataRecomendation((prev) =>
+      prev.map((item) =>
+        item.key === rowKey ? { ...item, allocationAmount: Number(newValue) || 0 } : item
+      )
+    );
+
+    // 2. Update data di tabel utama (HANYA kalau barisnya ada)
+    setDataTable((prev) => {
+      // Cek dulu, apakah row ini ada di tabel utama?
+      const isExist = prev.some((item) => item.key === rowKey);
+      
+      // Kalau nggak ada (artinya kita lagi ngedit di dalam modal),
+      // STOP di sini. Jangan return array baru biar useEffect nggak ke-trigger & nge-reset datanya!
+      if (!isExist) return prev; 
+
+      // Kalau ada, baru update angkanya
+      return prev.map((item) =>
+        item.key === rowKey ? { ...item, allocationAmount: Number(newValue) || 0 } : item
+      );
+    });
+  };
+
+  useEffect(() => {
+    if (openModalAllocation && selectDataTable?.length > 0) {
+      const newTotal = selectDataTable.reduce((total, row) => total + (row.allocationAmount || 0), 0);
+      setTotalAllocationAmount(newTotal);
+    }
+  }, [selectDataTable, openModalAllocation]);
+
   // filtered column
   const filteredColumns = columnAllocation(
     pageChoose,
@@ -424,8 +456,10 @@ const AllocationSection = ({
 
   const handleOpenModalAllocation = async () => {
     try {
-      const { apphierId, receiptCode, refrence, isMisc, ...keys } =
+      const { apphierId, receiptCode, refrence, isMisc, accountGroupType, classificationType, meterReadingCode, ...keys } =
         form?.getFieldsValue();
+
+      console.log(keys)
 
       const checkValues = Object.values(keys).every((value) => {
         return value !== undefined && value !== null && value !== "";
@@ -435,13 +469,13 @@ const AllocationSection = ({
       console.log(checkValues);
       if (checkValues === false) {
         const errorBody = {
-          title: "Failed",
-          description: `Please input values!`,
+          title: "Alert",
+          description: `Please input all mandatory form values!`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasValue(amount) === false || parsedAmount === 0) {
         const errorBody = {
-          title: "Failed",
+          title: "Alert",
           description: `Please input amount!`,
         };
         dispatch(showModalError(errorBody));
@@ -500,6 +534,8 @@ const AllocationSection = ({
             searchedColumn,
             searchText,
             handleSearch,
+            undefined,
+            handleEditAmount
           )}
           current={page}
           pageSize={pageSize}
@@ -592,6 +628,8 @@ const AllocationSection = ({
                       searchedColumnChoose,
                       searchTextChoose,
                       handleSearchModal,
+                      undefined,
+                      handleEditAmount
                     )}
                     current={pageChoose}
                     pageSize={pageSizeChoose}
@@ -700,6 +738,7 @@ const AllocationSection = ({
                             searchedColumnChoose,
                             searchTextChoose,
                             handleSearchModal,
+                            handleEditAmount
                           )}
                           dataSource={selectDataTable}
                           usePagination={false}

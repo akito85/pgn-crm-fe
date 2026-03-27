@@ -18,17 +18,13 @@ import { columnsReceipt } from "./ColumnReceiptView";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import ModalHoldReceipt from "./Table/ModalHoldReceipt";
 import ModalRefundReceipt from "./Table/ModalRefundReceipt";
 import ModalReleaseReceipt from "./Table/ModalReleaseReceipt";
 import ModalReverseReceipt from "./Table/ModalReverseReceipt";
-import { DownloadOutlined, WarningOutlined, DownOutlined } from "@ant-design/icons";
+import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-import Toolbar from "../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { hasValue } from "../../../../utils";
 
 const ViewReceipt = () => {
@@ -362,8 +358,8 @@ const ViewReceipt = () => {
           <span>Release</span>
         </div>
       </Menu.Item>
-      <Menu.Item 
-        key="Reverse" 
+      <Menu.Item
+        key="Reverse"
         onClick={() => handleReverse(record)}
         disabled={record?.statusApproval === "Waiting Approval" || record?.status?.toUpperCase() === "REVERSE"}
       >
@@ -372,14 +368,14 @@ const ViewReceipt = () => {
           <span>Reverse</span>
         </div>
       </Menu.Item>
-      <Menu.Item 
-        key="Refund" 
+      <Menu.Item
+        key="Refund"
         onClick={() => {
           setSelectedData([record]);
           handleRefund();
         }}
         disabled={
-          record?.statusApproval !== "Approved" || 
+          record?.statusApproval !== "Approved" ||
           (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0)
         }
       >
@@ -424,221 +420,6 @@ const ViewReceipt = () => {
     </Menu>
   );
 
-  const moreMenu = (
-    <Menu>
-      <Menu.Item
-        key="Release"
-        disabled={selectedData.length === 0}
-        onClick={handleRelease}
-      >
-        <div className="flex items-center gap-2">
-          <SVGIcon name="IconSend" color={"#000000"} width={16} />
-          <span>Release</span>
-        </div>
-      </Menu.Item>
-      <Menu.Item key="Hold" onClick={() => handleHold(null)}>
-        <div className="flex items-center gap-2">
-          <SVGIcon name="IconHold" color={"#000000"} width={16} />
-          <span>Hold</span>
-        </div>
-      </Menu.Item>
-      <Menu.Item 
-        key="Refund" 
-        onClick={handleRefund}
-        disabled={
-          selectedData.length === 0 || 
-          selectedData.some(item => 
-            item?.statusApproval !== "Approved" || 
-            (parseFloat(item?.unAppliedAmountReal || item?.unAppliedAmount || 0) <= 0)
-          )
-        }
-      >
-        <div className={`flex items-center gap-2 ${(selectedData.length === 0 || selectedData.some(item => item?.statusApproval !== "Approved" || (parseFloat(item?.unAppliedAmountReal || item?.unAppliedAmount || 0) <= 0))) ? 'opacity-50' : ''}`}>
-          <SVGIcon name="IconRefund" color={"#000000"} width={16} />
-          <span>Refund</span>
-        </div>
-      </Menu.Item>
-      <Menu.Item 
-        key="Reverse" 
-        onClick={() => handleReverse(null)}
-        disabled={
-          selectedData.length === 0 || 
-          selectedData.some(item => 
-            item?.statusApproval === "Waiting Approval" || 
-            item?.status?.toUpperCase() === "REVERSE"
-          )
-        }
-      >
-        <div className={`flex items-center gap-2 ${(selectedData.length === 0 || selectedData.some(item => item?.statusApproval === "Waiting Approval" || item?.status?.toUpperCase() === "REVERSE")) ? 'opacity-50' : ''}`}>
-          <SVGIcon name="IconRevers" color={"#000000"} width={16} />
-          <span>Reverse</span>
-        </div>
-      </Menu.Item>
-    </Menu>
-  );
-
-  const itemActions = [
-    // column action
-    {
-      action: "View",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT}
-              state={{ id: r?.id }}
-            >
-              <div>
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Update"}>
-            <Link
-            >
-              <ButtonComponent
-                className="gap-5"
-                icon={<SVGIcon name="IconEdit" color={"#808080"} width={24} />}
-                border={false}
-                disabled={true}
-              >
-              </ButtonComponent>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Transfer",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Transfer"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconTransfer" color={"#808080"} width={24} />
-              }
-              border={false}
-              disabled={true}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Reverse",
-      type: "table",
-      render: (r, data_length) => {
-        const isDisabled = r?.statusApproval === "Waiting Approval" || r?.status?.toUpperCase() === "REVERSE";
-        
-        return (
-          <Tooltip title={"Reverse"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={<SVGIcon name="IconRevers" color={isDisabled ? "#CCCCCC" : "#808080"} width={24} />}
-              border={false}
-              disabled={isDisabled}
-              onClick={() => handleReverse(r)}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Refund",
-      type: "table",
-      render: (r, data_length) => {
-        const isDisabled = 
-          r?.statusApproval !== "Approved" || 
-          (parseFloat(r?.unAppliedAmountReal || r?.unAppliedAmount || 0) <= 0);
-
-        return (
-          <Tooltip title={"Refund"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={<SVGIcon name="IconRefund" color={isDisabled ? "#CCCCCC" : "#808080"} width={24} />}
-              border={false}
-              disabled={isDisabled}
-              onClick={() => {
-                setSelectedData([r]);
-                handleRefund();
-              }}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Hold",
-      type: "table",
-      render: (r, data_length) => {
-
-        return (
-          <Tooltip title={"Hold"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={<SVGIcon name="IconHold" color={"#808080"} width={24} />}
-              border={false}
-              disabled={false}
-              onClick={() => handleHold(r)}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Release",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Release"}>
-            <Link
-            >
-              <ButtonComponent
-                className="gap-5"
-                icon={<SVGIcon name="IconSend" color={"#808080"} width={24} />}
-                border={false}
-                disabled={true}
-              >
-              </ButtonComponent>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "history",
-      type: "table",
-      render: (record, data_length) => {
-        return (
-          <ButtonComponent
-            className="gap-5"
-            icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-            }
-            border={false}
-            onClick={() => handleModalApprovalHistory(record?.id)}
-          >
-          </ButtonComponent>
-        );
-      },
-    },
-  ];
-
   // handle retry modal error
   const handleRetry = () => {
     try {
@@ -661,7 +442,7 @@ const ViewReceipt = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold uppercase text-[#0075BF]">receipt list</p>
+              <p className="mt-[15px] text-primary">RECEIPT LIST</p>
               <div className="flex gap-2">
                 <ButtonComponent
                   icon={<DownloadOutlined style={{ fontSize: 18 }} />}
@@ -685,9 +466,9 @@ const ViewReceipt = () => {
                   icon={<SVGIcon name="IconRefund" width={18} />}
                   onClick={handleRefund}
                   disabled={
-                    selectedData.length === 0 || 
-                    selectedData.some(item => 
-                      item?.statusApproval !== "Approved" || 
+                    selectedData.length === 0 ||
+                    selectedData.some(item =>
+                      item?.statusApproval !== "Approved" ||
                       (parseFloat(item?.unAppliedAmountReal || item?.unAppliedAmount || 0) <= 0)
                     )
                   }
@@ -698,9 +479,9 @@ const ViewReceipt = () => {
                   icon={<SVGIcon name="IconRevers" width={18} />}
                   onClick={() => handleReverse(null)}
                   disabled={
-                    selectedData.length === 0 || 
-                    selectedData.some(item => 
-                      item?.statusApproval === "Waiting Approval" || 
+                    selectedData.length === 0 ||
+                    selectedData.some(item =>
+                      item?.statusApproval === "Waiting Approval" ||
                       item?.status?.toUpperCase() === "REVERSE"
                     )
                   }

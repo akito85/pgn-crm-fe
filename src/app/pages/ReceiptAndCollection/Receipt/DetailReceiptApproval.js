@@ -48,18 +48,19 @@ const DetailReceiptApproval = ({ type: propType }) => {
     const [activeTab, setActiveTab] = useState("");
 
     useEffect(() => {
-        if (data_detail?.approvalDto?.category) {
+        if (data_detail?.approvalDto?.approvalType) {
             // Auto-detect from receipt data
-            const category = data_detail.approvalDto.category.toLowerCase();
+            const category = data_detail.approvalDto.approvalType.toLowerCase();
             if (category.includes('hold')) setActiveTab('hold');
             else if (category.includes('release')) setActiveTab('release');
             else if (category.includes('refund')) setActiveTab('refund');
             else if (category.includes('reverse')) setActiveTab('reverse');
-            else setActiveTab(propType || urlType || 'hold');
+            else setActiveTab(propType || urlType || 'approval');
         } else {
-            setActiveTab(propType || urlType || 'hold');
+            setActiveTab(propType || urlType || '');
         }
     }, [data_detail, propType, urlType]);
+    
     const [modalConfirm, setModalConfirm] = useState(false);
     const [approveOrReject, setApproveOrReject] = useState("");
     const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -90,9 +91,9 @@ const DetailReceiptApproval = ({ type: propType }) => {
 
     // Load approval hierarchy if exists
     useEffect(() => {
-        if (data_detail?.approvalDto?.appHierId) {
+        if (data_detail?.appHierId) {
             dispatch(
-                getListApprovalByIdReceipt({ id: data_detail.approvalDto.appHierId })
+                getListApprovalByIdReceipt({ id: data_detail.appHierId })
             );
         }
     }, [data_detail, dispatch]);
@@ -145,12 +146,15 @@ const DetailReceiptApproval = ({ type: propType }) => {
             action: approveOrReject.toUpperCase(),
         };
 
-        const category = data_detail?.approvalDto?.category;
+        const category = data_detail?.approvalDto?.approvalType;
 
         if (category === "RECEIPT_HOLD") {
             dispatch(approveOrRejectHoldReceipt({ body: data }));
         } else if (category === "RECEIPT_RELEASE") {
             dispatch(approveOrRejectReleaseReceipt({ body: data }));
+        } else if (category === "RECEIPT_REVERSE") {
+            // Pastikan approveOrRejectReverseReceipt sudah di-import di atas!
+            // dispatch(approveOrRejectReverseReceipt({ body: data }));
         } else {
             dispatch(approveOrRejectReceipt({ body: data }));
         }
@@ -178,23 +182,17 @@ const DetailReceiptApproval = ({ type: propType }) => {
         setPageSize(newPageSize);
     };
 
-    // Get type-specific data
-    const getTypeData = () => {
-        // This would fetch hold/release specific data
-        // For now, using receipt detail data
-        return data_detail;
-    };
-
-    const typeData = getTypeData();
-    const showButtonApproval = data_detail?.approvalDto?.isApprover;
+    const showButtonApproval = data_detail?.approvalDto?.isApprover === true;
+    
     // Determine actual type from receipt data for display
-    const actualType = data_detail?.approvalDto?.category ?
-        (data_detail.approvalDto.category.toLowerCase().includes('hold') ? 'Hold' :
-            data_detail.approvalDto.category.toLowerCase().includes('release') ? 'Release' :
-                data_detail.approvalDto.category.toLowerCase().includes('refund') ? 'Refund' :
-                    data_detail.approvalDto.category.toLowerCase().includes('reverse') ? 'Reverse' : 'Hold')
-        : (propType || urlType || 'Hold');
-    const typeLabel = toTitleCase(actualType);
+    const actualType = data_detail?.approvalDto?.approvalType ?
+        (data_detail.approvalDto.approvalType.toLowerCase().includes('hold') ? 'hold' :
+            data_detail.approvalDto.approvalType.toLowerCase().includes('release') ? 'release' :
+                data_detail.approvalDto.approvalType.toLowerCase().includes('refund') ? 'refund' :
+                    data_detail.approvalDto.approvalType.toLowerCase().includes('reverse') ? 'reverse' : '')
+        : (propType?.toLowerCase() || urlType?.toLowerCase() || '');
+        
+    const typeLabel = actualType ? toTitleCase(actualType) : "";
 
     // Breadcrumbs
     const routes = [
@@ -284,7 +282,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     style={{ marginBottom: '24px' }}
                 >
                     <Panel header="RECEIPT DETAIL" key="receipt">
-                        <div className="w-full grid grid-cols-3 gap-3 mb-5">
+                        <div className="w-full grid grid-cols-5 gap-3 mb-5">
                             <DetailText label="Receipt Number">
                                 {data_detail?.receiptNumber}
                             </DetailText>
@@ -299,7 +297,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                                     : ""}
                             </DetailText>
                             <DetailText label="Receipt Method">
-                                {data_detail?.receiptMethod}
+                                {data_detail?.paymentMethod}
                             </DetailText>
                             <DetailText label="Currency">
                                 {data_detail?.currency}
@@ -351,28 +349,31 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     </Panel>
                 </Collapse>
 
-                {/* HOLD/RELEASE DETAIL - Collapsible with Tabs */}
+                {/* HOLD/RELEASE DETAIL - Hanya muncul jika 'actualType' punya nilai */}
+                {actualType && (
                 <Collapse
-                    defaultActiveKey={[activeTab || 'Hold']}
+                    defaultActiveKey={[activeTab || actualType || "approval"]}
                     expandIcon={({ isActive }) => (
                         <DownOutlined rotate={isActive ? 180 : 0} />
                     )}
                     style={{ marginBottom: '24px' }}
                 >
-                    <Panel header={`${actualType.toUpperCase()} DETAIL`} key={actualType}>
+                    <Panel header={`${actualType ? actualType.toUpperCase() + ' DETAIL & ' : ''}APPROVAL`} key="approval_panel">
+                        
+                        {/* Atur RadioTabs: Tab pertama (Hold/Release) HANYA dirender jika actualType ada */}
                         <RadioTabs
                             data={[
-                                { value: actualType, label: actualType.charAt(0).toUpperCase() + actualType.slice(1) },
+                                ...(actualType ? [{ value: actualType, label: typeLabel }] : []),
                                 { value: "approval", label: "Approval" },
                                 { value: "attachment", label: "Attachment" },
                             ]}
-                            currentPosition={activeTab}
+                            currentPosition={activeTab || "approval"}
                             onChange={handleTabChange}
                         />
 
                         <div className="mt-4">
                             {/* Tab: Hold/Release */}
-                            {activeTab === actualType && (
+                            {actualType && activeTab === actualType && (
                                 <TableRBI
                                     dataSource={holdReleaseData}
                                     columns={holdReleaseColumns}
@@ -389,7 +390,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                                     disableSelect={true}
                                     approvalName={data_detail?.approvalDto?.approvalName}
                                     dataTable={appHierDataDetail}
-                                    selectedHierarchy={data_detail?.approvalDto?.appHierId}
+                                    selectedHierarchy={data_detail?.appHierId}
                                 />
                             )}
 
@@ -407,6 +408,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                         </div>
                     </Panel>
                 </Collapse>
+                )}
 
                 {/* HISTORY LOG INFORMATION - Collapsible */}
                 <Collapse
@@ -417,7 +419,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     style={{ marginBottom: '24px' }}
                 >
                     <Panel header="HISTORY LOG INFORMATION" key="history">
-                        <div className="w-full grid grid-cols-4 gap-3">
+                        <div className="w-full grid grid-cols-5 gap-3">
                             <DetailText label="Created Date">
                                 {data_detail?.createdDate
                                     ? moment(data_detail.createdDate).format(
@@ -443,46 +445,56 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 </Collapse>
             </Spin>
 
-            {/* Footer Buttons */}
-            <div className="flex mt-[30px] justify-between py-5">
-                <ButtonComponent
-                    type="submit"
-                    onClick={() => navigate(-1)}
-                    icon={
-                        <LeftOutlined
-                            style={{
-                                color: "#fff",
-                                fontSize: 24,
-                                justifyItems: "center",
-                            }}
-                        />
-                    }
-                >
-                    Cancel
-                </ButtonComponent>
+            {/* Custom Footer untuk Detail & Approval */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6 shadow-sm">
+                <div className="flex w-full justify-between items-center">
+                    {/* Tombol Back */}
+                    <ButtonComponent
+                        type="submit"
+                        onClick={() => navigate(-1)}
+                        icon={
+                            <LeftOutlined
+                                style={{
+                                    color: "#fff",
+                                    fontSize: 24,
+                                    justifyItems: "center",
+                                }}
+                            />
+                        }
+                    >
+                        Back
+                    </ButtonComponent>
 
-                {showButtonApproval && (
-                    <div className="flex align-middle gap-5">
-                        <ButtonComponent
-                            type="reject"
-                            onClick={() => {
-                                setModalConfirm(true);
-                                setApproveOrReject("reject");
-                            }}
-                        >
-                            Reject
-                        </ButtonComponent>
-                        <ButtonComponent
-                            type="approve"
-                            onClick={() => {
-                                setModalConfirm(true);
-                                setApproveOrReject("approved");
-                            }}
-                        >
-                            Approve
-                        </ButtonComponent>
-                    </div>
-                )}
+                    {/* Teks Info & Tombol Reject/Approve (Hanya muncul jika isApprover true) */}
+                    {showButtonApproval && (
+                        <div className="flex items-center gap-4">
+                            {/* Teks Dinamis Keterangan Approval */}
+                            <span className="font-bold text-primary mr-2">
+                                Approval for {actualType ? typeLabel : "Receipt & Allocation"}
+                            </span>
+
+                            <ButtonComponent
+                                type="reject"
+                                onClick={() => {
+                                    setModalConfirm(true);
+                                    setApproveOrReject("reject");
+                                }}
+                            >
+                                Reject
+                            </ButtonComponent>
+
+                            <ButtonComponent
+                                type="approve"
+                                onClick={() => {
+                                    setModalConfirm(true);
+                                    setApproveOrReject("approved");
+                                }}
+                            >
+                                Approve
+                            </ButtonComponent>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Modal Approve/Reject */}
@@ -492,7 +504,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 onFinish={handleConfirm}
                 header={approveOrReject}
                 approveOrReject={approveOrReject}
-                menu={`Receipt ${typeLabel}`}
+                menu={typeLabel ? `${typeLabel} Receipt` : "Receipt & Allocation"}
                 named={data_detail?.receiptNumber}
             />
         </LayoutMenu>

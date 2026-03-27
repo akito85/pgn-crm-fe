@@ -3,6 +3,7 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../utils/sorterFunction";
+import { InputNumber } from "antd";
 
 export const columnAllocation = (
   page = 1,
@@ -11,7 +12,8 @@ export const columnAllocation = (
   searchedColumn,
   searchText,
   handleSearch = () => { },
-  handleInactive = () => { }
+  handleInactive = () => { },
+  handleEditAmount
 ) => {
   const columns = [
     {
@@ -160,8 +162,6 @@ export const columnAllocation = (
       key: "allocationAmount",
       sorter: (a, b) => sorterFunction("allocationAmount", a, b, "number"),
       align: "right",
-      inputType: "number",
-      onInput: (e) => (e.target.value = e.target.value.replace(/\D/g, "")),
       ...getColumnSearchPropsPaging(
         "allocationAmount",
         searchInput,
@@ -169,11 +169,16 @@ export const columnAllocation = (
         searchText,
         handleSearch
       ),
-      render: (text) =>
-        text.toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }),
+      // Ubah bagian render-nya jadi seperti ini:
+      render: (text, record) => (
+        <InputNumber
+          value={text}
+          onChange={(val) => handleEditAmount(record.key, val)}
+          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          style={{ width: "100%" }}
+        />
+      ),
     },
     {
       title: "BILLING ITEM BALANCE",
@@ -257,6 +262,19 @@ export const columnAllocation = (
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         }),
+    },
+    {
+      title: "BILLING METHOD",
+      dataIndex: "billingMethod",
+      key: "billingMethod",
+      sorter: (a, b) => sorterFunction("billingMethod", a, b),
+      ...getColumnSearchPropsPaging(
+        "billingMethod",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
     },
     // {
     //     title: 'CREATED DATE',
