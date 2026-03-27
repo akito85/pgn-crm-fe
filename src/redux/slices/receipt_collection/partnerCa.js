@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import thunk from "redux-thunk";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import {
   setBodyError,
@@ -8,7 +7,6 @@ import {
   validateError,
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
-import { data } from "autoprefixer";
 
 const initialState = {
   loading: false,
@@ -21,23 +19,25 @@ const initialState = {
   dataType: [],
   dataPartner: [],
   dataCollectionAgent: [],
+  dataBankList: [],
 };
 
+// ─── LIST (infinity scroll) ────────────────────────────────────────────────
 export const getPaginatePartner = createAsyncThunk(
   "GET_ALL_PARTNER_CA",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/partner-ca/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/partner-ca-mapping/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore: isLoadMore ?? false };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: error,
-          action: "GET_ALL_PARTNER_CA_PAGING",
+          error,
+          action: "GET_ALL_PARTNER_CA",
           back: false,
         })
       );
@@ -46,149 +46,72 @@ export const getPaginatePartner = createAsyncThunk(
   }
 );
 
-export const getTypeDDL = createAsyncThunk(
-  "GET_LIST_TYPE",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/partner-ca/list-type`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
+// ─── VALIDATE CREATE / UPDATE ────────────────────────────────────────────────
 export const createValidasiPartner = createAsyncThunk(
   "CREATE_MASTER_PARTNER_CA_VALIDASI",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/validate-create-update`;
+      const url = `/v1/dbs/api/partner-ca-mapping/validate-create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
       return data.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        (error.response?.data?.message) || error.message || error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}.` }));
       }
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
-export const getDownloadPartner = createAsyncThunk(
-  "DOWNLOAD_PARTNER_CA",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
-    try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/partner-ca/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await receiptCollectionHttpService.downloadData(url);
-      return response.data;
-    } catch (response) {
-      thunkAPI.dispatch(
-        validateError({
-          error: response,
-          action: "DOWNLOAD_PARTNER_CA",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(response.response);
-    }
-  }
-);
-
-
+// ─── CREATE ─────────────────────────────────────────────────────────────────
 export const createPartner = createAsyncThunk(
   "CREATE_PARTNER_CA",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/create-update`;
+      const url = `/v1/dbs/api/partner-ca-mapping/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
-      // const successBody = {
-      //   title: "Successfull",
-      //   description: `Your data has been created`,
-      // };
-      // thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        data: error.response.data.data,
-        description: `Your data was not created. ${message}.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response.data);
+        (error.response?.data?.message) || error.message || error.toString();
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", data: error.response?.data?.data,
+          description: `Your data was not created. ${message}.` })
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
+// ─── UPDATE ──────────────────────────────────────────────────────────────────
 export const updatePartner = createAsyncThunk(
   "UPDATE_PARTNER_CA",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/create-update`;
+      const url = `/v1/dbs/api/partner-ca-mapping/create-update`;
       const data = await receiptCollectionHttpService.updateDataPost(url, body);
-      // const successBody = {
-      //   title: "Successfull",
-      //   description: `Your data has been updated`,
-      // };
-      // thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        data: error.response.data.data,
-        code: error.response.data.code,
-        description: `Your data was not updated. ${message}. Please try again.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunk.rejectWithValue(error.response.data);
+        (error.response?.data?.message) || error.message || error.toString();
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", data: error.response?.data?.data,
+          code: error.response?.data?.code,
+          description: `Your data was not updated. ${message}. Please try again.` })
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
+// ─── DETAIL ───────────────────────────────────────────────────────────────────
 export const getDetailPartner = createAsyncThunk(
   "GET_DETAIL_PARTNER_CA",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner-ca/detail-get/${id}`;
+      const url = `/v1/dbs/api/partner-ca-mapping/detail-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -200,21 +123,17 @@ export const getDetailPartner = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
-
+// ─── APPROVAL HIERARCHY LIST ─────────────────────────────────────────────────
 export const getAllApprovalList = createAsyncThunk(
-  "GET_ALL_APPROVAL_LIST_METHOD",
-  async (thunkAPI) => {
+  "GET_ALL_APPROVAL_LIST_PARTNER_CA",
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-list-approval-hierarchies`;
       const response = await receiptCollectionHttpService.getAll(url);
@@ -228,79 +147,16 @@ export const getAllApprovalList = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
-
-
-export const getApprovalHistory = createAsyncThunk(
-  "GET_APPROVAL_HISTORY_METHOD",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/partner-ca/approval-history-get/${id}`;
-      const response = await receiptCollectionHttpService.getDetail(url);
-      return Array.isArray(response.data) ? null : response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_APPROVAL_HISTORY",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-
-
-export const approveOrRejectPartner = createAsyncThunk(
-  "APPROVE_OR_REJECT_PARTNER_CA",
-  async ({ body }, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/partner-ca/approve-reject";
-      const response =
-        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
-      const message = response?.message;
-      const successMessage = {
-        title: "Successfull",
-        description: `${message}`,
-        return: true,
-      };
-      thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
-          return: false,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
+// ─── APPROVAL BY ID ──────────────────────────────────────────────────────────
 export const getListApprovalById = createAsyncThunk(
-  "GET_LIST_APPROVAL_BY_ID_METHOD",
+  "GET_LIST_APPROVAL_BY_ID_PARTNER_CA",
   async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
@@ -315,20 +171,241 @@ export const getListApprovalById = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
+// ─── APPROVAL HISTORY ────────────────────────────────────────────────────────
+export const getApprovalHistory = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_PARTNER_CA",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner-ca-mapping/approval-history-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_APPROVAL_HISTORY_PARTNER_CA", back: false })
+      );
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+// ─── DOWNLOAD ────────────────────────────────────────────────────────────────
+export const getDownloadPartner = createAsyncThunk(
+  "DOWNLOAD_PARTNER_CA",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/partner-ca-mapping/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.downloadData(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({ error: response, action: "DOWNLOAD_PARTNER_CA", back: false })
+      );
+      return thunkAPI.rejectWithValue(response.response);
+    }
+  }
+);
+
+// ─── APPROVE / REJECT ────────────────────────────────────────────────────────
+export const approveOrRejectPartner = createAsyncThunk(
+  "APPROVE_OR_REJECT_PARTNER_CA",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/partner-ca-mapping/approve-reject";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(
+        showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: true })
+      );
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response?.data?.message) || error.message || error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        thunkAPI.dispatch(
+          showModalError({ title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
+            return: false })
+        );
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// ─── ACTIVE / INACTIVE ───────────────────────────────────────────────────────
+export const inactivePartnerCa = createAsyncThunk(
+  "INACTIVE_PARTNER_CA",
+  async ({ body }, thunkAPI) => {
+    const status = body?.status === "Active" ? "Inactivate" : "Activate";
+    try {
+      const url = `/v1/dbs/api/partner-ca-mapping/active-inactive`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(
+        showModalSuccess({ title: "Successfull", description: "Your data has been submitted.", return: false })
+      );
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(response), status, errorMessage(response)),
+          action: "INACTIVE_PARTNER_CA",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(response.response?.data);
+    }
+  }
+);
+
+// ─── APPROVE INACTIVE ────────────────────────────────────────────────────────
+export const approveOrRejectInactivePartnerCa = createAsyncThunk(
+  "APPROVE_OR_REJECT_INACTIVE_PARTNER_CA",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/partner-ca-mapping/approve-inactive";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      thunkAPI.dispatch(
+        showModalSuccess({ title: "Successfull", description: `${response?.message}`, return: true })
+      );
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response?.data?.message) || error.message || error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        thunkAPI.dispatch(
+          showModalError({ title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
+            return: false })
+        );
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+// ─── SAVE DRAFT ───────────────────────────────────────────────────────────────
+export const saveDraftPartnerCa = createAsyncThunk(
+  "SAVE_DRAFT_PARTNER_CA",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner-ca-mapping/save-draft`;
+      const data = await receiptCollectionHttpService.createData(url, { ...body, isDraft: true });
+      thunkAPI.dispatch(
+        showModalSuccess({ title: "Successfull", description: `Your data has been saved as draft`, return: false })
+      );
+      return data.data;
+    } catch (error) {
+      const message =
+        (error.response?.data?.message) || error.message || error.toString();
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", data: error.response?.data?.data,
+          description: `Your draft was not saved. ${message}.` })
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+// ─── DDL LISTS ─────────────────────────────────────────────────────────────
+export const getTypeDDL = createAsyncThunk(
+  "GET_LIST_TYPE_PARTNER_CA",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner-ca/list-type`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getPartnerList = createAsyncThunk(
+  "GET_LIST_PARTNER_FOR_MAPPING",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getCollectionAgentList = createAsyncThunk(
+  "GET_LIST_COLLECTION_AGENT_FOR_MAPPING",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/collecting-agent/list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getBankListDDL = createAsyncThunk(
+  "GET_LIST_BANK_FOR_MAPPING",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner-ca-mapping/bank-list`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 export const getListCategory = createAsyncThunk(
-  "GET_LIST_CATEGORY",
-  async (thunkAPI) => {
+  "GET_LIST_CATEGORY_PARTNER_CA",
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/attachment/list-category";
       const response = await receiptCollectionHttpService.getAll(url);
@@ -346,400 +423,100 @@ export const getListCategory = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
-export const getPartnerList = createAsyncThunk(
-  "GET_LIST_PARTNER",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/partner/list`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-export const getCollectionAgentList = createAsyncThunk(
-  "GET_LIST_COLLECTION_AGENT",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/collecting-agent/list`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-export const inactivePartnerCa = createAsyncThunk(
-  "INACTIVE_PARTNER_CA",
-  async ({ body }, thunkAPI) => {
-    let status = body?.status === "Active" ? "Inactivate" : "Activate";
-    try {
-      const url = `/v1/dbs/api/partner-ca/active-inactive`;
-      const response = await receiptCollectionHttpService.activationWithRemarkPost(
-        url,
-        body
-      );
-      const successMessage = {
-        title: "Successfull",
-        description: "Your data has been submitted.",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response.data;
-    } catch (response) {
-      thunkAPI.dispatch(
-        validateError({
-          error: errorBody(errorCode(response), status, errorMessage(response)),
-          action: "INACTIVE_PARTNER_CA",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue(response.response.data);
-    }
-  }
-);
-
-export const approveOrRejectInactivePartnerCa = createAsyncThunk(
-  "APPROVE_OR_REJECT_FOR_INACTIVE_PARTNER_CA",
-  async ({ body }, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/partner-ca/approve-inactive";
-      const response =
-        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
-      const message = response?.message;
-      const successMessage = {
-        title: "Successfull",
-        description: `${message}`,
-        return: true,
-      };
-      thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
-          return: false,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-export const saveDraftPartnerCa = createAsyncThunk(
-  "SAVE_DRAFT_PARTNER_CA",
-  async (body, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/partner-ca/save-draft`;
-      const data = await receiptCollectionHttpService.createData(url, body);
-      const successBody = {
-        title: "Successfull",
-        description: `Your data has been saved as draft`,
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return data.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        data: error.response.data.data,
-        description: `Your draft was not saved. ${message}.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
-);
-
+// ─── SLICE ───────────────────────────────────────────────────────────────────
 const partnerCaSlice = createSlice({
   name: "partnerCa",
   initialState,
   extraReducers: {
-    //get all employee paginate reducer
-    [getPaginatePartner.pending]: (state, action) => {
-      state.data = action.payload;
+    // get list (infinity scroll) – merge result when isLoadMore=true
+    [getPaginatePartner.pending]: (state) => {
       state.loading = true;
     },
     [getPaginatePartner.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      const payload = action.payload;
+      if (payload?.isLoadMore && state.data?.result) {
+        state.data = {
+          ...payload,
+          result: [...state.data.result, ...(payload?.result ?? [])],
+        };
+      } else {
+        state.data = payload;
+      }
       state.loading = false;
     },
-    [getPaginatePartner.rejected]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
-    },
-
-    // get type ddl
-    [getTypeDDL.pending]: (state, action) => {
-      state.loading = true;
-      state.dataType = action.payload;
-    },
-    [getTypeDDL.fulfilled]: (state, action) => {
-      state.dataType = action.payload;
-      state.loading = false;
-    },
-    [getTypeDDL.rejected]: (state, action) => {
-      state.dataType = action.payload;
+    [getPaginatePartner.rejected]: (state) => {
       state.loading = false;
     },
 
-    /** Get Approval History */
-    [getApprovalHistory.pending]: (state, action) => {
-      state.loadingCalender = true;
-      state.dataApprovalHistory = action.payload;
-      state.loading = true;
-    },
-    [getApprovalHistory.fulfilled]: (state, action) => {
-      state.dataApprovalHistory = action.payload;
-      state.loadingCalender = false;
-      state.loading = false;
-    },
-    [getApprovalHistory.rejected]: (state, action) => {
-      state.dataApprovalHistory = action.payload;
-      state.loadingCalender = false;
-      state.loading = false;
-    },
+    [createValidasiPartner.pending]: (state) => { state.loading = true; },
+    [createValidasiPartner.fulfilled]: (state, action) => { state.data = action.payload; state.loading = false; },
+    [createValidasiPartner.rejected]: (state) => { state.loading = false; },
 
-    // get detail
-    [getDetailPartner.pending]: (state) => {
-      state.loading = true;
-    },
-    [getDetailPartner.fulfilled]: (state, action) => {
-      state.data_detail = action.payload;
-      state.loading = false;
-    },
-    [getDetailPartner.rejected]: (state) => {
-      state.loading = true;
-    },
-    // Get Approve Hierarchy List
-    [getAllApprovalList.pending]: (state, action) => {
-      state.loading = true;
-      state.dataListAppHierId = action.payload;
-    },
-    [getAllApprovalList.fulfilled]: (state, action) => {
-      state.dataListAppHierId = action.payload;
-      state.loading = false;
-    },
-    [getAllApprovalList.rejected]: (state, action) => {
-      state.dataListAppHierId = action.payload;
-      state.loading = false;
-    },
+    [createPartner.pending]: (state) => { state.loading = true; },
+    [createPartner.fulfilled]: (state) => { state.loading = false; },
+    [createPartner.rejected]: (state) => { state.loading = false; },
 
-    // Get List Approval By Id
-    [getListApprovalById.pending]: (state, action) => {
-      state.loading = true;
-      state.dataListAppHierDetail = action.payload;
-    },
-    [getListApprovalById.fulfilled]: (state, action) => {
-      state.dataListAppHierDetail = action.payload;
-      state.loading = false;
-    },
-    [getListApprovalById.rejected]: (state, action) => {
-      state.dataListAppHierDetail = action.payload;
-      state.loading = false;
-    },
-    /** Get List Category */
-    [getListCategory.pending]: (state, action) => {
-      state.dataListCategory = action.payload;
-      state.loadingProduct = true;
-    },
-    [getListCategory.fulfilled]: (state, action) => {
-      state.dataListCategory = action.payload;
-      state.loadingProduct = false;
-    },
-    [getListCategory.rejected]: (state, action) => {
-      state.dataListCategory = action.payload;
-      state.loadingProduct = false;
-    },
+    [updatePartner.pending]: (state) => { state.loading = true; },
+    [updatePartner.fulfilled]: (state) => { state.loading = false; },
+    [updatePartner.rejected]: (state) => { state.loading = false; },
 
+    [getDetailPartner.pending]: (state) => { state.loading = true; },
+    [getDetailPartner.fulfilled]: (state, action) => { state.data_detail = action.payload; state.loading = false; },
+    [getDetailPartner.rejected]: (state) => { state.loading = false; },
 
+    [getAllApprovalList.pending]: (state) => { state.loading = true; },
+    [getAllApprovalList.fulfilled]: (state, action) => { state.dataListAppHierId = action.payload; state.loading = false; },
+    [getAllApprovalList.rejected]: (state) => { state.loading = false; },
 
-    [approveOrRejectPartner.pending]: (state) => {
-      state.loading = true;
-    },
-    [approveOrRejectPartner.fulfilled]: (state) => {
-      state.isSuccess = true;
-      state.loading = false;
-    },
-    [approveOrRejectPartner.rejected]: (state, action) => {
-      state.isFailed = true;
-      state.loading = false;
-      state.message = action.payload;
-    },
+    [getListApprovalById.pending]: (state) => { state.loading = true; },
+    [getListApprovalById.fulfilled]: (state, action) => { state.dataListAppHierDetail = action.payload; state.loading = false; },
+    [getListApprovalById.rejected]: (state) => { state.loading = false; },
 
+    [getApprovalHistory.pending]: (state) => { state.loading = true; state.dataApprovalHistory = null; },
+    [getApprovalHistory.fulfilled]: (state, action) => { state.dataApprovalHistory = action.payload; state.loading = false; },
+    [getApprovalHistory.rejected]: (state) => { state.loading = false; },
 
+    [getDownloadPartner.fulfilled]: (state) => { state.loading = false; },
+    [getDownloadPartner.rejected]: (state) => { state.loading = false; },
 
-    // create payment item
-    [createPartner.pending]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
-    },
-    [createPartner.fulfilled]: (state, action) => {
-      state.data = action.payload;
-      state.loading = false;
-    },
-    [createPartner.rejected]: (state, action) => {
-      state.data = action.payload;
-      state.loading = false;
-    },
+    [approveOrRejectPartner.pending]: (state) => { state.loading = true; },
+    [approveOrRejectPartner.fulfilled]: (state) => { state.loading = false; },
+    [approveOrRejectPartner.rejected]: (state) => { state.loading = false; },
 
-    // update payment
-    [updatePartner.pending]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
-    },
-    [updatePartner.fulfilled]: (state, action) => {
-      state.data = action.payload;
-      state.isSuccess = false;
-    },
-    [updatePartner.rejected]: (state) => {
-      state.isFailed = false;
-    },
+    [inactivePartnerCa.pending]: (state) => { state.loading = true; },
+    [inactivePartnerCa.fulfilled]: (state) => { state.loading = false; },
+    [inactivePartnerCa.rejected]: (state) => { state.loading = false; },
 
-    //download
-    [getDownloadPartner.fulfilled]: (state, action) => {
-      state.data_download = action.payload;
-      // state.isSuccess = true;
-      state.loading = false;
-    },
-    [getDownloadPartner.rejected]: (state, action) => {
-      state.isFailed = true;
-      state.data_download = action.payload;
-      state.loading = false;
-    },
+    [approveOrRejectInactivePartnerCa.pending]: (state) => { state.loading = true; },
+    [approveOrRejectInactivePartnerCa.fulfilled]: (state) => { state.loading = false; },
+    [approveOrRejectInactivePartnerCa.rejected]: (state) => { state.loading = false; },
 
-    //validasi create payment method
-    [createValidasiPartner.pending]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
-    },
-    [createValidasiPartner.fulfilled]: (state, action) => {
-      state.data = action.payload;
-      state.loading = false;
-    },
-    [createValidasiPartner.rejected]: (state, action) => {
-      state.error = action.payload;
-      state.loading = false;
-    },
+    [saveDraftPartnerCa.pending]: (state) => { state.loading = true; },
+    [saveDraftPartnerCa.fulfilled]: (state) => { state.loading = false; },
+    [saveDraftPartnerCa.rejected]: (state) => { state.loading = false; },
 
-    //get list partner
-    [getPartnerList.pending]: (state, action) => {
-      state.dataPartner = action.payload;
-      state.loading = true;
-    },
-    [getPartnerList.fulfilled]: (state, action) => {
-      state.dataPartner = action.payload;
-      state.loading = false;
-    },
-    [getPartnerList.rejected]: (state, action) => {
-      state.dataPartner = action.payload;
-      state.loading = true;
-    },
+    [getPartnerList.pending]: (state) => { state.loading = true; },
+    [getPartnerList.fulfilled]: (state, action) => { state.dataPartner = action.payload; state.loading = false; },
+    [getPartnerList.rejected]: (state) => { state.loading = false; },
 
-    //get list collection agent
-    [getCollectionAgentList.pending]: (state, action) => {
-      state.dataCollectionAgent = action.payload;
-      state.loading = true;
-    },
-    [getCollectionAgentList.fulfilled]: (state, action) => {
-      state.dataCollectionAgent = action.payload;
-      state.loading = false;
-    },
-    [getCollectionAgentList.rejected]: (state, action) => {
-      state.dataCollectionAgent = action.payload;
-      state.loading = true;
-    },
-    [inactivePartnerCa.pending]: (state) => {
-      state.loading = true;
-    },
-    [inactivePartnerCa.fulfilled]: (state) => {
-      state.isSuccess = true;
-      state.loading = false;
-    },
-    [inactivePartnerCa.rejected]: (state) => {
-      state.isFailed = true;
-      state.loading = false;
-    },
+    [getCollectionAgentList.pending]: (state) => { state.loading = true; },
+    [getCollectionAgentList.fulfilled]: (state, action) => { state.dataCollectionAgent = action.payload; state.loading = false; },
+    [getCollectionAgentList.rejected]: (state) => { state.loading = false; },
 
-    [approveOrRejectInactivePartnerCa.pending]: (state) => {
-      state.loading = true;
-    },
-    [approveOrRejectInactivePartnerCa.fulfilled]: (state) => {
-      state.isSuccess = true;
-      state.loading = false;
-    },
-    [approveOrRejectInactivePartnerCa.rejected]: (state, action) => {
-      state.isFailed = true;
-      state.loading = false;
-      state.message = action.payload;
-    },
+    [getBankListDDL.pending]: (state) => { state.loading = true; },
+    [getBankListDDL.fulfilled]: (state, action) => { state.dataBankList = action.payload; state.loading = false; },
+    [getBankListDDL.rejected]: (state) => { state.loading = false; },
 
-    [saveDraftPartnerCa.pending]: (state) => {
-      state.loading = true;
-    },
-    [saveDraftPartnerCa.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [saveDraftPartnerCa.rejected]: (state) => {
-      state.loading = false;
-    },
+    [getListCategory.pending]: (state) => { state.dataListCategory = null; },
+    [getListCategory.fulfilled]: (state, action) => { state.dataListCategory = action.payload; },
+    [getListCategory.rejected]: (state) => { state.dataListCategory = null; },
   },
 });
 
