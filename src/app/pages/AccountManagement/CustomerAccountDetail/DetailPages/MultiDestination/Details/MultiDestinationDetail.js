@@ -4,9 +4,8 @@ import { Button, Spin } from "antd";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import MultiDestinationDetailTabs from "./MultiDestinationDetailTabs";
-import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import { getAccountStandardDetail, getAccountOneTimeDetail, getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
+import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
 import { getDetailMultiDestination, getDetailDraftMultiDestination, approveOrRejectMultiDestination, approveOrRejectInactiveMultiDestination } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
@@ -17,13 +16,14 @@ import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApprove
 import HeaderDetail from "../../../HeaderDetail";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 const MultiDestinationDetail = ({
   accountType = "standard"
 }) => {
   const dispatch = useDispatch();
 
-  const { detail_multiDestination, detailDraft_multiDestination } = useSelector(
+  const { detail_multiDestination, detailDraft_multiDestination, loading_detailMd, loading_detailDraftMd, loading_approveRejectMd } = useSelector(
     (state) => state.multiDestination
   );
 
@@ -35,7 +35,7 @@ const MultiDestinationDetail = ({
     (state) => state.accountManagement
   );
 
-  const isLoading = loading || loadingAccount;
+  const isLoading = loading || loadingAccount || loading_detailMd || loading_detailDraftMd;
 
   //declare
   const navigate = useNavigate();
@@ -43,8 +43,6 @@ const MultiDestinationDetail = ({
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const idMd = location?.state?.id;
-  const subjectId = location?.state?.subjectId;
-  const objectId = location?.state?.objectId;
 
   const tabOptions = [
     { key: "ori", label: "Original" },
@@ -123,59 +121,23 @@ const MultiDestinationDetail = ({
     if (approvalType === "MULTI_DESTINATION") {
       dispatch(approveOrRejectMultiDestination({ body, action }))
         .unwrap()
-        .then(() => {
-          dispatch(getDetailMultiDestination({ id: idMd, subjectId, objectId }));
-          dispatch(getDetailDraftMultiDestination({ id: idMd, subjectId, objectId }));
-          handleClear();
-          handleApprovalModal(false);
-        })
+        .then(() => navigate(-1))
         .catch(() => {});
     } else if (approvalType === "INACTIVE_MULTI_DESTINATION") {
       dispatch(approveOrRejectInactiveMultiDestination({ body, action }))
         .unwrap()
-        .then(() => {
-          dispatch(getDetailMultiDestination({ id: idMd, subjectId, objectId }));
-          dispatch(getDetailDraftMultiDestination({ id: idMd, subjectId, objectId }));
-          handleClear();
-          handleApprovalModal(false);
-        })
+        .then(() => navigate(-1))
         .catch(() => {});
     } else {
       dispatch(showModalError({ title: "Failed", description: "The approval type is invalid." }));
     }
   }
 
-  useEffect(() => {
-    dispatch(getGrantedAccessAccount('/account-management/customers/view/service-requests/details'))
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (idCustomer)
-      dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
-
-  useEffect(() => {
-    if (idAccount && idCustomer) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
-      }
-    }
-  }, [idAccount, idCustomer]);
-
-  useEffect(() => {
-    if (idMd) {
-      dispatch(getDetailMultiDestination({ id: idMd, subjectId, objectId }));
-      dispatch(getDetailDraftMultiDestination({ id: idMd, subjectId, objectId }));
-    }
-  }, [idMd])
-
   const { status, statusApproval } = detail_multiDestination;
 
   const {
     approvalType,
-    relatedAccountNumber,
+    accountNumber,
     id,
     createdDate,
     createdBy,
@@ -185,6 +147,20 @@ const MultiDestinationDetail = ({
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["MULTI_DESTINATION", "INACTIVE_MULTI_DESTINATION"].includes(approvalType);
+
+  useEffect(() => {
+    dispatch(getGrantedAccessAccount('/account-management/account-standard/multi-destination'))
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (idMd)
+      dispatch(getDetailMultiDestination({ id: idMd }));
+  }, [idMd]);
+
+  useEffect(() => {
+    if (idMd && draftExist)
+      dispatch(getDetailDraftMultiDestination({ id: idMd }));
+  }, [idMd, draftExist]);
 
   return (
     <>
@@ -206,10 +182,7 @@ const MultiDestinationDetail = ({
           )}
 
           <MultiDestinationDetailTabs
-            dataDetail={detail}
-            subjectAccountNumber={data_accountDetail?.accountSummary?.accountNumber}
-            dispatch={dispatch}
-            idMd={idMd}
+            detail={detail}
           />
 
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
@@ -230,8 +203,8 @@ const MultiDestinationDetail = ({
               <div className="flex justify-between">
                 <Button type={"menu"} onClick={() => navigate(-1)}>Cancel</Button>
                 <div className={"w-full flex justify-end gap-5"}>
-                  <Button type="reject" onClick={() => handleApprovalModal(true, "reject")}>Reject</Button>
-                  <Button type="approve" onClick={() => handleApprovalModal(true, "approve")}>Approve</Button>
+                  <Button type="reject" icon={<SVGIcon width={14} height={14} name="IconSquareX" />} className="flex-row-reverse" onClick={() => handleApprovalModal(true, "reject")}>Reject</Button>
+                  <Button type="approve" icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />} className="flex-row-reverse" onClick={() => handleApprovalModal(true, "approve")}>Approve</Button>
                 </div>
               </div>
             </NxBaseContainer>
@@ -242,8 +215,9 @@ const MultiDestinationDetail = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} multi destination - ${relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} multi destination - ${accountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
+        loading={loading_approveRejectMd}
       />
     </>
   );

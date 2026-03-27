@@ -4,7 +4,7 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 
-const MultiDestinationDetailInfo = ({ dataDetail = {} }) => {
+const MultiDestinationDetailInfo = ({ detail = {} }) => {
   const {
     accountNumber,
     accountName,
@@ -26,7 +26,7 @@ const MultiDestinationDetailInfo = ({ dataDetail = {} }) => {
     endDate,
     status,
     description
-  } = dataDetail;
+  } = detail;
 
   return (
     <NxBaseContainer border>

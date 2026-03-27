@@ -53,16 +53,6 @@ const initialState = {
     pageSize: 10,
   },
 
-  // --- Attachment ---
-  loading_detailMdDetailAttachment: false,
-  list_mdDetailAttachment: [],
-  pagination_mdDetailAttachment: {
-    totalPages: 0,
-    totalElements: 0,
-    currentPage: 0,
-    pageSize: 10,
-  },
-
   // --- History ---
   data_mdApprovalHistory: {},
 
