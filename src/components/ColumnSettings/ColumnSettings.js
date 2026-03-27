@@ -304,14 +304,14 @@ const ColumnSettings = ({
                       onChange={(e) =>
                         handlePositionChange(col.key, e.target.value)
                       }
-                      disabled={!isFixed || !isVisible || isStaticallyFixedCol}
+                      disabled={!isVisible || isStaticallyFixedCol}
                       size="small"
                       buttonStyle="solid"
                       style={{ display: "flex", gap: "4px" }}
                     >
                       <Radio.Button
                         value="left"
-                        disabled={!canFixLeft(index) || !isFixed || !isVisible || isStaticallyFixedCol}
+                        disabled={!canFixLeft(index) || !isVisible || isStaticallyFixedCol}
                         style={{
                           fontSize: "10px",
                           flex: 1,
@@ -323,7 +323,7 @@ const ColumnSettings = ({
                       </Radio.Button>
                       <Radio.Button
                         value="right"
-                        disabled={!canFixRight(index) || !isFixed || !isVisible || isStaticallyFixedCol}
+                        disabled={!canFixRight(index) || !isVisible || isStaticallyFixedCol}
                         style={{
                           fontSize: "10px",
                           flex: 1,
