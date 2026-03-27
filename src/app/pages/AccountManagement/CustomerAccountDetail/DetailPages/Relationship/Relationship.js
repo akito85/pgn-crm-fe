@@ -1,10 +1,8 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect } from "react";
 import { useState } from "react";
 import RelationshipTable from "./RelationshipTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getRelationshipList,
-  downloadRelationship,
   getApprovalHistory,
   inactivateRelationship,
   getApprovalHierarchies,
@@ -29,23 +27,9 @@ const Relationship = ({
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
-  const {
-    list_relationship,
-    pagination_relationship,
-    data_approvalHistory,
-    loading_listRelationship,
-  } = useSelector((state) => state.relationship);
+  const { data_approvalHistory } = useSelector((state) => state.relationship);
 
-  // declare
-  const searchInput = useRef(null);
-
-  // state
-  const [page, setPage] = useState(0);
-  const [loadMoreSize] = useState(20);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
+  const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
@@ -54,52 +38,16 @@ const Relationship = ({
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [tempFilters, setTempFilters] = useState([]);
 
-  const currentData = useMemo(() => list_relationship, [list_relationship]);
-
-  const currentPagination = pagination_relationship;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
-
-  const handleRefresh = () => {
-    const body = {
-      page: 0,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      inputFields: tempFilters,
-    };
-
-    dispatch(
-      getRelationshipList({
-        idAccount: id,
-        page: 0,
-        pageSize: loadMoreSize,
-        sort,
-        body,
-        isLoadMore: false,
-      })
-    );
-    setPage(0);
-  };
+  const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
    * Open or close inactivate modal
    * @param {boolean} show
    * @param {number} relationshipId
-   * @param {number} appHierId
    * @param {string} name
    */
-  const handleInactivateModal = (show, relationshipId = 0, appHierId = 0, name = "") => {
+  const handleInactivateModal = (show, relationshipId = 0, name = "") => {
     if (show) {
       setInactivateId(relationshipId);
       setInactivateName(name);
@@ -130,48 +78,11 @@ const Relationship = ({
     )
       .unwrap()
       .then(() => {
-        const body = {
-          page,
-          size: loadMoreSize,
-          sort,
-          searchs: search,
-          inputFields: tempFilters,
-        };
-
-        dispatch(
-          getRelationshipList({
-            idAccount: id,
-            page: 0,
-            pageSize: loadMoreSize,
-            sort,
-            body,
-            isLoadMore: false,
-          })
-        );
         setShowInactiveModal(false);
+        triggerRefresh();
         handleClear();
       })
       .catch(() => {});
-  };
-
-  /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
-   */
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
   };
 
   /**
@@ -187,57 +98,6 @@ const Relationship = ({
     }
   };
 
-  const handleDownload = () => {
-    const body = {
-      page,
-      size: loadMoreSize,
-      sort,
-      inputFields: tempFilters,
-      searchs: search,
-    };
-
-    dispatch(downloadRelationship({ idAccount: id, body }));
-  };
-
-  /**
-   * @param {*} _
-   * @param {*} __
-   * @param {import("antd/lib/table/interface").SorterResult} sort
-   */
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = pagination_relationship?.totalPages || 0;
-
-    if (nextPage <= totalPages) {
-      const body = {
-        page: nextPage,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        inputFields: tempFilters,
-      };
-
-      await dispatch(
-        getRelationshipList({
-          idAccount: id,
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          body,
-          isLoadMore: true,
-        }).unwrap()
-      );
-    }
-    setPage(nextPage);
-  };
-
   useEffect(() => {
     if (isStandard) {
       dispatch(
@@ -249,27 +109,6 @@ const Relationship = ({
       );
     }
   }, []);
-
-  useEffect(() => {
-    const body = {
-      page,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      inputFields: tempFilters,
-    };
-
-    dispatch(
-      getRelationshipList({
-        idAccount: id,
-        page,
-        pageSize: loadMoreSize,
-        sort,
-        body,
-        isLoadMore: false,
-      })
-    );
-  }, [sort, search, tempFilters]);
 
   useEffect(() => {
     if (data_approvalHistory && data_approvalHistory?.dataApprover) {
@@ -294,33 +133,20 @@ const Relationship = ({
     <NxCardContainer header={"RELATIONSHIP LIST"}>
       <NxBaseContainer border>
         <RelationshipTable
-          data={dataSourceWithKeys}
           idAccount={id}
           idCustomer={idCustomer}
           type={type}
-          totalElement={pagination_relationship.totalElements}
-          page={page}
-          onSort={onSort}
+          refreshSignal={refreshSignal}
           handleInactivateModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleApproval={setShowApprovalModal}
-          handleDownload={handleDownload}
-          tempFilters={tempFilters}
-          handleLoadMore={handleLoadMore}
-          hasMore={hasMore}
-          searchText={searchText}
-          search={search}
-          searchedColumn={searchedColumn}
-          searchInput={searchInput}
-          handleSearch={handleSearch}
-          loading={loading_listRelationship}
         />
 
         <RelationshipApprovalModal
           idAccount={id}
           isOpen={showApprovalModal}
           handleCancel={() => setShowApprovalModal(false)}
-          afterFinish={handleRefresh}
+          afterFinish={triggerRefresh}
         />
 
         {/* Inactivate Modal */}

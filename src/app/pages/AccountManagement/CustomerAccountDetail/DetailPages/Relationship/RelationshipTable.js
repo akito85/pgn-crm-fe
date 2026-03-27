@@ -3,11 +3,16 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_mana
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
 import NxTable from "../../../../../../components/Nx/NxTable";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getRelationshipColumns } from "./getRelationshipColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import TablePagination from "../../../../../../components/TablePagination";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getRelationshipList,
+  downloadRelationship,
+} from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 
 // Nested columns configuration for expandable rows
 const NESTED_COLUMNS = [
@@ -81,31 +86,194 @@ const expandedRowRender = (record) => {
   );
 };
 
+/**
+ * Relationship list table (container + presentational component).
+ * Owns search, pagination, sort, filter, and download state/logic.
+ * The parent (`Relationship`) is responsible only for modals and permissions.
+ *
+ * @param {object}   props
+ * @param {number}   [props.idAccount=0]                   - Account ID
+ * @param {number}   [props.idCustomer=0]                  - Customer ID
+ * @param {string}   [props.type="standard"]               - Account type
+ * @param {Function} [props.handleInactivateModal]         - Opens the inactivate confirmation modal
+ * @param {Function} [props.handleApprovalHistoryModal]    - Opens the approval history modal
+ * @param {Function} [props.handleApproval]                - Triggers the approval action
+ * @param {number}   [props.refreshSignal=0]               - Increment to trigger a page-0 refresh from the parent
+ */
 const RelationshipTable = ({
-  data = [],
   idAccount = 0,
   idCustomer = 0,
   type = "standard",
-  totalElement = 0,
-  page = 0,
-  onSort = () => {},
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
-  handleDownload = () => {},
-  handleLoadMore = () => {},
-  hasMore = false,
-  searchText = "",
-  search = "",
-  searchedColumn = {},
-  searchInput = "",
-  handleSearch = () => {},
-  loading = false,
+  refreshSignal = 0,
 }) => {
+  // --- Hooks ---
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const isOneTime = location.pathname.includes("account-onetime");
 
+  const {
+    list_relationship,
+    pagination_relationship,
+    loading_listRelationship: loading,
+  } = useSelector((state) => state.relationship);
+
+  // --- State ---
+  const searchInput = useRef(null);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [inputFields, setInputFields] = useState([]);
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["statusApproval", "status", "action"],
+    left: [],
+  }));
+
+  // --- Derived values ---
+  const totalElement = pagination_relationship?.totalElements || 0;
+  const hasMore = list_relationship.length < totalElement;
+
+  const dataSource = useMemo(() =>
+    list_relationship.map((item, index) => ({ ...item, key: `${item.id}-${index}` })),
+  [list_relationship]);
+
+  // --- Handlers ---
+  const handleRefresh = () => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      inputFields,
+    };
+
+    dispatch(
+      getRelationshipList({
+        idAccount,
+        page: 0,
+        pageSize: loadMoreSize,
+        sort,
+        body,
+        isLoadMore: false,
+      })
+    );
+    setPage(0);
+  };
+
+  /**
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(0);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
+  /**
+   * @param {*} _
+   * @param {*} __
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  /**
+   * Loads the next page of records and appends them to the existing list.
+   */
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination_relationship?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      const body = {
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        searchs: JSON.stringify(search),
+        inputFields,
+      };
+
+      await dispatch(
+        getRelationshipList({
+          idAccount,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          body,
+          isLoadMore: true,
+        }).unwrap()
+      );
+    }
+    setPage(nextPage);
+  };
+
+  /**
+   * Dispatches a download action for the current filtered/sorted view.
+   */
+  const handleDownload = () => {
+    const body = {
+      page,
+      size: loadMoreSize,
+      sort,
+      inputFields,
+      searchs: search,
+    };
+
+    dispatch(downloadRelationship({ idAccount, body }));
+  };
+
+  // --- Effects ---
+  // Re-fetch page 0 whenever sort, search, or filter changes.
+  useEffect(() => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      inputFields,
+    };
+
+    setPage(0);
+    dispatch(
+      getRelationshipList({
+        idAccount,
+        page: 0,
+        pageSize: loadMoreSize,
+        sort,
+        body,
+        isLoadMore: false,
+      })
+    );
+  }, [sort, search, inputFields]);
+
+  // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
+  useEffect(() => {
+    if (refreshSignal > 0) handleRefresh();
+  }, [refreshSignal]);
+
+  // --- Column configuration ---
   const itemActions = nxGetAccountActions({
     handleView: ({ id }) => navigate(
       isOneTime
@@ -145,13 +313,8 @@ const RelationshipTable = ({
     handleApproval,
     handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({id, accountName}) => handleInactivateModal(true, id, accountName),
+    handleInactivate: ({ id, accountName }) => handleInactivateModal(true, id, accountName),
   });
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: [],
-  }));
 
   const actionCols = useColumnActionPermission(
     ["Inactivate", "View", "Update", "History"],
@@ -200,10 +363,10 @@ const RelationshipTable = ({
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="relationship-table"
-        dataSource={data}
+        dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ x: data.length ? "max-content" : 2000 }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 2000 }}
         onSort={onSort}
         columns={processedColumns}
         usePagination={false}
