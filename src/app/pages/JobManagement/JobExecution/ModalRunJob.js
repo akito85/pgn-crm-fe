@@ -7,12 +7,13 @@ import {
 import NxModal from "../../../../components/Nx/NxModal";
 import NxTable from "../../../../components/Nx/NxTable";
 import NxDate from "../../../../components/Nx/NxDatePicker";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { useSearchJobsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const MODAL_PAGE_SIZE = 20;
+const MODAL_PAGE_SIZE = 10;
 
 const TIMEZONES = [
   "UTC","Asia/Jakarta","Asia/Makassar","Asia/Jayapura",
@@ -22,11 +23,24 @@ const TIMEZONES = [
 const TRIGGER_TYPES = ["IMMEDIATE","ONCE","PERIODICALLY","SPECIFIC_DAYS"];
 
 const TRIGGER_META = {
-  IMMEDIATE:    { icon: <ThunderboltOutlined />, label:"Immediate",    desc:"Run the job right now",                   color:"#f97316" },
-  ONCE:         { icon: <ClockCircleOutlined />,  label:"Once",         desc:"Schedule for a specific date & time",    color:"#3b82f6" },
-  PERIODICALLY: { icon: <SyncOutlined />,         label:"Periodically", desc:"Repeat at a fixed interval",             color:"#8b5cf6" },
-  SPECIFIC_DAYS:{ icon: <CalendarOutlined />,     label:"Specific Days",desc:"Use a cron expression for scheduling",   color:"#10b981" },
+  IMMEDIATE:    { icon: <ThunderboltOutlined />, label:"Immediate",    desc:"Run the job right now",                color:"#f97316" },
+  ONCE:         { icon: <ClockCircleOutlined />,  label:"Once",         desc:"Schedule for a specific date & time", color:"#3b82f6" },
+  PERIODICALLY: { icon: <SyncOutlined />,         label:"Periodically", desc:"Repeat at a fixed interval",          color:"#8b5cf6" },
+  SPECIFIC_DAYS:{ icon: <CalendarOutlined />,     label:"Specific Days",desc:"Use a cron expression for scheduling",color:"#10b981" },
 };
+
+// Standard presets + a custom entry. Values are 5-field cron expressions except __custom__.
+const CRON_PRESETS = [
+  { label:"Hourly",               value:"0 * * * *",         hint:"Every hour at :00" },
+  { label:"Daily (midnight)",     value:"0 0 * * *",         hint:"Every day at 00:00" },
+  { label:"Daily (6am)",          value:"0 6 * * *",         hint:"Every day at 06:00" },
+  { label:"Weekdays (Mon–Fri)",   value:"0 0 * * 1-5",       hint:"Mon to Fri at midnight" },
+  { label:"Weekly (Monday)",      value:"0 0 * * 1",         hint:"Every Monday at midnight" },
+  { label:"Fortnightly",          value:"0 0 1,15 * *",      hint:"1st and 15th of each month" },
+  { label:"Monthly (1st)",        value:"0 0 1 * *",         hint:"1st of every month at midnight" },
+  { label:"Quarterly",            value:"0 0 1 1,4,7,10 *",  hint:"1st of Jan, Apr, Jul, Oct" },
+  { label:"Custom / Advanced",    value:"__custom__",         hint:"Enter your own cron expression" },
+];
 
 // ─── AddJobIcon — same SVG as CreateJobGroupPage ───────────────────────────────
 
@@ -164,6 +178,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   const [step,        setStep]        = useState("select");
   const [selectedJob, setSelectedJob] = useState(null);
   const [triggerType, setTriggerType] = useState("IMMEDIATE");
+  const [cronPreset,  setCronPreset]  = useState(null);
   const [modalPage,   setModalPage]   = useState(0);
   const [allJobs,     setAllJobs]     = useState([]);
   const [hasMore,     setHasMore]     = useState(true);
@@ -174,6 +189,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   useEffect(() => {
     if (!open) {
       setStep("select"); setSelectedJob(null); setTriggerType("IMMEDIATE");
+      setCronPreset(null);
       setModalPage(0); setAllJobs([]); setHasMore(true);
       isResetRef.current = false; form.resetFields();
     }
@@ -203,13 +219,15 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
 
   const handleBack = () => {
     setStep("select"); setSelectedJob(null);
+    setCronPreset(null);
     form.resetFields(); setTriggerType("IMMEDIATE");
   };
 
   const handleStart = () => {
     form.validateFields().then((values) => {
       if (!selectedJob) return;
-      const { params: _params, ...scheduleValues } = values;
+      // cronSchedulePreset is a UI-only field — strip it before submitting
+      const { params: _params, cronSchedulePreset: _preset, ...scheduleValues } = values;
       const inputPayload = buildInputPayload(_params, selectedJob.parameters);
       onSubmit({ jobId: selectedJob.id, triggerType, ...scheduleValues, inputPayload });
     });
@@ -285,7 +303,8 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
               <TriggerCard key={t} type={t} selected={triggerType} disabled={loading}
                 onClick={(val) => {
                   setTriggerType(val);
-                  form.resetFields(["scheduledAt","intervalSeconds","cronExpression","timezone"]);
+                  setCronPreset(null);
+                  form.resetFields(["scheduledAt","intervalSeconds","cronExpression","cronSchedulePreset","timezone"]);
                 }}
               />
             ))}
@@ -332,29 +351,62 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
           </div>
         )}
 
-        {/* SPECIFIC_DAYS */}
+        {/* SPECIFIC_DAYS — preset schedule selector + optional custom cron */}
         {triggerType === "SPECIFIC_DAYS" && (
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}>
-            <Form.Item name="cronExpression" label={<FieldLabel required>Cron Expression</FieldLabel>}
-              rules={[{ required:true, message:"Required" }]} style={{ marginBottom:0 }}>
-              <Input placeholder="0 0 * * MON-FRI" disabled={loading} style={inputStyle} />
-            </Form.Item>
-            <Form.Item name="timezone" label={<FieldLabel>Timezone</FieldLabel>} initialValue="UTC" style={{ marginBottom:0 }}>
-              <Select options={TIMEZONES.map(z => ({ value:z, label:z }))} disabled={loading} style={inputStyle} />
-            </Form.Item>
+          <div style={{ marginBottom:16 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom: cronPreset ? 10 : 0 }}>
+              <Form.Item name="cronSchedulePreset" label={<FieldLabel required>Schedule</FieldLabel>}
+                rules={[{ required:true, message:"Please select a schedule" }]} style={{ marginBottom:0 }}>
+                <Select
+                  optionLabelProp="label"
+                  placeholder="Select a schedule..."
+                  disabled={loading}
+                  style={{ width:"100%", ...inputStyle }}
+                  onChange={(val) => {
+                    setCronPreset(val);
+                    // Pre-populate cronExpression with preset value; clear it for custom
+                    form.setFieldValue("cronExpression", val !== "__custom__" ? val : "");
+                  }}
+                >
+                  {CRON_PRESETS.map(p => (
+                    <Select.Option key={p.value} value={p.value} label={p.label}>
+                      <div>
+                        <div style={{ fontWeight:500, fontSize:13 }}>{p.label}</div>
+                        <div style={{ fontSize:11, color:"#aaa", marginTop:1 }}>{p.hint}</div>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item name="timezone" label={<FieldLabel>Timezone</FieldLabel>} initialValue="UTC" style={{ marginBottom:0 }}>
+                <Select options={TIMEZONES.map(z => ({ value:z, label:z }))} disabled={loading} style={inputStyle} />
+              </Form.Item>
+            </div>
+
+            {/* Show the resolved cron string for a preset selection */}
+            {cronPreset && cronPreset !== "__custom__" && (
+              <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 12px", background:"#f0f7ff", border:"1px solid #c8e0fa", borderRadius:6 }}>
+                <span style={{ fontSize:12, color:"#5a7a99" }}>Cron:</span>
+                <code style={{ fontSize:12, fontFamily:"monospace", color:"#1565C0", fontWeight:600 }}>{cronPreset}</code>
+                <span style={{ fontSize:11, color:"#888" }}>
+                  — {CRON_PRESETS.find(p => p.value === cronPreset)?.hint}
+                </span>
+              </div>
+            )}
+
+            {/* Custom cron input — shown only when "Custom / Advanced" is selected */}
+            {cronPreset === "__custom__" && (
+              <Form.Item name="cronExpression" label={<FieldLabel required>Cron Expression</FieldLabel>}
+                rules={[{ required:true, message:"Required" }]} style={{ marginBottom:0 }}>
+                <Input placeholder="e.g. 0 0 * * MON-FRI" disabled={loading} style={inputStyle} />
+              </Form.Item>
+            )}
           </div>
         )}
 
         {/* Parameters */}
         {selectedJob?.parameters?.length > 0 ? (
-          <div style={{ background:"#fafbfc", border:"1px solid #eef0f3", borderRadius:8, padding:16, marginTop:4 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-              <div style={{ flex:1, height:1, background:"#e8eaed" }} />
-              <span style={{ fontWeight:600, fontSize:10.5, color:"#888", textTransform:"uppercase", letterSpacing:"0.08em", whiteSpace:"nowrap" }}>
-                PARAMETERS
-              </span>
-              <div style={{ flex:1, height:1, background:"#e8eaed" }} />
-            </div>
+          <NxBaseContainer header="Parameters" border={true} padding={true}>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
               {selectedJob.parameters.map((param) => (
                 <Form.Item key={param.code} name={["params", param.code]}
@@ -374,7 +426,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
                 </Form.Item>
               ))}
             </div>
-          </div>
+          </NxBaseContainer>
         ) : (
           <div style={{
             display:"flex", alignItems:"center", gap:10,
