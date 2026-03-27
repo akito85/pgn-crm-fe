@@ -279,7 +279,13 @@ const NxDateTimeCustom = ({
               {renderDays()}
             </div>
             <div style={{ marginTop:10, paddingTop:10, borderTop:"1px solid #f5f5f5" }}>
-              <button onClick={handleNow} style={{ border:"none", background:"none", cursor:"pointer", fontSize:12, color:"#1976D2", padding:"3px 6px", borderRadius:4 }}
+              <button
+                onClick={() => {
+                  const now = new Date();
+                  setViewYear(now.getFullYear());
+                  setViewMonth(now.getMonth());
+                }}
+                style={{ border:"none", background:"none", cursor:"pointer", fontSize:12, color:"#1976D2", padding:"3px 6px", borderRadius:4 }}
                 onMouseOver={(e) => (e.currentTarget.style.background = "#e3f0fb")}
                 onMouseOut={(e)  => (e.currentTarget.style.background = "none")}>
                 Today
