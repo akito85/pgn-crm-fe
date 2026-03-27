@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import NxTableBase from "../../../../components/Nx/NxTableBase";
+import NxTable from "../../../../components/Nx/NxTable/NxTable";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
@@ -109,12 +109,18 @@ const ViewJobGroupDetailPage = () => {
           ) : jobs.length === 0 ? (
             <p style={{ color: "#999", fontSize: 13, padding: "8px 0" }}>No jobs in this group.</p>
           ) : (
-            <NxTableBase
+            <NxTable
               idTable={`job-group-detail-${id}-jobs`}
-              dataSource={jobs}
+              dataSource={jobs || []}
               columns={childColumns}
-              // tableScrolled={{ y: 350, x: "max-content" }}
+              usePagination={false}
+              showSearchBar={false}
+              showAdvanceSearch={false}
+              useSelect={false}
               loading={false}
+              tableScrolled={jobs && jobs.length > 10 ? { y: 380 } : {}}
+              fixedColumns={{ left: ["no", "name", "code"] }}
+              totalData={jobs?.length || 0}
             />
           )}
         </NxBaseContainer>

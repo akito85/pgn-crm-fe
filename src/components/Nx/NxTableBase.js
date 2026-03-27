@@ -93,11 +93,25 @@ const buildTableStyles = (idTable) => `
     padding: 4px 8px !important;
     line-height: 22px !important;
     height: 30px !important;
+    max-height: 30px !important;
+    min-height: 30px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
     border-right: 1px solid ${BORDER_COL} !important;
     border-bottom: 1px solid ${BORDER_COL} !important;
     font-family: ${FONT_FAMILY};
     background-color: ${HEADER_BG} !important;
     color: #fff !important;
+  }
+
+  #${idTable} .ant-table-thead > tr > th > span,
+  #${idTable} .ant-table-thead > tr > th > div {
+    max-height: 22px !important;
+    line-height: 22px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 
   #${idTable} .ant-table-thead > tr:first-child > th {
