@@ -91,6 +91,7 @@ const buildTableStyles = (idTable) => `
 
   #${idTable} .ant-table-thead > tr > th {
     padding: 4px 8px !important;
+    line-height: 22px !important;
     height: 30px !important;
     border-right: 1px solid ${BORDER_COL} !important;
     border-bottom: 1px solid ${BORDER_COL} !important;

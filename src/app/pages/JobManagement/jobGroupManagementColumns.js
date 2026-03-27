@@ -12,12 +12,14 @@ export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
     width: 60,
     align: "center",
     render: (_, __, index) => index + 1,
+    // fixed: "left"
   },
   {
     title: "JOB GROUP NAME",
     dataIndex: "name",
     key: "name",
     align: "left",
+    // fixed: "left"
   },
   {
     title: "JOB GROUP CODE",

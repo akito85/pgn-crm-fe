@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import NxTable from "../../../../components/Nx/NxTable";
+import NxTableBase from "../../../../components/Nx/NxTableBase";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
@@ -109,15 +109,11 @@ const ViewJobGroupDetailPage = () => {
           ) : jobs.length === 0 ? (
             <p style={{ color: "#999", fontSize: 13, padding: "8px 0" }}>No jobs in this group.</p>
           ) : (
-            <NxTable
+            <NxTableBase
               idTable={`job-group-detail-${id}-jobs`}
               dataSource={jobs}
               columns={childColumns}
-              pagination={false}
-              usePagination={false}
-              useSelect={false}
-              useInfiniteScroll={false}
-              tableScrolled={{ y: 350, x: "max-content" }}
+              // tableScrolled={{ y: 350, x: "max-content" }}
               loading={false}
             />
           )}

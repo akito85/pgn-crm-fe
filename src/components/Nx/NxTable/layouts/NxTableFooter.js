@@ -100,12 +100,19 @@ const NxTableFooter = ({
     );
   }
 
+  // Static branch (no infinite scroll, no pagination).
+  // "All data showed" only appears when resolvedTotalData is known (> 0)
+  // and all rows are present — prevents the badge showing while the API
+  // hasn't returned a total yet (resolvedTotalData would still be 0).
+  const staticLoadedCount = resolvedDataSource?.length || 0;
+  const allDataShowed = !loading && resolvedTotalData > 0 && staticLoadedCount >= resolvedTotalData;
+
   return (
-    <div style={{ ...footerBase, borderBottom: '1px solid transparent', justifyContent: 'flex-end', gap: '8px' }}>
+    <div style={{ ...footerBase, justifyContent: 'flex-end', gap: '8px' }}>
       <span style={{ fontSize: '12px', color: '#6B7280' }}>
-        Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
+        Showing {staticLoadedCount} of {resolvedTotalData} entries
       </span>
-      {!loading && resolvedDataSource?.length > 0 && (
+      {allDataShowed && (
         <>
           <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#D1D5DB', display: 'inline-block' }} />
           <span style={{ fontSize: '12px', color: '#22c55e', fontWeight: '500' }}>All data showed</span>
