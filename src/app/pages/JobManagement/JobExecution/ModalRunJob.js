@@ -208,6 +208,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
 
   const handleStart = () => {
     form.validateFields().then((values) => {
+      if (!selectedJob) return;
       const { params: _params, ...scheduleValues } = values;
       const inputPayload = buildInputPayload(_params, selectedJob.parameters);
       onSubmit({ jobId: selectedJob.id, triggerType, ...scheduleValues, inputPayload });
