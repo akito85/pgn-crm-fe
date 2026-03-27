@@ -77,12 +77,6 @@ const ColumnSettings = ({
     return null;
   };
 
-  // Check if column can be fixed to left
-  const canFixLeft = (columnIndex) => columnIndex !== columns.length - 1;
-
-  // Check if column can be fixed to right
-  const canFixRight = (columnIndex) => columnIndex !== 0;
-
   // Handle visibility checkbox change
   const handleVisibilityChange = (e, columnKey) => {
     const checked = e.target.checked;
@@ -304,14 +298,13 @@ const ColumnSettings = ({
                       onChange={(e) =>
                         handlePositionChange(col.key, e.target.value)
                       }
-                      disabled={!isVisible || isStaticallyFixedCol}
+                      disabled={!isFixed || !isVisible}
                       size="small"
                       buttonStyle="solid"
                       style={{ display: "flex", gap: "4px" }}
                     >
                       <Radio.Button
                         value="left"
-                        disabled={!canFixLeft(index) || !isVisible || isStaticallyFixedCol}
                         style={{
                           fontSize: "10px",
                           flex: 1,
@@ -323,7 +316,6 @@ const ColumnSettings = ({
                       </Radio.Button>
                       <Radio.Button
                         value="right"
-                        disabled={!canFixRight(index) || !isVisible || isStaticallyFixedCol}
                         style={{
                           fontSize: "10px",
                           flex: 1,
