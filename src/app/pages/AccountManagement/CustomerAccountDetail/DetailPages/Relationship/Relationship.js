@@ -18,13 +18,12 @@ import RelationshipApprovalModal from "./RelationshipApprovalModal";
 
 /**
  * Relationship list table module
- * @param {{ id: number; idCustomer: number; type: string }} props
+ * @param {{ accountId: number; customerId: number; type: string }} props
  * @returns
  */
 const Relationship = ({
-  id = 0,
-  idCustomer = 0,
-  type = "standard",
+  accountId,
+  customerId,
 }) => {
   // --- Hooks ---
   const location = useLocation();
@@ -79,7 +78,7 @@ const Relationship = ({
 
     dispatch(
       inactivateRelationship({
-        accountId: id,
+        accountId,
         body,
       })
     )
@@ -98,7 +97,7 @@ const Relationship = ({
    */
   const handleApprovalHistoryModal = (show, relationshipId = 0) => {
     if (show) {
-      dispatch(getApprovalHistory({ idAccount: id, relationshipId }));
+      dispatch(getApprovalHistory({ idAccount: accountId, relationshipId }));
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
@@ -142,9 +141,8 @@ const Relationship = ({
     <NxCardContainer header={"RELATIONSHIP LIST"}>
       <NxBaseContainer border>
         <RelationshipTable
-          idAccount={id}
-          idCustomer={idCustomer}
-          type={type}
+          accountId={accountId}
+          customerId={customerId}
           refreshSignal={refreshSignal}
           handleInactivateModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
@@ -152,7 +150,7 @@ const Relationship = ({
         />
 
         <RelationshipApprovalModal
-          idAccount={id}
+          accountId={accountId}
           isOpen={showApprovalModal}
           handleCancel={() => setShowApprovalModal(false)}
           afterFinish={triggerRefresh}
