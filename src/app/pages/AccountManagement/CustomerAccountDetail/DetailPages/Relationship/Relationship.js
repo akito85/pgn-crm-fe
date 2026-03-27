@@ -16,11 +16,17 @@ import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import RelationshipApprovalModal from "./RelationshipApprovalModal";
 
+/**
+ * Relationship list table module
+ * @param {{ id: number; idCustomer: number; type: string }} props
+ * @returns
+ */
 const Relationship = ({
   id = 0,
   idCustomer = 0,
   type = "standard",
 }) => {
+  // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -39,6 +45,7 @@ const Relationship = ({
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
+  // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
@@ -98,6 +105,7 @@ const Relationship = ({
     }
   };
 
+  // --- Effects ---
   useEffect(() => {
     if (isStandard) {
       dispatch(
@@ -110,6 +118,7 @@ const Relationship = ({
     }
   }, []);
 
+  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
     if (data_approvalHistory && data_approvalHistory?.dataApprover) {
       const temp = {
