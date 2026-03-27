@@ -190,7 +190,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
       setStep("select"); setSelectedJob(null); setTriggerType("IMMEDIATE");
       setCronPreset(null);
       setModalPage(0); setAllJobs([]); setHasMore(true);
-      isResetRef.current = false; form.resetFields();
+      isResetRef.current = true; form.resetFields();
     }
   }, [open, form]);
 
@@ -201,7 +201,8 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
 
   useEffect(() => {
     if (!allJobsData) return;
-    if (isResetRef.current) {
+    const isInitialLoad = allJobsData.currentPage === 0;
+    if (isInitialLoad || isResetRef.current) {
       isResetRef.current = false;
       setAllJobs(allJobsData.result);
     } else {
@@ -236,16 +237,18 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   const actionColumn = {
     title: "ACTION", key: "select-action", width: 70, align: "center",
     render: (_, record) => (
-      <button
-        type="button"
-        style={{ background:"none", border:"none", cursor:"pointer", padding:4, display:"flex", alignItems:"center" }}
-        onClick={() => {
-          setSelectedJob({ id: record.id, name: record.name, code: record.code, parameters: record.parameters ?? [] });
-          setStep("schedule");
-        }}
-      >
-        <AddJobIcon />
-      </button>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <button
+          type="button"
+          style={{ background:"none", border:"none", cursor:"pointer", padding:4, display:"flex", alignItems:"center" }}
+          onClick={() => {
+            setSelectedJob({ id: record.id, name: record.name, code: record.code, parameters: record.parameters ?? [] });
+            setStep("schedule");
+          }}
+        >
+          <AddJobIcon />
+        </button>
+      </div>
     ),
   };
 
@@ -495,12 +498,14 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
               dataSource={allJobs}
               loading={allJobsLoading}
               columns={jobColumns}
+              columnDefinitions={jobColumns.map((col) => ({ key: col.key || col.dataIndex || col.title, title: col.title }))}
               useInfiniteScroll={true}
               usePagination={false}
-              useSelect={false}
-              useSearch={true}
-              useAdvanceSearch={true}
-              useColumnSettings={true}
+              useSelect={true}
+              showSearchBar={true}
+              showAdvanceSearch={true}
+              showExport={false}
+              autoHeight={false}
               tableScrolled={{ y:400, x:"max-content" }}
               rowKey="id"
               onLoadMore={loadMoreData}

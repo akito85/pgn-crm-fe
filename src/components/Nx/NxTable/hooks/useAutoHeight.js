@@ -5,7 +5,7 @@ import { FOOTER_HEIGHT_PX, TOOLBAR_HEIGHT_PX } from '../constants';
 // Fix 3.1: single ResizeObserver handles both dynamicScrollY and containerWidth.
 // Previously two separate observers on containerRef.current caused redundant
 // setState calls when autoHeight toggled repeatedly.
-const useAutoHeight = ({ autoHeight, tableScrollYProp, useInfiniteScroll, usePagination, useSelect, containerRef, totalDataCount }) => {
+const useAutoHeight = ({ autoHeight, tableScrollYProp, useInfiniteScroll, usePagination, useSelect, containerRef }) => {
   const [dynamicScrollY, setDynamicScrollY]   = React.useState(tableScrollYProp);
   const [containerWidth, setContainerWidth]   = React.useState(0);
 
@@ -29,19 +29,7 @@ const useAutoHeight = ({ autoHeight, tableScrollYProp, useInfiniteScroll, usePag
       const TOOLBAR_H = useSelect ? TOOLBAR_HEIGHT_PX : 0;
       const viewportH = window.innerHeight;
       const BOTTOM_MARGIN = Math.round(viewportH * 0.10);
-      let available = viewportH - rect.top - FOOTER_H - TOOLBAR_H - BOTTOM_MARGIN;
-
-      // Fix: Adjust for small datasets (10-30 rows) to ensure scrollability
-      if (useInfiniteScroll && totalDataCount > 0 && totalDataCount <= 30) {
-        const estimatedRowHeight = 35;
-        const MIN_OVERFLOW = 100;
-        const contentHeight = totalDataCount * estimatedRowHeight;
-        const minHeightForScroll = contentHeight + MIN_OVERFLOW;
-        const minHeightWithMargins = minHeightForScroll + FOOTER_H + TOOLBAR_H + BOTTOM_MARGIN;
-        const maxAvailableForSmallData = Math.max(tableScrollYProp, minHeightWithMargins - rect.top);
-        available = Math.min(available, maxAvailableForSmallData);
-      }
-
+      const available = viewportH - rect.top - FOOTER_H - TOOLBAR_H - BOTTOM_MARGIN;
       setDynamicScrollY(Math.max(tableScrollYProp, Math.floor(available)));
     };
 
@@ -59,7 +47,7 @@ const useAutoHeight = ({ autoHeight, tableScrollYProp, useInfiniteScroll, usePag
 
     window.addEventListener('resize', compute, { passive: true });
     return () => window.removeEventListener('resize', compute);
-  }, [autoHeight, tableScrollYProp, useInfiniteScroll, usePagination, useSelect, containerRef, totalDataCount]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [autoHeight, tableScrollYProp, useInfiniteScroll, usePagination, useSelect, containerRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { dynamicScrollY, containerWidth };
 };

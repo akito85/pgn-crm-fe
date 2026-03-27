@@ -153,7 +153,6 @@ const NxTable = ({
     usePagination,
     useSelect,
     containerRef,
-    totalDataCount: resolvedTotalData,
   });
   const tableScrollY = dynamicScrollY;
 
