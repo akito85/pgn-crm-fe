@@ -28,7 +28,6 @@ const TRIGGER_META = {
   SPECIFIC_DAYS:{ icon: <CalendarOutlined />,     label:"Specific Days",desc:"Use a cron expression for scheduling",color:"#10b981" },
 };
 
-// Standard presets + a custom entry. Values are 5-field cron expressions except __custom__.
 const CRON_PRESETS = [
   { label:"Hourly",               value:"0 * * * *",         hint:"Every hour at :00" },
   { label:"Daily (midnight)",     value:"0 0 * * *",         hint:"Every day at 00:00" },
@@ -41,7 +40,7 @@ const CRON_PRESETS = [
   { label:"Custom / Advanced",    value:"__custom__",         hint:"Enter your own cron expression" },
 ];
 
-// ─── AddJobIcon — same SVG as CreateJobGroupPage ───────────────────────────────
+// ─── AddJobIcon ────────────────────────────────────────────────────────────────────
 
 const AddJobIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -51,7 +50,7 @@ const AddJobIcon = () => (
   </svg>
 );
 
-// ─── WizardStepBar ────────────────────────────────────────────────────────────
+// ─── WizardStepBar ────────────────────────────────────────────────────────────────────
 
 const WizardStepBar = ({ current }) => {
   const done = current === "schedule";
@@ -181,24 +180,29 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   const [modalPage,   setModalPage]   = useState(0);
   const [allJobs,     setAllJobs]     = useState([]);
   const [hasMore,     setHasMore]     = useState(true);
-  const isResetRef = React.useRef(false);
+  const isResetRef       = React.useRef(false);
+  const pendingResolveRef = React.useRef(null);
   const [form] = Form.useForm();
 
-  // Reset all state when modal closes
-  useEffect(() => {
-    if (!open) {
-      setStep("select"); setSelectedJob(null); setTriggerType("IMMEDIATE");
-      setCronPreset(null);
-      setModalPage(0); setAllJobs([]); setHasMore(true);
-      isResetRef.current = true; form.resetFields();
-    }
-  }, [open, form]);
-
+  // RTK Query — needs state (not ref) for the page param so it re-fetches on increment
   const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery(
     { page: modalPage, size: MODAL_PAGE_SIZE },
     { skip: !open }
   );
 
+  // Reset all state when modal closes; also release any pending loadMore promise
+  useEffect(() => {
+    if (!open) {
+      setStep("select"); setSelectedJob(null); setTriggerType("IMMEDIATE");
+      setCronPreset(null);
+      setModalPage(0); setAllJobs([]); setHasMore(true);
+      isResetRef.current = true;
+      if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
+      form.resetFields();
+    }
+  }, [open, form]);
+
+  // Process data when RTK Query responds; resolve the loadMore promise once data is appended
   useEffect(() => {
     if (!allJobsData) return;
     const isInitialLoad = allJobsData.currentPage === 0;
@@ -209,13 +213,19 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
       setAllJobs(prev => [...prev, ...allJobsData.result]);
     }
     setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
+    // Unblock the infinite-scroll gate only after data is actually appended
+    if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
   }, [allJobsData]);
 
-  const loadMoreData = useCallback(() => new Promise((resolve) => {
-    if (!hasMore || allJobsLoading) { resolve(); return; }
-    setModalPage(prev => prev + 1);
-    setTimeout(resolve, 0);
-  }), [hasMore, allJobsLoading]);
+  // loadMoreData returns a Promise that resolves only when the next page's data arrives,
+  // keeping useInfiniteScroll's isLoadingMoreRef locked until then — no skipped pages.
+  const loadMoreData = useCallback(() => {
+    if (!hasMore || allJobsLoading) return Promise.resolve();
+    return new Promise((resolve) => {
+      pendingResolveRef.current = resolve;
+      setModalPage(prev => prev + 1);
+    });
+  }, [hasMore, allJobsLoading]);
 
   const handleBack = () => {
     setStep("select"); setSelectedJob(null);
@@ -226,7 +236,6 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   const handleStart = () => {
     form.validateFields().then((values) => {
       if (!selectedJob) return;
-      // cronSchedulePreset is a UI-only field — strip it before submitting
       const { params: _params, cronSchedulePreset: _preset, ...scheduleValues } = values;
       const inputPayload = buildInputPayload(_params, selectedJob.parameters);
       onSubmit({ jobId: selectedJob.id, triggerType, ...scheduleValues, inputPayload });
@@ -366,7 +375,6 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
                   style={{ width:"100%", ...inputStyle }}
                   onChange={(val) => {
                     setCronPreset(val);
-                    // Pre-populate cronExpression with preset value; clear it for custom
                     form.setFieldValue("cronExpression", val !== "__custom__" ? val : "");
                   }}
                 >
@@ -385,7 +393,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
               </Form.Item>
             </div>
 
-            {/* Show the resolved cron string for a preset selection */}
+            {/* Show resolved cron string for a preset selection */}
             {cronPreset && cronPreset !== "__custom__" && (
               <div style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 12px", background:"#f0f7ff", border:"1px solid #c8e0fa", borderRadius:6 }}>
                 <span style={{ fontSize:12, color:"#5a7a99" }}>Cron:</span>
