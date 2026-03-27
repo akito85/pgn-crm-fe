@@ -101,8 +101,8 @@ const expandedRowRender = (record) => {
  * @param {number}   [props.refreshSignal=0]               - Increment to trigger a page-0 refresh from the parent
  */
 const RelationshipTable = ({
-  idAccount = 0,
-  idCustomer = 0,
+  idAccount,
+  idCustomer,
   type = "standard",
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
@@ -114,19 +114,16 @@ const RelationshipTable = ({
   const location = useLocation();
   const dispatch = useDispatch();
   const {
-    list_relationship,
-    pagination_relationship,
+    list_relationship: dataSource,
+    pagination_relationship: pagination,
     loading_listRelationship: loading,
   } = useSelector((state) => state.relationship);
 
   // --- Derived values ---
+  const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
-  const totalElement = pagination_relationship?.totalElements || 0;
-  const hasMore = list_relationship.length < totalElement;
-
-  const dataSource = useMemo(() =>
-    list_relationship.map((item, index) => ({ ...item, key: `${item.id}-${index}` })),
-  [list_relationship]);
+  const totalElement = pagination.totalElements || 0;
+  const hasMore = dataSource.length < totalElement;
 
   // --- State ---
   const searchInput = useRef(null);
@@ -136,7 +133,8 @@ const RelationshipTable = ({
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [inputFields, setInputFields] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["statusApproval", "status", "action"],
@@ -150,7 +148,8 @@ const RelationshipTable = ({
       size: loadMoreSize,
       sort,
       searchs: search,
-      inputFields,
+      filters,
+      filterRules,
     };
 
     dispatch(
@@ -203,15 +202,16 @@ const RelationshipTable = ({
    */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_relationship?.totalPages || 0;
+    const totalPages = pagination.totalPages || 0;
 
     if (nextPage <= totalPages) {
       const body = {
         page: nextPage,
         size: loadMoreSize,
         sort,
-        searchs: JSON.stringify(search),
-        inputFields,
+        searchs: search,
+        filters,
+        filterRules,
       };
 
       await dispatch(
@@ -233,10 +233,9 @@ const RelationshipTable = ({
    */
   const handleDownload = () => {
     const body = {
-      page,
-      size: loadMoreSize,
       sort,
-      inputFields,
+      filters,
+      filterRules,
       searchs: search,
     };
 
@@ -251,7 +250,8 @@ const RelationshipTable = ({
       size: loadMoreSize,
       sort,
       searchs: search,
-      inputFields,
+      filters,
+      filterRules,
     };
 
     setPage(0);
@@ -265,7 +265,7 @@ const RelationshipTable = ({
         isLoadMore: false,
       })
     );
-  }, [sort, search, inputFields]);
+  }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
   useEffect(() => {
@@ -275,9 +275,11 @@ const RelationshipTable = ({
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
     handleView: ({ id }) => navigate(
-      isOneTime
+      isStandard
+        ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP
+        : isOneTime
         ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP_ONETIME
-        : ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP,
+        : "",
       {
         state: {
           idAccount,
@@ -287,9 +289,11 @@ const RelationshipTable = ({
       }
     ),
     handleCreate: () => navigate(
-      isOneTime
+      isStandard
+        ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP
+        : isOneTime
         ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP_ONETIME
-        : ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP,
+        : "",
       {
         state: {
           idAccount,
@@ -298,9 +302,11 @@ const RelationshipTable = ({
       }
     ),
     handleUpdate: ({ id }) => navigate(
-      isOneTime
+      isStandard
+        ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP
+        : isOneTime
         ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP_ONETIME
-        : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
+        : "",
       {
         state: {
           idAccount,
@@ -312,7 +318,7 @@ const RelationshipTable = ({
     handleApproval,
     handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({ id, accountName }) => handleInactivateModal(true, id, accountName),
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
   const actionCols = useColumnActionPermission(
@@ -338,24 +344,16 @@ const RelationshipTable = ({
     [search, searchText, searchedColumn]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+  const columnDefinitions = useMemo(() => {
+    return [...baseColumns, ...actionCols].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns, actionCols]);
 
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -367,7 +365,7 @@ const RelationshipTable = ({
         current={page}
         tableScrolled={{ x: dataSource.length ? "max-content" : 2000 }}
         onSort={onSort}
-        columns={processedColumns}
+        columns={columns}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
