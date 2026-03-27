@@ -514,7 +514,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
               showAdvanceSearch={true}
               showExport={false}
               autoHeight={false}
-              tableScrolled={{ y:400, x:"max-content" }}
+              tableScrolled={{ y:320, x:"max-content" }}
               rowKey="id"
               onLoadMore={loadMoreData}
               hasMore={hasMore}
