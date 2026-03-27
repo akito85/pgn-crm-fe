@@ -10,11 +10,12 @@ const ConfirmationModal = ({
   isOpen,
   handleCancel,
   approvalData,
-  dataAttachment,
+  attachmentDataSource,
   type = "",
   service,
   configApplication,
   loading = false,
+  handleSubmitForm = () => {},
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
@@ -22,8 +23,11 @@ const ConfirmationModal = ({
 
   const { loading_createUpdatePr } = useSelector((state) => state.paymentRelation);
 
+  const isSubmit = type === "submit";
+  const isDraft = type === "draft";
+
   /**
-   * @param {"next" | "prev"} type
+   * @param {"next" | "prev"} direction
    */
   const handleChangeTab = (direction) => {
     if (direction === "next" && activeTab < tabLength - 1) {
@@ -64,8 +68,8 @@ const ConfirmationModal = ({
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} form={formId} htmlType={"submit"} loading={loading_createUpdatePr}>
-                {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
+              <Button type={"submit"} form={formId} htmlType={isSubmit ? "submit" : "button"} onClick={isDraft ? handleSubmitForm : undefined} loading={loading_createUpdatePr}>
+                Confirm
               </Button>
             )}
           </div>
@@ -76,7 +80,7 @@ const ConfirmationModal = ({
       <ConfirmationModalTabs
         form={form}
         approvalData={approvalData}
-        dataAttachment={dataAttachment}
+        attachmentDataSource={attachmentDataSource}
         service={service}
         type={type}
         configApplication={configApplication}

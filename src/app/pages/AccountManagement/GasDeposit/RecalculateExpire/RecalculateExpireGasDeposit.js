@@ -1,85 +1,87 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
-import InfoInvoiceRelation from "./StepContents/InformationForm/InfoInvoiceRelation";
-import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
-import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
-import SVGIcon from "../../../../../../../../assets/Icon/index";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
+import InfoGasDeposit from "./StepContents/InformationForm/InfoGasDeposit";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
+import { getCustomerDetail } from "../../../../../redux/slices/account_management/Customer/customerAccount";
 import {
   getAccountStandardDetail,
   getAccountOneTimeDetail
-} from "../../../../../../../../redux/slices/account_management/accountManagement";
+} from "../../../../../redux/slices/account_management/accountManagement";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
-import {
-  createInvoiceRelation,
-  getDetailDraftInvoiceRelation,
-  getDetailInvoiceRelation,
-  getDetailIrApprovalHierarchy,
-  getIrApprovalHierarchy,
-  getIrAttachmentCategory,
-  updateInvoiceRelation
-} from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import {
   showModalError,
   validateCreateUpdate
-} from "../../../../../../../../redux/slices/general_slice";
-import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
-import { configApp } from "../../../../../../../../constants/configApp";
-import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
-import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
-import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
-import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
-import HeaderDetail from "../../../../HeaderDetail";
-import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
-import { nxRemoveKeys } from "../../../../../../../../components/Nx/NxRemoveKeys";
+} from "../../../../../redux/slices/general_slice";
+import accountManagementService from "../../../../../redux/services/account_management/accountManagementService";
+import { configApp } from "../../../../../constants/configApp";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
+import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb";
+import { NxFormStepper } from "../../../../../components/Nx/NxFormStepNavigation";
+import HeaderDetail from "../HeaderDetail";
+import { nxRemoveKeys } from "../../../../../components/Nx/NxRemoveKeys";
+import GasDepositDetailTable from "../GasDepositDetailTable";
+import GasDepositDetailMutationTable from "../GasDepositDetailMutationTable";
+import NxApprovalInput from "../../../../../components/Nx/NxApprovalInput";
+import {
+  getGdAttachmentCategory,
+  recalculateGasDeposit,
+  expireGasDeposit,
+  getDetailGasDeposit,
+  getDetailDraftGasDeposit,
+  getDetailGdApprovalHierarchy,
+  getGdApprovalHierarchy,
+} from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
+import SVGIcon from "../../../../../assets/Icon/index";
 
-const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "standard" }) => {
+const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
-  const containerRef = useRef(null);
   const [current, setCurrent] = useState(0);
 
   const dispatch = useDispatch();
 
-  const isCreate = formType === "create";
-  const isUpdate = formType === "update";
-  
+  const isRecalculate = formType === "recalculate";
+  const isExpire = formType === "expire";
+
   const {
-    loading_listIrApprovalOption,
-    loading_listIrApprovalHierarchyEmployee,
-    loading_detailIr,
-    loading_detailDraftIr,
-    loading_createUpdateIr,
-    list_irApprovalHierarchy,
-    detail_irApprovalHierarchy,
-    detail_invoiceRelation,
-    detailDraft_invoiceRelation,
-    list_irAttachmentCategory,
-  } = useSelector((state) => state.invoiceRelation);
+    loading_listGdApprovalOption,
+    loading_detailGdApprovalHierarchyDetails,
+    loading_detailGd,
+    loading_detailDraftGd,
+    loading_recalculateExpireGd,
+    list_gdApprovalOptions,
+    detail_gdApprovalHierarchy,
+    detail_gasDeposit,
+    detailDraft_gasDeposit,
+    list_gdAttachmentCategory,
+  } = useSelector((state) => state.gasDeposit);
   
   const loading =
-  loading_listIrApprovalOption ||
-    loading_listIrApprovalHierarchyEmployee ||
-    loading_detailIr ||
-    loading_detailDraftIr;
+    loading_listGdApprovalOption ||
+    loading_detailGdApprovalHierarchyDetails ||
+    loading_detailGd ||
+    loading_detailDraftGd ||
+    loading_recalculateExpireGd;
     
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
-  const accountId = location?.state?.idAccount;
-  const customerId = location?.state?.idCustomer;
-  const idIr = location?.state?.id;
+  const accountId = location?.state?.accountId;
+  const customerId = location?.state?.customerId;
+  const idGd = location?.state?.id;
   
-  const status = detail_invoiceRelation.status || "DRAFT";
-  const statusApproval = detail_invoiceRelation.statusApproval || "DRAFT";
+  const status = detail_gasDeposit.status || "DRAFT";
+  const statusApproval = detail_gasDeposit.statusApproval || "DRAFT";
 
-  const isDraft = status === "DRAFT";
-  const isActive = status === "ACTIVE";
+  const isDraft = location.state?.status === "DRAFT" || status === "DRAFT";
+  const isActive = location.state?.status === "ACTIVE" || status === "ACTIVE";
   
-  const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectApproval = statusApproval === "REJECT";
+  const isDraftApproval = location.state?.statusApproval === "DRAFT" || statusApproval === "DRAFT";
+  const isRejectApproval = location.state?.statusApproval === "REJECT" || statusApproval === "REJECT";
 
   //state
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
@@ -90,63 +92,61 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   
   const attachmentIsRequired = true;
   
-  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_invoiceRelation : detail_invoiceRelation;
-  const attachments = detail.attachments;
+  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_gasDeposit : detail_gasDeposit;
+  const { details, attachments } = detail;
+
+  const [selectedDetailId, setSelectedDetailId] = useState();
 
   const formFields = [
-    ["accountNumber", "accountName", "startDate", "endDate", "description"],
+    [],
     ["appHierId"],
     []
   ];
 
   useEffect(() => {
-    if (isUpdate && idIr) {
-      dispatch(getDetailInvoiceRelation(idIr));
-      dispatch(getDetailDraftInvoiceRelation(idIr));
-    }
-  }, [formType, idIr]);
+    if (customerId) dispatch(getCustomerDetail(customerId));
+  }, [customerId]);
 
   useEffect(() => {
-    if (isUpdate && list_irApprovalHierarchy.length) {
+    if (idGd) {
+      if (isActive && (isDraftApproval || isRejectApproval))
+        dispatch(getDetailDraftGasDeposit(idGd));
+      else  
+        dispatch(getDetailGasDeposit(idGd));
+    }
+  }, [idGd]);
+
+  useEffect(() => {
+    if (list_gdApprovalOptions.length) {
       const {
         accountId,
-        accountNumber,
-        accountName,
-        startDate,
-        endDate,
-        description,
         appHierId,
       } = detail;
 
       form.setFieldsValue({
         accountId,
-        accountName,
-        accountNumber,
-        startDate,
-        endDate,
-        description,
         appHierId
       });
 
-      const appHierOption = list_irApprovalHierarchy.find(
+      const appHierOption = list_gdApprovalOptions.find(
         (option) => option.appHierId === appHierId
       );
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, list_irApprovalHierarchy]);
+  }, [detail, list_gdApprovalOptions]);
 
   useEffect(() => {
-    if (isUpdate && attachments)
+    if (Array.isArray(attachments))
       setAttachmentDataSource([...attachments.map((attachment) => ({
         ...attachment,
         key: attachment.id,
       }))]);
-  }, [detail]);
+  }, [attachments]);
 
   useEffect(() => {
-    dispatch(getIrApprovalHierarchy());
+    dispatch(getGdApprovalHierarchy());
   }, []);
 
   const routes = [
@@ -166,17 +166,17 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
       state: {
-        idAccount: accountId,
-        idCustomer: customerId
+        accountId,
+        customerId
       }
     },
     {
       path: "",
       breadcrumbName:
-        formType === "create"
-          ? "Create Invoice Relation"
-          : formType === "update"
-            ? "Update Invoice Relation"
+        formType === "recalculate"
+          ? "Recalculate Gas Deposit"
+          : formType === "expire"
+            ? "Expire Gas Deposit"
             : ""
     }
   ];
@@ -188,69 +188,57 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (submitType === "submit") {
-          if (current === 2) {
-            if (attachmentIsRequired && !attachmentDataSource.length) {
-              const errorBody = {
-                title: "Failed",
-                description: `Please upload at least one attachment`
-              };
-              dispatch(showModalError(errorBody));
-  
-              throw new Error("There was no file attached");
-            }
-          } else {
-            await form.validateFields(formFields[current]);
-  
-            const {
-              accountId : relatedAccountId,
-              description,
-              startDate,
-              endDate,
-              appHierId
-            } = form.getFieldsValue(true);
-  
-            const body = {
-              stepNumber: current + 1,
-              type: formType.toUpperCase(),
-              id: idIr,
-              data : {
-                accountId, 
-                relatedAccountId,
-                description, 
-                startDate: NxDate.formatForAPI(startDate),
-                endDate: NxDate.formatForAPI(endDate),
-                appHierId,
+        if (["submit", "draft"].includes(submitType)) {
+          if (submitType === "submit") {
+            if (current === 2) {
+              if (attachmentIsRequired && !attachmentDataSource.length) {
+                const errorBody = {
+                  title: "Failed",
+                  description: `Please upload at least one attachment`
+                };
+                dispatch(showModalError(errorBody));
+    
+                throw new Error("There was no file attached");
               }
+            } else {
+              await form.validateFields(formFields[current]);
+    
+              const {
+                appHierId
+              } = form.getFieldsValue(true);
+    
+              const body = {
+                stepNumber: current + 1,
+                type: formType.toUpperCase(),
+                id: idGd,
+                data : {
+                  accountId, 
+                  appHierId,
+                }
+              }
+    
+              await dispatch(
+                validateCreateUpdate({
+                  body,
+                  services: accountManagementService,
+                  endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+                  type: formType
+                })
+              ).unwrap();
             }
-  
-            await dispatch(
-              validateCreateUpdate({
-                body,
-                services: accountManagementService,
-                endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-                type: formType
-              })
-            ).unwrap();
           }
-        } else if (submitType === "draft")
-          await form.validateFields(["accountNumber", "accountName"]);
-        else
+        } else
           return;
       } catch (err) {
         return;
       }
 
-      const { accountId: relatedAccountId, description, startDate, endDate, appHierId } =
+      const { appHierId } =
         form.getFieldsValue(true);
 
       const body = {
-        id: idIr,
+        id: idGd,
         accountId,
-        relatedAccountId,
-        description,
-        startDate: NxDate.formatForAPI(startDate),
-        endDate: NxDate.formatForAPI(endDate),
         appHierId,
         action: submitType
       };
@@ -259,7 +247,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/invoice-relation/validate-${formType}`,
+          endPoint: `/v1/dbs/api/gas-deposit/validate-${formType}`,
           type: formType
         })
       )
@@ -293,29 +281,77 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailIrApprovalHierarchy(appHierId));
+    dispatch(getDetailGdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
+  };
+
+  const handleReset = () => {
+    if (isRecalculate) {
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
+      form.resetFields();
+      setCurrent(0);
+    } else if (isExpire) {
+      if (list_gdApprovalOptions?.length) {
+        const { accountId, appHierId } = detail;
+
+        form.setFieldsValue({ accountId, appHierId });
+
+        const appHierOption = list_gdApprovalOptions.find(
+          (option) => option.appHierId === appHierId
+        );
+
+        if (appHierOption)
+          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+      }
+
+      if (attachments)
+        setAttachmentDataSource([...attachments.map((attachment) => ({
+          ...attachment,
+          key: attachment.id,
+        }))]);
+
+      setDeletedAttachments([]);
+      setCurrent(0);
+    }
   };
 
   const steps = [
     {
-      title: "Invoice Relation",
+      title: "Gas Deposit",
       cards: [
         {
-          header: "Invoice Relation Information",
+          header: "Gas Deposit Information",
           content: (
-            <InfoInvoiceRelation
-              form={form}
-              setAccount={setAccount}
-              accountId={accountId}
-              isUpdate={isUpdate}
-              isDraft={isDraft}
-              key={`invoice-relation-tab-0`}
+            <InfoGasDeposit
+              detail={detail}
+              key="tab-0-card-0"
             />
           )
+        },
+        {
+          header: "Gas Deposit Detail",
+          content: (
+            <GasDepositDetailTable
+              dataSource={details}
+              handleView={({ id }) => setSelectedDetailId(id)}
+              key="tab-0-card-1"
+            />
+          )
+        },
+        selectedDetailId &&
+        {
+          header: "Gas Deposit Detail Mutation",
+          content: (
+            <GasDepositDetailMutationTable
+              detailId={selectedDetailId}
+              key="tab-0-card-2"
+            />  
+          )
         }
-      ],
-      disabled: false
+      ].filter(Boolean),
+      disabled: false,
+      key: "tab-0",
     },
     {
       title: "Approval",
@@ -325,15 +361,16 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           content: (
             <NxApprovalInput
               form={form}
-              hierarchyDetails={detail_irApprovalHierarchy}
-              options={list_irApprovalHierarchy}
+              hierarchyDetails={detail_gdApprovalHierarchy}
+              options={list_gdApprovalOptions}
               handleSelectHiararchy={handleSelectHiararchy}
-              key={`invoice-relation-tab-1`}
+              key="tab-1-card-0"
             />
           )
         }
       ],
-      disabled: false
+      disabled: false,
+      key: "tab-1",
     },
     {
       title: "Attachment",
@@ -345,16 +382,17 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
               data={attachmentDataSource}
               updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
-              key={`invoice-relation-tab-2`}
-              getAPICategory={getIrAttachmentCategory}
-              categoryData={list_irAttachmentCategory}
+              getAPICategory={getGdAttachmentCategory}
+              categoryData={list_gdAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               mandatory={attachmentIsRequired}
+              key="tab-2-card-0"
             />
           )
         }
       ],
+      key: "tab-2",
       disabled: false
     }
   ];
@@ -377,23 +415,15 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         await form.validateFields(formFields[current]);
 
         const {
-          accountId: relatedAccountId,
-          description,
-          startDate,
-          endDate,
           appHierId
         } = form.getFieldsValue(true);
 
         const body = {
           stepNumber: current + 1,
           type: formType.toUpperCase(),
-          id: idIr,
+          id: idGd,
           data : {
             accountId, 
-            relatedAccountId,
-            description, 
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
             appHierId,
           }
         }
@@ -402,7 +432,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
+            endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
             type: formType
           })
         ).unwrap();
@@ -418,84 +448,12 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     setCurrent(current - 1);
   };
 
-  const handleSetCurrent = async (newCurrent) => {
-    for (let i = current; i < newCurrent; i++) {
-      try {
-        if (i === 2) {
-          if (attachmentIsRequired && !attachmentDataSource.length) {
-            const errorBody = {
-              title: "Failed",
-              description: `Please upload at least one attachment`
-            };
-            dispatch(showModalError(errorBody));
-
-            throw new Error("There was no file attached");
-          }
-        } else {
-          await form.validateFields(formFields[i]);
-
-          const {
-            accountId: relatedAccountId,
-            description,
-            startDate,
-            endDate,
-            appHierId
-          } = form.getFieldsValue(true);
-
-          const body = {
-            stepNumber: current + 1,
-            type: formType.toUpperCase(),
-            id: idIr,
-            data : {
-              accountId, 
-              relatedAccountId,
-              description, 
-              startDate: NxDate.formatForAPI(startDate),
-              endDate: NxDate.formatForAPI(endDate),
-              appHierId,
-            }
-          }
-
-          await dispatch(
-            validateCreateUpdate({
-              body,
-              services: accountManagementService,
-              endPoint: `/v1/dbs/api/invoice-relation/validate-step`,
-              type: formType
-            })
-          ).unwrap();
-        }
-      } catch (err) {
-        setCurrent(i);
-        return;
-      }
-    }
-
-    setCurrent(newCurrent);
-  };
-
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
   const handleButtonNext = async () => {
     await next();
-    scrollRightHandler();
-  };
-
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
   };
 
   const handleSubmitForm = () => {
     const {
-      accountId: relatedAccountId,
-      description,
-      startDate,
-      endDate,
       appHierId,
       remark
     } = form.getFieldsValue(true);
@@ -509,10 +467,6 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
     const body = {
       accountId,
-      relatedAccountId,
-      description,
-      startDate: NxDate.formatForAPI(startDate),
-      endDate: NxDate.formatForAPI(endDate),
       appHierId,
       action: confirmationType,
       remark,
@@ -528,24 +482,24 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
         : "";
 
-    if (isCreate)
-      dispatch(createInvoiceRelation({ body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
+    if (isRecalculate)
+      dispatch(recalculateGasDeposit({ id: idGd, body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
         .unwrap()
         .then((data) => {
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount: accountId,
-                idCustomer: customerId
+                accountId,
+                customerId
               }
             });
           }, 2000);
         })
         .catch((error) => {});
-    else if (isUpdate)
+    else if (isExpire)
       dispatch(
-        updateInvoiceRelation({
-          id: idIr,
+        expireGasDeposit({
+          id: idGd,
           body,
           attachments: attachmentDataSource.filter(
             (attachment) => attachment.dataType === "new"
@@ -558,8 +512,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount: accountId,
-                idCustomer: customerId
+                accountId,
+                customerId
               }
             });
           }, 2000);
@@ -567,65 +521,20 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         .catch((error) => {});
   };
 
-  const handleClear = () => {
-    if (isCreate) {
-      setAttachmentDataSource([]);
-      setDeletedAttachments([]);
-      form.resetFields();
-      setCurrent(0);
-    } else if (isUpdate) {
-      if (list_irApprovalHierarchy?.length) {
-        const {
-          accountId,
-          startDate,
-          endDate,
-          description,
-          appHierId,
-          accountName,
-          accountNumber,
-        } = detail;
-
-        form.setFieldsValue({
-          accountId,
-          accountName,
-          accountNumber,
-          startDate: NxDate.formatForAPI(startDate),
-          endDate: NxDate.formatForAPI(endDate),
-          description,
-          appHierId
-        });
-
-        const appHierOption = list_irApprovalHierarchy.find(
-          (option) => option.appHierId === appHierId
-        );
-
-        if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
-      }
-
-      if (attachments)
-        setAttachmentDataSource([...attachments]);
-
-      setDeletedAttachments([]);
-
-      setCurrent(0);
-    }
-  };
-
   return (
-    <>
+    <div>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
         <HeaderDetail
           data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
           dispatch={dispatch}
-          idAccount={accountId}
-          idCustomer={customerId}
+          accountId={accountId}
+          customerId={customerId}
           type={accountType}
         />
         <Spin spinning={loading}>
           <Form
-            id="invoiceRelationForm"
+            id="gasDepositForm"
             form={form}
             layout={"vertical"}
             onFinish={handleSubmitForm}
@@ -665,11 +574,11 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                 </Button>
                 <div className="flex w-full justify-end gap-x-2">
                   <Button
-                    onClick={handleClear}
+                    onClick={handleReset}
                     type={"reject"}
                     icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    {isUpdate ? "Reset" : "Clear"} Data
+                    {isExpire ? "Reset" : "Clear"} Data
                   </Button>
                   <Button
                     onClick={() =>
@@ -682,7 +591,6 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                   <Button
                     onClick={() => {
                       prev();
-                      scrollLeftHandler();
                     }}
                     type={"menu"}
                     disabled={current < 1}
@@ -704,9 +612,9 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                         onClick={() =>
                           handleSetShowConfirmationModal(true, "submit")
                         }
-                        type={"approve"}
+                        type={"submit"}
                       >
-                        Submit
+                        Save & Submit
                       </Button>
                     </>
                   )}
@@ -715,22 +623,23 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
             </NxBaseContainer>
             <ConfirmationModal
               form={form}
-              formId={"invoiceRelationForm"}
+              formId={"gasDepositForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={detail_irApprovalHierarchy}
+              approvalData={detail_gdApprovalHierarchy}
               type={confirmationType}
               attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
-              loading={loading_createUpdateIr}
+              loading={loading_recalculateExpireGd}
+              detail={detail}
               handleSubmitForm={handleSubmitForm}
             />
           </Form>
         </Spin>
       </div>
-    </>
+    </div>
   );
 };
 
-export default CreateUpdateInvoiceRelation;
+export default RecalculateExpireGasDeposit;

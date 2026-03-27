@@ -4,13 +4,12 @@ import {
   RightCircleFilled,
   RightOutlined,
 } from "@ant-design/icons";
-import { Avatar, Divider, List, Modal, Tooltip } from "antd";
-import React, { Fragment, useEffect, useState } from "react";
+import { Avatar, Divider, List, Tooltip } from "antd";
+import { useEffect, useMemo, useRef, useState } from "react";
 import SVGIcon from "../../assets/Icon/index";
 import { dateFormatting } from "../../utils";
 import moment from "moment";
 import ButtonComponent from "../ButtonComponent";
-import RadioTabs from "../RadioTabs";
 import NxModal from "./NxModal";
 import NxTabs from "./NxTabs";
 
@@ -52,75 +51,74 @@ const defaultValueHistory = [
   },
 ];
 
-const styleBackgroundAvatar = (dataApprover) => {
-  const dataBackground = defaultValueHistory.filter((valueHistory) =>
-    dataApprover?.status?.includes(valueHistory.type)
-  );
-  return dataBackground.length > 0 ? dataBackground[0].style : undefined;
-};
-
-const handleIconAvatar = (dataApprover) => {
-  const dataIcon = defaultValueHistory.filter((valueHistory) =>
-    dataApprover?.status?.includes(valueHistory.type)
-  );
-  return dataIcon.length > 0 ? dataIcon[0].icon : undefined;
-};
-
-const handleTextColor = (dataHistory) => {
-  const dataIcon = defaultValueHistory.filter((valueHistory) =>
-    dataHistory?.status?.includes(valueHistory.type)
-  );
-  return dataIcon.length > 0 ? dataIcon[0].textColor : "white";
-};
-
-// const tabOptions = ["Create", "Inactive"];
+const getHistoryConfig = (status) =>
+  defaultValueHistory.find((h) => status?.includes(h.type)) ?? {};
 
 const NxHistoryModal = ({
   isOpen,
   handleClose = () => {},
   header,
-  tabOptions = [],
   dataApprover,
   dataHistory,
 }) => {
-  const [tabActive, setTabActive] = useState("");
-  const [dataApproverFinal, setDataApproverFinal] = useState([]);
-  const [dataHistoryFinal, setDataHistoryFinal] = useState([]);
+  const [tabActiveOverride, setTabActiveOverride] = useState(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
+  const sliderRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen && dataApprover && dataHistory) {
-      const useTabs = tabOptions && (tabOptions?.length > 0 || false);
-      if (useTabs) {
-        const tempTab = tabOptions[0].value.toLowerCase();
-        setTabActive(tempTab);
-        setDataApproverFinal(dataApprover[tempTab]);
-        setDataHistoryFinal(dataHistory[tempTab]);
-      } else {
-        setDataApproverFinal(dataApprover || []);
-        setDataHistoryFinal(dataHistory || []);
-      }
-    } else {
-      setDataApproverFinal([]);
-      setDataHistoryFinal([]);
+    if (!isOpen) {
+      setTabActiveOverride(null);
+      setExpandedDescriptions({});
     }
-  }, [isOpen, tabOptions, dataApprover, dataHistory]);
+  }, [isOpen]);
 
-  const handleTabs = (value) => {
-    const tempTab = value.toLowerCase();
-    setTabActive(value);
-    setDataApproverFinal(tabActive ? dataApprover[tempTab] : dataApprover);
-    setDataHistoryFinal(tabActive ? dataHistory[tempTab] : dataHistory);
-  };
+  const { tabOptions, tabActive, dataApproverFinal, dataHistoryFinal } =
+    useMemo(() => {
+      const empty = {
+        tabOptions: [],
+        tabActive: "",
+        dataApproverFinal: [],
+        dataHistoryFinal: [],
+      };
+
+      if (
+        !isOpen ||
+        !dataApprover ||
+        typeof dataApprover !== "object" ||
+        Array.isArray(dataApprover)
+      ) {
+        return empty;
+      }
+
+      const keys = Object.keys(dataApprover);
+      if (keys.length === 0) return empty;
+
+      const options = keys.map((key) => ({
+        key,
+        label: key.charAt(0).toUpperCase() + key.slice(1).toLowerCase(),
+      }));
+
+      const effectiveKey =
+        tabActiveOverride && dataApprover[tabActiveOverride] !== undefined
+          ? tabActiveOverride
+          : keys[0];
+
+      return {
+        tabOptions: options,
+        tabActive: effectiveKey,
+        dataApproverFinal: dataApprover[effectiveKey] ?? [],
+        dataHistoryFinal: dataHistory?.[effectiveKey] ?? [],
+      };
+    }, [isOpen, dataApprover, dataHistory, tabActiveOverride]);
+
+  const handleTabs = (key) => setTabActiveOverride(key);
 
   const sliderLeft = () => {
-    const slider = document.getElementById("sliderModalHistory");
-    slider.scrollLeft = slider.scrollLeft - 250;
+    if (sliderRef.current) sliderRef.current.scrollLeft -= 250;
   };
 
   const sliderRight = () => {
-    const slider = document.getElementById("sliderModalHistory");
-    slider.scrollLeft = slider.scrollLeft + 250;
+    if (sliderRef.current) sliderRef.current.scrollLeft += 250;
   };
 
   const toggleDescription = (itemId) => {
@@ -145,7 +143,7 @@ const NxHistoryModal = ({
         </div>
       }
     >
-      <Fragment>
+      <>
         {/* content section */}
         <NxTabs
           items={tabOptions}
@@ -158,7 +156,7 @@ const NxHistoryModal = ({
               <LeftCircleFilled width={32} onClick={sliderLeft} />
             ) : null}
             <div
-              id="sliderModalHistory"
+              ref={sliderRef}
               className={`flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar`}
             >
               {dataApproverFinal.map((approver, index) => (
@@ -169,8 +167,8 @@ const NxHistoryModal = ({
                   <Avatar
                     shape="square"
                     size={36}
-                    icon={handleIconAvatar(approver)}
-                    style={styleBackgroundAvatar(approver)}
+                    icon={getHistoryConfig(approver?.status).icon}
+                    style={getHistoryConfig(approver?.status).style}
                   />
                   <div className="flex flex-col gap-0.5 max-w-[180px]">
                     <p className="text-xs m-0 truncate">
@@ -206,7 +204,7 @@ const NxHistoryModal = ({
                     <div className="flex flex-col gap-1 w-1/2">
                       <p
                         className="text-xs m-0 font-semibold"
-                        style={{ color: handleTextColor(item) }}
+                        style={{ color: getHistoryConfig(item?.status).textColor ?? "white" }}
                       >
                         {item.status}
                       </p>
@@ -254,7 +252,7 @@ const NxHistoryModal = ({
             />
           </div>
         </div>
-      </Fragment>
+      </>
     </NxModal>
   );
 };

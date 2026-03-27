@@ -1,25 +1,27 @@
 import PaymentRelationDetailAttch from "./PaymentRelationDetailAttch";
 import PaymentRelationDetailInfo from "./PaymentRelationDetailInfo";
-import { Tabs } from "antd";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import { useState } from "react";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 
-const PaymentRelationDetailTabs = ({
-  subjectAccountNumber,
-  idPr = 0,
-  dataDetail = {},
-  dispatch = () => {},
-}) => {
-  // Use provided options or fall back to default tabs
+/**
+ * Tabbed detail view for a payment relation record.
+ * Renders "Payment Relation Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}]            - Payment relation detail record
+ * @param {string} [props.subjectAccountNumber] - Account number of the subject account (used for conditional display)
+ */
+const PaymentRelationDetailTabs = ({ detail = {} }) => {
+  const attachments = detail.attachments;
+
   const tabOptions = [
     {
       key: "pri",
       label: "Payment Relation Information",
       children: (
         <PaymentRelationDetailInfo
-          subjectAccountNumber={subjectAccountNumber}
-          dataDetail={dataDetail}
+          detail={detail}
         />
       )
     },
@@ -28,8 +30,7 @@ const PaymentRelationDetailTabs = ({
       label: "Attachment",
       children: (
         <PaymentRelationDetailAttch
-          dispatch={dispatch}
-          idPr={idPr}
+          attachments={attachments}
         />
       )
     },
