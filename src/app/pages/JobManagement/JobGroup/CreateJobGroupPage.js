@@ -140,8 +140,14 @@ const CreateJobGroupPage = () => {
 
   // Function to open the job selection modal
   const handleOpenModal = () => {
-    isResetRef.current = true; // next data arrival replaces the list
-    setCurrentPage(0);
+    if (currentPage !== 0) {
+      // Previous session scrolled past page 0 — reset and let fresh page-0
+      // data replace the stale list when it arrives.
+      isResetRef.current = true;
+      setCurrentPage(0);
+    }
+    // currentPage already 0: page-0 data is current; leave isResetRef alone
+    // so scroll-triggered page-1 loads correctly append instead of replacing.
     setHasMore(true);
     setModalVisible(true);
   };

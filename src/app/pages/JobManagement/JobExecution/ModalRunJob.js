@@ -195,7 +195,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
     if (!open) {
       setStep("select"); setSelectedJob(null); setTriggerType("IMMEDIATE");
       setCronPreset(null);
-      setModalPage(0); setAllJobs([]); setHasMore(true);
+      setModalPage(0); setHasMore(true);
       isResetRef.current = true;
       if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
       form.resetFields();
