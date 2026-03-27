@@ -190,12 +190,14 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
     { skip: !open }
   );
 
-  // Reset all state when modal closes; also release any pending loadMore promise
+  // Reset all state when modal closes; also release any pending loadMore promise.
+  // Clearing allJobs here ensures NxTable doesn't flash stale accumulated data
+  // on the next open (one frame before the data effect fires with page 0).
   useEffect(() => {
     if (!open) {
       setStep("select"); setSelectedJob(null); setTriggerType("IMMEDIATE");
       setCronPreset(null);
-      setModalPage(0); setHasMore(true);
+      setModalPage(0); setHasMore(true); setAllJobs([]);
       isResetRef.current = true;
       if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
       form.resetFields();

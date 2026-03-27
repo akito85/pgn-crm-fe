@@ -109,14 +109,19 @@ const CreateJobGroupPage = () => {
   const [hasMore, setHasMore] = useState(true);
   // Tracks whether the next allJobsData result should replace (reset) vs append
   const isResetRef = React.useRef(false);
+  // Holds the resolve() for the in-flight loadMore promise; released when data arrives
+  const pendingResolveRef = React.useRef(null);
 
-  // Fetch all jobs for the modal
+  // Unconditional query — pre-fetches on mount so allJobs is already populated
+  // when the modal opens, preventing Phase A of useInfiniteScroll from firing
+  // triggerLoad() prematurely on an empty list (which would skip page 0).
   const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery({
     page: currentPage,
     size: 20,
   });
 
-  // Accumulate pages; replace the list when a modal-open reset was requested
+  // Accumulate pages; replace the list when a modal-open reset was requested.
+  // Also unblocks the infinite-scroll gate after each page's data arrives.
   useEffect(() => {
     if (!allJobsData) return;
     if (isResetRef.current) {
@@ -126,28 +131,25 @@ const CreateJobGroupPage = () => {
       setAllJobs(prev => [...prev, ...allJobsData.result]);
     }
     setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
+    if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
   }, [allJobsData]);
 
-  // Returns a Promise so NxTable's IntersectionObserver can await completion
+  // Returns a Promise that resolves only when the next page's data has been
+  // appended — keeps useInfiniteScroll's gate locked until data actually arrives,
+  // preventing rapid-fire page increments that skip pages.
   const loadMoreData = useCallback(() => {
+    if (!hasMore || allJobsLoading) return Promise.resolve();
     return new Promise((resolve) => {
-      if (!hasMore || allJobsLoading) { resolve(); return; }
+      pendingResolveRef.current = resolve;
       setCurrentPage(prev => prev + 1);
-      // Resolve after a tick — actual data arrival is handled by the effect above
-      setTimeout(resolve, 0);
     });
   }, [hasMore, allJobsLoading]);
 
   // Function to open the job selection modal
   const handleOpenModal = () => {
-    if (currentPage !== 0) {
-      // Previous session scrolled past page 0 — reset and let fresh page-0
-      // data replace the stale list when it arrives.
-      isResetRef.current = true;
-      setCurrentPage(0);
-    }
-    // currentPage already 0: page-0 data is current; leave isResetRef alone
-    // so scroll-triggered page-1 loads correctly append instead of replacing.
+    // Mark reset so the next allJobsData arrival (if allJobsData reference changes
+    // due to a currentPage reset in handleCloseModal) replaces instead of appends.
+    isResetRef.current = true;
     setHasMore(true);
     setModalVisible(true);
   };
@@ -180,9 +182,20 @@ const CreateJobGroupPage = () => {
     setModalVisible(false);
   };
 
-  // Function to close the modal
+  // Function to close the modal — resets page counter and releases any in-flight
+  // promise. allJobs is intentionally NOT cleared: the pre-fetched page-0 data
+  // stays in place so the table mounts with data on the next open (preventing
+  // Phase A of useInfiniteScroll from firing triggerLoad on an empty list).
+  // If the user had scrolled past page 0, isResetRef is set so the page-0 data
+  // that arrives after currentPage resets will replace instead of append.
   const handleCloseModal = () => {
+    if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
     setModalVisible(false);
+    if (currentPage !== 0) {
+      isResetRef.current = true; // allJobsData will change (page N→0); replace, not append
+      setCurrentPage(0);
+    }
+    setHasMore(true);
   };
 
   // RTK Query hooks
