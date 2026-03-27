@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Form, Input, InputNumber, Select, Typography } from "antd";
+import { Button, Form, Input, InputNumber, Select, Typography } from "antd";
 import {
   SettingOutlined, ThunderboltOutlined, ClockCircleOutlined,
   SyncOutlined, CalendarOutlined, CheckOutlined, CheckCircleOutlined,
@@ -8,7 +8,6 @@ import NxModal from "../../../../components/Nx/NxModal";
 import NxTable from "../../../../components/Nx/NxTable";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import ButtonComponent from "../../../../components/ButtonComponent";
 import { useSearchJobsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -457,39 +456,36 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   );
 
   const footer = (
-    <div style={{
-      display:"flex", justifyContent:"space-between", alignItems:"center",
-      padding:"12px 24px", borderTop:"1px solid #f0f0f0",
-      background:"#fafafa", borderRadius:"0 0 12px 12px",
-    }}>
-      <ButtonComponent onClick={onClose} disabled={loading}
+    <>
+      <Button onClick={onClose} disabled={loading}
         style={{ minWidth:88, height:38, borderRadius:7, border:"1px solid #d9d9d9", background:"#fff", color:"#555", fontWeight:500, fontSize:13 }}>
         Cancel
-      </ButtonComponent>
+      </Button>
       <div style={{ display:"flex", gap:8 }}>
         {step === "schedule" && (
-          <ButtonComponent onClick={handleBack} disabled={loading}
+          <Button onClick={handleBack} disabled={loading}
             style={{ minWidth:80, height:38, borderRadius:7, border:"1px solid #d9d9d9", background:"#fff", color:"#555", fontWeight:500, fontSize:13 }}>
             ← Back
-          </ButtonComponent>
+          </Button>
         )}
         {step === "schedule" && (
-          <ButtonComponent type="primary" isPrimary onClick={handleStart} loading={loading}
+          <Button type="primary" onClick={handleStart} loading={loading}
             style={{
               minWidth:110, height:38, borderRadius:7,
               background:"linear-gradient(135deg, #1565C0, #1976D2)",
               border:"none", color:"#fff", fontWeight:600, fontSize:13,
               boxShadow:"0 2px 10px rgba(25,118,210,0.35)",
             }}>
-            {loading ? "Starting…" : "Start Job"}
-          </ButtonComponent>
+            Start Job
+          </Button>
         )}
       </div>
-    </div>
+    </>
   );
 
   return (
-    <NxModal isOpen={open} title={modalTitle} width={900} loading={loading} closeable handleCancel={onClose} footer={footer}>
+    <NxModal isOpen={open} title={modalTitle} width={900} loading={loading} closeable handleCancel={onClose} footer={footer}
+      className="[&_.ant-modal-footer]:flex [&_.ant-modal-footer]:justify-between [&_.ant-modal-footer]:items-center">
       <WizardStepBar current={step} />
       <div style={{ paddingBottom:4 }}>
         {step === "select" && (
@@ -500,6 +496,8 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
               loading={allJobsLoading}
               columns={jobColumns}
               useInfiniteScroll={true}
+              usePagination={false}
+              useSelect={false}
               useSearch={true}
               useAdvanceSearch={true}
               useColumnSettings={true}
