@@ -216,7 +216,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
 
   // Action column — AddJobIcon navigates to step 2
   const actionColumn = {
-    title: "", key: "select-action", width: 70, align: "center",
+    title: "ACTION", key: "select-action", width: 70, align: "center",
     render: (_, record) => (
       <button
         type="button"
@@ -350,7 +350,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
             <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
               <div style={{ flex:1, height:1, background:"#e8eaed" }} />
               <span style={{ fontWeight:600, fontSize:10.5, color:"#888", textTransform:"uppercase", letterSpacing:"0.08em", whiteSpace:"nowrap" }}>
-                Parameters
+                PARAMETERS
               </span>
               <div style={{ flex:1, height:1, background:"#e8eaed" }} />
             </div>
@@ -382,7 +382,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
           }}>
             <CheckCircleOutlined style={{ color:"#10b981", fontSize:15 }} />
             <Typography.Text type="secondary" style={{ fontSize:13 }}>
-              This job requires no additional parameters.
+              No parameters required
             </Typography.Text>
           </div>
         )}
