@@ -43,8 +43,8 @@ const MultiDestinationDetail = ({
 
   const navigate = useNavigate();
   const location = useLocation();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.accountId;
+  const customerId = location?.state?.customerId;
   const idMd = location?.state?.id;
 
   const tabOptions = [
@@ -92,8 +92,8 @@ const MultiDestinationDetail = ({
           "",
       breadcrumbName: "Detail Account",
       state: {
-        idAccount,
-        idCustomer,
+        accountId,
+        customerId,
       }
     },
     {
@@ -184,8 +184,8 @@ const MultiDestinationDetail = ({
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
 

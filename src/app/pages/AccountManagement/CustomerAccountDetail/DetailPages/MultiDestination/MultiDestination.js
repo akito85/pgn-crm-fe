@@ -18,10 +18,10 @@ import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
 /**
  * Multi destination list table module
- * @param {{ id?: number; idCustomer?: number }} props
+ * @param {{ accountId: number; customerId: number }} props
  * @returns
  */
-const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
+const MultiDestination = ({ accountId, customerId }) => {
   // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
@@ -147,8 +147,8 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
     <NxCardContainer header={"MULTI DESTINATION"}>
       <NxBaseContainer border>
         <MultiDestinationTable
-          idAccount={id}
-          idCustomer={idCustomer}
+          accountId={accountId}
+          customerId={customerId}
           handleInactivateModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleApproval={setShowApprovalModal}
@@ -156,7 +156,7 @@ const MultiDestination = ({ id = 0, idCustomer = 0 }) => {
         />
 
         <MultiDestinationApprovalModal
-          id={id}
+          accountId={accountId}
           isOpen={showApprovalModal}
           handleCancel={() => setShowApprovalModal(false)}
           afterFinish={triggerRefresh}

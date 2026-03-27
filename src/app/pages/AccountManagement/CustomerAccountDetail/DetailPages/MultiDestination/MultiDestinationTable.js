@@ -19,16 +19,16 @@ import {
  * The parent (`MultiDestination`) is responsible only for modals and permissions.
  *
  * @param {object}   props
- * @param {number}   [props.idAccount=0]                  - Account ID
- * @param {number}   [props.idCustomer=0]                 - Customer ID
+ * @param {number}   [props.accountId=0]                  - Account ID
+ * @param {number}   [props.customerId=0]                 - Customer ID
  * @param {Function} [props.handleInactivateModal]        - Opens the inactivate confirmation modal
  * @param {Function} [props.handleApprovalHistoryModal]   - Opens the approval history modal
  * @param {Function} [props.handleApproval]               - Triggers the approval action
  * @param {number}   [props.refreshSignal=0]              - Increment to trigger a page-0 refresh from the parent
  */
 const MultiDestinationTable = ({
-  idAccount = 0,
-  idCustomer = 0,
+  accountId,
+  customerId,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
@@ -78,7 +78,7 @@ const MultiDestinationTable = ({
       filterRules,
     };
 
-    dispatch(getMultiDestination({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getMultiDestination({ id: accountId, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -132,7 +132,7 @@ const MultiDestinationTable = ({
       };
 
       await dispatch(
-        getMultiDestination({ id: idAccount, body, isLoadMore: true })
+        getMultiDestination({ id: accountId, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -149,7 +149,7 @@ const MultiDestinationTable = ({
       searchs: search,
     };
 
-    dispatch(downloadMultiDestination({ body, id: idAccount }));
+    dispatch(downloadMultiDestination({ body, id: accountId }));
   };
 
   // --- Effects ---
@@ -165,7 +165,7 @@ const MultiDestinationTable = ({
     };
 
     setPage(0);
-    dispatch(getMultiDestination({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getMultiDestination({ id: accountId, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
@@ -183,8 +183,8 @@ const MultiDestinationTable = ({
         "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          accountId,
+          customerId,
           id,
         }
       }
@@ -197,8 +197,8 @@ const MultiDestinationTable = ({
         "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          accountId,
+          customerId,
         }
       }
     ),
@@ -210,8 +210,8 @@ const MultiDestinationTable = ({
         "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          accountId,
+          customerId,
           id,
         }
       }

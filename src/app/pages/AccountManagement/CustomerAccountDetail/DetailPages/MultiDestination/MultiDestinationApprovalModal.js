@@ -19,11 +19,11 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 /**
  * Modal for approving or rejecting pending multi-destination records.
  * Displays a two-step wizard: select records + enter remark, then confirm.
- * @param {{ id?: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @param {{ accountId: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
  * @returns
  */
 const MultiDestinationApprovalModal = ({
-  id = 0,
+  accountId,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {}
@@ -75,7 +75,7 @@ const MultiDestinationApprovalModal = ({
 
       dispatch(
         getMultiDestinationApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: false
         })
@@ -128,7 +128,7 @@ const MultiDestinationApprovalModal = ({
 
       dispatch(
         getMultiDestinationApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: true
         })

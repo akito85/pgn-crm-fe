@@ -38,9 +38,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   const dispatch = useDispatch();
 
-  const {
-    data_accountDetail,
-  } = useSelector((state) => state.accountManagement);
+  const isCreate = formType === "create";
+  const isUpdate = formType === "update";
 
   const {
     loading_listMdApprovalOption,
@@ -64,14 +63,9 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.accountId;
+  const customerId = location?.state?.customerId;
   const idMd = location?.state?.id;
-  const subjectId = location?.state?.subjectId;
-  const objectId = location?.state?.objectId;
-
-  const isCreate = formType === "create";
-  const isUpdate = formType === "update";
 
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
@@ -139,8 +133,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       list_mdApprovalOptions?.length
     ) {
       const {
-        subjectId,
-        objectId,
+        accountId,
         accountName,
         accountNumber,
         sor: accountSor,
@@ -163,8 +156,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       } = detail;
 
       form.setFieldsValue({
-        subjectId,
-        objectId,
+        accountId,
         account: `${accountNumber}-${accountName}`,
         accountSor,
         accountCostCenter,
@@ -194,10 +186,9 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   useEffect(() => {
     if (isUpdate && detail?.attachments)
-      setAttachmentDataSource([...detail.attachments.map((item) => ({
-        ...item,
-        key: item.id,
-        dataType: "exist",
+      setAttachmentDataSource([...detail.attachments.map((attachment) => ({
+        ...attachment,
+        key: attachment.id,
       }))]);
   }, [detail]);
 
@@ -233,8 +224,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           "",
       breadcrumbName: "Detail Account",
       state: {
-        idAccount,
-        idCustomer,
+        accountId,
+        customerId,
       }
     },
     {
@@ -250,54 +241,60 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (current === 2) {
-          if (attachmentIsRequired && !attachmentDataSource.length) {
-            const errorBody = {
-              title: "Failed",
-              description: `Please upload at least one attachment`,
+        if (submitType === "submit") {
+          if (current === 2) {
+            if (attachmentIsRequired && !attachmentDataSource.length) {
+              const errorBody = {
+                title: "Failed",
+                description: `Please upload at least one attachment`,
+              };
+
+              dispatch(showModalError(errorBody));
+
+              throw new Error("There was no file attached");
+            }
+          }
+          else {
+            await form.validateFields(formFields[current]);
+
+            const {
+              accountId: relatedAccountId,
+              description,
+              startDate,
+              endDate,
+              appHierId,
+            } = form.getFieldsValue(true);
+
+            const body = {
+              id: isUpdate ? idMd : undefined,
+              accountId,
+              relatedAccountId,
+              description,
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
+              appHierId,
+              validationType: validationTypes[current],
             };
 
-            dispatch(showModalError(errorBody));
-
-            throw new Error("There was no file attached");
+            await dispatch(validateCreateUpdate({
+              body,
+              services: accountManagementService,
+              endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+              type: formType,
+            }))
+            .unwrap();
           }
-        }
-        else {
-          await form.validateFields(formFields[current]);
-
-          const {
-            objectId,
-            description,
-            startDate,
-            endDate,
-            appHierId,
-          } = form.getFieldsValue(true);
-
-          const body = {
-            id: isUpdate ? idMd : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId,
-            objectId,
-            description,
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
-            appHierId,
-            validationType: validationTypes[current],
-          };
-
-          await dispatch(validateCreateUpdate({
-            body,
-            services: accountManagementService,
-            endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
-            type: formType,
-          }))
-          .unwrap();
+        } else if (submitType === "draft") {
+          await form.validateFields(["account"]);
+        } else {
+          return;
         }
       } catch (err) {
         return;
       }
 
       const {
-        objectId,
+        accountId: relatedAccountId,
         description,
         startDate,
         endDate,
@@ -305,9 +302,9 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       } = form.getFieldsValue(true);
 
       const body = {
-        id: isUpdate ? idMd : undefined,
-        subjectId: data_accountDetail?.accountInformation?.accountId,
-        objectId,
+        id: idMd,
+        accountId,
+        relatedAccountId,
         description,
         startDate: NxDate.formatForAPI(startDate),
         endDate: NxDate.formatForAPI(endDate),
@@ -335,18 +332,18 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
-    if (idAccount && idCustomer && accountType) {
+    if (accountId && customerId && accountType) {
       if (isStandard) {
-        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
+        dispatch(getAccountStandardDetail({ customerId, accountId }));
       } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
+        dispatch(getAccountOneTimeDetail({ customerId, accountId }));
       }
     }
-  }, [dispatch, idAccount, idCustomer, accountType]);
+  }, [dispatch, accountId, customerId, accountType]);
 
   const setAccount = (
     {
-      objectId,
+      accountId,
       accountNumber,
       accountName,
       accountSor,
@@ -366,7 +363,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     }
   ) => {
     form.setFieldsValue({
-      objectId,
+      accountId,
       account: `${accountNumber}-${accountName}`,
       accountSor,
       accountCostCenter,
@@ -401,7 +398,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             isUpdate={isUpdate}
             isDraft={isDraft}
             setAccount={setAccount}
-            accountId={idAccount}
+            accountId={accountId}
             key={`multi-destination-tab-0`}
           />
         )
@@ -415,11 +412,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         content: (
           <NxApprovalInput
             form={form}
-            hierarchyDetails={(list_mdApprovalHierarchyDetail || []).map((d, i) => ({
-              ...d,
-              employeeDetail: d.employeeDetail.map((e, j) => ({ ...e, key: `employee-detail-${j}` })),
-              key: `detail-detail-${i}`,
-            }))}
+            hierarchyDetails={list_mdApprovalHierarchyDetail || []}
             options={list_mdApprovalOptions}
             handleSelectHiararchy={handleSelectHiararchy}
             key={`multi-destination-tab-1`}
@@ -469,7 +462,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         await form.validateFields(formFields[current]);
 
         const {
-          objectId,
+          accountId: relatedAccountId,
           description,
           startDate,
           endDate,
@@ -478,8 +471,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
         const body = {
           id: isUpdate ? idMd : undefined,
-          subjectId: data_accountDetail?.accountInformation?.accountId,
-          objectId,
+          accountId,
+          relatedAccountId,
           description,
           startDate: NxDate.formatForAPI(startDate),
           endDate: NxDate.formatForAPI(endDate),
@@ -524,7 +517,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           await form.validateFields(formFields[i]);
 
           const {
-            objectId,
+            accountId: relatedAccountId,
             description,
             startDate,
             endDate,
@@ -532,9 +525,9 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           } = form.getFieldsValue(true);
 
           const body = {
-            id: isUpdate ? idMd : undefined,
-            subjectId: data_accountDetail?.accountInformation?.accountId,
-            objectId,
+            id: idMd,
+            accountId,
+            relatedAccountId,
             description,
             startDate: NxDate.formatForAPI(startDate),
             endDate: NxDate.formatForAPI(endDate),
@@ -577,7 +570,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   const handleSubmitForm = () => {
     const {
-      objectId,
+      accountId: relatedAccountId,
       description,
       startDate,
       endDate,
@@ -591,9 +584,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     ]);
 
     const body = {
-      id: idMd,
-      subjectId: data_accountDetail?.accountInformation?.accountId,
-      objectId,
+      accountId,
+      relatedAccountId,
       description,
       startDate: NxDate.formatForAPI(startDate),
       endDate: NxDate.formatForAPI(endDate),
@@ -618,8 +610,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             detailRoute,
             {
               state: {
-                idAccount,
-                idCustomer,
+                accountId,
+                customerId,
               }
             }
           );
@@ -635,8 +627,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
               detailRoute,
               {
                 state: {
-                  idAccount,
-                  idCustomer,
+                  accountId,
+                  customerId,
                 }
               }
             );
@@ -657,8 +649,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         list_mdApprovalOptions?.length
       ) {
         const {
-          subjectId,
-          objectId,
+          accountId: relatedAccountId,
           accountName,
           accountNumber,
           sor: accountSor,
@@ -681,8 +672,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         } = detail;
 
         form.setFieldsValue({
-          subjectId,
-          objectId,
+          accountId,
+          relatedAccountId,
           account: `${accountNumber}-${accountName}`,
           accountSor,
           accountCostCenter,
@@ -710,11 +701,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       }
 
       if (detail?.attachments)
-        setAttachmentDataSource([...detail.attachments.map((item) => ({
-          ...item,
-          key: item.id,
-          dataType: "exist",
-        }))]);
+        setAttachmentDataSource([...detail.attachments]);
       setDeletedAttachments([]);
 
       setCurrent(0);
@@ -728,8 +715,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         <HeaderDetail
           data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
           dispatch={dispatch}
-          idAccount={idAccount}
-          idCustomer={idCustomer}
+          idAccount={accountId}
+          idCustomer={customerId}
           type={accountType}
         />
         <Spin
@@ -818,11 +805,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
               formId={"multiDestinationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={(list_mdApprovalHierarchyDetail || []).map((d, i) => ({
-                ...d,
-                employeeDetail: d.employeeDetail.map((e, j) => ({ ...e, key: `employee-detail-${j}` })),
-                key: `detail-detail-${i}`,
-              }))}
+              approvalData={list_mdApprovalHierarchyDetail || []}
               type={confirmationType}
               attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
