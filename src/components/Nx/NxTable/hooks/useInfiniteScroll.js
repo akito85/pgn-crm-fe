@@ -29,6 +29,10 @@ const useInfiniteScroll = ({
   // simultaneously mounted NxTable instances have independent counters.
   const loadGenRef = React.useRef(0);
 
+  // Fix 7.2: track the last scroll position where we triggered a load.
+  // This prevents re-triggering on the same scroll position after data loads.
+  const lastTriggerScrollTopRef = React.useRef(0);
+
   // ── Shared trigger ──────────────────────────────────────────────────────
   const triggerLoad = React.useCallback(() => {
     if (!hasMoreRef.current || isLoadingMoreRef.current) return;
@@ -42,6 +46,9 @@ const useInfiniteScroll = ({
         if (loadGenRef.current === gen) {
           isLoadingMoreRef.current = false;
           setIsLoadingMore(false);
+          // Fix 7.2: reset the trigger position after load completes so
+          // subsequent scrolls can fire again.
+          lastTriggerScrollTopRef.current = 0;
         }
       });
   }, []);
@@ -74,9 +81,20 @@ const useInfiniteScroll = ({
       infinitePhaseRef.current = 'scroll';
 
       const onScroll = () => {
-        if (!hasMoreRef.current || isLoadingMoreRef.current) return;
+      // If not scrollable but has more data, keep loading until scrollable
+      if (!hasMoreRef.current || isLoadingMoreRef.current) {
+        // No more data or already loading - proceed to scroll phase anyway
+        startScrollPhase(scrollRoot);
+        return;
+      }
         const { scrollTop, clientHeight, scrollHeight } = scrollRoot;
-        if (scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD_PX) {
+        // Fix 7.2: with virtual scrolling, scrollHeight stays constant. Track
+        // the last trigger position to ensure we only fire when scrolling
+        // beyond the previous trigger point.
+        const nearBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD_PX;
+        const hasScrolledPastLastTrigger = scrollTop > lastTriggerScrollTopRef.current + 10;
+        if (nearBottom && hasScrolledPastLastTrigger) {
+          lastTriggerScrollTopRef.current = scrollTop;
           triggerLoad();
         }
       };
@@ -97,7 +115,12 @@ const useInfiniteScroll = ({
         return;
       }
 
-      if (!hasMoreRef.current || isLoadingMoreRef.current) return;
+      // If not scrollable but has more data, keep loading until scrollable
+      if (!hasMoreRef.current || isLoadingMoreRef.current) {
+        // No more data or already loading - proceed to scroll phase anyway
+        startScrollPhase(scrollRoot);
+        return;
+      }
 
       const firstRow = scrollRoot.querySelector(
         'tr.ant-table-row, tr:not(.ant-table-placeholder):not(.ant-table-measure-row)'
@@ -107,9 +130,12 @@ const useInfiniteScroll = ({
         return;
       }
 
-      const rowH       = firstRow.getBoundingClientRect().height;
+      const rowH = firstRow.getBoundingClientRect().height;
       const containerH = scrollRoot.clientHeight;
-      const rowsNeeded = Math.ceil(containerH / rowH);
+
+      // Fix: Calculate minimum rows needed for scrollability with small datasets
+      const MIN_SCROLL_OVERFLOW_PX = 100;
+      const rowsForScroll = Math.ceil((containerH + MIN_SCROLL_OVERFLOW_PX) / rowH);
 
       // Fix 4.3 / virtual compat: when virtual=true the DOM row count reflects
       // only the visible window (~20-40 rows), not total loaded data. Use the
@@ -120,7 +146,7 @@ const useInfiniteScroll = ({
             'tr.ant-table-row, tr:not(.ant-table-placeholder):not(.ant-table-measure-row)'
           ).length;
 
-      if (currentRows < rowsNeeded) {
+      if (currentRows < rowsForScroll) {
         triggerLoad();
       } else {
         startScrollPhase(scrollRoot);

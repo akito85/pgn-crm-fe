@@ -325,9 +325,23 @@ const NxTable = ({
 
   // ── Initial load guarantee ────────────────────────────────────────────────
   const hasTriggeredInitialLoad = React.useRef(false);
+  // Fix: Detect data reset (non-empty → empty) and re-trigger initial load
+  const dataWasResetRef = React.useRef(false);
   // Fix 2.2: loading and resolvedDataSource.length added to deps so the mount
   // snapshot cannot capture a stale loading=false from before RTK Query resolves.
   React.useEffect(() => {
+    // Detect data reset: non-empty → empty transition (indicates refresh/delete)
+    const dataWasCleared =
+      prevDataSourceRef.current.length > 0 &&
+      resolvedDataSource.length === 0;
+
+    if (dataWasCleared) {
+      hasTriggeredInitialLoad.current = false;
+      dataWasResetRef.current = true;
+    }
+
+    // Note: prevDataSourceRef.current is updated by the stable ID map logic above
+
     if (
       !hasTriggeredInitialLoad.current &&
       !loading &&
@@ -336,6 +350,7 @@ const NxTable = ({
       typeof onInitialLoad === 'function'
     ) {
       hasTriggeredInitialLoad.current = true;
+      dataWasResetRef.current = false;
       onInitialLoad();
     }
   }, [loading, resolvedDataSource.length, fetchFailed, onInitialLoad]); // Fix 2.2: full deps

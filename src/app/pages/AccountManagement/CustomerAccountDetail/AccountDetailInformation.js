@@ -385,8 +385,8 @@ const AccountDetailInformation = ({
       case dataTabs.md:
         return (
           <MultiDestination
-            id={id}
-            idCustomer={idCustomer}
+            accountId={id}
+            customerId={idCustomer}
           />
         )
       default:

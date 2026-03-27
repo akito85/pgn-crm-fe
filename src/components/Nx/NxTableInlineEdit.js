@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Table, Input, InputNumber, Select, Empty } from "antd";
 
 const { Option } = Select;
@@ -10,8 +10,7 @@ const ROW_WHITE   = "#FFFFFF";
 const ROW_HOVER   = "#EBF2FA";
 const FONT_FAMILY = "'PlusJakartaSans', 'PublicSans', sans-serif";
 
-// ── Shared CSS factory (mirrors NxTable's <style> block exactly) ──────────────
-// Pass the scoped idTable so every rule is scoped the same way NxTable does it.
+// ── Shared CSS factory — called once per unique idTable via useMemo ───────────
 const buildTableStyles = (idTable) => `
   #${idTable} .ant-table-content {
     position: relative;
@@ -135,7 +134,7 @@ const buildTableStyles = (idTable) => `
     padding: 0 8px !important;
   }
 
-  /* ── Alternating row colors — exclude placeholder & measure rows (bug fix) ── */
+  /* ── Alternating row colors — exclude placeholder & measure rows ── */
   #${idTable} .ant-table-tbody > tr:not(.ant-table-placeholder):not(.ant-table-measure-row):nth-child(odd) > td {
     background-color: ${ROW_WHITE} !important;
   }
@@ -153,7 +152,7 @@ const buildTableStyles = (idTable) => `
     background-color: ${ROW_WHITE} !important;
   }
 
-  /* ── Empty / placeholder row — always white, never inherits stripe color ── */
+  /* ── Empty / placeholder row — always white ── */
   #${idTable} .ant-table-placeholder > td {
     background-color: ${ROW_WHITE} !important;
     border-left: 1px solid ${BORDER_COL} !important;
@@ -197,10 +196,14 @@ const buildTableStyles = (idTable) => `
   #${idTable} .ant-select-selection-placeholder {
     font-size: 12px;
   }
+
+  /* ── Icon button hover — CSS instead of inline JS handlers ── */
+  #${idTable} .nx-btn-edit:hover  { background: #e3f2fd; }
+  #${idTable} .nx-btn-trash:hover { background: #fff1f0; }
 `;
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
-const EditIcon = () => (
+// ── Static icon nodes — module-level constants, never re-created ──────────────
+const EDIT_ICON = (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7.50004 5.8335H5.00004C4.07957 5.8335 3.33337 6.57969 3.33337 7.50016V15.0002C3.33337 15.9206 4.07957 16.6668 5.00004 16.6668H12.5C13.4205 16.6668 14.1667 15.9206 14.1667 15.0002V12.5002" stroke="#1976D2" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M7.5 12.5H10L17.0833 5.41669C17.7737 4.72634 17.7737 3.60705 17.0833 2.91669C16.393 2.22634 15.2737 2.22634 14.5833 2.91669L7.5 10V12.5" stroke="#1976D2" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
@@ -208,7 +211,7 @@ const EditIcon = () => (
   </svg>
 );
 
-const TrashIcon = () => (
+const TRASH_ICON = (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3.33337 5.8335H16.6667" stroke="#E53935" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M8.33337 9.1665V14.1665" stroke="#E53935" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
@@ -218,7 +221,7 @@ const TrashIcon = () => (
   </svg>
 );
 
-// ── Button styles (same as before) ────────────────────────────────────────────
+// ── Static style objects — module-level, zero GC pressure ────────────────────
 const iconBtnStyle = {
   border: "none",
   background: "none",
@@ -260,6 +263,15 @@ const saveBtnStyle = {
   fontFamily: "inherit",
 };
 
+const actionCellStyle   = { display: "flex", alignItems: "center", gap: "4px", justifyContent: "center" };
+const headerCellStyle   = { textTransform: "uppercase", fontSize: "10px", cursor: "default" };
+const actionColCellStyle = { textAlign: "center", whiteSpace: "nowrap", overflow: "hidden", fontSize: "12px", padding: "4px 8px" };
+
+// ── Stable onHeaderCell / onCell callbacks — same reference every call ────────
+const onHeaderCellDefault = () => ({ style: headerCellStyle });
+const onActionHeaderCell  = () => ({ style: headerCellStyle });
+const onActionCell        = () => ({ style: actionColCellStyle });
+
 /**
  * NxTableInlineEdit
  *
@@ -286,7 +298,6 @@ const saveBtnStyle = {
  *   showDelete        {boolean}   — show delete button (default: true)
  *   emptyText         {string}    — empty state message
  *   editMode          {string}    — 'full' | 'deleteOnly' (default: 'full')
- *   onAddRow          {Function}  — callback to add a new row (optional)
  *   autoEditOnAppend  {boolean}   — auto-enter edit mode when a row is appended
  *                                   (default: true). Set false when rows are
  *                                   pre-filled externally (modal picker, import).
@@ -301,56 +312,57 @@ const NxTableInlineEdit = ({
   showDelete = true,
   emptyText = "No data. Click Create to add a new row.",
   editMode = "full",
-  onAddRow,
   autoEditOnAppend = true,
 }) => {
   const [editingKey, setEditingKey]       = useState(null);
   const [editingValues, setEditingValues] = useState({});
-  const [isNewRow, setIsNewRow]           = useState(false);
-  const prevLengthRef                     = useRef(dataSource.length);
+  // isNewRow doesn't drive any JSX — ref avoids an extra state-triggered render
+  const isNewRowRef   = useRef(false);
+  const prevLengthRef = useRef(dataSource.length);
 
-  // ── Auto-enter edit mode when a new row is appended ──────────────────────
+  // ── CSS string — regenerated only when idTable changes (practically never) ─
+  const tableStyles = useMemo(() => buildTableStyles(idTable), [idTable]);
+
+  // ── Auto-enter edit mode when a new row is appended ───────────────────────
   useEffect(() => {
     const prevLength = prevLengthRef.current;
     prevLengthRef.current = dataSource.length;
 
-    if (autoEditOnAppend && dataSource.length > prevLength) {
+    if (autoEditOnAppend && editMode !== "deleteOnly" && dataSource.length > prevLength) {
       const newRow = dataSource[dataSource.length - 1];
       if (newRow) {
         setEditingKey(newRow[rowKey]);
         setEditingValues({ ...newRow });
-        setIsNewRow(true);
+        isNewRowRef.current = true;
       }
     }
-  }, [dataSource, rowKey, autoEditOnAppend]);
+  }, [dataSource, rowKey, autoEditOnAppend, editMode]);
 
-  // ── Edit state helpers ────────────────────────────────────────────────────
-  const isEditing = (record) => record[rowKey] === editingKey;
-
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleEditStart = useCallback(
     (record) => {
       setEditingKey(record[rowKey]);
       setEditingValues({ ...record });
-      setIsNewRow(false);
+      isNewRowRef.current = false;
     },
     [rowKey]
   );
 
   const handleEditCancel = useCallback(() => {
-    if (isNewRow) {
-      const newData = dataSource.filter((row) => row[rowKey] !== editingKey);
-      onDataChange?.(newData);
+    if (isNewRowRef.current) {
+      onDataChange?.(dataSource.filter((row) => row[rowKey] !== editingKey));
     }
     setEditingKey(null);
     setEditingValues({});
-    setIsNewRow(false);
-  }, [isNewRow, dataSource, editingKey, onDataChange, rowKey]);
+    isNewRowRef.current = false;
+  }, [dataSource, editingKey, onDataChange, rowKey]);
 
   const handleEditSave = useCallback(() => {
-    const newData = dataSource.map((row) =>
-      row[rowKey] === editingKey ? { ...row, ...editingValues } : row
+    onDataChange?.(
+      dataSource.map((row) =>
+        row[rowKey] === editingKey ? { ...row, ...editingValues } : row
+      )
     );
-    onDataChange?.(newData);
     setEditingKey(null);
     setEditingValues({});
   }, [dataSource, editingKey, editingValues, onDataChange, rowKey]);
@@ -361,298 +373,234 @@ const NxTableInlineEdit = ({
 
   const handleDelete = useCallback(
     (recordKey) => {
-      const newData = dataSource.filter((row) => row[rowKey] !== recordKey);
-      onDataChange?.(newData);
-      if (editingKey === recordKey) {
-        setEditingKey(null);
-        setEditingValues({});
-      }
+      onDataChange?.(dataSource.filter((row) => row[rowKey] !== recordKey));
+      setEditingKey((key) => (key === recordKey ? null : key));
     },
-    [dataSource, editingKey, onDataChange, rowKey]
+    [dataSource, onDataChange, rowKey]
   );
 
-  // ── Cell renderer (view or edit input) ───────────────────────────────────
-  const renderCell = (col, text, record, index) => {
-    const editing = isEditing(record);
-
-    if (!col.editable || !editing) {
-      return col.render ? col.render(text, record, index) : (text ?? "—");
-    }
-
-    const value = editingValues[col.dataIndex];
-
-    // Wrap in a div so top/bottom padding is part of the content flow,
-    // not the td box — matches NxTable's consistent vertical spacing.
-    if (col.inputType === "select") {
-      return (
-        <div style={{ padding: "4px 0" }}>
-          <Select
-            value={value || undefined}
-            placeholder={col.placeholder || `Select ${col.title}`}
-            onChange={(v) => handleEditChange(col.dataIndex, v)}
-            style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
-          >
-            {(col.selectOptions || []).map((opt) => (
-              <Option key={opt.value} value={opt.value}>
-                {opt.label}
-              </Option>
-            ))}
-          </Select>
-        </div>
-      );
-    }
-
-    if (col.inputType === "number") {
-      return (
-        <div style={{ padding: "4px 0" }}>
-          <InputNumber
-            value={value}
-            placeholder={col.placeholder}
-            min={col.min ?? 0}
-            max={col.max}
-            precision={col.precision ?? 0}
-            onChange={(v) => handleEditChange(col.dataIndex, v)}
-            style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
+  // ── Stable empty locale — only rebuilds when emptyText changes ────────────
+  const tableLocale = useMemo(
+    () => ({
+      emptyText: (
+        <div style={{ padding: "20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: "12px" }}>
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "12px", color: "#999" }}>
+                {emptyText}
+              </span>
+            }
           />
         </div>
-      );
-    }
-
-    return (
-      <div style={{ padding: "4px 0" }}>
-        <Input
-          value={value ?? ""}
-          placeholder={col.placeholder || col.title}
-          maxLength={col.maxLength}
-          onChange={(e) => handleEditChange(col.dataIndex, e.target.value)}
-          style={{ height: "34px", padding: "4px 8px", fontFamily: FONT_FAMILY }}
-        />
-      </div>
-    );
-  };
-
-  // ── Column processing — mirrors NxTable's processColumn pattern ───────────
-  const processedColumns = columns.map((col) => {
-    // Resolve text alignment exactly as NxTable does
-    let textAlign = "left";
-    if (col.isNumber || col.align === "right") textAlign = "right";
-    else if (col.isClassification) textAlign = "center";
-
-    const colKey = col.key || col.dataIndex;
-
-    return {
-      ...col,
-      key: colKey,
-      // onHeaderCell: same uppercase small-caps style as NxTable
-      onHeaderCell: () => ({
-        style: {
-          textTransform: "uppercase",
-          fontSize: "10px",
-          cursor: "default",
-        },
-      }),
-      // onCell: same ellipsis + alignment pattern as NxTable
-      onCell: (record) => ({
-        style: {
-          textAlign,
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          fontSize: "12px",
-        },
-      }),
-      render: (text, record, index) => renderCell(col, text, record, index),
-    };
-  });
-
-  // ── Actions column ────────────────────────────────────────────────────────
-  const actionsColumn = {
-    title: "ACTION",
-    key: "__actions__",
-    width: 200,
-    onHeaderCell: () => ({
-      style: { textTransform: "uppercase", fontSize: "10px", cursor: "default" },
+      ),
     }),
-    onCell: () => ({
-      style: {
-        textAlign: "center",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        fontSize: "12px",
-        padding: "4px 8px",
-      },
-    }),
-    render: (_, record) => {
-      const editing = isEditing(record);
+    [emptyText]
+  );
 
-      if (editing) {
+  // ── rowClassName — stable, only changes when editingKey changes ───────────
+  const rowClassName = useCallback(
+    (record) => (record[rowKey] === editingKey ? "nx-row-editing" : ""),
+    [rowKey, editingKey]
+  );
+
+  // ── Column definitions — rebuilt only when deps actually change ───────────
+  // Deps: columns shape, which row is being edited, current field values,
+  // editMode, showDelete, and the stable handler references.
+  const tableColumns = useMemo(() => {
+    // Build one onCell per column (closes over textAlign) rather than per cell.
+    const makeOnCell = (textAlign) => () => ({
+      style: { textAlign, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: "12px" },
+    });
+
+    const processed = columns.map((col, colIndex) => {
+      let textAlign = "left";
+      if (col.isNumber || col.align === "right") textAlign = "right";
+      else if (col.isClassification) textAlign = "center";
+
+      return {
+        ...col,
+        key: col.key || col.dataIndex,
+        fixed: colIndex === 0 ? "left" : col.fixed,
+        onHeaderCell: onHeaderCellDefault,
+        onCell: makeOnCell(textAlign),
+        render: (text, record, index) => {
+          const editing = record[rowKey] === editingKey;
+
+          if (!col.editable || !editing) {
+            if (col.render) return col.render(text, record, index);
+            if (col.inputType === "select" && col.selectOptions?.length) {
+              const match = col.selectOptions.find((opt) => opt.value === text);
+              return match ? match.label : (text ?? "—");
+            }
+            return text ?? "—";
+          }
+
+          const value = editingValues[col.dataIndex];
+
+          if (col.inputType === "select") {
+            return (
+              <div style={{ padding: "4px 0" }}>
+                <Select
+                  value={value != null ? value : undefined}
+                  placeholder={col.placeholder || `Select ${col.title}`}
+                  onChange={(v) => handleEditChange(col.dataIndex, v)}
+                  style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
+                >
+                  {(col.selectOptions || []).map((opt) => (
+                    <Option key={opt.value} value={opt.value}>{opt.label}</Option>
+                  ))}
+                </Select>
+              </div>
+            );
+          }
+
+          if (col.inputType === "number") {
+            return (
+              <div style={{ padding: "4px 0" }}>
+                <InputNumber
+                  value={value}
+                  placeholder={col.placeholder}
+                  min={col.min ?? 0}
+                  max={col.max}
+                  precision={col.precision ?? 0}
+                  onChange={(v) => handleEditChange(col.dataIndex, v)}
+                  style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
+                />
+              </div>
+            );
+          }
+
+          return (
+            <div style={{ padding: "4px 0" }}>
+              <Input
+                value={value ?? ""}
+                placeholder={col.placeholder || col.title}
+                maxLength={col.maxLength}
+                onChange={(e) => handleEditChange(col.dataIndex, e.target.value)}
+                style={{ height: "34px", padding: "4px 8px", fontFamily: FONT_FAMILY }}
+              />
+            </div>
+          );
+        },
+      };
+    });
+
+    const actionsColumn = {
+      title: "ACTION",
+      fixed: "right",
+      key: "__actions__",
+      width: 200,
+      onHeaderCell: onActionHeaderCell,
+      onCell: onActionCell,
+      render: (_, record) => {
+        const editing = record[rowKey] === editingKey;
+
+        if (editing) {
+          return (
+            <div style={actionCellStyle}>
+              {showDelete && (
+                <button type="button" className="nx-btn-trash" style={iconBtnStyle}
+                  onClick={() => handleDelete(record[rowKey])} title="Delete">
+                  {TRASH_ICON}
+                </button>
+              )}
+              <button type="button" style={cancelBtnStyle} onClick={handleEditCancel}>Cancel</button>
+              <button type="button" style={saveBtnStyle}   onClick={handleEditSave}>Save</button>
+            </div>
+          );
+        }
+
+        if (editMode === "deleteOnly") {
+          if (!showDelete) return null;
+          return (
+            <div style={actionCellStyle}>
+              <button type="button" className="nx-btn-trash" style={iconBtnStyle}
+                onClick={() => handleDelete(record[rowKey])} title="Delete">
+                {TRASH_ICON}
+              </button>
+            </div>
+          );
+        }
+
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center" }}>
+          <div style={actionCellStyle}>
+            <button type="button" className="nx-btn-edit" style={iconBtnStyle}
+              onClick={() => handleEditStart(record)} title="Edit">
+              {EDIT_ICON}
+            </button>
             {showDelete && (
-              <button
-                type="button"
-                onClick={() => handleDelete(record[rowKey])}
-                title="Delete"
-                style={iconBtnStyle}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#fff1f0")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-              >
-                <TrashIcon />
+              <button type="button" className="nx-btn-trash" style={iconBtnStyle}
+                onClick={() => handleDelete(record[rowKey])} title="Delete">
+                {TRASH_ICON}
               </button>
             )}
-            <button type="button" onClick={handleEditCancel} style={cancelBtnStyle}>
-              Cancel
-            </button>
-            <button type="button" onClick={handleEditSave} style={saveBtnStyle}>
-              Save
-            </button>
           </div>
         );
-      }
+      },
+    };
 
-      if (editMode === "deleteOnly") {
-        return showDelete ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center" }}>
-            <button
-              type="button"
-              onClick={() => handleDelete(record[rowKey])}
-              title="Delete"
-              style={iconBtnStyle}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#fff1f0")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-            >
-              <TrashIcon />
-            </button>
-          </div>
-        ) : null;
-      }
+    return [...processed, actionsColumn];
+  }, [
+    columns, rowKey, editingKey, editingValues, editMode, showDelete,
+    handleEditStart, handleEditCancel, handleEditSave, handleEditChange, handleDelete,
+  ]);
 
-      // Default: edit + delete
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: "center" }}>
-          <button
-            type="button"
-            onClick={() => handleEditStart(record)}
-            title="Edit"
-            style={iconBtnStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#e3f2fd")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-          >
-            <EditIcon />
-          </button>
-          {showDelete && (
-            <button
-              type="button"
-              onClick={() => handleDelete(record[rowKey])}
-              title="Delete"
-              style={iconBtnStyle}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#fff1f0")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
-            >
-              <TrashIcon />
-            </button>
-          )}
-        </div>
-      );
-    },
-  };
-
-  // ── rowClassName — mirrors NxTable's customRowClassName pattern ───────────
-  const rowClassName = (record) =>
-    isEditing(record) ? "nx-row-editing" : "";
-
-  // ── Footer bar — same layout as NxTable's "no-pagination" footer ─────────
-  const footerBar = (
-    <div
-      style={{
-        position: "relative",
-        zIndex: 1,
-        marginTop: "-1px",
-        borderLeft: `1px solid ${BORDER_COL}`,
-        borderRight: `1px solid ${BORDER_COL}`,
-        borderBottom: `1px solid ${BORDER_COL}`,
-        borderTop: `1px solid ${BORDER_COL}`,
-        borderRadius: "0 0 8px 8px",
-        background: "#fff",
-        padding: "6px 12px",
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        gap: "8px",
-      }}
-    >
-      <span style={{ fontSize: "12px", color: "#6B7280" }}>
-        Showing {dataSource.length} of {dataSource.length} entries
-      </span>
-      {!loading && dataSource.length > 0 && (
-        <>
-          <span
-            style={{
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
-              background: "#D1D5DB",
-              display: "inline-block",
-            }}
-          />
-          <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>
-            All data showed
-          </span>
-        </>
-      )}
-    </div>
+  // ── Footer — only rebuilds when row count or loading changes ─────────────
+  const footerBar = useMemo(
+    () => (
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          marginTop: "-1px",
+          borderLeft: `1px solid ${BORDER_COL}`,
+          borderRight: `1px solid ${BORDER_COL}`,
+          borderBottom: `1px solid ${BORDER_COL}`,
+          borderTop: `1px solid ${BORDER_COL}`,
+          borderRadius: "0 0 8px 8px",
+          background: "#fff",
+          padding: "6px 12px",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <span style={{ fontSize: "12px", color: "#6B7280" }}>
+          Showing {dataSource.length} of {dataSource.length} entries
+        </span>
+        {!loading && dataSource.length > 0 && (
+          <>
+            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
+            <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: "500" }}>All data showed</span>
+          </>
+        )}
+      </div>
+    ),
+    [dataSource.length, loading]
   );
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div id={idTable}>
-      {/* Shared CSS — generated by the same factory as NxTable would use */}
-      <style>{buildTableStyles(idTable)}</style>
-
+      <style>{tableStyles}</style>
       <div style={{ position: "relative" }}>
         <Table
           dataSource={dataSource}
           rowKey={rowKey}
-          columns={[...processedColumns, actionsColumn]}
-          scroll={{ y: 380 }}
+          columns={tableColumns}
+          scroll={{ x: "max-content", y: 380 }}
           bordered
           pagination={false}
           size="small"
           loading={loading}
           tableLayout="fixed"
           rowClassName={rowClassName}
-          locale={{
-            emptyText: (
-              <div
-                style={{
-                  padding: "20px",
-                  textAlign: "center",
-                  color: "#999",
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "12px",
-                }}
-              >
-                <Empty
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  description={
-                    <span
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "12px",
-                        color: "#999",
-                      }}
-                    >
-                      {emptyText}
-                    </span>
-                  }
-                />
-              </div>
-            ),
-          }}
+          locale={tableLocale}
           style={{ margin: 0 }}
         />
       </div>
-
       {footerBar}
     </div>
   );

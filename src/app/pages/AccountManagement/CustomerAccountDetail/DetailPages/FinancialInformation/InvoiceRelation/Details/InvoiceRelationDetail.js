@@ -44,8 +44,8 @@ const InvoiceRelationDetail = ({
 
   const navigate = useNavigate();
   const location = useLocation();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idIr = location?.state?.id;
 
   const tabOptions = [
@@ -76,7 +76,7 @@ const InvoiceRelationDetail = ({
 
   const {
     approvalType,
-    relatedAccountNumber,
+    accountNumber,
     id,
     createdDate,
     createdBy,
@@ -203,8 +203,8 @@ const InvoiceRelationDetail = ({
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
 
@@ -273,7 +273,7 @@ const InvoiceRelationDetail = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${accountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
         loading={loading_approveRejectIr}
       />

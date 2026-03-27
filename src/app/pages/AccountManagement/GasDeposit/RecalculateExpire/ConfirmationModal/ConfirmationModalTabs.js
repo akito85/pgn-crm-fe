@@ -1,12 +1,13 @@
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
-import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
-import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
-import NxApprovalInput from "../../../../../../../../../components/Nx/NxApprovalInput";
-import NxAttachmentInput from "../../../../../../../../../components/Nx/NxAttachmentInput";
-import InfoPaymentRelation from "../StepContents/InformationForm/InfoPaymentRelation";
+import NxTabs from "../../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
+import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
+import NxApprovalInput from "../../../../../components/Nx/NxApprovalInput";
+import InfoGasDeposit from "../StepContents/InformationForm/InfoGasDeposit";
 
 const ConfirmationModalTabs = ({
   form,
+  detail,
   approvalData,
   attachmentDataSource,
   service,
@@ -19,22 +20,21 @@ const ConfirmationModalTabs = ({
   const tabOptions = [
     {
       key: 0,
-      label: "Payment Relation Information",
+      label: "Gas Deposit Information",
+      children: <InfoGasDeposit detail={detail} />,
       disabled,
-      children: <InfoPaymentRelation form={form} formView={false} />
     },
     {
       key: 1,
       label: "Approval",
-      disabled,
       children: (
         <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />
-      )
+      ),
+      disabled,
     },
     {
       key: 2,
       label: "Attachment",
-      disabled,
       children: (
         <NxAttachmentInput
           data={attachmentDataSource}
@@ -42,13 +42,14 @@ const ConfirmationModalTabs = ({
           configApplication={configApplication}
           type={"confirmation"}
         />
-      )
+      ),
+      disabled,
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
+      children: <ConfirmationModalRemark disabled={disabled} />,
       disabled,
-      children: <ConfirmationModalRemark disabled={disabled} />
     },
   ].filter(Boolean).map((tabOption) => ({
     ...tabOption,

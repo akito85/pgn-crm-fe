@@ -36,20 +36,11 @@ const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId 
     }
   }, [data_approvalHistory]);
 
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
-
   return (
     <NxHistoryModal
       isOpen={isOpen}
       handleClose={handleCancel}
       header={"Approval History"}
-      tabOptions={handleApprovalHistoryOptions()}
       dataApprover={dataApprovalHistoryFix?.dataApprover}
       dataHistory={dataApprovalHistoryFix?.dataHistory}
     />

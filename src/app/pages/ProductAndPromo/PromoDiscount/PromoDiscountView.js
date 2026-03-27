@@ -129,16 +129,6 @@ const PromoDiscountView = () => {
     setSort(dataSort);
   };
 
-  const handleOptions = () => {
-    const data = dataApprovalHistory?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
-
   const handleApprovalHistory = (id) => {
     dispatch(getPromoApprovalHistory(id));
     setModalApprovalHistory(true);
@@ -286,7 +276,6 @@ const PromoDiscountView = () => {
         isOpen={modalApprovalHistory}
         handleClose={() => setModalApprovalHistory(false)}
         header={"Approval History"}
-        tabOptions={handleOptions()}
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
       />
