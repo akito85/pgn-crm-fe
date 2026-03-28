@@ -13,12 +13,13 @@ export const columnRecommendation = (
   searchText,
   handleSearch = () => { },
   handleInactive = () => { },
-  handleEditAmount
+  handleEditAmount,
+  isReadOnly = false
 ) => {
   const columns = [
     {
       title: "NO",
-      width: 60,
+      width: 50,
       align: "center",
       dataIndex: "no",
       key: "no",
@@ -26,6 +27,7 @@ export const columnRecommendation = (
     },
     {
       title: "ITEM",
+      width: 120,
       dataIndex: "billingItem",
       key: "billingItem",
       // sorter:true,
@@ -41,6 +43,7 @@ export const columnRecommendation = (
 
     {
       title: "INVOICE NO",
+      width: 150,
       dataIndex: "invoiceNumber",
       key: "invoiceNumber",
       // sorter:true,
@@ -55,6 +58,7 @@ export const columnRecommendation = (
     },
     {
       title: "INVOICE CURRENCY",
+      width: 120,
       dataIndex: "invoiceCurrency",
       key: "invoiceCurrency",
       // sorter:true,
@@ -70,6 +74,7 @@ export const columnRecommendation = (
     },
     {
       title: "BILLING PERIOD",
+      width: 130,
       dataIndex: "billingPeriod",
       key: "billingPeriod",
       // sorter:true,
@@ -90,6 +95,7 @@ export const columnRecommendation = (
     },
     {
       title: "BILLING ITEM AMOUNT",
+      width: 150,
       dataIndex: "billingItemAmount",
       key: "billingItemAmount",
       // sorter:true,
@@ -110,6 +116,7 @@ export const columnRecommendation = (
     },
     {
       title: "TYPE",
+      width: 100,
       dataIndex: "type",
       key: "type",
       // sorter:true,
@@ -123,31 +130,8 @@ export const columnRecommendation = (
       ),
     },
     {
-      title: "ALLOCATION AMOUNT",
-      dataIndex: "allocationAmount",
-      key: "allocationAmount",
-      sorter: (a, b) => sorterFunction("allocationAmount", a, b, "number"),
-      align: "right",
-      ...getColumnSearchPropsPaging(
-        "allocationAmount",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      // Ubah bagian render-nya jadi seperti ini:
-      render: (text, record) => (
-        <InputNumber
-          value={text}
-          onChange={(val) => handleEditAmount(record.key, val)}
-          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-          style={{ width: "100%" }}
-        />
-      ),
-    },
-    {
       title: "BILLING ITEM BALANCE",
+      width: 160,
       dataIndex: "billingItemBalance",
       key: "billingItemBalance",
       // sorter:true,
@@ -167,33 +151,8 @@ export const columnRecommendation = (
         }),
     },
     {
-      title: "ALLOCATION STATUS",
-      dataIndex: "allocationStatus",
-      key: "allocationStatus",
-      // sorter:true,
-      sorter: (a, b) => sorterFunction("allocationStatus", a, b),
-      ...getColumnSearchPropsPaging(
-        "allocationStatus",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      // width: 120,
-      render: (index) => {
-        return index ? (
-          <div className={" flex justify-center"}>
-            <StatusComponent colour={index}>
-              {toTitleCase(index)}
-            </StatusComponent>
-          </div>
-        ) : (
-          index
-        );
-      },
-    },
-    {
       title: "CONVERTED CURRENCY",
+      width: 150,
       dataIndex: "convertedCurrency",
       key: "convertedCurrency",
       // sorter:true,
@@ -209,6 +168,7 @@ export const columnRecommendation = (
     },
     {
       title: "EQUIVALENT AMOUNT",
+      width: 160,
       dataIndex: "equivalentAmount",
       key: "equivalentAmount",
       // sorter:true,
@@ -229,6 +189,7 @@ export const columnRecommendation = (
     },
     {
       title: "BILLING METHOD",
+      width: 140,
       dataIndex: "billingMethod",
       key: "billingMethod",
       sorter: (a, b) => sorterFunction("billingMethod", a, b),
@@ -240,36 +201,65 @@ export const columnRecommendation = (
         handleSearch
       ),
     },
-    // {
-    //     title: 'CREATED DATE',
-    //     dataIndex: 'createdDate',
-    //     // sorter:true,
-    //     sorter: (a, b) => sorterFunction('createdDate', a, b, 'date'),
-    //     ...getColumnSearchPropsPaging(
-    //         'createdDate',
-    //         searchInput,
-    //         searchedColumn,
-    //         searchText,
-    //         handleSearch,
-    //         false,
-    //         "datetime"
-    //     )
-
-    // },
-    // {
-    //     title: 'CREATED BY',
-    //     dataIndex: 'createdBy',
-    //     // sorter:true,
-    //     sorter: (a, b) => sorterFunction('createdBy', a, b),
-    //     ...getColumnSearchPropsPaging(
-    //         'createdBy',
-    //         searchInput,
-    //         searchedColumn,
-    //         searchText,
-    //         handleSearch
-    //     )
-
-    // },
+    {
+      title: "ALLOCATION AMOUNT",
+      width: 150,
+      dataIndex: "allocationAmount",
+      key: "allocationAmount",
+      sorter: (a, b) => sorterFunction("allocationAmount", a, b, "number"),
+      align: "right",
+      fixed: "right",
+      ...getColumnSearchPropsPaging(
+        "allocationAmount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text, record) => (
+        isReadOnly ? (
+          text.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        ) : (
+          <InputNumber
+            value={text}
+            onChange={(val) => handleEditAmount(record.key, val)}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+            style={{ width: "100%" }}
+          />
+        )
+      ),
+    },
+    {
+      title: "ALLOCATION STATUS",
+      width: 140,
+      dataIndex: "allocationStatus",
+      key: "allocationStatus",
+      // sorter:true,
+      sorter: (a, b) => sorterFunction("allocationStatus", a, b),
+      fixed: "right",
+      ...getColumnSearchPropsPaging(
+        "allocationStatus",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (index) => {
+        return index ? (
+          <div className={" flex justify-center"}>
+            <StatusComponent colour={index}>
+              {toTitleCase(index)}
+            </StatusComponent>
+          </div>
+        ) : (
+          index
+        );
+      },
+    },
   ];
 
   return columns;

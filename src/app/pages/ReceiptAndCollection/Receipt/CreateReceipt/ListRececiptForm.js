@@ -502,8 +502,23 @@ const ListRececiptForm = ({ type }) => {
         allocationAmount: item?.allocationAmount,
       })),
       description: formValue?.description,
+      receiptRemark: formValue?.receiptRemark,
       receiptCode: formValue?.receiptCode,
       isMisc: formValue?.miscellaneous === "Yes",
+      miscellaneous: formValue?.miscellaneous,
+      customerType: formValue?.customerType,
+      registrationNumber: formValue?.registrationNumber,
+      accountGroupType: formValue?.accountGroupType,
+      classificationType: formValue?.classificationType,
+      meterReadingCode: formValue?.meterReadingCode,
+      unappliedAmount: formValue?.unappliedAmount,
+      appliedAmount: formValue?.appliedAmount,
+      appliedEqvAmount: formValue?.appliedEqvAmount,
+      unappliedEqvAmount: formValue?.unappliedEqvAmount,
+      unidentifiedAmount: formValue?.unidentifiedAmount,
+      holdAmount: formValue?.holdAmount,
+      refundAmount: formValue?.refundAmount,
+      transferAmount: formValue?.transferAmount,
     };
 
     setBodyData(dataValue);

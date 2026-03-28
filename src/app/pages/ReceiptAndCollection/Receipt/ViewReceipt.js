@@ -445,25 +445,29 @@ const ViewReceipt = () => {
               <p className="mt-[15px] text-primary">RECEIPT LIST</p>
               <div className="flex gap-2">
                 <ButtonComponent
-                  icon={<DownloadOutlined style={{ fontSize: 18 }} />}
+                  isPrimary={true}
+                  icon={<DownloadOutlined style={{ fontSize: 18, color: '#FFFFFF' }} />}
                   onClick={handleDownload}
                 >
                   Download List
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconHold" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconHold" width={18} color={"#FFFFFF"} />}
                   onClick={() => handleHold(null)}
                 >
                   Hold
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconSend" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconSend" width={18} color={"#FFFFFF"} />}
                   onClick={handleRelease}
                 >
                   Release
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconRefund" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconRefund" width={18} color={"#FFFFFF"} />}
                   onClick={handleRefund}
                   disabled={
                     selectedData.length === 0 ||
@@ -476,7 +480,8 @@ const ViewReceipt = () => {
                   Refund
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconRevers" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconRevers" width={18} color={"#FFFFFF"} />}
                   onClick={() => handleReverse(null)}
                   disabled={
                     selectedData.length === 0 ||
@@ -490,7 +495,8 @@ const ViewReceipt = () => {
                 </ButtonComponent>
                 <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_RECEIPT}>
                   <ButtonComponent
-                    icon={<SVGIcon name="IconButtonCreate" width={18} />}
+                    isPrimary={true}
+                    icon={<SVGIcon name="IconButtonCreate" width={18} color={"#FFFFFF"} />}
                     type="submit"
                   >
                     Create
@@ -524,7 +530,7 @@ const ViewReceipt = () => {
                     <div className="flex justify-center items-center gap-2">
                       <Dropdown overlay={moreActionsMenu(record)} trigger={['click']}>
                         <div className="cursor-pointer">
-                          <SVGIcon name="IconActionDropdown" width={20} />
+                          <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
                         </div>
                       </Dropdown>
                       <Tooltip title="Detail">
@@ -532,8 +538,8 @@ const ViewReceipt = () => {
                           to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT}
                           state={{ id: record?.id }}
                         >
-                          <div className="cursor-pointer">
-                            <SVGIcon name="IconDetail" width={20} />
+                          <div className="cursor-pointer mt-1">
+                            <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
                           </div>
                         </Link>
                       </Tooltip>
@@ -553,7 +559,6 @@ const ViewReceipt = () => {
               }}
               handleDownload={handleDownload} // For Export button in TableRBI
               showExport={true}
-              rowSelection={rowSelection} // Added Row Selection
             />
           </div>
         </CardContainer>

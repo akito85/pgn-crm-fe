@@ -11,7 +11,7 @@ import {
 } from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
-import { Spin, Form, Button } from "antd";
+import { Spin, Form, Button, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
@@ -31,6 +31,7 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import { configApp } from "../../../../../constants/configApp";
 import InputComponent from "../../../../../components/InputComponent";
 import { FormStepper } from "../../../../../components/FormStepNavigation";
+import TableRBI from "../../../../../components/TableRBI";
 
 const AllocationSection = ({
   dataTable,
@@ -456,24 +457,32 @@ const AllocationSection = ({
 
   const handleOpenModalAllocation = async () => {
     try {
-      const { apphierId, receiptCode, refrence, isMisc, accountGroupType, classificationType, meterReadingCode, ...keys } =
-        form?.getFieldsValue();
+      try {
+        // Validate specific fields from the Receipt form (tab 1)
+        await form.validateFields([
+          "miscellaneous", "accNumber", "cusNumber", "cusName", "accountName", 
+          "segment", "accountGroupType", "accountType", "sor", "costCenterCode", 
+          "costCenterName", "receiptCode", "receiptChannel", "paymentType", 
+          "paymentGateway", "collectingAgent", "deliveryChannel", "method", 
+          "bank", "receiptDate", "currency", "amount", "rateType", "rateDate", 
+          "rateAmount", "convertedCurrency", "eqAmount", "description",
+          "registrationNumber", "customerType", "partner"
+        ]);
+      } catch (err) {
+        // If validation fails, show the exact fields
+        if (err?.errorFields?.length > 0) {
+          const failingFields = err.errorFields.map(f => f.name.join('.')).join(', ');
+          console.log("Validation Error Fields:", err.errorFields);
+          const errorBody = {
+            title: "Alert",
+            description: `Please input all mandatory form values! Missing: ${failingFields}`,
+          };
+          dispatch(showModalError(errorBody));
+          return;
+        }
+      }
 
-      console.log(keys)
-
-      const checkValues = Object.values(keys).every((value) => {
-        return value !== undefined && value !== null && value !== "";
-      });
-      // setSelectedRowKeys([]);
-      // setSelectDataTable([]);
-      console.log(checkValues);
-      if (checkValues === false) {
-        const errorBody = {
-          title: "Alert",
-          description: `Please input all mandatory form values!`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (hasValue(amount) === false || parsedAmount === 0) {
+      if (hasValue(amount) === false || parsedAmount === 0) {
         const errorBody = {
           title: "Alert",
           description: `Please input amount!`,
@@ -486,7 +495,7 @@ const AllocationSection = ({
             pageChoose,
             pageSizeChoose,
             sort: sort,
-            accountNumberSelected,
+            accountNumberSelected: accountNumberSelected?.split(" - ")[0],
             balance: balance,
             currencyId: formValues?.currency,
             rateAmount: rateAmountValue,
@@ -501,10 +510,10 @@ const AllocationSection = ({
 
   // handle sort
   const steps = [
-    { title: "Allocation Information" },
-    { title: "Approval Information" },
-    { title: "Attachment Information" },
-    { title: "Confirmation" },
+    { title: "CHOOSE ALLOCATION" },
+    { title: "APPROVAL" },
+    { title: "ATTACHMENT" },
+    { title: "CONFIRMATION" },
   ];
 
   const handleNext = () => {
@@ -516,18 +525,21 @@ const AllocationSection = ({
   };
 
   return (
-    <div className="w-full items-end flex flex-col gap-5">
-      <ButtonComponent
-        type={"submit"}
-        icon={<SVGIcon name="IconButtonCreate" width={24} />}
-        onClick={handleOpenModalAllocation}
-        disabled={isInsert || rateAmountValue === 0}
-      >
-        Create
-      </ButtonComponent>
+    <div className="w-full flex flex-col gap-4">
+      <div className="flex justify-end">
+        <ButtonComponent
+          type={"submit"}
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          onClick={handleOpenModalAllocation}
+          disabled={isInsert || rateAmountValue === 0}
+        >
+          Create
+        </ButtonComponent>
+      </div>
+
       <div className="w-full">
-        <TableInlineAllocation
-          cols={columnAllocation(
+        <TableRBI
+          columns={columnAllocation(
             page,
             pageSize,
             searchInput,
@@ -535,72 +547,76 @@ const AllocationSection = ({
             searchText,
             handleSearch,
             undefined,
-            handleEditAmount
+            () => setOpenModalAllocation(true), // This is "Update" in main view? Usually it should open edit modal.
+            (key) => {
+              const newData = dataTable.filter((item) => item.key !== key);
+              setDataTable(newData);
+            }
           )}
           current={page}
           pageSize={pageSize}
-          scrollTable={{ x: 3500, y: 500 }}
-          actionFix={true}
-          tableData={updatePagination(
+          dataSource={updatePagination(
             dataTable,
             "data",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
-            typeColumn,
+            page,
+            pageSize,
+            typeColumn
           )}
-          setInserted={setIsInsert}
-          onDataChange={setDataTable}
           totalData={updatePagination(
             dataTable,
             "length",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
-            typeColumn,
+            page,
+            pageSize,
+            typeColumn
           )}
-          setUpdateSelectDataTable={setSelectDataTable}
-          setUpdateSelectRowKeys={setSelectedRowKeys}
-          setUpdateTotalAmount={setTotalAllocationAmount}
-          rateAmount={rateAmountValue}
-          currency={currencyId}
-          // onSort={onSort}
-          // dispatcher={dispatch}
+          tableScrolled={{ x: 1500, y: 500 }}
+          onChange={(p, s) => {
+            setPage(p);
+            setPageSize(s);
+          }}
+          actionFix={true}
         />
       </div>
-      <div className="w-full flex flex-col">
+
+      <div className="w-full flex flex-col items-end text-sm text-[#4B465C] opacity-80">
         {totalAllocationAmount > parsedAmount && (
           <span className="text-red-800">
             Total amount of selected item has been exceeded Total available
             amount. Please select other item.
           </span>
         )}
-        <span>
-          {" "}
-          Total Amount :{" "}
-          {totalAllocationAmount?.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </span>
-        <span>
-          {" "}
-          Balance :{" "}
-          {balance === 0
-            ? 0
-            : balance?.toLocaleString("en-US", {
+        <div className="flex gap-4 mt-2">
+          <span>
+            Total Amount :{" "}
+            <strong>
+              {totalAllocationAmount?.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
-              })}{" "}
-        </span>
+              })}
+            </strong>
+          </span>
+          <span>
+            Balance :{" "}
+            <strong>
+              {balance === 0
+                ? 0
+                : balance?.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+            </strong>
+          </span>
+        </div>
       </div>
       <ModalCustom
         isOpen={openModalAllocation}
         handleCancel={handleCancel}
         type={"confirmation"}
-        header={"Choose Allocation"}
+        header={"CREATE ALLOCATION"}
         width={1200}
         footer={null}
       >
@@ -617,10 +633,10 @@ const AllocationSection = ({
               {/* Step 1: Allocation Information */}
               <div style={{ display: currentStep === 0 ? "block" : "none" }}>
                 <p className="text-primary text-xl font-semibold uppercase py-[20px] gap-5">
-                  RECEIPT ON BANK STATEMENT
+                  ALLOCATION LIST
                 </p>
                 <div className="my-5">
-                  <TablePagination
+                  <TableRBI
                     columns={columnRecommendation(
                       pageChoose,
                       pageSizeChoose,
@@ -651,10 +667,11 @@ const AllocationSection = ({
                       pageSizeChoose,
                       typeColumn,
                     )}
-                    tableScrolled={{ x: 3500, y: 500 }}
+                    tableScrolled={{ x: 1800, y: 500 }}
                     onChange={handleChange}
                     rowSelection={rowSelection}
                     onSizeChanger={handleChange}
+                    actionFix={true}
                   />
                 </div>
                 {totalAllocationAmount > parsedAmount && (
@@ -713,24 +730,22 @@ const AllocationSection = ({
               {/* Step 4: Confirmation */}
               <div style={{ display: currentStep === 3 ? "block" : "none" }}>
                 <div className="flex flex-col gap-4">
-                  <RadioTabs
-                    data={[
-                      { value: "Allocation" },
-                      { value: "Approval" },
-                      { value: "Attachment" },
+                  <Tabs
+                    activeKey={confirmationTab || "Allocation"}
+                    onChange={(key) => setConfirmationTab(key)}
+                    items={[
+                      { label: "Allocation", key: "Allocation" },
+                      { label: "Approval", key: "Approval" },
+                      { label: "Attachment", key: "Attachment" },
                     ]}
-                    onChange={(e) => setConfirmationTab(e.target.value)}
-                    currentPosition={confirmationTab || "Allocation"}
                   />
                   <div className="flex flex-col gap-4">
-                    <div className="text-primary text-sm font-bold uppercase">
-                      {`${confirmationTab || "Allocation"} INFORMATION`}
-                    </div>
+
 
                     {/* Allocation Info Tab */}
                     {(confirmationTab === "Allocation" || !confirmationTab) && (
                       <>
-                        <TablePagination
+                        <TableRBI
                           columns={columnRecommendation(
                             pageChoose,
                             pageSizeChoose,
@@ -738,13 +753,15 @@ const AllocationSection = ({
                             searchedColumnChoose,
                             searchTextChoose,
                             handleSearchModal,
-                            handleEditAmount
+                            undefined,
+                            handleEditAmount,
+                            true
                           )}
                           dataSource={selectDataTable}
                           usePagination={false}
-                          tableScrolled={{ x: 3500, y: 300 }}
+                          tableScrolled={{ x: 1800, y: 300 }}
                         />
-                        <DetailText label={"Remark"}>
+                        {/* <DetailText label={"Remark"}>
                           {forceObj?.remark}
                         </DetailText>
                         <div className="mt-2">
@@ -752,7 +769,7 @@ const AllocationSection = ({
                           {totalAllocationAmount?.toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                           })}
-                        </div>
+                        </div> */}
                       </>
                     )}
 
@@ -833,22 +850,22 @@ const AllocationSection = ({
                   Next
                 </Button>
               ) : (
-                <Button
-                  key="btn-submit"
-                  htmlType="button"
-                  onClick={handleSaveDataTable}
-                  type="primary"
-                  style={{
-                    backgroundColor: "#388E3C",
-                    borderColor: "#388E3C",
-                    color: "#fff",
-                    borderRadius: "6px",
-                    height: "32px",
-                    fontSize: "12px",
-                  }}
-                >
-                  Submit
-                </Button>
+                  <Button
+                    key="btn-confirm"
+                    htmlType="button"
+                    onClick={handleSaveDataTable}
+                    type="primary"
+                    style={{
+                      backgroundColor: "#28a745",
+                      borderColor: "#28a745",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Confirm
+                  </Button>
               )}
             </div>
           </div>

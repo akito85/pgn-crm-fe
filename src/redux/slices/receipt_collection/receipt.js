@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { message as antMessage } from "antd";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import {
   showModalError,
@@ -619,13 +620,19 @@ export const getAllocationRecomendationList = createAsyncThunk(
         return response?.data;
       }
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: errorBody(errorCode(error), "created", errorMessage(error)),
-          action: "allocation-list",
-          back: false,
-        })
-      );
+      const isNotFound = error?.response?.data?.message?.toLowerCase()?.includes("data not found");
+
+      if (isNotFound) {
+        antMessage.info("Data allocation not found.");
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: errorBody(errorCode(error), "created", errorMessage(error)),
+            action: "allocation-list",
+            back: false,
+          })
+        );
+      }
       return thunkAPI.rejectWithValue([]);
     }
   }
