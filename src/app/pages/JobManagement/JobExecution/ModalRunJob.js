@@ -497,7 +497,7 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   );
 
   return (
-    <NxModal isOpen={open} title={modalTitle} width={900} loading={loading} closeable handleCancel={onClose} footer={footer}
+    <NxModal isOpen={open} title={modalTitle} width={900} loading={loading} handleCancel={onClose} footer={footer}
       className="[&_.ant-modal-footer]:flex [&_.ant-modal-footer]:justify-between [&_.ant-modal-footer]:items-center">
       <WizardStepBar current={step} />
       <div style={{ paddingBottom:4 }}>

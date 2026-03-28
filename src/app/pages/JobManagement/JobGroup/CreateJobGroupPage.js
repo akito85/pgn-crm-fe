@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Form, Input, Select, message } from "antd";
+import { Form, Input, Select, message, Button } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PlusOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -147,9 +147,12 @@ const CreateJobGroupPage = () => {
 
   // Function to open the job selection modal
   const handleOpenModal = () => {
-    // Mark reset so the next allJobsData arrival (if allJobsData reference changes
-    // due to a currentPage reset in handleCloseModal) replaces instead of appends.
-    isResetRef.current = true;
+    // Do NOT set isResetRef here. handleCloseModal sets it when currentPage > 0
+    // so the page-0 re-fetch that follows replaces the stale accumulated list.
+    // Setting it here would cause the first Phase-A scroll load to replace
+    // instead of append (and if both pages have the same count, filteredDataLength
+    // wouldn't change, so the Phase A+B effect would never re-run and the scroll
+    // observer would never attach — breaking infinite scroll entirely).
     setHasMore(true);
     setModalVisible(true);
   };
@@ -372,32 +375,21 @@ const CreateJobGroupPage = () => {
         {/* Job Selection Modal */}
         <NxModal
           isOpen={modalVisible}
-          className="p-4"
+          className="[&_.ant-modal-footer]:flex [&_.ant-modal-footer]:justify-between [&_.ant-modal-footer]:items-center"
           title="Select Jobs"
           handleCancel={handleCloseModal}
           width={1100}
-          footer={[
-            <button
-              key="cancel"
-              style={{
-                border: "1px solid #C8CDD4",
-                background: "#fff",
-                cursor: "pointer",
-                padding: "2px 10px",
-                borderRadius: "8px",
-                fontSize: "12px",
-                fontWeight: "500",
-                color: "#374151",
-                height: "28px",
-                display: "inline-flex",
-                alignItems: "center",
-                fontFamily: "inherit",
-              }}
-              onClick={handleCloseModal}
-            >
-              Cancel
-            </button>,
-          ]}
+          footer={
+            <>
+              <Button
+                onClick={handleCloseModal}
+                style={{ minWidth:88, height:38, borderRadius:7, border:"1px solid #d9d9d9", background:"#fff", color:"#555", fontWeight:500, fontSize:13 }}
+              >
+                Cancel
+              </Button>
+              <div />
+            </>
+          }
         >
           {modalVisible && <div className="p-4">
             <NxTable
