@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Select, message, Button } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PlusOutlined } from "@ant-design/icons";
@@ -8,6 +8,7 @@ import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import NxTable from "../../../../components/Nx/NxTable";
+import useModalInfiniteData from "../../../../components/Nx/NxTable/hooks/useModalInfiniteData";
 import NxModal from "../../../../components/Nx/NxModal";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
@@ -102,59 +103,35 @@ const CreateJobGroupPage = () => {
 
   // State for job selection modal
   const [modalVisible, setModalVisible] = useState(false);
+  const [ready, setReady] = useState(false);
 
-  // State for infinite scrolling
-  const [currentPage, setCurrentPage] = useState(0);
-  const [allJobs, setAllJobs] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  // Tracks whether the next allJobsData result should replace (reset) vs append
-  const isResetRef = React.useRef(false);
-  // Holds the resolve() for the in-flight loadMore promise; released when data arrives
-  const pendingResolveRef = React.useRef(null);
-
-  // Unconditional query — pre-fetches on mount so allJobs is already populated
-  // when the modal opens, preventing Phase A of useInfiniteScroll from firing
-  // triggerLoad() prematurely on an empty list (which would skip page 0).
-  const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery({
-    page: currentPage,
-    size: 20,
+  // Encapsulated infinite-scroll data management with RTK Query cache-busting.
+  // Replaces manual currentPage/allJobs/hasMore/isResetRef/pendingResolveRef state.
+  // Only fetches when modalVisible is true (no wasteful pre-fetch on page mount).
+  const jobs = useModalInfiniteData({
+    queryHook: useSearchJobsQuery,
+    pageSize: 20,
+    enabled: modalVisible,
   });
 
-  // Accumulate pages; replace the list when a modal-open reset was requested.
-  // Also unblocks the infinite-scroll gate after each page's data arrives.
-  useEffect(() => {
-    if (!allJobsData) return;
-    if (isResetRef.current) {
-      isResetRef.current = false;
-      setAllJobs(allJobsData.result);
-    } else {
-      setAllJobs(prev => [...prev, ...allJobsData.result]);
-    }
-    setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
-    if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
-  }, [allJobsData]);
-
-  // Returns a Promise that resolves only when the next page's data has been
-  // appended — keeps useInfiniteScroll's gate locked until data actually arrives,
-  // preventing rapid-fire page increments that skip pages.
-  const loadMoreData = useCallback(() => {
-    if (!hasMore || allJobsLoading) return Promise.resolve();
-    return new Promise((resolve) => {
-      pendingResolveRef.current = resolve;
-      setCurrentPage(prev => prev + 1);
-    });
-  }, [hasMore, allJobsLoading]);
+  // Deferred mount via setTimeout: NxTable only renders after the AntD 4.x
+  // modal animation settles (~300ms), preventing dimension measurement during
+  // the CSS transform transition that causes the visible "glitch".
+  const readyTimerRef = React.useRef(null);
 
   // Function to open the job selection modal
   const handleOpenModal = () => {
-    // Do NOT set isResetRef here. handleCloseModal sets it when currentPage > 0
-    // so the page-0 re-fetch that follows replaces the stale accumulated list.
-    // Setting it here would cause the first Phase-A scroll load to replace
-    // instead of append (and if both pages have the same count, filteredDataLength
-    // wouldn't change, so the Phase A+B effect would never re-run and the scroll
-    // observer would never attach — breaking infinite scroll entirely).
-    setHasMore(true);
     setModalVisible(true);
+    jobs.open();
+    readyTimerRef.current = setTimeout(() => setReady(true), 300);
+  };
+
+  // Shared close logic — used by Cancel button and handleAddSelectedJobs
+  const handleCloseModal = () => {
+    if (readyTimerRef.current) { clearTimeout(readyTimerRef.current); readyTimerRef.current = null; }
+    setModalVisible(false);
+    jobs.close();
+    setReady(false);
   };
 
   // Function to add a single job to the table
@@ -173,7 +150,7 @@ const CreateJobGroupPage = () => {
   // Function to add selected jobs from modal to the table
   const handleAddSelectedJobs = (jobsToAdd) => {
     const newJobs = jobsToAdd.map(job => ({
-      key: Date.now() + Math.random(), // Unique key
+      key: Date.now() + Math.random(),
       name: job.name,
       code: job.code,
       type: job.type,
@@ -182,23 +159,7 @@ const CreateJobGroupPage = () => {
     }));
 
     setSelectedJobs(prev => [...prev, ...newJobs]);
-    setModalVisible(false);
-  };
-
-  // Function to close the modal — resets page counter and releases any in-flight
-  // promise. allJobs is intentionally NOT cleared: the pre-fetched page-0 data
-  // stays in place so the table mounts with data on the next open (preventing
-  // Phase A of useInfiniteScroll from firing triggerLoad on an empty list).
-  // If the user had scrolled past page 0, isResetRef is set so the page-0 data
-  // that arrives after currentPage resets will replace instead of append.
-  const handleCloseModal = () => {
-    if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
-    setModalVisible(false);
-    if (currentPage !== 0) {
-      isResetRef.current = true; // allJobsData will change (page N→0); replace, not append
-      setCurrentPage(0);
-    }
-    setHasMore(true);
+    handleCloseModal();
   };
 
   // RTK Query hooks
@@ -391,12 +352,12 @@ const CreateJobGroupPage = () => {
             </>
           }
         >
-          {modalVisible && <div className="p-4">
+          {ready && <div className="p-4">
             <NxTable
               idTable="job-selection-table"
-              dataSource={allJobs}
+              dataSource={jobs.data}
               columns={JOB_SELECTION_COLUMNS(handleAddJobToTable)}
-              loading={allJobsLoading}
+              loading={jobs.loading}
               useInfiniteScroll={true}
               useSearch={true}
               useAdvanceSearch={true}
@@ -404,8 +365,8 @@ const CreateJobGroupPage = () => {
               autoHeight={false}
               tableScrolled={{ y: 400, x: "max-content" }}
               rowKey="id"
-              onLoadMore={loadMoreData}
-              hasMore={hasMore}
+              onLoadMore={jobs.loadMore}
+              hasMore={jobs.hasMore}
             />
           </div>}
         </NxModal>

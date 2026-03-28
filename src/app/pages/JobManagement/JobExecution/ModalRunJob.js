@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Form, Input, InputNumber, Select, Typography } from "antd";
 import {
   SettingOutlined, ThunderboltOutlined, ClockCircleOutlined,
@@ -6,6 +6,7 @@ import {
 } from "@ant-design/icons";
 import NxModal from "../../../../components/Nx/NxModal";
 import NxTable from "../../../../components/Nx/NxTable";
+import useModalInfiniteData from "../../../../components/Nx/NxTable/hooks/useModalInfiniteData";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import { useSearchJobsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
@@ -177,57 +178,33 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [triggerType, setTriggerType] = useState("IMMEDIATE");
   const [cronPreset,  setCronPreset]  = useState(null);
-  const [modalPage,   setModalPage]   = useState(0);
-  const [allJobs,     setAllJobs]     = useState([]);
-  const [hasMore,     setHasMore]     = useState(true);
-  const isResetRef       = React.useRef(false);
-  const pendingResolveRef = React.useRef(null);
+  const [ready,       setReady]       = useState(false);
   const [form] = Form.useForm();
 
-  // RTK Query — needs state (not ref) for the page param so it re-fetches on increment
-  const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery(
-    { page: modalPage, size: MODAL_PAGE_SIZE },
-    { skip: !open }
-  );
+  // Encapsulated infinite-scroll data management with RTK Query cache-busting.
+  // Replaces manual modalPage/allJobs/hasMore/isResetRef/pendingResolveRef state.
+  const jobs = useModalInfiniteData({
+    queryHook: useSearchJobsQuery,
+    pageSize: MODAL_PAGE_SIZE,
+    enabled: open,
+  });
 
-  // Reset all state when modal closes; also release any pending loadMore promise.
-  // Clearing allJobs here ensures NxTable doesn't flash stale accumulated data
-  // on the next open (one frame before the data effect fires with page 0).
+  // Open/close lifecycle.
+  // Deferred mount via setTimeout: NxTable only renders after the AntD 4.x
+  // modal animation settles (~300ms), preventing dimension measurement during
+  // the CSS transform transition that causes the visible "glitch".
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      jobs.open();
+      const timer = setTimeout(() => setReady(true), 300);
+      return () => clearTimeout(timer);
+    } else {
+      jobs.close();
       setStep("select"); setSelectedJob(null); setTriggerType("IMMEDIATE");
-      setCronPreset(null);
-      setModalPage(0); setHasMore(true); setAllJobs([]);
-      isResetRef.current = true;
-      if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
+      setCronPreset(null); setReady(false);
       form.resetFields();
     }
-  }, [open, form]);
-
-  // Process data when RTK Query responds; resolve the loadMore promise once data is appended
-  useEffect(() => {
-    if (!allJobsData) return;
-    const isInitialLoad = allJobsData.currentPage === 0;
-    if (isInitialLoad || isResetRef.current) {
-      isResetRef.current = false;
-      setAllJobs(allJobsData.result);
-    } else {
-      setAllJobs(prev => [...prev, ...allJobsData.result]);
-    }
-    setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
-    // Unblock the infinite-scroll gate only after data is actually appended
-    if (pendingResolveRef.current) { pendingResolveRef.current(); pendingResolveRef.current = null; }
-  }, [allJobsData]);
-
-  // loadMoreData returns a Promise that resolves only when the next page's data arrives,
-  // keeping useInfiniteScroll's isLoadingMoreRef locked until then — no skipped pages.
-  const loadMoreData = useCallback(() => {
-    if (!hasMore || allJobsLoading) return Promise.resolve();
-    return new Promise((resolve) => {
-      pendingResolveRef.current = resolve;
-      setModalPage(prev => prev + 1);
-    });
-  }, [hasMore, allJobsLoading]);
+  }, [open, form, jobs.open, jobs.close]); // jobs.open/close are stable (useCallback)
 
   const handleBack = () => {
     setStep("select"); setSelectedJob(null);
@@ -501,12 +478,12 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
       className="[&_.ant-modal-footer]:flex [&_.ant-modal-footer]:justify-between [&_.ant-modal-footer]:items-center">
       <WizardStepBar current={step} />
       <div style={{ paddingBottom:4 }}>
-        {step === "select" && open && (
+        {step === "select" && ready && (
           <div style={{ padding:"16px 16px 0" }}>
             <NxTable
               idTable="modal-run-job-table"
-              dataSource={allJobs}
-              loading={allJobsLoading}
+              dataSource={jobs.data}
+              loading={jobs.loading}
               columns={jobColumns}
               columnDefinitions={jobColumns.map((col) => ({ key: col.key || col.dataIndex || col.title, title: col.title }))}
               useInfiniteScroll={true}
@@ -518,8 +495,8 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit }) => {
               autoHeight={false}
               tableScrolled={{ y:320, x:"max-content" }}
               rowKey="id"
-              onLoadMore={loadMoreData}
-              hasMore={hasMore}
+              onLoadMore={jobs.loadMore}
+              hasMore={jobs.hasMore}
             />
           </div>
         )}
