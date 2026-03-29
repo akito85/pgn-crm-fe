@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Collapse, Spin, Button } from "antd";
+import { Collapse, Spin, Button, message } from "antd";
 import { UpOutlined } from "@ant-design/icons";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { FormStepper } from "../../../../../components/FormStepNavigation";
@@ -14,6 +14,7 @@ import { dateFormatting } from "../../../../../utils";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getAccountingAllocation, submitAccountingAllocation } from "../../../../../redux/slices/receipt_collection/accounting";
 
 const { Panel } = Collapse;
 
@@ -30,10 +31,8 @@ const ModalCreateAccounting = ({
     onSubmit = () => { },
 }) => {
     const dispatch = useDispatch();
+    const { loading: reduxLoading } = useSelector((state) => state.receiptHistories || {});
     const searchInput = useRef(null);
-
-    // Redux state (adjust based on your redux structure)
-    // const { loading, accountingData } = useSelector((state) => state.accounting);
 
     // Local state
     const [currentStep, setCurrentStep] = useState(0); // 0: CREATE, 1: ATTACHMENT
@@ -46,6 +45,7 @@ const ModalCreateAccounting = ({
     const [searchedColumn, setSearchedColumn] = useState("");
     const [attachments, setAttachments] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [payPeriod, setPayPeriod] = useState("");
 
     // Mock data - replace with actual data from Redux/API
     const [accountingData, setAccountingData] = useState({
@@ -84,70 +84,39 @@ const ModalCreateAccounting = ({
             setLoading(true);
 
             // Extract pay period from receipt date (format: YYYYMM)
-            const payPeriod = receiptData?.receiptDate
+            const period = receiptData?.receiptDate
                 ? moment(receiptData.receiptDate).format("YYYYMM")
                 : moment().format("YYYYMM");
+            setPayPeriod(period);
 
-            // TODO: Dispatch action to call backend API
-            // const response = await dispatch(getAccountingAllocation({
-            //   receiptId: receiptData.id,
-            //   payPeriod: payPeriod,
-            // })).unwrap();
+            // Dispatch real API call
+            const result = await dispatch(getAccountingAllocation({
+                receiptId: receiptData.id,
+                payPeriod: period,
+            })).unwrap();
 
-            // Mock response for now
-            const mockResponse = {
-                customerInfo: {
-                    customerNumber: receiptData?.customerNumber || "CST000000005087",
-                    customerName: receiptData?.customerName || "ARGO PANTES TBK",
-                    billPeriod: moment(receiptData?.receiptDate).format("MMM YYYY").toUpperCase() || "DEC 2025",
-                },
-                accountInfo: {
-                    accountNumber: receiptData?.accountNumber || "00200837",
-                    accountName: receiptData?.accountName || "ARGO PANTES TBK",
-                    accountReferenceId: receiptData?.accountReferenceId || "00232966",
-                },
-                journal1: [
-                    {
-                        id: 1,
-                        joinOrganizationCodeInSap: "A001",
-                        year: "2025",
-                        month: "10",
-                        postBatchNumber: "SCRI - BIL OCT 2025",
-                        transactionNumber: "01IM02561SDR",
+            // Map API response to local state
+            if (result && result.data) {
+                const apiData = result.data;
+                setAccountingData({
+                    customerInfo: apiData.customerInfo || {
+                        customerNumber: receiptData?.customer || "",
+                        customerName: receiptData?.customerName || "",
+                        billPeriod: moment(receiptData?.receiptDate).format("MMM YYYY").toUpperCase(),
                     },
-                    {
-                        id: 2,
-                        joinOrganizationCodeInSap: "A002",
-                        year: "2025",
-                        month: "10",
-                        postBatchNumber: "SCRI - BIL OCT 2025",
-                        transactionNumber: "01IM02565DRDM",
+                    accountInfo: apiData.accountInfo || {
+                        accountNumber: receiptData?.accountNumber || "",
+                        accountName: receiptData?.accountName || "",
+                        accountReferenceId: receiptData?.accountReferenceId || "",
                     },
-                ],
-                journal2: [
-                    {
-                        id: 1,
-                        joinOrganizationCodeInSap: "A001",
-                        year: "2025",
-                        month: "10",
-                        postBatchNumber: "SCRI - BIL OCT 2025",
-                        transactionNumber: "01IM02561SDR",
-                    },
-                    {
-                        id: 2,
-                        joinOrganizationCodeInSap: "A002",
-                        year: "2025",
-                        month: "10",
-                        postBatchNumber: "SCRI - BIL OCT 2025",
-                        transactionNumber: "01IM02565DRDM",
-                    },
-                ],
-            };
-
-            setAccountingData(mockResponse);
+                    journal1: apiData.journal1 || [],
+                    journal2: apiData.journal2 || [],
+                });
+            }
             setLoading(false);
         } catch (error) {
             console.error("Error fetching accounting allocation:", error);
+            message.error("Failed to load accounting data. Please try again.");
             setLoading(false);
         }
     };
@@ -191,14 +160,25 @@ const ModalCreateAccounting = ({
         }
     };
 
-    const handleSubmit = () => {
-        const submitData = {
-            receiptId: receiptData?.id,
-            journal1: accountingData.journal1,
-            journal2: accountingData.journal2,
-            attachments: attachments,
-        };
-        onSubmit(submitData);
+    const handleSubmit = async () => {
+        if (!receiptData?.id || !payPeriod) {
+            message.error("Missing receipt ID or pay period. Cannot submit accounting.");
+            return;
+        }
+        try {
+            setLoading(true);
+            await dispatch(submitAccountingAllocation({
+                receiptId: receiptData.id,
+                payPeriod: payPeriod,
+            })).unwrap();
+            message.success("Accounting allocation submitted successfully.");
+            onSubmit({ receiptId: receiptData.id, payPeriod });
+        } catch (error) {
+            console.error("Error submitting accounting allocation:", error);
+            message.error("Failed to submit accounting. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const renderCreateStep = () => (
