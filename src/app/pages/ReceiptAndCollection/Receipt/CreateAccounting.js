@@ -21,6 +21,7 @@ import {
     getAccountingAllocation,
     submitAccountingAllocation
 } from "../../../../redux/slices/receipt_collection/accounting";
+import { clearBodyMessage } from "../../../../redux/slices/general_slice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 
 const { Panel } = Collapse;
@@ -97,6 +98,11 @@ const CreateAccounting = () => {
         if (receiptData?.id) {
             fetchAccountingAllocation();
         }
+
+        // Cleanup: Clear error messages when leaving the page
+        return () => {
+            dispatch(clearBodyMessage());
+        };
     }, [receiptData?.id]);
 
     const fetchAccountingAllocation = async () => {
@@ -169,6 +175,7 @@ const CreateAccounting = () => {
     };
 
     const handleCancel = () => {
+        dispatch(clearBodyMessage());
         navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT);
     };
 

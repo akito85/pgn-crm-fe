@@ -31,6 +31,7 @@ import ListFormReplace from "../../app/pages/ReceiptAndCollection/LateChargeMana
 import ListFormReverse from "../../app/pages/ReceiptAndCollection/LateChargeManagement/Reverse/ListFormReverse";
 
 
+import DetailAccounting from "../../app/pages/ReceiptAndCollection/Receipt/DetailAccounting";
 import ViewPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ViewPartner";
 import ListDetailPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListDetailPartner";
 import ListFormPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListFormPartner";
@@ -105,6 +106,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   CREATE_RECEIPT: <ListRececiptForm type="create" />,
   UPDATE_RECEIPT: <ListRececiptForm type="update" />,
   CREATE_ACCOUNTING: <CreateAccounting />,
+  DETAIL_ACCOUNTING: <DetailAccounting />,
 
   // Receipt Reconciliation
 

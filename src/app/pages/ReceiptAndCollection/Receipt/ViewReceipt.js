@@ -26,6 +26,7 @@ import ModalReverseReceipt from "./Table/ModalReverseReceipt";
 import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { hasValue } from "../../../../utils";
+import { clearBodyMessage } from "../../../../redux/slices/general_slice";
 
 const ViewReceipt = () => {
   // Selector
@@ -198,6 +199,8 @@ const ViewReceipt = () => {
   }, [dispatch, page, pageSize, search, sort]);
 
   useEffect(() => {
+    // Clear any stale error messages from other pages on mount
+    dispatch(clearBodyMessage());
     handleFetch();
   }, [handleFetch]);
 
@@ -385,7 +388,7 @@ const ViewReceipt = () => {
         </div>
       </Menu.Item>
       <Menu.Item
-        key="CreateAccounting"
+        key="Create Accounting"
         onClick={() => handleCreateAccounting(record)}
       >
         <div className="flex items-center gap-2">
@@ -393,9 +396,9 @@ const ViewReceipt = () => {
           <span>Create Accounting</span>
         </div>
       </Menu.Item>
-      <Menu.Item key="ViewAccounting">
+      <Menu.Item key="View Accounting">
         <Link
-          to={RECEIPT_AND_COLLECTION_ROUTES.VIEW_ACCOUNTING}
+          to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_ACCOUNTING}
           state={{ id: record?.id }}
           className="flex items-center gap-2"
         >
