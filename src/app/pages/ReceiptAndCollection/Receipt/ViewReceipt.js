@@ -12,6 +12,7 @@ import {
   getPaginateReceipt,
   deleteReceipt,
   holdReleaseReceiptBulk,
+  submitRefundReceipt,
 } from "../../../../redux/slices/receipt_collection/receipt";
 import { columnsReceipt } from "./ColumnReceiptView";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
@@ -94,7 +95,25 @@ const ViewReceipt = () => {
   };
 
   const handleSubmitRefund = (data) => {
-    setOpenModalRefund(false);
+    const body = {
+      customerId: data.customerId,
+      appHierId: data.appHierId,
+      refundDate: data.refundDate,
+      remark: data.remark,
+      attachmentIds: data.attachmentIds || [],
+      receipts: data.receipts?.map((item) => ({
+        receiptId: item.receiptId || item.id,
+        refundAmount: item.refundAmount,
+        remark: item.remark,
+      })),
+    };
+
+    dispatch(submitRefundReceipt({ body })).then((res) => {
+      if (!res.error) {
+        setOpenModalRefund(false);
+        handleFetch();
+      }
+    });
   };
 
   const handleRelease = () => {

@@ -17,6 +17,7 @@ import {
     approveOrRejectHoldReceipt,
     approveOrRejectReleaseReceipt,
     approveOrRejectReverseReceipt,
+    approveOrRejectRefundReceipt,
     approveOrRejectReceipt,
     getListApprovalByIdReceipt,
 } from "../../../../redux/slices/receipt_collection/receipt";
@@ -153,6 +154,8 @@ const DetailReceiptApproval = ({ type: propType }) => {
             dispatch(approveOrRejectReleaseReceipt({ body: data }));
         } else if (category === "RECEIPT_REVERSE") {
             dispatch(approveOrRejectReverseReceipt({ body: data }));
+        } else if (category === "RECEIPT_REFUND") {
+            dispatch(approveOrRejectRefundReceipt({ body: data }));
         } else {
             dispatch(approveOrRejectReceipt({ body: data }));
         }
