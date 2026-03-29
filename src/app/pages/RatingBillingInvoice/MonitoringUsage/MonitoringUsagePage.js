@@ -20,7 +20,6 @@ import {
   clearUpdatedBatchIds,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -408,7 +407,7 @@ const MonitoringUsagePage = () => {
 
   return (
     <>
-      <LayoutMenu>
+      <div>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -475,7 +474,7 @@ const MonitoringUsagePage = () => {
             </Tabs.TabPane>
           </Tabs>
         </CardContainer>
-      </LayoutMenu>
+      </div>
 
       {modalApproval ? (
         <ModalApprovalUsage

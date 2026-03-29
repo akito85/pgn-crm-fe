@@ -17,7 +17,6 @@ import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 // Global Custom Components
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
@@ -714,7 +713,7 @@ const ViewWarranty = () => {
   }, [dataSource]);
 
   return (
-    <LayoutMenu>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
       <CardContainer header={
@@ -848,7 +847,7 @@ const ViewWarranty = () => {
         handleCancel={() => setModalApproval(false)}
         handleListRefresh={handleRefresh}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

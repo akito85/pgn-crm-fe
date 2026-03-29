@@ -3,7 +3,6 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_managem
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Form, Select, Spin } from 'antd';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import BaseContainer from '../../../../../components/BaseContainer';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -166,7 +165,7 @@ const FormMeterReadingCode = ({ type }) => {
 
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -229,7 +228,7 @@ const FormMeterReadingCode = ({ type }) => {
                 width={900}
                 header={'confirmation'}
                 footer={[
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                    <div key="footer" className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                         <ButtonComponent
                             onClick={handleCancel}
                             type="default"
@@ -273,7 +272,7 @@ const FormMeterReadingCode = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 

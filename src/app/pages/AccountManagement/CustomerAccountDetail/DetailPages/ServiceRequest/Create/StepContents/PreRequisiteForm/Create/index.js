@@ -8,7 +8,6 @@ import { UpOutlined, DownOutlined } from "@ant-design/icons";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../../../routes/account_management/customer_account_routes";
 import { requiredMessage } from "../../../../../../../../../../utils";
 
-import LayoutMenu from "../../../../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../../../../../components/BreadCrumb";
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import ButtonComponent from "../../../../../../../../../../components/ButtonComponent";
@@ -200,7 +199,7 @@ const PreRequisiteCreateFrom = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading} className="w-full top-20">
         <div className="flex flex-col gap-4">
@@ -470,7 +469,7 @@ const PreRequisiteCreateFrom = () => {
           </Form>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

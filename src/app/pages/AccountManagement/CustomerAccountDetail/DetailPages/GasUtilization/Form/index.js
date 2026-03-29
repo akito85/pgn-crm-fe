@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import HeaderDetail from '../../../HeaderDetail'
 import BaseContainer from '../../../../../../../components/BaseContainer'
-import LayoutMenu from '../../../../../../../components/SidebarMenu/LayoutMenu'
 import BreadCrumbAdvanced from '../../../../../../../components/BreadCrumbAdvanced'
 import { dateFormatting, requiredMessage } from '../../../../../../../utils'
 import InputComponent from '../../../../../../../components/InputComponent'
@@ -157,7 +156,7 @@ const GasUtilizationForm = ({type}) => {
 
   return (
     <>
-      <LayoutMenu>
+      <>
         <Spin spinning={false}>
         <BreadCrumbAdvanced  />
           <HeaderDetail
@@ -286,7 +285,7 @@ const GasUtilizationForm = ({type}) => {
             handleOk={() => navigate(-1)}
           />
         </Spin>
-      </LayoutMenu>
+      </>
     </>
   )
 }

@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Tabs, Spin, Row, Col } from "antd";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainerNoBorder from "../../../../components/CardContainerNoBorder";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -526,7 +525,7 @@ const DetailAccounting = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             
             <Spin spinning={receiptLoading || accountingLoading}>
@@ -614,7 +613,7 @@ const DetailAccounting = () => {
                     }}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

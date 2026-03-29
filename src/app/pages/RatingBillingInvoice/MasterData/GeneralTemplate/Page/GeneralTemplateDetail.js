@@ -6,7 +6,6 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { Form, Spin } from "antd";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { useCallback, useEffect, useState } from "react";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import { useDispatch, useSelector } from "react-redux";
@@ -246,7 +245,7 @@ const GeneralTemplateDetail = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {data_detail?.inactiveApproval?.isInactive &&
@@ -392,7 +391,7 @@ const GeneralTemplateDetail = () => {
           </ModalError>
         ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

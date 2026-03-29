@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Alert, Checkbox, Form, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -700,7 +699,7 @@ const ViewAssets = () => {
     ]
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
 
@@ -800,7 +799,7 @@ const ViewAssets = () => {
 
             {/* modal retry */}
             {renderModal()}
-        </LayoutMenu>
+        </>
     );
 }
 

@@ -230,18 +230,18 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   };
 
   const itemGrantAccess = nxGetAccountActions({
-    handleView: (record, _) => handleDetail(record),
-    handleUpdate: (record, _) => navigate(
+    handleView: ({ id: recordId }) => handleDetail(recordId),
+    handleUpdate: ({ id: recordId }) => navigate(
       ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PRODUCT_DISTRIBUTION,
       {
         state: {
-          idPD: record,
+          idPD: recordId,
           accountId: id,
           idCustomer: idCustomer,
         }
       }
     ),
-    handleDelete: (record, _) => handleDelete(record),
+    handleDelete: ({ id: recordId }) => handleDelete(recordId),
   });
 
   // Handle Detail

@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -810,7 +809,7 @@ const FormDataAccessHierarchy = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinnish}>
@@ -1081,7 +1080,7 @@ const FormDataAccessHierarchy = (props) => {
 
       {/* render try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

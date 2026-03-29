@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button, Form, Spin } from "antd";
 import { NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import Promo from "./Form/Promo";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -727,7 +726,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingForm}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -923,7 +922,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           </ModalConfirm>
         ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

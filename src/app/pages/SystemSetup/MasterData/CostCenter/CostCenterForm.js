@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { Select, Spin, Form } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -179,7 +178,7 @@ const CostCenterForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -361,7 +360,7 @@ const CostCenterForm = (props) => {
 
       {/* render try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

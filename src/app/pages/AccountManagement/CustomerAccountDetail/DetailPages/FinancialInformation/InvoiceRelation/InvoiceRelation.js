@@ -1,31 +1,28 @@
 import { memo, useEffect } from "react";
 import { useState } from "react";
-import { Fragment } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getIrApprovalHistory,
-  inactivateInvoiceRelation
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
 import {
   getIrApprovalHierarchy,
-  getDetailIrApprovalHierarchy
+  getDetailIrApprovalHierarchy,
+  getIrApprovalHistory,
+  inactivateInvoiceRelation
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 /**
  * Invoice relation list table module
- * @param {{ id?: number; idCustomer?: number }} props
+ * @param {{ accountId: number; customerId: number }} props
  * @returns
  */
-const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
+const InvoiceRelation = ({ accountId, customerId }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
 
   const { data_irApprovalHistory } = useSelector(
-    (state) => state.financialInformation
+    (state) => state.invoiceRelation
   );
 
   const [refreshSignal, setRefreshSignal] = useState(0);
@@ -84,20 +81,6 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   };
 
   /**
-   * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
-   * @returns {{ key: string, value: string, label: string }[]}
-   */
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
-    }));
-  };
-
-  /**
    * @param {boolean} show
    * @param {number} irId
    */
@@ -135,23 +118,21 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   }, [data_irApprovalHistory]);
 
   return (
-    <Fragment>
+    <>
       <InvoiceRelationTable
-        idAccount={id}
-        idCustomer={idCustomer}
+        accountId={accountId}
+        customerId={customerId}
         handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
         handleApproval={setShowApprovalModal}
         refreshSignal={refreshSignal}
       />
-
       <InvoiceRelationApprovalModal
-        id={id}
+        accountId={accountId}
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={triggerRefresh}
       />
-
       {/* Inactivate Modal */}
       <NxInactivateModal
         isOpen={showInactiveModal}
@@ -164,22 +145,21 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
         named={inactivateIrAccountNumber}
         menu="invoice relation"
         sliceName="invoiceRelation"
-        approvalOptionsStateName="data_irApprovalHierarchy"
+        approvalOptionsStateName="list_irApprovalHierarchy"
         approvalHierarchtDetailsStateName="detail_irApprovalHierarchy"
+        loadingInactivateName={"loading_inactivateIr"}
         getApprovalOptions={getIrApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailIrApprovalHierarchy}
       />
-
       {/* Approval History Modal */}
       <NxHistoryModal
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
-        tabOptions={handleApprovalHistoryOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
-    </Fragment>
+    </>
   );
 };
 

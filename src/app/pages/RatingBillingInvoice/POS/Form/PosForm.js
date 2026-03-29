@@ -1,5 +1,4 @@
 import React, { useCallback, useRef } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { useState } from "react";
@@ -1469,7 +1468,7 @@ const PosForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingForm || loadingAccount}>
         <BreadCrumb routes={routes} />
 
@@ -1674,7 +1673,7 @@ const PosForm = ({ type }) => {
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

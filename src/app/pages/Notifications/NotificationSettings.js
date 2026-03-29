@@ -14,7 +14,6 @@ import {
 } from "@ant-design/icons";
 import "./Notifications.css";
 
-import LayoutMenu from "../../../components/SidebarMenu/LayoutMenu";
 import NxPanel from "../../../components/Nx/NxPanel";
 import NxSwitch from "../../../components/Nx/NxSwitch";
 
@@ -272,16 +271,16 @@ const NotificationSettings = () => {
 
   if (isLoading && !localSettings.displayType) {
     return (
-      <LayoutMenu>
+      <>
         <div className="flex items-center justify-center h-64">
           <Spin size="large" tip="Loading settings..." />
         </div>
-      </LayoutMenu>
+      </>
     );
   }
 
   return (
-    <LayoutMenu>
+    <>
       <div className={transitionClass}>
         {/* General Settings */}
         <NxPanel
@@ -508,7 +507,7 @@ const NotificationSettings = () => {
           )}
         </div>
       </div>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -6,7 +6,6 @@ import Toolbar from '../../../../components/Toolbar';
 import BaseContainer from '../../../../components/BaseContainer';
 import TablePagination from '../../../../components/TablePagination';
 import REPORT_ROUTES from '../../../../routes/report/report_routes';
-const LayoutMenu = lazy(() => import("../../../../components/SidebarMenu/LayoutMenu"))
 const CustomerAssetReport = () => {
     const {
         page,
@@ -34,7 +33,7 @@ const CustomerAssetReport = () => {
     return (
         <Suspense fallback={<Spin />}>
 
-            <LayoutMenu>
+            <>
                 <BreadCrumb routes={routes} />
                 <Toolbar items={itemActions} />
                 <Spin spinning={false}>
@@ -52,7 +51,7 @@ const CustomerAssetReport = () => {
 
                     </BaseContainer>
                 </Spin>
-            </LayoutMenu>
+            </>
         </Suspense>
     );
 }

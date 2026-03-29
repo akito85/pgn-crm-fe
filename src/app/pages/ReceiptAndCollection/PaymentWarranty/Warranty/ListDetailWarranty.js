@@ -18,7 +18,6 @@ import DetailWarranty from "./DetailWarranty";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import FooterDetail from "../../../../../components/FooterDetail";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -456,9 +455,9 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   }
 
   return (
-    <LayoutMenu>
+    <>
       {content}
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -21,13 +21,12 @@ const SelectComponent = ({
   onDeselect = () => { },
   onClear = () => { },
   onPopupScroll = () => { },
-  isPassingId = false,
-  id,
   onSearch = () => { },
   filterOption,
   showSearch = true,
   className,
   style: customStyle,
+  ...restProps
 }) => {
   const wrapper = "flex flex-col";
   const style = {
@@ -49,7 +48,7 @@ const SelectComponent = ({
   };
 
   return (
-    <div className={wrapper} id={isPassingId ? id : undefined}>
+    <div className={wrapper}>
       <InputLabel text={label} mandatory={mandatory}></InputLabel>
       <Select
         onPopupScroll={onPopupScroll}
@@ -73,6 +72,7 @@ const SelectComponent = ({
         onSelect={onSelect}
         onDeselect={onDeselect}
         onClear={onClear}
+        {...restProps}
       >
         {children}
       </Select>

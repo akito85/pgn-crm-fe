@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import ButtonComponent from "../../../../../components/ButtonComponent";
 import CardContainer from "../../../../../components/CardContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
@@ -212,7 +212,7 @@ const ViewPaymentPeriod = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <Tabs
@@ -243,7 +243,7 @@ const ViewPaymentPeriod = () => {
                     loading={loadingConfirm}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

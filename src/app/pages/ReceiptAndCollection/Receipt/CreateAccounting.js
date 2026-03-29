@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainerNoBorder from "../../../../components/CardContainerNoBorder";
 import SectionCard from "../../../../components/SectionCard";
@@ -468,7 +467,7 @@ const CreateAccounting = () => {
     );
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
 
             <div className="mb-3">
@@ -499,7 +498,7 @@ const CreateAccounting = () => {
                     type="create"
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

@@ -274,16 +274,8 @@ const FunctionalRMSDetail = ({
   const dataItem = data?.length > 0 ? data?.map((item) => item?.country) : [];
 
   const itemActions = nxGetAccountActions({
-    // nxGetAccountActions will call handlers with the record id (e.g. handleUpdate(record.id))
-    // so map the id back to the actual record object before calling edit/deleteRow
-    handleUpdate: (id) => {
-      const rec = data.find((d) => d.key === id || d.id === id);
-      if (rec) edit(rec);
-    },
-    handleDelete: (id) => {
-      const rec = data.find((d) => d.key === id || d.id === id);
-      if (rec) deleteRow(rec);
-    },
+    handleUpdate: (record) => edit(record),
+    handleDelete: (record) => deleteRow(record),
   }).filter((action) => action.action === "Delete" || action.action === "Update");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({

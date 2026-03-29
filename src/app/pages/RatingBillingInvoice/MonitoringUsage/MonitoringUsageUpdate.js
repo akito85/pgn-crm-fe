@@ -1,6 +1,5 @@
 import { DatePicker, Form, Select, Spin, TimePicker } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import BaseContainer from "../../../../components/BaseContainer";
 import TextArea from "antd/lib/input/TextArea";
@@ -175,7 +174,7 @@ const MonitoringUsageUpdate = () => {
 
     return (
         <Spin spinning={loading}>
-            <LayoutMenu>
+            <div>
                 <BreadCrumb routes={routes} />
                 <Form
                     labelCol={{
@@ -354,7 +353,7 @@ const MonitoringUsageUpdate = () => {
                         </div>
                     </div>
                 </Form>
-            </LayoutMenu>
+            </div>
         </Spin>
     );
 };

@@ -6,7 +6,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import SelectComponent from "../../../../components/SelectComponent";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
@@ -301,7 +300,7 @@ const MaintainUser = ({ dataTable }) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"CHANGE AUTHENTICATION TYPE"}>
@@ -450,7 +449,7 @@ const MaintainUser = ({ dataTable }) => {
         {/* render modal */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

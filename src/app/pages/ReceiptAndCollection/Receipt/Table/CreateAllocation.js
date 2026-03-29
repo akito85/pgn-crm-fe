@@ -399,7 +399,7 @@ const CreateAllocation = ({
         header={"Choose Allocation"}
         width={1200}
         footer={[
-          <div className="flex gap-5 justify-end w-full">
+          <div key="footer" className="flex gap-5 justify-end w-full">
             <ButtonComponent
               // type={"reject"}
               htmlType={"submit"}

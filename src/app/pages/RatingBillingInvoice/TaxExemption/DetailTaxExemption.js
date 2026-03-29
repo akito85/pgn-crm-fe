@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin, Table, Tabs } from "antd";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -190,7 +189,7 @@ const DetailTaxExemption = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -402,7 +401,7 @@ const DetailTaxExemption = () => {
           named={taxExemption.proformaInvoiceNumber}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

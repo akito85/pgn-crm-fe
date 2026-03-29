@@ -1,14 +1,14 @@
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
-import AttachmentSectionForm from "../StepContents/AttachmentForm/AttachmentMultiDestination";
-import ApprovalSectionForm from "../StepContents/ApprovalForm/ApprovalMultiDestination";
+import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import InfoMultiDestination from "../StepContents/InformationForm/InfoMultiDestination";
 
 const ConfirmationModalTabs = ({
   form,
   approvalData,
-  dataAttachment,
+  attachmentDataSource,
   service,
   type = "",
   configApplication,
@@ -26,15 +26,15 @@ const ConfirmationModalTabs = ({
     {
       key: 1,
       label: "Approval",
-      children: <ApprovalSectionForm form={form} dataTable={approvalData} formView={false} />,
+      children: <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />,
       disabled,
     },
     {
       key: 2,
       label: "Attachment",
       children: (
-        <AttachmentSectionForm
-          data={dataAttachment}
+        <NxAttachmentInput
+          data={attachmentDataSource}
           service={service}
           configApplication={configApplication}
           type={"confirmation"}
