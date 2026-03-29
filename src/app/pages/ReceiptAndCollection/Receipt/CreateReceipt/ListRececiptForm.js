@@ -425,7 +425,7 @@ const ListRececiptForm = ({ type }) => {
 
   const handleSubmitForm = (formValue) => {
     // 1. Validasi Allocation Table
-    if (dataTable?.length === 0) {
+    if (dataTable?.length === 0 && formValue?.custType !== "Prospective") {
       const errorBody = {
         title: "Alert",
         description: `Please input allocation information!`,
@@ -501,11 +501,11 @@ const ListRececiptForm = ({ type }) => {
         allocationAmount: item?.allocationAmount,
       })),
       description: formValue?.description,
-      receiptRemark: formValue?.receiptRemark,
+      remark: formValue?.remark,
       receiptCode: formValue?.receiptCode,
       isMisc: formValue?.miscellaneous === "Yes",
       miscellaneous: formValue?.miscellaneous,
-      customerType: formValue?.customerType,
+      customerType: formValue?.custType,
       registrationNumber: formValue?.registrationNumber,
       accountGroupType: formValue?.accountGroupType,
       classificationType: formValue?.classificationType,
