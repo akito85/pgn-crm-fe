@@ -9,7 +9,6 @@ import {
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import HeaderDetail from "../../../HeaderDetail";
 import TosInformation from "./TosInformation";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
@@ -487,7 +486,7 @@ const CreateTosSubmission = ({ typeForm }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumbAdvanced routes={routes(location?.state)} />
         <div className="flex flex-col w-full gap-4">
@@ -656,7 +655,7 @@ const CreateTosSubmission = ({ typeForm }) => {
         </div>
       </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

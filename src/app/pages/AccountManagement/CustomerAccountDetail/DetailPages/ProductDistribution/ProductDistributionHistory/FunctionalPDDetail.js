@@ -261,14 +261,8 @@ const FunctionalPDDetail = ({
   const dataItem = data?.length > 0 ? data?.map((item) => item?.country) : [];
 
   const itemActions = nxGetAccountActions({
-    handleUpdate: (id) => {
-      const rec = data.find((d) => d.key === id || d.id === id);
-      if (rec) edit(rec);
-    },
-    handleDelete: (id) => {
-      const rec = data.find((d) => d.key === id || d.id === id);
-      if (rec) deleteRow(rec);
-    },
+    handleUpdate: (record) => edit(record),
+    handleDelete: (record) => deleteRow(record),
   }).filter((action) => action.action === "Delete" || action.action === "Update");
 
   const filterItem = () => {

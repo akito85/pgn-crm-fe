@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tabs, Tooltip } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import DetailText from "../../../../components/DetailText";
@@ -400,7 +399,7 @@ const PrabillingDetail = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading_detail_prabilling}>
 
@@ -510,7 +509,7 @@ const PrabillingDetail = () => {
         </div>
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

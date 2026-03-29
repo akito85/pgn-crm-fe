@@ -9,6 +9,7 @@ const ColumnSettings = ({
   onHiddenColumnsChange,
   fixedColumns = { left: [], right: [] },
   onFixedColumnsChange,
+  staticFixedKeys = { left: [], right: [] },
   buttonStyle = {},
   buttonText = "Column Settings",
   panelWidth = "480px",
@@ -55,14 +56,24 @@ const ColumnSettings = ({
   const isColumnFixed = (columnKey) => {
     return (
       fixedColumns.left.includes(columnKey) ||
-      fixedColumns.right.includes(columnKey)
+      fixedColumns.right.includes(columnKey) ||
+      staticFixedKeys.left.includes(columnKey) ||
+      staticFixedKeys.right.includes(columnKey)
+    );
+  };
+
+  // Check if column is statically fixed (from column definitions)
+  const isStaticallyFixed = (columnKey) => {
+    return (
+      staticFixedKeys.left.includes(columnKey) ||
+      staticFixedKeys.right.includes(columnKey)
     );
   };
 
   // Get fixed position
   const getFixedPosition = (columnKey) => {
-    if (fixedColumns.left.includes(columnKey)) return "left";
-    if (fixedColumns.right.includes(columnKey)) return "right";
+    if (fixedColumns.left.includes(columnKey) || staticFixedKeys.left.includes(columnKey)) return "left";
+    if (fixedColumns.right.includes(columnKey) || staticFixedKeys.right.includes(columnKey)) return "right";
     return null;
   };
 
@@ -238,6 +249,7 @@ const ColumnSettings = ({
             {filteredColumns.map((col, index) => {
               const isVisible = isColumnVisible(col.key);
               const isFixed = isColumnFixed(col.key);
+              const isStaticallyFixedCol = isStaticallyFixed(col.key);
               const position = getFixedPosition(col.key);
 
               return (
@@ -281,7 +293,7 @@ const ColumnSettings = ({
                     <Checkbox
                       checked={isFixed}
                       onChange={(e) => handleFixedChange(e, col.key)}
-                      disabled={!isVisible}
+                      disabled={!isVisible || isStaticallyFixedCol}
                     />
                   </div>
 
@@ -292,14 +304,14 @@ const ColumnSettings = ({
                       onChange={(e) =>
                         handlePositionChange(col.key, e.target.value)
                       }
-                      disabled={!isFixed || !isVisible}
+                      disabled={!isFixed || !isVisible || isStaticallyFixedCol}
                       size="small"
                       buttonStyle="solid"
                       style={{ display: "flex", gap: "4px" }}
                     >
                       <Radio.Button
                         value="left"
-                        disabled={!canFixLeft(index) || !isFixed || !isVisible}
+                        disabled={!canFixLeft(index) || !isFixed || !isVisible || isStaticallyFixedCol}
                         style={{
                           fontSize: "10px",
                           flex: 1,
@@ -311,7 +323,7 @@ const ColumnSettings = ({
                       </Radio.Button>
                       <Radio.Button
                         value="right"
-                        disabled={!canFixRight(index) || !isFixed || !isVisible}
+                        disabled={!canFixRight(index) || !isFixed || !isVisible || isStaticallyFixedCol}
                         style={{
                           fontSize: "10px",
                           flex: 1,

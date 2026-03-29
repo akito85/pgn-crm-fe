@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
@@ -487,7 +486,7 @@ const GeneralTemplateView = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -570,7 +569,7 @@ const GeneralTemplateView = () => {
           />
         ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import { Spin, Input, Tooltip, Checkbox } from "antd";
@@ -678,7 +677,7 @@ const TermOfServiceView = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -761,7 +760,7 @@ const TermOfServiceView = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

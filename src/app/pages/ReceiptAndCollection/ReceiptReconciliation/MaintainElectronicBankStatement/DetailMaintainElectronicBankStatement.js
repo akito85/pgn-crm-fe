@@ -8,7 +8,6 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 
 import {
   getElectronicDetail,
@@ -217,7 +216,7 @@ const DetailMaintainElectronicBankStatement = () => {
   // ===================== UI ========================
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb
         routes={[
           { breadcrumbName: "Receipt & Collection" },
@@ -320,7 +319,7 @@ const DetailMaintainElectronicBankStatement = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -4,7 +4,6 @@ import { Link, NavLink } from "react-router-dom";
 import { Checkbox, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -411,7 +410,7 @@ const InvoiceTemplateView = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -496,7 +495,7 @@ const InvoiceTemplateView = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

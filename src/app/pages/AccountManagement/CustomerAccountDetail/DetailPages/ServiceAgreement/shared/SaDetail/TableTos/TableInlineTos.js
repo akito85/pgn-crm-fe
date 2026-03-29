@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Table,
   Input,
@@ -234,15 +234,26 @@ const TableInlineTos = ({
   const [statusAction, setStatusAction] = useState("");
   const { editing } = useDynamicTableInlineHooks();
 
-  useEffect(() => {
-    if (mode === "update") {
-      setData(
-        tableData?.map((row, index) => ({ ...row, key: index.toString() }))
-      );
-    } else {
-      setData(tableData);
+  const getStableRowKey = useCallback((row, index) => {
+    if (row?.key !== undefined && row?.key !== null && row?.key !== "") {
+      return String(row.key);
     }
-  }, [mode, tableData]);
+
+    if (row?.id !== undefined && row?.id !== null && row?.id !== "") {
+      return String(row.id);
+    }
+
+    return `row-${index}`;
+  }, []);
+
+  useEffect(() => {
+    setData(
+      (tableData || []).map((row, index) => ({
+        ...row,
+        key: getStableRowKey(row, index),
+      }))
+    );
+  }, [tableData, getStableRowKey]);
 
   useEffect(() => {
     setDisabledButton(storedDate)
@@ -546,6 +557,7 @@ const TableInlineTos = ({
         <Form form={form} component={false}>
           <Table
             dataSource={data}
+            rowKey="key"
             columns={filterColumn(
               columns.map((col) => {
                 return {
@@ -635,6 +647,7 @@ const TableInlineTos = ({
       <Form form={form} component={false}>
         <Table
           dataSource={data}
+          rowKey="key"
           columns={filterColumn(
             columns.map((col) => {
               return {

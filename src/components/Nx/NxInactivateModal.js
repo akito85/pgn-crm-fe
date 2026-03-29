@@ -1,7 +1,6 @@
 import { Alert, Button, Form } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { requiredMessage } from "../../utils";
-import ButtonComponent from "../ButtonComponent";
 import InputComponent from "../InputComponent";
 import NxModal from "./NxModal";
 import NxApprovalInput from "./NxApprovalInput";
@@ -19,6 +18,7 @@ const NxInactivateModal = ({
   sliceName,
   approvalOptionsStateName,
   approvalHierarchtDetailsStateName,
+  loadingInactivateName,
   getApprovalOptions = () => {},
   getApprovalHierarchyDetails = () => {},
   width = 1000,
@@ -30,6 +30,7 @@ const NxInactivateModal = ({
   const {
     [approvalOptionsStateName]: approvalOptions,
     [approvalHierarchtDetailsStateName]: approvalHierarchyDetails,
+    [loadingInactivateName]: inactivateLoading,
   } = useSelector(
     (state) => state[sliceName]
   );
@@ -65,18 +66,20 @@ const NxInactivateModal = ({
       type={"confirmation"}
       footer={
         <div className="flex justify-end">
-          <Button onClick={handleCancelModalFinal} type="menu">
+          <Button onClick={handleCancelModalFinal} type="menu" disabled={inactivateLoading}>
             Cancel
           </Button>
           <Button
             form="formApproveReject"
             type="submit"
             htmlType="submit"
+            loading={inactivateLoading}
           >
             Confirm
           </Button>
         </div>
       }
+      loading={inactivateLoading}
     >
       <div className="p-4">
         <Form
@@ -107,6 +110,7 @@ const NxInactivateModal = ({
             hierarchyDetails={approvalHierarchyDetails}
             options={approvalOptions}
             handleSelectHiararchy={handleSelectHiararchy}
+            loading={inactivateLoading}
           />
           <Form.Item
             name={"remark"}
@@ -119,6 +123,7 @@ const NxInactivateModal = ({
               rows={1}
               type="textarea"
               placeholder={"Type your remark"}
+              disabled={inactivateLoading}
             />
           </Form.Item>
         </Form>

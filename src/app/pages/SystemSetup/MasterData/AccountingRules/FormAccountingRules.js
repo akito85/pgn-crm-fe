@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Form, Spin } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -156,7 +155,7 @@ const FormAccountingRules = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -244,7 +243,7 @@ const FormAccountingRules = ({ type }) => {
                 width={900}
                 header={'confirmation'}
                 footer={[
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                    <div key="footer" className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                         <ButtonComponent
                             onClick={handleCancel}
                             type="default"
@@ -286,7 +285,7 @@ const FormAccountingRules = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 

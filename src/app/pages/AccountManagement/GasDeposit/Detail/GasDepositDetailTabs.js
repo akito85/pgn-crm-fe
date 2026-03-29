@@ -1,10 +1,18 @@
 import GasDepositDetailAttch from "./GasDepositDetailAttch";
 import GasDepositDetailInfo from "./GasDepositDetailInfo";
-import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import { useState } from "react";
-import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import NxTabs from "../../../../../components/Nx/NxTabs";
 
+/**
+ * Tabbed detail view for a gas deposit record.
+ * Renders "Gas Deposit Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Gas deposit detail record
+ */
 const GasDepositDetailTabs = ({ detail = {} }) => {
+  // --- Derived values ---
   const attachments = detail.attachments;
 
   const tabOptions = [
@@ -20,7 +28,10 @@ const GasDepositDetailTabs = ({ detail = {} }) => {
     }
   ];
 
-  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
+  const firstTabKey = tabOptions[0].key;
+
+  // --- State ---
+  const [activeKey, setActiveKey] = useState(firstTabKey || "");
 
   return (
     <NxCardContainer

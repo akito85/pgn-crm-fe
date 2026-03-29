@@ -1,6 +1,5 @@
 import { LeftOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import moment from "moment";
@@ -270,7 +269,7 @@ const BillingCycleDetail = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <div className="flex flex-col w-full gap-4">
         {bodyApproval.isApprover &&
@@ -371,7 +370,7 @@ const BillingCycleDetail = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

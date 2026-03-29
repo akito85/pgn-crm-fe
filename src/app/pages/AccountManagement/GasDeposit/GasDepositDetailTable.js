@@ -8,7 +8,8 @@ import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { getGasDepositDetailColumns } from "./getGasDepositDetailColumns";
 
 const GasDepositDetailTable = ({
-  data = [],
+  dataSource = [],
+  handleView = () => {},
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -20,21 +21,25 @@ const GasDepositDetailTable = ({
   const [search, setSearch] = useState({});
   
   const itemActions = nxGetAccountActions({
-    idKey: "idGd",
-  });
+    handleView, 
+  }).filter((item) => item.action === "View");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["statusApproval", "status", "action"],
     left: [],
   }));
 
-  const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
-    (col) => ({
-      ...col,
-      width: 70,
-      align: "center",
-    })
-  );
+  const actionCols = [{
+    key: "action",
+    title: "ACTION",
+    dataIndex: "action",
+    width: 70,
+    render: (_, record) => (
+      <div className="w-full flex justify-center gap-4 py-1 items-center">
+        {itemActions.map((item, index) => item.render(record, 1, index))}
+      </div>
+    )
+  }];
 
   /**
    * @param {string[]} selectedKeys
@@ -85,9 +90,9 @@ const GasDepositDetailTable = ({
     <div className="flex flex-col gap-y-4">
       <NxTable
         idTable="gas-deposit-detail-table"
-        dataSource={data}
-        totalData={data.length}
-        tableScrolled={{ x: data.length ? "max-content" : 4000 }}
+        dataSource={dataSource}
+        totalData={dataSource.length}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}

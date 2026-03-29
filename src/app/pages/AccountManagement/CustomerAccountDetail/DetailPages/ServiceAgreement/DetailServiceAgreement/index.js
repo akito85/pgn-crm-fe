@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import moment from 'moment'
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ServiceAgreementDetailCompoment from "./ServiceAgreementDetailCompoment";
 import Warranty from "./Warranty";
@@ -89,6 +88,14 @@ const DetailServiceAgreement = () => {
       )
     ) {
       setActiveTab("tosSubmission");
+    } else if (
+      path && (
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/create") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/view") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/update")
+      )
+    ) {
+      setActiveTab("warranty");
     } else {
       setActiveTab("saInformation");
     }
@@ -288,8 +295,16 @@ const DetailServiceAgreement = () => {
     {
       key: "warranty",
       label: "Warranty",
-      disabled: true,
-      children: <Warranty />,
+      disabled: statusSa !== "ACTIVE",
+      children: (
+        <Warranty
+          idSA={idSA}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={type}
+          dataDetailSA={data_detail}
+        />
+      ),
     },
     {
       key: "tosSubmission",
@@ -329,8 +344,8 @@ const DetailServiceAgreement = () => {
   ];
 
   return (
-    <div>
-      <LayoutMenu>
+    <>
+      <div>
         <Spin spinning={loading}>
           <div className="flex flex-col gap-y-4">
             {/* <BreadCrumbAdvanced routes={routes(location?.state)} /> */}
@@ -444,8 +459,8 @@ const DetailServiceAgreement = () => {
           approveOrReject={approveOrReject}
           message={message}
         />
-      </LayoutMenu>
-    </div>
+      </div>
+    </>
   );
 };
 

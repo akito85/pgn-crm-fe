@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import { Tooltip, Spin } from "antd";
@@ -486,7 +485,7 @@ const EmployeeDetail = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
 
         <div className="gap-5 w-full flex flex-col">
@@ -615,7 +614,7 @@ const EmployeeDetail = () => {
         {renderModal()}
       </Spin>
 
-    </LayoutMenu>
+    </>
   );
 };
 

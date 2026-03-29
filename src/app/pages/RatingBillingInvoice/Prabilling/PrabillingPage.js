@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs } from "antd";
 import { NavLink } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -520,7 +519,7 @@ const PrabillingPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -643,7 +642,7 @@ const PrabillingPage = () => {
           />
         </div>
       )}
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -1,20 +1,18 @@
 import { TreeSelect } from "antd";
 import React from "react";
 
-const UtilsTreeSelect = (props) => {
-  const {
-    label,
-    treeData = [],
-    onChange = () => {},
-    value,
-    disabled = false,
-    placeholder,
-    treeCheckable = false,
-    treeCheckStrictly = false,
-    filterTreeNode = () => {},
-    isPassingId = false,
-    id,
-  } = props;
+const UtilsTreeSelect = ({
+  label,
+  treeData = [],
+  onChange = () => {},
+  value,
+  disabled = false,
+  placeholder,
+  treeCheckable = false,
+  treeCheckStrictly = false,
+  filterTreeNode = () => {},
+  ...restProps
+}) => {
   const wrapper = "flex flex-col";
   const style = {
     borderRadius: "6px",
@@ -23,7 +21,7 @@ const UtilsTreeSelect = (props) => {
   };
 
   return (
-    <div className={wrapper} id={isPassingId ? id : undefined}>
+    <div className={wrapper}>
       <TreeSelect
         showSearch
         treeData={treeData}
@@ -34,6 +32,7 @@ const UtilsTreeSelect = (props) => {
         style={style}
         value={value}
         filterTreeNode={filterTreeNode}
+        {...restProps}
       />
     </div>
   );

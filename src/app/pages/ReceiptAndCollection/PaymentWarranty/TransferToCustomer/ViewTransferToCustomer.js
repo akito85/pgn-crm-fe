@@ -9,7 +9,6 @@ import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Col
 
 // Global Custom Components
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
 import Toolbar from "../../../../../components/Toolbar";
@@ -174,7 +173,7 @@ const ViewTransferToCustomer = () => {
     );
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
@@ -203,7 +202,7 @@ const ViewTransferToCustomer = () => {
                     />
                 </CardContainer>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

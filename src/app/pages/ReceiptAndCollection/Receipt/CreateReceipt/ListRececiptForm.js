@@ -13,7 +13,6 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../../components/Modal/ModalPopUp";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   clearBodyMessage,
   showModalError,
@@ -634,7 +633,7 @@ const ListRececiptForm = ({ type }) => {
   );
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       
       {/* Step Indicator with FormStepper */}
@@ -815,7 +814,7 @@ const ListRececiptForm = ({ type }) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

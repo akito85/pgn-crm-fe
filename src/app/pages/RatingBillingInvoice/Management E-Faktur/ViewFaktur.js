@@ -14,7 +14,6 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -314,7 +313,7 @@ const ViewFaktur = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -463,7 +462,7 @@ const ViewFaktur = () => {
           billingData={selectedBilling}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -124,8 +124,8 @@ const FinancialInformation = ({
       header: "Invoice Relation",
       children: (
         <InvoiceRelation
-          id={id}
-          idCustomer={idCustomer}
+          accountId={id}
+          customerId={idCustomer}
           isActive={current === 7}
         />
       ),

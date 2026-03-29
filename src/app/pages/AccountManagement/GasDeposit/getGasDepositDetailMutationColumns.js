@@ -1,6 +1,21 @@
 import NxDate from "../../../../components/Nx/NxDatePicker";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 
+/**
+ * Returns the column definitions for the Gas Deposit Detail Mutation table.
+ *
+ * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValue`
+ * for server-side filtering, with `filteredValue` set per column. Sorting is handled
+ * server-side via `sorter: true`. The mutationDate column is formatted as "DD MMM YYYY".
+ * Numeric columns (m3, mscf, mmbtu, price, amount) use right-aligned text.
+ *
+ * @param {Object} search - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} searchInput - Ref to the search input element (used for focus).
+ * @param {string} searchedColumn - The dataIndex of the column currently being searched.
+ * @param {string} searchText - The current search text value.
+ * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
 const getGasDepositDetailMutationColumns = (
   search,
   searchInput,

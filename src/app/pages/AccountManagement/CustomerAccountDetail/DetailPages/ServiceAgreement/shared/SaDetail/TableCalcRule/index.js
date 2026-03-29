@@ -492,6 +492,7 @@ const TableCalcRule = ({
 			<Form form={formTable} component={false}>
 				<NxTable
 					idTable="calc-rule-table"
+					rowKey="key"
 					dataSource={displayData}
 					columns={filterColumn(
 						columns.map((col) => ({

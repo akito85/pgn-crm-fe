@@ -368,7 +368,7 @@ const TaxIdentifierForm = ({
             )
           }
         >
-          <SelectComponent isPassingId>
+          <SelectComponent>
             {data_taxIdentifierType &&
               data_taxIdentifierType?.map((ta, index) => (
                 <Select.Option value={ta.id} key={index}>
@@ -395,7 +395,6 @@ const TaxIdentifierForm = ({
               (e.target.value = e.target.value.replace(/\D/g, ""))
             }
             disabled={!tiObj?.taxIdentifierType ? true : false}
-            isPassingId
           />
         </Form.Item>
         <Form.Item
@@ -412,7 +411,6 @@ const TaxIdentifierForm = ({
           <InputComponent
             disabled={!tiObj?.taxIdentifierNumber ? true : false}
             onInput={onInputUpperCase}
-            isPassingId
           />
         </Form.Item>
 
@@ -430,7 +428,6 @@ const TaxIdentifierForm = ({
           >
             <SelectComponent
               disabled={!tiObj?.taxIdentifierName ? true : false}
-              isPassingId
             >
               {dataAddress &&
                 dataAddress?.map((data) => (
@@ -460,7 +457,6 @@ const TaxIdentifierForm = ({
                 onChange={(e) => {
                   handleChangesReset(e.target.value)
                 }}
-                isPassingId
               />
             </Form.Item>
             <Button
@@ -474,25 +470,25 @@ const TaxIdentifierForm = ({
           </Input.Group>
         </Form.Item>
         <Form.Item label={"Customer Name"} name={"customerNameTI"}>
-          <InputComponent disabled isPassingId />
+          <InputComponent disabled />
         </Form.Item>
         <Form.Item label={"Account Name"} name={"accountNameTI"}>
-          <InputComponent disabled isPassingId />
+          <InputComponent disabled />
         </Form.Item>
         <Form.Item label={"Related Account Tax Identifier Type"} name={"ratit"}>
-          <InputComponent disabled isPassingId />
+          <InputComponent disabled />
         </Form.Item>
         <Form.Item
           label={"Related Account Tax Identifier Number"}
           name={"ratin"}
         >
-          <InputComponent disabled isPassingId />
+          <InputComponent disabled />
         </Form.Item>
         <Form.Item
           label={"Related Account Tax Identifier Name"}
           name={"ratin2"}
         >
-          <InputComponent disabled isPassingId />
+          <InputComponent disabled />
         </Form.Item>
 
         <div className="col-span-3">
@@ -500,7 +496,7 @@ const TaxIdentifierForm = ({
             label={"Related Account Tax Identifier Address"}
             name={"ratia"}
           >
-            <InputComponent disabled isPassingId />
+            <InputComponent disabled />
           </Form.Item>
         </div>
         <div className="col-span-3">
@@ -514,7 +510,7 @@ const TaxIdentifierForm = ({
               },
             ]}
           >
-            <DateComponent isPassingId />
+            <DateComponent />
           </Form.Item>
         </div>
         <div className="col-span-3">
@@ -527,7 +523,6 @@ const TaxIdentifierForm = ({
               type="textarea"
               value={descriptionTI}
               onChange={(e) => setDescriptionTI(e.target.value)}
-              isPassingId
             />
           </Form.Item>
         </div>

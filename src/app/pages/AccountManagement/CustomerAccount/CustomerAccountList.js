@@ -10,7 +10,6 @@ import {
 } from "antd";
 import Highlighter from "react-highlight-words";
 import TablePagination from "../../../../components/TablePagination";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import StatusComponent from "../../../../components/StatusComponent";
@@ -792,7 +791,7 @@ const CustomerList = () => {
       //   });
     };
     return (
-      <div>
+      <>
         <p className="text-primary text-xs font-bold uppercase">
           ACCOUNT INFORMATION
         </p>
@@ -806,7 +805,7 @@ const CustomerList = () => {
             y: 300,
           }}
         />
-      </div>
+      </>
     );
   };
 
@@ -1078,7 +1077,7 @@ const CustomerList = () => {
   ]
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -1299,7 +1298,7 @@ const CustomerList = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

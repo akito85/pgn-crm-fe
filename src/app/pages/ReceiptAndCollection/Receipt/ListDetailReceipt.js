@@ -5,7 +5,6 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Tabs, Spin, Alert } from "antd";
 import moment from "moment";
 import { toTitleCase } from "../../../../utils";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainerNoBorder from "../../../../components/CardContainerNoBorder";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
@@ -423,7 +422,7 @@ const ListDetailReceipt = ({ type: propType }) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <Spin spinning={loading}>
@@ -561,7 +560,7 @@ const ListDetailReceipt = ({ type: propType }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 
