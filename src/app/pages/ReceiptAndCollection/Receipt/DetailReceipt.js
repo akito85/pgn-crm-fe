@@ -45,7 +45,7 @@ const DetailReceipt = ({ data_detail }) => {
           <div className="col-span-1" />
           <div className="col-span-1" />
           <div className="col-span-5">
-            <DetailText label="Remark">{data_detail?.description || "-"}</DetailText>
+            <DetailText label="Remark">{data_detail?.remark || "-"}</DetailText>
           </div>
         </div>
       </SectionCard>

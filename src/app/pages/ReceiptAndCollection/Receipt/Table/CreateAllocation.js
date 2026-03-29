@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -107,14 +107,23 @@ const CreateAllocation = ({
   }, [selectedRowKeys, openModalAllocation, dataRecomendation]);
 
   // selected row keys
+  const dataRecomendationKeys = useMemo(() => {
+    return dataRecomendation?.map((item) => item?.key) || [];
+  }, [dataRecomendation?.length]);
+
   useEffect(() => {
-    if (dataRecomendation) {
-      setSelectedRowKeys(
-        dataRecomendation
-          ?.map((item) => item?.key)
-      );
+    if (dataRecomendationKeys.length > 0) {
+      setSelectedRowKeys(dataRecomendationKeys);
     }
-  }, [dataRecomendation]);
+  }, [dataRecomendationKeys]);
+
+  // Handle cleanup
+  useEffect(() => {
+    return () => {
+      setSelectedRowKeys([]);
+      setSelectDataTable([]);
+    };
+  }, []);
 
   // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {

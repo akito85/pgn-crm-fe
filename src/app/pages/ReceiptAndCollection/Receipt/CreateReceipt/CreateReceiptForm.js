@@ -11,6 +11,7 @@ import {
   formMessageRequired,
   hasValue,
 } from "../../../../../utils";
+import { sanitizeNumericInput } from "../../../../../utils/sanitizeInput";
 import AllocationSection from "../Table/AllocationSection";
 import {
   getAccountDDL,
@@ -552,7 +553,7 @@ const CreateReceiptForm = ({
           <div className="col-span-5 grid grid-cols-1 gap-2">
             <Form.Item
               label={"Remark"}
-              name={"receiptRemark"}
+              name={"remark"}
               rules={formMessageRequired("Remark")}
               style={{ marginBottom: 0 }}
             >
@@ -587,13 +588,15 @@ const CreateReceiptForm = ({
                 validator: (_, value) => {
                   if (!value) return Promise.resolve();
                   
+                  const sanitizedValue = sanitizeNumericInput(value);
+                  
                   // Validasi umum: gak boleh 0 atau minus
-                  if (Number(value) <= 0) {
+                  if (Number(sanitizedValue) <= 0) {
                     return Promise.reject(new Error("Amount harus lebih dari 0"));
                   }
 
                   // Validasi khusus IDR: gak boleh ada angka di belakang koma
-                  if (isIDR && !Number.isInteger(Number(value))) {
+                  if (isIDR && !Number.isInteger(Number(sanitizedValue))) {
                     return Promise.reject(new Error("Input IDR tidak boleh menggunakan desimal/koma"));
                   }
 
