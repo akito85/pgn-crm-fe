@@ -6,7 +6,9 @@ import React, {
   useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Tooltip } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Tooltip, Dropdown, Menu } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -36,6 +38,7 @@ const BillingPage = () => {
   );
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
   const dataSource = data?.result;
   const detailRef = useRef(null);
@@ -276,23 +279,44 @@ const BillingPage = () => {
     {
       action: "History",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Approval Hierarchy">
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              handleApprovalHistory(record);
-            }}
-            style={{
-              cursor: "pointer",
-              display: "inline-block",
-              lineHeight: 0,
-            }}
-          >
-            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
-          </div>
-        </Tooltip>
-      ),
+      render: (record) => {
+        const menu = (
+          <Menu>
+            <Menu.Item
+              key="approval-history"
+              icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                handleApprovalHistory(record);
+              }}
+            >
+              Approval History
+            </Menu.Item>
+            <Menu.Item
+              key="create-accounting"
+              icon={<SVGIcon name="IconButtonCreate" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                navigate(RBI_ROUTES.ACCOUNTING_CREATE, {
+                  state: { billingData: record },
+                });
+              }}
+            >
+              Create Accounting
+            </Menu.Item>
+          </Menu>
+        );
+        return (
+          <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{ cursor: "pointer", display: "inline-flex", alignItems: "center" }}
+            >
+              <MoreOutlined className="text-xl text-[#0075bf] cursor-pointer" />
+            </div>
+          </Dropdown>
+        );
+      },
     },
   ];
 

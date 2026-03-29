@@ -48,6 +48,7 @@ import itemReducer from "../slices/receipt_collection/paymentItem";
 import billingReducer from "../slices/rating_billing_invoice/billing";
 import adjustmentBillingReducer from "../slices/rating_billing_invoice/adjustmentBilling";
 import adjustmentInvoiceReducer from "../slices/rating_billing_invoice/adjustmentInvoice";
+import rbiAccountingReducer from "../slices/rating_billing_invoice/accounting";
 import accountReducer from "../slices/account_management/Account/accountSlice";
 import cycleReducer from "../slices/receipt_collection/transactionCalender";
 import financialInformationReducer from "../slices/account_management/detailAccount/FinancialInformationSlice";
@@ -247,6 +248,7 @@ const reducer = combineReducers({
   billing: billingReducer,
   adjustmentBilling: adjustmentBillingReducer,
   adjustmentInvoice: adjustmentInvoiceReducer,
+  rbiAccounting: rbiAccountingReducer,
   rating: ratingReducer,
   pointOfSales: postOfSalesReducer,
   invoice: invoiceReducer,

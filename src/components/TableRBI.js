@@ -143,6 +143,7 @@ const TableRBI = ({
   enableRowClick = false,
   selectedRowKey = null,
   onRowClick = () => {},
+  tableSize = "default",
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -357,6 +358,7 @@ const TableRBI = ({
           const baseStyle = {
             textTransform: "uppercase",
             fontSize: "10px",
+            padding: tableSize === "small" ? "2px 4px" : "4px 8px",
             cursor: isDraggable ? "move" : "default",
           };
 
@@ -378,15 +380,20 @@ const TableRBI = ({
             onDragEnd: isDraggable ? handleDragEnd : undefined,
           };
         },
-        onCell: () => ({
-          style: {
-            textAlign: textAlign,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontSize: "11px",
-          },
-        }),
+        onCell: (record, rowIndex) => {
+          const original = col.onCell ? col.onCell(record, rowIndex) : {};
+          return {
+            ...original,
+            style: {
+              ...original.style,
+              textAlign: textAlign,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontSize: "11px",
+            },
+          };
+        },
       };
 
       if (fixedPos) {
@@ -405,6 +412,7 @@ const TableRBI = ({
       handleDrop,
       handleDragEnd,
       draggedColumnKey,
+      tableSize,
     ],
   );
 
@@ -816,6 +824,7 @@ const TableRBI = ({
         rowSelection={rowSelection}
         onRow={customOnRow}
         rowClassName={customRowClassName}
+        size={tableSize}
       />
 
       {useInfiniteScroll ? (
