@@ -49,6 +49,7 @@ const ViewReceipt = () => {
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const [openModalApproval, setOpenModalApproval] = useState("");
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [recordSelected, setRecordSelected] = useState({});
   const [body, setBody] = useState();
@@ -202,6 +203,35 @@ const ViewReceipt = () => {
     dispatch(clearBodyMessage());
     handleFetch();
   }, [handleFetch]);
+
+  useEffect(() => {
+    if (data_detail && (data_detail?.dataApprover || data_detail?.dataHistory)) {
+      setDataApprovalHistoryFix({
+        dataApprover: {
+          receipt: data_detail?.dataApprover?.MANUAL_RECEIPT || [],
+          hold: data_detail?.dataApprover?.RECEIPT_HOLD || [],
+          release: data_detail?.dataApprover?.RECEIPT_RELEASE || [],
+          reverse: data_detail?.dataApprover?.RECEIPT_REVERSE || [],
+        },
+        dataHistory: {
+          receipt: data_detail?.dataHistory?.MANUAL_RECEIPT || [],
+          hold: data_detail?.dataHistory?.RECEIPT_HOLD || [],
+          release: data_detail?.dataHistory?.RECEIPT_RELEASE || [],
+          reverse: data_detail?.dataHistory?.RECEIPT_REVERSE || [],
+        },
+      });
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [data_detail]);
+
+  const handleOptions = () => {
+    const data = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(data);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase().replace(/_/g, " "),
+    }));
+  };
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -602,8 +632,9 @@ const ViewReceipt = () => {
           handleClose={() => setOpenModalApproval(false)}
           header={"Approval History"}
           width={850}
-          dataApprover={data_detail?.dataApprover?.MANUAL_RECEIPT}
-          dataHistory={data_detail?.dataHistory?.MANUAL_RECEIPT}
+          tabOptions={handleOptions()}
+          dataApprover={dataApprovalHistoryFix?.dataApprover}
+          dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
       </Spin>
 
