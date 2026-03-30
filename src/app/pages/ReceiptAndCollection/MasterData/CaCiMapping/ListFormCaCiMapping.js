@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
   createCaCiMapping,
@@ -368,7 +367,7 @@ const ListFormCaCiMapping = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading || loadingForm}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -474,7 +473,7 @@ const ListFormCaCiMapping = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to go back?</p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

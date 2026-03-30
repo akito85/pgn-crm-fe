@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Spin, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -14,16 +14,21 @@ import ViewListIcon from "../../../../../assets/Icon/Nx/IconViewList";
 import { PlusOutlined } from "@ant-design/icons";
 
 const AccountStandard = () => {
-  // Selector
-  const { data_accountStandard, loading } = useSelector(
+  // Selector — loading is NOT used for the table spinner; see isLoading below.
+  const { data_accountStandard } = useSelector(
     (state) => state.account
   );
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try { const t = JSON.parse(rawToken || '{}'); return t?.userId || t?.id || t?.username || null; }
+    catch { return null; }
+  }, [rawToken]);
 
   // Declaration
   const dispatch = useDispatch();
 
   // State
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(30);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [advancedSearch, setAdvancedSearch] = useState(null);
@@ -31,8 +36,14 @@ const AccountStandard = () => {
   const [allData, setAllData] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  // Local loading flag: set true before each fetch, cleared in the finally block
+  // AFTER setAllData so React 18 batches both updates into one render.
+  // This prevents the "spinner gone, table still empty" flash that occurs when
+  // using the Redux loading flag (which goes false before local state is updated).
+  const [isLoading, setIsLoading] = useState(false);
   const pageRef = useRef(0); // 0-based to match Spring API directly
   const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
 
   // Helper: build combined search string
   const buildSearch = useCallback((basicSearch, advSearch) => {
@@ -48,37 +59,62 @@ const AccountStandard = () => {
     return encodeURIComponent(JSON.stringify(combined));
   }, []);
 
-  // Fetch a specific page and append (or replace) results locally
-  const fetchPage = useCallback(async (page, replace = false) => {
+  // Fetch a specific page and append (or replace) results locally.
+  // The optional `signal` object ({ aborted: false }) lets the caller cancel
+  // a stale fetch (e.g. StrictMode cleanup or rapid filter changes) without
+  // touching isFetchingRef so the guard stays coherent.
+  const fetchPage = useCallback(async (page, replace = false, signal = null) => {
     if (isFetchingRef.current) return;
+    if (signal?.aborted) return;
     isFetchingRef.current = true;
+    setIsLoading(true);
     try {
       const reqSearch = buildSearch(search, advancedSearch);
-      const result = await dispatch(getAllAccountStandardPaginate({ 
+      const result = await dispatch(getAllAccountStandardPaginate({
         page, // 0-based, matches Spring API directly
-        pageSize, 
-        sort, 
-        search: reqSearch 
+        pageSize,
+        sort,
+        search: reqSearch
       })).unwrap();
+      // If the signal was aborted after the await (StrictMode cleanup or rapid
+      // filter change), discard the result AND leave isLoading=true so the
+      // spinner stays visible while the superseding fetch is still in-flight.
+      if (signal?.aborted) return;
       const rows = result?.result ?? [];
       const pageInfo = result?.page ?? {};
+      const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
       setAllData(prev => replace ? rows : [...prev, ...rows]);
       setTotalElements(pageInfo.totalElements ?? 0);
-      setHasMore(pageInfo.number < (pageInfo.totalPages ?? 0) - 1);
-      pageRef.current = pageInfo.number ?? page;
+      setHasMore(nextHasMore);
+      hasMoreRef.current = nextHasMore;
+      // Use the page we requested, not pageInfo.number — avoids the 0 ?? page
+      // pitfall where a valid 0 from the API overrides the actual page index.
+      pageRef.current = page;
     } catch (e) {
-      console.error('fetchPage error', e);
+      if (!signal?.aborted) console.error('fetchPage error', e);
     } finally {
       isFetchingRef.current = false;
+      // Only clear loading when we committed a result (or hit a real error).
+      // If the signal was aborted the superseding fetch is still running —
+      // clearing loading here would cause a spinner-gone + empty-table flash.
+      if (!signal?.aborted) setIsLoading(false);
     }
   }, [search, advancedSearch, sort, pageSize, dispatch, buildSearch]);
 
-  // Initial load + reload when filters/sort/pageSize change
+  // Initial load + reload when filters/sort/pageSize change.
+  // The signal is marked aborted on cleanup so StrictMode double-mounts and
+  // rapid filter changes don't commit stale results into component state.
   useEffect(() => {
+    const signal = { aborted: false };
     pageRef.current = 0;
     setAllData([]);
     setHasMore(false);
-    fetchPage(0, true);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false; // unblock the next effect so it can fetch
+    };
   }, [search, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
 
   const handleDownload = () => {
@@ -112,9 +148,11 @@ const AccountStandard = () => {
   };
 
   const onLoadMore = useCallback(() => {
-    if (!hasMore || isFetchingRef.current) return;
-    fetchPage(pageRef.current + 1, false);
-  }, [hasMore, fetchPage]);
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    // Return the promise so useInfiniteScroll's triggerLoad waits for
+    // the fetch to complete before clearing its isLoadingMoreRef gate.
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
 
   const onSort = (_, __, sortInfo) => {
     const dataSort =
@@ -185,7 +223,7 @@ const AccountStandard = () => {
         <div className="w-full">
           <TableAccountStandard
             dataSource={allData}
-            loading={loading}
+            loading={isLoading}
             totalData={totalElements}
             current={pageRef.current + 1}
             pageSize={pageSize}
@@ -196,12 +234,13 @@ const AccountStandard = () => {
             handleDownload={handleDownload}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
-            useInfiniteScroll={true} // Enable infinite scrolling
+            useInfiniteScroll={true}
             onLoadMore={onLoadMore}
             hasMore={hasMore}
             itemActions={itemActions}
-            columnDefinitions={columnsAccountStandard} // Pass column definitions for advanced search
+            columnDefinitions={columnsAccountStandard}
             tableScrolled={{ x: 3000, y: 600 }}
+            userId={userId}
           />
         </div>
       </NxCardContainer>

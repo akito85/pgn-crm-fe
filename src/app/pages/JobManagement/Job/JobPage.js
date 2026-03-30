@@ -14,7 +14,7 @@ import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 
 // ─── SVG Icons ───────────────────────────────────────────────────────────────
 
@@ -280,8 +280,8 @@ const JobPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
-          onRefresh={handleRefresh}
-          showRefresh={true}
+          // onRefresh={handleRefresh}
+          // showRefresh={true}
         />
       </NxCardContainer>
 
@@ -293,18 +293,21 @@ const JobPage = () => {
         handleCancel={handleDeleteCancel}
         width={480}
         footer={[
-          <ButtonComponent key="cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
-            Cancel
-          </ButtonComponent>,
-          <ButtonComponent
-            key="delete"
-            border={false}
-            className="!bg-[#d32f2f] !text-white !border-transparent"
-            onClick={handleDeleteConfirm}
-            loading={deleteLoading}
-          >
-            Delete
-          </ButtonComponent>,
+          <div className="flex flex-row justify-between items-center">
+            <ButtonComponent size={"small"} key="cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              size={"small"}
+              key="delete"
+              border={false}
+              className="!bg-[#d32f2f] !text-white !border-transparent"
+              onClick={handleDeleteConfirm}
+              loading={deleteLoading}
+            >
+              Delete
+            </ButtonComponent>
+          </div>
         ]}
       >
         <div style={{ padding: "20px 24px" }}>

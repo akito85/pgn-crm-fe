@@ -6,7 +6,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
 import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectCaCiMapping,
   approveOrRejectInactiveCaCiMapping,
@@ -128,7 +127,7 @@ const ListDetailCaCiMapping = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <div>
@@ -186,7 +185,7 @@ const ListDetailCaCiMapping = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

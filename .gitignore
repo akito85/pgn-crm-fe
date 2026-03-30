@@ -32,6 +32,7 @@ logs/
 docs/
 
 .cla*
+.q*
 *.md
 *.MD
 *.sh
