@@ -1,5 +1,4 @@
 import { Checkbox, Spin, Tooltip } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -483,7 +482,7 @@ const TaxCodeView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -554,7 +553,7 @@ const TaxCodeView = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

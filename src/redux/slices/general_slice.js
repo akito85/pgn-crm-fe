@@ -45,6 +45,14 @@ export const validateError = createAsyncThunk(
       thunkAPI.dispatch(logoutTokenExpired());
     } else if (errorLog === 500 || errorLog === 419) {
       thunkAPI.dispatch(setBodyError({ ...error, action: action }));
+      if (action === "CHECK_GRANTED_ACCESS") {
+        // Grant check returned 500 — path not registered in backend.
+        // Fall back to view-only so the action column still renders.
+        thunkAPI.dispatch(grantedAccess({
+          isGranted: true,
+          actionList: [{ name: "view" }],
+        }));
+      }
     } else if (
       errorLog === 503 ||
       (errorLog === 404 && error?.response?.data?.data?.isGranted === false)

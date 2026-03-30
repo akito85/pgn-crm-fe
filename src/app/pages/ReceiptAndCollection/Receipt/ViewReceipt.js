@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { Spin, Tooltip, Alert, Menu, Dropdown } from "antd";
 import SVGIcon from "../../../../assets/Icon/index";
 import CardContainer from "../../../../components/CardContainer";
@@ -13,23 +12,21 @@ import {
   getPaginateReceipt,
   deleteReceipt,
   holdReleaseReceiptBulk,
+  submitRefundReceipt,
 } from "../../../../redux/slices/receipt_collection/receipt";
 import { columnsReceipt } from "./ColumnReceiptView";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import ModalHoldReceipt from "./Table/ModalHoldReceipt";
 import ModalRefundReceipt from "./Table/ModalRefundReceipt";
 import ModalReleaseReceipt from "./Table/ModalReleaseReceipt";
 import ModalReverseReceipt from "./Table/ModalReverseReceipt";
-import { DownloadOutlined, WarningOutlined, DownOutlined } from "@ant-design/icons";
+import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-import Toolbar from "../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { hasValue } from "../../../../utils";
+import { clearBodyMessage } from "../../../../redux/slices/general_slice";
 
 const ViewReceipt = () => {
   // Selector
@@ -53,6 +50,7 @@ const ViewReceipt = () => {
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const [openModalApproval, setOpenModalApproval] = useState("");
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [recordSelected, setRecordSelected] = useState({});
   const [body, setBody] = useState();
@@ -97,7 +95,25 @@ const ViewReceipt = () => {
   };
 
   const handleSubmitRefund = (data) => {
-    setOpenModalRefund(false);
+    const body = {
+      customerId: data.customerId,
+      appHierId: data.appHierId,
+      refundDate: data.refundDate,
+      remark: data.remark,
+      attachmentIds: data.attachmentIds || [],
+      receipts: data.receipts?.map((item) => ({
+        receiptId: item.receiptId || item.id,
+        refundAmount: item.refundAmount,
+        remark: item.remark,
+      })),
+    };
+
+    dispatch(submitRefundReceipt({ body })).then((res) => {
+      if (!res.error) {
+        setOpenModalRefund(false);
+        handleFetch();
+      }
+    });
   };
 
   const handleRelease = () => {
@@ -202,8 +218,39 @@ const ViewReceipt = () => {
   }, [dispatch, page, pageSize, search, sort]);
 
   useEffect(() => {
+    // Clear any stale error messages from other pages on mount
+    dispatch(clearBodyMessage());
     handleFetch();
   }, [handleFetch]);
+
+  useEffect(() => {
+    if (data_detail && (data_detail?.dataApprover || data_detail?.dataHistory)) {
+      setDataApprovalHistoryFix({
+        dataApprover: {
+          receipt: data_detail?.dataApprover?.MANUAL_RECEIPT || [],
+          hold: data_detail?.dataApprover?.RECEIPT_HOLD || [],
+          release: data_detail?.dataApprover?.RECEIPT_RELEASE || [],
+          reverse: data_detail?.dataApprover?.RECEIPT_REVERSE || [],
+        },
+        dataHistory: {
+          receipt: data_detail?.dataHistory?.MANUAL_RECEIPT || [],
+          hold: data_detail?.dataHistory?.RECEIPT_HOLD || [],
+          release: data_detail?.dataHistory?.RECEIPT_RELEASE || [],
+          reverse: data_detail?.dataHistory?.RECEIPT_REVERSE || [],
+        },
+      });
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [data_detail]);
+
+  const handleOptions = () => {
+    const data = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(data);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase().replace(/_/g, " "),
+    }));
+  };
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -362,8 +409,8 @@ const ViewReceipt = () => {
           <span>Release</span>
         </div>
       </Menu.Item>
-      <Menu.Item 
-        key="Reverse" 
+      <Menu.Item
+        key="Reverse"
         onClick={() => handleReverse(record)}
         disabled={record?.statusApproval === "Waiting Approval" || record?.status?.toUpperCase() === "REVERSE"}
       >
@@ -372,14 +419,14 @@ const ViewReceipt = () => {
           <span>Reverse</span>
         </div>
       </Menu.Item>
-      <Menu.Item 
-        key="Refund" 
+      <Menu.Item
+        key="Refund"
         onClick={() => {
           setSelectedData([record]);
           handleRefund();
         }}
         disabled={
-          record?.statusApproval !== "Approved" || 
+          record?.statusApproval !== "Approved" ||
           (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0)
         }
       >
@@ -389,7 +436,7 @@ const ViewReceipt = () => {
         </div>
       </Menu.Item>
       <Menu.Item
-        key="CreateAccounting"
+        key="Create Accounting"
         onClick={() => handleCreateAccounting(record)}
       >
         <div className="flex items-center gap-2">
@@ -397,9 +444,9 @@ const ViewReceipt = () => {
           <span>Create Accounting</span>
         </div>
       </Menu.Item>
-      <Menu.Item key="ViewAccounting">
+      <Menu.Item key="View Accounting">
         <Link
-          to={RECEIPT_AND_COLLECTION_ROUTES.VIEW_ACCOUNTING}
+          to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_ACCOUNTING}
           state={{ id: record?.id }}
           className="flex items-center gap-2"
         >
@@ -424,221 +471,6 @@ const ViewReceipt = () => {
     </Menu>
   );
 
-  const moreMenu = (
-    <Menu>
-      <Menu.Item
-        key="Release"
-        disabled={selectedData.length === 0}
-        onClick={handleRelease}
-      >
-        <div className="flex items-center gap-2">
-          <SVGIcon name="IconSend" color={"#000000"} width={16} />
-          <span>Release</span>
-        </div>
-      </Menu.Item>
-      <Menu.Item key="Hold" onClick={() => handleHold(null)}>
-        <div className="flex items-center gap-2">
-          <SVGIcon name="IconHold" color={"#000000"} width={16} />
-          <span>Hold</span>
-        </div>
-      </Menu.Item>
-      <Menu.Item 
-        key="Refund" 
-        onClick={handleRefund}
-        disabled={
-          selectedData.length === 0 || 
-          selectedData.some(item => 
-            item?.statusApproval !== "Approved" || 
-            (parseFloat(item?.unAppliedAmountReal || item?.unAppliedAmount || 0) <= 0)
-          )
-        }
-      >
-        <div className={`flex items-center gap-2 ${(selectedData.length === 0 || selectedData.some(item => item?.statusApproval !== "Approved" || (parseFloat(item?.unAppliedAmountReal || item?.unAppliedAmount || 0) <= 0))) ? 'opacity-50' : ''}`}>
-          <SVGIcon name="IconRefund" color={"#000000"} width={16} />
-          <span>Refund</span>
-        </div>
-      </Menu.Item>
-      <Menu.Item 
-        key="Reverse" 
-        onClick={() => handleReverse(null)}
-        disabled={
-          selectedData.length === 0 || 
-          selectedData.some(item => 
-            item?.statusApproval === "Waiting Approval" || 
-            item?.status?.toUpperCase() === "REVERSE"
-          )
-        }
-      >
-        <div className={`flex items-center gap-2 ${(selectedData.length === 0 || selectedData.some(item => item?.statusApproval === "Waiting Approval" || item?.status?.toUpperCase() === "REVERSE")) ? 'opacity-50' : ''}`}>
-          <SVGIcon name="IconRevers" color={"#000000"} width={16} />
-          <span>Reverse</span>
-        </div>
-      </Menu.Item>
-    </Menu>
-  );
-
-  const itemActions = [
-    // column action
-    {
-      action: "View",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT}
-              state={{ id: r?.id }}
-            >
-              <div>
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Update"}>
-            <Link
-            >
-              <ButtonComponent
-                className="gap-5"
-                icon={<SVGIcon name="IconEdit" color={"#808080"} width={24} />}
-                border={false}
-                disabled={true}
-              >
-              </ButtonComponent>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Transfer",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Transfer"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconTransfer" color={"#808080"} width={24} />
-              }
-              border={false}
-              disabled={true}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Reverse",
-      type: "table",
-      render: (r, data_length) => {
-        const isDisabled = r?.statusApproval === "Waiting Approval" || r?.status?.toUpperCase() === "REVERSE";
-        
-        return (
-          <Tooltip title={"Reverse"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={<SVGIcon name="IconRevers" color={isDisabled ? "#CCCCCC" : "#808080"} width={24} />}
-              border={false}
-              disabled={isDisabled}
-              onClick={() => handleReverse(r)}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Refund",
-      type: "table",
-      render: (r, data_length) => {
-        const isDisabled = 
-          r?.statusApproval !== "Approved" || 
-          (parseFloat(r?.unAppliedAmountReal || r?.unAppliedAmount || 0) <= 0);
-
-        return (
-          <Tooltip title={"Refund"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={<SVGIcon name="IconRefund" color={isDisabled ? "#CCCCCC" : "#808080"} width={24} />}
-              border={false}
-              disabled={isDisabled}
-              onClick={() => {
-                setSelectedData([r]);
-                handleRefund();
-              }}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Hold",
-      type: "table",
-      render: (r, data_length) => {
-
-        return (
-          <Tooltip title={"Hold"}>
-            <ButtonComponent
-              className="gap-5"
-              icon={<SVGIcon name="IconHold" color={"#808080"} width={24} />}
-              border={false}
-              disabled={false}
-              onClick={() => handleHold(r)}
-            >
-            </ButtonComponent>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Release",
-      type: "table",
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Release"}>
-            <Link
-            >
-              <ButtonComponent
-                className="gap-5"
-                icon={<SVGIcon name="IconSend" color={"#808080"} width={24} />}
-                border={false}
-                disabled={true}
-              >
-              </ButtonComponent>
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "history",
-      type: "table",
-      render: (record, data_length) => {
-        return (
-          <ButtonComponent
-            className="gap-5"
-            icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-            }
-            border={false}
-            onClick={() => handleModalApprovalHistory(record?.id)}
-          >
-          </ButtonComponent>
-        );
-      },
-    },
-  ];
-
   // handle retry modal error
   const handleRetry = () => {
     try {
@@ -655,39 +487,43 @@ const ViewReceipt = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold uppercase text-[#0075BF]">receipt list</p>
+              <p className="mt-[15px] text-primary">RECEIPT LIST</p>
               <div className="flex gap-2">
                 <ButtonComponent
-                  icon={<DownloadOutlined style={{ fontSize: 18 }} />}
+                  isPrimary={true}
+                  icon={<DownloadOutlined style={{ fontSize: 18, color: '#FFFFFF' }} />}
                   onClick={handleDownload}
                 >
                   Download List
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconHold" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconHold" width={18} color={"#FFFFFF"} />}
                   onClick={() => handleHold(null)}
                 >
                   Hold
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconSend" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconSend" width={18} color={"#FFFFFF"} />}
                   onClick={handleRelease}
                 >
                   Release
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconRefund" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconRefund" width={18} color={"#FFFFFF"} />}
                   onClick={handleRefund}
                   disabled={
-                    selectedData.length === 0 || 
-                    selectedData.some(item => 
-                      item?.statusApproval !== "Approved" || 
+                    selectedData.length === 0 ||
+                    selectedData.some(item =>
+                      item?.statusApproval !== "Approved" ||
                       (parseFloat(item?.unAppliedAmountReal || item?.unAppliedAmount || 0) <= 0)
                     )
                   }
@@ -695,12 +531,13 @@ const ViewReceipt = () => {
                   Refund
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconRevers" width={18} />}
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconRevers" width={18} color={"#FFFFFF"} />}
                   onClick={() => handleReverse(null)}
                   disabled={
-                    selectedData.length === 0 || 
-                    selectedData.some(item => 
-                      item?.statusApproval === "Waiting Approval" || 
+                    selectedData.length === 0 ||
+                    selectedData.some(item =>
+                      item?.statusApproval === "Waiting Approval" ||
                       item?.status?.toUpperCase() === "REVERSE"
                     )
                   }
@@ -709,7 +546,8 @@ const ViewReceipt = () => {
                 </ButtonComponent>
                 <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_RECEIPT}>
                   <ButtonComponent
-                    icon={<SVGIcon name="IconButtonCreate" width={18} />}
+                    isPrimary={true}
+                    icon={<SVGIcon name="IconButtonCreate" width={18} color={"#FFFFFF"} />}
                     type="submit"
                   >
                     Create
@@ -743,7 +581,7 @@ const ViewReceipt = () => {
                     <div className="flex justify-center items-center gap-2">
                       <Dropdown overlay={moreActionsMenu(record)} trigger={['click']}>
                         <div className="cursor-pointer">
-                          <SVGIcon name="IconActionDropdown" width={20} />
+                          <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
                         </div>
                       </Dropdown>
                       <Tooltip title="Detail">
@@ -751,8 +589,8 @@ const ViewReceipt = () => {
                           to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_RECEIPT}
                           state={{ id: record?.id }}
                         >
-                          <div className="cursor-pointer">
-                            <SVGIcon name="IconDetail" width={20} />
+                          <div className="cursor-pointer mt-1">
+                            <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
                           </div>
                         </Link>
                       </Tooltip>
@@ -772,7 +610,6 @@ const ViewReceipt = () => {
               }}
               handleDownload={handleDownload} // For Export button in TableRBI
               showExport={true}
-              rowSelection={rowSelection} // Added Row Selection
             />
           </div>
         </CardContainer>
@@ -814,8 +651,9 @@ const ViewReceipt = () => {
           handleClose={() => setOpenModalApproval(false)}
           header={"Approval History"}
           width={850}
-          dataApprover={data_detail?.dataApprover?.MANUAL_RECEIPT}
-          dataHistory={data_detail?.dataHistory?.MANUAL_RECEIPT}
+          tabOptions={handleOptions()}
+          dataApprover={dataApprovalHistoryFix?.dataApprover}
+          dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
       </Spin>
 
@@ -838,7 +676,7 @@ const ViewReceipt = () => {
         />
       </ModalConfirm>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

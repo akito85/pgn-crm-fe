@@ -30,7 +30,7 @@ export const getAllProductClassPaginate = createAsyncThunk(
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
-      return thunkAPI.rejectWithValue(error?.response);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -50,7 +50,7 @@ export const getDetailProductClass = createAsyncThunk(
       thunkAPI.dispatch(
         validateError({ error, action: "DOWNLOAD_PRODUCT_CLASS", back: false })
       );
-      return thunkAPI.rejectWithValue(error?.response);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -77,7 +77,7 @@ export const createProductClass = createAsyncThunk(
           thunkAPI.dispatch(showModalError(errorBody));
         }
       }
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -107,7 +107,7 @@ export const updateProductClass = createAsyncThunk(
           thunkAPI.dispatch(showModalError(errorBody));
         }
       }
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -179,11 +179,10 @@ const productClassSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Product Class Pagination
-    [getAllProductClassPaginate.pending]: (state, action) => {
+    [getAllProductClassPaginate.pending]: (state) => {
       state.isFailed = false;
       state.isSuccess = false;
       state.loading = true;
-      state.data = action.payload;
     },
     [getAllProductClassPaginate.fulfilled]: (state, action) => {
       state.isFailed = false;
@@ -197,9 +196,8 @@ const productClassSlice = createSlice({
     },
 
     // Get Detail Product Class
-    [getDetailProductClass.pending]: (state, action) => {
+    [getDetailProductClass.pending]: (state) => {
       state.loading = true;
-      state.data_detail = action.payload;
     },
     [getDetailProductClass.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
@@ -224,9 +222,8 @@ const productClassSlice = createSlice({
     },
 
     // Update Product Class
-    [updateProductClass.pending]: (state, action) => {
+    [updateProductClass.pending]: (state) => {
       state.loading = true;
-      state.data = action.payload;
     },
     [updateProductClass.fulfilled]: (state, action) => {
       state.loading = false;

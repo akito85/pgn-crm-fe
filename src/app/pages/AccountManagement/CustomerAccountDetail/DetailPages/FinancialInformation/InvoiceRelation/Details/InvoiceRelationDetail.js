@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import LayoutMenu from "../../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useState } from "react";
@@ -17,29 +16,36 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import NxApproveOrRejectModal from "../../../../../../../../components/Nx/NxApproveOrRejectModal";
 import HeaderDetail from "../../../../HeaderDetail";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import SVGIcon from "../../../../../../../../assets/Icon/index";
 
+/**
+ * Invoice relation detail view (container + presentational component).
+ * Fetches original and draft records, supports approve/reject workflow.
+ *
+ * @param {object}                    props
+ * @param {"standard"|"oneTime"}      [props.accountType="standard"] - Account type context.
+ */
 const InvoiceRelationDetail = ({
   accountType = "standard"
 }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
+
+  // --- Hooks ---
   const dispatch = useDispatch();
 
-  const { detail_invoiceRelation, detailDraft_invoiceRelation } = useSelector(
+  const { detail_invoiceRelation, detailDraft_invoiceRelation, loading_detailIr, loading_detailDraftIr, loading_approveRejectIr } = useSelector(
     (state) => state.invoiceRelation
   )
 
   const { loading, loadingAccount } = useSelector(
     (state) => state.customerAccount
   );
-  
-  const isLoading = loading || loadingAccount;
 
-  //declare
   const navigate = useNavigate();
   const location = useLocation();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idIr = location?.state?.id;
 
   const tabOptions = [
@@ -53,16 +59,15 @@ const InvoiceRelationDetail = ({
     }
   ]
   const originalKey = tabOptions[0]?.key;
-  const [activeKey, setActiveKey] = useState(originalKey || "")
-  const detail = (activeKey === originalKey ? detail_invoiceRelation : detailDraft_invoiceRelation) || {}
 
-  const handleSetActiveKey = (newActiveKey) => {
-    setActiveKey(newActiveKey)
-  }
-  
-  //state
+  // --- State ---
+  const [activeKey, setActiveKey] = useState(originalKey || "")
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
+
+  // --- Derived values ---
+  const isLoading = loading || loadingAccount || loading_detailIr || loading_detailDraftIr;
+  const detail = (activeKey === originalKey ? detail_invoiceRelation : detailDraft_invoiceRelation) || {}
 
   const {
     status,
@@ -71,7 +76,7 @@ const InvoiceRelationDetail = ({
 
   const {
     approvalType,
-    relatedAccountNumber,
+    accountNumber,
     id,
     createdDate,
     createdBy,
@@ -79,7 +84,9 @@ const InvoiceRelationDetail = ({
     updatedBy,
     tappId,
   } = detail;
-  
+
+  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
+  const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
   const routes = [
     {
       path: "",
@@ -106,9 +113,19 @@ const InvoiceRelationDetail = ({
     },
   ];
 
+  // --- Handlers ---
   /**
-   * @param {boolean} show
-   * @param {"approve"|"reject"} action 
+   * Switches the active detail tab between Original and Current.
+   * @param {string} newActiveKey
+   */
+  const handleSetActiveKey = (newActiveKey) => {
+    setActiveKey(newActiveKey)
+  }
+
+  /**
+   * Opens or closes the approval/rejection modal.
+   * @param {boolean}            show   - true to open, false to close
+   * @param {"approve"|"reject"} [action] - Which action to arm
    */
   const handleApprovalModal = (show, action) => {
     if (show) {
@@ -121,7 +138,10 @@ const InvoiceRelationDetail = ({
   }
 
   /**
-   * @param {"approve"|"reject"} action 
+   * Dispatches approve or reject for the current invoice relation record.
+   * @param {string}             description - Remark entered in the approval form
+   * @param {"approve"|"reject"} action
+   * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
     const body = [{
@@ -137,12 +157,7 @@ const InvoiceRelationDetail = ({
         action,
       }))
       .unwrap()
-      .then(() => {
-        dispatch(getDetailInvoiceRelation(idIr));
-        dispatch(getDetailDraftInvoiceRelation(idIr));
-        handleClear();
-        handleApprovalModal(false);
-      })
+      .then(() => navigate(-1))
       .catch(() => {});
     } else if (approvalType === "INACTIVE_INVOICE_RELATION") {
       dispatch(approveOrRejectInactiveInvoiceRelation({
@@ -150,12 +165,7 @@ const InvoiceRelationDetail = ({
         action,
       }))
       .unwrap()
-      .then(() => {
-        dispatch(getDetailInvoiceRelation(idIr));
-        dispatch(getDetailDraftInvoiceRelation(idIr));
-        handleClear();
-        handleApprovalModal(false);
-      })
+      .then(() => navigate(-1))
       .catch(() => {});
     } else {
       const errorBody = {
@@ -167,33 +177,34 @@ const InvoiceRelationDetail = ({
     }
   }
 
+  // --- Effects ---
   useEffect(() => {
     if (isStandard)
       dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information/invoice-relation'))
     else if (isOneTime)
       dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information/invoice-relation'))
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    if (idIr) {
+    if (idIr)
       dispatch(getDetailInvoiceRelation(idIr));
+  }, [idIr]);
+  
+  useEffect(() => {
+    if (idIr && draftExist)
       dispatch(getDetailDraftInvoiceRelation(idIr));
-    }
-  }, [idIr])
-
-  const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
-  const isApproval = ["INVOICE_RELATION", "INACTIVE_INVOICE_RELATION"].includes(approvalType);
+  }, [idIr, draftExist])
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
 
@@ -238,12 +249,16 @@ const InvoiceRelationDetail = ({
                 <div className={"w-full flex justify-end gap-5"}>
                   <Button
                     type="reject"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "reject")}
                   >
                     Reject
                   </Button>
                   <Button
                     type="approve"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "approve")}
                   >
                     Approve
@@ -258,10 +273,11 @@ const InvoiceRelationDetail = ({
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${accountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
+        loading={loading_approveRejectIr}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

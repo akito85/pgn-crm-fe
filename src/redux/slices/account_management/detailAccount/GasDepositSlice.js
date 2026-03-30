@@ -57,6 +57,7 @@ const initialState = {
   data_gdApprovalHistory: {},
   loading_approveRejectGd: false,
   loading_inactivateGd: false,
+  loading_recalculateExpireGd: false,
 };
 
 export const getGasDeposit = createAsyncThunk(
@@ -179,6 +180,124 @@ export const getDetailDraftGasDeposit = createAsyncThunk(
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+/**
+ * Recalculate a gas deposit and uploads any provided attachments.
+ * @param {{ body: object, attachments: Array, action: string }} args
+ */
+export const recalculateGasDeposit = createAsyncThunk(
+  "RECALCULATE_GAS_DEEPOSIT",
+  async ({ body: recalculateBody, attachments = [], action }, thunkAPI) => {
+    try {
+      const recalculateUrl = "/v1/dbs/api/gas-deposit/recalculate";
+      const response = await accountManagementService.createData(
+        recalculateUrl,
+        recalculateBody
+      );
+
+      const { id } = response.data;
+
+      const uploadUrl = `/v1/dbs/api/gas-deposit/upload-attachment`;
+
+      const uploadPromises = attachments.map((attachment) =>
+        accountManagementService.uploadAttachment(uploadUrl, {
+          files: attachment.file,
+          category: attachment.fileCategoryId,
+          refId: id,
+          action
+        })
+      );
+
+      await Promise.all(uploadPromises);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${recalculateBody?.action === "draft" ? "saved as draft" : "submitted"}.`,
+        return: false
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      let message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${recalculateBody?.action === "draft" ? "saved as draft" : "submitted"}. ${message}.`
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+/**
+ * Expire a gas deposit and uploads any provided attachments.
+ * @param {{ body: object, attachments: Array, action: string }} args
+ */
+export const expireGasDeposit = createAsyncThunk(
+  "EXPIRE_GAS_DEEPOSIT",
+  async ({ body: expireBody, attachments = [], action }, thunkAPI) => {
+    try {
+      const expireUrl = "/v1/dbs/api/gas-deposit/expire";
+      const response = await accountManagementService.createData(
+        expireUrl,
+        expireBody
+      );
+
+      const { id } = response.data;
+
+      const uploadUrl = `/v1/dbs/api/gas-deposit/upload-attachment`;
+
+      const uploadPromises = attachments.map((attachment) =>
+        accountManagementService.uploadAttachment(uploadUrl, {
+          files: attachment.file,
+          category: attachment.fileCategoryId,
+          refId: id,
+          action
+        })
+      );
+
+      await Promise.all(uploadPromises);
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${expireBody?.action === "draft" ? "saved as draft" : "submitted"}.`,
+        return: false
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      let message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${expireBody?.action === "draft" ? "saved as draft" : "submitted"}. ${message}.`
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
+
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -473,6 +592,7 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDeposit.rejected]: (state, action) => {
+      if (action.meta.aborted) return;
       state.loading_listGd = false;
 
       if (!action.meta.arg?.isLoadMore) {
@@ -602,6 +722,26 @@ const gasDepositSlice = createSlice({
     [getDetailDraftGasDeposit.rejected]: (state) => {
       state.detailDraft_gasDeposit = {};
       state.loading_detailDraftGd = false;
+    },
+
+    [recalculateGasDeposit.pending]: (state) => {
+      state.loading_recalculateExpireGd = true;
+    },
+    [recalculateGasDeposit.fulfilled]: (state) => {
+      state.loading_recalculateExpireGd = false;
+    },
+    [recalculateGasDeposit.rejected]: (state) => {
+      state.loading_recalculateExpireGd = false;
+    },
+
+    [expireGasDeposit.pending]: (state) => {
+      state.loading_recalculateExpireGd = true;
+    },
+    [expireGasDeposit.fulfilled]: (state) => {
+      state.loading_recalculateExpireGd = false;
+    },
+    [expireGasDeposit.rejected]: (state) => {
+      state.loading_recalculateExpireGd = false;
     },
 
     /** Get Gas Deposit Approval Hierarchy */

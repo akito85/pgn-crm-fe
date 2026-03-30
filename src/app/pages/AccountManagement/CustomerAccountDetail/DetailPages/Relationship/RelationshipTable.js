@@ -107,7 +107,7 @@ const RelationshipTable = ({
   const isOneTime = location.pathname.includes("account-onetime");
 
   const itemActions = nxGetAccountActions({
-    handleView: (id) => navigate(
+    handleView: ({ id }) => navigate(
       isOneTime
         ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP_ONETIME
         : ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP,
@@ -130,7 +130,7 @@ const RelationshipTable = ({
         }
       }
     ),
-    handleUpdate: (id) => navigate(
+    handleUpdate: ({ id }) => navigate(
       isOneTime
         ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP_ONETIME
         : ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP,
@@ -143,9 +143,9 @@ const RelationshipTable = ({
       }
     ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal,
+    handleInactivate: ({id, accountName}) => handleInactivateModal(true, id, accountName),
   });
 
   const [fixedColumns, setFixedColumns] = useState(() => ({

@@ -1,9 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Alert, Spin, Tooltip } from "antd";
+import { Alert, Spin, Tooltip, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
-import { WarningOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import { WarningOutlined, MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -96,8 +95,6 @@ const PosPage = () => {
 
       if (newTab) {
         newTab.document.title = `Invoice Preview - ${record.posNumber}`;
-
-        // TAMBAHAN: Gunakan DocViewer seperti di ViewInvoice.js
         const viewerContainer = document.createElement("div");
         newTab.document.body.appendChild(viewerContainer);
 
@@ -436,250 +433,155 @@ const PosPage = () => {
 
     // Column Action Table
     {
-      action: "View",
-      type: "table",
-      render: (record, data) => {
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconDetail" width={20} />}
-              border={false}
-              onClick={() => handleOpenDetail(record)}
-            >
-              <span className={"text-black ml-3"}> Detail</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Detail">
-              <div className="">
-                <SVGIcon
-                  name="IconDetail"
-                  width={20}
-                  onClick={() => handleOpenDetail(record)}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-    {
-      action: "Preview",
-      type: "table",
-      render: (record, data) => {
-        const isAvailable = record.statusApproval === "APPROVED";
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconDownload" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isAvailable}
-              onClick={() => isAvailable && handlePreviewInvoice(record)}
-            >
-              <span className={"text-black ml-3"}>Preview Invoice</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Preview Invoice">
-              <div
-                onClick={() => isAvailable && handlePreviewInvoice(record)}
-                style={{
-                  cursor: isAvailable ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                <SVGIcon
-                  name="IconDownload"
-                  width={20}
-                  color={isAvailable ? "#0075bf" : "#8D91A0"}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-    {
-      action: "Preview",
-      type: "table",
-      render: (record, data) => {
-        const isAvailable = record.statusApproval === "APPROVED";
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconDownload" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isAvailable}
-              onClick={() => isAvailable && handleProformaInvoice(record)}
-            >
-              <span className={"text-black ml-3"}>Download Proforma</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Download Proforma">
-              <div
-                onClick={() => isAvailable && handleProformaInvoice(record)}
-                style={{
-                  cursor: isAvailable ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                <SVGIcon
-                  name="IconDownload"
-                  width={20}
-                  color={isAvailable ? "#0075bf" : "#8D91A0"}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-
-    {
-      action: "Preview",
-      type: "table",
-      render: (record, data) => {
-        const isAvailable = record.statusApproval === "APPROVED";
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconReGenerate" width={20} />}
-              border={false}
-              disabled={!isAvailable}
-              onClick={() => isAvailable && handleGenerateProforma(record)}
-            >
-              <span className={"text-black ml-3"}>Generate Proforma</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Generate Proforma Invoice">
-              <div
-                onClick={() => isAvailable && handleGenerateProforma(record)}
-                style={{
-                  cursor: isAvailable ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                <SVGIcon
-                  name="IconReGenerate"
-                  width={20}
-                  color={isAvailable ? "#ACC424" : "#8D91A0"}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-
-    {
       action: "Update",
       type: "table",
-      render: (record, data) => {
+      width: 40,
+      render: (record) => {
         const isEditable =
+          record.statusApproval === "DRAFT" ||
+          record.statusApproval === "REJECTED";
+
+        const isApproved = record.statusApproval === "APPROVED";
+
+        const isDelete =
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
         const customerTypeForNav =
           record.customerType === 2 ? "prospective" : "customer";
 
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isEditable}
-            >
-              <span className={"text-black ml-3"}> Update</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Update">
-              <div className="">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
-            </Tooltip>
-          );
+        const menuItems = [
+          {
+            key: "update",
+            label: isEditable ? (
+              <Link
+                to={RBI_ROUTES.POS_UPDATE}
+                state={{
+                  id: record.id,
+                  idPos: record.posNumber,
+                  customerType: customerTypeForNav,
+                }}
+              >
+                Update
+              </Link>
+            ) : (
+              <span className="text-[#8D91A0]">Update</span>
+            ),
+            icon: (
+              <SVGIcon
+                name="IconEdit"
+                color={isEditable ? "#0075BF" : "#8D91A0"}
+                width={16}
+              />
+            ),
+            disabled: !isEditable,
+          },
+          {
+            key: "delete",
+            label: "Delete",
+            icon: (
+              <SVGIcon
+                name="IconDelete"
+                width={16}
+                color={isDelete ? "#D90000" : "#8D91A0"}
+              />
+            ),
+            disabled: !isDelete,
+            onClick: () => {
+              if (isDelete) handleDelete(record);
+            },
+          },
+          {
+            key: "preview-invoice",
+            label: "Preview Invoice",
+            icon: (
+              <SVGIcon
+                name="IconDownload"
+                width={16}
+                color={isApproved ? "#0075BF" : "#8D91A0"}
+              />
+            ),
+            disabled: !isApproved,
+            onClick: () => {
+              if (isApproved) handlePreviewInvoice(record);
+            },
+          },
+          {
+            key: "download-proforma",
+            label: "Download Proforma",
+            icon: (
+              <SVGIcon
+                name="IconDownload"
+                width={16}
+                color={isApproved ? "#0075BF" : "#8D91A0"}
+              />
+            ),
+            disabled: !isApproved,
+            onClick: () => {
+              if (isApproved) handleProformaInvoice(record);
+            },
+          },
+          {
+            key: "generate-proforma",
+            label: "Generate Proforma",
+            icon: (
+              <SVGIcon
+                name="IconReGenerate"
+                width={16}
+                color={isApproved ? "#0075BF" : "#8D91A0"}
+              />
+            ),
+            disabled: !isApproved,
+            onClick: () => {
+              if (isApproved) handleGenerateProforma(record);
+            },
+          },
+          {
+            key: "approval-history",
+            label: "Approval History",
+            icon: (
+              <SVGIcon name="IconLogHistory" width={16} color="#0075BF" />
+            ),
+            onClick: () => handleApprovalHistory(record),
+          },
+        ];
 
-        return isEditable ? (
-          <Link
-            to={RBI_ROUTES.POS_UPDATE}
-            state={{
-              id: record.id,
-              idPos: record.posNumber,
-              customerType: customerTypeForNav,
-            }}
-          >
-            {content}
-          </Link>
-        ) : (
-          <div>{content}</div>
-        );
-      },
-    },
-    {
-      action: "Delete",
-      type: "table",
-      render: (record) => {
-        const isDelete =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
         return (
-          <Tooltip title="Delete">
-            <SVGIcon
-              name="IconDelete"
-              width={24}
-              color={isDelete ? "#D90000" : "#8D91A0"}
-              className={isDelete ? undefined : "disabled cursor-not-allowed"}
-              onClick={isDelete ? () => handleDelete(record) : undefined}
-            />
+          <Tooltip title="Aksi Lainnya">
+            <Dropdown
+              menu={{ items: menuItems }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <div className="cursor-pointer">
+                <MoreOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+              </div>
+            </Dropdown>
           </Tooltip>
         );
       },
     },
     {
-      action: "History",
+      action: "View",
       type: "table",
-      render: (record, data) => {
-        const Content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
+      width: 40,
+      render: (record) => {
+        return (
+          <Tooltip title="Detail">
+            <div
+              className="pt-0 cursor-pointer"
+              onClick={() => handleOpenDetail(record)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Approval History">
-              <div className="">
-                <SVGIcon
-                  name="IconLogHistory"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => handleApprovalHistory(record.id)}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return Content;
+              <SVGIcon name="IconDetail" color="#0075BF" width={20} />
+            </div>
+          </Tooltip>
+        );
       },
     },
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -707,9 +609,9 @@ const PosPage = () => {
                   search,
                 ),
                 ...useColumnActionPermission(
-                  ["view", "update", "delete", "preview", "history", "generate"],
+                  ["view", "update"],
                   itemGrantAccess,
-                  "Delete",
+                  "View",
                 ),
               ]}
               totalData={data_view?.page?.totalElements || 0}
@@ -796,7 +698,7 @@ const PosPage = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

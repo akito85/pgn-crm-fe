@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getInvoiceRelation,
   downloadInvoiceRelation
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 
 /**
  * Invoice relation list table (container + presentational component).
@@ -19,16 +19,16 @@ import {
  * The parent (`InvoiceRelation`) is responsible only for modals and permissions.
  *
  * @param {object}   props
- * @param {number}   [props.idAccount=0]                  - Account ID
- * @param {number}   [props.idCustomer=0]                 - Customer ID
+ * @param {number}   props.accountId                  - Account ID
+ * @param {number}   props.customerId                 - Customer ID
  * @param {Function} [props.handleInactivateModal]        - Opens the inactivate confirmation modal
  * @param {Function} [props.handleApprovalHistoryModal]   - Opens the approval history modal
  * @param {Function} [props.handleApproval]               - Triggers the approval action
  * @param {number}   [props.refreshSignal=0]              - Increment to trigger a page-0 refresh from the parent
  */
 const InvoiceRelationTable = ({
-  idAccount = 0,
-  idCustomer = 0,
+  accountId,
+  customerId,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
@@ -42,7 +42,7 @@ const InvoiceRelationTable = ({
     list_invoiceRelation: dataSource,
     pagination_invoiceRelation: pagination,
     loading_listIr: loading
-  } = useSelector((state) => state.financialInformation);
+  } = useSelector((state) => state.invoiceRelation);
 
   // --- Derived values ---
   const isStandard = location.pathname.includes("account-standard");
@@ -81,7 +81,7 @@ const InvoiceRelationTable = ({
       filterRules
     };
 
-    dispatch(getInvoiceRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -135,7 +135,7 @@ const InvoiceRelationTable = ({
       };
 
       await dispatch(
-        getInvoiceRelation({ id: idAccount, body, isLoadMore: true })
+        getInvoiceRelation({ id: accountId, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -152,7 +152,7 @@ const InvoiceRelationTable = ({
       filterRules
     };
 
-    dispatch(downloadInvoiceRelation({ body, id: idAccount }));
+    dispatch(downloadInvoiceRelation({ body, id: accountId }));
   };
 
   // --- Effects ---
@@ -168,7 +168,7 @@ const InvoiceRelationTable = ({
     };
 
     setPage(0);
-    dispatch(getInvoiceRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
@@ -178,7 +178,7 @@ const InvoiceRelationTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: (id) =>
+    handleView: ({ id }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_INVOICE_RELATION
@@ -187,8 +187,8 @@ const InvoiceRelationTable = ({
             : "",
         {
           state: {
-            idAccount,
-            idCustomer,
+            idAccount: accountId,
+            idCustomer: customerId,
             id
           }
         }
@@ -202,12 +202,12 @@ const InvoiceRelationTable = ({
             : "",
         {
           state: {
-            idAccount,
-            idCustomer
+            idAccount: accountId,
+            idCustomer: customerId,
           }
         }
       ),
-    handleUpdate: (id) =>
+    handleUpdate: ({ id }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION
@@ -216,16 +216,16 @@ const InvoiceRelationTable = ({
             : "",
         {
           state: {
-            idAccount,
-            idCustomer,
+            idAccount: accountId,
+            idCustomer: customerId,
             id
           }
         }
       ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber)
   });
 
   const actionCols = useColumnActionPermission(

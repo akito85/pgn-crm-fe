@@ -1,10 +1,10 @@
-import { Checkbox, Tooltip } from "antd";
+import { Checkbox, Tooltip, Dropdown } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -280,82 +280,15 @@ const BillingItemView = () => {
 
     // Column Action Table
     {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.BILLING_ITEM_DETAIL}
-            state={{ id: record.billingItemCode }}
-          >
-            <Tooltip title="Detail">
-              <div>
-                <SVGIcon name="IconDetail" width={20} />
-              </div>
-            </Tooltip>
-          </Link>
-        );
-      },
-    },
-    {
       action: "Update",
       type: "table",
-      render: (record, data) => {
+      width: 40,
+      render: (record) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED" ||
           (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
 
-        const linkContent =
-          data > 3 ? (
-            isEditable ? (
-              <ButtonComponent
-                icon={<SVGIcon name="IconEdit" color="#0075bf" width={20} />}
-                border={false}
-              >
-                <span className="text-black ml-3">Update</span>
-              </ButtonComponent>
-            ) : (
-              <div className="flex items-center px-1 py-0 cursor-not-allowed">
-                <span className="pointer-events-none">
-                  <SVGIcon name="IconEdit" color="#8D91A0" width={20} />
-                </span>
-                <span className="text-[#8D91A0] ml-4 pointer-events-none">
-                  Update
-                </span>
-              </div>
-            )
-          ) : (
-            <Tooltip title="Update">
-              <div>
-                <SVGIcon
-                  name="IconEdit"
-                  width={20}
-                  color={isEditable ? "#ACC420" : "#8D91A0"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return isEditable ? (
-          <Link
-            to={RBI_ROUTES.BILLING_ITEM_UPDATE}
-            state={{
-              id: record.billingItemCode,
-            }}
-          >
-            {linkContent}
-          </Link>
-        ) : (
-          <div>{linkContent}</div>
-        );
-      },
-    },
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data) => {
         const isActivateOrInactivate =
           (record.statusApproval === "APPROVED" &&
             record.status === "ACTIVE") ||
@@ -367,80 +300,88 @@ const BillingItemView = () => {
 
         const isActive = record.status === "ACTIVE";
 
-        const Content =
-          data > 3 ? (
-            isActivateOrInactivate ? (
-              <ButtonComponent
-                icon={
-                  <Checkbox
-                    className="inactive-check"
-                    disabled={false}
-                    checked={!isActive}
-                  />
-                }
-                border={false}
-                onClick={() => handleInactive(record)}
+        const menuItems = [
+          {
+            key: "update",
+            label: isEditable ? (
+              <Link
+                to={RBI_ROUTES.BILLING_ITEM_UPDATE}
+                state={{ id: record.billingItemCode }}
               >
-                <span className="text-black ml-5">Inactivate</span>
-              </ButtonComponent>
+                Update
+              </Link>
             ) : (
-              <div className="flex items-center px-2 py-0">
-                <Checkbox
-                  className="inactive-check"
-                  disabled={true}
-                  checked={false}
-                />
-                <span className="text-[#8D91A0] ml-5">Inactivate</span>
-              </div>
-            )
-          ) : (
-            <Tooltip title="Inactivate">
-              <div>
-                <Checkbox
-                  className="inactive-check"
-                  onClick={
-                    isActivateOrInactivate
-                      ? () => handleInactive(record)
-                      : undefined
-                  }
-                  disabled={!isActivateOrInactivate}
-                  checked={isActivateOrInactivate && !isActive}
-                />
-              </div>
-            </Tooltip>
-          );
+              <span className="text-[#8D91A0]">Update</span>
+            ),
+            icon: (
+              <SVGIcon
+                name="IconEdit"
+                color={isEditable ? "#0075BF" : "#8D91A0"}
+                width={16}
+              />
+            ),
+            disabled: !isEditable,
+          },
+          {
+            key: "inactivate",
+            label: "Inactivate",
+            icon: (
+              <Checkbox
+                className="inactive-check"
+                disabled={!isActivateOrInactivate}
+                checked={isActivateOrInactivate && !isActive}
+                style={{ pointerEvents: "none" }}
+              />
+            ),
+            disabled: !isActivateOrInactivate,
+            onClick: () => {
+              if (isActivateOrInactivate) {
+                handleInactive(record);
+              }
+            },
+          },
+          {
+            key: "approval-history",
+            label: "Approval History",
+            icon: (
+              <SVGIcon name="IconLogHistory" width={16} color="#0075BF" />
+            ),
+            onClick: () => handleApprovalHistory(record.id),
+          },
+        ];
 
-        return Content;
+        return (
+          <Tooltip title="Aksi Lainnya">
+            <Dropdown
+              menu={{ items: menuItems }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <div className="cursor-pointer">
+                <MoreOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+              </div>
+            </Dropdown>
+          </Tooltip>
+        );
       },
     },
     {
-      action: "History",
+      action: "View",
       type: "table",
-      render: (record, data) => {
-        const Content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record.id)}
+      width: 40,
+      render: (record) => {
+        return (
+          <Tooltip title="Detail">
+            <Link
+              to={RBI_ROUTES.BILLING_ITEM_DETAIL}
+              state={{ id: record.billingItemCode }}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Approval History">
-              <div>
-                <SVGIcon
-                  name="IconLogHistory"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => handleApprovalHistory(record.id)}
-                />
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" color="#0075BF" width={20} />
               </div>
-            </Tooltip>
-          );
-        return Content;
+            </Link>
+          </Tooltip>
+        );
       },
     },
   ];
@@ -459,7 +400,7 @@ const BillingItemView = () => {
   }, [search, page, searchedColumn, searchText]);
 
   const actionCols = useColumnActionPermission(
-    ["view", "activate", "update", "history"],
+    ["view", "update"],
     itemGrantAccess,
   ).map((col) => ({
     ...col,
@@ -487,7 +428,7 @@ const BillingItemView = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -572,7 +513,7 @@ const BillingItemView = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

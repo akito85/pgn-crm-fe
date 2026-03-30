@@ -166,6 +166,14 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   DETAIL_TOS_SUBMISSION:
     "/account-management/account-standard/service-agreement/tos/view",
 
+  // WARRANTY TERM
+  CREATE_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/create",
+  UPDATE_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/update",
+  DETAIL_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/view",
+
   // Raw Material Source
   CREATE_RAW_MATERIAL_SOURCE:
     "/account-management/account-standard/raw-material-source/create",

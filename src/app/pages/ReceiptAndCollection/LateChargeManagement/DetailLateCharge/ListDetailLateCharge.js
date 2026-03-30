@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -119,7 +118,7 @@ const ListDetailLateCharge = () => {
   const historyColumns = getHistoryColumns({});
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <div className="mt-5 pb-10">
@@ -230,7 +229,7 @@ const ListDetailLateCharge = () => {
         menu={"Late Charge"}
         named={lateCharge.id}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

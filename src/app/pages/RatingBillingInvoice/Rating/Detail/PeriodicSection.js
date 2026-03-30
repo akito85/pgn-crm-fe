@@ -6,7 +6,7 @@ import { columnsPeriodic } from "./Table/TablePeriodic";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const PeriodicSection = ({ ratingCode, calculationCode }) => {
-  const { data_periodicSA, loading } = useSelector((state) => state.rating);
+  const { data_periodicSA, loadingPeriodic } = useSelector((state) => state.rating);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -134,7 +134,7 @@ const PeriodicSection = ({ ratingCode, calculationCode }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingPeriodic}
         />
       </div>
     </>

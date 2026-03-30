@@ -7,7 +7,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import DetailPaymentWarrantyPartner from "./DetailPaymentWarrantyPartner";
 import RatingList from "./Rating/RatingList";
 import BranchList from "./Branch/BranchList";
@@ -119,7 +118,7 @@ const ListDetailPaymentWarrantyPartner = () => {
   const approverItemsCount = data_detail?.activeApprovals?.filter(a => a?.tApprovalDto?.isApprover).length || 0;
 
   return (
-    <LayoutMenu>
+    <>
         <BreadCrumb routes={routes} />
         <CardContainerNoBorder
           header="PAYMENT GUARANTEE PARTNER DETAIL"
@@ -230,7 +229,7 @@ const ListDetailPaymentWarrantyPartner = () => {
         }}
         showApproval={!loading_detail && data_detail?.isApprover && data_detail?.activeApprovals?.length > 0}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

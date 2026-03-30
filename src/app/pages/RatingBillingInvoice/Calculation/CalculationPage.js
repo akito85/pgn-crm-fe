@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip, Tabs } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -1537,7 +1536,7 @@ const CalculationPage = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -1609,7 +1608,7 @@ const CalculationPage = () => {
           </Tabs.TabPane>
         </Tabs>
       </CardContainer>
-    </LayoutMenu>
+    </>
   );
 };
 

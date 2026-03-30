@@ -36,7 +36,7 @@ const ModalRequestApproval = ({
     data_approval,
     data_approval_list,
     data_list_billing_request_approval,
-    loading,
+    loadingRequest,
   } = useSelector((state) => state.billing);
 
   // Declaration
@@ -424,7 +424,7 @@ const ModalRequestApproval = ({
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingRequest}
                 showExport={false}
                 rowSelection={rowSelection}
                 usePagination={false}
@@ -489,7 +489,7 @@ const ModalRequestApproval = ({
                       handleSelect(value);
                     }}
                     placeholder="Select approval hierarchy"
-                    loading={loading}
+                    loading={loadingRequest}
                     showSearch
                     filterOption={(input, option) =>
                       (option?.children ?? "")
@@ -546,7 +546,7 @@ const ModalRequestApproval = ({
                   }}
                   useSelect={false}
                   usePagination={false}
-                  loading={loading}
+                  loading={loadingRequest}
                 />
               )}
             </div>

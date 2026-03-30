@@ -15,15 +15,14 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
 
 /**
  * Gas deposit list table module
- * @param {{ moduleType: "sa" | "ua"; id?: number; idCustomer?: number }} props
+ * @param {{ moduleType: "sa" | "ua"; accountId: number; customerId: number }} props
  * @returns
  */
-const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
+const GasDeposit = ({ moduleType, accountId, customerId }) => {
   // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
@@ -99,20 +98,6 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
   };
 
   /**
-   * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
-   * @returns {{ key: string, value: string, label: string }[]}
-   */
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
-
-  /**
    * @param {boolean} show
    * @param {number} gdId
    */
@@ -168,11 +153,8 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
         <NxBaseContainer border>
           <GasDepositTable
             moduleType={moduleType}
-            idAccount={id}
-            idCustomer={idCustomer}
-            handleInactivateModal={handleInactivateModal}
-            handleApprovalHistoryModal={handleApprovalHistoryModal}
-            handleApproval={setShowApprovalModal}
+            accountId={accountId}
+            cutomerId={customerId}
             handleSelectDetail={handleSelectDetail}
             refreshSignal={refreshSignal}
           />
@@ -191,7 +173,7 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
       )}
 
       <GasDepositApprovalModal
-        id={id}
+        accountId={accountId}
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={triggerRefresh}
@@ -220,39 +202,11 @@ const GasDepositModule = ({ moduleType, id = 0, idCustomer = 0 }) => {
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
-        tabOptions={handleApprovalHistoryOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
     </>
   );
-};
-
-/**
- * Gas deposit list table page/module
- * @param {{ moduleType: "sa" | "ua"; id?: number; idCustomer?: number }} props
- * @returns
- */
-const GasDeposit = ({ moduleType, id = 0, idCustomer = 0 }) => {
-  if (moduleType === "sa")
-    return (
-      <LayoutMenu>
-        <GasDepositModule
-          moduleType={moduleType}
-          id={id}
-          idCustomer={idCustomer}
-        />
-      </LayoutMenu>
-    );
-  else if (moduleType === "ua")
-    return (
-      <GasDepositModule
-        moduleType={moduleType}
-        id={id}
-        idCustomer={idCustomer}
-      />
-    );
-  return null;
 };
 
 export default memo(GasDeposit);

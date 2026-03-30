@@ -318,7 +318,7 @@ const ListFormPartnerCa = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading || loadingForm}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />

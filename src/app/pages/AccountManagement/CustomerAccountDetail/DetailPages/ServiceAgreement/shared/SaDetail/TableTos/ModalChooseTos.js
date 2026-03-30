@@ -8,6 +8,24 @@ import { getColumnSearchProps } from '../../../../../../../../../utils/getColumn
 
 const expandedRowRender = (record) => {
   const contactDetail = record?.rtosAttributes || [];
+  const getAttributeRowKey = (item, index) => {
+    if (item?.key !== undefined && item?.key !== null && item?.key !== "") {
+      return String(item.key);
+    }
+
+    if (item?.id !== undefined && item?.id !== null && item?.id !== "") {
+      return String(item.id);
+    }
+
+    if (item?.attributeId !== undefined && item?.attributeId !== null && item?.attributeId !== "") {
+      return String(item.attributeId);
+    }
+
+    const attributeName = item?.attributeName || "attribute";
+    const value = item?.value || "value";
+    return `${attributeName}-${value}-${index}`;
+  };
+
   const columns = [
     {
       title: "NO",
@@ -39,7 +57,7 @@ const expandedRowRender = (record) => {
         dataSource={contactDetail}
         columns={columns}
         pagination={false}
-        rowKey={(_, index) => index}
+        rowKey={getAttributeRowKey}
       />
     </div>
   );
@@ -73,10 +91,10 @@ const ModalChooseTos = ({
   useEffect(() => {
     if (isOpen && idAccount) {
       setIsLoading(true);
-      dispatch(getListChooseTos({ id: idAccount, page: 1, pageSize: 9999, sort: '', search: '' }))
+      dispatch(getListChooseTos({ id: idAccount, page: 1, pageSize: 20, sort: '', search: '' }))
         .finally(() => setIsLoading(false));
     }
-  }, [isOpen, idAccount]);
+  }, [dispatch, getListChooseTos, isOpen, idAccount]);
 
   // Raw data flattened from BE response
   const rawData = useMemo(() => {
@@ -207,6 +225,7 @@ const ModalChooseTos = ({
         <div className="w-full">
           <NxTable
             idTable="modal-choose-tos-table"
+            rowKey="key"
             dataSource={displayData}
             columns={columns}
             totalData={processedData.length}

@@ -7,7 +7,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -353,7 +352,7 @@ const PaymentCycleForm = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper
@@ -565,7 +564,7 @@ const PaymentCycleForm = ({ type }) => {
                     />
                 </ModalCustom>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

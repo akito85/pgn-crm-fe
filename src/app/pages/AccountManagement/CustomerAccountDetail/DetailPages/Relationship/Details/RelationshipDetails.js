@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -213,7 +212,7 @@ const RelationshipDetails = ({ accountType = "standard" }) => {
   }, [idAccount, idRelationship]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
@@ -298,7 +297,7 @@ const RelationshipDetails = ({ accountType = "standard" }) => {
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }
       />
-    </LayoutMenu>
+    </>
   );
 };
 

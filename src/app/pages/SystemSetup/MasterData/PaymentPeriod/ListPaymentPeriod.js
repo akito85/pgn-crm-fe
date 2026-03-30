@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -679,7 +678,7 @@ const ListPaymentPeriod = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer
@@ -748,7 +747,7 @@ const ListPaymentPeriod = () => {
                     onFinish={handleSubmitModalOpenClose}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

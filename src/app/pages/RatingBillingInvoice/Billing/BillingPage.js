@@ -8,7 +8,6 @@ import React, {
 import { useDispatch, useSelector } from "react-redux";
 import { Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -32,7 +31,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
-  const { data, loading, data_approval_history, filters } = useSelector(
+  const { data, loadingList, loadingHistory, data_approval_history, filters } = useSelector(
     (state) => state.billing,
   );
 
@@ -345,7 +344,7 @@ const BillingPage = () => {
   );
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -367,7 +366,7 @@ const BillingPage = () => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingList}
           showExport={false}
           usePagination={false}
           useInfiniteScroll={true}
@@ -415,6 +414,7 @@ const BillingPage = () => {
         width={1000}
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
+        loading={loadingHistory}
       />
 
       <ModalRequestApproval
@@ -430,7 +430,7 @@ const BillingPage = () => {
         handleRefresh={handleRefresh}
         handleOpenModal={() => setModalApproval(true)}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

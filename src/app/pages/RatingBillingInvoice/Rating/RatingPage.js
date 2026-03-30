@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
@@ -21,7 +20,7 @@ import SelectComponent from "../../../../components/SelectComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
-  const { data, loading, list_billing_period } = useSelector(
+  const { data, loadingList, list_billing_period } = useSelector(
     (state) => state.rating,
   );
 
@@ -164,7 +163,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: initialPageSize, // refresh balik ke 100
+          pageSize: initialPageSize,
           sort,
           period: selectedBillingPeriod,
           isLoadMore: false,
@@ -174,7 +173,6 @@ const RatingPage = () => {
     }
   };
 
-  // ✅ Sama persis seperti Billing
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSortApi = (_, __, sorter) => {
@@ -291,7 +289,7 @@ const RatingPage = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -323,7 +321,7 @@ const RatingPage = () => {
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
-            loading={loading}
+            loading={loadingList}
             enableRowClick={true}
             selectedRowKey={activeRowKey}
             onRowClick={handleDetail}
@@ -377,7 +375,7 @@ const RatingPage = () => {
           />
         </div>
       )}
-    </LayoutMenu>
+    </>
   );
 };
 

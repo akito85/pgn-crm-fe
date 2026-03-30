@@ -14,7 +14,6 @@ import { PlusOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import TableRBI from "../../../../components/TableRBI";
 import { columnsGenerateInvoice } from "./TableGenerateInvoice";
 import CardContainer from "../../../../components/CardContainer";
@@ -716,7 +715,7 @@ const GenerateInvoicePage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Form layout="vertical" form={form}>
         <CardContainer header="GENERATE INFORMATION">
           <div className="grid grid-cols-3 gap-3">
@@ -842,7 +841,7 @@ const GenerateInvoicePage = () => {
           </Button>
         </div>
       </Form>
-    </LayoutMenu>
+    </>
   );
 };
 

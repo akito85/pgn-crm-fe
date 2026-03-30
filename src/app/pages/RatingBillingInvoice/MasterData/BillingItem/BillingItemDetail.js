@@ -1,7 +1,6 @@
 import moment from "moment";
 import { Spin, Tabs } from "antd";
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BillingItemDetailInformation from "./Detail/BillingItemDetailInformation";
 import CardContainer from "../../../../../components/CardContainer";
@@ -256,7 +255,7 @@ const BillingItemDetail = () => {
 
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") &&
@@ -353,7 +352,7 @@ const BillingItemDetail = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

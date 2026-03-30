@@ -13,6 +13,7 @@ export const NOTIFICATION_CONFIG = {
 // explort constant app service
 export const configApp = {
   USER_MANAGEMENT_SERVICE: `/um`,
+  JOB_SERVICE: `/job`,
   MASTER_MANAGEMENT: `/mst`,
   PRODUCT_SERVICE: `/service/product`,
   RATING_BILLING_SERVICE: `/rbi`,
