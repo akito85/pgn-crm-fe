@@ -4,7 +4,7 @@ import {
   RightCircleFilled,
   RightOutlined,
 } from "@ant-design/icons";
-import { Avatar, Divider, List, Modal, Tooltip } from "antd";
+import { Avatar, Divider, List, Modal, Spin, Tooltip } from "antd";
 import React, { Fragment, useEffect, useState } from "react";
 import SVGIcon from "../../assets/Icon/index";
 import { dateFormatting } from "../../utils";
@@ -82,6 +82,7 @@ const ModalHistory = (props) => {
     tabOptions,
     dataApprover,
     dataHistory,
+    loading = false,
   } = props;
 
   const [tabActive, setTabActive] = useState("");
@@ -169,6 +170,7 @@ const ModalHistory = (props) => {
         </div>
 
         {/* content section */}
+        <Spin spinning={loading}>
         <div className={"flex flex-col w-full gap-3 p-3"}>
           {tabOptions && tabOptions.length > 0 ? (
             <RadioTabs data={tabOptions} onChange={handleTabs} />
@@ -274,6 +276,7 @@ const ModalHistory = (props) => {
             />
           </div>
         </div>
+        </Spin>
       </Fragment>
     </Modal>
   );

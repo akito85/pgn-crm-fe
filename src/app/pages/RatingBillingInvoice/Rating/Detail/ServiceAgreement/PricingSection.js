@@ -11,14 +11,14 @@ import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const PricingSection = ({ SAId }) => {
   // Selector
-  const { data_pricing, data_pricingRule, loading } = useSelector(
+  const { data_pricing, data_pricingRule, loadingSA } = useSelector(
     (state) => state.rating
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_pricingRule?.result?.pricingRules || [];
+  const dataSource = useMemo(() => data_pricingRule?.result?.pricingRules || [], [data_pricingRule?.result?.pricingRules]);
   const pricingRuleName = data_pricingRule?.result?.priceCode;
 
   // State
@@ -181,7 +181,7 @@ const PricingSection = ({ SAId }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingSA}
         />
       </div>
     </>
