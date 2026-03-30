@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tooltip } from "antd";
-import { NavLink, Link } from "react-router-dom";
-import { EyeOutlined } from "@ant-design/icons";
+import { Spin, Tooltip, Dropdown, Menu } from "antd";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { EyeOutlined, WarningOutlined } from "@ant-design/icons";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -11,20 +11,22 @@ import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Col
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
-import Toolbar from "../../../../../components/Toolbar";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 
 // Column Configuration
 import { getDeductionColumns } from "./DeductionColumns";
 
 // Redux
-import { getDeductionList, downloadDeductionList } from "../../../../../redux/slices/receipt_collection/deduction";
+import { getDeductionList, downloadDeductionList, deleteDeduction, getApprovalHistory } from "../../../../../redux/slices/receipt_collection/deduction";
 
 const ViewDeduction = () => {
   const dispatch = useDispatch();
-  const { data, loading } = useSelector((state) => state.deduction);
+  const navigate = useNavigate();
+  const { data, loading, dataApprovalHistory } = useSelector((state) => state.deduction);
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
@@ -32,6 +34,11 @@ const ViewDeduction = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
+
+  const [openModalDelete, setOpenModalDelete] = useState(false);
+  const [openModalHistory, setOpenModalHistory] = useState(false);
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   const routes = [
     {
@@ -51,6 +58,21 @@ const ViewDeduction = () => {
   useEffect(() => {
     dispatch(getDeductionList({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
   }, [dispatch, page, pageSize, search]);
+
+  useEffect(() => {
+    if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
+      setDataApprovalHistoryFix({
+        dataApprover: {
+          creation: dataApprovalHistory?.dataApprover?.DEDUCTION_CREATION || [],
+        },
+        dataHistory: {
+          creation: dataApprovalHistory?.dataHistory?.DEDUCTION_CREATION || [],
+        },
+      });
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [dataApprovalHistory]);
 
   const handleChangePage = (page, pageSize) => {
     setPage(page);
@@ -76,13 +98,75 @@ const ViewDeduction = () => {
     });
   };
 
+  const handleDelete = (record) => {
+    setSelectedRecord(record);
+    setOpenModalDelete(true);
+  };
+
+  const handleConfirmDelete = () => {
+    dispatch(deleteDeduction(selectedRecord.id)).then(() => {
+      setOpenModalDelete(false);
+      dispatch(getDeductionList({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+    });
+  };
+
+  const handleHistory = (record) => {
+    setSelectedRecord(record);
+    dispatch(getApprovalHistory({ id: record.id }));
+    setOpenModalHistory(true);
+  };
+
+  const handleOptions = () => {
+    const dataObj = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(dataObj);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase().replace(/_/g, " "),
+    }));
+  };
+
+  const moreActionsMenu = (record) => (
+    <Menu>
+      <Menu.Item
+        key="History"
+        onClick={() => handleHistory(record)}
+      >
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconLogHistory" color={"#000000"} width={16} />
+          <span>Approval History</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item 
+        key="Delete" 
+        onClick={() => handleDelete(record)}
+      >
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconDelete" color={"#BE3036"} width={16} />
+          <span className="text-[#BE3036]">Delete</span>
+        </div>
+      </Menu.Item>
+    </Menu>
+  );
+
   const itemActions = [
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          isPrimary={true}
+          icon={<SVGIcon name="IconButtonDownload" width={18} color={"#FFFFFF"} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            isPrimary={true}
+            icon={<SVGIcon name="IconButtonCreate" width={18} color={"#FFFFFF"} />}
             type="submit"
           >
             Create Deduction
@@ -95,37 +179,32 @@ const ViewDeduction = () => {
     {
       action: "View",
       type: "table",
+      fixed: "right",
+      width: 100,
       render: (record) => {
         return (
-          <Tooltip title={"Detail"}>
-            <Link
-              // Ensure this route exists or use a placeholder if DETAIL_DEDUCTION is not yet defined
-              to={`${RECEIPT_AND_COLLECTION_ROUTES.DETAIL_DEDUCTION}`}
-              state={{ id: record?.id }}
-            >
-              <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
-            </Link>
-          </Tooltip>
+          <div className="flex justify-center items-center gap-2">
+             <Dropdown overlay={moreActionsMenu(record)} trigger={['click']}>
+              <div className="cursor-pointer">
+                <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+              </div>
+            </Dropdown>
+            <Tooltip title={"Detail"}>
+              <Link
+                to={`${RECEIPT_AND_COLLECTION_ROUTES.DETAIL_DEDUCTION}`}
+                state={{ id: record?.id }}
+              >
+                 <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
+              </Link>
+            </Tooltip>
+          </div>
         );
       },
     },
-    {
-      action: "Delete",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title={"Delete"}>
-            <div onClick={() => console.log('Delete', record)} style={{ cursor: 'pointer' }}>
-              <SVGIcon name="IconDelete" width={24} />
-            </div>
-          </Tooltip>
-        );
-      },
-    }
   ];
 
   const actionCols = useColumnActionPermission(
-    ["view", "delete"],
+    ["view"],
     itemActions
   );
 
@@ -152,9 +231,24 @@ const ViewDeduction = () => {
         <BreadCrumb routes={routes} />
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">DEDUCTION LIST</p>
+            <p className="mt-[15px] font-bold uppercase text-[#0075BF]">DEDUCTION LIST</p>
             <div className="flex gap-2">
-              <Toolbar items={itemActions} />
+              <ButtonComponent
+                onClick={handleDownload}
+                isPrimary={true}
+                icon={<SVGIcon name="IconButtonDownload" width={18} color={"#FFFFFF"} />}
+              >
+                Download List
+              </ButtonComponent>
+              <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION}>
+                <ButtonComponent
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconButtonCreate" width={18} color={"#FFFFFF"} />}
+                  type="submit"
+                >
+                  Create Deduction
+                </ButtonComponent>
+              </NavLink>
             </div>
           </div>
         }>
@@ -172,6 +266,32 @@ const ViewDeduction = () => {
           />
         </CardContainer>
       </Spin>
+
+      {/* History Modal */}
+      <ModalHistory
+        isOpen={openModalHistory}
+        handleClose={() => setOpenModalHistory(false)}
+        header={"Approval History"}
+        width={850}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
+
+      {/* Delete Modal */}
+      <ModalConfirm
+        isOpen={openModalDelete}
+        handleCancel={() => setOpenModalDelete(false)}
+        handleOk={handleConfirmDelete}
+        width={600}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className={"text-[18px] font-bold"}>
+            Warning! if you delete this data, it will be permanently.
+          </p>
+        </div>
+      </ModalConfirm>
     </>
   );
 };

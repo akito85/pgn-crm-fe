@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import hc_deduction_list from "./temp_hardcoded_json/deduction/get-deduction-list.json";
 import hc_customer_list from "./temp_hardcoded_json/deduction/get-customer-list.json";
+import hc_customer_deduction_list from "./temp_hardcoded_json/deduction/get-customer-deduction-list.json";
 import hc_deduction_detail from "./temp_hardcoded_json/deduction/get-detail-deduction.json";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import { setBodyError, showModalError, validateError } from "../general_slice";
@@ -24,6 +25,7 @@ const initialState = {
     }
   },
   data_detail: null,
+  dataApprovalHistory: null,
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   dataListCategory: [],
@@ -63,10 +65,56 @@ export const downloadDeductionList = createAsyncThunk(
   "deduction/downloadDeductionList",
   async (params, thunkAPI) => {
     try {
-      console.log("Download triggered with params:", params);
       return true;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const deleteDeduction = createAsyncThunk(
+  "deduction/deleteDeduction",
+  async (id, thunkAPI) => {
+    try {
+      // Mock delete
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return { id };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getApprovalHistory = createAsyncThunk(
+  "deduction/getApprovalHistory",
+  async ({ id }, thunkAPI) => {
+    try {
+      // Mock history
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return {
+        dataApprover: {
+          DEDUCTION_CREATION: [
+            {
+              id: 1,
+              name: "Approver 1",
+              status: "APPROVED",
+              date: "2023-01-21",
+            },
+          ],
+        },
+        dataHistory: {
+          DEDUCTION_CREATION: [
+            {
+              id: 1,
+              name: "Submitter",
+              status: "SUBMITTED",
+              date: "2023-01-20",
+            },
+          ],
+        },
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
@@ -90,6 +138,33 @@ export const searchCustomerDeduction = createAsyncThunk(
             size: pageSize,
             totalElements: customerList.length,
             totalPages: Math.ceil(customerList.length / pageSize),
+            number: page - 1
+          }
+        }
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getCustomerDeductionList = createAsyncThunk(
+  "deduction/getCustomerDeductionList",
+  async ({ page = 1, pageSize = 10 }, thunkAPI) => {
+    try {
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      
+      // Filter from our new dummy data if needed, or just return paged slice
+      const allResults = hc_customer_deduction_list.data.result;
+      
+      return {
+        data: {
+          result: allResults.slice(start, end),
+          page: {
+            size: pageSize,
+            totalElements: allResults.length,
+            totalPages: Math.ceil(allResults.length / pageSize),
             number: page - 1
           }
         }
@@ -217,68 +292,62 @@ const deductionSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getDeductionList.pending, (state) => {
-        state.loading = true;
-      })
       .addCase(getDeductionList.fulfilled, (state, action) => {
-        state.loading = false;
         state.data = action.payload.data;
       })
       .addCase(getDeductionList.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload;
       })
-      .addCase(searchCustomerDeduction.pending, (state) => {
-        state.loading = true;
-      })
       .addCase(searchCustomerDeduction.fulfilled, (state, action) => {
-        state.loading = false;
         state.customerData = action.payload.data;
       })
       .addCase(searchCustomerDeduction.rejected, (state, action) => {
-        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getCustomerDeductionList.fulfilled, (state, action) => {
+        state.customerData = action.payload.data;
+      })
+      .addCase(getCustomerDeductionList.rejected, (state, action) => {
         state.error = action.payload;
       })
       .addCase(getTypeDDL.fulfilled, (state, action) => {
         state.dataType = action.payload;
-        state.loading = false;
       })
       .addCase(getAllApprovalList.fulfilled, (state, action) => {
         state.dataListAppHierId = action.payload;
-        state.loading = false;
       })
       .addCase(getListApprovalById.fulfilled, (state, action) => {
         state.dataListAppHierDetail = action.payload;
-        state.loading = false;
       })
       .addCase(getListCategory.fulfilled, (state, action) => {
         state.dataListCategory = action.payload;
-        state.loading = false;
       })
       .addCase(getDetailDeduction.fulfilled, (state, action) => {
         state.data_detail = action.payload;
-        state.loading = false;
       })
-      .addCase(approveOrRejectDeduction.pending, (state) => {
-        state.loading = true;
+      .addCase(getApprovalHistory.fulfilled, (state, action) => {
+        state.dataApprovalHistory = action.payload;
+      })
+      .addCase(deleteDeduction.fulfilled, (state) => {
+        state.isSuccess = true;
       })
       .addCase(approveOrRejectDeduction.fulfilled, (state) => {
         state.isSuccess = true;
-        state.loading = false;
       })
       .addCase(approveOrRejectDeduction.rejected, (state, action) => {
         state.isFailed = true;
-        state.loading = false;
         state.message = action.payload;
       })
       .addMatcher(
-        (action) => action.type.endsWith("/pending"),
+        (action) => action.type.startsWith("deduction/") && action.type.endsWith("/pending"),
         (state) => {
           state.loading = true;
+          state.isSuccess = false;
+          state.isFailed = false;
         }
       )
       .addMatcher(
-        (action) => action.type.endsWith("/rejected"),
+        (action) => action.type.startsWith("deduction/") && (action.type.endsWith("/fulfilled") || action.type.endsWith("/rejected")),
         (state) => {
           state.loading = false;
         }
