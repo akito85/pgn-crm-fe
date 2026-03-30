@@ -254,15 +254,15 @@ export const inactivePartnerCa = createAsyncThunk(
         showModalSuccess({ title: "Successfull", description: "Your data has been submitted.", return: false })
       );
       return response.data;
-    } catch (response) {
+    } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(response), status, errorMessage(response)),
+          error: errorBody(errorCode(error.response), status, errorMessage(error.response)),
           action: "INACTIVE_PARTNER_CA",
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(response.response?.data);
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );

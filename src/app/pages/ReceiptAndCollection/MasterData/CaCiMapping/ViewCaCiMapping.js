@@ -63,7 +63,7 @@ const ViewCaCiMapping = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
-  const [status, setStatus] = useState("");
+  const statusRef = useRef("");
   const [id, setId] = useState("");
   const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
@@ -79,8 +79,7 @@ const ViewCaCiMapping = () => {
 
     const fetchData = async () => {
       try {
-        await Promise.resolve(
-          dispatch(
+        dispatch(
           getPaginateCaCiMapping({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
@@ -88,7 +87,6 @@ const ViewCaCiMapping = () => {
             sort,
             isLoadMore: false,
           })
-          )
         );
         if (isMounted) {
           setPage(1);
@@ -113,16 +111,14 @@ const ViewCaCiMapping = () => {
     if (!hasMore) return;
     const currentDataLength = data?.result?.length || 0;
     const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
-    await Promise.resolve(
-      dispatch(
-        getPaginateCaCiMapping({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          isLoadMore: true,
-        })
-      )
+    dispatch(
+      getPaginateCaCiMapping({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      })
     );
     setPage(nextPage);
   };
@@ -152,20 +148,34 @@ const ViewCaCiMapping = () => {
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
+    const escapeUnsafe = (s) =>
+      String(s ?? "").replaceAll(/[<>"'&]/g, (char) => {
+        const escapeMap = { "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "&": "&amp;" };
+        return escapeMap[char] ?? char;
+      });
     return keyData.map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      value: escapeUnsafe(
+        item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
+      ),
     }));
   };
 
   const handleSearch = useMemo(
-    () => debounce((selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      setSearchedColumn(dataIndex);
-      setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
-    }, 500),
+    () =>
+      debounce((selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+        setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
+      }, 500),
     []
   );
+
+  useEffect(() => {
+    return () => {
+      handleSearch.cancel?.();
+    };
+  }, [handleSearch]);
 
   const handleReset = useCallback((clearFilters, dataIndex) => {
     clearFilters();
@@ -353,7 +363,7 @@ const ViewCaCiMapping = () => {
     setOpenModalInactivate(true);
     setId(r?.id);
     setNameModalActiveOrInactivate(r?.name);
-    setStatus(r?.status);
+    statusRef.current = r?.status ?? "";
   };
 
   const handleCancelModalInactivate = () => {
@@ -364,7 +374,7 @@ const ViewCaCiMapping = () => {
     const body = {
       id,
       appHierId: res.approvalHierarchy,
-      status: status === "Inactive" ? "Active" : "Inactive",
+      status: statusRef.current === "Inactive" ? "Active" : "Inactive",
       remark: res.remark,
     };
     dispatch(inactiveCaCiMapping({ body }))

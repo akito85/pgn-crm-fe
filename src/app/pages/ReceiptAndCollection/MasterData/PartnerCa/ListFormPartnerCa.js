@@ -1,6 +1,7 @@
 import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import moment from "moment";
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -147,8 +148,8 @@ const ListFormPartnerCa = (props) => {
       form.validateFields(fieldsToValidate)
         .then(() => { if (current < steps.length - 1) setCurrent(current + 1); })
         .catch((error) => { console.log("Validation failed:", error); });
-    } else {
-      if (current < steps.length - 1) setCurrent(current + 1);
+    } else if (current < steps.length - 1) {
+      setCurrent(current + 1);
     }
   };
 
@@ -171,11 +172,7 @@ const ListFormPartnerCa = (props) => {
     setSendBody(dataValue);
     const bodyValidasiUpdate = { ...dataValue, id: data_detail?.partnerCaMapping?.id };
 
-    if (type !== "update") {
-      dispatch(createValidasiPartner(dataValue))
-        .unwrap()
-        .then((data) => { if (data?.success !== false) setModalConfirm(true); });
-    } else {
+    if (type === "update") {
       dispatch(createValidasiPartner(bodyValidasiUpdate))
         .unwrap()
         .then((data) => {
@@ -184,6 +181,10 @@ const ListFormPartnerCa = (props) => {
             setSendBody(bodyValidasiUpdate);
           }
         });
+    } else {
+      dispatch(createValidasiPartner(dataValue))
+        .unwrap()
+        .then((data) => { if (data?.success !== false) setModalConfirm(true); });
     }
   };
 
@@ -244,17 +245,24 @@ const ListFormPartnerCa = (props) => {
       if (type === "update") {
         await dispatch(updatePartner(sendBody)).unwrap();
         setLoadingForm(true);
-        const filterDataAttach = listDataAttachment.filter((item) => item.dataType !== "exist");
-        for (const element of filterDataAttach) {
-          const body = {
-            referensiId: data_detail?.partnerCaMapping?.id,
-            files: element.file,
-            category: "PARTNER_CA",
-            fileCategoryId: element.fileCategoryId,
-          };
-          await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body);
+        try {
+          const filterDataAttach = listDataAttachment.filter((item) => item.dataType !== "exist");
+          for (const element of filterDataAttach) {
+            try {
+              const body = {
+                referensiId: data_detail?.partnerCaMapping?.id,
+                files: element.file,
+                category: "PARTNER_CA",
+                fileCategoryId: element.fileCategoryId,
+              };
+              await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body);
+            } catch (uploadError) {
+              console.error(`Failed to upload file ${element.fileName ?? "attachment"}:`, uploadError);
+            }
+          }
+        } finally {
+          setLoadingForm(false);
         }
-        setLoadingForm(false);
         handleCancelModalConfirm();
         form.resetFields();
         setSelectedHierarchy("");
@@ -264,16 +272,23 @@ const ListFormPartnerCa = (props) => {
       } else {
         const data = await dispatch(createPartner(sendBody)).unwrap();
         setLoadingForm(true);
-        for (const element of listDataAttachment) {
-          const body = {
-            files: element.file,
-            fileCategoryId: element.fileCategoryId,
-            referensiId: data.id,
-            category: "PARTNER_CA",
-          };
-          await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body);
+        try {
+          for (const element of listDataAttachment) {
+            try {
+              const body = {
+                files: element.file,
+                fileCategoryId: element.fileCategoryId,
+                referensiId: data.id,
+                category: "PARTNER_CA",
+              };
+              await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body);
+            } catch (uploadError) {
+              console.error(`Failed to upload file ${element.fileName ?? "attachment"}:`, uploadError);
+            }
+          }
+        } finally {
+          setLoadingForm(false);
         }
-        setLoadingForm(false);
         handleCancelModalConfirm();
         handleClear();
         dispatch(showModalSuccess(successMessage));
@@ -313,7 +328,7 @@ const ListFormPartnerCa = (props) => {
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
         >
-          <div style={{ display: valuePage !== steps[0].value ? "none" : undefined }}>
+          <div style={{ display: valuePage === steps[0].value ? undefined : "none" }}>
             <PartnerCaForm
               form={form}
               dataPartner={dataPartner}
@@ -321,7 +336,7 @@ const ListFormPartnerCa = (props) => {
               dataBankList={dataBankList}
             />
           </div>
-          <div style={{ display: valuePage !== steps[1].value ? "none" : undefined }}>
+          <div style={{ display: valuePage === steps[1].value ? undefined : "none" }}>
             <CardContainer header="APPROVAL INFORMATION">
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
@@ -331,7 +346,7 @@ const ListFormPartnerCa = (props) => {
               />
             </CardContainer>
           </div>
-          <div style={{ display: valuePage !== steps[2].value ? "none" : undefined }}>
+          <div style={{ display: valuePage === steps[2].value ? undefined : "none" }}>
             <CardContainer header="ATTACHMENT INFORMATION">
               <AttachmentComponent
                 type={type}
@@ -410,6 +425,10 @@ const ListFormPartnerCa = (props) => {
       </ModalConfirm>
     </LayoutMenu>
   );
+};
+
+ListFormPartnerCa.propTypes = {
+  type: PropTypes.string,
 };
 
 export default ListFormPartnerCa;
