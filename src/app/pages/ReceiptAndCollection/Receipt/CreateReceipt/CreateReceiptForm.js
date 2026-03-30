@@ -226,15 +226,15 @@ const CreateReceiptForm = ({
     const paymentTypeId = form.getFieldValue("paymentType");
     const partnerId = form.getFieldValue("paymentGateway");
     dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId, deliveryChannelId: value }));
-    form.resetFields(["method", "bank"]);
+    form.resetFields(["bank"]);
   };
 
   const handleReceiptMethodChange = (value) => {
     const paymentTypeId = form.getFieldValue("paymentType");
-    const partnerId = form.getFieldValue("paymentGateway");
-    const deliveryChannelId = form.getFieldValue("deliveryChannel");
-    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId, deliveryChannelId, methodId: value }));
-    form.resetFields(["bank"]);
+    // const partnerId = form.getFieldValue("paymentGateway");
+    // const deliveryChannelId = form.getFieldValue("deliveryChannel");
+    // dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId, deliveryChannelId, methodId: value }));
+    // form.resetFields(["bank"]);
   };
 
   // Helper untuk Header CardContainer
@@ -414,6 +414,7 @@ const CreateReceiptForm = ({
         <div className="w-full grid grid-cols-5 gap-2">
           <Form.Item
             label={"Receipt Method"}
+            rules={formMessageRequired("Receipt Method")}
             name={"method"}
             style={{ marginBottom: 0 }}
           >
