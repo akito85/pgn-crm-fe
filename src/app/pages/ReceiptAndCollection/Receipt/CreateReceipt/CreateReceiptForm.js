@@ -20,7 +20,10 @@ import {
   resetDataAccountNumber,
   getCusNumberDDL,
   getAccountNumberByTypeDDL,
-  getUnifiedCreateReceiptDdl,
+  getPayGetwayDDL,
+  getCollectionAgentDDL,
+  getPayMethodDDL,
+  getBankDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import { useDispatch } from "react-redux";
 
@@ -150,8 +153,14 @@ const CreateReceiptForm = ({
     const selectedAccount = dataAccNumber?.data?.find((item) => item.id === value);
 
     if (selectedAccount) {
+        const isFirstPartNaN = isNaN(selectedAccount?.name?.split(" - ")?.[0]);
+        const extractedAccountName = isFirstPartNaN 
+          ? selectedAccount?.name?.split(" - ")?.[0] 
+          : selectedAccount?.name?.split(" - ")?.[1];
+
         form.setFieldsValue({
-            cusNumber: selectedAccount.customerId
+            cusNumber: selectedAccount.customerId,
+            accountName: extractedAccountName || selectedAccount?.name
         });
         
         setCusNumb({ 
@@ -212,29 +221,26 @@ const CreateReceiptForm = ({
   };
 
   const handlePaymentTypeChange = (value) => {
-    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId: value }));
+    dispatch(getPayGetwayDDL(value));
+    dispatch(getCollectionAgentDDL({ paymentTypeId: value }));
     form.resetFields(["paymentGateway", "collectingAgent"]);
   };
 
   const handlePaymentGatewayChange = (value) => {
     const paymentTypeId = form.getFieldValue("paymentType");
-    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId: value }));
+    dispatch(getCollectionAgentDDL({ paymentTypeId, partnerId: value }));
     form.resetFields(["collectingAgent"]);
   };
 
   const handleDeliveryChannelChange = (value) => {
-    const paymentTypeId = form.getFieldValue("paymentType");
-    const partnerId = form.getFieldValue("paymentGateway");
-    dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId, deliveryChannelId: value }));
+    dispatch(getPayMethodDDL(value));
+    dispatch(getBankDDL()); // Fetch default list of banks when switching delivery channel
     form.resetFields(["bank"]);
   };
 
   const handleReceiptMethodChange = (value) => {
-    const paymentTypeId = form.getFieldValue("paymentType");
-    // const partnerId = form.getFieldValue("paymentGateway");
-    // const deliveryChannelId = form.getFieldValue("deliveryChannel");
-    // dispatch(getUnifiedCreateReceiptDdl({ paymentTypeId, partnerId, deliveryChannelId, methodId: value }));
-    // form.resetFields(["bank"]);
+    dispatch(getBankDDL(value));
+    form.resetFields(["bank"]);
   };
 
   // Helper untuk Header CardContainer

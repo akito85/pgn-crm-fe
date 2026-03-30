@@ -130,12 +130,14 @@ export const getDownloadReceipt = createAsyncThunk(
 
 export const getCollectionAgentDDL = createAsyncThunk(
   "GET_LIST_COLL_AGENT_RECEIPT",
-  async (thunkAPI) => {
+  async ({ paymentTypeId, partnerId } = {}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/collecting-agent/list`;
-      const response = await receiptCollectionHttpService.getAll(url);
-      const data = response?.data;
-      return { data };
+      const params = new URLSearchParams();
+      if (paymentTypeId) params.append("paymentTypeId", paymentTypeId);
+      if (partnerId) params.append("partnerId", partnerId);
+      const url = `/v1/dbs/api/receipt/list-collection-agent${params.toString() ? `?${params.toString()}` : ""}`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -399,15 +401,11 @@ export const getCusNumberDDL = createAsyncThunk(
 
 export const getPayGetwayDDL = createAsyncThunk(
   "GET_LIST_PAY_GET_RECEIPTS",
-  async (thunkAPI) => {
+  async (paymentTypeId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/list`;
-      const response = await receiptCollectionHttpService.getAll(url);
-      const data = response?.data?.map((item) => ({
-        id: item?.id,
-        name: item?.partnerName,
-      }));
-      return { data };
+      const url = `/v1/dbs/api/receipt/list-payment-gateway${paymentTypeId ? `?paymentTypeId=${paymentTypeId}` : ""}`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -512,9 +510,9 @@ export const getCurrencyDDL = createAsyncThunk(
 
 export const getBankDDL = createAsyncThunk(
   "GET_LIST_BANK_RECEIPTS",
-  async (thunkAPI) => {
+  async (methodId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-bank`;
+      const url = `/v1/dbs/api/receipt/list-bank${methodId ? `?methodId=${methodId}` : ""}`;
       const data = await receiptCollectionHttpService.getAll(url);
       return data;
     } catch (error) {
