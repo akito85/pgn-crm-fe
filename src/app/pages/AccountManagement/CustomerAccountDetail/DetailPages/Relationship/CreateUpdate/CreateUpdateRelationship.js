@@ -85,7 +85,7 @@ const CreateUpdateRelationship = ({
   const isDraftApproval = statusApproval === "DRAFT";
   const isRejectApproval = statusApproval === "REJECT";
 
-  const detail = (isActive && statusApproval && isDraftApproval && isRejectApproval)
+  const detail = (isActive && (isDraftApproval || isRejectApproval))
     ? detailDraft_relationshipDetail
     : data_relationshipDetail;
 
@@ -213,6 +213,10 @@ const CreateUpdateRelationship = ({
     // Filter only new attachments (not existing ones)
     const newAttachments = listDataAttachment.filter(a => a.dataType !== "exist");
 
+    const detailRoute = isStandard
+      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME;
+
     if (formType === "create")
       dispatch(createRelationship({
         idAccount,
@@ -222,7 +226,7 @@ const CreateUpdateRelationship = ({
         .unwrap()
         .then(() => {
           setTimeout(() => {
-            navigate(-1);
+            navigate(detailRoute, { state: { idAccount, idCustomer } });
           }, 2000);
         })
         .catch(() => {});
@@ -236,7 +240,7 @@ const CreateUpdateRelationship = ({
         .unwrap()
         .then(() => {
           setTimeout(() => {
-            navigate(-1);
+            navigate(detailRoute, { state: { idAccount, idCustomer } });
           }, 2000);
         })
         .catch(() => {});
@@ -656,12 +660,11 @@ const CreateUpdateRelationship = ({
                       type="reject"
                       onClick={handleClear}
                     >
-                      {isCreate ? "Clear" : "Reset"}
+                      {isCreate ? "Clear" : "Reset"} Data
                     </Button>
                     <Button
                       onClick={() => handleSetShowConfirmationModal(true, "draft")}
                       type={"secondary"}
-                      disabled={current !== steps.length - 1}
                     >
                       Save as Draft
                     </Button>
@@ -688,9 +691,9 @@ const CreateUpdateRelationship = ({
                       <>
                         <Button
                           onClick={() => handleSetShowConfirmationModal(true, "submit")}
-                          type={"submit"}
+                          type={"approve"}
                         >
-                          Save & Submit
+                          Submit
                         </Button>
                       </>
                     )}
@@ -701,13 +704,14 @@ const CreateUpdateRelationship = ({
                 form={form}
                 formId={"relationshipForm"}
                 isOpen={showConfirmModal}
-                handleCancel={() => {handleSetShowConfirmationModal(false)}}
+                handleCancel={() => handleSetShowConfirmationModal(false)}
                 approvalData={data_approvalHierarchyDetail || []}
                 type={confirmationType}
-                attachmentData={listDataAttachment}
-                idAccount={idAccount}
+                attachmentDataSource={listDataAttachment}
                 configApplication={configApp.ACCOUNT_SERVICE}
+                service={accountManagementService}
                 relatedDetails={relatedDetails}
+                handleSubmitForm={handleSubmitForm}
               />
             </Form>
           </Spin>
