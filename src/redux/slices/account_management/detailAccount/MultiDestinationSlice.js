@@ -781,7 +781,6 @@ const multiDestinationSlice = createSlice({
 
     /** Get Multi Destination Detail Approval Hierarchy */
     [getDetailMdApprovalHierarchy.pending]: (state) => {
-      state.list_mdApprovalHierarchyDetail = [];
       state.loading_listMdApprovalHierarchyDetail = true;
     },
     [getDetailMdApprovalHierarchy.fulfilled]: (state, action) => {

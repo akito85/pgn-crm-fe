@@ -18,6 +18,8 @@ const NxInactivateModal = ({
   sliceName,
   approvalOptionsStateName,
   approvalHierarchtDetailsStateName,
+  loadingListApprovalOptionsName,
+  loadingListHierarchyDetailName,
   loadingInactivateName,
   getApprovalOptions = () => {},
   getApprovalHierarchyDetails = () => {},
@@ -30,6 +32,8 @@ const NxInactivateModal = ({
   const {
     [approvalOptionsStateName]: approvalOptions,
     [approvalHierarchtDetailsStateName]: approvalHierarchyDetails,
+    [loadingListApprovalOptionsName]: loadingApprovalOptions,
+    [loadingListHierarchyDetailName]: loadingHierarchyDetails,
     [loadingInactivateName]: inactivateLoading,
   } = useSelector(
     (state) => state[sliceName]
@@ -110,7 +114,8 @@ const NxInactivateModal = ({
             hierarchyDetails={approvalHierarchyDetails}
             options={approvalOptions}
             handleSelectHiararchy={handleSelectHiararchy}
-            loading={inactivateLoading}
+            loading={inactivateLoading || loadingApprovalOptions || loadingHierarchyDetails}
+            tableLoading={loadingHierarchyDetails}
           />
           <Form.Item
             name={"remark"}
