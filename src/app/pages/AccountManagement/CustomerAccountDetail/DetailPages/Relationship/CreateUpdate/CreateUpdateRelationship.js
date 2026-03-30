@@ -13,7 +13,6 @@ import {
   getApprovalHierarchies,
   getApprovalHierarchyDetail,
   getAttachmentCategory,
-  getAttachmentList,
   getDetailDraftRelationship,
   getRelationshipDetail,
   updateRelationship
@@ -28,6 +27,7 @@ import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { configApp } from "../../../../../../../constants/configApp";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import { nxRemoveKeys } from "../../../../../../../components/Nx/NxRemoveKeys";
 
 const CreateUpdateRelationship = ({
   accountType = "standard",
@@ -85,17 +85,19 @@ const CreateUpdateRelationship = ({
   const isDraftApproval = statusApproval === "DRAFT";
   const isRejectApproval = statusApproval === "REJECT";
 
+  const attachmentIsRequired = true;
+
   const detail = (isActive && (isDraftApproval || isRejectApproval))
     ? detailDraft_relationshipDetail
     : data_relationshipDetail;
 
   // State Management
   const [current, setCurrent] = useState(0);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
   // Relationship Data States
-  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
   const [relatedDetails, setRelatedDetails] = useState([]);
 
@@ -176,7 +178,7 @@ const CreateUpdateRelationship = ({
         createdDate: item.createdDate,
         dataType: "exist",
       }));
-      setListDataAttachment(mapped);
+      setAttachmentDataSource(mapped);
     }
   }, [data_attachmentList, formType]);
 
@@ -197,6 +199,12 @@ const CreateUpdateRelationship = ({
       remark,
     } = form.getFieldsValue(true);
 
+    const attachments = nxRemoveKeys([
+      ...attachmentDataSource.filter((a) => ["exist", "draft"].includes(a.dataType)),
+      ...deletedAttachments,
+    ]);
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
+
     const payload = {
       relationshipType,
       relationshipCategory,
@@ -207,10 +215,8 @@ const CreateUpdateRelationship = ({
       appHierId,
       action: confirmationType,
       remark,
+      attachments,
     };
-
-    // Filter only new attachments (not existing ones)
-    const newAttachments = listDataAttachment.filter(a => a.dataType !== "exist");
 
     const detailRoute = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
@@ -250,7 +256,7 @@ const CreateUpdateRelationship = ({
       try {
         if (submitType === "submit") {
           if (current === 2) {
-            if (listDataAttachment.length === 0) {
+            if (attachmentIsRequired && !attachmentDataSource.length) {
               const errorBody = {
                 title: "Failed",
                 description: `Please upload at least one attachment`,
@@ -337,12 +343,12 @@ const CreateUpdateRelationship = ({
       }))
         .unwrap()
         .then(() => {
-          setShowConfirmModal(show);
+          setShowConfirmationModal(show);
           setConfirmationType(submitType);
         })
         .catch(() => { });
     } else {
-      setShowConfirmModal(show);
+      setShowConfirmationModal(show);
       setConfirmationType("");
     }
   };
@@ -404,7 +410,7 @@ const CreateUpdateRelationship = ({
   const next = async () => {
     try {
       if (current === 2) {
-        if (listDataAttachment.length === 0) {
+        if (attachmentIsRequired && !attachmentDataSource.length) {
           const errorBody = {
             title: "Failed",
             description: `Please upload at least one attachment`,
@@ -474,7 +480,7 @@ const CreateUpdateRelationship = ({
 
   const handleClear = () => {
     if (isCreate) {
-      setListDataAttachment([]);
+      setAttachmentDataSource([]);
       setDeletedAttachments([]);
       setRelatedDetails([]);
       form.resetFields();
@@ -496,9 +502,11 @@ const CreateUpdateRelationship = ({
         });
 
         // Restore approval hierarchy detail
-        if (detail.appHierId) {
-          dispatch(getApprovalHierarchyDetail({ accountId, appHierId: detail.appHierId }));
-        }
+        const appHierOption = data_approvalHierarchies.find(
+          (option) => option.appHierId === detail.appHierId
+        );
+        if (appHierOption)
+          handleSelectHierarchy(detail.appHierId, appHierOption.approvalName);
 
         // Restore Related Detail data
         if (detail.relatedDetail && detail.relatedDetail.length > 0) {
@@ -524,9 +532,9 @@ const CreateUpdateRelationship = ({
           createdDate: item.createdDate,
           dataType: "exist",
         }));
-        setListDataAttachment(mapped);
+        setAttachmentDataSource(mapped);
       } else {
-        setListDataAttachment([]);
+        setAttachmentDataSource([]);
       }
 
       setDeletedAttachments([]);
@@ -595,14 +603,14 @@ const CreateUpdateRelationship = ({
           header: "Attachment",
           content: (
             <NxAttachmentInput
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
+              data={attachmentDataSource}
+              updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
               getAPICategory={() => getAttachmentCategory({ accountId })}
               categoryData={data_attachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
-              mandatory
+              mandatory={attachmentIsRequired}
               key={`relationship-tab-2`}
             />
           )
@@ -653,7 +661,7 @@ const CreateUpdateRelationship = ({
                   >
                     Cancel
                   </Button>
-                  <div className="flex w-full justify-end gap-x-4">
+                  <div className="flex w-full justify-end gap-x-2">
                     <Button
                       icon={<SVGIcon name="IconButtonClear" width={14} />}
                       type="reject"
@@ -702,11 +710,11 @@ const CreateUpdateRelationship = ({
               <ConfirmationModal
                 form={form}
                 formId={"relationshipForm"}
-                isOpen={showConfirmModal}
+                isOpen={showConfirmationModal}
                 handleCancel={() => handleSetShowConfirmationModal(false)}
                 approvalData={data_approvalHierarchyDetail || []}
                 type={confirmationType}
-                attachmentDataSource={listDataAttachment}
+                attachmentDataSource={attachmentDataSource}
                 configApplication={configApp.ACCOUNT_SERVICE}
                 service={accountManagementService}
                 relatedDetails={relatedDetails}

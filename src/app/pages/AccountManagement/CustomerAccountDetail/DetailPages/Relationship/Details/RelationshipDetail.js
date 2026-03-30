@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import RelationshipDetailTabs from "./RelationshipDetailTabs";
-import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import {
   getGrantedAccessAccount,
@@ -11,7 +10,6 @@ import {
 import {
   getRelationshipDetail,
   getDetailDraftRelationship,
-  getAttachmentList,
   approveOrRejectRelationship,
   approveOrRejectInactiveRelationship,
 } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";

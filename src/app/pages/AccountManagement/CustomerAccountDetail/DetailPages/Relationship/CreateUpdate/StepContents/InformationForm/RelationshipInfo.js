@@ -192,7 +192,7 @@ const RelationshipInfo = ({
         {/* Modal Choose Related */}
         <ModalChooseRelated
           isOpen={modalChoose}
-          idAccount={accountId}
+          accountId={accountId}
           relationshipType={relationshipTypeName}
           relationshipCategory={relationshipCategoryName}
           handleCancel={() => setModalChoose(false)}
