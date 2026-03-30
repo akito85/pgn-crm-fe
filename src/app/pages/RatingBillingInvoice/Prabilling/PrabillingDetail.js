@@ -334,7 +334,7 @@ const PrabillingDetail = () => {
         ),
       },
     ],
-    [search, searchText, searchedColumn, prabillData]
+    [search, searchText, searchedColumn, prabillData, handleViewDetail]
   );
 
   const allColumns = useMemo(() => {

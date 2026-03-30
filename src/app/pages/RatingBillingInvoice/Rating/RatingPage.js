@@ -20,7 +20,7 @@ import SelectComponent from "../../../../components/SelectComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 
 const RatingPage = () => {
-  const { data, loading, list_billing_period } = useSelector(
+  const { data, loadingList, list_billing_period } = useSelector(
     (state) => state.rating,
   );
 
@@ -321,7 +321,7 @@ const RatingPage = () => {
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
-            loading={loading}
+            loading={loadingList}
             enableRowClick={true}
             selectedRowKey={activeRowKey}
             onRowClick={handleDetail}
