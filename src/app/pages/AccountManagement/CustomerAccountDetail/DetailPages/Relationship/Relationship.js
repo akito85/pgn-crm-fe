@@ -166,8 +166,8 @@ const Relationship = ({
           named={inactivateName}
           menu="relationship"
           sliceName="relationship"
-          approvalOptionsStateName="data_approvalHierarchies"
-          approvalHierarchtDetailsStateName="data_approvalHierarchyDetail"
+          approvalOptionsName="data_approvalHierarchies"
+          approvalHierarchtDetailsName="data_approvalHierarchyDetail"
           getApprovalOptions={getApprovalHierarchies}
           getApprovalHierarchyDetails={getApprovalHierarchyDetail}
         />

@@ -16,8 +16,8 @@ const NxInactivateModal = ({
   named,
   customMessage,
   sliceName,
-  approvalOptionsStateName,
-  approvalHierarchtDetailsStateName,
+  approvalOptionsName,
+  approvalHierarchtDetailsName,
   loadingListApprovalOptionsName,
   loadingListHierarchyDetailName,
   loadingInactivateName,
@@ -30,8 +30,8 @@ const NxInactivateModal = ({
   const [form] = Form.useForm();
 
   const {
-    [approvalOptionsStateName]: approvalOptions,
-    [approvalHierarchtDetailsStateName]: approvalHierarchyDetails,
+    [approvalOptionsName]: approvalOptions,
+    [approvalHierarchtDetailsName]: approvalHierarchyDetails,
     [loadingListApprovalOptionsName]: loadingApprovalOptions,
     [loadingListHierarchyDetailName]: loadingHierarchyDetails,
     [loadingInactivateName]: inactivateLoading,
