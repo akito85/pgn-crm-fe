@@ -254,15 +254,6 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     setModalError(false);
     setBodyError({});
   };
-  const handleOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    return Object.keys(data).map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
-
   // ─── WARRANTY INFORMATION columns (display-only, ACTION = detail icon) ─
   const warrantyInfoColumns = useMemo(
     () => [
@@ -743,7 +734,6 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         isOpen={openModalHistory && dataApprovalHistoryFix}
         handleClose={() => setOpenModalHistory(false)}
         header={"Approval History"}
-        tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />

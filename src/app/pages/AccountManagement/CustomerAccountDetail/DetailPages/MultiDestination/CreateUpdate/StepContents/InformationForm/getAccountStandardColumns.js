@@ -426,7 +426,7 @@ const getAccountStandardColumns = (
                 width={20}
                 onClick={() => {
                   setAccount({
-                    objectId: r.accountId,
+                    accountId: r.accountId,
                     accountNumber: r.accountNumber,
                     accountName: r.accountName,
                     accountSor: r.sor,
