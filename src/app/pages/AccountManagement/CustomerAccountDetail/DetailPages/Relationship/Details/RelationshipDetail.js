@@ -26,7 +26,7 @@ import HeaderDetail from "../../../HeaderDetail";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
-const RelationshipDetails = ({ accountType = "standard" }) => {
+const RelationshipDetail = ({ accountType = "standard" }) => {
   const dispatch = useDispatch();
 
   const { data_relationshipDetail, detailDraft_relationshipDetail, loading_detailRelationship } = useSelector(
@@ -36,8 +36,6 @@ const RelationshipDetails = ({ accountType = "standard" }) => {
   const { loading: loadingCustomer, loadingAccount } = useSelector(
     (state) => state.customerAccount
   );
-
-  const { data_accountDetail } = useSelector((state) => state.accountManagement);
 
   const isLoading = loading_detailRelationship || loadingCustomer || loadingAccount;
 
@@ -301,4 +299,4 @@ const RelationshipDetails = ({ accountType = "standard" }) => {
   );
 };
 
-export default RelationshipDetails;
+export default RelationshipDetail;
