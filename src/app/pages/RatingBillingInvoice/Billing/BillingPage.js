@@ -31,7 +31,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
-  const { data, loading, data_approval_history, filters } = useSelector(
+  const { data, loadingList, loadingHistory, data_approval_history, filters } = useSelector(
     (state) => state.billing,
   );
 
@@ -366,7 +366,7 @@ const BillingPage = () => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingList}
           showExport={false}
           usePagination={false}
           useInfiniteScroll={true}
@@ -414,6 +414,7 @@ const BillingPage = () => {
         width={1000}
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
+        loading={loadingHistory}
       />
 
       <ModalRequestApproval
