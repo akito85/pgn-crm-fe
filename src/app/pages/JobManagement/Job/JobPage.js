@@ -11,9 +11,10 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { getJobManagementColumns } from "../jobManagementColumns";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
-import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
+import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery, useCreateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
+import IconCopy from "../../../../assets/Icon/Nx/IconCopy";
 
 const PAGE_SIZE = 30;
 
@@ -64,6 +65,9 @@ const JobPage = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [jobToDelete, setJobToDelete]         = useState(null); // { id, name, code }
 
+  // Copy state
+  const [copyingId, setCopyingId] = useState(null);
+
   // RTK Query hooks
   const { data, isFetching } = useSearchJobsQuery({
     page,
@@ -79,6 +83,7 @@ const JobPage = () => {
   }, [accessGroupsRaw]);
 
   const [deleteJobMutation, { isLoading: deleteLoading }] = useDeleteJobMutation();
+  const [createJobMutation] = useCreateJobMutation();
 
   // Accumulate pages for infinite scroll
   useEffect(() => {
@@ -142,9 +147,36 @@ const JobPage = () => {
     setJobToDelete(null);
   };
 
+  const handleCopy = useCallback(async (record) => {
+    setCopyingId(record.id);
+    try {
+      await createJobMutation({
+        name:                 `${record.name} (Copy)`,
+        code:                 `${record.code}_COPY`,
+        description:          record.description,
+        type:                 record.type,
+        executeType:          record.executeType,
+        handler:              record.handler,
+        taskQueueId:          record.taskQueueId    ?? null,
+        timeout:              record.timeout        ?? null,
+        maxRetry:             record.maxRetry       ?? 0,
+        retryPolicy:          record.retryPolicy    ?? null,
+        module:               record.module         ?? null,
+        defaultInput:         record.defaultInput   ?? null,
+        parameters:           record.parameters     ?? [],
+        accessGroupId:        record.accessGroupId  ?? null,
+        notificationSettings: record.notificationSettings ?? null,
+      }).unwrap();
+    } catch {
+      // showModalError dispatched inside jobApiSlice on failure
+    } finally {
+      setCopyingId(null);
+    }
+  }, [createJobMutation]);
+
   // Action column (permission-gated)
   const actionColumn = useMemo(() => {
-    const hasAnyAction = canUpdate || canDelete || canView;
+    const hasAnyAction = canCreate || canUpdate || canDelete || canView;
     if (!hasAnyAction) return null;
 
     return {
@@ -155,6 +187,16 @@ const JobPage = () => {
       fixed: "right",
       render: (_, record) => {
         const menuItems = [
+          canCreate && {
+            key: "copy",
+            label: (
+              <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
+                <IconCopy width="18" height="18" /> Copy
+              </span>
+            ),
+            onClick: () => handleCopy(record),
+            disabled: copyingId === record.id,
+          },
           canUpdate && {
             key: "update",
             label: (
@@ -202,7 +244,7 @@ const JobPage = () => {
         );
       },
     };
-  }, [toView, toUpdate, canUpdate, canDelete, canView]);
+  }, [toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
 
   const baseColumns = useMemo(
     () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
