@@ -50,6 +50,14 @@ import {
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ConfirmationSa from "../shared/Modal/ConfirmationSa";
 import { hasValue } from "../../../../../../../utils";
+import {
+  getDefaultServiceAgreementTypeSemantic,
+  isSelectedOptionSemantic,
+  resolveOptionIdBySemantic,
+  resolveOptionValueBySemantic,
+  SERVICE_AGREEMENT_TYPE_VALUE,
+  SERVICE_TYPE_VALUE,
+} from "../idResolver";
 
 const CreateServiceAgreement = ({ saType }) => {
   const dispatch = useDispatch();
@@ -169,6 +177,18 @@ const CreateServiceAgreement = ({ saType }) => {
   const saReferenceNumber = location?.state?.saReferenceNumber;
   const saRecordData = location?.state;
   const idSa = location?.state?.idSa;
+  const defaultServiceAgreementTypeSemantic =
+    getDefaultServiceAgreementTypeSemantic(saRecordData?.typeSa);
+  const isGasServiceType = isSelectedOptionSemantic(
+    data_service_type,
+    saInfoObj?.serviceType,
+    SERVICE_TYPE_VALUE.GAS
+  );
+  const isPjbgServiceAgreementType = isSelectedOptionSemantic(
+    data_sa_type,
+    saInfoObj?.serviceAgreementType,
+    SERVICE_AGREEMENT_TYPE_VALUE.PJBG
+  );
 
   const stateSave = {
     idAccount: idAccount,
@@ -215,8 +235,16 @@ const CreateServiceAgreement = ({ saType }) => {
           serviceAgreementReferenceNumber: saReferenceNumber,
           saReferenceNumber: saRecordData?.saReferenceNumber,
           serviceType: saRecordData?.serviceType,
-          serviceAgreementType: saRecordData?.typeSa === "addon" ? 92 : 91,
-          serviceAgreementTypeValue: saRecordData?.typeSa === "addon" ? "ADDON" : "MAIN",
+          serviceAgreementType:
+            resolveOptionIdBySemantic(
+              data_sa_type,
+              defaultServiceAgreementTypeSemantic
+            ) ?? null,
+          serviceAgreementTypeValue:
+            resolveOptionValueBySemantic(
+              data_sa_type,
+              defaultServiceAgreementTypeSemantic
+            ) ?? defaultServiceAgreementTypeSemantic,
           pjbgType: saRecordData?.pjbgType,
           billingCycle: saRecordData?.billingCycle,
           serviceAgreementChildType: saRecordData?.serviceAgreementChildType,
@@ -224,7 +252,6 @@ const CreateServiceAgreement = ({ saType }) => {
           invoiceTemplate: saRecordData?.invoiceTemplate,
         };
 
-        console.log('isReset = ', isReset)
         // If Reset Action: Explicitly CLEAR user inputs
         setSaInfoObj({
           ...saInfoObj,
@@ -311,6 +338,47 @@ const CreateServiceAgreement = ({ saType }) => {
       setListDataAttachment([]);
     }
   }, [isReset]);
+
+  useEffect(() => {
+    if (!saReferenceNumber || current !== 0 || !data_sa_type?.length) {
+      return;
+    }
+
+    const resolvedServiceAgreementTypeId = resolveOptionIdBySemantic(
+      data_sa_type,
+      defaultServiceAgreementTypeSemantic
+    );
+
+    if (
+      resolvedServiceAgreementTypeId === null ||
+      saInfoObj?.serviceAgreementType === resolvedServiceAgreementTypeId
+    ) {
+      return;
+    }
+
+    const resolvedServiceAgreementTypeValue = resolveOptionValueBySemantic(
+      data_sa_type,
+      defaultServiceAgreementTypeSemantic
+    );
+
+    setSaInfoObj((prevState) => ({
+      ...prevState,
+      serviceAgreementType: resolvedServiceAgreementTypeId,
+      serviceAgreementTypeValue:
+        resolvedServiceAgreementTypeValue ?? prevState?.serviceAgreementTypeValue,
+    }));
+
+    form.setFieldsValue({
+      serviceAgreementType: resolvedServiceAgreementTypeId,
+    });
+  }, [
+    current,
+    data_sa_type,
+    defaultServiceAgreementTypeSemantic,
+    form,
+    saInfoObj?.serviceAgreementType,
+    saReferenceNumber,
+  ]);
 
   useEffect(() => {
     if (data_approval_detail?.length > 0) {
@@ -711,7 +779,7 @@ const CreateServiceAgreement = ({ saType }) => {
   const validateGasInPlanDate = () => {
     let obj2 = saInfoObj.gasInPlanDate;
     if (
-      saInfoObj.serviceType === 608 &&
+      isGasServiceType &&
       (obj2 !== undefined || obj2 !== null) &&
       !saInfoObj.alreadyGasIn
     ) {
@@ -846,8 +914,8 @@ const CreateServiceAgreement = ({ saType }) => {
         if (data.product !== null) {
           // Start DDL Product Selected
           const tempProductDetail = data?.product?.productDetail;
-          const paymentTypeId = 210;
-          const chargingMethodId = 214;
+          const paymentTypeId = 210; // buat ngambil Payment Type di endpoint detail product. nah Payment Type itu gataunya ditarget pake id. ini targetin nya data.product.productDetail
+          const chargingMethodId = 214; //  buat ngambil data charging type di endpoint detail product. nah charging type itu gataunya ditarget pake id.
           const hasIdpaymentTypeId = tempProductDetail.filter(
             (item) => item.nameId === paymentTypeId
           );
@@ -858,7 +926,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
           // Start Ddl Calc Rule - Calc Type
           const tempCalcRuleDetail = data?.product?.productCalcRule;
-          const calculationTypeId = 687;
+          const calculationTypeId = 687; // buat ngambil data calculation type di endpoint detail product. nah calculation type itu gataunya ditarget pake id. ini targetin nya data.product.productCalcRule
           const hasIdCalcTypeId = tempCalcRuleDetail.filter(
             (item) => item.nameId === calculationTypeId
           );
@@ -1586,7 +1654,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
   const next = () => {
     if (current === 0 
-      && saInfoObj.serviceType === 608 
+      && isGasServiceType
       && isMain) {
       const body = {
         saId: idSa,
@@ -1759,16 +1827,14 @@ const CreateServiceAgreement = ({ saType }) => {
     ];
   }
 
-  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
-  if (saInfoObj?.serviceAgreementType === 1170) {
+  if (isPjbgServiceAgreementType) {
     saInformationFields = [
       ...saInformationFields,
       'pjbgType'
     ];
   }
 
-  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
-  if (saInfoObj?.serviceType === 608 
+  if (isGasServiceType
     && saRecordData?.typeSa === "main" 
     && !saInfoObj?.alreadyGasIn
   ) {
