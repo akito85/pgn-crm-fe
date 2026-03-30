@@ -12,7 +12,7 @@ const ModalChooseRelated = ({
   isOpen = false,
   handleCancel = () => {},
   handleSelect = () => {},
-  idAccount = null,
+  accountId = null,
   relationshipType,
   relationshipCategory,
 }) => {
@@ -69,7 +69,7 @@ const ModalChooseRelated = ({
     if (nextPage <= totalPages) {
       await dispatch(
         getRelatedObjectData({
-          idAccount,
+          accountId,
           page: nextPage,
           size: loadMoreSize,
           relationshipType,
@@ -84,11 +84,11 @@ const ModalChooseRelated = ({
   };
 
   useEffect(() => {
-    if (idAccount && relationshipType && relationshipCategory) {
+    if (accountId && relationshipType && relationshipCategory) {
       setPage(0);
       dispatch(
         getRelatedObjectData({
-          idAccount,
+          accountId,
           page: 0,
           size: loadMoreSize,
           relationshipType,
@@ -99,7 +99,7 @@ const ModalChooseRelated = ({
         })
       );
     }
-  }, [dispatch, idAccount, relationshipType, relationshipCategory, sort, search]);
+  }, [dispatch, accountId, relationshipType, relationshipCategory, sort, search]);
 
   const baseColumns = useMemo(() => {
     const columnFn = isAccountType ? getAccountColumns : getCustomerColumns;

@@ -42,8 +42,8 @@ const CreateUpdateRelationship = ({
   const id = location?.state?.id;
 
   //modal
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
 
   const {
     data_attachmentList,
@@ -100,17 +100,16 @@ const CreateUpdateRelationship = ({
   const [relatedDetails, setRelatedDetails] = useState([]);
 
   useEffect(() => {
-    if (idAccount) {
-      dispatch(getAttachmentCategory({ idAccount }));
-      dispatch(getApprovalHierarchies({ idAccount }));
+    if (accountId) {
+      dispatch(getAttachmentCategory({ accountId }));
+      dispatch(getApprovalHierarchies({ accountId }));
     }
-  }, [idAccount]);
+  }, [accountId]);
 
   useEffect(() => {
     if (formType === "update" && id) {
-      dispatch(getAttachmentList({ idAccount, idRelationship: id }));
-      dispatch(getRelationshipDetail({ idAccount, idRelationship: id }));
-      dispatch(getDetailDraftRelationship({ idAccount, idRelationship: id }));
+      dispatch(getRelationshipDetail({ accountId, idRelationship: id }));
+      dispatch(getDetailDraftRelationship({ accountId, idRelationship: id }));
     }
   }, [formType, id]);
 
@@ -182,8 +181,8 @@ const CreateUpdateRelationship = ({
   }, [data_attachmentList, formType]);
 
   const handleSelectHierarchy = (appHierId, approvalName) => {
-    if (idAccount && appHierId)
-      dispatch(getApprovalHierarchyDetail({ idAccount, appHierId }));
+    if (accountId && appHierId)
+      dispatch(getApprovalHierarchyDetail({ accountId, appHierId }));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -191,7 +190,7 @@ const CreateUpdateRelationship = ({
     const {
       relationshipType,
       relationshipCategory,
-      objectId,
+      accountId: relatedAccountId,
       startDate,
       endDate,
       appHierId,
@@ -201,8 +200,8 @@ const CreateUpdateRelationship = ({
     const payload = {
       relationshipType,
       relationshipCategory,
-      objectId,
-      subjectId: idAccount,
+      relatedAccountId,
+      accountId,
       startDate: NxDate.formatForAPI(startDate),
       endDate: NxDate.formatForAPI(endDate),
       appHierId,
@@ -219,20 +218,20 @@ const CreateUpdateRelationship = ({
 
     if (formType === "create")
       dispatch(createRelationship({
-        idAccount,
+        accountId,
         payload,
         attachments: newAttachments
       }))
         .unwrap()
         .then(() => {
           setTimeout(() => {
-            navigate(detailRoute, { state: { idAccount, idCustomer } });
+            navigate(detailRoute, { state: { idAccount: accountId, idCustomer: customerId } });
           }, 2000);
         })
         .catch(() => {});
     else if (isUpdate)
       dispatch(updateRelationship({
-        idAccount,
+        accountId,
         idRelationship: id,
         payload,
         attachments: newAttachments
@@ -240,7 +239,7 @@ const CreateUpdateRelationship = ({
         .unwrap()
         .then(() => {
           setTimeout(() => {
-            navigate(detailRoute, { state: { idAccount, idCustomer } });
+            navigate(detailRoute, { state: { idAccount: accountId, idCustomer: customerId } });
           }, 2000);
         })
         .catch(() => {});
@@ -266,7 +265,7 @@ const CreateUpdateRelationship = ({
             const {
               relationshipType,
               relationshipCategory,
-              objectId,
+              accountId: relatedAccountId,
               startDate,
               endDate,
               description,
@@ -278,10 +277,10 @@ const CreateUpdateRelationship = ({
               type: formType.toUpperCase(),
               id: isUpdate ? id : undefined,
               data: {
-                subjectId: idAccount,
+                accountId,
                 relationshipType,
                 relationshipCategory,
-                objectId,
+                relatedAccountId,
                 description,
                 startDate: NxDate.formatForAPI(startDate),
                 endDate: NxDate.formatForAPI(endDate),
@@ -292,7 +291,7 @@ const CreateUpdateRelationship = ({
             await dispatch(validateCreateUpdate({
               body,
               services: accountManagementService,
-              endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-step`,
+              endPoint: `/v1/dbs/api/accounts/${accountId}/relationships/validate-step`,
               type: formType,
             })).unwrap();
           }
@@ -308,7 +307,7 @@ const CreateUpdateRelationship = ({
       const {
         relationshipType,
         relationshipCategory,
-        objectId,
+        accountId: relatedAccountId,
         startDate,
         endDate,
         description,
@@ -319,10 +318,10 @@ const CreateUpdateRelationship = ({
         id: isUpdate ? id : undefined,
         action: submitType,
         data: {
-          subjectId: idAccount,
+          accountId,
           relationshipType,
           relationshipCategory,
-          objectId,
+          relatedAccountId,
           description,
           startDate: NxDate.formatForAPI(startDate),
           endDate: NxDate.formatForAPI(endDate),
@@ -333,7 +332,7 @@ const CreateUpdateRelationship = ({
       dispatch(validateCreateUpdate({
         body,
         services: accountManagementService,
-        endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${formType}`,
+        endPoint: `/v1/dbs/api/accounts/${accountId}/relationships/validate-${formType}`,
         type: formType,
       }))
         .unwrap()
@@ -376,8 +375,8 @@ const CreateUpdateRelationship = ({
           "",
       breadcrumbName: "Detail Account",
       state: {
-        idAccount: idAccount,
-        idCustomer: idCustomer,
+        idAccount: accountId,
+        idCustomer: customerId,
       }
     },
     {
@@ -420,7 +419,7 @@ const CreateUpdateRelationship = ({
         const {
           relationshipType,
           relationshipCategory,
-          objectId,
+          accountId: relatedAccountId,
           startDate,
           endDate,
           description,
@@ -432,10 +431,10 @@ const CreateUpdateRelationship = ({
           type: formType.toUpperCase(),
           id: isUpdate ? id : undefined,
           data: {
-            subjectId: idAccount,
+            accountId,
             relationshipType,
             relationshipCategory,
-            objectId,
+            relatedAccountId,
             description,
             startDate: NxDate.formatForAPI(startDate),
             endDate: NxDate.formatForAPI(endDate),
@@ -446,7 +445,7 @@ const CreateUpdateRelationship = ({
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-step`,
+          endPoint: `/v1/dbs/api/accounts/${accountId}/relationships/validate-step`,
           type: formType,
         })).unwrap();
       }
@@ -487,8 +486,8 @@ const CreateUpdateRelationship = ({
         form.setFieldsValue({
           relationshipType: detail.relationshipType,
           relationshipCategory: detail.relationshipCategory,
-          relatedName: detail.objectName,
-          relatedNumber: detail.objectNumber,
+          relatedName: detail.accountName,
+          relatedNumber: detail.accountNumber,
           startDate: detail.startDate,
           endDate: detail.endDate,
           description: detail.description || "",
@@ -498,7 +497,7 @@ const CreateUpdateRelationship = ({
 
         // Restore approval hierarchy detail
         if (detail.appHierId) {
-          dispatch(getApprovalHierarchyDetail({ idAccount, appHierId: detail.appHierId }));
+          dispatch(getApprovalHierarchyDetail({ accountId, appHierId: detail.appHierId }));
         }
 
         // Restore Related Detail data
@@ -599,7 +598,7 @@ const CreateUpdateRelationship = ({
               data={listDataAttachment}
               updateData={setListDataAttachment}
               setDeleted={setDeletedAttachments}
-              getAPICategory={() => getAttachmentCategory({ idAccount })}
+              getAPICategory={() => getAttachmentCategory({ accountId })}
               categoryData={data_attachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
@@ -619,8 +618,8 @@ const CreateUpdateRelationship = ({
           <NxBreadCrumb routes={routes} />
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
           <Spin spinning={loading}>
