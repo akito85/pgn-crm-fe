@@ -138,7 +138,7 @@ const JobPage = () => {
       setJobToDelete(null);
       handleRefresh(); // reset to page 0 — RTK Query cache invalidation re-fetches automatically
     } catch {
-      // error shown via showModalError in the slice
+      // intentionally empty: deleteJob queryFn dispatches showModalError on failure
     }
   };
 
