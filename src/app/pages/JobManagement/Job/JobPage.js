@@ -167,8 +167,9 @@ const JobPage = () => {
         accessGroupId:        record.accessGroupId  ?? null,
         notificationSettings: record.notificationSettings ?? null,
       }).unwrap();
+      handleRefresh();
     } catch {
-      // showModalError dispatched inside jobApiSlice on failure
+      // intentionally empty: createJob queryFn dispatches showModalError on failure
     } finally {
       setCopyingId(null);
     }
