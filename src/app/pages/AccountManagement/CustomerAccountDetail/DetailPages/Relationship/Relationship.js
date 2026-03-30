@@ -168,6 +168,9 @@ const Relationship = ({
           sliceName="relationship"
           approvalOptionsName="data_approvalHierarchies"
           approvalHierarchtDetailsName="data_approvalHierarchyDetail"
+          loadingInactivateName="loading_inactivateRelationship"
+          loadingListApprovalOptionsName="loading_listRelationshipApprovalOption"
+          loadingListHierarchyDetailName="loading_listRelationshipApprovalHierarchyDetail"
           getApprovalOptions={getApprovalHierarchies}
           getApprovalHierarchyDetails={getApprovalHierarchyDetail}
         />

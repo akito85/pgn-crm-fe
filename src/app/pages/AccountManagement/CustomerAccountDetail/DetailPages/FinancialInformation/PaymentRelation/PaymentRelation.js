@@ -140,7 +140,9 @@ const PaymentRelation = ({
         sliceName="paymentRelation"
         approvalOptionsName="list_prApprovalOptions"
         approvalHierarchtDetailsName="list_prApprovalHierarchyDetail"
-        loadingInactivateName={"loading_inactivatePr"}
+        loadingInactivateName="loading_inactivatePr"
+        loadingListApprovalOptionsName="loading_listPrApprovalOption"
+        loadingListHierarchyDetailName="loading_detailPrApprovalHierarchyDetails"
         getApprovalOptions={getPrApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailPrApprovalHierarchy}
       />
