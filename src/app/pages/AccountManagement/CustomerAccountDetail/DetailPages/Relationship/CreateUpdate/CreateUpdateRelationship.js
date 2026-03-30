@@ -2,10 +2,10 @@ import SVGIcon from "../../../../../../../assets/Icon/index";
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import HeaderDetail from "../../../HeaderDetail";
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import RelationshipApproval from "./StepContents/ApprovalForm/RelationshipApproval";
-import RelationshipAttachment from "./StepContents/AttachmentForm/RelationshipAttachment";
+import NxApprovalInput from "../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
 import RelationshipInfo from "./StepContents/InformationForm/RelationshipInfo";
 import RelatedDetailCard from "./StepContents/InformationForm/RelatedDetailCard";
 import {
@@ -28,7 +28,6 @@ import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { configApp } from "../../../../../../../constants/configApp";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
-import { dateFormat, dateFormatting } from "../../../../../../../utils";
 
 const CreateUpdateRelationship = ({
   accountType = "standard",
@@ -46,9 +45,9 @@ const CreateUpdateRelationship = ({
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
 
-  // Get Attachment Category and List from Store
   const {
     data_attachmentList,
+    data_attachmentCategory,
     data_approvalHierarchies,
     data_approvalHierarchyDetail,
     data_relationshipDetail,
@@ -67,8 +66,8 @@ const CreateUpdateRelationship = ({
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
-  const isCreate = formType ==="create";
-  const isUpdate = formType ==="update";
+  const isCreate = formType === "create";
+  const isUpdate = formType === "update";
 
   const loading =
     loading_detailRelationship ||
@@ -97,6 +96,7 @@ const CreateUpdateRelationship = ({
 
   // Relationship Data States
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
   const [relatedDetails, setRelatedDetails] = useState([]);
 
   useEffect(() => {
@@ -114,16 +114,12 @@ const CreateUpdateRelationship = ({
     }
   }, [formType, id]);
 
-  // Populate form when both detail data AND approval hierarchy list are loaded (update mode)
+  // Populate form when detail data AND approval hierarchy list are loaded (update mode)
   useEffect(() => {
     if (
-      formType === "update" &&
+      isUpdate &&
       detail?.appHierId &&
-      detail?.relationshipType &&
-      data_relationshipDetail?.id &&
-      data_approvalHierarchies?.length &&
-      data_relationshipType?.length &&
-      data_relationshipCategory?.length
+      data_approvalHierarchies?.length
     ) {
       // Set form values
       form.setFieldsValue({
@@ -185,14 +181,10 @@ const CreateUpdateRelationship = ({
     }
   }, [data_attachmentList, formType]);
 
-  const handleSelectHierarchy = (appHierId, appHierOptions) => {
+  const handleSelectHierarchy = (appHierId, approvalName) => {
     if (idAccount && appHierId)
       dispatch(getApprovalHierarchyDetail({ idAccount, appHierId }));
-
-    if (appHierOptions) {
-      const appHierLabel = appHierOptions.children;
-      form.setFieldsValue({ appHierLabel })
-    }
+    form.setFieldValue("appHierName", approvalName);
   };
 
   const handleSubmitForm = () => {
@@ -253,48 +245,57 @@ const CreateUpdateRelationship = ({
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
-        if (current === 2) {
-          if (listDataAttachment.length === 0) {
-            const errorBody = {
-              title: "Failed",
-              description: `Please upload at least one attachment`,
+        if (submitType === "submit") {
+          if (current === 2) {
+            if (listDataAttachment.length === 0) {
+              const errorBody = {
+                title: "Failed",
+                description: `Please upload at least one attachment`,
+              };
+              dispatch(showModalError(errorBody));
+
+              throw new Error("There was no file attached");
+            }
+          } else {
+            await form.validateFields(formFields[current]);
+
+            const {
+              relationshipType,
+              relationshipCategory,
+              objectId,
+              startDate,
+              endDate,
+              description,
+              appHierId,
+            } = form.getFieldsValue(true);
+
+            const body = {
+              stepNumber: current + 1,
+              type: formType.toUpperCase(),
+              id: isUpdate ? id : undefined,
+              data: {
+                subjectId: idAccount,
+                relationshipType,
+                relationshipCategory,
+                objectId,
+                description,
+                startDate: NxDate.formatForAPI(startDate),
+                endDate: NxDate.formatForAPI(endDate),
+                appHierId,
+              }
             };
-            dispatch(showModalError(errorBody));
 
-            throw new Error("There was no file attached");
+            await dispatch(validateCreateUpdate({
+              body,
+              services: accountManagementService,
+              endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-step`,
+              type: formType,
+            })).unwrap();
           }
+        } else if (submitType === "draft") {
+          await form.validateFields(["relatedName"]);
         } else {
-          await form.validateFields(formFields[current]);
-
-          const {
-            relationshipType,
-            relationshipCategory,
-            objectId,
-            startDate,
-            endDate,
-            description,
-            appHierId,
-          } = form.getFieldsValue(true);
-
-          const body = {
-            id: isUpdate ? id : undefined,
-            subjectId: idAccount,
-            relationshipType,
-            relationshipCategory,
-            objectId,
-            description,
-            startDate,
-            endDate,
-            appHierId,
-            validationType: validationTypes[current],
-          };
-
-          await dispatch(validateCreateUpdate({
-            body,
-            services: accountManagementService,
-            endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${formType}`,
-            type: formType,
-          })).unwrap();
+          return;
         }
       } catch (err) {
         return;
@@ -312,15 +313,17 @@ const CreateUpdateRelationship = ({
 
       const body = {
         id: isUpdate ? id : undefined,
-        subjectId: idAccount,
-        relationshipType,
-        relationshipCategory,
-        objectId,
-        description,
-        startDate,
-        endDate,
-        appHierId,
         action: submitType,
+        data: {
+          subjectId: idAccount,
+          relationshipType,
+          relationshipCategory,
+          objectId,
+          description,
+          startDate: NxDate.formatForAPI(startDate),
+          endDate: NxDate.formatForAPI(endDate),
+          appHierId,
+        }
       };
 
       dispatch(validateCreateUpdate({
@@ -368,6 +371,10 @@ const CreateUpdateRelationship = ({
           ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
           "",
       breadcrumbName: "Detail Account",
+      state: {
+        idAccount: idAccount,
+        idCustomer: idCustomer,
+      }
     },
     {
       path: "",
@@ -389,8 +396,6 @@ const CreateUpdateRelationship = ({
     ],
     []
   ];
-
-  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
 
   // Navigation handlers
   const next = async () => {
@@ -419,22 +424,25 @@ const CreateUpdateRelationship = ({
         } = form.getFieldsValue(true);
 
         const body = {
+          stepNumber: current + 1,
+          type: formType.toUpperCase(),
           id: isUpdate ? id : undefined,
-          subjectId: idAccount,
-          relationshipType,
-          relationshipCategory,
-          objectId,
-          description,
-          startDate,
-          endDate,
-          appHierId,
-          validationType: validationTypes[current],
+          data: {
+            subjectId: idAccount,
+            relationshipType,
+            relationshipCategory,
+            objectId,
+            description,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
+            appHierId,
+          }
         };
 
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-${formType}`,
+          endPoint: `/v1/dbs/api/accounts/${idAccount}/relationships/validate-step`,
           type: formType,
         })).unwrap();
       }
@@ -464,6 +472,7 @@ const CreateUpdateRelationship = ({
   const handleClear = () => {
     if (isCreate) {
       setListDataAttachment([]);
+      setDeletedAttachments([]);
       setRelatedDetails([]);
       form.resetFields();
       setCurrent(0);
@@ -509,12 +518,15 @@ const CreateUpdateRelationship = ({
           fileType: item.fileType,
           urlFile1: item.urlFile1,
           createdBy: item.createdBy,
+          createdDate: item.createdDate,
           dataType: "exist",
         }));
         setListDataAttachment(mapped);
       } else {
         setListDataAttachment([]);
       }
+
+      setDeletedAttachments([]);
 
       // Reset to first step
       setCurrent(0);
@@ -561,21 +573,13 @@ const CreateUpdateRelationship = ({
         {
           header: "Approval",
           content: (
-            <RelationshipApproval
+            <NxApprovalInput
               form={form}
-              dataApprovalList={data_approvalHierarchies}
-              dataDetailApproval={(data_approvalHierarchyDetail || []).map((item, index) => ({
-                ...item,
-                employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
-                  ...emp,
-                  key: `employee-detail-${empIndex}`,
-                })),
-                key: `detail-detail-${index}`,
-              }))}
-              handleSelectHierarchy={handleSelectHierarchy}
+              options={data_approvalHierarchies}
+              hierarchyDetails={data_approvalHierarchyDetail || []}
+              handleSelectHiararchy={handleSelectHierarchy}
               loading={loading_listRelationshipApprovalHierarchyDetail}
               key={`relationship-tab-1`}
-              className={`${current !== 1 ? "hidden" : ""}`}
             />
           )
         }
@@ -587,13 +591,16 @@ const CreateUpdateRelationship = ({
         {
           header: "Attachment",
           content: (
-            <RelationshipAttachment
+            <NxAttachmentInput
               data={listDataAttachment}
               updateData={setListDataAttachment}
-              dispatch={dispatch}
-              key={`relationship-tab-2`}
-              className={`${current !== 2 ? "hidden" : ""}`}
+              setDeleted={setDeletedAttachments}
+              getAPICategory={() => getAttachmentCategory({ idAccount })}
+              categoryData={data_attachmentCategory}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
               mandatory
+              key={`relationship-tab-2`}
             />
           )
         }
@@ -605,7 +612,7 @@ const CreateUpdateRelationship = ({
     <>
       <div>
         <div className="flex flex-col gap-y-4">
-          <BreadCrumb routes={routes} />
+          <NxBreadCrumb routes={routes} />
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             idAccount={idAccount}
@@ -633,7 +640,7 @@ const CreateUpdateRelationship = ({
                   </NxCardContainer>
                 ))
               )}
-              
+
               {/* Section Action Steps */}
               <NxBaseContainer border>
                 <div className="flex justify-between">
@@ -695,14 +702,7 @@ const CreateUpdateRelationship = ({
                 formId={"relationshipForm"}
                 isOpen={showConfirmModal}
                 handleCancel={() => {handleSetShowConfirmationModal(false)}}
-                approvalData={(data_approvalHierarchyDetail || []).map((item, index) => ({
-                  ...item,
-                  employeeDetail: (item.employeeDetail || []).map((emp, empIndex) => ({
-                    ...emp,
-                    key: `employee-detail-${empIndex}`,
-                  })),
-                  key: `detail-detail-${index}`,
-                }))}
+                approvalData={data_approvalHierarchyDetail || []}
                 type={confirmationType}
                 attachmentData={listDataAttachment}
                 idAccount={idAccount}
