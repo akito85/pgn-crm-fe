@@ -8,12 +8,13 @@ import MuldestSection from "./Detail/MuldestSection";
 import UsageSection from "./Detail/UsageSection";
 import CardContainer from "../../../../components/CardContainer";
 
-const RatingDetail = ({ 
+const RatingDetail = ({
   ratingCode,
-  calculationCode, 
+  calculationCode,
   accountNumber,
   saType,
-  onClose 
+  billPeriod,
+  onClose,
 }) => {
   // State
   const [tabSection, setTabSection] = useState("Calculation Usage");
@@ -87,6 +88,8 @@ const RatingDetail = ({
           <UsageSection
             ratingCode={ratingCode}
             calculationCode={calculationCode}
+            accountNumber={accountNumber} 
+            billPeriod={billPeriod}
           />
         );
       case "Promo":

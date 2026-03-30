@@ -3,6 +3,13 @@ import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContain
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../../components/StatusComponent";
 
+/**
+ * Presentational info panel for an invoice relation record.
+ * Displays account details, dates, status, and description.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Invoice relation detail record
+ */
 const InvoiceRelationDetailInfo = ({
   detail = {},
 }) => {
@@ -12,6 +19,7 @@ const InvoiceRelationDetailInfo = ({
     startDate,
     endDate,
     status,
+    statusApproval,
     description,
   } = detail;
 
@@ -27,6 +35,11 @@ const InvoiceRelationDetailInfo = ({
           <NxDetailText label="Status">
             <StatusComponent colour={status} margin={false}>
               {status}
+            </StatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <StatusComponent colour={statusApproval} margin={false}>
+              {statusApproval}
             </StatusComponent>
           </NxDetailText>
         </div>

@@ -1,11 +1,5 @@
-import {
-  LeftOutlined,
-  RightOutlined,
-  WarningOutlined,
-  LeftCircleOutlined,
-  RightCircleOutlined,
-} from "@ant-design/icons";
-import { Form, Spin, Steps, Button, Row, Col } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
+import { Form, Spin } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +7,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
   createPartner,
@@ -29,7 +22,6 @@ import {
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
 import PartnerForm from "./PartnerForm";
-import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import CardContainer from "../../../../../components/CardContainer";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -43,6 +35,12 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+
+const steps = [
+  { title: "CREATE", value: "Partner" },
+  { title: "APPROVAL", value: "Approval" },
+  { title: "ATTACHMENT", value: "Attachment" },
+];
 
 const ListFormPartner = (props) => {
   const { type } = props;
@@ -69,14 +67,6 @@ const ListFormPartner = (props) => {
   const [loadingForm, setLoadingForm] = useState(loading);
   const [loadingSave, setLoadingSave] = useState(false);
   const [current, setCurrent] = useState(0);
-
-  const steps = [
-    { title: "CREATE", value: "Partner" },
-    { title: "APPROVAL", value: "Approval" },
-    { title: "ATTACHMENT", value: "Attachment" },
-  ];
-
-
 
 
 
@@ -173,7 +163,7 @@ const ListFormPartner = (props) => {
         }))
       );
     }
-  }, [data_detail, id]);
+  }, [data_detail, id, form]);
 
   // Define tabData before using it in useState
 
@@ -197,10 +187,6 @@ const ListFormPartner = (props) => {
   useEffect(() => {
     setValuePage(steps[current].value);
   }, [current]);
-
-  const onChange = (e) => {
-    // setValuePage(e.target.value);
-  };
 
   const next = () => {
     const fieldsToValidate = tabData[current]?.paramValue;
@@ -393,7 +379,6 @@ const ListFormPartner = (props) => {
       dispatch(updatePartner(sendBody))
         .unwrap()
         .then(async () => {
-          const id = data_detail?.partner?.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
@@ -406,7 +391,7 @@ const ListFormPartner = (props) => {
               category: "PARTNER",
               fileCategoryId: element.fileCategoryId,
             };
-            const response = await receiptCollectionHttpService.uploadImage(
+            await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
               body
             );
@@ -448,7 +433,7 @@ const ListFormPartner = (props) => {
               referensiId: id,
               category: "PARTNER",
             };
-            const response = await receiptCollectionHttpService.uploadImage(
+            await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
               body
             );
@@ -476,7 +461,7 @@ const ListFormPartner = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading || loadingForm}>
         <FormStepper
@@ -592,7 +577,7 @@ const ListFormPartner = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

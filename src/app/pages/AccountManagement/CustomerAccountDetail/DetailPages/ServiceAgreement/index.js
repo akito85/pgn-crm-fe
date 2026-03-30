@@ -286,16 +286,6 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
     setShowApprovalHistoryModal(false);
   };
 
-  const handleOptions = () => {
-    const historyData = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(historyData);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
-
   // Inactivate handlers
   const handleOpenInactivate = (recordId, saNumber) => {
     setSaId(recordId);
@@ -434,7 +424,6 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header="Approval History"
-        tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />

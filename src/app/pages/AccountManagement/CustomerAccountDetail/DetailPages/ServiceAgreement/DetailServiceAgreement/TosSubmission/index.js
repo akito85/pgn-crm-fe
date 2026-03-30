@@ -658,15 +658,6 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     [allColumns]
   );
 
-  const handleOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
   const handleSubmitModalInactivate = (res, handleClear) => {
     const data = {
       tosSubmissionId: dataInactivate.id,
@@ -746,7 +737,6 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
           isOpen={showApprovalHistoryModal}
           handleClose={() => handleApprovalHistoryModal(false)}
           header={"Approval History"}
-          tabOptions={handleOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
         />

@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import {
   DownloadOutlined,
@@ -455,7 +454,7 @@ const DataAccessHierarchyView = () => {
   // use hooks handle retry
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -592,7 +591,7 @@ const DataAccessHierarchyView = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

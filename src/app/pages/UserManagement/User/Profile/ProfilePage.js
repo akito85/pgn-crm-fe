@@ -1,5 +1,4 @@
 import React from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BaseContainer from '../../../../../components/BaseContainer';
 import { Spin } from 'antd';
 import { LeftOutlined } from '@ant-design/icons';
@@ -89,7 +88,7 @@ const ProfilePage = () => {
         }
     }
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <ButtonComponent onClick={() => navigate(-1)} border={false} icon={<LeftOutlined
                     style={{
@@ -105,7 +104,7 @@ const ProfilePage = () => {
                     </BaseContainer>
                 </div>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 }
 

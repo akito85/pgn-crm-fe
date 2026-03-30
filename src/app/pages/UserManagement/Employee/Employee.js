@@ -6,7 +6,6 @@ import {
 } from "antd";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { Link, NavLink } from "react-router-dom";
 import {
@@ -593,7 +592,7 @@ const Employee = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading} className={"w-full top-20"}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -708,7 +707,7 @@ const Employee = () => {
       </ModalCustom>
 
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsTaxExemption } from "./TableViewTaxExemption";
@@ -387,7 +386,7 @@ const ViewTaxExemption = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <>
         <BreadCrumb routes={routes} />
 
@@ -454,7 +453,7 @@ const ViewTaxExemption = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
       </>
-    </LayoutMenu>
+    </>
   );
 };
 

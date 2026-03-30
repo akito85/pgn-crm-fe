@@ -327,7 +327,7 @@ const AccountDetailInformation = ({
       case dataTabs.gs:
         return <GasSourceInformation />;
       case dataTabs.gd:
-        return <GasDeposit moduleType="ua" id={id} idCustomer={idCustomer} />
+        return <GasDeposit moduleType="ua" accountId={id} customerId={idCustomer} />
       case dataTabs.rec:
         return (
           <AccountReceipt
@@ -356,9 +356,8 @@ const AccountDetailInformation = ({
       case dataTabs.rs:
         return (
           <Relationship
-            id={id}
-            type={type}
-            idCustomer={idCustomer}
+            accountId={id}
+            customerId={idCustomer}
           />
         );
       case dataTabs.adi:
@@ -385,8 +384,8 @@ const AccountDetailInformation = ({
       case dataTabs.md:
         return (
           <MultiDestination
-            id={id}
-            idCustomer={idCustomer}
+            accountId={id}
+            customerId={idCustomer}
           />
         )
       default:

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Alert, Checkbox, Form, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -545,7 +544,7 @@ const ViewLateCharges = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
+      <>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -651,7 +650,7 @@ const ViewLateCharges = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-      </LayoutMenu>
+      </>
     </Spin>
   );
 };

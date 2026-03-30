@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
     getDetailGapuraManagement,
 } from "../../../../redux/slices/receipt_collection/gapuraManagement";
@@ -61,7 +60,7 @@ const ListDetailGapuraManagement = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
 
@@ -101,7 +100,7 @@ const ListDetailGapuraManagement = () => {
                     </ButtonComponent>
                 </div>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

@@ -217,7 +217,7 @@ const ModalChooseContact = ({
       }}
       width={1200}
       footer={[
-        <ButtonComponent onClick={handleCancelModalChoose}>
+        <ButtonComponent key="back" onClick={handleCancelModalChoose}>
           Back
         </ButtonComponent>,
       ]}

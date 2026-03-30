@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
@@ -387,7 +386,7 @@ const EntityPage = () => {
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -463,7 +462,7 @@ const EntityPage = () => {
         </Form>
       </ModalCustom>
       {renderModal}
-    </LayoutMenu>
+    </>
   );
 };
 

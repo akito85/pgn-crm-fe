@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
@@ -408,7 +407,7 @@ const EntityDetail = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"my-5"}>
@@ -544,7 +543,7 @@ const EntityDetail = () => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

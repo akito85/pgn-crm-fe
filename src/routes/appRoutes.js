@@ -19,6 +19,7 @@ const ChoosePositionRoute = lazy(() => import('../components/ChoosePositionRoute
 const ChooseEntityRoute = lazy(() => import('../components/ChooseEntityRoute'));
 const VerifyPage = lazy(() => import('../app/pages/Authentication/VerifyPage'));
 const SuspenseComponent = lazy(() => import('../components/SuspenseComponent'))
+const SwitchPage = lazy(() => import('../app/pages/Authentication/SwitchPage'));
 const PageLayout = ({ children }) => children;
 const pageVariants = {
   initial: {

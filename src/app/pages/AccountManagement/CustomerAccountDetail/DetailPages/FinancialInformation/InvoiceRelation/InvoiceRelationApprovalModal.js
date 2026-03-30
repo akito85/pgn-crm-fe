@@ -1,27 +1,29 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import {
   approveOrRejectAllInvoiceRelation,
   getInvoiceRelationApproval
-} from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+} from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 /**
  * Modal for approving or rejecting pending invoice relation records.
  * Displays a two-step wizard: select records + enter remark, then confirm.
- * @param {{ id?: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @param {{ accountId: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
  * @returns
  */
 const InvoiceRelationApprovalModal = ({
-  id = 0,
+  accountId,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {}
@@ -31,8 +33,11 @@ const InvoiceRelationApprovalModal = ({
     list_invoiceRelationApproval: invoiceRelationApprovals,
     pagination_invoiceRelationApproval: pagination,
     loading_listIrApproval,
-    loading_approveRejectIr
-  } = useSelector((state) => state.financialInformation);
+    loading_approveIr,
+    loading_rejectIr
+  } = useSelector((state) => state.invoiceRelation);
+
+  const loadingApproval = loading_approveIr || loading_rejectIr;
 
   const searchInput = useRef(null);
   const [form] = Form.useForm();
@@ -73,7 +78,7 @@ const InvoiceRelationApprovalModal = ({
 
       dispatch(
         getInvoiceRelationApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: false
         })
@@ -126,7 +131,7 @@ const InvoiceRelationApprovalModal = ({
 
       dispatch(
         getInvoiceRelationApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: true
         })
@@ -279,7 +284,7 @@ const InvoiceRelationApprovalModal = ({
         approveOrRejectAllInvoiceRelation({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected"
+          action,
         })
       )
         .unwrap()
@@ -316,9 +321,10 @@ const InvoiceRelationApprovalModal = ({
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
-            <Button type={"menu"} onClick={handleCancelForm}>
+            <Button type={"menu"} onClick={handleCancelForm} disabled={loadingApproval}>
               Cancel
             </Button>
 
@@ -328,7 +334,7 @@ const InvoiceRelationApprovalModal = ({
                   prev();
                 }}
                 type={"menu"}
-                disabled={current < 1}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
               </Button>
@@ -338,7 +344,7 @@ const InvoiceRelationApprovalModal = ({
                   onClick={() => handleButtonNext()}
                   type={"submit"}
                   disabled={
-                    current > steps.length - 1 || steps[current].disabled
+                    current > steps.length - 1 || steps[current].disabled || loadingApproval
                   }
                 >
                   Next
@@ -349,14 +355,20 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading_approveRejectIr}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
+                    disabled={!loading_rejectIr && loadingApproval}
+                    loading={loading_rejectIr}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading_approveRejectIr}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
+                    disabled={!loading_approveIr && loadingApproval}
+                    loading={loading_approveIr}
                   >
                     Approve
                   </Button>
@@ -366,22 +378,13 @@ const InvoiceRelationApprovalModal = ({
           </div>
         }
       >
-        <NxBaseContainer
-          border={{
-            top: false,
-            right: false,
-            left: false
-          }}
-          rounded={false}
-        >
-          <div className="flex flex-row justify-center">
-            <Steps
-              current={current}
-              items={steps}
-              labelPlacement="vertical"
-            />
-          </div>
-        </NxBaseContainer>
+        <NxFormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={handleButtonNext}
+          inModal
+        />
 
         <div className="p-4">
           {/* STEP 1: INVOICE RELATION INFORMATION */}
@@ -397,7 +400,7 @@ const InvoiceRelationApprovalModal = ({
                     dataSource={invoiceRelationApprovals}
                     columns={columns}
                     totalData={totalElement}
-                    tableScrolled={{ x: invoiceRelationApprovals.length ? "max-content" : 5000 }}
+                    tableScrolled={{ x: invoiceRelationApprovals.length ? "max-content" : 1200 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}

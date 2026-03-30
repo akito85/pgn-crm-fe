@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectPaymentChannel,
   approveOrRejectInactivePaymentChannel,
@@ -138,7 +137,7 @@ const ListDetailPaymentChannel = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <Tabs
@@ -199,7 +198,7 @@ const ListDetailPaymentChannel = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

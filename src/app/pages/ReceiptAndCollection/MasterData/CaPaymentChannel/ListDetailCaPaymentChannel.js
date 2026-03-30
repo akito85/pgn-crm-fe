@@ -7,7 +7,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
     approveOrRejectCaPaymentChannel,
     approveOrRejectInactiveCaPaymentChannel,
@@ -123,7 +122,7 @@ const ListDetailCaPaymentChannel = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Tabs
                 activeKey={segmentedPage}
@@ -181,7 +180,7 @@ const ListDetailCaPaymentChannel = () => {
                 }}
                 showApproval={isShowButton === true}
             />
-        </LayoutMenu>
+        </>
     );
 };
 

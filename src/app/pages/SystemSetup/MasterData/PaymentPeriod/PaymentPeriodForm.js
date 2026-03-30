@@ -1,18 +1,19 @@
-import { Form, Spin, Input, DatePicker } from "antd";
+import { Form, Spin } from "antd";
 import PropTypes from "prop-types";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ConfirmModalPaymentPeriod from "./Modal/ConfirmModalPaymentPeriod";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import InputComponent from "../../../../../components/InputComponent";
+import DateComponent from "../../../../../components/DateComponent";
 import {
     createPaymentPeriod,
     getDetailPaymentPeriod,
@@ -28,7 +29,7 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
 
 
-const { TextArea } = Input;
+
 
 const steps = [
     { title: "CREATE", value: "Payment Period" },
@@ -372,7 +373,7 @@ const PaymentPeriodForm = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper
@@ -381,7 +382,7 @@ const PaymentPeriodForm = ({ type }) => {
                     onPrev={prev}
                     onNext={next}
                 />
-                <BaseContainer header={isEdit ? "EDIT PAYMENT PERIOD" : "CREATE PAYMENT PERIOD"}>
+                <div className="w-full flex flex-col justify-start pb-5">
                     <Form
                         form={form}
                         layout="vertical"
@@ -390,61 +391,59 @@ const PaymentPeriodForm = ({ type }) => {
                     >
                         {/* Tab 1: Payment Period Information */}
                         <div style={{ display: valuePage === "Payment Period" ? "block" : "none" }}>
-                            <div className="grid grid-cols-4 gap-4">
-                                <Form.Item
-                                    label="Period Name"
-                                    name="periodName"
-                                    rules={[{ required: true, message: "Please input period name!" }]}
-                                >
-                                    <Input placeholder="Enter Period Name" />
-                                </Form.Item>
-
-                                <Form.Item
-                                    label="Start Date"
-                                    name="startDate"
-                                    rules={[{ required: true, message: "Please select start date!" }]}
-                                >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
-                                        placeholder="Select Start Date"
-                                        onChange={(date) => {
-                                            const endDate = form.getFieldValue("endDate");
-                                            if (date && endDate && endDate < date) {
-                                                form.setFieldsValue({
-                                                    endDate: null,
-                                                });
-                                            }
-                                        }}
-                                    />
-                                </Form.Item>
-
-                                <Form.Item
-                                    label="End Date"
-                                    name="endDate"
-                                    rules={[{ required: true, message: "Please select end date!" }]}
-                                >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
-                                        placeholder="Select End Date"
-                                        disabledDate={disabledEndDate}
-                                    />
-                                </Form.Item>
-
-                                <div className="col-span-4">
-                                    <Form.Item
-                                        label="Description"
-                                        name="description"
-                                    >
-                                        <TextArea rows={4} placeholder="Enter description" showCount maxLength={255} />
-                                    </Form.Item>
-                                </div>
-                            </div>
+                            <CardContainer header="PAYMENT PERIOD INFORMATION">
+                             <div className="grid grid-cols-5 gap-4">
+                                 <Form.Item
+                                     label="Period Name"
+                                     name="periodName"
+                                     rules={[{ required: true, message: "Please input period name!" }]}
+                                 >
+                                     <InputComponent placeholder="Enter Period Name" />
+                                 </Form.Item>
+ 
+                                 <Form.Item
+                                     label="Start Date"
+                                     name="startDate"
+                                     rules={[{ required: true, message: "Please select start date!" }]}
+                                 >
+                                     <DateComponent
+                                         placeholder="Select Start Date"
+                                         onChange={(date) => {
+                                             const endDate = form.getFieldValue("endDate");
+                                             if (date && endDate && endDate < date) {
+                                                 form.setFieldsValue({
+                                                     endDate: null,
+                                                 });
+                                             }
+                                         }}
+                                         dateDisable={() => false}
+                                     />
+                                 </Form.Item>
+ 
+                                 <Form.Item
+                                     label="End Date"
+                                     name="endDate"
+                                     rules={[{ required: true, message: "Please select end date!" }]}
+                                 >
+                                     <DateComponent
+                                         placeholder="Select End Date"
+                                         dateDisable={disabledEndDate}
+                                     />
+                                 </Form.Item>
+ 
+                                 <Form.Item
+                                     label="Description"
+                                     name="description"
+                                     className="col-span-2"
+                                 >
+                                     <InputComponent type="textarea" rows={4} placeholder="Enter description" showCount maxLength={255} />
+                                 </Form.Item>
+                             </div></CardContainer>
                         </div>
 
                         {/* Tab 2: Approval */}
                         <div style={{ display: valuePage === "Approval" ? "block" : "none" }}>
+                            <CardContainer header="APPROVAL INFORMATION">
                             <ApprovalComponentGeneral
                                 parentForm={form}
                                 dataOption={appHierOptions}
@@ -454,10 +453,12 @@ const PaymentPeriodForm = ({ type }) => {
                                 detailData={data_detail?.paymentPeriodDetail}
                                 isEditing={isEdit}
                             />
+                            </CardContainer>
                         </div>
 
                         {/* Tab 3: Attachment */}
                         <div style={{ display: valuePage === "Attachment" ? "block" : "none" }}>
+                            <CardContainer header="ATTACHMENT INFORMATION">
                             <AttachmentComponent
                                 type="create"
                                 data={files}
@@ -468,6 +469,7 @@ const PaymentPeriodForm = ({ type }) => {
                                 service={receiptCollectionHttpService}
                                 configApplication={configApp.PAYMENT_SERVICE}
                             />
+                            </CardContainer>
                         </div>
 
                         <FormFooter
@@ -482,7 +484,8 @@ const PaymentPeriodForm = ({ type }) => {
                             onSubmit={() => form.submit()}
                         />
                     </Form>
-                </BaseContainer>
+                </div>
+
                 {/* Confirmation Modal */}
                 <ModalCustom
                     title="Confirmation"
@@ -522,7 +525,7 @@ const PaymentPeriodForm = ({ type }) => {
                     />
                 </ModalCustom>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

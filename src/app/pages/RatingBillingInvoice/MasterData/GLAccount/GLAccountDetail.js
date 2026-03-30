@@ -6,7 +6,6 @@ import { Spin, Tabs } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import CardContainer from "../../../../../components/CardContainer";
@@ -160,7 +159,7 @@ const GLAccountDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         
@@ -372,7 +371,7 @@ const GLAccountDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

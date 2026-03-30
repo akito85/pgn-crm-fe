@@ -5,7 +5,6 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
   DeleteOutlined,
   FilterOutlined,
@@ -545,7 +544,7 @@ const ApprovalHierarchyForm = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <PageHeader breadcrumb={<BreadCrumb routes={routes} />} />
       <Spin spinning={loading || isLoading}>
         <div className="flex w-full justify-end gap-5">
@@ -855,7 +854,7 @@ const ApprovalHierarchyForm = (props) => {
 
       {/* render modal */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

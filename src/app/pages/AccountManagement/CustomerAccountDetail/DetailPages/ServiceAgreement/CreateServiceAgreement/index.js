@@ -15,7 +15,6 @@ import accountManagementPromoHttpService from "../../../../../../../redux/servic
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
@@ -2276,7 +2275,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes(stateSave)} />
@@ -2430,7 +2429,7 @@ const CreateServiceAgreement = ({ saType }) => {
         width={400}
         maskClosable={false}
         footer={[
-          <div className={"w-full justify-end flex gap-[20px]"}>
+          <div key="footer" className={"w-full justify-end flex gap-[20px]"}>
             <ButtonComponent
               type={"default"}
               onClick={() => setModalBack(false)}
@@ -2564,7 +2563,7 @@ const CreateServiceAgreement = ({ saType }) => {
           </p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

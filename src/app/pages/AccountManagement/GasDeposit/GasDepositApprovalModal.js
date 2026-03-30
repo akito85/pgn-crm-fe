@@ -21,7 +21,7 @@ import NxModal from "../../../../components/Nx/NxModal";
  * @returns
  */
 const GasDepositApprovalModal = ({
-  id = 0,
+  accountId,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {}
@@ -130,7 +130,7 @@ const GasDepositApprovalModal = ({
 
       dispatch(
         getGasDepositApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: true
         })
@@ -260,14 +260,14 @@ const GasDepositApprovalModal = ({
 
   const columnDefinitions = useMemo(
     () =>
-      getGasDepositColumns(
+      getGasDepositColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false
-      ),
+        includeStatus: false
+      }),
     [search, searchInput, searchedColumn, searchText]
   );
 
@@ -291,7 +291,7 @@ const GasDepositApprovalModal = ({
 
       dispatch(
         getGasDepositApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: false
         })
