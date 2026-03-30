@@ -55,11 +55,11 @@ const initialState = {
 // Get Relationship List (POST)
 export const getRelationshipList = createAsyncThunk(
   "GET_RELATIONSHIP_LIST",
-  async ({ idAccount, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
+  async ({ accountId, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
     try {
       // empty string for default sort
       const sortParam = sort === undefined || sort === "" ? "" : sort;
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships`;
       const requestBody = {
         ...body,
         page,
@@ -83,11 +83,11 @@ export const getRelationshipList = createAsyncThunk(
 
 export const getRelationshipApprovalList = createAsyncThunk(
   "GET_RELATIONSHIP_APPROVAL_LIST",
-  async ({ idAccount, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
+  async ({ accountId, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
     try {
       // empty string for default sort
       const sortParam = sort === undefined || sort === "" ? "" : sort;
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships`;
       const requestBody = {
         ...body,
         page,
@@ -112,9 +112,9 @@ export const getRelationshipApprovalList = createAsyncThunk(
 // Get Relationship Detail
 export const getRelationshipDetail = createAsyncThunk(
   "GET_RELATIONSHIP_DETAIL",
-  async ({ idAccount, idRelationship }, thunkAPI) => {
+  async ({ accountId, idRelationship }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/${idRelationship}`;
       const response = await accountManagementService.getDetail(url);
       return response?.data;
     } catch (error) {
@@ -129,9 +129,9 @@ export const getRelationshipDetail = createAsyncThunk(
 // Get Relationship Detail Draft
 export const getDetailDraftRelationship = createAsyncThunk(
   "GET_DETAIL_DRAFT_RELATIONSHIP",
-  async ({ idAccount, idRelationship }, thunkAPI) => {
+  async ({ accountId, idRelationship }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/detail-draft/${idRelationship}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/detail-draft/${idRelationship}`;
       const response = await accountManagementService.getDetail(url);
       return response?.data;
     } catch (error) {
@@ -143,9 +143,9 @@ export const getDetailDraftRelationship = createAsyncThunk(
 // Get Relationship Type Options
 export const getRelationshipType = createAsyncThunk(
   "GET_RELATIONSHIP_TYPE",
-  async ({ idAccount }, thunkAPI) => {
+  async ({ accountId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/relationship-type`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/relationship-type`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -160,9 +160,9 @@ export const getRelationshipType = createAsyncThunk(
 // Get Relationship Category Options
 export const getRelationshipCategory = createAsyncThunk(
   "GET_RELATIONSHIP_CATEGORY",
-  async ({ idAccount }, thunkAPI) => {
+  async ({ accountId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/relationship-category`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/relationship-category`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -177,9 +177,9 @@ export const getRelationshipCategory = createAsyncThunk(
 // Get Approval Hierarchies
 export const getApprovalHierarchies = createAsyncThunk(
   "GET_APPROVAL_HIERARCHIES",
-  async ({ idAccount }, thunkAPI) => {
+  async ({ accountId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-hierarchies`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -194,9 +194,9 @@ export const getApprovalHierarchies = createAsyncThunk(
 // Get Approval Hierarchy Detail
 export const getApprovalHierarchyDetail = createAsyncThunk(
   "GET_APPROVAL_HIERARCHY_DETAIL",
-  async ({ idAccount, appHierId }, thunkAPI) => {
+  async ({ accountId, appHierId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-hierarchy/${appHierId}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approval-hierarchy/${appHierId}`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -211,9 +211,9 @@ export const getApprovalHierarchyDetail = createAsyncThunk(
 // Get Approval History
 export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY",
-  async ({ idAccount, relationshipId }, thunkAPI) => {
+  async ({ accountId, relationshipId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-history/${relationshipId}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approval-history/${relationshipId}`;
       const response = await accountManagementService.getAll(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -272,9 +272,9 @@ export const getRelationshipOperatorApi = createAsyncThunk(
 // Activate/Inactivate Relationship
 export const activateRelationship = createAsyncThunk(
   "ACTIVATE_RELATIONSHIP",
-  async ({ idAccount, idRelationship, status }, thunkAPI) => {
+  async ({ accountId, idRelationship, status }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}/${status}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/${idRelationship}/${status}`;
       const response = await accountManagementService.updateData(url, {});
       const successMessage = {
         title: "Successful",
@@ -375,10 +375,10 @@ export const inactivateRelationship = createAsyncThunk(
 // Create Relationship
 export const createRelationship = createAsyncThunk(
   "CREATE_RELATIONSHIP",
-  async ({ idAccount, payload, attachments = [] }, thunkAPI) => {
+  async ({ accountId, payload, attachments = [] }, thunkAPI) => {
     try {
       // 1. Create relationship first
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/create`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/create`;
       const response = await accountManagementService.createData(url, payload);
 
       // 2. Get ID from response
@@ -386,7 +386,7 @@ export const createRelationship = createAsyncThunk(
 
       // 3. Upload all attachments with refId
       if (id && attachments.length > 0) {
-        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadUrl = `/v1/dbs/api/accounts/${accountId}/relationships/upload-attachment`;
         const uploadPromises = attachments.map((attachment) =>
           accountManagementService.uploadAttachment(uploadUrl, {
             files: attachment.file,
@@ -423,15 +423,15 @@ export const createRelationship = createAsyncThunk(
 // Update Relationship
 export const updateRelationship = createAsyncThunk(
   "UPDATE_RELATIONSHIP",
-  async ({ idAccount, idRelationship, payload, attachments = [] }, thunkAPI) => {
+  async ({ accountId, idRelationship, payload, attachments = [] }, thunkAPI) => {
     try {
       // 1. Update relationship first
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/${idRelationship}`;
       const response = await accountManagementService.updateData(url, payload);
 
       // 2. Upload new attachments only (filter out existing ones)
       if (attachments.length > 0) {
-        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadUrl = `/v1/dbs/api/accounts/${accountId}/relationships/upload-attachment`;
         const uploadPromises = attachments.map((attachment) =>
           accountManagementService.uploadAttachment(uploadUrl, {
             files: attachment.file,
@@ -468,9 +468,9 @@ export const updateRelationship = createAsyncThunk(
 // Get Attachment Category
 export const getAttachmentCategory = createAsyncThunk(
   "GET_ATTACHMENT_CATEGORY",
-  async ({ idAccount }, thunkAPI) => {
+  async ({ accountId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/attachment-category`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/attachment-category`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -485,9 +485,9 @@ export const getAttachmentCategory = createAsyncThunk(
 // Upload Attachment
 export const uploadAttachment = createAsyncThunk(
   "UPLOAD_ATTACHMENT",
-  async ({ idAccount, payload }, thunkAPI) => {
+  async ({ accountId, payload }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/upload-attachment`;
       const response = await accountManagementService.uploadAttachment(
         url,
         payload
@@ -513,9 +513,9 @@ export const uploadAttachment = createAsyncThunk(
 // Get Attachment List
 export const getAttachmentList = createAsyncThunk(
   "GET_ATTACHMENT_LIST",
-  async ({ idAccount, idRelationship }, thunkAPI) => {
+  async ({ accountId, idRelationship }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/list-attachment/${idRelationship}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/list-attachment/${idRelationship}`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -530,10 +530,10 @@ export const getAttachmentList = createAsyncThunk(
 // Download Attachment
 export const downloadAttachment = createAsyncThunk(
   "DOWNLOAD_ATTACHMENT",
-  async ({ idAccount, idFile, urlFile1, fileName }, thunkAPI) => {
+  async ({ accountId, idFile, urlFile1, fileName }, thunkAPI) => {
     try {
       // craft url if urlFile1 is not provided, else use urlFile1
-      const url = urlFile1 || `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
+      const url = urlFile1 || `/v1/dbs/api/accounts/${accountId}/relationships/download-attachment/${idFile}`;
       const response = await accountManagementService.downloadData(url);
       return response;
     } catch (error) {
@@ -583,7 +583,7 @@ export const getAllAccounts = createAsyncThunk(
 // Get Related Object Data (Customer or Account based on relationship type)
 export const getRelatedObjectData = createAsyncThunk(
   "GET_RELATED_OBJECT_DATA",
-  async ({ idAccount, page, size, relationshipType, relationshipCategory, sort, searchs, isLoadMore }, thunkAPI) => {
+  async ({ accountId, page, size, relationshipType, relationshipCategory, sort, searchs, isLoadMore }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams();
 
@@ -602,7 +602,7 @@ export const getRelatedObjectData = createAsyncThunk(
         : "";
       if (categoryParam) queryParams.append("relationshipCategory", categoryParam);
 
-      let url = `/v1/dbs/api/accounts/${idAccount}/relationships/related-object-data`;
+      let url = `/v1/dbs/api/accounts/${accountId}/relationships/related-object-data`;
       if (queryParams.toString().length) url += `?${queryParams.toString()}`;
 
       const response = await accountManagementService.getPagination(url);
@@ -622,9 +622,9 @@ export const getRelatedObjectData = createAsyncThunk(
 // Approve or Reject Relationship
 export const approveOrRejectRelationship = createAsyncThunk(
   "APPROVE_OR_REJECT_RELATIONSHIP",
-  async ({ idAccount, body, action }, thunkAPI) => {
+  async ({ accountId, body, action }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approve`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approve`;
       const response = await accountManagementService.activationWithRemark(url, body, {
         headers: {
           "Accept": "application/json"
@@ -664,9 +664,9 @@ export const approveOrRejectRelationship = createAsyncThunk(
 // Approve or Reject Inactive Relationship
 export const approveOrRejectInactiveRelationship = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_RELATIONSHIP",
-  async ({ idAccount, body, action }, thunkAPI) => {
+  async ({ accountId, body, action }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approve-inactive`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approve-inactive`;
       const response = await accountManagementService.activationWithRemark(url, body, {
         headers: {
           "Accept": "application/json"
@@ -706,9 +706,9 @@ export const approveOrRejectInactiveRelationship = createAsyncThunk(
 // Download Relationship to Excel
 export const downloadRelationship = createAsyncThunk(
   "DOWNLOAD_RELATIONSHIP",
-  async ({ idAccount, body }, thunkAPI) => {
+  async ({ accountId, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/export-excel`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/export-excel`;
       const response = await accountManagementService.downloadDataAdvanced(url, body);
       return response;
     } catch (error) {

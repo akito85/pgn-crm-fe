@@ -97,7 +97,7 @@ const Relationship = ({
    */
   const handleApprovalHistoryModal = (show, relationshipId = 0) => {
     if (show) {
-      dispatch(getApprovalHistory({ idAccount: accountId, relationshipId }));
+      dispatch(getApprovalHistory({ accountId, relationshipId }));
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
