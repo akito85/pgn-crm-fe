@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
-import { Dropdown, Spin } from "antd";
+import { Dropdown } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTableNested from "../../../../components/Nx/NxTableNested";
@@ -18,9 +18,9 @@ import {
   getJobGroupManagementColumns,
   getJobGroupChildTableColumns,
 } from "../jobGroupManagementColumns";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import { useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
+import { configApp } from "../../../../constants/configApp";
 
 const PAGE_SIZE = 20;
 
@@ -73,6 +73,11 @@ const JobGroupPage = () => {
 
   // Redux state
   const { data, loading, jobsByGroupId } = useSelector((state) => state.jobGroup);
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try { const t = JSON.parse(rawToken || "{}"); return t?.userId || t?.id || t?.username || null; }
+    catch { return null; }
+  }, [rawToken]);
 
   // Access group id→name map (shared with child columns)
   const { data: accessGroupsRaw } = useGetAccessGroupsQuery();
@@ -85,7 +90,6 @@ const JobGroupPage = () => {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("");
   const [accumulatedData, setAccumulatedData] = useState([]);
-  const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState(null);
@@ -166,17 +170,6 @@ const JobGroupPage = () => {
     },
     [dispatch, jobsByGroupId]
   );
-
-  // Column width configuration for child table (use the 'key' property from column definitions)
-  // These override the default widths from column definitions for child table only
-  const tableColumnWidths = useMemo(() => ({
-    parameter: 800,    // PARAMETER column (dataIndex: parameters, key: parameter)
-    type: 120,         // TYPE column (matches original)
-    execType: 220,     // EXEC TYPE column
-    timeout: 100,      // TIMEOUT column (matches original)
-    maxRetry: 100,     // MAX RETRY column (matches original)
-    handlerClass: 330, // HANDLER CLASS column (increased)
-  }), []);
 
   // Get child columns for nested table (exclude desc and audit columns)
   const childColumns = useMemo(() => {
@@ -277,25 +270,13 @@ const JobGroupPage = () => {
     };
   }, [navigate, canUpdate, canDelete, canView]);
 
-  // Column definitions (actionColumn is null when user has no permissions)
-  const baseColumns = useMemo(
-    () => [...getJobGroupManagementColumns(), ...(actionColumn ? [actionColumn] : [])],
-    [actionColumn]
-  );
-
-  const allColumns = useMemo(
-    () => baseColumns.map((col) => ({ ...col, key: col.key || col.dataIndex || col.title })),
-    [baseColumns]
-  );
-
-  const processedColumns = useMemo(
-    () => nxApplyFixedColumns(allColumns, fixedColumns),
-    [allColumns, fixedColumns]
-  );
-
-  const columnDefinitions = useMemo(
-    () => allColumns.map((col) => ({ key: col.key || col.dataIndex || col.title, title: col.title })),
-    [allColumns]
+  // Parent column definitions (memoized — stable reference, not re-created on every render)
+  const parentColumns = useMemo(
+    () => getJobGroupManagementColumns(accessGroupsMap).map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    })),
+    [accessGroupsMap]
   );
 
   // Pagination & sorting
@@ -342,9 +323,29 @@ const JobGroupPage = () => {
     setGroupToDelete(null);
   };
 
-  const downloadListHandler = () => {
-    // TODO: Implement download functionality
-    console.log("Download List clicked");
+  const downloadListHandler = async () => {
+    try {
+      const token = JSON.parse(
+        localStorage.getItem("token") || sessionStorage.getItem("token") || "{}"
+      );
+      const response = await fetch(
+        `${configApp.JOB_SERVICE}/v1/api/job-group/download`,
+        {
+          method: "GET",
+          headers: { Authorization: token?.accessToken },
+        }
+      );
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "job-groups.csv";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
   };
 
   const createHandler = () => {
@@ -369,6 +370,7 @@ const JobGroupPage = () => {
         header="JOB GROUP LIST"
         actionElement={
           <div className="flex gap-2">
+            {/*
             <ButtonComponent
               type="primary"
               icon={<DownloadOutlined />}
@@ -378,6 +380,8 @@ const JobGroupPage = () => {
             >
               <span className="text-xs font-medium tracking-tight">Download List</span>
             </ButtonComponent>
+            */}
+
             <ButtonComponent
               type="primary"
               icon={<PlusOutlined />}
@@ -390,18 +394,23 @@ const JobGroupPage = () => {
           </div>
         }
       >
-        <div style={{ maxHeight: "600px", overflowY: "auto", width: "100%" }}>
-          <NxTableNested
-            parentColumns={getJobGroupManagementColumns()}
-            childColumns={childColumns}
-            dataSource={tableDataWithJobs}
-            loading={loading}
-            onExpand={handleExpandRow}
-            actionColumn={actionColumn}
-            loadingKeys={loadingKeys}
-            columnWidths={tableColumnWidths}
-          />
-        </div>
+        <NxTableNested
+          idTable="job-group-list"
+          userId={userId}
+          parentColumns={parentColumns}
+          childColumns={childColumns}
+          dataSource={tableDataWithJobs}
+          loading={loading}
+          onExpand={handleExpandRow}
+          actionColumn={actionColumn}
+          loadingKeys={loadingKeys}
+          // showRefresh
+          // onRefresh={handleRefresh}
+          useInfiniteScroll
+          onLoadMore={handleLoadMore}
+          hasMore={hasMore}
+          showExport={true}
+        />
       </NxCardContainer>
 
       {/* Delete Confirmation Modal */}

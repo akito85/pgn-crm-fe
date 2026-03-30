@@ -2,7 +2,6 @@ import { Checkbox, Tooltip } from "antd";
 import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
@@ -617,7 +616,7 @@ const ViewCaCiMapping = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <CardContainer
         header={
@@ -676,7 +675,7 @@ const ViewCaCiMapping = () => {
         onFinish={handleSubmitModalInactivate}
       />
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

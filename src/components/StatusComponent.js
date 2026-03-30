@@ -125,6 +125,7 @@ const StatusComponent = ({
       case "waiting cancellation approval":
       case "waiting_upload_approval":
       case "waiting upload approval":
+      case "partially paid": // recipt allocation
         bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
