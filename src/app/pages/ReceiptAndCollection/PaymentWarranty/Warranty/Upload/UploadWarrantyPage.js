@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Form, Spin, Modal, message } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import CardContainer from "../../../../../../components/CardContainer";
@@ -91,7 +90,7 @@ const UploadWarrantyPage = () => {
   const isNoValidData = uploadedData && uploadedData.totalValid === 0;
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingCreate}>
         <Form form={form} layout="vertical">
@@ -138,7 +137,7 @@ const UploadWarrantyPage = () => {
           />
         </Form>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 
