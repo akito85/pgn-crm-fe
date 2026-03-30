@@ -41,7 +41,6 @@ const CreateUpdateRelationship = ({
   const containerRef = useRef(null);
   const id = location?.state?.id;
 
-  //modal
   const accountId = location?.state?.idAccount;
   const customerId = location?.state?.idCustomer;
 
@@ -91,12 +90,11 @@ const CreateUpdateRelationship = ({
     ? detailDraft_relationshipDetail
     : data_relationshipDetail;
 
-  // State Management
+  //state
   const [current, setCurrent] = useState(0);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
 
-  // Relationship Data States
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
   const [relatedDetails, setRelatedDetails] = useState([]);
@@ -115,14 +113,12 @@ const CreateUpdateRelationship = ({
     }
   }, [formType, id]);
 
-  // Populate form when detail data AND approval hierarchy list are loaded (update mode)
   useEffect(() => {
     if (
       isUpdate &&
       detail?.appHierId &&
       data_approvalHierarchies?.length
     ) {
-      // Set form values
       form.setFieldsValue({
         relationshipType: detail.relationshipType,
         relationshipCategory: detail.relationshipCategory,
@@ -132,7 +128,6 @@ const CreateUpdateRelationship = ({
         appHierId: detail.appHierId,
       });
 
-      // Find matching approval option and load hierarchy detail
       const appHierOption = data_approvalHierarchies.find(
         (option) => option.appHierId === detail.appHierId
       );
@@ -140,7 +135,6 @@ const CreateUpdateRelationship = ({
       if (appHierOption)
         form.setFieldValue("appHierName", appHierOption.approvalName);
 
-      // Find matching relationship type option
       const relationshipTypeOption = data_relationshipType.find(
         (option) => option.id === detail.relationshipType
       );
@@ -148,7 +142,6 @@ const CreateUpdateRelationship = ({
       if (relationshipTypeOption)
         form.setFieldValue("relationshipTypeName", relationshipTypeOption.text);
 
-      // Find matching relationship category option
       const relationshipCategoryOption = data_relationshipCategory.find(
         (option) => option.id === detail.relationshipCategory
       );
@@ -156,7 +149,6 @@ const CreateUpdateRelationship = ({
       if (relationshipCategoryOption)
         form.setFieldValue("relationshipCategoryName", relationshipCategoryOption.text);
 
-      // Populate Related Detail data for update mode
       if (detail.relatedDetail && detail.relatedDetail.length > 0)
         setRelatedDetails(detail.relatedDetail);
     }
@@ -251,6 +243,10 @@ const CreateUpdateRelationship = ({
         .catch(() => {});
   };
 
+  /**
+   * @param {boolean} show
+   * @param {"draft" | "submit"} submitType
+   */
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
@@ -406,7 +402,6 @@ const CreateUpdateRelationship = ({
     []
   ];
 
-  // Navigation handlers
   const next = async () => {
     try {
       if (current === 2) {
@@ -486,9 +481,7 @@ const CreateUpdateRelationship = ({
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      // Update mode - restore to original API data
       if (data_relationshipDetail && data_relationshipDetail.id) {
-        // Restore form values to original
         form.setFieldsValue({
           relationshipType: detail.relationshipType,
           relationshipCategory: detail.relationshipCategory,
@@ -501,14 +494,12 @@ const CreateUpdateRelationship = ({
           appHierName: detail.appHierName,
         });
 
-        // Restore approval hierarchy detail
         const appHierOption = data_approvalHierarchies.find(
           (option) => option.appHierId === detail.appHierId
         );
         if (appHierOption)
           handleSelectHierarchy(detail.appHierId, appHierOption.approvalName);
 
-        // Restore Related Detail data
         if (detail.relatedDetail && detail.relatedDetail.length > 0) {
           setRelatedDetails(detail.relatedDetail);
         } else {
@@ -516,7 +507,6 @@ const CreateUpdateRelationship = ({
         }
       }
 
-      // Restore attachment list to original API data
       if (data_attachmentList && data_attachmentList.length > 0) {
         const mapped = data_attachmentList.map((item) => ({
           key: item.id,
@@ -539,7 +529,6 @@ const CreateUpdateRelationship = ({
 
       setDeletedAttachments([]);
 
-      // Reset to first step
       setCurrent(0);
     }
   };
@@ -549,7 +538,6 @@ const CreateUpdateRelationship = ({
     scrollRightHandler();
   };
 
-  // Steps Configuration
   const steps = [
     {
       title: "Relationship Information",
@@ -639,7 +627,7 @@ const CreateUpdateRelationship = ({
               scrollToFirstError={true}
               className="flex flex-col gap-y-4"
             >
-              {/* Steps Content */}
+              {/* Step Contents */}
               <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={handleButtonNext} />
 
               {steps.map((step, stepIndex) =>
