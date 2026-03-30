@@ -293,9 +293,10 @@ const AccountDetailPage = () => {
         render: (text, record) => (
           <div className="flex w-full justify-center gap-6">
             <Tooltip title="Detail">
-              <div className="pt-1 cursor-pointer">
+              <div className="pt-0 cursor-pointer">
                 <SVGIcon
                   name="IconDetail"
+                  color="#0075BF"
                   width={20}
                   onClick={() => handleViewSaDetail(record)}
                 />

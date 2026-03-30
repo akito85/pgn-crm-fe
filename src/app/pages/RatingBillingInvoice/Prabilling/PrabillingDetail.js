@@ -321,14 +321,14 @@ const PrabillingDetail = () => {
         key: "action",
         title: "ACTION",
         width: 60,
-        fixed: "right",
+        align: "center",
         render: (text, record) => (
           <Tooltip title="View Account Detail">
             <div
               onClick={() => handleViewDetail(record)}
-              style={{ cursor: "pointer", display: "inline-block" }}
+              style={{ cursor: "pointer", display: "flex", justifyContent: "center" }}
             >
-              <SVGIcon name="IconDetail" width={20} />
+              <SVGIcon name="IconDetail" color="#0075BF" width={20} />
             </div>
           </Tooltip>
         ),
