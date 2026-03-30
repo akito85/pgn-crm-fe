@@ -18,6 +18,7 @@ import {
   useUpdateJobGroupMutation,
 } from "../../../../redux/slices/job_management/jobGroupApiSlice";
 import { getAllGroupAccessPaginate } from "../../../../redux/slices/system_setup/group_access";
+import { getJobsByGroupId } from "../../../../redux/slices/job_management/jobGroupSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchJobsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 const { Option } = Select;
@@ -100,6 +101,7 @@ const CreateJobGroupPage = () => {
 
   // State for selected jobs
   const [selectedJobs, setSelectedJobs] = useState([]);
+  const hasPopulatedJobs = React.useRef(false);
 
   // State for job selection modal
   const [modalVisible, setModalVisible] = useState(false);
@@ -136,8 +138,15 @@ const CreateJobGroupPage = () => {
 
   // Function to add a single job to the table
   const handleAddJobToTable = (job) => {
+    const jobId = job.id || job.jobId;
+    // Prevent duplicate selection
+    if (selectedJobs.some((j) => j.jobId === jobId)) {
+      message.warning("Job already selected");
+      return;
+    }
     const newJob = {
       key: Date.now() + Math.random(),
+      jobId: jobId,
       name: job.name || job.jobName,
       code: job.code || job.jobCode,
       type: job.type || job.jobType,
@@ -149,14 +158,17 @@ const CreateJobGroupPage = () => {
 
   // Function to add selected jobs from modal to the table
   const handleAddSelectedJobs = (jobsToAdd) => {
-    const newJobs = jobsToAdd.map(job => ({
-      key: Date.now() + Math.random(),
-      name: job.name,
-      code: job.code,
-      type: job.type,
-      execType: job.executeType || job.execType,
-      handlerClass: job.handler || job.handlerClass
-    }));
+    const newJobs = jobsToAdd
+      .filter((job) => !selectedJobs.some((j) => j.jobId === (job.id || job.jobId)))
+      .map(job => ({
+        key: Date.now() + Math.random(),
+        jobId: job.id || job.jobId,
+        name: job.name,
+        code: job.code,
+        type: job.type,
+        execType: job.executeType || job.execType,
+        handlerClass: job.handler || job.handlerClass,
+      }));
 
     setSelectedJobs(prev => [...prev, ...newJobs]);
     handleCloseModal();
@@ -176,6 +188,8 @@ const CreateJobGroupPage = () => {
     { path: "",                                             breadcrumbName: isEditMode ? "Update" : "Create" },
   ];
 
+  const jobsByGroupId = useSelector((state) => state.jobGroup.jobsByGroupId);
+
   // Populate form in edit mode
   useEffect(() => {
     if (!isEditMode || !currentGroup) return;
@@ -185,7 +199,29 @@ const CreateJobGroupPage = () => {
       description: currentGroup.description,
       accessGroupId: currentGroup.accessGroupId,
     });
-  }, [currentGroup, isEditMode, form]);
+    // Fetch associated jobs for this group
+    dispatch(getJobsByGroupId({ groupId: id, page: 0, pageSize: 200 }));
+  }, [currentGroup, isEditMode, form, dispatch, id]);
+
+  // Populate selectedJobs when group's jobs are loaded (edit mode) — once only
+  useEffect(() => {
+    if (!isEditMode || !id || hasPopulatedJobs.current) return;
+    const cached = jobsByGroupId[id];
+    if (cached && cached.data && cached.data.length > 0) {
+      hasPopulatedJobs.current = true;
+      setSelectedJobs(
+        cached.data.map((job) => ({
+          key: Date.now() + Math.random(),
+          jobId: job.id,
+          name: job.name,
+          code: job.code,
+          type: job.type,
+          execType: job.execType,
+          handlerClass: job.handlerClass,
+        }))
+      );
+    }
+  }, [jobsByGroupId, id, isEditMode]);
 
   // Fetch group access data
   useEffect(() => {
@@ -193,11 +229,16 @@ const CreateJobGroupPage = () => {
   }, [dispatch]);
 
   const onFinish = async (values) => {
+    const jobIds = selectedJobs
+      .map((j) => j.jobId)
+      .filter(Boolean);
+
     const payload = {
       name:        values.name,
       code:        values.code.toUpperCase(),
       description: values.description,
       accessGroupId: values.accessGroupId,
+      jobIds,
     };
 
     try {
