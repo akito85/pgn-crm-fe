@@ -21,6 +21,8 @@ const initialState = {
   data_attachments: [],
   data_contacts: [],
   loading_contacts: false,
+  data_attachments: [],
+  loading_attachments: false,
   // Dropdowns
   data_types: [],
   data_categories: [],
@@ -617,6 +619,20 @@ export const deletePrerequisiteForServiceRequest = createAsyncThunk(
 // CONTACTS
 // =====================================================
 
+// Get Attachments by Service Request
+export const getAttachmentsByServiceRequest = createAsyncThunk(
+  "GET_ATTACHMENTS_BY_SERVICE_REQUEST",
+  async ({ accountId, srId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/attachments`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Get Contacts by Service Request
 export const getContactsByServiceRequest = createAsyncThunk(
   "GET_CONTACTS_BY_SERVICE_REQUEST",
@@ -1152,6 +1168,21 @@ const serviceRequestSlice = createSlice({
     [createPrerequisiteForServiceRequest.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
+    },
+
+    // =====================================================
+    // ATTACHMENTS
+    // =====================================================
+    [getAttachmentsByServiceRequest.pending]: (state) => {
+      state.loading_attachments = true;
+    },
+    [getAttachmentsByServiceRequest.fulfilled]: (state, action) => {
+      state.loading_attachments = false;
+      const raw = action.payload;
+      state.data_attachments = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+    },
+    [getAttachmentsByServiceRequest.rejected]: (state) => {
+      state.loading_attachments = false;
     },
 
     // =====================================================
