@@ -6,7 +6,6 @@ import RelationshipDetailTabs from "./RelationshipDetailTabs";
 import { getCustomerDetail } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import {
-  getAccountStandardDetail,
   getGrantedAccessAccount,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 import {
@@ -25,27 +24,41 @@ import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApprove
 import HeaderDetail from "../../../HeaderDetail";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
+/**
+ * Relationship detail view (container + presentational component).
+ * Fetches original and draft records, supports approve/reject workflow.
+ *
+ * @param {object}                    props
+ * @param {"standard"|"oneTime"}      [props.accountType="standard"] - Account type context.
+ */
 const RelationshipDetail = ({ accountType = "standard" }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
 
-  const { data_relationshipDetail, detailDraft_relationshipDetail, loading_detailRelationship } = useSelector(
-    (state) => state.relationship
-  );
+  const {
+    data_relationshipDetail,
+    detailDraft_relationshipDetail,
+    loading_detailRelationship,
+    loading_detailDraftRelationship,
+    loading_approveRejectRelationship,
+    data_attachmentList,
+  } = useSelector((state) => state.relationship);
 
   const { loading: loadingCustomer, loadingAccount } = useSelector(
     (state) => state.customerAccount
   );
 
-  const isLoading = loading_detailRelationship || loadingCustomer || loadingAccount;
+  const isLoading = loading_detailRelationship || loading_detailDraftRelationship || loadingCustomer || loadingAccount;
 
-  // declare
   const navigate = useNavigate();
   const location = useLocation();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idRelationship = location?.state?.idRelationship || location?.state?.id;
 
+  // --- State ---
   const tabOptions = [
     { key: "ori", label: "Original" },
     { key: "cur", label: "Current" },
@@ -54,15 +67,16 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   const [activeKey, setActiveKey] = useState(originalKey || "");
   const detail = (activeKey === originalKey ? data_relationshipDetail : detailDraft_relationshipDetail) || {};
 
-  const handleSetActiveKey = (newActiveKey) => setActiveKey(newActiveKey);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [approveOrReject, setApproveOrReject] = useState("");
 
+  // --- Derived values ---
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
+  const { status, statusApproval } = data_relationshipDetail;
   const {
     id,
-    status,
-    statusApproval,
     approvalType,
     subjectName,
     objectName,
@@ -75,9 +89,6 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["ACCOUNT_RELATIONSHIP", "INACTIVE_ACCOUNT_RELATIONSHIP"].includes(approvalType);
-
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [approveOrReject, setApproveOrReject] = useState("");
 
   const routes = [
     {
@@ -106,6 +117,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
           ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
           "",
       breadcrumbName: "Detail Account",
+      state: { idAccount: accountId, idCustomer: customerId },
     },
     {
       path: "",
@@ -113,9 +125,11 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
     },
   ];
 
+  // --- Handlers ---
   /**
-   * @param {boolean} show
-   * @param {"approve"|"reject"} action
+   * Opens or closes the approval/rejection modal.
+   * @param {boolean}            show     - true to open, false to close
+   * @param {"approve"|"reject"} [action] - Which action to arm
    */
   const handleApprovalModal = (show, action) => {
     if (show) {
@@ -128,7 +142,10 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   };
 
   /**
+   * Dispatches approve or reject for the current relationship record.
+   * @param {string}             description - Remark entered in the approval form
    * @param {"approve"|"reject"} action
+   * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
     const { id, approvalType, tappId } = data_relationshipDetail;
@@ -144,70 +161,51 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
     if (approvalType === "ACCOUNT_RELATIONSHIP") {
       dispatch(
         approveOrRejectRelationship({
-          idAccount,
+          accountId,
           body,
           action: action.toUpperCase(),
         })
       )
         .unwrap()
-        .then(() => {
-          dispatch(getRelationshipDetail({ idAccount, idRelationship }));
-          dispatch(getDetailDraftRelationship({ idAccount, idRelationship }));
-          handleClear();
-          handleApprovalModal(false);
-        })
+        .then(() => navigate(-1))
         .catch(() => {});
     } else if (approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP") {
       dispatch(
         approveOrRejectInactiveRelationship({
-          idAccount,
+          accountId,
           body,
           action: action.toUpperCase(),
         })
       )
         .unwrap()
-        .then(() => {
-          dispatch(getRelationshipDetail({ idAccount, idRelationship }));
-          dispatch(getDetailDraftRelationship({ idAccount, idRelationship }));
-          handleClear();
-          handleApprovalModal(false);
-        })
+        .then(() => navigate(-1))
         .catch(() => {});
     } else {
-      const errorBody = {
+      dispatch(showModalError({
         title: "Failed",
-        description: `The approval type is invalid.`,
-      };
-
-      dispatch(showModalError(errorBody));
+        description: "The approval type is invalid.",
+      }));
     }
   };
 
+  // --- Effects ---
   useEffect(() => {
-    dispatch(
-      getGrantedAccessAccount(
-        "/account-management/customers/view/service-requests/details"
-      )
-    );
-  }, [dispatch]);
+    if (isStandard)
+      dispatch(getGrantedAccessAccount('/account-management/account-standard/relationship'));
+    else if (isOneTime)
+      dispatch(getGrantedAccessAccount('/account-management/account-onetime/relationship'));
+  }, []);
 
   useEffect(() => {
-    if (idCustomer) dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
-
-  useEffect(() => {
-    if (idAccount && idCustomer) {
-      dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
+    if (accountId && idRelationship) {
+      dispatch(getRelationshipDetail({ accountId, idRelationship }));
     }
-  }, [idAccount, idCustomer]);
+  }, [accountId, idRelationship]);
 
   useEffect(() => {
-    if (idAccount && idRelationship) {
-      dispatch(getRelationshipDetail({ idAccount, idRelationship }));
-      dispatch(getDetailDraftRelationship({ idAccount, idRelationship }));
-      dispatch(getAttachmentList({ idAccount, idRelationship }));
-    }
-  }, [idAccount, idRelationship]);
+    if (accountId && idRelationship && draftExist)
+      dispatch(getDetailDraftRelationship({ accountId, idRelationship }));
+  }, [accountId, idRelationship, draftExist]);
 
   return (
     <>
@@ -217,8 +215,8 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
 
@@ -227,15 +225,13 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
               <NxTabs
                 items={tabOptions}
                 activeKey={activeKey}
-                onChange={handleSetActiveKey}
+                onChange={setActiveKey}
               />
             </NxBaseContainer>
           )}
 
           <RelationshipDetailTabs
-            dataDetail={detail}
-            dispatch={dispatch}
-            idAccount={idAccount}
+            detail={detail}
             idRelationship={idRelationship}
           />
 
@@ -254,18 +250,20 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
           {isApproval && (
             <NxBaseContainer border>
               <div className="flex justify-between">
-                <Button type={"menu"} onClick={() => navigate(-1)}>
-                  Cancel
-                </Button>
+                <Button type={"menu"} onClick={() => navigate(-1)}>Cancel</Button>
                 <div className={"w-full flex justify-end gap-5"}>
                   <Button
                     type="reject"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "reject")}
                   >
                     Reject
                   </Button>
                   <Button
                     type="approve"
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
                     onClick={() => handleApprovalModal(true, "approve")}
                   >
                     Approve
@@ -294,6 +292,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
         onFinish={({ remark }, handleClear) =>
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }
+        loading={loading_approveRejectRelationship}
       />
     </>
   );

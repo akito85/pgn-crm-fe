@@ -5,25 +5,22 @@ import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer"
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 
 const RelationshipDetailTabs = ({
-  idAccount = 0,
-  idRelationship = 0,
-  dataDetail = {},
-  dispatch = () => {},
+  detail = {},
 }) => {
+  const { attachments } = detail;
+
   const tabOptions = [
     {
       key: "info",
       label: "Relationship Information",
-      children: <RelationshipDetailInfo dataDetail={dataDetail} />,
+      children: <RelationshipDetailInfo detail={detail} />,
     },
     {
       key: "attch",
       label: "Attachment",
       children: (
         <RelationshipDetailAttch
-          idAccount={idAccount}
-          idRelationship={idRelationship}
-          dispatch={dispatch}
+          attachments={attachments}
         />
       ),
     },
