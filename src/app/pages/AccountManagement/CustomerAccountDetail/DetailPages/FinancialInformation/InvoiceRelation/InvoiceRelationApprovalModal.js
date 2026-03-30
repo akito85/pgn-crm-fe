@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
@@ -14,15 +14,16 @@ import { showModalError } from "../../../../../../../redux/slices/general_slice"
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../../components/Nx/NxModal";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 /**
  * Modal for approving or rejecting pending invoice relation records.
  * Displays a two-step wizard: select records + enter remark, then confirm.
- * @param {{ id?: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @param {{ accountId: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
  * @returns
  */
 const InvoiceRelationApprovalModal = ({
-  id = 0,
+  accountId,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {}
@@ -77,7 +78,7 @@ const InvoiceRelationApprovalModal = ({
 
       dispatch(
         getInvoiceRelationApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: false
         })
@@ -130,7 +131,7 @@ const InvoiceRelationApprovalModal = ({
 
       dispatch(
         getInvoiceRelationApproval({
-          id,
+          id: accountId,
           body,
           isLoadMore: true
         })
@@ -283,7 +284,7 @@ const InvoiceRelationApprovalModal = ({
         approveOrRejectAllInvoiceRelation({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected"
+          action,
         })
       )
         .unwrap()
@@ -354,6 +355,8 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
                     disabled={!loading_rejectIr && loadingApproval}
                     loading={loading_rejectIr}
                   >
@@ -362,6 +365,8 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
                     disabled={!loading_approveIr && loadingApproval}
                     loading={loading_approveIr}
                   >

@@ -4,7 +4,7 @@ import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import NxTable from "../../../../components/Nx/NxTable";
+import NxTableBase from "../../../../components/Nx/NxTableBase";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
@@ -115,9 +115,9 @@ const ViewJobPage = () => {
           {!job.parameters?.length ? (
             <p style={{ color: "#999", fontSize: 13, padding: "8px 0" }}>No parameters defined.</p>
           ) : (
-            <NxTable
+            <NxTableBase
               idTable="jobParametersTable"
-              dataSource={job.parameters}
+              dataSource={job.parameters || []}
               columns={[
                 {
                   title: "Name",
@@ -145,13 +145,8 @@ const ViewJobPage = () => {
                   key: "description",
                 },
               ]}
-              usePagination={false}
-              showSearchBar={false}
-              showAdvanceSearch={false}
-              useSelect={false}
               loading={false}
-              rowKey="key"
-              tableScrolled={job.parameters && job.parameters.length > 10 ? { y: 380 } : {}}
+              scroll={job.parameters && job.parameters.length > 10 ? { y: 380 } : {}}
             />
           )}
         </NxBaseContainer>

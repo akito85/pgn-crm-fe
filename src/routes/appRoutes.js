@@ -4,6 +4,7 @@ import { index } from "./routes";
 import { motion } from "framer-motion";
 import { PrevLocProvider } from "../utils/usePrevLoc";
 import AccountPromo from "../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/AccountPromo";
+import SuspenseComponent from '../components/SuspenseComponent';
 
 const NotFound = lazy(() => import('../app/NotFound'));
 const LogIn = lazy(() => import('../app/pages/Authentication/LogIn'));
@@ -18,7 +19,6 @@ const SelectionPage = lazy(() => import('../app/pages/Authentication/SelectionPa
 const ChoosePositionRoute = lazy(() => import('../components/ChoosePositionRoute'));
 const ChooseEntityRoute = lazy(() => import('../components/ChooseEntityRoute'));
 const VerifyPage = lazy(() => import('../app/pages/Authentication/VerifyPage'));
-const SuspenseComponent = lazy(() => import('../components/SuspenseComponent'))
 const SwitchPage = lazy(() => import('../app/pages/Authentication/SwitchPage'));
 const PageLayout = ({ children }) => children;
 const pageVariants = {

@@ -51,6 +51,7 @@ const getDetailAttachmentColumns = (
     ),
   },
   {
+    key: "fileName",
     title: "FILE NAME",
     dataIndex: "fileName",
     width: 300,
@@ -67,6 +68,7 @@ const getDetailAttachmentColumns = (
     ),
   },
   {
+    key: "fileSize",
     title: "FILE SIZE",
     dataIndex: "fileSize",
     width: 100,
