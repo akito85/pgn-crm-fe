@@ -77,7 +77,7 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
   const [modalDeleteDraft, setModalDeleteDraft] = useState(false);
 
   // Modal Approval History
-  const [openModalHistory, setOpenModalHistory] = useState(false);
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
   // modal approval
@@ -276,9 +276,14 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
   };
 
   // Approval History
-  const handleApprovalHistory = (recordId) => {
-    dispatch(getApprovalHistory(recordId));
-    setOpenModalHistory(true);
+  const handleApprovalHistoryModal = (show, recordId = 0) => {
+    if (show) {
+      dispatch(getApprovalHistory(recordId));
+      setShowApprovalHistoryModal(true);
+      return;
+    }
+
+    setShowApprovalHistoryModal(false);
   };
 
   // Inactivate handlers
@@ -377,7 +382,9 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
               onSort={onSort}
               handleOpenDeleteDraft={handleOpenDeleteDraft}
               handleOpenInactivate={handleOpenInactivate}
-              handleApprovalHistory={handleApprovalHistory}
+              handleApprovalHistory={(recordId) =>
+                handleApprovalHistoryModal(true, recordId)
+              }
               handleLoadMore={handleLoadMore}
               hasMore={hasMore}
               searchText={searchText}
@@ -414,8 +421,8 @@ const ServiceAgreement = ({ idAccount, idCustomer, type }) => {
 
       {/* Modal Approval History */}
       <NxHistoryModal
-        isOpen={openModalHistory && dataApprovalHistoryFix}
-        handleClose={() => setOpenModalHistory(false)}
+        isOpen={showApprovalHistoryModal}
+        handleClose={() => handleApprovalHistoryModal(false)}
         header="Approval History"
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}

@@ -6,7 +6,7 @@ import { columnsPromo } from "./Table/TablePromo";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const PromoSection = ({ ratingCode, calculationCode }) => {
-  const { data_promoSA, loading } = useSelector((state) => state.rating);
+  const { data_promoSA, loadingPromo } = useSelector((state) => state.rating);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -134,7 +134,7 @@ const PromoSection = ({ ratingCode, calculationCode }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingPromo}
         />
       </div>
     </>

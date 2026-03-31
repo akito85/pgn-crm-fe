@@ -643,19 +643,6 @@ export const getActionColumn = ({
       render: (record) => {
         const menuItems = [
           {
-            key: "detail",
-            label: (
-              <Link
-                to={INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}
-                state={{ id: record.efakturId }}
-                style={{ color: "inherit", textDecoration: "none" }}
-              >
-                Detail
-              </Link>
-            ),
-            icon: <SVGIcon name="IconDetail" width={16} />,
-          },
-          {
             key: "approval-history",
             label: "Approval History",
             icon: <SVGIcon name="IconLogHistory" width={16} color="#0075bf" />,
@@ -693,9 +680,28 @@ export const getActionColumn = ({
               placement="bottomRight"
             >
               <div className="cursor-pointer">
-                <EllipsisOutlined style={{ fontSize: 20, color: "#595959" }} />
+                <MoreOutlined style={{ fontSize: 20, color: "#595959" }} />
               </div>
             </Dropdown>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      action: "View",
+      type: "table",
+      width: 40,
+      render: (record) => {
+        return (
+          <Tooltip title="Detail">
+            <Link
+              to={INVOICE_ROUTES.EFAKTUR_VIEW_DETAIL}
+              state={{ id: record.efakturId }}
+            >
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={20} />
+              </div>
+            </Link>
           </Tooltip>
         );
       },
