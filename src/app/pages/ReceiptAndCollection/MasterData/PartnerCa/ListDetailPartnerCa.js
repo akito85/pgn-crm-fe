@@ -43,9 +43,9 @@ const ListDetailPartnerCa = () => {
   useEffect(() => {
     if (
       id &&
-      data_detail?.partnerCa?.id &&
+      data_detail?.partnerCaMapping?.id &&
       data_detail &&
-      data_detail?.partnerCa?.id === id
+      data_detail?.partnerCaMapping?.id === id
     ) {
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
         (item) => {
@@ -69,7 +69,7 @@ const ListDetailPartnerCa = () => {
         }
       );
       setListDataAttachment(dataAttachment);
-      setDataHeader(data_detail?.partnerCa);
+      setDataHeader(data_detail?.partnerCaMapping);
     }
   }, [id, data_detail]);
 
@@ -95,7 +95,6 @@ const ListDetailPartnerCa = () => {
     },
   ];
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
     setLoadingConfirm(true);
     if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_PARTNER_CA") {
@@ -117,7 +116,7 @@ const ListDetailPartnerCa = () => {
         });
     } else {
       const data = {
-        partnerCaId: id,
+        id: id,
         remark: res.remark,
         approvalId: data_detail?.tApprovalDto?.tAppId,
         action: approveOrReject.toUpperCase(),
@@ -184,8 +183,8 @@ const ListDetailPartnerCa = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Partner"}
-        named={data_detail?.partnerCa?.caCode}
+        menu={"Partner Ca Mapping"}
+        named={data_detail?.partnerCaMapping?.partner?.partnerName}
         loading={loadingConfirm}
       />
 

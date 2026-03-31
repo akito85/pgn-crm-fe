@@ -25,21 +25,21 @@ const DetailPartnerCa = ({ data_detail, data_req }) => {
       ) : null}
       <DetailSection header={"PARTNER COLLECTING AGENT MAPPING INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-4">
-          <DetailText label="Partner Code">
-            {data_detail?.partnerCode}
+          <DetailText label="Partner">
+            {data_detail?.partner ? `${data_detail.partner.partnerCode} - ${data_detail.partner.partnerName}` : "-"}
           </DetailText>
-          <DetailText label="Collaction Agent Code">
-            {data_detail?.caCode}
+          <DetailText label="Collecting Agent">
+            {data_detail?.collectingAgent ? `${data_detail.collectingAgent.code} - ${data_detail.collectingAgent.name}` : "-"}
           </DetailText>
           <DetailText label="Settlement Bank">
-            {data_detail?.settlementBank}
+            {data_detail?.settlementBank ? `${data_detail.settlementBank.bankCode} - ${data_detail.settlementBank.bankName}` : "-"}
           </DetailText>
           <DetailText label="Start Date">
-            {moment(data_detail?.effStartDate).format(dateFormatting.date)}
+            {data_detail?.startDate ? moment(data_detail.startDate).format(dateFormatting.date) : "-"}
           </DetailText>
           <DetailText label="End Date">
-            {data_detail?.effEndDate
-              ? moment(data_detail?.effEndDate).format(dateFormatting.date)
+            {data_detail?.endDate
+              ? moment(data_detail.endDate).format(dateFormatting.date)
               : ""}
           </DetailText>
           <DetailText label="Status">{data_detail?.status}</DetailText>
@@ -53,12 +53,12 @@ const DetailPartnerCa = ({ data_detail, data_req }) => {
         <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label={"Record ID"}>{data_detail?.id}</DetailText>
           <DetailText label={"Created Date"}>
-            {moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")}
+            {data_detail?.createdDate ? moment(data_detail.createdDate).format("DD MMM YYYY HH:mm:ss") : "-"}
           </DetailText>
           <DetailText label={"Created By"}>{data_detail?.createdBy}</DetailText>
           <DetailText label={"Updated Date"}>
             {data_detail?.updatedDate !== null
-              ? moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss")
+              ? moment(data_detail.updatedDate).format("DD MMM YYYY HH:mm:ss")
               : ""}
           </DetailText>
           <DetailText label={"Updated By"}>{data_detail?.updatedBy}</DetailText>
@@ -69,4 +69,3 @@ const DetailPartnerCa = ({ data_detail, data_req }) => {
 };
 
 export default DetailPartnerCa;
-
