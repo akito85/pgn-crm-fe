@@ -11,26 +11,8 @@ import GasDepositDetailTable from "./GasDepositDetailTable";
 import { useDispatch, useSelector } from "react-redux";
 import { getGasDeposit, downloadGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
-/**
- * Gas deposit list table (container + presentational component).
- * Owns search, pagination, sort, filter, and download state/logic.
- * The parent (`GasDepositModule`) is responsible only for modals, permissions,
- * and the detail mutation table.
- *
- * @param {object}    props
- * @param {"sa"|"ua"} props.moduleType                    - Module context: standalone ("sa") or under-account ("ua")
- * @param {Function}  [props.handleInactivateModal]       - Opens the inactivate confirmation modal
- * @param {Function}  [props.handleApprovalHistoryModal]  - Opens the approval history modal
- * @param {Function}  [props.handleApproval]              - Triggers the approval action
- * @param {Function}  [props.handleSelectDetail]          - Row click / select-detail handler
- * @param {number}    [props.accountId]                   - Account ID (used when moduleType is "ua")
- * @param {number}    [props.cutomerId]                   - Customer ID
- * @param {number}    [props.refreshSignal=0]             - Increment to trigger a page-0 refresh from the parent
- */
 const GasDepositTable = ({
   moduleType,
-  handleInactivateModal = () => {},
-  handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
   handleSelectDetail = () => {},
   accountId,
@@ -248,12 +230,10 @@ const GasDepositTable = ({
       }
     ),
     handleApproval,
-    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
-  const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["Recalculate", "Expire"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,

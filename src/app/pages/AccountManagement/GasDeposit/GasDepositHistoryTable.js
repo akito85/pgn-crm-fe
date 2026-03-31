@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getGasDeposit, downloadGasDeposit, getGasDepositHistory } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { getGasDepositHistoryColumns } from "./getGasDepositHistoryColumns";
 
-const GasDepositTable = ({
+const GasDepositHistoryTable = ({
   moduleType,
   handleApprovalHistoryModal,
   handleDetailModal,
@@ -225,4 +225,4 @@ const GasDepositTable = ({
   );
 };
 
-export default GasDepositTable;
+export default GasDepositHistoryTable;
