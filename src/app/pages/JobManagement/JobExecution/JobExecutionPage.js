@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { PlusCircleOutlined, EyeOutlined } from "@ant-design/icons";
 import { Dropdown, Tag, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -56,6 +57,7 @@ const STATUS_COLORS = {
 
 const JobExecutionPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { data, loading, actionLoading } = useSelector((state) => state.jobExecution);
 
   const [page, setPage] = useState(1);
@@ -132,6 +134,15 @@ const JobExecutionPage = () => {
 
       const menuItems = [
         {
+          key: "view",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EyeOutlined /> View Details
+            </span>
+          ),
+          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
+        },
+        {
           key: "stop",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: status === "PROCESSING" ? 1 : 0.4 }}>
@@ -145,7 +156,7 @@ const JobExecutionPage = () => {
           key: "suspend",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: (status === "SCHEDULED" && isRecurring) ? 1 : 0.4 }}>
-              <IconSuspend width="14" height="14" /> Suspend
+              <IconSuspend width="16" height="16" /> Suspend
             </span>
           ),
           disabled: !(status === "SCHEDULED" && isRecurring),
@@ -165,7 +176,7 @@ const JobExecutionPage = () => {
           key: "cancel",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
-              <IconCancel width="12" height="12" /> Cancel
+              <IconCancel width="16" height="16" /> Cancel
             </span>
           ),
           disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
