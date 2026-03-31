@@ -54,6 +54,8 @@ const whitelistMenu = [
   "Detail Product",
   "Relationship",
   "Notifications",
+  // Job Execution detail page — accessed via "View Details" action, not direct navigation
+  "Detail Job Execution",
 ];
 
 /**
@@ -437,14 +439,22 @@ const SideMenu = ({ isCollapsed }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getLocation, datas]);
 
-  // remove menu from whitelist -- non-mutating: returns new objects, never modifies datas
+  // remove menu from whitelist -- non-mutating: returns new objects, never modifies datas.
+  // If all children of a parent are filtered out, the parent is demoted to a leaf so it
+  // continues to render with its icon and path (instead of becoming an empty, icon-less submenu).
   function removeProfileItems(tree) {
     if (!Array.isArray(tree)) return tree;
     return tree
       .map((item) => {
         if (whitelistMenu.includes(item.name)) return null;
         if (item.children) {
-          return { ...item, children: removeProfileItems(item.children) };
+          const filteredChildren = removeProfileItems(item.children);
+          if (filteredChildren.length === 0) {
+            // Demote to leaf: drop the children array so renderItems treats it as a leaf item
+            const { children, ...leafItem } = item;
+            return leafItem;
+          }
+          return { ...item, children: filteredChildren };
         }
         return item;
       })
