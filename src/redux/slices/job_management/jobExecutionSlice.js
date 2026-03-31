@@ -146,7 +146,15 @@ const jobExecutionSlice = createSlice({
         state.data = action.payload;
       })
       .addCase(getAllJobExecutionPaginate.rejected, (state) => { state.loading = false; })
-      // Actions
+      // Detail
+      .addCase(getJobExecutionById.pending,   (state) => { state.detailLoading = true; state.detail = null; })
+      .addCase(getJobExecutionById.fulfilled, (state, action) => { state.detailLoading = false; state.detail = action.payload; })
+      .addCase(getJobExecutionById.rejected,  (state) => { state.detailLoading = false; })
+      // Logs
+      .addCase(getJobExecutionLogs.pending,   (state) => { state.logsLoading = true; })
+      .addCase(getJobExecutionLogs.fulfilled, (state, action) => { state.logsLoading = false; state.logs = action.payload; })
+      .addCase(getJobExecutionLogs.rejected,  (state) => { state.logsLoading = false; state.logs = []; })
+      // Actions (matchers must come after all addCase calls)
       .addMatcher(
         (action) => [
           startExecution.pending.type, stopExecution.pending.type,
@@ -165,15 +173,7 @@ const jobExecutionSlice = createSlice({
           cancelExecution.rejected.type, restartExecution.rejected.type,
         ].includes(action.type),
         (state) => { state.actionLoading = false; }
-      )
-      // Detail
-      .addCase(getJobExecutionById.pending, (state) => { state.detailLoading = true; state.detail = null; })
-      .addCase(getJobExecutionById.fulfilled, (state, action) => { state.detailLoading = false; state.detail = action.payload; })
-      .addCase(getJobExecutionById.rejected, (state) => { state.detailLoading = false; })
-      // Logs
-      .addCase(getJobExecutionLogs.pending, (state) => { state.logsLoading = true; })
-      .addCase(getJobExecutionLogs.fulfilled, (state, action) => { state.logsLoading = false; state.logs = action.payload; })
-      .addCase(getJobExecutionLogs.rejected, (state) => { state.logsLoading = false; state.logs = []; });
+      );
   },
 });
 
