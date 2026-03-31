@@ -3,28 +3,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { getGasDepositDetailMutationColumns } from "./getGasDepositDetailMutationColumns";
 import { useDispatch, useSelector } from "react-redux";
-import { getGasDepositDetailMutation, getGasDepositDetailMutationCmv } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { getGasDepositDetailMutations } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
 /**
  * 
- * @param {{id: number; detailId: number; confirmationModalView?: boolean}} 
+ * @param {{id: number; detailId: number;}} 
  * @returns 
  */
 const GasDepositDetailMutationTable = ({
   id,
   detailId,
-  confirmationModalView = false,
 }) => {
   const dispatch = useDispatch();
 
-  const loadingName = !confirmationModalView ? "loading_listGdDetailMutation" : "loading_listGdDetailMutationCmv";
-  const listName = !confirmationModalView ? "list_gasDepositDetailMutation" : "list_gasDepositDetailMutationCmv";
-  const paginationName = !confirmationModalView ? "pagination_gasDepositDetailMutation" : "pagination_gasDepositDetailMutationCmv";
-
   const {
-    [loadingName]: loadingList,
-    [listName]: gasDepositDetailMutations,
-    [paginationName]: pagination,
+    loading_listGdDetailMutation: loadingList,
+    list_gasDepositDetailMutation: gasDepositDetailMutations,
+    pagination_listGdDetailMutation: pagination,
   } = useSelector((state) => state.gasDeposit);
 
   const searchInput = useRef(null);
@@ -75,22 +70,13 @@ const GasDepositDetailMutationTable = ({
         filterRules,
       };
 
-      if (!confirmationModalView)
-        await dispatch(
-          getGasDepositDetailMutation({
-            id,
-            body,
-            isLoadMore: true
-          })
-        ).unwrap();
-      else
-        await dispatch(
-          getGasDepositDetailMutationCmv({
-            id,
-            body,
-            isLoadMore: true
-          })
-        ).unwrap();
+      await dispatch(
+        getGasDepositDetailMutations({
+          id,
+          body,
+          isLoadMore: true
+        })
+      ).unwrap();
     }
     setPage(nextPage);
   };
@@ -137,12 +123,8 @@ const GasDepositDetailMutationTable = ({
       filterRules,
     };
 
-    if (detailId) {
-      if (!confirmationModalView)
-        dispatch(getGasDepositDetailMutation({ id: detailId, body, isLoadMore: false }));
-      else
-        dispatch(getGasDepositDetailMutationCmv({ id: detailId, body, isLoadMore: false }));
-    }
+    if (detailId)
+      dispatch(getGasDepositDetailMutations({ id: detailId, body, isLoadMore: false }));
   }, [detailId])
 
   return (

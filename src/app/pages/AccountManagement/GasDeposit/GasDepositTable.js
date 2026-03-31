@@ -9,7 +9,7 @@ import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActio
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import GasDepositDetailTable from "./GasDepositDetailTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getGasDeposit, downloadGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
 const GasDepositTable = ({
   moduleType,
@@ -25,7 +25,7 @@ const GasDepositTable = ({
   const dispatch = useDispatch();
   const {
     list_gasDeposit: dataSource,
-    pagination_gasDeposit: pagination,
+    pagination_listGd: pagination,
     loading_listGd: loading,
   } = useSelector((state) => state.gasDeposit);
 
@@ -70,7 +70,7 @@ const GasDepositTable = ({
     };
 
     dispatch(
-      getGasDeposit({
+      getGasDeposits({
         accountId: isUnderAccount ? accountId : undefined,
         body,
         isLoadMore: false,
@@ -129,7 +129,7 @@ const GasDepositTable = ({
       };
 
       await dispatch(
-        getGasDeposit({
+        getGasDeposits({
           accountId: isUnderAccount ? accountId : undefined,
           body,
           isLoadMore: true,
@@ -170,7 +170,7 @@ const GasDepositTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDeposit({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDeposits({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
@@ -271,6 +271,10 @@ const GasDepositTable = ({
     );
   };
 
+  const onExpand = (_, record) => {
+    
+  }
+
   return (
     <div className="flex flex-col gap-y-4">
       <Toolbar items={itemActions} type="detail" />
@@ -291,7 +295,7 @@ const GasDepositTable = ({
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
-        expandable={{ expandedRowRender }}
+        expandable={{ expandedRowRender, onExpand }}
       />
     </div>
   );

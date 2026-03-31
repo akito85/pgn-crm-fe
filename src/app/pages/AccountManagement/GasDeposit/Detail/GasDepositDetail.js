@@ -13,8 +13,8 @@ import {
   getGrantedAccessAccount
 } from "../../../../../redux/slices/account_management/accountManagement";
 import {
-  getDetailGasDeposit,
-  getDetailDraftGasDeposit,
+  getGasDeposit,
+  getGasDepositDraft,
   approveOrRejectGasDeposit,
   approveOrRejectInactiveGasDeposit
 } from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
@@ -186,8 +186,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getDetailGasDeposit(idGd));
-          dispatch(getDetailDraftGasDeposit(idGd));
+          dispatch(getGasDeposit(idGd));
+          dispatch(getGasDepositDraft(idGd));
           handleClear();
           handleApprovalModal(false);
         })
@@ -201,8 +201,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getDetailGasDeposit(idGd));
-          dispatch(getDetailDraftGasDeposit(idGd));
+          dispatch(getGasDeposit(idGd));
+          dispatch(getGasDepositDraft(idGd));
           handleClear();
           handleApprovalModal(false);
         })
@@ -253,12 +253,12 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
 
   useEffect(() => {
     if (idGd)
-      dispatch(getDetailGasDeposit(idGd))
+      dispatch(getGasDeposit(idGd))
   }, [idGd]);
 
   useEffect(() => {
     if (idGd && draftExist)
-      dispatch(getDetailDraftGasDeposit(idGd));
+      dispatch(getGasDepositDraft(idGd));
   }, [idGd, draftExist])
 
   return (

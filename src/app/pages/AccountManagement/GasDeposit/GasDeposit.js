@@ -28,7 +28,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const {
-    data_gdApprovalHistory,
+    detail_gdApprovalHistory,
     loading_detailGdHistory,
     detail_gasDepositHistory,
   } = useSelector((state) => state.gasDeposit);
@@ -133,17 +133,17 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
 
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_gdApprovalHistory && data_gdApprovalHistory?.dataApprover) {
+    if (detail_gdApprovalHistory && detail_gdApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_gdApprovalHistory?.dataApprover?.GAS_DEPOSIT || [],
+          create: detail_gdApprovalHistory?.dataApprover?.GAS_DEPOSIT || [],
           inactive:
-            data_gdApprovalHistory?.dataApprover?.INACTIVE_GAS_DEPOSIT || [],
+            detail_gdApprovalHistory?.dataApprover?.INACTIVE_GAS_DEPOSIT || [],
         },
         dataHistory: {
-          create: data_gdApprovalHistory?.dataHistory?.GAS_DEPOSIT || [],
+          create: detail_gdApprovalHistory?.dataHistory?.GAS_DEPOSIT || [],
           inactive:
-            data_gdApprovalHistory?.dataHistory?.INACTIVE_GAS_DEPOSIT || [],
+            detail_gdApprovalHistory?.dataHistory?.INACTIVE_GAS_DEPOSIT || [],
         },
       };
 
@@ -151,7 +151,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_gdApprovalHistory]);
+  }, [detail_gdApprovalHistory]);
 
   return (
     <div className="flex flex-col gap-y-4">

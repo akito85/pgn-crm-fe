@@ -5,7 +5,7 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
-import { getGasDeposit, downloadGasDeposit, getGasDepositHistory } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { downloadGasDeposit, getGasDepositHistories } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { getGasDepositHistoryColumns } from "./getGasDepositHistoryColumns";
 
 const GasDepositHistoryTable = ({
@@ -18,8 +18,8 @@ const GasDepositHistoryTable = ({
   // --- Hooks ---
   const dispatch = useDispatch();
   const {
-    list_gasDeposit: dataSource,
-    pagination_gasDeposit: pagination,
+    list_gasDepositHistory: dataSource,
+    pagination_listGdHistory: pagination,
     loading_listGdHistory: loading,
   } = useSelector((state) => state.gasDeposit);
 
@@ -60,7 +60,7 @@ const GasDepositHistoryTable = ({
     };
 
     dispatch(
-      getGasDepositHistory({
+      getGasDepositHistories({
         accountId: isUnderAccount ? accountId : undefined,
         body,
         isLoadMore: false,
@@ -119,7 +119,7 @@ const GasDepositHistoryTable = ({
       };
 
       await dispatch(
-        getGasDepositHistory({
+        getGasDepositHistories({
           accountId: isUnderAccount ? accountId : undefined,
           body,
           isLoadMore: true,
@@ -160,7 +160,7 @@ const GasDepositHistoryTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDeposit({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDepositHistories({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
