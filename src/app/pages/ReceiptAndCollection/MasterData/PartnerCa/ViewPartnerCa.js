@@ -619,7 +619,7 @@ const ViewPartnerCa = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <CardContainer
         header={

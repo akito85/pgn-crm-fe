@@ -423,7 +423,7 @@ const ListFormPartnerCa = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to go back?</p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 
