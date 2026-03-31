@@ -16,6 +16,7 @@ import { getGrantedAccessAccount } from "../../../../redux/slices/account_manage
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
+import NxTabs from "../../../../components/Nx/NxTabs";
 
 /**
  * Gas deposit list table module
@@ -28,6 +29,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const dispatch = useDispatch();
   const { data_gdApprovalHistory } = useSelector((state) => state.gasDeposit);
 
+  const [activeKey, setActiveKey] = useState(0);
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
@@ -42,6 +44,20 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const isUnderAccount = moduleType === "ua";
   const isStandard = isUnderAccount && location.pathname.includes("account-standard");
   const isOneTime = isUnderAccount && location.pathname.includes("account-onetime");
+
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Gas Deposit List",
+    },
+    {
+      key: 1,
+      label: "Recalculate/Expire Request History",
+      children: (
+        <></>
+      )
+    }
+  ];
 
   // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
@@ -148,64 +164,77 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   }, [data_gdApprovalHistory]);
 
   return (
-    <>
-      <NxCardContainer header={"GAS DEPOSIT"}>
-        <NxBaseContainer border>
-          <GasDepositTable
-            moduleType={moduleType}
+    <div className="flex flex-col gap-y-4">
+      <NxBaseContainer border padding={false}>
+        <NxTabs
+          activeKey={activeKey}
+          onChange={setActiveKey}
+          items={tabOptions}
+        />
+      </NxBaseContainer>
+      {activeKey === 0 ? (
+        <>
+          <NxCardContainer header={"GAS DEPOSIT"}>
+            <NxBaseContainer border>
+              <GasDepositTable
+                moduleType={moduleType}
+                accountId={accountId}
+                cutomerId={customerId}
+                handleSelectDetail={handleSelectDetail}
+                refreshSignal={refreshSignal}
+              />
+            </NxBaseContainer>
+          </NxCardContainer>
+    
+          {/* Detail mutation table — rendered only when a row is selected */}
+          {selectedDetailId && (
+            <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
+              <NxBaseContainer border>
+                <GasDepositDetailMutationTable
+                  detailId={selectedDetailId}
+                />
+              </NxBaseContainer>
+            </NxCardContainer>
+          )}
+    
+          <GasDepositApprovalModal
             accountId={accountId}
-            cutomerId={customerId}
-            handleSelectDetail={handleSelectDetail}
-            refreshSignal={refreshSignal}
+            isOpen={showApprovalModal}
+            handleCancel={() => setShowApprovalModal(false)}
+            afterFinish={triggerRefresh}
           />
-        </NxBaseContainer>
-      </NxCardContainer>
-
-      {/* Detail mutation table — rendered only when a row is selected */}
-      {selectedDetailId && (
-        <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
-          <NxBaseContainer border>
-            <GasDepositDetailMutationTable
-              detailId={selectedDetailId}
-            />
-          </NxBaseContainer>
-        </NxCardContainer>
-      )}
-
-      <GasDepositApprovalModal
-        accountId={accountId}
-        isOpen={showApprovalModal}
-        handleCancel={() => setShowApprovalModal(false)}
-        afterFinish={triggerRefresh}
-      />
-
-      {/* Inactivate Modal */}
-      <NxInactivateModal
-        isOpen={showInactiveModal}
-        header={"INACTIVATE"}
-        handleCloseModal={() => handleInactivateModal(false)}
-        customMessage={`Are you sure you want to inactivate gas deposit - ${inactivateGdAccountNumber}?`}
-        onFinish={({ remark, appHierId }, handleClear) =>
-          handleInactivateGd({ remark, appHierId }, handleClear)
-        }
-        named={inactivateGdAccountNumber}
-        menu="gas deposit"
-        sliceName="gasDeposit"
-        approvalOptionsName="data_gdApprovalHierarchy"
-        approvalHierarchtDetailsName="detail_gdApprovalHierarchy"
-        getApprovalOptions={getGdApprovalHierarchy}
-        getApprovalHierarchyDetails={getDetailGdApprovalHierarchy}
-      />
-
-      {/* Approval History Modal */}
-      <NxHistoryModal
-        isOpen={showApprovalHistoryModal}
-        handleClose={() => handleApprovalHistoryModal(false)}
-        header={"Approval History"}
-        dataApprover={dataApprovalHistoryFix?.dataApprover}
-        dataHistory={dataApprovalHistoryFix?.dataHistory}
-      />
-    </>
+    
+          {/* Inactivate Modal */}
+          <NxInactivateModal
+            isOpen={showInactiveModal}
+            header={"INACTIVATE"}
+            handleCloseModal={() => handleInactivateModal(false)}
+            customMessage={`Are you sure you want to inactivate gas deposit - ${inactivateGdAccountNumber}?`}
+            onFinish={({ remark, appHierId }, handleClear) =>
+              handleInactivateGd({ remark, appHierId }, handleClear)
+            }
+            named={inactivateGdAccountNumber}
+            menu="gas deposit"
+            sliceName="gasDeposit"
+            approvalOptionsName="data_gdApprovalHierarchy"
+            approvalHierarchtDetailsName="detail_gdApprovalHierarchy"
+            getApprovalOptions={getGdApprovalHierarchy}
+            getApprovalHierarchyDetails={getDetailGdApprovalHierarchy}
+          />
+    
+          {/* Approval History Modal */}
+          <NxHistoryModal
+            isOpen={showApprovalHistoryModal}
+            handleClose={() => handleApprovalHistoryModal(false)}
+            header={"Approval History"}
+            dataApprover={dataApprovalHistoryFix?.dataApprover}
+            dataHistory={dataApprovalHistoryFix?.dataHistory}
+          />
+        </>
+      ) : activeKey === 1 ? (
+        <></>
+      ) : <></>}
+    </div>
   );
 };
 
