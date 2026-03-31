@@ -1,11 +1,11 @@
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -13,7 +13,6 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../../components/Modal/ModalPopUp";
-import RadioTabs from "../../../../../components/RadioTabs";
 import {
   clearBodyMessage,
   showModalError,
@@ -26,31 +25,25 @@ import {
   createReceipt,
   getAllApprovalListReceipt,
   getBankDDL,
-  getCollectionAgentDDL,
   getConvertedCurrency,
   getCurrencyDDL,
   getCusNumberDDL,
   getListApprovalByIdReceipt,
   getListCategoryReceipt,
-  getPayDeliverDDL,
-  getPayGetwayDDL,
-  getPayMethodDDL,
-  getPayTypeDDL,
-  getRateTypeDDL,
   getReceiptChanelDDL,
   resetConvertedAmount,
   resetDataAccountNumber,
   getAccountTypeDDL,
-  getAccountNumberByTypeDDL,
   getUnifiedCreateReceiptDdl,
   getAllAccountNumberDDL,
+  getRateTypeDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { countBadgeFieldsErrorMandatory, dateFormatting, hasValue } from "../../../../../utils";
 import moment from "moment";
-import { FormStepper } from "../../../../../components/FormStepNavigation";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 
 const ListRececiptForm = ({ type }) => {
   const {
@@ -100,22 +93,66 @@ const ListRececiptForm = ({ type }) => {
   const [requestBodyConvertedRate, setRequestBodyConvertedRate] = useState({});
   const [allValues, setAllValues] = useState(null);
 
+  // Stepper State
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+
   const isLoading = loading || loadingForm;
+
+  // Step Configuration
+  const steps = [
+    { title: 'RECEIPT' },
+    { title: 'APPROVAL' },
+    { title: 'ATTACHMENT' }
+  ];
+
+  // Tab Data for Validation Logic
+  const [tabData, setTabData] = useState([
+    {
+      value: "Receipt",
+      paramValue: [
+        "miscellaneous",
+        "accNumber",
+        "cusNumber",
+        "cusName",
+        "accountName",
+        "segment",
+        "accountGroupType",
+        "accountType",
+        "sor",
+        "costCenterCode",
+        "costCenterName",
+        "receiptCode",
+        "receiptChannel",
+        "paymentType",
+        "paymentGateway",
+        "collectingAgent",
+        "deliveryChannel",
+        "method",
+        "bank",
+        "receiptDate",
+        "currency",
+        "amount",
+        "rateType",
+        "rateDate",
+        "rateAmount",
+        "convertedCurrency",
+        "eqAmount",
+        "description",
+      ],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
 
   //useEffect DDL form
   useEffect(() => {
     dispatch(resetDataAccountNumber());
     dispatch(getAllApprovalListReceipt());
     dispatch(getRateTypeDDL());
-    // dispatch(getPayDeliverDDL());
-    // dispatch(getPayGetwayDDL());
     dispatch(getBankDDL());
-    // dispatch(getCollectionAgentDDL());
     dispatch(getCusNumberDDL());
     dispatch(getCurrencyDDL());
-    // dispatch(getPayTypeDDL());
     dispatch(getUnifiedCreateReceiptDdl());
-    // dispatch(getPayMethodDDL());
     dispatch(getReceiptChanelDDL());
     dispatch(getAccountTypeDDL());
     dispatch(getAllAccountNumberDDL());
@@ -154,14 +191,6 @@ const ListRececiptForm = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
-  // useEffect(() => {
-  //   if (id && data_detail && data_detail?.paymentItem) {
-  //     setIsMisc(data_detail?.paymentItem?.isBankMethod);
-  //   } else {
-  //     setIsMisc(false);
-  //   }
-  // }, [data_detail]);
-
   useEffect(() => {
     if (
       formValue.approvalHierarchy &&
@@ -176,19 +205,6 @@ const ListRececiptForm = ({ type }) => {
 
   useEffect(() => {
     if (accNumb !== "" && type !== "update") {
-      const accountNumbers =
-        dataAccountNumber ||
-        []?.map((a) => {
-          return {
-            idArea: a?.areaId,
-            area: a?.area,
-            customerId: a?.customerId,
-            customerName: a?.customerName,
-            segment: a?.segment,
-            segmentId: a?.segmentId,
-          };
-        });
-
       // set default value
       if (rateTypeDDL?.data?.length > 0) {
         const rateType = rateTypeDDL?.data?.filter(
@@ -209,12 +225,14 @@ const ListRececiptForm = ({ type }) => {
           area: dataAccountNumber?.data?.area,
           segment: dataAccountNumber?.data?.segment,
           accountType: dataAccountNumber?.data?.accountType,
-          accountGroupType: dataAccountNumber?.data?.accountType, // Same as Account Type
+          accountGroupType: dataAccountNumber?.data?.accountGroupType,
+          classificationType: dataAccountNumber?.data?.classificationType,
+          meterReadingCode: dataAccountNumber?.data?.meterReadingCode,
           accountName: dataAccountNumber?.data?.accountName,
           sor: dataAccountNumber?.data?.sor,
           cusNumber: dataAccountNumber?.data?.customerNumber,
-          costCenterCode: dataAccountNumber?.data?.area, // TODO: Backend needs to split
-          costCenterName: dataAccountNumber?.data?.area, // TODO: Backend needs to split
+          costCenterCode: dataAccountNumber?.data?.area,
+          costCenterName: dataAccountNumber?.data?.area,
         });
       }
     }
@@ -223,22 +241,7 @@ const ListRececiptForm = ({ type }) => {
   // use effect to get converted rate
   const handleChangeRequestConverted = useCallback(
     (changedValues, allValues) => {
-      // checking value
       setAllValues(allValues);
-      // const fieldsToCheck = ["rateDate", "rateType", "fromCurrency", "toCurrency"];
-      // const allFieldsHaveValues = fieldsToCheck.every(field => formValue[field]);
-
-      // if (allFieldsHaveValues) {
-      //   const requestBody = {
-      //     rateType: rateTypeDDL?.data?.filter(item => item?.id === formValue?.rateType)[0]?.name,
-      //     rateDate: moment(formValue?.rateDate)?.format(dateFormatting?.date),
-      //     fromCurrency: formValue?.fromCurrency,
-      //     toCurrency: formValue?.toCurrency
-      //   };
-      //   dispatch(getConvertedCurrency(requestBody));
-      // } else {
-      //   return formValue;
-      // }
     },
     []
   );
@@ -265,15 +268,6 @@ const ListRececiptForm = ({ type }) => {
     if (!amount) return 0;
     return parseFloat(amount?.toString()?.replace(/\./g, "").replace(",", "."));
   };
-
-
-  // console.log(formValue, "formValue");
-
-  console.log(hasValue(formValue?.convertedCurrency) &&
-    hasValue(formValue?.currency) &&
-    hasValue(formValue?.rateAmount), "validasi");
-
-
 
   useEffect(() => {
     if (
@@ -321,52 +315,6 @@ const ListRececiptForm = ({ type }) => {
     }
   }, [data_converted_currency, form, amount]);
 
-
-  //   if (
-  //     hasValue(data_converted_currency) &&
-  //     Object.keys(data_converted_currency).length !== 0
-  //   ) {
-  //     const convertedAmount = hasValue(formValue?.amount)
-  //       ? formValue?.amount
-  //       : 0;
-
-  //     let eqAmount = 0;
-  //     if (
-  //       hasValue(formValue?.convertedCurrency) &&
-  //       hasValue(formValue?.currency) &&
-  //       hasValue(formValue?.rateAmount)
-  //     ) {
-  //       if (formValue?.currency === 243) {
-  //         // USD to IDR
-  //         eqAmount = data_converted_currency?.convertedRate * convertedAmount;
-  //         form.setFieldsValue({
-  //           rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-  //             "en-US",
-  //             { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-  //           ),
-  //           eqAmount: eqAmount.toLocaleString("id-ID", {
-  //             style: "currency",
-  //             currency: "IDR",
-  //           }),
-  //         });
-  //       } else if (formValue?.currency === 244) {
-  //         // IDR to USD
-  //         eqAmount = convertedAmount / data_converted_currency?.convertedRate;
-  //         form.setFieldsValue({
-  //           rateAmount: data_converted_currency?.convertedRate?.toLocaleString(
-  //             "en-US",
-  //             { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-  //           ),
-  //           eqAmount: eqAmount.toLocaleString("en-US", {
-  //             style: "currency",
-  //             currency: "USD",
-  //           }),
-  //         });
-  //       }
-  //     }
-  //   }
-  // }, [data_converted_currency, form, formValue?.amount]);
-
   // trigger modal try again
   useEffect(() => {
     if (bodyError?.response?.data?.code === 500) {
@@ -390,74 +338,33 @@ const ListRececiptForm = ({ type }) => {
     },
   ];
 
-  // Define tabData before using it in useState
-  const [tabData, setTabData] = useState([
-    {
-      value: "Receipt",
-      paramValue: [
-        "miscellaneous",
-        "accNumber",
-        "cusNumber",
-        "cusName",
-        "accountName",
-        "segment",
-        "accountGroupType",
-        "sor",
-        "costCenterCode",
-        "costCenterName",
-        "receiptCode",
-        "receiptChannel",
-        "paymentType",
-        "paymentGateway",
-        "collectingAgent",
-        "deliveryChannel",
-        "method",
-        "bank",
-        "receiptDate",
-        "currency",
-        "amount",
-        "rateType",
-        "rateDate",
-        "rateAmount",
-        "convertedCurrency",
-        "eqAmount",
-        "description",
-      ],
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  
-  const steps = [
-    { title: 'CREATE RECEIPT' },
-    { title: 'APPROVAL' },
-    { title: 'ATTACHMENT' }
-  ];
-
-  const currentStepIndex = tabData.findIndex(tab => tab.value === valuePage);
-
+  // Navigation Logic
   const handleNext = () => {
-    if (currentStepIndex < tabData.length - 1) {
-      setValuePage(tabData[currentStepIndex + 1].value);
+    const fieldsToValidate = tabData[currentStepIndex]?.paramValue;
+
+    if (fieldsToValidate) {
+        form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+            if (currentStepIndex < steps.length - 1) {
+            setCurrentStepIndex(currentStepIndex + 1);
+            }
+        })
+        .catch((error) => {
+            // Validation failed, handle errors if needed
+            handleError({ errorFields: error.errorFields });
+        });
+    } else {
+        // No fields to validate for this step (e.g. Attachment)
+        if (currentStepIndex < steps.length - 1) {
+            setCurrentStepIndex(currentStepIndex + 1);
+        }
     }
   };
 
   const handlePrev = () => {
     if (currentStepIndex > 0) {
-      setValuePage(tabData[currentStepIndex - 1].value);
-    }
-  };
-
-  const onChange = (e) => {
-    if (storedData) {
-      const errorBody = {
-        title: "Failed",
-        description: `Please save data table inline before submit. Please try again.`,
-      };
-      dispatch(showModalError(errorBody));
-    } else {
-      setValuePage(e.target.value);
+      setCurrentStepIndex(currentStepIndex - 1);
     }
   };
 
@@ -468,8 +375,6 @@ const ListRececiptForm = ({ type }) => {
 
   // Validation Button Back
   const handleBack = () => {
-    // form.resetFields();
-    // dispatch(resetDataAccountNumber());
     if (
       form.getFieldValue() === null ||
       Object.keys(form.getFieldValue()).length === 0 ||
@@ -489,7 +394,6 @@ const ListRececiptForm = ({ type }) => {
   const convertAndTrimString = (str) => {
     const cleanedString = str.replace(/[,]/g, "");
     const floatNumber = parseFloat(cleanedString);
-    // return Math.floor(integerNumber / 100);
     return floatNumber;
   };
 
@@ -502,92 +406,150 @@ const ListRececiptForm = ({ type }) => {
     return parseFloat(cleaned);
   };
 
-  const handleSubmitForm = (formValue) => {
-    if (dataTable?.length === 0) {
+  const handleSaveSubmit = async () => {
+    setFlag(1);
+    try {
+      const values = await form.validateFields();
+      
+      handleSubmitForm(values);
+    } catch (errorInfo) {
+      handleError({ errorFields: errorInfo.errorFields });
+      
       const errorBody = {
-        title: "Failed",
-        description: `Please input allocation information!`,
+        title: "Validation Failed",
+        description: "Please check all required fields in the tabs.",
       };
       dispatch(showModalError(errorBody));
-    } else if (listDataAttachment?.length === 0) {
-      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment)
-    } else {
-      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment)
-      setModalConfirm(true);
-      const dataValue = {
-        // receiptId: ,
-        appHierId: selectedHierarchy,
-        areaId: dataAccountNumber?.data?.areaId,
-        customerId: dataAccountNumber?.data?.customerId,
-        accountId: formValue?.accNumber,
-        customerName: formValue?.cusName,
-        segmentId: dataAccountNumber?.data?.segmentId,
-        accountType: formValue?.accountType,
-        accountName: formValue?.accountName,
-        customerNumber: formValue?.cusNumber,
-        sor: formValue?.sor,
-        area: formValue?.area,
-        segment: formValue?.segment,
-        receiptDate: moment(formValue?.receiptDate).format(
-          dateFormatting.dateTime
-        ),
-        currencyId: formValue?.currency,
-        amount: parseMonetaryValue(formValue?.amount),
-        paymentTypeId: formValue?.paymentType,
-        paymentMethodId: formValue?.method,
-        receiptChannelId: formValue?.receiptChannel,
-        bankId: formValue?.bank,
-        collectingAgentId: formValue?.collectingAgent,
-        deliveryChannelId: formValue?.deliveryChannel,
-        rateTypeId: formValue?.rateType,
-        rateDate: moment(formValue?.rateDate).format(dateFormatting.date),
-        rateAmount: convertAndTrimString(formValue?.rateAmount),
-        convertedCurrency: currencyDDL?.data?.filter(
-          (item) => item?.id === formValue?.convertedCurrency
-        )[0]?.name,
-        equivalentAmount: formValue?.eqAmount || 0,
-        referenceNumber: formValue?.reference,
-        paymentGatewayId: formValue?.paymentGateway,
-        allocationDtoList: dataTable?.map((item) => ({
-          id: item?.id,
-          allocationAmount: item?.allocationAmount,
-        })),
-        description: formValue?.description,
-        receiptCode: formValue?.receiptCode,
-        isMisc: formValue?.miscellaneous === "Yes", // Map "Yes"/"No" to true/false
-      };
-
-      setBodyData(dataValue);
-      setTabData([
-        {
-          value: "Receipt",
-          paramValue: [
-            "cusNumber",
-            "accNumber",
-            "cusName",
-            "area",
-            "segment",
-            "receiptChannel",
-            "paymentGateway",
-            "collectingAgent",
-            "deliveryChannel",
-            "method",
-            "receiptDate",
-            "paymentType",
-            "bank",
-            "currency",
-            "amount",
-            "rateType",
-            "rateDate",
-            "rateAmount",
-            "convertedCurrency",
-            "eqAmount",
-          ],
-        },
-        { value: "Approval", paramValue: ["apphierId"] },
-        { value: "Attachment" },
-      ]);
     }
+  };
+
+  const handleSubmitForm = (formValue) => {
+    // 1. Validasi Allocation Table
+    // if (dataTable?.length === 0 && formValue?.custType !== "Prospective") {
+    //   const errorBody = {
+    //     title: "Alert",
+    //     description: `Please input allocation information!`,
+    //   };
+    //   dispatch(showModalError(errorBody));
+    //   return; // Stop eksekusi
+    // } 
+    
+    // 2. Validasi Approval Hierarchy
+    if (!selectedHierarchy) {
+      const errorBody = {
+        title: "Validation Failed",
+        description: `Please select Approval Information!`,
+      };
+      dispatch(showModalError(errorBody));
+      // Biar badge merahnya tetep update
+      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment);
+      return; // Stop eksekusi
+    }
+
+    // 3. Validasi Attachment
+    if (listDataAttachment?.length === 0) {
+      const errorBody = {
+        title: "Validation Failed",
+        description: `Please upload at least one mandatory attachment!`,
+      };
+      dispatch(showModalError(errorBody));
+      // Biar badge merahnya tetep update
+      countBadgeFieldsErrorMandatory(setTabData, listDataAttachment);
+      return; // Stop eksekusi
+    }
+
+    // Kalau lolos semua validasi di atas:
+    countBadgeFieldsErrorMandatory(setTabData, listDataAttachment);
+    setModalConfirm(true);
+    
+    const dataValue = {
+      // receiptId: ,
+      appHierId: selectedHierarchy,
+      areaId: dataAccountNumber?.data?.areaId,
+      customerId: dataAccountNumber?.data?.customerId,
+      accountId: formValue?.accNumber,
+      customerName: formValue?.cusName,
+      segmentId: dataAccountNumber?.data?.segmentId,
+      accountType: formValue?.accountType,
+      accountName: formValue?.accountName,
+      customerNumber: formValue?.cusNumber,
+      sor: formValue?.sor,
+      area: formValue?.area,
+      segment: formValue?.segment,
+      receiptDate: moment(formValue?.receiptDate).format(
+        dateFormatting.dateTime
+      ),
+      currencyId: formValue?.currency,
+      amount: parseMonetaryValue(formValue?.amount),
+      paymentTypeId: formValue?.paymentType,
+      paymentMethodId: formValue?.method,
+      receiptChannelId: formValue?.receiptChannel,
+      bankId: formValue?.bank,
+      collectingAgentId: formValue?.collectingAgent,
+      deliveryChannelId: formValue?.deliveryChannel,
+      rateTypeId: formValue?.rateType,
+      rateDate: moment(formValue?.rateDate).format(dateFormatting.date),
+      rateAmount: convertAndTrimString(formValue?.rateAmount),
+      convertedCurrency: currencyDDL?.data?.filter(
+        (item) => item?.id === formValue?.convertedCurrency
+      )[0]?.name,
+      equivalentAmount: formValue?.eqAmount || 0,
+      referenceNumber: formValue?.reference,
+      paymentGatewayId: formValue?.paymentGateway,
+      allocationDtoList: dataTable?.map((item) => ({
+        id: item?.id,
+        allocationAmount: item?.allocationAmount,
+      })),
+      description: formValue?.description,
+      remark: formValue?.remark,
+      receiptCode: formValue?.receiptCode,
+      isMisc: formValue?.miscellaneous === "Yes",
+      miscellaneous: formValue?.miscellaneous,
+      customerType: formValue?.custType,
+      registrationNumber: formValue?.registrationNumber,
+      accountGroupType: formValue?.accountGroupType,
+      classificationType: formValue?.classificationType,
+      meterReadingCode: formValue?.meterReadingCode,
+      unappliedAmount: formValue?.unappliedAmount,
+      appliedAmount: formValue?.appliedAmount,
+      appliedEqvAmount: formValue?.appliedEqvAmount,
+      unappliedEqvAmount: formValue?.unappliedEqvAmount,
+      unidentifiedAmount: formValue?.unidentifiedAmount,
+      holdAmount: formValue?.holdAmount,
+      refundAmount: formValue?.refundAmount,
+      transferAmount: formValue?.transferAmount,
+    };
+
+    setBodyData(dataValue);
+    setTabData([
+      {
+        value: "Receipt",
+        paramValue: [
+          "cusNumber",
+          "accNumber",
+          "cusName",
+          "area",
+          "segment",
+          "receiptChannel",
+          "paymentGateway",
+          "collectingAgent",
+          "deliveryChannel",
+          "method",
+          "receiptDate",
+          "paymentType",
+          "bank",
+          "currency",
+          "amount",
+          "rateType",
+          "rateDate",
+          "rateAmount",
+          "convertedCurrency",
+          "eqAmount",
+        ],
+      },
+      { value: "Approval", paramValue: ["apphierId"] },
+      { value: "Attachment" },
+    ]);
   };
 
   // handle confirm
@@ -639,6 +601,8 @@ const ListRececiptForm = ({ type }) => {
     setRequestBodyConvertedRate({});
     setListDataAttachment([]);
     setAppHierDataDetail([]);
+    // Reset Stepper
+    setCurrentStepIndex(0);
     setTabData(
       tabData?.map((item) => {
         const { errorBadge, ...keys } = item;
@@ -647,17 +611,8 @@ const ListRececiptForm = ({ type }) => {
     );
   };
 
-  // handle confirm
-  const handleConfirm = () => {
-    if (bodyData) {
-      // handleSave();
-    } else {
-      // dispatch(getDetailLocation({ id: location?.state?.id, locationType: location?.state?.locationType }));
-    }
-  };
   // handle retry
   const handleRetry = () => {
-    handleConfirm();
     setModalError(false);
     dispatch(clearBodyMessage());
   };
@@ -668,9 +623,19 @@ const ListRececiptForm = ({ type }) => {
     dispatch(clearBodyMessage());
   };
 
+  // Helper untuk Header CardContainer
+  const renderHeader = (title) => (
+    <div className="flex -my-4 justify-between items-center">
+      <p className="w-full mt-[15px] text-primary">
+        {title.toUpperCase()}
+      </p>
+    </div>
+  );
+
   return (
     <>
       <BreadCrumb routes={routes} />
+      
       {/* Step Indicator with FormStepper */}
       <div className="mb-3">
         <FormStepper
@@ -680,22 +645,17 @@ const ListRececiptForm = ({ type }) => {
           onNext={handleNext}
         />
       </div>
-      {/* RadioTabs for navigation */}
-      <RadioTabs
-        data={tabData}
-        onChange={onChange}
-        currentPosition={valuePage}
-      />
+
       <Spin spinning={isLoading}>
         <Form
           layout="vertical"
           form={form}
           onFinish={handleSubmitForm}
-          // onFinishFailed={handleError}
           onFinishFailed={handleError}
           onValuesChange={handleChangeRequestConverted}
         >
-          <div className={`${valuePage !== "Receipt" ? "hidden" : ""}`}>
+          {/* Section 1: Create Receipt Form */}
+          <div className={`${currentStepIndex !== 0 ? "hidden" : ""}`}>
             <CreateReceiptForm
               cusNumb={cusNumb}
               setCusNumb={setCusNumb}
@@ -728,18 +688,22 @@ const ListRececiptForm = ({ type }) => {
               accountTypeDDL={accountTypeDDL}
             />
           </div>
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+
+          {/* Section 2: Approval */}
+          <div className={`${currentStepIndex !== 1 ? "hidden" : ""}`}>
+            <CardContainer header={renderHeader("Approval Information")}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+
+          {/* Section 3: Attachment */}
+          <div className={`${currentStepIndex !== 2 ? "hidden" : ""}`}>
+            <CardContainer header={renderHeader("Attachment Information")}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -749,58 +713,24 @@ const ListRececiptForm = ({ type }) => {
                 typeSelector="receipt"
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
-                //  getAPIGuard={getConfigFileR}
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedData}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-                disabled={storedData}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <Form.Item>
-                <ButtonComponent
-                  htmlType="submit"
-                  type="submit"
-                  onClick={() => setFlag(1)}
-                  // disabled={disableSubmit}
-                  disabled={storedData || totalAllocationAmount > amount}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+
+          {/* Standardized Form Footer */}
+          <FormFooter
+            current={currentStepIndex}
+            totalSteps={steps.length}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSubmit={handleSaveSubmit} 
+            type={type}
+            disableSubmit={storedData || totalAllocationAmount > amount}
+          />
         </Form>
       </Spin>
 
@@ -884,7 +814,6 @@ const ListRececiptForm = ({ type }) => {
           </p>
         </div>
       </ModalConfirm>
-      {/* </Spin> */}
     </>
   );
 };

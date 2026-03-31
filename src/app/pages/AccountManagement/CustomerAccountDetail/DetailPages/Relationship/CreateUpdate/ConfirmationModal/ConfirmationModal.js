@@ -8,17 +8,21 @@ const ConfirmationModal = ({
   form,
   formId,
   isOpen,
-  handleCancel,
+  handleCancel = () => {},
   type = "",
   approvalData,
-  attachmentData,
+  attachmentDataSource,
   configApplication,
   service,
   relatedDetails,
+  handleSubmitForm = () => {},
 }) => {
   const { loading_createUpdateRelationship } = useSelector((state) => state.relationship);
   const tabLength = type === "submit" ? 4 : 3;
   const [activeTab, setActiveTab] = useState(0);
+
+  const isSubmit = type === "submit";
+  const isDraft = type === "draft";
 
   /**
    * @param {"next" | "prev"} direction
@@ -52,7 +56,7 @@ const ConfirmationModal = ({
           <Button type={"menu"} disabled={loading_createUpdateRelationship} onClick={() => handleCancel()}>
             Cancel
           </Button>
-          <div className="flex gap-x-2">
+          <div className="flex">
             <Button type={"menu"} disabled={loading_createUpdateRelationship || activeTab < 1} onClick={() => handleChangeTab("prev")}>
               Previous
             </Button>
@@ -62,8 +66,14 @@ const ConfirmationModal = ({
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} loading={loading_createUpdateRelationship} form={formId} htmlType={"submit"}>
-                {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
+              <Button
+                type={"submit"}
+                form={formId}
+                htmlType={isSubmit ? "submit" : "button"}
+                onClick={isDraft ? handleSubmitForm : undefined}
+                loading={loading_createUpdateRelationship}
+              >
+                Confirm
               </Button>
             )}
           </div>
@@ -72,8 +82,8 @@ const ConfirmationModal = ({
     >
       <ConfirmationModalTabs
         form={form}
-        hierarchyTableData={approvalData}
-        dataAttachment={attachmentData}
+        approvalData={approvalData}
+        attachmentDataSource={attachmentDataSource}
         service={service}
         type={type}
         configApplication={configApplication}

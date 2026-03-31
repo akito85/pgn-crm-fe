@@ -174,8 +174,11 @@ const MultiDestination = ({ accountId, customerId }) => {
           named={inactivateMdAccountNumber}
           menu="multi destination"
           sliceName="multiDestination"
-          approvalOptionsStateName="data_mdApprovalHierarchy"
-          approvalHierarchtDetailsStateName="detail_mdApprovalHierarchy"
+          approvalOptionsName="list_mdApprovalOptions"
+          approvalHierarchtDetailsName="list_mdApprovalHierarchyDetail"
+          loadingListApprovalOptionsName="loading_listMdApprovalOption"
+          loadingListHierarchyDetailName="loading_listMdApprovalHierarchyDetail"
+          loadingInactivateName="loading_inactivateMd"
           getApprovalOptions={getMdApprovalHierarchy}
           getApprovalHierarchyDetails={getDetailMdApprovalHierarchy}
         />

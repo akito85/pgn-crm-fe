@@ -10,12 +10,19 @@ const initialState = {
   // Detail / Create state
   data: [],
   data_detail: null,
+  data_detail_draft: null,
+  loading_detail_draft: false,
+  loading_update: false,
+  loading_status_update: false,
   data_prerequisites: [],
   data_work_orders: [],
   data_activities: [],
   data_data_requirements: [],
   data_attachments: [],
   data_contacts: [],
+  loading_contacts: false,
+  data_attachments: [],
+  loading_attachments: false,
   // Dropdowns
   data_types: [],
   data_categories: [],
@@ -108,6 +115,20 @@ export const getServiceRequestDetailByAccount = createAsyncThunk(
   }
 );
 
+// Get Service Request Draft Detail (from triggerJson)
+export const getDetailDraftServiceRequest = createAsyncThunk(
+  "GET_DETAIL_DRAFT_SERVICE_REQUEST",
+  async ({ accountId, id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/detail-draft/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Create Service Request for Account
 export const createServiceRequestForAccount = createAsyncThunk(
   "CREATE_SERVICE_REQUEST_FOR_ACCOUNT",
@@ -192,6 +213,41 @@ export const updateServiceRequestForAccount = createAsyncThunk(
       const errorBody = {
         title: "Failed",
         description: `Service Request was not updated. ${message}. Please try again.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Update Service Request with composite data (supports draft/submit via triggerJson)
+export const updateCompleteServiceRequest = createAsyncThunk(
+  "UPDATE_COMPLETE_SERVICE_REQUEST",
+  async ({ accountId, id, body, successBodyExtra = {} }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const response = await accountManagementService.updateData(url, body);
+      const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
+      const successBody = {
+        title: "Successful",
+        description: isDraft
+          ? "Service Request draft has been saved."
+          : "Service Request has been submitted.",
+        ...successBodyExtra,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
+      const message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        description: isDraft
+          ? `Service Request draft was not saved. ${message}. Please try again.`
+          : `Service Request was not submitted. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
@@ -560,6 +616,38 @@ export const deletePrerequisiteForServiceRequest = createAsyncThunk(
 );
 
 // =====================================================
+// CONTACTS
+// =====================================================
+
+// Get Attachments by Service Request
+export const getAttachmentsByServiceRequest = createAsyncThunk(
+  "GET_ATTACHMENTS_BY_SERVICE_REQUEST",
+  async ({ accountId, srId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/attachments`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Contacts by Service Request
+export const getContactsByServiceRequest = createAsyncThunk(
+  "GET_CONTACTS_BY_SERVICE_REQUEST",
+  async ({ accountId, srId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/contacts`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// =====================================================
 // WORK ORDERS
 // =====================================================
 
@@ -729,6 +817,36 @@ export const getInstallmentPaymentSchedule = createAsyncThunk(
   }
 );
 
+export const updateServiceRequestStatus = createAsyncThunk(
+  "UPDATE_SERVICE_REQUEST_STATUS",
+  async ({ accountId, id, status, remark = "" }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const response = await accountManagementService.updateData(url, {
+        serviceRequestId: id,
+        requestStatus: status,
+        remark,
+      });
+      thunkAPI.dispatch(showModalSuccess({
+        title: "Successful",
+        description: `Service Request status updated to ${status}.`,
+        return: false,
+      }));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+      thunkAPI.dispatch(showModalError({
+        title: "Failed",
+        description: `Status update failed. ${message}`,
+      }));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // =====================================================
 // SLICE DEFINITION
 // =====================================================
@@ -754,6 +872,9 @@ const serviceRequestSlice = createSlice({
     },
     clearDataRequirements: (state) => {
       state.data_data_requirements = [];
+    },
+    resetDetailDraft: (state) => {
+      state.data_detail_draft = null;
     },
   },
   extraReducers: {
@@ -783,8 +904,6 @@ const serviceRequestSlice = createSlice({
         category: item.requestCategory,
         subCategory: item.requestSubCategory,
         requestSource: item.source,
-        statusApproval: item.approval,
-        statusPrerequisite: item.prerequisiteStatus ?? null,
       }));
       if (isLoadMore) {
         state.serviceRequests = [...(state.serviceRequests || []), ...items];
@@ -842,6 +961,18 @@ const serviceRequestSlice = createSlice({
       state.isFailed = true;
     },
 
+    [getDetailDraftServiceRequest.pending]: (state) => {
+      state.loading_detail_draft = true;
+    },
+    [getDetailDraftServiceRequest.fulfilled]: (state, action) => {
+      state.loading_detail_draft = false;
+      state.data_detail_draft = action.payload;
+    },
+    [getDetailDraftServiceRequest.rejected]: (state) => {
+      state.loading_detail_draft = false;
+      state.data_detail_draft = null;
+    },
+
     [getServiceRequestById.pending]: (state) => {
       state.loading_detail = true;
       state.isFailed = false;
@@ -893,6 +1024,30 @@ const serviceRequestSlice = createSlice({
     },
     [updateServiceRequestForAccount.rejected]: (state) => {
       state.loading = false;
+      state.isFailed = true;
+    },
+
+    [updateCompleteServiceRequest.pending]: (state) => {
+      state.loading_update = true;
+    },
+    [updateCompleteServiceRequest.fulfilled]: (state, action) => {
+      state.loading_update = false;
+      state.isSuccess = true;
+    },
+    [updateCompleteServiceRequest.rejected]: (state) => {
+      state.loading_update = false;
+      state.isFailed = true;
+    },
+
+    [updateServiceRequestStatus.pending]: (state) => {
+      state.loading_status_update = true;
+    },
+    [updateServiceRequestStatus.fulfilled]: (state, action) => {
+      state.loading_status_update = false;
+      state.isSuccess = true;
+    },
+    [updateServiceRequestStatus.rejected]: (state) => {
+      state.loading_status_update = false;
       state.isFailed = true;
     },
 
@@ -1016,6 +1171,36 @@ const serviceRequestSlice = createSlice({
     },
 
     // =====================================================
+    // ATTACHMENTS
+    // =====================================================
+    [getAttachmentsByServiceRequest.pending]: (state) => {
+      state.loading_attachments = true;
+    },
+    [getAttachmentsByServiceRequest.fulfilled]: (state, action) => {
+      state.loading_attachments = false;
+      const raw = action.payload;
+      state.data_attachments = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+    },
+    [getAttachmentsByServiceRequest.rejected]: (state) => {
+      state.loading_attachments = false;
+    },
+
+    // =====================================================
+    // CONTACTS
+    // =====================================================
+    [getContactsByServiceRequest.pending]: (state) => {
+      state.loading_contacts = true;
+    },
+    [getContactsByServiceRequest.fulfilled]: (state, action) => {
+      state.loading_contacts = false;
+      const raw = action.payload;
+      state.data_contacts = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+    },
+    [getContactsByServiceRequest.rejected]: (state) => {
+      state.loading_contacts = false;
+    },
+
+    // =====================================================
     // WORK ORDERS
     // =====================================================
     [getWorkOrdersByServiceRequest.pending]: (state) => {
@@ -1084,5 +1269,6 @@ export const {
   clearWorkOrders,
   clearActivities,
   clearDataRequirements,
+  resetDetailDraft,
 } = serviceRequestSlice.actions;
 export default reducer;

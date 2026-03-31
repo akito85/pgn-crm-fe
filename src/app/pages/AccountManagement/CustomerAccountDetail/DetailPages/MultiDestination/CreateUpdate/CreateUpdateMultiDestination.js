@@ -335,9 +335,9 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   useEffect(() => {
     if (accountId && customerId && accountType) {
       if (isStandard) {
-        dispatch(getAccountStandardDetail({ customerId, accountId }));
+        dispatch(getAccountStandardDetail({ idCustomer: customerId, idAccount: accountId }));
       } else {
-        dispatch(getAccountOneTimeDetail({ customerId, accountId }));
+        dispatch(getAccountOneTimeDetail({ idCustomer: customerId, idAccount: accountId }));
       }
     }
   }, [dispatch, accountId, customerId, accountType]);

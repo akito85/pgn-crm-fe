@@ -175,6 +175,8 @@ const GasDepositTable = ({
 
   // --- Effects ---
   // Re-fetch page 0 whenever sort, search, filters, or filterRules change.
+  // Abort the in-flight request on cleanup so StrictMode double-mounts and
+  // rapid filter changes don't produce stale or duplicate page-0 fetches.
   useEffect(() => {
     const body = {
       page: 0,
@@ -186,7 +188,8 @@ const GasDepositTable = ({
     };
 
     setPage(0);
-    dispatch(getGasDeposit({ id: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDeposit({ id: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).

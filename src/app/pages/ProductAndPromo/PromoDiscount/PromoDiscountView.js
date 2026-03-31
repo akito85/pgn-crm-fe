@@ -265,8 +265,8 @@ const PromoDiscountView = () => {
         named={chooseId}
         menu="promo"
         sliceName="promo"
-        approvalHierarchtDetailsStateName="dataListAppHierDetail"
-        approvalOptionsStateName="dataListAppHierId"
+        approvalHierarchtDetailsName="dataListAppHierDetail"
+        approvalOptionsName="dataListAppHierId"
         getApprovalOptions={getAvailableApprovalPromo}
         getApprovalHierarchyDetails={getSelectedApprovalPromo}
       />

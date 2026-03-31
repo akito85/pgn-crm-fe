@@ -33,8 +33,11 @@ const MultiDestinationApprovalModal = ({
     list_multiDestinationApproval,
     pagination_multiDestinationApproval,
     loading_listMdApproval,
-    loading_approveRejectMd
+    loading_approveMd,
+    loading_rejectMd
   } = useSelector((state) => state.multiDestination);
+
+  const loadingApproval = loading_approveMd || loading_rejectMd;
 
   const searchInput = useRef(null);
   const [form] = Form.useForm();
@@ -282,7 +285,7 @@ const MultiDestinationApprovalModal = ({
         approveOrRejectAllMultiDestination({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected"
+          action
         })
       )
         .unwrap()
@@ -327,13 +330,13 @@ const MultiDestinationApprovalModal = ({
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
-        loading={loading_approveRejectMd}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
             <Button
               type={"menu"}
               onClick={handleCancelForm}
-              disabled={loading_approveRejectMd}
+              disabled={loadingApproval}
             >
               Cancel
             </Button>
@@ -343,7 +346,7 @@ const MultiDestinationApprovalModal = ({
                   prev();
                 }}
                 type={"menu"}
-                disabled={current < 1 || loading_approveRejectMd}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
               </Button>
@@ -355,7 +358,7 @@ const MultiDestinationApprovalModal = ({
                   disabled={
                     current > steps.length - 1 ||
                     steps[current].disabled ||
-                    loading_approveRejectMd
+                    loadingApproval
                   }
                 >
                   Next
@@ -368,8 +371,8 @@ const MultiDestinationApprovalModal = ({
                     onClick={() => handleSave("REJECT")}
                     icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
                     className="flex-row-reverse"
-                    disabled={loading_approveRejectMd}
-                    loading={loading_approveRejectMd}
+                    disabled={!loading_rejectMd && loadingApproval}
+                    loading={loading_rejectMd}
                   >
                     Reject
                   </Button>
@@ -380,8 +383,8 @@ const MultiDestinationApprovalModal = ({
                       <SVGIcon width={14} height={14} name="IconSquareCheck" />
                     }
                     className="flex-row-reverse"
-                    disabled={loading_approveRejectMd}
-                    loading={loading_approveRejectMd}
+                    disabled={!loading_approveMd && loadingApproval}
+                    loading={loading_approveMd}
                   >
                     Approve
                   </Button>
