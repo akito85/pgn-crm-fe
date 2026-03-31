@@ -138,9 +138,11 @@ const PaymentRelation = ({
         named={inactivatePrAccountNumber}
         menu="payment relation"
         sliceName="paymentRelation"
-        approvalOptionsStateName="list_prApprovalOptions"
-        approvalHierarchtDetailsStateName="list_prApprovalHierarchyDetail"
-        loadingInactivateName={"loading_inactivatePr"}
+        approvalOptionsName="list_prApprovalOptions"
+        approvalHierarchtDetailsName="list_prApprovalHierarchyDetail"
+        loadingInactivateName="loading_inactivatePr"
+        loadingListApprovalOptionsName="loading_listPrApprovalOption"
+        loadingListHierarchyDetailName="loading_detailPrApprovalHierarchyDetails"
         getApprovalOptions={getPrApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailPrApprovalHierarchy}
       />

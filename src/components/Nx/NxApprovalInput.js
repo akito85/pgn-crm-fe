@@ -72,6 +72,7 @@ const NxApprovalInput = ({
   formView = true,
   handleSelectHiararchy = () => {},
   loading = false,
+  tableLoading = false,
 }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -164,6 +165,7 @@ const NxApprovalInput = ({
           dataSource={hierarchyDetails}
           columns={columns}
           expandable={{ expandedRowRender }}
+          loading={tableLoading}
         />
       )}
     </div>

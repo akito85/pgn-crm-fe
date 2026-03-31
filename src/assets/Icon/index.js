@@ -69,6 +69,7 @@ import IconJobExecution from "./IconJobExecution";
 import IconExpire from "./IconExpire";
 import IconSquareX from "./IconSquareX";
 import IconSquareCheck from "./IconSquareCheck";
+import IconTripleDot from "./IconTripleDot";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
@@ -220,6 +221,8 @@ const Icon = (props) => {
       return <IconSquareX {...props} />
     case "IconSquareCheck":
       return <IconSquareCheck {...props} />
+    case "IconTripleDot":
+      return <IconTripleDot {...props} />;
     default:
       return;
   }

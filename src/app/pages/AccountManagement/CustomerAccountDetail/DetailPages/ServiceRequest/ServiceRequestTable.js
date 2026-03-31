@@ -32,8 +32,6 @@ const ServiceRequestTable = ({
   const navigate = useNavigate();
 
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
     handleCreate: () => {
       dispatch(
         setData({
@@ -42,16 +40,19 @@ const ServiceRequestTable = ({
         })
       );
       navigate(ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_REQUEST, {
-        state: {
-          idAccount,
-          idCustomer,
-          type: "standard",
-        },
+        state: { idAccount, idCustomer, type: "standard" },
       });
     },
-    updateRoute: ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST,
-    detailRoute: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
-    navigate,
+    handleView: (record) => {
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST, {
+        state: { id: record?.id, idAccount, idCustomer, type: "standard" },
+      });
+    },
+    handleUpdate: (record) => {
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST, {
+        state: { id: record?.id, idAccount, idCustomer, type: "update" },
+      });
+    },
     handleApproval,
     handleDownload,
   });
