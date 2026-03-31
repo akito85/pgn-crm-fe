@@ -102,7 +102,7 @@ const COLUMN_ALIGN = {
   f: 'right',
 };
 
-const makeSearchCol = (dataIndex, search, searchInput, searchedColumn, searchText, handleSearch) => ({
+const makeSearchCol = (dataIndex, search, searchInput, searchedColumn, searchText, handleSearch, handleReset) => ({
   ...getColumnSearchPropsUseFilteredValue(
     search,
     dataIndex,
@@ -110,7 +110,10 @@ const makeSearchCol = (dataIndex, search, searchInput, searchedColumn, searchTex
     searchedColumn,
     searchText,
     handleSearch,
-    true
+    true,
+    "input",
+    [],
+    handleReset
   ),
   render: (text, _record, index) =>
     renderColumn(
@@ -124,7 +127,7 @@ const makeSearchCol = (dataIndex, search, searchInput, searchedColumn, searchTex
     ),
 });
 
-const makeNumberSearchCol = (dataIndex, search, searchInput, searchedColumn, searchText, handleSearch) => ({
+const makeNumberSearchCol = (dataIndex, search, searchInput, searchedColumn, searchText, handleSearch, handleReset) => ({
   ...getColumnSearchPropsUseFilteredValue(
     search,
     dataIndex,
@@ -132,7 +135,10 @@ const makeNumberSearchCol = (dataIndex, search, searchInput, searchedColumn, sea
     searchedColumn,
     searchText,
     handleSearch,
-    true
+    true,
+    "input",
+    [],
+    handleReset
   ),
   render: (text, _record, index) =>
     renderColumn(
@@ -146,7 +152,7 @@ const makeNumberSearchCol = (dataIndex, search, searchInput, searchedColumn, sea
     ),
 });
 
-const makeMergedSearchCol = (dataIndex, rowSpans, search, searchInput, searchedColumn, searchText, handleSearch) => ({
+const makeMergedSearchCol = (dataIndex, rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset) => ({
   ...getColumnSearchPropsUseFilteredValue(
     search,
     dataIndex,
@@ -154,7 +160,10 @@ const makeMergedSearchCol = (dataIndex, rowSpans, search, searchInput, searchedC
     searchedColumn,
     searchText,
     handleSearch,
-    true
+    true,
+    "input",
+    [],
+    handleReset
   ),
   render: (text, _record, index) => {
     const span = rowSpans?.[dataIndex]?.[index] ?? 1;
@@ -181,7 +190,8 @@ export const columnsAccounting = (
   search = {},
   rowSpans = {},
   groupIndex = 1,
-  groupSize = 1
+  groupSize = 1,
+  handleReset = null
 ) => {
   const rawColumns = [
   {
@@ -200,7 +210,7 @@ export const columnsAccounting = (
     title: "PGN ORGANIZATION IN SAP",
     sorter: true,
     width: 220,
-    ...makeMergedSearchCol("pgnOrgSap", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("pgnOrgSap", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "year",
@@ -209,7 +219,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 90,
     isClassification: true,
-    ...makeMergedSearchCol("year", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("year", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "month",
@@ -218,7 +228,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 90,
     isClassification: true,
-    ...makeMergedSearchCol("month", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("month", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "postBatchNumber",
@@ -226,7 +236,7 @@ export const columnsAccounting = (
     title: "POST BATCH NUMBER",
     sorter: true,
     width: 180,
-    ...makeMergedSearchCol("postBatchNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("postBatchNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "transactionNumber",
@@ -234,7 +244,7 @@ export const columnsAccounting = (
     title: "TRANSACTION NUMBER",
     sorter: true,
     width: 190,
-    ...makeMergedSearchCol("transactionNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("transactionNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "lineNumber",
@@ -243,7 +253,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 130,
     isClassification: true,
-    ...makeSearchCol("lineNumber", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("lineNumber", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "invNumber",
@@ -251,7 +261,7 @@ export const columnsAccounting = (
     title: "INV NUMBER",
     sorter: true,
     width: 160,
-    ...makeMergedSearchCol("invNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("invNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "accountNumber",
@@ -259,7 +269,7 @@ export const columnsAccounting = (
     title: "ACCOUNT NUMBER",
     sorter: true,
     width: 160,
-    ...makeMergedSearchCol("accountNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("accountNumber", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "accSor",
@@ -268,7 +278,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 120,
     isClassification: true,
-    ...makeMergedSearchCol("accSor", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("accSor", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "accCostCenterArea",
@@ -276,7 +286,7 @@ export const columnsAccounting = (
     title: "ACC. COST CENTER/AREA",
     sorter: true,
     width: 210,
-    ...makeMergedSearchCol("accCostCenterArea", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("accCostCenterArea", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "accountSegment",
@@ -284,7 +294,7 @@ export const columnsAccounting = (
     title: "ACCOUNT SEGMENT",
     sorter: true,
     width: 170,
-    ...makeMergedSearchCol("accountSegment", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("accountSegment", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "accountGroupType",
@@ -292,7 +302,7 @@ export const columnsAccounting = (
     title: "ACCOUNT GROUP TYPE",
     sorter: true,
     width: 190,
-    ...makeMergedSearchCol("accountGroupType", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("accountGroupType", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "accountType",
@@ -300,7 +310,7 @@ export const columnsAccounting = (
     title: "ACCOUNT TYPE",
     sorter: true,
     width: 140,
-    ...makeMergedSearchCol("accountType", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("accountType", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "billingItemCode",
@@ -308,7 +318,7 @@ export const columnsAccounting = (
     title: "BILLING ITEM CODE",
     sorter: true,
     width: 170,
-    ...makeSearchCol("billingItemCode", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("billingItemCode", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "billPeriod",
@@ -316,7 +326,7 @@ export const columnsAccounting = (
     title: "BILL PERIOD",
     sorter: true,
     width: 130,
-    ...makeMergedSearchCol("billPeriod", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("billPeriod", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "rateType",
@@ -325,7 +335,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 120,
     isClassification: true,
-    ...makeMergedSearchCol("rateType", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("rateType", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "dueDate",
@@ -333,7 +343,7 @@ export const columnsAccounting = (
     title: "DUE DATE",
     sorter: true,
     width: 130,
-    ...makeMergedSearchCol("dueDate", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("dueDate", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "custIdSap",
@@ -341,7 +351,7 @@ export const columnsAccounting = (
     title: "CUST ID SAP",
     sorter: true,
     width: 130,
-    ...makeMergedSearchCol("custIdSap", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("custIdSap", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "categorySap",
@@ -350,7 +360,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 150,
     isClassification: true,
-    ...makeMergedSearchCol("categorySap", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("categorySap", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "documentDate",
@@ -358,7 +368,7 @@ export const columnsAccounting = (
     title: "DOCUMENT DATE",
     sorter: true,
     width: 160,
-    ...makeMergedSearchCol("documentDate", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("documentDate", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "postingDate",
@@ -366,7 +376,7 @@ export const columnsAccounting = (
     title: "POSTING DATE",
     sorter: true,
     width: 150,
-    ...makeMergedSearchCol("postingDate", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("postingDate", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "currency",
@@ -375,7 +385,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 110,
     isClassification: true,
-    ...makeMergedSearchCol("currency", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("currency", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "exchangeRate",
@@ -384,7 +394,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 150,
     isNumber: true,
-    ...makeNumberSearchCol("exchangeRate", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeNumberSearchCol("exchangeRate", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "transactionGroups",
@@ -393,7 +403,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 190,
     isClassification: true,
-    ...makeSearchCol("transactionGroups", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("transactionGroups", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "glAccount",
@@ -402,7 +412,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 130,
     isClassification: true,
-    ...makeSearchCol("glAccount", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("glAccount", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "amount",
@@ -411,7 +421,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 130,
     isNumber: true,
-    ...makeNumberSearchCol("amount", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeNumberSearchCol("amount", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "equivAmountIdr",
@@ -420,7 +430,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 170,
     isNumber: true,
-    ...makeNumberSearchCol("equivAmountIdr", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeNumberSearchCol("equivAmountIdr", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "equivAmountUsd",
@@ -429,7 +439,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 170,
     isNumber: true,
-    ...makeNumberSearchCol("equivAmountUsd", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeNumberSearchCol("equivAmountUsd", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "specialGl",
@@ -438,7 +448,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 120,
     isClassification: true,
-    ...makeSearchCol("specialGl", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("specialGl", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "withholdingTaxType",
@@ -447,7 +457,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 190,
     isClassification: true,
-    ...makeSearchCol("withholdingTaxType", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("withholdingTaxType", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "withholdingTaxCode",
@@ -456,7 +466,7 @@ export const columnsAccounting = (
     sorter: true,
     width: 190,
     isClassification: true,
-    ...makeSearchCol("withholdingTaxCode", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("withholdingTaxCode", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "costCenterSap",
@@ -464,7 +474,7 @@ export const columnsAccounting = (
     title: "COST CENTER SAP",
     sorter: true,
     width: 160,
-    ...makeSearchCol("costCenterSap", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("costCenterSap", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "transactionReference",
@@ -472,7 +482,7 @@ export const columnsAccounting = (
     title: "TRANSACTION REFERENCE",
     sorter: true,
     width: 210,
-    ...makeMergedSearchCol("transactionReference", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("transactionReference", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "text",
@@ -480,7 +490,7 @@ export const columnsAccounting = (
     title: "TEXT",
     sorter: true,
     width: 100,
-    ...makeSearchCol("text", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("text", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "reference1",
@@ -488,7 +498,7 @@ export const columnsAccounting = (
     title: "REFERENCE 1",
     sorter: true,
     width: 140,
-    ...makeMergedSearchCol("reference1", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeMergedSearchCol("reference1", rowSpans, search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "reference2",
@@ -496,7 +506,7 @@ export const columnsAccounting = (
     title: "REFERENCE 2",
     sorter: true,
     width: 140,
-    ...makeSearchCol("reference2", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("reference2", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "reference3",
@@ -504,7 +514,7 @@ export const columnsAccounting = (
     title: "REFERENCE 3",
     sorter: true,
     width: 140,
-    ...makeSearchCol("reference3", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("reference3", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "meterReadingCode",
@@ -512,7 +522,7 @@ export const columnsAccounting = (
     title: "METER READING CODE",
     sorter: true,
     width: 190,
-    ...makeSearchCol("meterReadingCode", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("meterReadingCode", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
     key: "f",
@@ -521,13 +531,18 @@ export const columnsAccounting = (
     sorter: true,
     width: 70,
     isClassification: true,
-    ...makeSearchCol("f", search, searchInput, searchedColumn, searchText, handleSearch),
+    ...makeSearchCol("f", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   ];
   return rawColumns.map((col) => ({
     ...col,
     align: COLUMN_ALIGN[col.key] || 'left',
-    onHeaderCell: () => ({ style: { padding: '3px 6px' } }),
+    onHeaderCell: () => ({
+      style: {
+        padding: '3px 6px',
+        ...(col.dataIndex && search[col.dataIndex] ? { backgroundColor: '#ffffff', color: '#000000' } : {}),
+      },
+    }),
     onCell: () => ({ style: { padding: '3px 6px' } }),
   }));
 };

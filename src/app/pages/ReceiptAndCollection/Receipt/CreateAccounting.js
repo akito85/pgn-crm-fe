@@ -14,6 +14,7 @@ import {
     computeRowSpans,
     ACCOUNTING_MERGED_FIELDS,
 } from "../../RatingBillingInvoice/Accounting/Table/TableAccounting";
+import { separatorNumber } from "../../../../utils";
 import moment from "moment";
 import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../constants/configApp";
@@ -64,10 +65,10 @@ const CreateAccounting = () => {
     const [loading, setLoading] = useState(false);
     const [attachments, setAttachments] = useState([]);
 
-    // Search state required by columnsAccounting signature (no-op for now)
-    const [search] = useState({});
-    const [searchText] = useState("");
-    const [searchedColumn] = useState("");
+    // Search state for per-column client-side filtering
+    const [search, setSearch] = useState({});
+    const [searchText, setSearchText] = useState("");
+    const [searchedColumn, setSearchedColumn] = useState("");
 
     // Journal recommendation received from backend
     const [recommendation, setRecommendation] = useState({
@@ -121,22 +122,55 @@ const CreateAccounting = () => {
         }
     };
 
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+        const value = selectedKeys[0] ?? "";
+        setSearchText(value);
+        setSearchedColumn(dataIndex);
+        setSearch((prev) => ({ ...prev, [dataIndex]: value || undefined }));
+    };
+
+    const handleReset = (clearFilters, dataIndex) => {
+        clearFilters();
+        setSearch((prev) => {
+            const next = { ...prev };
+            delete next[dataIndex];
+            return next;
+        });
+        setSearchText("");
+    };
+
     // Flatten recommendation details to keyed rows
     const journalData = useMemo(
         () => (recommendation?.details || []).map((item, idx) => ({ ...item, key: idx })),
         [recommendation]
     );
 
+    const NUMERIC_JOURNAL_COLS = ["exchangeRate", "amount", "equivAmountIdr", "equivAmountUsd"];
+
+    const filteredJournalData = useMemo(() => {
+        const activeFilters = Object.entries(search).filter(([, val]) => val);
+        if (!activeFilters.length) return journalData;
+        return journalData.filter((record) =>
+            activeFilters.every(([col, val]) => {
+                const cellValue = NUMERIC_JOURNAL_COLS.includes(col)
+                    ? separatorNumber(record[col])
+                    : record[col];
+                return cellValue?.toString()?.toLowerCase()?.includes(val.toLowerCase());
+            })
+        );
+    }, [journalData, search]); // eslint-disable-line react-hooks/exhaustive-deps
+
     // Group rows by transactionNumber — one table per group
     const groupedJournals = useMemo(() => {
         const groups = {};
-        journalData.forEach((item) => {
+        filteredJournalData.forEach((item) => {
             const key = item.transactionNumber || `_row_${item.key}`;
             if (!groups[key]) groups[key] = [];
             groups[key].push(item);
         });
         return Object.values(groups);
-    }, [journalData]);
+    }, [filteredJournalData]);
 
     // Pre-compute column definitions per group (rowSpans included)
     const groupedJournalColumns = useMemo(
@@ -147,11 +181,12 @@ const CreateAccounting = () => {
                     searchInput,
                     searchedColumn,
                     searchText,
-                    () => {},
+                    handleSearch,
                     search,
                     rowSpans,
                     idx + 1,
-                    groupRows.length
+                    groupRows.length,
+                    handleReset
                 );
             }),
         [groupedJournals, search, searchText, searchedColumn]
@@ -333,7 +368,7 @@ const CreateAccounting = () => {
                             <TableRBI
                                 idTable="receipt-accounting-journal-table-empty"
                                 dataSource={[]}
-                                columns={columnsAccounting(searchInput, searchedColumn, searchText, () => {}, search, {}, 1, 0)}
+                                columns={columnsAccounting(searchInput, searchedColumn, searchText, handleSearch, search, {}, 1, 0, handleReset)}
                                 totalData={0}
                                 tableScrolled={{ x: 11000, y: 400 }}
                                 loading={loading}
