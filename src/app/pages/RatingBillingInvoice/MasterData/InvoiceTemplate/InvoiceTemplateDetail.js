@@ -331,7 +331,7 @@ const InvoiceTemplateDetail = () => {
           className="!overflow-visible [&>div]:!overflow-visible"
         >
           {/* Inactive Request Info */}
-          {bodyApproval.isApprover &&
+          {/* {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_INVOICE_TEMPLATE" && (
               <CardContainer header={"Inactive Request Information"}>
@@ -351,7 +351,7 @@ const InvoiceTemplateDetail = () => {
                   </DetailText>
                 </div>
               </CardContainer>
-            )}
+            )} */}
 
           {/* Tabs - only switches top section */}
           <Tabs

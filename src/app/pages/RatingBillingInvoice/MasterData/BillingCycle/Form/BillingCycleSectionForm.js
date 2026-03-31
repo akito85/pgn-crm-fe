@@ -38,10 +38,19 @@ const BillingCycleSectionForm = ({
               required: true,
               message: "Please input your Begin Cycle!",
             },
+            {
+              validator: (_, value) => {
+                if (value && (Number(value) > 31 || Number(value) < 1)) {
+                  return Promise.reject("Begin Cycle must be between 1 and 31");
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <InputComponent
             type={"number"}
+            maxLength={2}
             disabled={type !== "create" && status !== "DRAFT" ? true : false}
           />
         </Form.Item>
@@ -53,10 +62,19 @@ const BillingCycleSectionForm = ({
               required: true,
               message: "Please input your End Cycle!",
             },
+            {
+              validator: (_, value) => {
+                if (value && (Number(value) > 31 || Number(value) < 1)) {
+                  return Promise.reject("End Cycle must be between 1 and 31");
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <InputComponent
             type={"number"}
+            maxLength={2}
             disabled={type !== "create" && status !== "DRAFT" ? true : false}
           />
         </Form.Item>

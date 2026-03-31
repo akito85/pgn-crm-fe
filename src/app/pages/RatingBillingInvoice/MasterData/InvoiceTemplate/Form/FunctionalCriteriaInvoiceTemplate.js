@@ -667,7 +667,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
             record.type !== "exist";
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="gap-2">
               {editable ? (
                 <>
                   <ButtonComponent
@@ -687,10 +687,10 @@ const FunctionalCriteriaInvoiceTemplate = ({
                 <div className="flex w-full justify-center gap-4">
                   {showAction === "show" ? (
                     <Tooltip title="Detail">
-                      <div className="pt-1">
+                      <div className="pt-0">
                         <SVGIcon
                           name="IconDetail"
-                          width={24}
+                          width={20}
                           onClick={() => handleDetail(record)}
                         />
                       </div>
@@ -859,6 +859,10 @@ const FunctionalCriteriaInvoiceTemplate = ({
             }
             #criteria-table-invoice .ant-table-tbody > tr > td {
               font-size: 11px;
+              padding: 2px 8px !important;
+            }
+            #criteria-table-invoice .ant-table-thead > tr > th {
+              padding: 2px 8px !important;
             }
             #criteria-table-invoice .ant-table-thead .ant-table-cell-fix-left,
             #criteria-table-invoice .ant-table-thead .ant-table-cell-fix-right {
@@ -871,6 +875,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
           <Form form={formTableCriteria} component={false}>
             <Table
               bordered
+              size="small"
               className="w-full"
               dataSource={data}
               columns={filterColumn(

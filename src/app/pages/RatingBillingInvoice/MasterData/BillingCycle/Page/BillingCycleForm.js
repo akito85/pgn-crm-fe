@@ -634,29 +634,10 @@ const BillingCycleForm = ({ type }) => {
           />
         </Form>
 
-        <ModalCustom
-          isOpen={modalConfirm}
-          handleCancel={() => setModalConfirm(false)}
-          header={"Confirmation"}
-          width={1000}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-between gap-5 p-4">
-              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
-                isPrimary
-                onClick={handleSave}
-                loading={loadingSave}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <ModalConfirmationBillingCycle
+        <ModalConfirmationBillingCycle
+            isOpen={modalConfirm}
+            handleCancel={() => setModalConfirm(false)}
+            handleConfirm={handleSave}
             data={bodyData}
             listDataAppHierDetail={appHierDataDetail}
             apiApproval={dataListAppHierId}
@@ -665,7 +646,6 @@ const BillingCycleForm = ({ type }) => {
             selectedHierarchy={selectedHierarchy}
             apiTimeUnit={list_time_unit}
           />
-        </ModalCustom>
 
         <ModalConfirm
           isOpen={modalBack}
