@@ -68,8 +68,8 @@ const ListDetailDeduction = () => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    dispatch(getCustomerDeductionList({ page, pageSize }));
-  }, [dispatch, page, pageSize]);
+    dispatch(getCustomerDeductionList({ page, pageSize, id }));
+  }, [dispatch, page, pageSize, id]);
 
   useEffect(() => {
     if (data_detail && data_detail.deduction?.appHierId) {

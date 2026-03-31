@@ -6,19 +6,10 @@ import DateComponent from "../../../../../components/DateComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 
 const DeductionForm = (props) => {
-  const { form, isEmbedded } = props;
+  const { form, isEmbedded, dataType, dataPeriod } = props;
 
-  // Dummy Data
-  const periodOptions = [
-    { label: "Jan 2023", value: "Jan 2023" },
-    { label: "Feb 2023", value: "Feb 2023" },
-    { label: "Mar 2023", value: "Mar 2023" },
-  ];
-
-  const typeOptions = [
-    { label: "Gas", value: "Gas" },
-    { label: "Non-Gas", value: "Non-Gas" },
-  ];
+  const periodOptions = dataPeriod?.map(item => ({ label: item.p_label || item.label, value: item.p_value || item.value })) || [];
+  const typeOptions = dataType?.map(item => ({ label: item.p_label || item.label, value: item.p_value || item.value })) || [];
 
   const content = (
     <div className="w-full">

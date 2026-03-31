@@ -13,10 +13,12 @@ import SectionCard from "../../../../../components/SectionCard";
 import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import {
   getTypeDDL,
+  getPeriodDDL,
   getAllApprovalList,
   getDetailDeduction,
   getListApprovalById,
   getListCategory,
+  createDeduction as saveDeduction,
 } from "../../../../../redux/slices/receipt_collection/deduction";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DeductionForm from "./DeductionForm";
@@ -46,6 +48,7 @@ const ListFormDeduction = (props) => {
     dataListAppHierDetail,
     loading,
     dataType,
+    dataPeriod,
   } = useSelector((state) => state.deduction);
 
   // Declaration
@@ -89,6 +92,7 @@ const ListFormDeduction = (props) => {
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getTypeDDL());
+    dispatch(getPeriodDDL());
   }, [dispatch]);
 
   useEffect(() => {
@@ -253,9 +257,19 @@ const ListFormDeduction = (props) => {
 
   const handleSave = async () => {
     setModalConfirm(false);
-    // Logic to save
-    console.log("Saving data:", sendBody);
-    navigate(-1);
+    const body = {
+      ...sendBody,
+      apphierId: selectedHierarchy,
+      attachments: listDataAttachment.map(a => ({
+        attachmentId: a.attachmentId,
+        category: a.category
+      }))
+    };
+    dispatch(saveDeduction({ body })).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+      }
+    });
   };
 
   const handleCustomerAmountChange = (id, value) => {
@@ -319,6 +333,7 @@ const ListFormDeduction = (props) => {
               <SectionCard title="DEDUCTION INFORMATION">
                 <DeductionForm
                   dataType={dataType}
+                  dataPeriod={dataPeriod}
                   form={form}
                   isEmbedded={true}
                 />

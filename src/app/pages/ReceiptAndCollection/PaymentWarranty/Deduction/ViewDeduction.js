@@ -21,7 +21,7 @@ import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { getDeductionColumns } from "./DeductionColumns";
 
 // Redux
-import { getDeductionList, downloadDeductionList, deleteDeduction, getApprovalHistory } from "../../../../../redux/slices/receipt_collection/deduction";
+import { getPaginateDeduction, getDownloadDeduction, deleteDeduction, getApprovalHistory } from "../../../../../redux/slices/receipt_collection/deduction";
 
 const ViewDeduction = () => {
   const dispatch = useDispatch();
@@ -56,7 +56,7 @@ const ViewDeduction = () => {
   ];
 
   useEffect(() => {
-    dispatch(getDeductionList({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+    dispatch(getPaginateDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
   }, [dispatch, page, pageSize, search]);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const ViewDeduction = () => {
   };
 
   const handleDownload = () => {
-    dispatch(downloadDeductionList({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+    dispatch(getDownloadDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
   };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -104,9 +104,11 @@ const ViewDeduction = () => {
   };
 
   const handleConfirmDelete = () => {
-    dispatch(deleteDeduction(selectedRecord.id)).then(() => {
-      setOpenModalDelete(false);
-      dispatch(getDeductionList({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+    dispatch(deleteDeduction(selectedRecord.id)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        setOpenModalDelete(false);
+        dispatch(getPaginateDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+      }
     });
   };
 
