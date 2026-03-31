@@ -59,7 +59,7 @@ const BillingCycleForm = ({ type }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
-  const [flag, setFlag] = useState(false);
+  const flagRef = React.useRef(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
   const [startDate, setStartDate] = useState();
@@ -318,19 +318,23 @@ const BillingCycleForm = ({ type }) => {
     return body;
   };
 
+  // Helper to build processData with the current flag ref value
+  const buildProcessData = (bodyDataArg) =>
+    processData({
+      bodyData: bodyDataArg,
+      id,
+      type,
+      dateFormatting,
+      flag: flagRef.current,
+    });
+
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
         ? "/v1/dbs/api/billingcycle/validate-create"
         : "/v1/dbs/api/billingcycle/validate-update";
 
-    const body = processData({
-      bodyData: formValue,
-      id,
-      type,
-      dateFormatting,
-      flag,
-    });
+    const body = buildProcessData(formValue);
 
     try {
       await dispatch(
@@ -426,13 +430,7 @@ const BillingCycleForm = ({ type }) => {
     setLoadingSave(true);
     setModalConfirm(false);
 
-    const payload = processData({
-      bodyData: bodyData,
-      dateFormatting,
-      flag,
-      id,
-      type,
-    });
+    const payload = buildProcessData(bodyData);
 
     if (type === "create") {
       dispatch(createBillingCycle(payload))
@@ -533,18 +531,18 @@ const BillingCycleForm = ({ type }) => {
   };
 
   const handleSubmit = () => {
-    setFlag(true);
+    flagRef.current = true;
     setTimeout(() => {
-        form.submit();
+      form.submit();
     }, 0);
-};
+  };
 
   const handleSaveDraft = () => {
-    setFlag(false);
+    flagRef.current = false;
     setTimeout(() => {
-        form.submit();
+      form.submit();
     }, 0);
-};
+  };
 
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
@@ -568,8 +566,12 @@ const BillingCycleForm = ({ type }) => {
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
         >
-         {valuePage === tabData[0].value && (
-            <div>
+          <div
+            style={{
+              display:
+                valuePage !== tabData[0].value ? "none" : undefined,
+            }}
+          >
               <BillingCycleSectionForm
                 type={type}
                 dataTimeUnit={list_time_unit}
@@ -577,11 +579,14 @@ const BillingCycleForm = ({ type }) => {
                 status={status}
                 handleStartDate={handleStartDate}
               />
-            </div>
-          )}
+          </div>
 
-          {valuePage === tabData[1].value && (
-            <div>
+          <div
+            style={{
+              display:
+                valuePage !== tabData[1].value ? "none" : undefined,
+            }}
+          >
               <BaseContainer header={"Approval Information"}>
                 <ApprovalComponentGeneral
                   type={type}
@@ -591,11 +596,14 @@ const BillingCycleForm = ({ type }) => {
                   updateSelectedHierarchy={setSelectedHierarchy}
                 />
               </BaseContainer>
-            </div>
-          )}
+          </div>
 
-          {valuePage === tabData[2].value && (
-            <div>
+          <div
+            style={{
+              display:
+                valuePage !== tabData[2].value ? "none" : undefined,
+            }}
+          >
               <BaseContainer header={"Attachment Information"}>
                 <AttachmentComponent
                   type={type}
@@ -611,8 +619,7 @@ const BillingCycleForm = ({ type }) => {
                   mandatory={true}
                 />
               </BaseContainer>
-            </div>
-          )}
+          </div>
 
           <FormFooter
             current={current}
@@ -627,29 +634,10 @@ const BillingCycleForm = ({ type }) => {
           />
         </Form>
 
-        <ModalCustom
-          isOpen={modalConfirm}
-          handleCancel={() => setModalConfirm(false)}
-          header={"Confirmation"}
-          width={1000}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-between gap-5 p-4">
-              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
-                isPrimary
-                onClick={handleSave}
-                loading={loadingSave}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <ModalConfirmationBillingCycle
+        <ModalConfirmationBillingCycle
+            isOpen={modalConfirm}
+            handleCancel={() => setModalConfirm(false)}
+            handleConfirm={handleSave}
             data={bodyData}
             listDataAppHierDetail={appHierDataDetail}
             apiApproval={dataListAppHierId}
@@ -658,7 +646,6 @@ const BillingCycleForm = ({ type }) => {
             selectedHierarchy={selectedHierarchy}
             apiTimeUnit={list_time_unit}
           />
-        </ModalCustom>
 
         <ModalConfirm
           isOpen={modalBack}
@@ -686,7 +673,7 @@ const BillingCycleForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>

@@ -5,7 +5,7 @@ import moment from "moment";
 import DateComponent from "../../../../../../components/DateComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../components/InputComponent";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import FunctionalCriteriaInvoiceTemplate from "./FunctionalCriteriaInvoiceTemplate";
 import {
   getCriteria,
@@ -120,8 +120,8 @@ const InvoiceTemplateSectionForm = ({
 
   return (
     <div>
-      <BaseContainer header={"Invoice Template Information"}>
-        <div className="w-full grid grid-cols-4 gap-4">
+      <CardContainer header={"Invoice Template Information"}>
+        <div className="w-full grid grid-cols-5 gap-2">
           <Form.Item
             label={"Invoice Name"}
             name={"invoiceName"}
@@ -238,7 +238,7 @@ const InvoiceTemplateSectionForm = ({
             />
           </Form.Item>
 
-          <div className="col-span-4">
+          <div className="col-span-5">
             <Form.Item
               label={"Criteria"}
               name={"criteria"}
@@ -262,7 +262,7 @@ const InvoiceTemplateSectionForm = ({
             </Form.Item>
           </div>
 
-          <div className="col-span-4">
+          <div className="col-span-5">
             <Form.Item
               label={"Description"}
               name={"description"}
@@ -276,9 +276,9 @@ const InvoiceTemplateSectionForm = ({
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"CRITERIA INFORMATION"}>
+      <CardContainer header={"CRITERIA INFORMATION"}>
         <div className="w-full">
           <FunctionalCriteriaInvoiceTemplate
             type={type}
@@ -295,7 +295,7 @@ const InvoiceTemplateSectionForm = ({
             validEndDate={endDate}
           />
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };
