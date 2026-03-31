@@ -633,6 +633,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_recalculateExpireGd}
               detail={detail}
+              details={details}
               handleSubmitForm={handleSubmitForm}
             />
           </Form>
