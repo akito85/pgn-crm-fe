@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin, Checkbox } from "antd";
@@ -74,9 +74,26 @@ const BillingCreateAccountingForm = () => {
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
-  const [search] = useState({});
-  const [searchText] = useState("");
-  const [searchedColumn] = useState("");
+  const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
+  }, []);
+
+  const handleReset = useCallback((clearFilters, dataIndex) => {
+    clearFilters?.();
+    setSearch((prev) => {
+      const next = { ...prev };
+      delete next[dataIndex];
+      return next;
+    });
+    setSearchText("");
+  }, []);
 
   useEffect(() => {
     if (billingData?.billCode) {
@@ -106,23 +123,41 @@ const BillingCreateAccountingForm = () => {
     return Object.values(groups);
   }, [journalData]);
 
-  const groupedJournalColumns = useMemo(
-    () =>
-      groupedJournals.map((groupRows, idx) => {
-        const groupRowSpans = computeRowSpans(groupRows, ACCOUNTING_MERGED_FIELDS);
-        return columnsAccounting(
-          searchInput,
-          searchedColumn,
-          searchText,
-          () => {},
-          search,
-          groupRowSpans,
-          idx + 1,
-          groupRows.length
-        );
-      }),
-    [groupedJournals, search, searchText, searchedColumn]
-  );
+  // Per-group filtered rows + columns. Always derived from groupedJournals so
+  // tables never disappear (keeping filter dropdowns accessible) even when a
+  // filter yields zero matches.
+  const groupedJournalData = useMemo(() => {
+    const activeFilters = Object.entries(search).filter(([, v]) => v != null && v !== "");
+    return groupedJournals.map((groupRows, idx) => {
+      const filteredRows =
+        activeFilters.length === 0
+          ? groupRows
+          : groupRows.filter((item) =>
+              activeFilters.every(([key, val]) =>
+                String(item[key] ?? "").toLowerCase().includes(String(val).toLowerCase())
+              )
+            );
+      const groupRowSpans = computeRowSpans(filteredRows, ACCOUNTING_MERGED_FIELDS);
+      const cols = columnsAccounting(
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search,
+        groupRowSpans,
+        idx + 1,
+        filteredRows.length,
+        handleReset
+      ).map((col) => ({
+        ...col,
+        filteredValue:
+          col.dataIndex && search[col.dataIndex] != null && search[col.dataIndex] !== ""
+            ? [search[col.dataIndex]]
+            : null,
+      }));
+      return { rows: filteredRows, columns: cols };
+    });
+  }, [groupedJournals, search, searchText, searchedColumn, handleSearch, handleReset]);
 
   const routes = fromBilling
     ? [
@@ -318,7 +353,7 @@ const BillingCreateAccountingForm = () => {
           </CardContainer>
 
           <CardContainer subHeader="Journal Information">
-            {groupedJournals.map((groupRows, idx) => (
+            {groupedJournalData.map(({ rows, columns }, idx) => (
               <CardContainerNoBorder
                 key={idx}
                 header={`Journal ${idx + 1}`}
@@ -327,9 +362,9 @@ const BillingCreateAccountingForm = () => {
               >
                 <TableRBI
                   idTable={`billing-accounting-journal-table-${idx}`}
-                  dataSource={groupRows}
-                  columns={groupedJournalColumns[idx]}
-                  totalData={groupRows.length}
+                  dataSource={rows}
+                  columns={columns}
+                  totalData={rows.length}
                   tableScrolled={{ x: 11000, y: 400 }}
                   loading={loading_form}
                   showExport={false}
