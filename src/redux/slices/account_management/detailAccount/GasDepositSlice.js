@@ -27,6 +27,14 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
+  loading_listGdDetailMutationCmv: false,
+  list_gasDepositDetailMutationCmv: [],
+  pagination_gasDepositDetailMutationCmv: {
+    totalPage: 0,
+    totalElement: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   loading_listGdHistory: false,
   list_gasDepositHistory: [],
   pagination_gasDepositHistory: {
@@ -55,12 +63,6 @@ const initialState = {
   detailDraft_gasDeposit: {},
   loading_detailGdHistory: false,
   detail_gasDepositHistory: {},
-  pagination_gdDetailAttachment: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10,
-  },
   loading_gdApprovalHistory: false,
   data_gdApprovalHistory: {},
   loading_approveRejectGd: false,
@@ -116,6 +118,24 @@ export const getGasDepositApproval = createAsyncThunk(
 
 export const getGasDepositDetailMutation = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATION",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+          headers: { "Accept": "application/json, text/plain, */*" }
+        });
+      return {
+        ...response.data,
+        isLoadMore,
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getGasDepositDetailMutationCmv = createAsyncThunk(
+  "GET_GAS_DEPOSIT_DETAIL_MUTATION_CMV",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${id}`;
@@ -715,6 +735,51 @@ const gasDepositSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_gasDepositDetailMutation = [];
         state.pagination_gasDepositDetailMutation = {
+          totalPage: 0,
+          totalElement: 0,
+          currentPage: 0,
+          pageSize: 10,
+        }
+      }
+    },
+
+    /** Get Gas Deposit Detail Mutation Confirmation Modal View */
+    [getGasDepositDetailMutationCmv.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listGdDetailMutationCmv = true;
+      }
+    },
+    [getGasDepositDetailMutationCmv.fulfilled]: (state, action) => {
+      state.loading_listGdDetailMutationCmv = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_gasDepositDetailMutationCmv.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_gasDepositDetailMutationCmv = [
+            ...state.list_gasDepositDetailMutationCmv,
+            ...filteredResult,
+          ];
+        }
+        else
+          state.list_gasDepositDetailMutationCmv = result;
+      }
+
+      state.pagination_gasDepositDetailMutationCmv = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      }
+    },
+    [getGasDepositDetailMutationCmv.rejected]: (state, action) => {
+      state.loading_listGdDetailMutationCmv = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_gasDepositDetailMutationCmv = [];
+        state.pagination_gasDepositDetailMutationCmv = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,

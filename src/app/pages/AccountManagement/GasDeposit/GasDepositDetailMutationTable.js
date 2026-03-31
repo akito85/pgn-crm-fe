@@ -1,37 +1,30 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import NxTable from "../../../../components/Nx/NxTable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { getGasDepositDetailMutationColumns } from "./getGasDepositDetailMutationColumns";
 import { useDispatch, useSelector } from "react-redux";
-import { getGasDepositDetailMutation } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { getGasDepositDetailMutation, getGasDepositDetailMutationCmv } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
 /**
  * 
- * @param {{id: number; detailId: number; moduleType: "sa"|"ua"}} 
+ * @param {{id: number; detailId: number; confirmationModalView?: boolean}} 
  * @returns 
  */
 const GasDepositDetailMutationTable = ({
   id,
   detailId,
-  moduleType,
+  confirmationModalView = false,
 }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
   const dispatch = useDispatch();
 
-  const isStandAlone = moduleType = "sa";
-  const isUnderAccount = moduleType = "ua";
-
-  const isStandard = location.pathname.includes("account-standard");
-  const isOneTime = location.pathname.includes("account-onetime");
+  const loadingName = !confirmationModalView ? "loading_listGdDetailMutation" : "loading_listGdDetailMutationCmv";
+  const listName = !confirmationModalView ? "list_gasDepositDetailMutation" : "list_gasDepositDetailMutationCmv";
+  const paginationName = !confirmationModalView ? "pagination_gasDepositDetailMutation" : "pagination_gasDepositDetailMutationCmv";
 
   const {
-    loading_listGdDetailMutation: loadingList,
-    list_gasDepositDetailMutation: gasDepositDetailMutations,
-    pagination_gasDepositDetailMutation: pagination,
+    [loadingName]: loadingList,
+    [listName]: gasDepositDetailMutations,
+    [paginationName]: pagination,
   } = useSelector((state) => state.gasDeposit);
 
   const searchInput = useRef(null);
@@ -82,13 +75,22 @@ const GasDepositDetailMutationTable = ({
         filterRules,
       };
 
-      await dispatch(
-        getGasDepositDetailMutation({
-          id: isUnderAccount ? id : undefined,
-          body,
-          isLoadMore: true
-        })
-      ).unwrap();
+      if (!confirmationModalView)
+        await dispatch(
+          getGasDepositDetailMutation({
+            id,
+            body,
+            isLoadMore: true
+          })
+        ).unwrap();
+      else
+        await dispatch(
+          getGasDepositDetailMutationCmv({
+            id,
+            body,
+            isLoadMore: true
+          })
+        ).unwrap();
     }
     setPage(nextPage);
   };
@@ -135,7 +137,12 @@ const GasDepositDetailMutationTable = ({
       filterRules,
     };
 
-    dispatch(getGasDepositDetailMutation({ id: detailId, body, isLoadMore: false }));
+    if (detailId) {
+      if (!confirmationModalView)
+        dispatch(getGasDepositDetailMutation({ id: detailId, body, isLoadMore: false }));
+      else
+        dispatch(getGasDepositDetailMutationCmv({ id: detailId, body, isLoadMore: false }));
+    }
   }, [detailId])
 
   return (

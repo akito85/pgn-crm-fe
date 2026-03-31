@@ -42,7 +42,7 @@ const ConfirmationModalTabs = ({
           header: "Gas Deposit Information",
         },
         selectedDetailId && {
-          content: <GasDepositDetailMutationTable detailId={selectedDetailId} />,
+          content: <GasDepositDetailMutationTable detailId={selectedDetailId} confirmationModalView />,
           header: "Gas Deposit Information",
         },
       ].filter(Boolean),
