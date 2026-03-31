@@ -1,45 +1,21 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
-import { getGasDepositColumns } from "./getGasDepositColumns";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
-import GasDepositDetailTable from "./GasDepositDetailTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getGasDeposit, downloadGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { getGasDeposit, downloadGasDeposit, getGasDepositHistory } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { getGasDepositHistoryColumns } from "./getGasDepositHistoryColumns";
 
-/**
- * Gas deposit list table (container + presentational component).
- * Owns search, pagination, sort, filter, and download state/logic.
- * The parent (`GasDepositModule`) is responsible only for modals, permissions,
- * and the detail mutation table.
- *
- * @param {object}    props
- * @param {"sa"|"ua"} props.moduleType                    - Module context: standalone ("sa") or under-account ("ua")
- * @param {Function}  [props.handleInactivateModal]       - Opens the inactivate confirmation modal
- * @param {Function}  [props.handleApprovalHistoryModal]  - Opens the approval history modal
- * @param {Function}  [props.handleApproval]              - Triggers the approval action
- * @param {Function}  [props.handleSelectDetail]          - Row click / select-detail handler
- * @param {number}    [props.accountId]                   - Account ID (used when moduleType is "ua")
- * @param {number}    [props.cutomerId]                   - Customer ID
- * @param {number}    [props.refreshSignal=0]             - Increment to trigger a page-0 refresh from the parent
- */
 const GasDepositTable = ({
   moduleType,
-  handleInactivateModal = () => {},
-  handleApprovalHistoryModal = () => {},
-  handleApproval = () => {},
-  handleSelectDetail = () => {},
+  handleApprovalHistoryModal,
+  handleDetailModal,
   accountId,
-  cutomerId,
   refreshSignal = 0,
 }) => {
   // --- Hooks ---
-  const location = useLocation();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     list_gasDeposit: dataSource,
@@ -48,11 +24,7 @@ const GasDepositTable = ({
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
-  const isStandAlone = moduleType === "sa";
   const isUnderAccount = moduleType === "ua";
-
-  const isStandard = location.pathname.includes("account-standard");
-  const isOneTime = location.pathname.includes("account-onetime");
 
   const totalElement = pagination.totalElement;
   const hasMore = dataSource.length < totalElement;
@@ -88,7 +60,7 @@ const GasDepositTable = ({
     };
 
     dispatch(
-      getGasDeposit({
+      getGasDepositHistory({
         accountId: isUnderAccount ? accountId : undefined,
         body,
         isLoadMore: false,
@@ -147,7 +119,7 @@ const GasDepositTable = ({
       };
 
       await dispatch(
-        getGasDeposit({
+        getGasDepositHistory({
           accountId: isUnderAccount ? accountId : undefined,
           body,
           isLoadMore: true,
@@ -199,61 +171,12 @@ const GasDepositTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => navigate(
-      isStandAlone ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_SA :
-      isStandard ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT :
-      isOneTime ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_ONETIME :
-        "",
-      {
-        state: {
-          accountId,
-          cutomerId,
-          id,
-        }
-      }
-    ),
-    handleRecalculate: ({ id, recordAccountId, recordCustomerId }) => navigate(
-      isStandAlone ?
-        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_SA :
-      isStandard ?
-        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT :
-      isOneTime ?
-        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_ONETIME :
-        "",
-      {
-        state: {
-          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
-          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
-          id,
-        }
-      }
-    ),
-    handleExpire: ({ id, recordAccountId, recordCustomerId }) => navigate(
-      isStandAlone ?
-        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_SA :
-      isStandard ?
-        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT :
-      isOneTime ?
-        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_ONETIME :
-        "",
-      {
-        state: {
-          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
-          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
-          id,
-        }
-      }
-    ),
-    handleApproval,
-    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
+    handleView: ({ id }) => handleDetailModal({ show: true, id }),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal({ show: true, id }),
     handleDownload,
-    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
-  const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["History"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
@@ -262,13 +185,12 @@ const GasDepositTable = ({
   );
 
   const baseColumns = useMemo(() =>
-    getGasDepositColumns({
+    getGasDepositHistoryColumns({
       search,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      isUnderAccount,
     }),
   [search, searchInput, searchText, searchedColumn]);
 
@@ -277,19 +199,6 @@ const GasDepositTable = ({
   const columns = useMemo(() => {
     return nxApplyFixedColumns(columnDefinitions, fixedColumns);
   }, [columnDefinitions, fixedColumns]);
-
-  /**
-   * Renders the expanded child row for a gas deposit record.
-   * @param {object} record - The parent gas deposit row record
-   */
-  const expandedRowRender = (record) => {
-    return (
-      <GasDepositDetailTable
-        dataSource={record.details}
-        handleView={handleSelectDetail}
-      />
-    );
-  };
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -311,7 +220,6 @@ const GasDepositTable = ({
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
-        expandable={{ expandedRowRender }}
       />
     </div>
   );
