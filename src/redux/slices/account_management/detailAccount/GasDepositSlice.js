@@ -53,8 +53,8 @@ const initialState = {
   detail_gasDeposit: {},
   loading_detailDraftGd: false,
   detailDraft_gasDeposit: {},
-  loading_detailGdDetailAttachment: false,
-  list_gdDetailAttachment: [],
+  loading_detailGdHistory: false,
+  detail_gasDepositHistory: {},
   pagination_gdDetailAttachment: {
     totalPage: 0,
     totalElement: 0,
@@ -189,6 +189,20 @@ export const getDetailDraftGasDeposit = createAsyncThunk(
 
       if (queryParams.toString().length)
         url += `?${queryParams.toString()}`;
+
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDetailGasDepositHistory = createAsyncThunk(
+  "GET_DETAIL_GAS_DEPOSIT_HISTORY",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit-history/${id}`;
 
       const response = await accountManagementService.getDetail(url);
       return response.data;
@@ -781,6 +795,20 @@ const gasDepositSlice = createSlice({
     [getDetailDraftGasDeposit.rejected]: (state) => {
       state.detailDraft_gasDeposit = {};
       state.loading_detailDraftGd = false;
+    },
+
+    /** Get Detail Gas Deposit */
+    [getDetailGasDepositHistory.pending]: (state) => {
+      state.detail_gasDepositHistory = {};
+      state.loading_detailGdHistory = true;
+    },
+    [getDetailGasDepositHistory.fulfilled]: (state, action) => {
+      state.detail_gasDepositHistory = action.payload || {};
+      state.loading_detailGdHistory = false;
+    },
+    [getDetailGasDepositHistory.rejected]: (state) => {
+      state.detail_gasDepositHistory = {};
+      state.loading_detailGdHistory = false;
     },
 
     [recalculateGasDeposit.pending]: (state) => {
