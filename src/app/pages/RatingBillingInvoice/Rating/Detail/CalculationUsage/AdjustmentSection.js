@@ -6,7 +6,7 @@ import { columnsAdjustment } from "./columns/ColumnsAdjustment";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const AdjustmentSection = ({ ratingCodeId }) => {
-  const { data_adjustment, loading } = useSelector((state) => state.rating);
+  const { data_adjustment, loadingCalculation } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_adjustment?.result;
@@ -111,7 +111,7 @@ const AdjustmentSection = ({ ratingCodeId }) => {
         columnDefinitions={columnDefinitions}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
-        loading={loading}
+        loading={loadingCalculation}
       />
     </div>
   );

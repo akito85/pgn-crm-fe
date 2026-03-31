@@ -75,7 +75,7 @@ export const columnsDetailServiceAgreement = (
 
 const DetailSection = ({ SAId }) => {
   // Selector
-  const { data_detailServiceAgreement, loading } = useSelector((state) => state.rating);
+  const { data_detailServiceAgreement, loadingSA } = useSelector((state) => state.rating);
 
   // Declaration
   const dispatch = useDispatch();
@@ -193,7 +193,7 @@ const DetailSection = ({ SAId }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingSA}
         />
       </div>
     </>

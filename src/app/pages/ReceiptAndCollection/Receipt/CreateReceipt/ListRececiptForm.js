@@ -425,14 +425,14 @@ const ListRececiptForm = ({ type }) => {
 
   const handleSubmitForm = (formValue) => {
     // 1. Validasi Allocation Table
-    if (dataTable?.length === 0 && formValue?.custType !== "Prospective") {
-      const errorBody = {
-        title: "Alert",
-        description: `Please input allocation information!`,
-      };
-      dispatch(showModalError(errorBody));
-      return; // Stop eksekusi
-    } 
+    // if (dataTable?.length === 0 && formValue?.custType !== "Prospective") {
+    //   const errorBody = {
+    //     title: "Alert",
+    //     description: `Please input allocation information!`,
+    //   };
+    //   dispatch(showModalError(errorBody));
+    //   return; // Stop eksekusi
+    // } 
     
     // 2. Validasi Approval Hierarchy
     if (!selectedHierarchy) {

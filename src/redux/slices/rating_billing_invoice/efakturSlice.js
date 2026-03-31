@@ -99,6 +99,8 @@ const initialState = {
     dataApprover: {},
   },
 
+  loading_sync: false,
+
   upload_progress: 0,
   upload_results: [],
 
@@ -1365,6 +1367,43 @@ export const createEFakturManual = createAsyncThunk(
   },
 );
 
+// ========================================
+// REQUEST SYNC DATA E-FAKTUR
+// ========================================
+export const requestSyncData = createAsyncThunk(
+  "EFAKTUR/REQUEST_SYNC_DATA",
+  async ({ efakturIds, reason, apphierId }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/request-sync-data";
+      const requestBody = {
+        efakturIds: efakturIds.map((id) => String(id)),
+        reason: reason || "",
+        apphierId: String(apphierId),
+      };
+
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody,
+      );
+
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: response.message || "Request sync data berhasil dikirim",
+            return: false,
+          }),
+        );
+        return response.data;
+      } else {
+        throw new Error(response.message || "Gagal melakukan request sync data");
+      }
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal melakukan request sync data");
+    }
+  },
+);
+
 const efakturSlice = createSlice({
   name: "efaktur",
   initialState,
@@ -1905,6 +1944,17 @@ const efakturSlice = createSlice({
       state.loading_modal = false;
       state.upload_progress = 0;
       state.upload_results = [];
+    },
+
+    // REQUEST SYNC DATA E-FAKTUR
+    [requestSyncData.pending]: (state) => {
+      state.loading_sync = true;
+    },
+    [requestSyncData.fulfilled]: (state) => {
+      state.loading_sync = false;
+    },
+    [requestSyncData.rejected]: (state) => {
+      state.loading_sync = false;
     },
   },
 });
