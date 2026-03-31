@@ -20,7 +20,7 @@ const GasDepositHistoryTable = ({
   const {
     list_gasDeposit: dataSource,
     pagination_gasDeposit: pagination,
-    loading_listGd: loading,
+    loading_listGdHistory: loading,
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
