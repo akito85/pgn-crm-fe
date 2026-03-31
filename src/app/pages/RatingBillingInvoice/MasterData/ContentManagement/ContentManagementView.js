@@ -389,22 +389,27 @@ const ContentManagementView = () => {
         searchText,
         handleSearch
       ),
-      // ✅ Definisikan manual action column dengan Dropdown Menu
+      // ✅ Definisikan manual action column dengan Detail icon + Dropdown Menu
       {
         title: "ACTION",
         key: "action",
         dataIndex: "action",
         fixed: "right",
-        width: 80,
+        width: 100,
         align: "center",
         render: (_, record) => {
-          // Filter hanya action dengan type "table"
-          const tableActions = itemGrantAccess.filter(
-            (item) => item.type === "table"
+          // Filter action table selain "View" untuk dropdown
+          const dropdownActions = itemGrantAccess.filter(
+            (item) => item.type === "table" && item.action !== "View"
+          );
+
+          // Ambil action "View" untuk icon detail
+          const viewAction = itemGrantAccess.find(
+            (item) => item.type === "table" && item.action === "View"
           );
 
           // Buat menu items untuk dropdown
-          const menuItems = tableActions.map((item, idx) => ({
+          const menuItems = dropdownActions.map((item, idx) => ({
             key: idx,
             label: item.render(record, 5),
           }));
@@ -412,19 +417,22 @@ const ContentManagementView = () => {
           const menu = <Menu items={menuItems} />;
 
           return (
-            <Dropdown
-              overlay={menu}
-              trigger={["click"]}
-              placement="bottomRight"
-            >
-              <MoreOutlined
-                style={{
-                  fontSize: "20px",
-                  cursor: "pointer",
-                  color: "#0075bf",
-                }}
-              />
-            </Dropdown>
+            <div className="flex items-center justify-center gap-2">
+              <Dropdown
+                overlay={menu}
+                trigger={["click"]}
+                placement="bottomRight"
+              >
+                <MoreOutlined
+                  style={{
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    color: "#0075bf",
+                  }}
+                />
+              </Dropdown>
+              {viewAction && viewAction.render(record)}
+            </div>
           );
         },
       },

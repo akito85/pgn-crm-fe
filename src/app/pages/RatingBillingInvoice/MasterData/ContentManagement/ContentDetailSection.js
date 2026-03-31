@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
-import RadioTabs from "../../../../../components/RadioTabs";
+import CardContainer from "../../../../../components/CardContainer";
+import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
 import DetailText from "../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
-import { Table, Space, Tooltip } from "antd";
+import { Table, Space, Tooltip, Tabs } from "antd";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -14,12 +14,9 @@ const ContentDetailSection = ({
   dataContentManagement,
   dataHistory,
   dataCriteria,
+  criteriaList,
 }) => {
-  const [valuePage, setValuePage] = useState("Content");
-  const [tabPages] = useState([
-    { value: "Content" },
-    { value: "Criteria" },
-  ]);
+  const [valuePage, setValuePage] = useState("Content Setup");
 
   // State for modal history
   const [modalHistory, setModalHistory] = useState(false);
@@ -29,8 +26,8 @@ const ContentDetailSection = ({
 
   const contentTemplate = dataContentManagement?.contentTemplate || {};
 
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  const onChange = (key) => {
+    setValuePage(key);
   };
 
   const labelStatus = (index) => {
@@ -74,23 +71,18 @@ const ContentDetailSection = ({
   // Render Content Tab
   const renderContentTab = () => {
     return (
-      <div className="space-y-6">
-        {/* Content Information - Display with proper HTML rendering */}
-        <div>
-          <h3 className="text-blue-600 font-semibold mb-4 uppercase text-sm">
-            Content Information
-          </h3>
-          
+      <CollapsibleContainer header={"CONTENT INFORMATION"} border={true} defaultOpen={true}>
+        <div className="space-y-6 pb-3">
           {/* Subject */}
-          <div className="mb-6">
-            <div className="mb-2">
+          <div>
+            <div className="mb-1">
               <span className="font-medium text-gray-700">Subject</span>
             </div>
-            <div 
-              className="bg-white border border-gray-300 rounded p-3 min-h-[50px]"
-              style={{ 
-                wordBreak: 'break-word',
-                whiteSpace: 'pre-wrap'
+            <div
+              style={{
+                wordBreak: "break-word",
+                whiteSpace: "pre-wrap",
+                fontSize: "14px",
               }}
             >
               {contentTemplate.contentSubject || "-"}
@@ -99,28 +91,27 @@ const ContentDetailSection = ({
 
           {/* Body */}
           <div>
-            <div className="mb-2">
+            <div className="mb-1">
               <span className="font-medium text-gray-700">Body</span>
             </div>
-            <div 
-              className="bg-white border border-gray-300 rounded p-4 min-h-[300px]"
+            <div
               style={{
-                lineHeight: '1.6',
-                fontSize: '14px'
+                lineHeight: "1.6",
+                fontSize: "14px",
               }}
             >
-              <div 
-                dangerouslySetInnerHTML={{ 
-                  __html: contentTemplate.contentBody || "-" 
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: contentTemplate.contentBody || "-",
                 }}
                 style={{
-                  wordBreak: 'break-word'
+                  wordBreak: "break-word",
                 }}
               />
             </div>
           </div>
         </div>
-      </div>
+      </CollapsibleContainer>
     );
   };
 
@@ -140,23 +131,28 @@ const ContentDetailSection = ({
     // Dynamically add columns based on available data
     const dynamicColumns = [];
 
-    // Check if any record has these fields and add columns accordingly
-    const hasCustomer = dataCriteria?.some(item => item.customer);
-    const hasBudget = dataCriteria?.some(item => item.budget);
-    const hasProvince = dataCriteria?.some(item => item.province);
-    const hasCity = dataCriteria?.some(item => item.city);
-    const hasDistrict = dataCriteria?.some(item => item.district);
-    const hasSubDistrict = dataCriteria?.some(item => item.subDistrict);
-    const hasArea = dataCriteria?.some(item => item.area);
-    const hasSor = dataCriteria?.some(item => item.sor);
-    const hasIndustrialSector = dataCriteria?.some(item => item.industrialSector);
-    const hasProduct = dataCriteria?.some(item => item.product);
-    const hasGsizes = dataCriteria?.some(item => item.gsizes);
-    const hasCustomerSegment = dataCriteria?.some(item => item.customerSegment);
-    const hasAccountGroupType = dataCriteria?.some(item => item.accountGroupType);
-    const hasAccountClass = dataCriteria?.some(item => item.accountClass);
-    const hasAccountCategory = dataCriteria?.some(item => item.accountCategory);
-    const hasServiceType = dataCriteria?.some(item => item.serviceType);
+    // Helper: check if any record has a non-null/non-empty value for a field
+    const hasField = (field) => dataCriteria?.some(item => {
+      const val = item[field];
+      return val !== null && val !== undefined && val !== "" && val !== "-";
+    });
+
+    const hasCustomer = hasField("customer");
+    const hasBudget = hasField("budget");
+    const hasProvince = hasField("province");
+    const hasCity = hasField("city");
+    const hasDistrict = hasField("district");
+    const hasSubDistrict = hasField("subDistrict");
+    const hasArea = hasField("area");
+    const hasSor = hasField("sor");
+    const hasIndustrialSector = hasField("industrialSector");
+    const hasProduct = hasField("product");
+    const hasGsizes = hasField("gsizes");
+    const hasCustomerSegment = hasField("customerSegment");
+    const hasAccountGroupType = hasField("accountGroupType");
+    const hasAccountClass = hasField("accountClass");
+    const hasAccountCategory = hasField("accountCategory");
+    const hasServiceType = hasField("serviceType");
 
     if (hasCustomer) {
       dynamicColumns.push({
@@ -407,17 +403,14 @@ const ContentDetailSection = ({
 
   return (
     <div>
-      {/* Container 1: Content Setup Information */}
-      <BaseContainer header={"Content Setup Information"}>
-        <div className="grid grid-cols-3 gap-4">
+      {/* Container 1: Content Setup Information - Collapsible */}
+      <CollapsibleContainer header={"CONTENT SETUP INFORMATION"} border={true} defaultOpen={true}>
+        <div className="grid grid-cols-5 gap-4">
           <DetailText label="Name">
             {contentTemplate.templateName || "-"}
           </DetailText>
           <DetailText label="Format">
             {contentTemplate.formatType || "-"}
-          </DetailText>
-          <DetailText label="Category">
-            {contentTemplate.category || "-"}
           </DetailText>
           <DetailText label="Media">
             {contentTemplate.mediaChannel || "-"}
@@ -432,53 +425,45 @@ const ContentDetailSection = ({
               ? moment(contentTemplate.endDate).format(dateFormatting.date)
               : "-"}
           </DetailText>
-          <DetailText label="Status">
-            {labelStatus(contentTemplate.status)}
-          </DetailText>
-          <DetailText label="Status Approval">
-            {labelStatus(contentTemplate.statusApproval)}
-          </DetailText>
-          <div className="col-span-3">
+          <div className="col-span-5">
             <DetailText label="Criteria">
-              {dataCriteria && dataCriteria.length > 0
-                ? dataCriteria
-                    .map((item) => {
-                      const parts = [];
-                      if (item.customerSegment) parts.push(item.customerSegment);
-                      if (item.accountGroupType) parts.push(item.accountGroupType);
-                      return parts.join(", ");
-                    })
-                    .filter(Boolean)
-                    .join("; ") || "All Criteria"
-                : "All Criteria"}
+              {criteriaList && criteriaList.length > 0
+                ? criteriaList.map((item) => item.criteriaName).join(", ")
+                : dataCriteria && dataCriteria.some((item) => item.allCriteria)
+                  ? "All Criteria"
+                  : "-"}
             </DetailText>
           </div>
-          <div className="col-span-3">
+          <div className="col-span-5">
             <DetailText label="Description">
               {contentTemplate.description || "-"}
             </DetailText>
           </div>
         </div>
-      </BaseContainer>
+      </CollapsibleContainer>
 
-      {/* Container 2: Content Detail Information with Tabs */}
-      <BaseContainer
-        header={"Content Detail Information"}
-        type={"tabs"}
-        element={
-          <RadioTabs
-            data={tabPages}
-            onChange={onChange}
-            currentPosition={valuePage}
-          />
-        }
-      >
-        {valuePage === "Content" && renderContentTab()}
-        {valuePage === "Criteria" && renderCriteriaTab()}
-      </BaseContainer>
+      {/* Container 2: Information with Tabs */}
+      <CardContainer header={"INFORMATION"}>
+        <Tabs
+          activeKey={valuePage}
+          onChange={onChange}
+          items={[
+            {
+              key: "Content Setup",
+              label: "Content Setup",
+              children: renderContentTab(),
+            },
+            {
+              key: "Criteria",
+              label: "Criteria",
+              children: renderCriteriaTab(),
+            },
+          ]}
+        />
+      </CardContainer>
 
       {/* Container 3: History Log Information */}
-      <BaseContainer header={"History Log Information"}>
+      <CardContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-3">
           <DetailText label="Record ID">
             {dataHistory.recordId || "-"}
@@ -500,7 +485,7 @@ const ContentDetailSection = ({
             {dataHistory.updatedBy || "-"}
           </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* Modal History Log */}
       <ModalCustom

@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin } from "antd";
+import { Spin, Tabs } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ContentDetailSection from "./ContentDetailSection";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -115,27 +114,34 @@ const ContentManagementDetail = () => {
   // Process Detail Data
   useEffect(() => {
     if (id && data_detail?.contentTemplate?.id === id) {
-      // Data Criteria Information
-      const dataCriteriaList = (data_detail?.contentCriteria || []).map(
+      // Helper: extract label from object field { label, value }
+      const extractLabel = (field) => {
+        if (!field) return null;
+        if (typeof field === "object" && field.label) return field.label;
+        return field;
+      };
+
+      // Data Criteria Information (new response: criteriaData with object fields)
+      const dataCriteriaList = (data_detail?.criteriaData || data_detail?.contentCriteria || []).map(
         (item, index) => {
           return {
             id: item.id,
-            budget: item.budget,
-            subDistrict: item.subDistrict,
-            district: item.district,
-            city: item.city,
-            province: item.province,
-            area: item.area,
-            sor: item.sor,
-            industrialSector: item.industrialSector,
-            product: item.product,
-            gsizes: item.gsizes,
-            customerSegment: item.customerSegment,
-            accountGroupType: item.accountGroupType,
-            accountClass: item.accountClass,
-            accountCategory: item.accountCategory,
-            serviceType: item.serviceType,
-            customer: item.customer,
+            budget: extractLabel(item.budget),
+            subDistrict: extractLabel(item.subDistrict),
+            district: extractLabel(item.district),
+            city: extractLabel(item.city),
+            province: extractLabel(item.province),
+            area: extractLabel(item.area) || extractLabel(item.costCenter),
+            sor: extractLabel(item.sor),
+            industrialSector: extractLabel(item.industrialSector),
+            product: extractLabel(item.product),
+            gsizes: extractLabel(item.gsizes),
+            customerSegment: extractLabel(item.customerSegment),
+            accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
+            accountClass: extractLabel(item.accountClass),
+            accountCategory: extractLabel(item.accountCategory),
+            serviceType: extractLabel(item.serviceType),
+            customer: extractLabel(item.customer),
             startDate: item.startDate,
             endDate: item.endDate,
             allCriteria: item.allCriteria,
@@ -143,6 +149,8 @@ const ContentManagementDetail = () => {
             type: "exist",
             createdDate: item.createdDate,
             createdBy: item.createdBy,
+            updatedDate: item.updatedDate,
+            updatedBy: item.updatedBy,
           };
         }
       );
@@ -175,27 +183,32 @@ const ContentManagementDetail = () => {
       (!data_detail?.approvalInformation?.approvalType ||
         data_detail?.approvalInformation?.approvalType !== "INACTIVE_CONTENT_TEMPLATE")
     ) {
-      // Data Criteria Information Draft
-      const dataDraftCriteriaList = (data_detail_draft?.contentCriteria || []).map(
+      // Data Criteria Information Draft (new response: criteriaData with object fields)
+      const dataDraftCriteriaList = (data_detail_draft?.criteriaData || data_detail_draft?.contentCriteria || []).map(
         (item, index) => {
+          const extractLabel = (field) => {
+            if (!field) return null;
+            if (typeof field === "object" && field.label) return field.label;
+            return field;
+          };
           return {
             id: item.id,
-            budget: item.budget,
-            subDistrict: item.subDistrict,
-            district: item.district,
-            city: item.city,
-            province: item.province,
-            area: item.area,
-            sor: item.sor,
-            industrialSector: item.industrialSector,
-            product: item.product,
-            gsizes: item.gsizes,
-            customerSegment: item.customerSegment,
-            accountGroupType: item.accountGroupType,
-            accountClass: item.accountClass,
-            accountCategory: item.accountCategory,
-            serviceType: item.serviceType,
-            customer: item.customer,
+            budget: extractLabel(item.budget),
+            subDistrict: extractLabel(item.subDistrict),
+            district: extractLabel(item.district),
+            city: extractLabel(item.city),
+            province: extractLabel(item.province),
+            area: extractLabel(item.area) || extractLabel(item.costCenter),
+            sor: extractLabel(item.sor),
+            industrialSector: extractLabel(item.industrialSector),
+            product: extractLabel(item.product),
+            gsizes: extractLabel(item.gsizes),
+            customerSegment: extractLabel(item.customerSegment),
+            accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
+            accountClass: extractLabel(item.accountClass),
+            accountCategory: extractLabel(item.accountCategory),
+            serviceType: extractLabel(item.serviceType),
+            customer: extractLabel(item.customer),
             startDate: item.startDate,
             endDate: item.endDate,
             allCriteria: item.allCriteria,
@@ -245,6 +258,7 @@ const ContentManagementDetail = () => {
             dataContentManagement={dataDetail}
             dataHistory={dataLogInformation}
             dataCriteria={dataCriteria}
+            criteriaList={dataDetail?.criteria}
           />
         );
       case "Draft":
@@ -254,11 +268,12 @@ const ContentManagementDetail = () => {
             dataContentManagement={dataDraft}
             dataHistory={dataLogInformation}
             dataCriteria={dataCriteriaDraft}
+            criteriaList={dataDraft?.criteria}
           />
         );
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <CardContainer header={"ATTACHMENT INFORMATION"}>
             {listDataAttachment && listDataAttachment.length > 0 ? (
               <AttachmentComponent
                 type={"detail"}
@@ -273,7 +288,7 @@ const ContentManagementDetail = () => {
                 No attachment available
               </div>
             )}
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return <></>;
@@ -340,7 +355,7 @@ const ContentManagementDetail = () => {
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_CONTENT_TEMPLATE" && (
-              <BaseContainer header={"inactive request information"}>
+              <CardContainer header={"INACTIVE REQUEST INFORMATION"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
@@ -356,14 +371,19 @@ const ContentManagementDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
+              </CardContainer>
             )}
-          <RadioTabs
-            data={listSectionInfo}
-            onChange={(e) => setValuePage(e.target.value)}
-            currentPosition={valuePage}
+
+          <Tabs
+            activeKey={valuePage}
+            onChange={(key) => setValuePage(key)}
+            destroyInactiveTabPane={false}
+            items={listSectionInfo.map((item) => ({
+              key: item.value,
+              label: item.value,
+              children: layout(item.value),
+            }))}
           />
-          {layout(valuePage)}
         </div>
 
         <div className="flex mt-[30px]">
