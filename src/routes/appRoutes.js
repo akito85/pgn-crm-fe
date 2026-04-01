@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { index } from "./routes";
 import { motion } from "framer-motion";
@@ -40,6 +40,11 @@ const pageTransition = {
 };
 const AppRoutes = () => {
   const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <PageLayout>
       <PrevLocProvider>
