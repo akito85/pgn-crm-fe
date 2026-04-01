@@ -12,12 +12,14 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
   getInvoiceActivityLogs,
+  getInvoiceDetail,
   downloadOriginalInvoice,
   downloadStampedInvoice,
   downloadSignedInvoice,
 } from "../../../../../redux/slices/rating_billing_invoice/emeterai";
 import moment from "moment";
 import CardContainer from "../../../../../components/CardContainer";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
   const dispatch = useDispatch();
@@ -26,13 +28,26 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
   const [logPageSize, setLogPageSize] = useState(10);
 
   // Get log data from Redux
-  const { logData, logLoading, logPageInfo, downloadLoading } = useSelector(
-    (state) => state.emeterai
-  );
+  const {
+    detailData,
+    detailLoading,
+    logData,
+    logLoading,
+    logPageInfo,
+    downloadLoading,
+  } = useSelector((state) => state.emeterai);
+
+  // Fetch detail from API when modal opens
+  useEffect(() => {
+    if (visible && invoiceData?.invoiceNumber) {
+      dispatch(getInvoiceDetail({ invoiceNumber: invoiceData.invoiceNumber }));
+    }
+  }, [visible, invoiceData?.invoiceNumber, dispatch]);
 
   // Safe invoice data with proper fallback using useMemo
   const invoice = useMemo(() => {
-    if (!invoiceData) {
+    const source = detailData;
+    if (!source) {
       return {
         invoiceNumber: "-",
         customerName: "-",
@@ -51,21 +66,21 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
     }
 
     return {
-      invoiceNumber: invoiceData.invoiceNumber || "-",
-      customerName: invoiceData.customerName || "-",
-      accountNumber: invoiceData.accountNumber || "-",
-      accountName: invoiceData.accountName || "-",
-      billPeriod: invoiceData.billPeriod || "-",
-      invoiceDate: invoiceData.invoiceDate || "-",
-      totalAmountEqvIdr: invoiceData.totalAmountEqvIdr || 0,
-      stampStatus: invoiceData.stampStatus || "Not Processed",
-      signStatus: invoiceData.signStatus || "Not Processed",
-      recordId: invoiceData.recordId || invoiceData.id || "-",
-      createdDate: invoiceData.createdDate || "-",
-      createdBy: invoiceData.createdBy || "-",
-      updatedBy: invoiceData.updatedBy || invoiceData.modifiedBy || "-",
+      invoiceNumber: source.invoiceNumber || "-",
+      customerName: source.customerName || "-",
+      accountNumber: source.accountNumber || "-",
+      accountName: source.accountName || "-",
+      billPeriod: source.billPeriod || "-",
+      invoiceDate: source.invoiceDate || "-",
+      totalAmountEqvIdr: source.totalAmountEqvIdr || 0,
+      stampStatus: source.stampStatus || "Not Processed",
+      signStatus: source.signStatus || "Not Processed",
+      recordId: source.recordId || source.id || "-",
+      createdDate: source.createdDate || "-",
+      createdBy: source.createdBy || "-",
+      updatedBy: source.updatedBy || source.modifiedBy || "-",
     };
-  }, [invoiceData]);
+  }, [detailData]);
 
   const formatAmount = (amount) => {
     if (typeof amount === "number") {
@@ -87,7 +102,7 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
           invoiceNumber: invoiceData.invoiceNumber,
           page: logPage,
           pageSize: logPageSize,
-        })
+        }),
       );
     }
   }, [
@@ -117,7 +132,7 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
       await dispatch(
         downloadOriginalInvoice({
           invoiceNumber: invoiceData.invoiceNumber,
-        })
+        }),
       );
     }
   };
@@ -127,7 +142,7 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
       await dispatch(
         downloadStampedInvoice({
           invoiceNumber: invoiceData.invoiceNumber,
-        })
+        }),
       );
     }
   };
@@ -137,7 +152,7 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
       await dispatch(
         downloadSignedInvoice({
           invoiceNumber: invoiceData.invoiceNumber,
-        })
+        }),
       );
     }
   };
@@ -173,11 +188,11 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
 
   // Render information row
   const InfoRow = ({ label, value, valueBold = false, valueColor }) => (
-    <div className="flex mb-2">
-      <div className="w-1/2">
+    <div className="flex flex-col mb-2">
+      <div className="w-full">
         <p className="text-sm text-gray-600">{label}</p>
       </div>
-      <div className="w-1/2">
+      <div className="w-full">
         <p
           className={`text-sm ${valueBold ? "font-bold" : "font-normal"}`}
           style={valueColor ? { color: valueColor } : {}}
@@ -198,12 +213,10 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
       bodyStyle={{ padding: "16px", maxHeight: "80vh", overflowY: "auto" }}
       destroyOnClose
       title={
-        <div className="text-xl font-bold uppercase text-primary">
-          INVOICE DETAIL
-        </div>
+        <div className="text-md uppercase text-primary">INVOICE DETAIL</div>
       }
     >
-      {!invoiceData ? (
+      {detailLoading ? (
         <div style={{ padding: "40px", textAlign: "center" }}>
           <p>Loading invoice details...</p>
         </div>
@@ -249,60 +262,45 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
         // DETAIL VIEW
         <div className="space-y-3">
           {/* GENERAL INFORMATION */}
-          <CardContainer header="GENERAL INFORMATION" border={true}>
-            <div className="grid grid-cols-2">
-              <div>
-                <InfoRow label="Invoice #" value={invoice.invoiceNumber} />
-                <InfoRow label="Issue Date" value={invoice.invoiceDate} />
-                <InfoRow
-                  label="Amount"
-                  value={formatAmount(invoice.totalAmountEqvIdr)}
-                  valueBold={true}
-                />
-              </div>
-              <div>
-                <InfoRow label="Customer" value={invoice.customerName} />
-                <InfoRow label="Due Date" value={invoice.invoiceDate} />
-              </div>
+          <BaseContainer header="GENERAL INFORMATION" border={true}>
+            <div className="grid grid-cols-5 space-x-2">
+              <InfoRow label="Invoice #" value={invoice.invoiceNumber} />
+              <InfoRow label="Customer" value={invoice.customerName} />
+              <InfoRow label="Issue Date" value={invoice.invoiceDate} />
+              <InfoRow label="Due Date" value={invoice.invoiceDate} />
+              <InfoRow
+                label="Amount"
+                value={formatAmount(invoice.totalAmountEqvIdr)}
+              />
             </div>
-          </CardContainer>
+          </BaseContainer>
 
           {/* PROCESSING STATUS */}
-          <CardContainer header="PROCESSING STATUS" border={true}>
-            <div className="grid grid-cols-2 gap-x-4">
+          <BaseContainer header="PROCESSING STATUS" border={true}>
+            <div className="grid grid-cols-2 gap-x-4 pb-3">
               <div>
                 <p className="text-sm font-semibold mb-1">Stamping Status</p>
-                <div
-                  className={`px-2 py-1 inline-block rounded text-sm ${
-                    invoice.stampStatus === "Not Processed"
-                      ? "bg-gray-100 text-gray-700"
-                      : invoice.stampStatus === "SUCCESS"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
+                <StatusComponent
+                  size="small"
+                  colour={invoice.stampStatus?.toLowerCase()}
                 >
                   {invoice.stampStatus}
-                </div>
+                </StatusComponent>
               </div>
               <div>
                 <p className="text-sm font-semibold mb-1">Signing Status</p>
-                <div
-                  className={`px-2 py-1 inline-block rounded text-sm ${
-                    invoice.signStatus === "Not Processed"
-                      ? "bg-gray-100 text-gray-700"
-                      : invoice.signStatus === "SUCCESS"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
+                <StatusComponent
+                  size="small"
+                  colour={invoice.signStatus?.toLowerCase()}
                 >
                   {invoice.signStatus}
-                </div>
+                </StatusComponent>
               </div>
             </div>
-          </CardContainer>
+          </BaseContainer>
 
           {/* HISTORY LOG INFORMATION */}
-          <CardContainer header="HISTORY LOG INFORMATION" border={true}>
+          <BaseContainer header="HISTORY LOG INFORMATION" border={true}>
             <div className="grid grid-cols-2 gap-x-4">
               <div>
                 <InfoRow label="Record ID" value={invoice.recordId} />
@@ -317,11 +315,11 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
                 <InfoRow label="Created By" value={invoice.createdBy} />
               </div>
             </div>
-          </CardContainer>
+          </BaseContainer>
 
           {/* DOCUMENT */}
-          <CardContainer header="DOCUMENT" border={true}>
-            <div className="space-y-2">
+          <BaseContainer header="DOCUMENT" border={true}>
+            <div className="space-y-2 pb-3">
               {/* Download Original Document */}
               <Button
                 icon={<DownloadOutlined />}
@@ -380,7 +378,7 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
                 </Button>
               )}
             </div>
-          </CardContainer>
+          </BaseContainer>
 
           {/* Footer Buttons */}
           <div className="flex justify-end gap-2 mt-3">

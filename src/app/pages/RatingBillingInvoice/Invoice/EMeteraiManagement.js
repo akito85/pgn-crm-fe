@@ -1,5 +1,5 @@
 // EMeteraiManagement.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { message, Dropdown } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { DownOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons";
@@ -25,16 +25,11 @@ const EMeteraiManagement = () => {
   const dispatch = useDispatch();
 
   // Redux state
-  const {
-    data: DATA_INVOICE,
-    loading,
-    stampingLoading,
-    pageInfo,
-  } = useSelector((state) => state.emeterai);
+  const { invoice_list, invoice_pagination, loading, stampingLoading } =
+    useSelector((state) => state.emeterai);
 
   // Local state
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const loadMoreSize = 20;
   const [sort, setSort] = useState("billPeriod~desc");
 
   // Modal states
@@ -67,18 +62,51 @@ const EMeteraiManagement = () => {
 
   // Fetch data on mount and when dependencies change
   useEffect(() => {
-    fetchInvoices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, sort]);
+    dispatch(
+      getAllEMeteraiInvoices({
+        page: 1,
+        pageSize: loadMoreSize,
+        search: "",
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, sort]);
+
+  const handleLoadMore = useCallback(() => {
+    const nextPage = Math.floor(invoice_list.length / loadMoreSize) + 1;
+    dispatch(
+      getAllEMeteraiInvoices({
+        page: nextPage,
+        pageSize: loadMoreSize,
+        search: "",
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, sort, invoice_list.length]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getAllEMeteraiInvoices({
+        page: 1,
+        pageSize: loadMoreSize,
+        search: "",
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, sort]);
 
   const fetchInvoices = () => {
     dispatch(
       getAllEMeteraiInvoices({
-        page: page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         search: "",
-        sort: sort,
-      })
+        sort,
+        isLoadMore: false,
+      }),
     );
   };
 
@@ -158,7 +186,7 @@ const EMeteraiManagement = () => {
       message.success(
         submissionData.stampingMethod === "e-stamping"
           ? "E-Stamping request submitted successfully!"
-          : "Manual stamping uploaded successfully!"
+          : "Manual stamping uploaded successfully!",
       );
     } catch (error) {
       console.error("❌ Stamping Submission Error:", error);
@@ -176,7 +204,7 @@ const EMeteraiManagement = () => {
           createStampingRequest({
             invoiceNumber,
             signingMethod,
-          })
+          }),
         ).unwrap();
       } else if (signingMethod === "manual") {
         await dispatch(
@@ -185,7 +213,7 @@ const EMeteraiManagement = () => {
             file,
             remark: remark || "Manual signing upload",
             apphierId,
-          })
+          }),
         ).unwrap();
       }
 
@@ -195,16 +223,6 @@ const EMeteraiManagement = () => {
     } catch (error) {
       console.error("❌ Signing Submission Error:", error);
     }
-  };
-
-  // Handle pagination change
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
-
-  const handleSizeChange = (current, size) => {
-    setPage(1);
-    setPageSize(size);
   };
 
   // Sort Handler
@@ -233,7 +251,7 @@ const EMeteraiManagement = () => {
     setModalRequest(false);
   };
 
-  const handleRefresh = () => {
+  const handleRefreshBtn = () => {
     fetchInvoices();
   };
 
@@ -278,8 +296,11 @@ const EMeteraiManagement = () => {
                 }}
                 trigger={["click"]}
               >
-                <ButtonComponent type="default">
-                  Approval Configuration <DownOutlined />
+                <ButtonComponent
+                  type="primary"
+                  icon={<DownOutlined width={20} />}
+                >
+                  Approval Configuration
                 </ButtonComponent>
               </Dropdown>
             </div>
@@ -289,18 +310,22 @@ const EMeteraiManagement = () => {
         {/* Table with TableRBI */}
         <TableRBI
           idTable="emeterai-management-table"
-          dataSource={DATA_INVOICE || []}
+          dataSource={invoice_list}
           columns={columnDefinitions}
           loading={loading}
-          pageSize={pageSize}
-          current={page}
-          onChange={handlePageChange}
-          onSizeChanger={handleSizeChange}
           onSort={onSort}
-          totalData={pageInfo.totalElements || 0}
+          totalData={invoice_pagination?.totalElements || 0}
           tableScrolled={{ x: 1500, y: 500 }}
           useSelect={true}
-          usePagination={true}
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={
+            invoice_list.length < (invoice_pagination?.totalElements || 0)
+          }
+          showRefresh={true}
+          onRefresh={handleRefresh}
+          refreshLabel="Refresh"
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
@@ -345,7 +370,7 @@ const EMeteraiManagement = () => {
         handleClose={closeModalApproval}
         onSuccess={() => {
           closeModalApproval();
-          handleRefresh();
+          handleRefreshBtn();
         }}
       />
 
@@ -355,7 +380,7 @@ const EMeteraiManagement = () => {
         handleClose={closeModalRequest}
         onSuccess={() => {
           closeModalRequest();
-          handleRefresh();
+          handleRefreshBtn();
         }}
       />
     </>
