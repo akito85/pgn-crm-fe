@@ -14,6 +14,7 @@ const GasDepositDetailMutationTable = ({
   detailId,
   index,
   detailIndex,
+  opened,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
@@ -39,6 +40,7 @@ const GasDepositDetailMutationTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
+  const [isLoad, setIsLoad] = useState(!opened);
 
   /**
    * @param {string[]} selectedKeys
@@ -152,18 +154,21 @@ const GasDepositDetailMutationTable = ({
   // Abort the in-flight request on cleanup so StrictMode double-mounts and
   // rapid filter changes don't produce stale or duplicate page-0 fetches.
   useEffect(() => {
-    const body = {
-      page: 0,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      filters,
-      filterRules,
-    };
-
-    setPage(0);
-    const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false }));
-    return () => { promise.abort(); };
+    if (isLoad) {
+      const body = {
+        page: 0,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      };
+  
+      setPage(0);
+      const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false }));
+      return () => { promise.abort(); };
+    } else
+      setIsLoad(true)
   }, [sort, search, filters, filterRules]);
 
   return (

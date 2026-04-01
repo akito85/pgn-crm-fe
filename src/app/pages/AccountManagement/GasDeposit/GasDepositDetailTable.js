@@ -9,6 +9,7 @@ import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
 const GasDepositDetailTable = ({
   id,
   index,
+  opened,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
@@ -34,6 +35,9 @@ const GasDepositDetailTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
+  const [isLoad, setIsLoad] = useState(!opened);
+
+  const [openedMemo, setOpenedMemo] = useState({});
 
   /**
    * @param {string[]} selectedKeys
@@ -150,26 +154,39 @@ const GasDepositDetailTable = ({
       index={index}
       detailId={record.id}
       detailIndex={detailIndex}
+      opened={openedMemo[record.id]}
     />
   );
+
+  const onExpand = (expanded, record) => {
+    if (expanded) {
+      setOpenedMemo(prev => ({
+        ...prev,
+        [record.id]: true,
+      }))
+    }
+  }
 
   // --- Effects ---
   // Re-fetch page 0 whenever sort, search, filters, or filterRules change.
   // Abort the in-flight request on cleanup so StrictMode double-mounts and
   // rapid filter changes don't produce stale or duplicate page-0 fetches.
   useEffect(() => {
-    const body = {
-      page: 0,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      filters,
-      filterRules,
-    };
-
-    setPage(0);
-    const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false }));
-    return () => { promise.abort(); };
+    if (isLoad) {
+      const body = {
+        page: 0,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      };
+  
+      setPage(0);
+      const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false }));
+      return () => { promise.abort(); };
+    } else
+      setIsLoad(true);
   }, [sort, search, filters, filterRules]);
 
   return (
@@ -189,7 +206,7 @@ const GasDepositDetailTable = ({
         onLoadMore={handleLoadMore}
         hasMore={hasMore}
         loading={loading}
-        expandable={{ expandedRowRender }}
+        expandable={{ expandedRowRender, onExpand }}
         onRefresh={handleRefresh}
         useInfiniteScroll
       />
