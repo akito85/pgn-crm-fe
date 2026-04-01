@@ -118,7 +118,7 @@ export const getGasDepositApprovals = createAsyncThunk(
 
 export const getGasDepositDetails = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAILS",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
+  async ({ id, index, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit-detail/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
@@ -126,7 +126,7 @@ export const getGasDepositDetails = createAsyncThunk(
         });
       return {
         ...response.data,
-        id,
+        index,
         isLoadMore,
       };
     } catch (error) {
@@ -137,7 +137,7 @@ export const getGasDepositDetails = createAsyncThunk(
 
 export const getGasDepositDetailMutations = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATIONS",
-  async ({ id, detailId, body, isLoadMore }, thunkAPI) => {
+  async ({ id, detailId, index, detailIndex, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${detailId}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
@@ -145,8 +145,8 @@ export const getGasDepositDetailMutations = createAsyncThunk(
         });
       return {
         ...response.data,
-        id,
-        detailId,
+        index,
+        detailIndex,
         isLoadMore,
       };
     } catch (error) {
@@ -725,14 +725,14 @@ const gasDepositSlice = createSlice({
     /** Get Gas Deposit Details */
     [getGasDepositDetails.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
+        const gasDeposit = state.list_gasDeposit[action.meta.arg?.index];
         gasDeposit.loading_listGdDetail = true;
       }
     },
     [getGasDepositDetails.fulfilled]: (state, action) => {
-      const { result, page, isLoadMore, id } = action.payload;
+      const { result, page, isLoadMore, index } = action.payload;
 
-      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === id)
+      const gasDeposit = state.list_gasDeposit[index];
       gasDeposit.loading_listGdDetail = true;
 
       if (Array.isArray(result)) {
@@ -779,7 +779,7 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDepositDetails.rejected]: (state, action) => {
-      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
+      const gasDeposit = state.list_gasDeposit[action.meta.arg?.index]
       gasDeposit.loading_listGdDetail = false;
 
       if (!action.meta.arg?.isLoadMore) {
@@ -796,15 +796,15 @@ const gasDepositSlice = createSlice({
     /** Get Gas Deposit Detail Mutations */
     [getGasDepositDetailMutations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
-        const gasDepositDetail = gasDeposit.list_gasDepositDetail.find((gasDepositDetail) => gasDepositDetail.id === action.meta.arg?.detailId);
+        const gasDeposit = state.list_gasDeposit[action.meta.arg?.index]
+        const gasDepositDetail = gasDeposit.list_gasDepositDetail[action.meta.arg?.detailIndex];
         gasDepositDetail.loading_listGdDetailMutation = true;
       }
     },
     [getGasDepositDetailMutations.fulfilled]: (state, action) => {
-      const { result, page, isLoadMore, id, detailId } = action.payload;
-      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === id)
-      const gasDepositDetail = gasDeposit.list_gasDepositDetail.find((gasDepositDetail) => gasDepositDetail.id === detailId);
+      const { result, page, isLoadMore, index, detailIndex } = action.payload;
+      const gasDeposit = state.list_gasDeposit[index]
+      const gasDepositDetail = gasDeposit.list_gasDepositDetail[detailIndex];
       gasDepositDetail.loading_listGdDetailMutation = false;
 
       if (Array.isArray(result)) {
@@ -829,8 +829,8 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDepositDetailMutations.rejected]: (state, action) => {
-      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
-      const gasDepositDetail = gasDeposit.list_gasDepositDetail.find((gasDepositDetail) => gasDepositDetail.id === action.meta.arg?.detailId);
+      const gasDeposit = state.list_gasDeposit[action.meta.arg?.index];
+      const gasDepositDetail = gasDeposit.list_gasDepositDetail[action.meta.arg?.detailIndex];
       gasDepositDetail.loading_listGdDetailMutation = false;
 
       if (!action.meta.arg?.isLoadMore) {
