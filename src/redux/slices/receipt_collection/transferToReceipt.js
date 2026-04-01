@@ -6,11 +6,7 @@ import {
   showModalSuccess,
 } from "../general_slice";
 
-// Hard Code
-import hc_transfer_to_receipt_list from "./temp_hardcoded_json/transferToReceipt/get-list-transferToReceipt.json"
-import hc_list_receipt from "./temp_hardcoded_json/transferToReceipt/get-list-receipt.json";
-import hc_ddl_deduction_period from "./temp_hardcoded_json/transferToReceipt/get-ddl-deduction-period.json";
-import hc_ddl_type from "./temp_hardcoded_json/transferToReceipt/get-ddl-type.json";
+
 
 
 
@@ -103,35 +99,9 @@ export const getDetailTransferToReceipt = createAsyncThunk(
   "GET_DETAIL_TRANSFER",
   async (id, thunkAPI) => {
     try {
-      // Simulator Detail Transfer To Receipt
-      const response = {
-        data: {
-          transferToReceipt: {
-            deductionPeriod: "Jan 2025",
-            type: "Gas",
-            deductionDate: "2025-01-01",
-            appHierId: 502,
-            receiptList: hc_list_receipt.data,
-            id: id,
-            status: "DRAFT",
-            statusApproval: "Draft",
-            createdBy: "admin",
-            createdDate: "2025-01-01T00:00:00.000+00:00",
-            updatedBy: "admin",
-            updatedDate: "2025-01-01T00:00:00.000+00:00",
-          },
-          attachmentDtoList: [],
-          tApprovalDto: {
-            approvalType: "TRANSFER_TO_RECEIPT",
-            status: "DRAFT",
-            isApprover: true
-          },
-        }
-      };
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const url = `/v1/dbs/api/payment-warranty/mutation/detail-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
-
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -270,8 +240,8 @@ export const getListReceipt = createAsyncThunk(
   "GET_LIST_RECEIPT",
   async (_, thunkAPI) => {
     try {
-      const response = hc_list_receipt;
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const url = `/v1/dbs/api/receipt/get-list`;
+      const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
@@ -286,8 +256,8 @@ export const getDDLDeductionPeriod = createAsyncThunk(
   "GET_DDL_DEDUCTION_PERIOD",
   async (_, thunkAPI) => {
     try {
-      const response = hc_ddl_deduction_period;
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const url = `/v1/dbs/api/payment-period/get-list`;
+      const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
@@ -302,8 +272,8 @@ export const getDDLType = createAsyncThunk(
   "GET_DDL_TYPE",
   async (_, thunkAPI) => {
     try {
-      const response = hc_ddl_type;
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const url = `/v1/dbs/api/payment-warranty/warranty-type`;
+      const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
@@ -318,25 +288,12 @@ export const downloadTransferToReceiptList = createAsyncThunk(
   "DOWNLOAD_TRANSFER_TO_RECEIPT_LIST",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      // const searchParams = search === undefined ? "" : search;
-      // const sortParams =
-      //   sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // const url = `/v1/dbs/api/billing/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      // const response = await receiptCollectionHttpService.downloadData(url);
-      // return response.data;
-
-      // Simulate download
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return true;
-
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/payment-warranty/download-detail-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.downloadData(url);
+      return response.data;
     } catch (error) {
-      // thunkAPI.dispatch(
-      //   validateError({
-      //     error: error,
-      //     action: "DOWNLOAD_WARRANTY_LIST",
-      //     back: false,
-      //   })
-      // );
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
       const errorBody = {

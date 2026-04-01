@@ -163,7 +163,7 @@ const columns = (
     },
     {
       key: "noh",
-      title: "OPERATIOIN HOURS/DAY",
+      title: "OPERATION HOURS/DAY",
       dataIndex: "noh",
       align: "right",
       sorter: true,
@@ -180,7 +180,7 @@ const columns = (
     },
     {
       key: "nod",
-      title: "OPERATIOIN DAYS/WEEK",
+      title: "OPERATION DAYS/WEEK",
       dataIndex: "nod",
       align: "right",
       sorter: true,
