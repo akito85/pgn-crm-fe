@@ -203,8 +203,8 @@ const RelationshipInfo = ({
             const displayNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
 
             form.setFieldsValue({
-              accountName: displayName,
-              accountNumber: displayNumber,
+              relatedName: displayName,
+              relatedNumber: displayNumber,
               accountId: selected.id,
             });
 

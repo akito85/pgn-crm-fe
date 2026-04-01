@@ -7,6 +7,7 @@ import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import { getCustomerColumns } from "./getCustomerColumns";
 import { getAccountColumns } from "./getAccountColumns";
 import { Button } from "antd";
+import { convertToSnakeCase } from "../../../../../../../../../utils";
 
 const ModalChooseRelated = ({
   isOpen = false,
@@ -66,16 +67,20 @@ const ModalChooseRelated = ({
     const nextPage = page + 1;
     const totalPages = pagination_relatedObject?.totalPages || 0;
 
+    const body = {
+      page: nextPage,
+      size: loadMoreSize,
+      relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
+      relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
+      sort,
+      searchs: JSON.stringify(search)
+    };
+    
     if (nextPage <= totalPages) {
       await dispatch(
         getRelatedObjectData({
           accountId,
-          page: nextPage,
-          size: loadMoreSize,
-          relationshipType,
-          relationshipCategory,
-          sort,
-          searchs: JSON.stringify(search),
+          body,
           isLoadMore: true,
         })
       );
@@ -85,16 +90,20 @@ const ModalChooseRelated = ({
 
   useEffect(() => {
     if (accountId && relationshipType && relationshipCategory) {
+      const body = {
+        page: 0,
+        size: loadMoreSize,
+        relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
+        relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
+        sort,
+        searchs: JSON.stringify(search),
+      }
+      
       setPage(0);
       dispatch(
         getRelatedObjectData({
           accountId,
-          page: 0,
-          size: loadMoreSize,
-          relationshipType,
-          relationshipCategory,
-          sort,
-          searchs: JSON.stringify(search),
+          body,
           isLoadMore: false,
         })
       );
