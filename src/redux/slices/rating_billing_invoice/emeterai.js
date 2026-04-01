@@ -36,6 +36,8 @@ const initialState = {
     number: 0,
   },
   // Approval states
+  data_approval_history: null,
+  loading_approval_history: false,
   data_ready_request: [],
   loading_ready_request: false,
   data_approval_hierarchy: [],
@@ -310,6 +312,26 @@ export const downloadSignedInvoice = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalError(errorBody));
 
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
+
+export const getApprovalHistory = createAsyncThunk(
+  "GET_EMETERAI_APPROVAL_HISTORY",
+  async ({ invoiceNumber }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/approval-history/${invoiceNumber}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      console.error("\u274C GET E-Meterai Approval History Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message,
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
   },
@@ -967,6 +989,23 @@ const emeteraiSlice = createSlice({
       state.isFailed = true;
       state.message =
         action.payload?.data?.message || "Failed to request approval";
+    },
+
+    [getApprovalHistory.pending]: (state) => {
+      state.loading_approval_history = true;
+      state.isFailed = false;
+    },
+    [getApprovalHistory.fulfilled]: (state, action) => {
+      state.loading_approval_history = false;
+      state.data_approval_history = action.payload;
+      state.isSuccess = true;
+    },
+    [getApprovalHistory.rejected]: (state, action) => {
+      state.loading_approval_history = false;
+      state.isFailed = true;
+      state.data_approval_history = null;
+      state.message =
+        action.payload?.data?.message || "Failed to fetch approval history";
     },
   },
 });

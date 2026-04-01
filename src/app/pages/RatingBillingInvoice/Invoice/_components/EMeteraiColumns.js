@@ -4,6 +4,7 @@ import {
   EditOutlined,
   RedoOutlined,
   FileProtectOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import StatusComponent from "../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -13,6 +14,7 @@ export const getEMeteraiColumns = ({
   onProcessStamping,
   onProcessSigning,
   onRetry,
+  onApprovalHistory,
 }) => {
   return [
     {
@@ -264,6 +266,12 @@ export const getEMeteraiColumns = ({
             icon: <RedoOutlined />,
             disabled: record.stampingStatus !== "Failed",
             onClick: () => onRetry(record),
+          },
+          {
+            key: "approval-history",
+            label: "Approval History",
+            icon: <HistoryOutlined />,
+            onClick: () => onApprovalHistory(record),
           },
         ];
 
