@@ -199,13 +199,15 @@ const RelationshipInfo = ({
           handleSelect={(selected) => {
             // Handle different data structure based on source
             const isCustomer = selected.source === "CUSTOMER";
-            const displayName = isCustomer ? selected.customerName : selected.accountName;
-            const displayNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+
+            const relatedName = isCustomer ? selected.customerName : selected.accountName;
+            const relatedNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+            const accountId = isCustomer ? selected.id : selected.accountId;
 
             form.setFieldsValue({
-              relatedName: displayName,
-              relatedNumber: displayNumber,
-              accountId: selected.id,
+              relatedName,
+              relatedNumber,
+              accountId,
             });
 
             // Pass allAccount data to parent for display in RelatedDetailCard
