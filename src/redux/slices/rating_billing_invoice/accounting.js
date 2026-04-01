@@ -53,7 +53,7 @@ export const getAccountingDetailList = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "detailId~asc" : sort;
+        sort === undefined || sort === "" ? "journal.entryId~desc" : sort;
       const url = `/v1/dbs/api/rbi/accounting/get-accounting-detail-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return { ...response.data, isLoadMore };
@@ -280,6 +280,30 @@ export const createAccountingJournal = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const checkAccountingExists = createAsyncThunk(
+  "CHECK_ACCOUNTING_EXISTS",
+  async (billCode, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/accounting/check-exists/${billCode}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data?.data || response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
