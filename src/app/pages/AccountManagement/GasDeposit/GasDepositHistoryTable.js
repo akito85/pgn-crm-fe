@@ -176,6 +176,8 @@ const GasDepositHistoryTable = ({
     handleDownload,
   });
 
+  const toolbarItemActions = itemActions.filter(item => item.action === "Download");
+
   const actionCols = useColumnActionPermission(["History"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
@@ -202,7 +204,7 @@ const GasDepositHistoryTable = ({
 
   return (
     <div className="flex flex-col gap-y-4">
-      <Toolbar items={itemActions} type="detail" />
+      <Toolbar items={toolbarItemActions} type="detail" />
       <NxTable
         idTable="gas-deposit-table"
         dataSource={dataSource}
