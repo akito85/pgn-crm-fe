@@ -71,7 +71,7 @@ const ModalChooseRelated = ({
       page: nextPage,
       size: loadMoreSize,
       sort,
-      searchs: JSON.stringify(search)
+      searchs: search
     };
     
     if (nextPage <= totalPages) {
@@ -94,7 +94,7 @@ const ModalChooseRelated = ({
         page: 0,
         size: loadMoreSize,
         sort,
-        searchs: JSON.stringify(search),
+        searchs: search,
       }
       
       setPage(0);
