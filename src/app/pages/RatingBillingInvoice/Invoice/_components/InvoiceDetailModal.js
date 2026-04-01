@@ -51,34 +51,38 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
       return {
         invoiceNumber: "-",
         customerName: "-",
-        accountNumber: "-",
-        accountName: "-",
-        billPeriod: "-",
-        invoiceDate: "-",
-        totalAmountEqvIdr: 0,
-        stampStatus: "Not Processed",
-        signStatus: "Not Processed",
         recordId: "-",
+        issueDate: "-",
+        dueDate: "-",
+        amount: 0,
+        stampingStatus: "DRAFT",
+        signingStatus: "DRAFT",
         createdDate: "-",
         createdBy: "-",
+        updatedDate: "-",
         updatedBy: "-",
+        invoiceUrl: null,
+        invoiceStampedUrl: null,
+        invoiceSignedUrl: null,
       };
     }
 
     return {
       invoiceNumber: source.invoiceNumber || "-",
       customerName: source.customerName || "-",
-      accountNumber: source.accountNumber || "-",
-      accountName: source.accountName || "-",
-      billPeriod: source.billPeriod || "-",
-      invoiceDate: source.invoiceDate || "-",
-      totalAmountEqvIdr: source.totalAmountEqvIdr || 0,
-      stampStatus: source.stampStatus || "Not Processed",
-      signStatus: source.signStatus || "Not Processed",
-      recordId: source.recordId || source.id || "-",
+      recordId: source.recordId || "-",
+      issueDate: source.issueDate || "-",
+      dueDate: source.dueDate || "-",
+      amount: source.amount || 0,
+      stampingStatus: source.stampingStatus || "DRAFT",
+      signingStatus: source.signingStatus || "DRAFT",
       createdDate: source.createdDate || "-",
       createdBy: source.createdBy || "-",
-      updatedBy: source.updatedBy || source.modifiedBy || "-",
+      updatedDate: source.updatedDate || "-",
+      updatedBy: source.updatedBy || "-",
+      invoiceUrl: source.invoiceUrl || null,
+      invoiceStampedUrl: source.invoiceStampedUrl || null,
+      invoiceSignedUrl: source.invoiceSignedUrl || null,
     };
   }, [detailData]);
 
@@ -266,12 +270,9 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
             <div className="grid grid-cols-5 space-x-2">
               <InfoRow label="Invoice #" value={invoice.invoiceNumber} />
               <InfoRow label="Customer" value={invoice.customerName} />
-              <InfoRow label="Issue Date" value={invoice.invoiceDate} />
-              <InfoRow label="Due Date" value={invoice.invoiceDate} />
-              <InfoRow
-                label="Amount"
-                value={formatAmount(invoice.totalAmountEqvIdr)}
-              />
+              <InfoRow label="Issue Date" value={invoice.issueDate} />
+              <InfoRow label="Due Date" value={invoice.dueDate} />
+              <InfoRow label="Amount" value={formatAmount(invoice.amount)} />
             </div>
           </BaseContainer>
 
@@ -282,18 +283,18 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
                 <p className="text-sm font-semibold mb-1">Stamping Status</p>
                 <StatusComponent
                   size="small"
-                  colour={invoice.stampStatus?.toLowerCase()}
+                  colour={invoice.stampingStatus?.toLowerCase()}
                 >
-                  {invoice.stampStatus}
+                  {invoice.stampingStatus}
                 </StatusComponent>
               </div>
               <div>
                 <p className="text-sm font-semibold mb-1">Signing Status</p>
                 <StatusComponent
                   size="small"
-                  colour={invoice.signStatus?.toLowerCase()}
+                  colour={invoice.signingStatus?.toLowerCase()}
                 >
-                  {invoice.signStatus}
+                  {invoice.signingStatus}
                 </StatusComponent>
               </div>
             </div>
@@ -303,16 +304,19 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
           <BaseContainer header="HISTORY LOG INFORMATION" border={true}>
             <div className="grid grid-cols-2 gap-x-4">
               <div>
-                <InfoRow label="Record ID" value={invoice.recordId} />
+                <InfoRow label="Record ID" value={String(invoice.recordId)} />
                 <InfoRow label="Created By" value={invoice.createdBy} />
-                <InfoRow label="Updated By" value={invoice.updatedBy} />
-              </div>
-              <div>
                 <InfoRow
                   label="Created Date"
                   value={formatDateTime(invoice.createdDate)}
                 />
-                <InfoRow label="Created By" value={invoice.createdBy} />
+              </div>
+              <div>
+                <InfoRow label="Updated By" value={invoice.updatedBy} />
+                <InfoRow
+                  label="Updated Date"
+                  value={formatDateTime(invoice.updatedDate)}
+                />
               </div>
             </div>
           </BaseContainer>
@@ -339,7 +343,7 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
               </Button>
 
               {/* Download Stamped Document - only show if stamped */}
-              {invoice.stampStatus === "SUCCESS" && (
+              {invoice.stampingStatus === "SUCCESS" && (
                 <Button
                   icon={<DownloadOutlined />}
                   size="middle"
@@ -359,7 +363,7 @@ const InvoiceDetailModal = ({ visible, onClose, invoiceData }) => {
               )}
 
               {/* Download Signed Document - only show if signed */}
-              {invoice.signStatus === "SUCCESS" && (
+              {invoice.signingStatus === "SUCCESS" && (
                 <Button
                   icon={<DownloadOutlined />}
                   size="middle"

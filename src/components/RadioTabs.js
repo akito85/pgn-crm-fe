@@ -24,7 +24,7 @@ const RadioTabs = ({
           onClick={onClick}
           disabled={index.disabled || false}
         >
-          {index.value}
+          {index.label ?? index.value}
         </Radio.Button>
       );
       if (index.errorBadge !== undefined) {
