@@ -7,11 +7,10 @@ import { getGasDepositDetailMutations } from "../../../../redux/slices/account_m
 
 /**
  * 
- * @param {{id: number; detailId: number;}} 
+ * @param {{detailId: number; index: number; detailIndex: number;}} 
  * @returns 
  */
 const GasDepositDetailMutationTable = ({
-  id,
   detailId,
   index,
   detailIndex,
@@ -76,7 +75,9 @@ const GasDepositDetailMutationTable = ({
 
     dispatch(
       getGasDepositDetailMutations({
-        id,
+        detailId,
+        index,
+        detailIndex,
         body,
         isLoadMore: false,
       })
@@ -135,7 +136,6 @@ const GasDepositDetailMutationTable = ({
 
       await dispatch(
         getGasDepositDetailMutations({
-          id,
           detailId,
           index,
           detailIndex,
@@ -162,7 +162,7 @@ const GasDepositDetailMutationTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDepositDetailMutations({ id, body, isLoadMore: false }));
+    const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 

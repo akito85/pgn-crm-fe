@@ -131,6 +131,7 @@ const GasDepositDetailTable = ({
       await dispatch(
         getGasDepositDetails({
           id,
+          index,
           body,
           isLoadMore: true,
         })
@@ -167,7 +168,7 @@ const GasDepositDetailTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDepositDetails({ id, body, isLoadMore: false }));
+    const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
@@ -190,6 +191,7 @@ const GasDepositDetailTable = ({
         loading={loading}
         expandable={{ expandedRowRender }}
         onRefresh={handleRefresh}
+        useInfiniteScroll
       />
     </div>
   );

@@ -137,7 +137,7 @@ export const getGasDepositDetails = createAsyncThunk(
 
 export const getGasDepositDetailMutations = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATIONS",
-  async ({ id, detailId, index, detailIndex, body, isLoadMore }, thunkAPI) => {
+  async ({ detailId, index, detailIndex, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${detailId}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
@@ -733,7 +733,7 @@ const gasDepositSlice = createSlice({
       const { result, page, isLoadMore, index } = action.payload;
 
       const gasDeposit = state.list_gasDeposit[index];
-      gasDeposit.loading_listGdDetail = true;
+      gasDeposit.loading_listGdDetail = false;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
@@ -779,11 +779,11 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDepositDetails.rejected]: (state, action) => {
-      const gasDeposit = state.list_gasDeposit[action.meta.arg?.index]
+      const gasDeposit = state.list_gasDeposit[action.meta.arg?.index];
       gasDeposit.loading_listGdDetail = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        gasDeposit.loading_listGdDetail = [];
+        gasDeposit.list_gasDepositDetail = [];
         gasDeposit.pagination_listGdDetail = {
           totalPage: 0,
           totalElement: 0,
