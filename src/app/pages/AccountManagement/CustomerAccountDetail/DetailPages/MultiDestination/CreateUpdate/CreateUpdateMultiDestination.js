@@ -117,8 +117,6 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     []
   ];
 
-  const validationTypes = ["DATA", "APPROVAL", "ATTACHMENT"];
-
   useEffect(() => {
     if (isUpdate && idMd) {
       dispatch(getDetailMultiDestination(idMd));
@@ -266,20 +264,23 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             } = form.getFieldsValue(true);
 
             const body = {
-              id: isUpdate ? idMd : undefined,
-              accountId,
-              relatedAccountId,
-              description,
-              startDate: NxDate.formatForAPI(startDate),
-              endDate: NxDate.formatForAPI(endDate),
-              appHierId,
-              validationType: validationTypes[current],
+              stepNumber: current + 1,
+              type: formType.toUpperCase(),
+              id: idMd,
+              data: {
+                accountId,
+                relatedAccountId,
+                description,
+                startDate: NxDate.formatForAPI(startDate),
+                endDate: NxDate.formatForAPI(endDate),
+                appHierId,
+              }
             };
 
             await dispatch(validateCreateUpdate({
               body,
               services: accountManagementService,
-              endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+              endPoint: `/v1/dbs/api/multi-destination/validate-step`,
               type: formType,
             }))
             .unwrap();
@@ -334,9 +335,9 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   useEffect(() => {
     if (accountId && customerId && accountType) {
       if (isStandard) {
-        dispatch(getAccountStandardDetail({ customerId, accountId }));
+        dispatch(getAccountStandardDetail({ idCustomer: customerId, idAccount: accountId }));
       } else {
-        dispatch(getAccountOneTimeDetail({ customerId, accountId }));
+        dispatch(getAccountOneTimeDetail({ idCustomer: customerId, idAccount: accountId }));
       }
     }
   }, [dispatch, accountId, customerId, accountType]);
@@ -470,20 +471,23 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         } = form.getFieldsValue(true);
 
         const body = {
-          id: isUpdate ? idMd : undefined,
-          accountId,
-          relatedAccountId,
-          description,
-          startDate: NxDate.formatForAPI(startDate),
-          endDate: NxDate.formatForAPI(endDate),
-          appHierId,
-          validationType: validationTypes[current],
+          stepNumber: current + 1,
+          type: formType.toUpperCase(),
+          id: idMd,
+          data: {
+            accountId,
+            relatedAccountId,
+            description,
+            startDate: NxDate.formatForAPI(startDate),
+            endDate: NxDate.formatForAPI(endDate),
+            appHierId,
+          }
         };
 
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+          endPoint: `/v1/dbs/api/multi-destination/validate-step`,
           type: formType,
         }))
         .unwrap();
@@ -525,20 +529,23 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           } = form.getFieldsValue(true);
 
           const body = {
+            stepNumber: current + 1,
+            type: formType.toUpperCase(),
             id: idMd,
-            accountId,
-            relatedAccountId,
-            description,
-            startDate: NxDate.formatForAPI(startDate),
-            endDate: NxDate.formatForAPI(endDate),
-            appHierId,
-            validationType: validationTypes[i],
+            data: {
+              accountId,
+              relatedAccountId,
+              description,
+              startDate: NxDate.formatForAPI(startDate),
+              endDate: NxDate.formatForAPI(endDate),
+              appHierId,
+            }
           };
 
           await dispatch(validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/multi-destination/validate-${formType}`,
+            endPoint: `/v1/dbs/api/multi-destination/validate-step`,
             type: formType,
           }))
           .unwrap();

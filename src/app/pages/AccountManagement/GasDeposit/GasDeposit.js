@@ -191,8 +191,8 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
         named={inactivateGdAccountNumber}
         menu="gas deposit"
         sliceName="gasDeposit"
-        approvalOptionsStateName="data_gdApprovalHierarchy"
-        approvalHierarchtDetailsStateName="detail_gdApprovalHierarchy"
+        approvalOptionsName="data_gdApprovalHierarchy"
+        approvalHierarchtDetailsName="detail_gdApprovalHierarchy"
         getApprovalOptions={getGdApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailGdApprovalHierarchy}
       />

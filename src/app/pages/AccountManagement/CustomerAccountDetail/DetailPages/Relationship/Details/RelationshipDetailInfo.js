@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import moment from "moment";
+import { useMemo, useRef, useState } from "react";
 import { dateFormatting } from "../../../../../../../utils";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getRelatedDetailColumns } from "../getRelatedDetailColumns";
 
-const RelationshipDetailInfo = ({ dataDetail = {} }) => {
+const RelationshipDetailInfo = ({ detail = {} }) => {
   const searchInput = useRef(null);
 
   // Related Detail table state
@@ -21,7 +21,7 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
     left: [],
   }));
 
-  const listRelatedDetail = dataDetail?.relatedDetail || [];
+  const listRelatedDetail = detail?.relatedDetail || [];
 
   /**
    * @param {string[]} selectedKeys
@@ -86,36 +86,32 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
         <div className="flex flex-col gap-y-4">
           <div className="w-full grid grid-cols-4 gap-4">
             <NxDetailText label="Relationship Type">
-              {dataDetail?.relationshipTypeName?.toUpperCase() || "-"}
+              {detail?.relationshipTypeName?.toUpperCase() || "-"}
             </NxDetailText>
             <NxDetailText label="Relationship Category">
-              {dataDetail?.relationshipCategoryName?.toUpperCase() || "-"}
+              {detail?.relationshipCategoryName?.toUpperCase() || "-"}
             </NxDetailText>
             <NxDetailText label="Related Name">
-              {dataDetail?.subjectName || dataDetail?.objectName || "-"}
+              {detail?.subjectName || detail?.objectName || "-"}
             </NxDetailText>
             <NxDetailText label="Related Number">
-              {dataDetail?.subjectNumber || dataDetail?.objectNumber || "-"}
+              {detail?.subjectNumber || detail?.objectNumber || "-"}
             </NxDetailText>
             <NxDetailText label="Start Date">
-              {dataDetail?.startDate
-                ? moment(dataDetail.startDate).format(dateFormatting.date)
-                : "-"}
+              {NxDate.formatDate(detail?.startDate, dateFormatting.date)}
             </NxDetailText>
             <NxDetailText label="End Date">
-              {dataDetail?.endDate
-                ? moment(dataDetail.endDate).format(dateFormatting.date)
-                : "-"}
+              {NxDate.formatDate(detail?.endDate, dateFormatting.date)}
             </NxDetailText>
             <NxDetailText label="Status">
-              <StatusComponent colour={dataDetail?.status}>
-                {dataDetail?.status || "-"}
+              <StatusComponent colour={detail?.status}>
+                {detail?.status || "-"}
               </StatusComponent>
             </NxDetailText>
           </div>
           <div className="w-full">
             <NxDetailText label="Description">
-              {dataDetail?.description || "-"}
+              {detail?.description || "-"}
             </NxDetailText>
           </div>
         </div>

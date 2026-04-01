@@ -356,9 +356,8 @@ const AccountDetailInformation = ({
       case dataTabs.rs:
         return (
           <Relationship
-            id={id}
-            type={type}
-            idCustomer={idCustomer}
+            accountId={id}
+            customerId={idCustomer}
           />
         );
       case dataTabs.adi:

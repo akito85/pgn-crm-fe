@@ -49,7 +49,7 @@ const ConfirmationModal = ({
           </Button>
         ) : (
           <Button type="submit" loading={loading} onClick={handleConfirm}>
-            Confirm
+            {type === "draft" ? "Save as Draft" : "Confirm"}
           </Button>
         )}
       </div>
@@ -60,7 +60,7 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1100}
-      title="CONFIRMATION"
+      title={type === "draft" ? "SAVE AS DRAFT CONFIRMATION" : "SUBMIT CONFIRMATION"}
       type="confirmation"
       hidePadding={{ top: true }}
       loading={loading}

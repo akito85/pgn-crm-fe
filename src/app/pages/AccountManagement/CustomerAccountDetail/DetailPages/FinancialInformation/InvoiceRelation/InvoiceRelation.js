@@ -145,9 +145,11 @@ const InvoiceRelation = ({ accountId, customerId }) => {
         named={inactivateIrAccountNumber}
         menu="invoice relation"
         sliceName="invoiceRelation"
-        approvalOptionsStateName="list_irApprovalHierarchy"
-        approvalHierarchtDetailsStateName="detail_irApprovalHierarchy"
-        loadingInactivateName={"loading_inactivateIr"}
+        approvalOptionsName="list_irApprovalHierarchy"
+        approvalHierarchtDetailsName="detail_irApprovalHierarchy"
+        loadingInactivateName="loading_inactivateIr"
+        loadingListApprovalOptionsName="loading_listIrApprovalOption"
+        loadingListHierarchyDetailName="loading_listIrApprovalHierarchyEmployee"
         getApprovalOptions={getIrApprovalHierarchy}
         getApprovalHierarchyDetails={getDetailIrApprovalHierarchy}
       />

@@ -28,7 +28,7 @@ const RelationshipInfo = ({
 }) => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const idAccount = location?.state?.idAccount;
+  const accountId = location?.state?.idAccount;
 
   const [modalChoose, setModalChoose] = useState(false);
 
@@ -49,11 +49,11 @@ const RelationshipInfo = ({
 
   // Fetch relationship type and category on component mount
   useEffect(() => {
-    if (idAccount && formView) {
-      dispatch(getRelationshipType({ idAccount }));
-      dispatch(getRelationshipCategory({ idAccount }));
+    if (accountId && formView) {
+      dispatch(getRelationshipType({ accountId }));
+      dispatch(getRelationshipCategory({ accountId }));
     }
-  }, [dispatch, idAccount]);
+  }, [dispatch, accountId]);
 
   if (formView)
     return (
@@ -192,7 +192,7 @@ const RelationshipInfo = ({
         {/* Modal Choose Related */}
         <ModalChooseRelated
           isOpen={modalChoose}
-          idAccount={idAccount}
+          accountId={accountId}
           relationshipType={relationshipTypeName}
           relationshipCategory={relationshipCategoryName}
           handleCancel={() => setModalChoose(false)}
@@ -203,9 +203,9 @@ const RelationshipInfo = ({
             const displayNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
 
             form.setFieldsValue({
-              relatedName: displayName,
-              relatedNumber: displayNumber,
-              objectId: selected.relatedObjectId,
+              accountName: displayName,
+              accountNumber: displayNumber,
+              accountId: selected.id,
             });
 
             // Pass allAccount data to parent for display in RelatedDetailCard

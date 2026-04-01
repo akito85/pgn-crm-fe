@@ -63,7 +63,7 @@ const ModalInactivateWithHierarchy = ({
   useEffect(() => {
     if (openModalInactivate && selectedHierarchy && selectedHierarchy !== 0) {
       console.log("Fetching detail for hierarchy ID:", selectedHierarchy);
-      dispatch(getAPIDetail(selectedHierarchy));
+      dispatch(getAPIDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy, openModalInactivate, getAPIDetail]);
 

@@ -28,14 +28,14 @@ const UploadTemplate = ({
   isMultiList = false,
   maxCount = 1,
   allowedFile = "png, jpeg, jpg",
-  accept = ".pdf, .rtf",
+  accept = ".rtf, .docx",
   type = false,
   acceptFile = "file",
   allowSize = 5,
   configApplication,
   getAPIGuard,
   typeRBI,
-  fileTypeCheck = ["application/msword", "application/rtf"],
+  fileTypeCheck = ["application/msword", "application/rtf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
 }) => {
   // Selector
   const { dataConfigRBIDataGeneralTemplate } = useSelector(
@@ -68,10 +68,10 @@ const UploadTemplate = ({
       }, "");
     const tempSize = parseInt(valueGuard?.size || "0") * 1000000;
     setDataGuard({
-      fileExt: tempFileExt === "." ? ExtensionFile : tempFileExt,
+      fileExt: tempFileExt === "." ? accept : tempFileExt,
       size: tempSize || 5000000,
     });
-  }, [valueGuard]);
+  }, [valueGuard, accept]);
 
   const getFileExtension = (file) => {
     return file.slice(((file.lastIndexOf(".") - 1) >>> 0) + 2)?.toLowerCase();
@@ -127,14 +127,14 @@ const UploadTemplate = ({
         <Upload
           fileList={fileList}
           showUploadList={showUploadList}
-          accept={dataGuard.fileExt}
+          accept={accept}
           // listType={acceptFile}
           beforeUpload={async (file) => {
-            const allowed_file = allowedFile.toLowerCase()?.split(",");
+            const allowed_file = allowedFile.toLowerCase()?.split(",").map(ext => ext.trim());
             const file_extension = getFileExtension(file?.name);
             if (
-              dataGuard.fileExt?.includes(file_extension) &&
-              file.size / (1024 * 1024) <= parseInt(valueGuard?.size) // file in Mb
+              allowed_file?.includes(file_extension) &&
+              file.size / (1024 * 1024) <= parseInt(valueGuard?.size || allowSize) // file in Mb
             ) {
               setValidateFile(true);
               setFileName(file?.name);
@@ -164,13 +164,13 @@ const UploadTemplate = ({
                 setValidateFile(false);
                 const errorBody = {
                   title: "Failed",
-                  description: `Format file not valid`,
+                  description: `Format file not valid, please upload file with format ${allowedFile.split(",").map(ext => ext.trim()).join(" or ")}`,
                 };
                 dispatch(showModalError(errorBody));
               }
               if (
                 allowed_file?.includes(file_extension) === true &&
-                file.size / (1024 * 1024) > parseInt(valueGuard?.size)
+                file.size / (1024 * 1024) > parseInt(valueGuard?.size || allowSize)
               ) {
                 setValidateFile(false);
                 const errorBody = {
