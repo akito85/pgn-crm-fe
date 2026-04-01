@@ -118,14 +118,15 @@ export const getGasDepositApprovals = createAsyncThunk(
 
 export const getGasDepositDetails = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAILS",
-  async ({ accountId, body, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit-detail/list/${accountId}`;
+      const url = `/v1/dbs/api/gas-deposit-detail/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
         });
       return {
         ...response.data,
+        id,
         isLoadMore,
       };
     } catch (error) {
@@ -136,14 +137,16 @@ export const getGasDepositDetails = createAsyncThunk(
 
 export const getGasDepositDetailMutations = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATIONS",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
+  async ({ id, detailId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${id}`;
+      const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${detailId}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
         });
       return {
         ...response.data,
+        id,
+        detailId,
         isLoadMore,
       };
     } catch (error) {
@@ -698,31 +701,34 @@ const gasDepositSlice = createSlice({
       }
     },
 
-    /** Get Gas Deposits */
+    /** Get Gas Deposit Details */
     [getGasDepositDetails.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listGdDetail = true;
+        const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
+        gasDeposit.loading_listGdDetail = true;
       }
     },
     [getGasDepositDetails.fulfilled]: (state, action) => {
-      state.loading_listGdDetail = false;
-      const { result, page, isLoadMore } = action.payload;
+      const { result, page, isLoadMore, id } = action.payload;
+
+      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === id)
+      gasDeposit.loading_listGdDetail = true;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_gasDepositDetail.map((item) => item.id));
+          const currentIds = new Set(gasDeposit.list_gasDepositDetail.map((item) => item.id));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
 
-          state.list_gasDepositDetail = [
-            ...state.list_gasDepositDetail,
+          gasDeposit.list_gasDepositDetail = [
+            ...gasDeposit.list_gasDepositDetail,
             ...filteredResult,
           ];
         }
         else
-          state.list_gasDepositDetail = result;
+          gasDeposit.list_gasDepositDetail = result;
       }
 
-      state.pagination_listGdDetail = {
+      gasDeposit.pagination_listGdDetail = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
@@ -730,12 +736,12 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDepositDetails.rejected]: (state, action) => {
-      if (action.meta.aborted) return;
-      state.loading_listGdDetail = false;
+      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
+      gasDeposit.loading_listGdDetail = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_gasDepositDetail = [];
-        state.pagination_listGdDetail = {
+        gasDeposit.loading_listGdDetail = [];
+        gasDeposit.pagination_listGdDetail = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -744,31 +750,35 @@ const gasDepositSlice = createSlice({
       }
     },
 
-    /** Get Gas Deposit Detail Mutation */
+    /** Get Gas Deposit Detail Mutations */
     [getGasDepositDetailMutations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listGdDetailMutation = true;
+        const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
+        const gasDepositDetail = gasDeposit.list_gasDepositDetail.find((gasDepositDetail) => gasDepositDetail.id === action.meta.arg?.detailId);
+        gasDepositDetail.loading_listGdDetailMutation = true;
       }
     },
     [getGasDepositDetailMutations.fulfilled]: (state, action) => {
-      state.loading_listGdDetailMutation = false;
-      const { result, page, isLoadMore } = action.payload;
+      const { result, page, isLoadMore, id, detailId } = action.payload;
+      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === id)
+      const gasDepositDetail = gasDeposit.list_gasDepositDetail.find((gasDepositDetail) => gasDepositDetail.id === detailId);
+      gasDepositDetail.loading_listGdDetailMutation = false;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_gasDepositDetailMutation.map((item) => item.id));
+          const currentIds = new Set(gasDepositDetail.list_gasDepositDetailMutation.map((item) => item.id));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
 
-          state.list_gasDepositDetailMutation = [
-            ...state.list_gasDepositDetailMutation,
+          gasDepositDetail.list_gasDepositDetailMutation = [
+            ...gasDepositDetail.list_gasDepositDetailMutation,
             ...filteredResult,
           ];
         }
         else
-          state.list_gasDepositDetailMutation = result;
+          gasDepositDetail.list_gasDepositDetailMutation = result;
       }
 
-      state.pagination_listGdDetailMutation = {
+      gasDepositDetail.pagination_listGdDetailMutation = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
@@ -776,11 +786,13 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDepositDetailMutations.rejected]: (state, action) => {
-      state.loading_listGdDetailMutation = false;
+      const gasDeposit = state.list_gasDeposit.find((gasDeposit) => gasDeposit.id === action.meta.arg?.id)
+      const gasDepositDetail = gasDeposit.list_gasDepositDetail.find((gasDepositDetail) => gasDepositDetail.id === action.meta.arg?.detailId);
+      gasDepositDetail.loading_listGdDetailMutation = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_gasDepositDetailMutation = [];
-        state.pagination_listGdDetailMutation = {
+        gasDepositDetail.list_gasDepositDetailMutation = [];
+        gasDepositDetail.pagination_listGdDetailMutation = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
