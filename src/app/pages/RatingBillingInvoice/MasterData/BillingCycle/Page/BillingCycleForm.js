@@ -7,7 +7,7 @@ import BreadCrumb from "../../../../../../components/BreadCrumb";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import SVGIcon from "../../../../../../assets/Icon";
 import BillingCycleSectionForm from "../Form/BillingCycleSectionForm";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
@@ -402,10 +402,10 @@ const BillingCycleForm = ({ type }) => {
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
-      setAppHierOptions([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
       setBodyData({});
+      setCurrent(0);
       setTabData([
         {
           value: "Billing Cycle",
@@ -587,7 +587,7 @@ const BillingCycleForm = ({ type }) => {
                 valuePage !== tabData[1].value ? "none" : undefined,
             }}
           >
-              <BaseContainer header={"Approval Information"}>
+              <CardContainer header={"Approval Information"}>
                 <ApprovalComponentGeneral
                   type={type}
                   dataTable={appHierDataDetail}
@@ -595,7 +595,7 @@ const BillingCycleForm = ({ type }) => {
                   selectedHierarchy={selectedHierarchy}
                   updateSelectedHierarchy={setSelectedHierarchy}
                 />
-              </BaseContainer>
+                </CardContainer>
           </div>
 
           <div
@@ -604,7 +604,7 @@ const BillingCycleForm = ({ type }) => {
                 valuePage !== tabData[2].value ? "none" : undefined,
             }}
           >
-              <BaseContainer header={"Attachment Information"}>
+              <CardContainer header={"Attachment Information"}>
                 <AttachmentComponent
                   type={type}
                   data={listDataAttachment}
@@ -618,7 +618,7 @@ const BillingCycleForm = ({ type }) => {
                   typeRBI={"data"}
                   mandatory={true}
                 />
-              </BaseContainer>
+                </CardContainer>
           </div>
 
           <FormFooter
