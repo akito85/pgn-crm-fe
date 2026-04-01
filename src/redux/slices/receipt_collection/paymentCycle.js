@@ -16,6 +16,11 @@ const initialState = {
     dataPaymentPeriods: [],
 };
 
+const getSafeErrorMessage = (error) => {
+    const message = error?.response?.data?.message || error?.message || "An error occurred";
+    return message;
+};
+
 export const getTimeUnit = createAsyncThunk(
     "GET_DATA_TIME_UNIT_PAYMENT_CYCLE",
     async (thunkAPI) => {
@@ -174,6 +179,32 @@ export const approveOrRejectInactivePaymentCycle = createAsyncThunk(
             if (!error.success) {
                 return thunkAPI.rejectWithValue(error);
             }
+        }
+    }
+);
+
+export const openClosePaymentCycle = createAsyncThunk(
+    "OPEN_CLOSE_PAYMENT_CYCLE",
+    async (param, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/payment-cycle/open-close`;
+            const data = await receiptCollectionHttpService.activationWithRemark(url, param);
+            const successBody = {
+                title: "Successful",
+                description: `Successfully ${param.statusOpen.toLowerCase()} cycle`,
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successBody));
+            return data;
+        } catch (error) {
+            const message = getSafeErrorMessage(error);
+            thunkAPI.dispatch(
+                showModalError({
+                    title: "Failed",
+                    description: message,
+                })
+            );
+            return thunkAPI.rejectWithValue(error);
         }
     }
 );
@@ -455,6 +486,15 @@ const paymentCycleSlice = createSlice({
                 state.dataPaymentPeriods = action.payload;
             })
             .addCase(getPaymentPeriods.rejected, (state) => {
+                state.loading = false;
+            })
+            .addCase(openClosePaymentCycle.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(openClosePaymentCycle.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(openClosePaymentCycle.rejected, (state) => {
                 state.loading = false;
             });
     },
