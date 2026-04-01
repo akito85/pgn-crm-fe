@@ -4,9 +4,8 @@ import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { Link, NavLink } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
 import TableRBI from "../../../../../components/TableRBI";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import {
   downloadTaxCode,
   getApprovalHistory,
@@ -25,15 +24,18 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 
 const TaxCodeView = () => {
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.tax_code
-  );
+  const {
+    data,
+    loading,
+    data_approval_history,
+    tax_code_list,
+    tax_code_pagination,
+  } = useSelector((state) => state.tax_code);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
   //state
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
@@ -46,7 +48,6 @@ const TaxCodeView = () => {
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("taxCodeFixedColumns");
     return saved
@@ -57,7 +58,6 @@ const TaxCodeView = () => {
         };
   });
 
-  // ✅ Save to localStorage when fixedColumns change
   useEffect(() => {
     localStorage.setItem("taxCodeFixedColumns", JSON.stringify(fixedColumns));
   }, [fixedColumns]);
@@ -81,12 +81,13 @@ const TaxCodeView = () => {
     dispatch(
       getTaxCodePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [dispatch, search, page, pageSize, sort]);
+  }, [dispatch, search, sort]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -107,13 +108,6 @@ const TaxCodeView = () => {
     }
   }, [data_approval_history]);
 
-  // Function Change Pagination
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   // Function Sort Table
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -128,15 +122,10 @@ const TaxCodeView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   const handleInactive = (data) => {
@@ -144,19 +133,47 @@ const TaxCodeView = () => {
     setModalInactive(true);
   };
 
-  const handleApprovalHistory = (e) => {
-    dispatch(getApprovalHistory(e));
-    setModalApprovalHistory(true);
-  };
+  const handleApprovalHistory = useCallback(
+    (e) => {
+      dispatch(getApprovalHistory(e));
+      setModalApprovalHistory(true);
+    },
+    [dispatch],
+  );
+
+  const handleLoadMore = useCallback(async () => {
+    const nextPage = Math.floor(tax_code_list.length / loadMoreSize) + 1;
+    dispatch(
+      getTaxCodePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, search, sort, tax_code_list.length]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getTaxCodePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, search, sort]);
 
   const handleDownload = () => {
     dispatch(
       downloadTaxCode({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -198,10 +215,11 @@ const TaxCodeView = () => {
         dispatch(
           getTaxCodePaginate({
             search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
-          })
+            isLoadMore: false,
+          }),
         );
       })
       .catch((error) => {
@@ -223,7 +241,7 @@ const TaxCodeView = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={() => handleDownload()}
         >
@@ -236,7 +254,7 @@ const TaxCodeView = () => {
       render: (
         <NavLink to={RBI_ROUTES.TAX_CODE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Tax Code
@@ -259,7 +277,7 @@ const TaxCodeView = () => {
           >
             <Tooltip title="Detail">
               <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -285,11 +303,12 @@ const TaxCodeView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -350,11 +369,12 @@ const TaxCodeView = () => {
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -386,10 +406,11 @@ const TaxCodeView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.taxCodeId)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -412,7 +433,7 @@ const TaxCodeView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -420,12 +441,12 @@ const TaxCodeView = () => {
     const taxCodeCols = [
       ...columnsTaxCodeList(
         search,
-        page,
-        pageSize,
+        1,
+        loadMoreSize,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];
@@ -437,7 +458,7 @@ const TaxCodeView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -489,26 +510,33 @@ const TaxCodeView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">TAX CODE LIST</p>
+              <p className="mt-[15px] w-full">TAX CODE LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
           <div className="w-full">
             <TableRBI
-              dataSource={data?.result}
+              idTable="taxCodeTable"
+              dataSource={tax_code_list}
               columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
+              totalData={tax_code_pagination?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 2400 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={
+                tax_code_list.length < (tax_code_pagination?.totalElements || 0)
+              }
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>

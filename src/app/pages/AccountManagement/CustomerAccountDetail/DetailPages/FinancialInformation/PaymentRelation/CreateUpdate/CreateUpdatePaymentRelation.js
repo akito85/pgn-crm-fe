@@ -266,7 +266,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             ).unwrap();
           }
         } else if (submitType === "draft")
-          await form.validateFields(["accountNumber", "accountName", "priority"]);
+          await form.validateFields(["accountNumber", "accountName"]);
         else
           return;
       } catch (err) {
@@ -703,7 +703,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
                       handleSetShowConfirmationModal(true, "draft")
                     }
                     type={"secondary"}
-                    disabled={current !== steps.length - 1}
                   >
                     Save as Draft
                   </Button>

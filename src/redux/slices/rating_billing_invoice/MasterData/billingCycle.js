@@ -13,6 +13,8 @@ const initialState = {
   message: "",
   data: [],
   data_list_billing_cycle: [],
+  billing_cycle_list: [],
+  billing_cycle_pagination: null,
   list_time_unit: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
@@ -30,17 +32,17 @@ const initialState = {
 
 export const getBillingCycleList = createAsyncThunk(
   "GET_BILLING_CYCLE_LIST",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort || "createdDate~desc";
       const url = `/v1/dbs/api/billingcycle/get-list?size=${pageSize}&page=${page}&searchs=${searchParams}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getTimeUnit = createAsyncThunk(
@@ -53,7 +55,7 @@ export const getTimeUnit = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadBillingCycle = createAsyncThunk(
@@ -72,11 +74,11 @@ export const downloadBillingCycle = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_BILLING_CYCLE_TEMPLATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchy = createAsyncThunk(
@@ -89,7 +91,7 @@ export const getApprovalHierarchy = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailApproval = createAsyncThunk(
@@ -102,7 +104,7 @@ export const getDetailApproval = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -115,7 +117,7 @@ export const getApprovalHistory = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListAttachment = createAsyncThunk(
@@ -128,7 +130,7 @@ export const getListAttachment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const inactiveBillingCycle = createAsyncThunk(
@@ -138,7 +140,7 @@ export const inactiveBillingCycle = createAsyncThunk(
       const url = `/v1/dbs/api/billingcycle/inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -164,7 +166,7 @@ export const inactiveBillingCycle = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getListCategoryFile = createAsyncThunk(
@@ -180,7 +182,7 @@ export const getListCategoryFile = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getInfoDetail = createAsyncThunk(
@@ -193,7 +195,7 @@ export const getInfoDetail = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getInfoDetailDraft = createAsyncThunk(
@@ -206,7 +208,7 @@ export const getInfoDetailDraft = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getBillingPeriodList = createAsyncThunk(
@@ -221,7 +223,7 @@ export const getBillingPeriodList = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveRejectBillingCycle = createAsyncThunk(
@@ -231,7 +233,7 @@ export const approveRejectBillingCycle = createAsyncThunk(
       const url = "/v1/dbs/api/billingcycle/approve";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successApprove = {
         title: `Successful`,
@@ -264,7 +266,7 @@ export const approveRejectBillingCycle = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const createBillingCycle = createAsyncThunk(
@@ -299,7 +301,7 @@ export const createBillingCycle = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateBillingCycle = createAsyncThunk(
@@ -334,7 +336,7 @@ export const updateBillingCycle = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveOrRejectInactiveBillingCycle = createAsyncThunk(
@@ -344,7 +346,7 @@ export const approveOrRejectInactiveBillingCycle = createAsyncThunk(
       const url = "/v1/dbs/api/billingcycle/approve-inactive";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successApprove = {
         title: `Successful`,
@@ -367,7 +369,7 @@ export const approveOrRejectInactiveBillingCycle = createAsyncThunk(
             validateError({
               error,
               action: "APPROVE_OR_REJECT_INACTIVE_BILLING_CYCLE",
-            })
+            }),
           );
         } else {
           const errorBody = {
@@ -382,7 +384,7 @@ export const approveOrRejectInactiveBillingCycle = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updatePeriodInformation = createAsyncThunk(
@@ -419,7 +421,7 @@ export const updatePeriodInformation = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunk.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const createPeriodInformation = createAsyncThunk(
@@ -456,7 +458,7 @@ export const createPeriodInformation = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunk.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailPeriod = createAsyncThunk(
@@ -469,7 +471,7 @@ export const getDetailPeriod = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getHistoryPeriod = createAsyncThunk(
@@ -484,7 +486,7 @@ export const getHistoryPeriod = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const openClosePeriodBilling = createAsyncThunk(
@@ -499,7 +501,7 @@ export const openClosePeriodBilling = createAsyncThunk(
       const url = `/v1/dbs/api/billingperiod/open-close`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        reqBody
+        reqBody,
       );
       const message = isOpen ? "opened" : "closed";
       const successBody = {
@@ -526,7 +528,7 @@ export const openClosePeriodBilling = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const billingCycleSlice = createSlice({
@@ -534,12 +536,22 @@ const billingCycleSlice = createSlice({
   initialState,
   extraReducers: {
     // getBillingCycleList
-    [getBillingCycleList.pending]: (state) => {
-      state.loading = true;
+    [getBillingCycleList.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getBillingCycleList.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_list_billing_cycle = action.payload;
+      const newResult = action.payload?.result || [];
+      const isLoadMore = action.payload?.isLoadMore;
+      if (isLoadMore) {
+        state.billing_cycle_list = [...state.billing_cycle_list, ...newResult];
+      } else {
+        state.billing_cycle_list = newResult;
+      }
+      state.billing_cycle_pagination = action.payload?.page || null;
     },
     [getBillingCycleList.rejected]: (state) => {
       state.loading = false;

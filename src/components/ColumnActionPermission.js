@@ -1,6 +1,7 @@
 import { Popover, Space } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
+import SVGIcon from "../assets/Icon/index";
 
 // render content column
 export const RenderContentActions = (
@@ -13,22 +14,15 @@ export const RenderContentActions = (
   sliceColumn = "View",
   stopClickPropagation = false,
 ) => {
-
-  const ViewListIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5.625 5.625H18.125M5.625 10H18.125M5.625 14.375H18.125" stroke="#1976D2" strokeWidth="1.875" strokeLinejoin="round"/>
-      <path d="M2.5 5H3.75V6.25H2.5V5ZM2.5 9.375H3.75V10.625H2.5V9.375ZM2.5 13.75H3.75V15H2.5V13.75Z" stroke="#1976D2" strokeWidth="1.25" strokeLinecap="square" strokeLinejoin="round"/>
-    </svg>
-  );
-
   if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center gap-4">
+      <div className="w-full flex justify-center items-center gap-2.5">
         <Popover
           trigger={"click"}
           placement="bottomRight"
           showArrow={false}
           overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
+          className="text-black hover:text-[#1976D2] transition-colors duration-300"
           content={
             <div className="flex flex-col">
               {itemRender
@@ -44,12 +38,12 @@ export const RenderContentActions = (
           }
         >
           <div
-            className="group"
+            className="flex items-center"
             onClick={(e) => {
               if (stopClickPropagation) e.stopPropagation();
             }}
           >
-            <ViewListIcon />
+            <SVGIcon name="IconTripleDot" width={20} />
           </div>
         </Popover>
         <div>
@@ -70,7 +64,7 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 items-center">
+      <div className="w-full flex justify-center gap-2.5 items-center">
         {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength, index);

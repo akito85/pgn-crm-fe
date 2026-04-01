@@ -66,7 +66,7 @@ const InvoiceTemplateView = () => {
         pageSize: initialPageSize,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -88,7 +88,7 @@ const InvoiceTemplateView = () => {
         pageSize: loadMoreSize,
         sort,
         isLoadMore: true,
-      })
+      }),
     );
     setPage(nextPage);
   };
@@ -103,7 +103,7 @@ const InvoiceTemplateView = () => {
         pageSize: initialPageSize,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   };
@@ -228,7 +228,12 @@ const InvoiceTemplateView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadInvoiceTemplate({ search: tempSearch, page, pageSize: loadMoreSize, sort })
+      downloadInvoiceTemplate({
+        search: tempSearch,
+        page,
+        pageSize: loadMoreSize,
+        sort,
+      }),
     );
   };
 
@@ -259,9 +264,9 @@ const InvoiceTemplateView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   // Grant Access Item
@@ -270,7 +275,7 @@ const InvoiceTemplateView = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={() => handleDownload()}
         >
@@ -283,7 +288,7 @@ const InvoiceTemplateView = () => {
       render: (
         <NavLink to={RBI_ROUTES.INVOICE_TEMPLATE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Invoice Template
@@ -332,11 +337,12 @@ const InvoiceTemplateView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -397,11 +403,12 @@ const InvoiceTemplateView = () => {
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -433,10 +440,11 @@ const InvoiceTemplateView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -458,7 +466,7 @@ const InvoiceTemplateView = () => {
 
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: 50,
@@ -500,9 +508,7 @@ const InvoiceTemplateView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">
-                INVOICE TEMPLATE LIST
-              </p>
+              <p className="mt-[15px] w-full">INVOICE TEMPLATE LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
