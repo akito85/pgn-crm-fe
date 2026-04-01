@@ -182,6 +182,14 @@ const TaxCodeSectionForm = ({
               numericFormatType={"text"}
               thousandSeparator={false}
               decimalSeparator={"."}
+              maxLength={3}
+              isAllowed={(values) => {
+                const { value } = values;
+                if (!value) return true;
+                // Allow max 3 digits (integer part only)
+                const integerPart = value.split(".")[0];
+                return integerPart.length <= 3;
+              }}
             />
           </Form.Item>
 
