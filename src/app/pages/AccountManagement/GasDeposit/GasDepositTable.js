@@ -14,7 +14,6 @@ import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/acc
 const GasDepositTable = ({
   moduleType,
   handleApproval = () => {},
-  handleSelectDetail = () => {},
   accountId,
   cutomerId,
   refreshSignal = 0,
@@ -262,18 +261,12 @@ const GasDepositTable = ({
    * Renders the expanded child row for a gas deposit record.
    * @param {object} record - The parent gas deposit row record
    */
-  const expandedRowRender = (record) => {
-    return (
-      <GasDepositDetailTable
-        dataSource={record.details}
-        handleView={handleSelectDetail}
-      />
-    );
-  };
-
-  const onExpand = (_, record) => {
-    
-  }
+  const expandedRowRender = (record, index) => (
+    <GasDepositDetailTable
+      id={record.id}
+      index={index}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -295,7 +288,7 @@ const GasDepositTable = ({
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
-        expandable={{ expandedRowRender, onExpand }}
+        expandable={{ expandedRowRender }}
       />
     </div>
   );

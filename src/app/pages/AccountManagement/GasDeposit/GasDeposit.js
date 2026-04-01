@@ -11,7 +11,6 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
 import NxTabs from "../../../../components/Nx/NxTabs";
 import GasDepositHistoryTable from "./GasDepositHistoryTable";
 import NxModal from "../../../../components/Nx/NxModal";
@@ -38,7 +37,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [selectedDetailId, setSelectedDetailId] = useState();
   const [showHistoryDetailModal, setShowHistoryDetailModal] = useState(false);
 
   // --- Derived values ---
@@ -78,14 +76,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
 
   // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
-
-  /**
-   * Stores the selected record's ID to show the detail mutation table below the main table.
-   * @param {object} record - The clicked table row record
-   */
-  const handleSelectDetail = (record) => {
-    setSelectedDetailId(record.id);
-  };
 
   /**
    * @param {boolean} show
@@ -170,23 +160,11 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
                 moduleType={moduleType}
                 accountId={accountId}
                 cutomerId={customerId}
-                handleSelectDetail={handleSelectDetail}
                 handleApproval={setShowApprovalModal}
                 refreshSignal={refreshSignal}
               />
             </NxBaseContainer>
           </NxCardContainer>
-    
-          {/* Detail mutation table — rendered only when a row is selected */}
-          {selectedDetailId && (
-            <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
-              <NxBaseContainer border>
-                <GasDepositDetailMutationTable
-                  detailId={selectedDetailId}
-                />
-              </NxBaseContainer>
-            </NxCardContainer>
-          )}
     
           <GasDepositApprovalModal
             accountId={accountId}
