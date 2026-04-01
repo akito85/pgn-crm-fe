@@ -18,9 +18,11 @@ import NxDetailText from "../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 
 /**
- * Gas deposit list table module
- * @param {{ moduleType: "sa" | "ua"; accountId: number; customerId: number }} props
- * @returns
+ * Top-level Gas Deposit module container. Renders a Gas Deposit List tab and a
+ * Recalculate/Expire History tab. Supports standalone ("sa") and under-account
+ * ("ua") contexts; account sub-type is inferred from the URL. Wrapped with `React.memo`.
+ *
+ * @param {{ moduleType: "sa" | "ua"; accountId?: number; customerId?: number }} props
  */
 const GasDeposit = ({ moduleType, accountId, customerId }) => {
   // --- Hooks ---
@@ -32,6 +34,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
     detail_gasDepositHistory,
   } = useSelector((state) => state.gasDeposit);
 
+  // --- State ---
   const [activeKey, setActiveKey] = useState(0);
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -75,6 +78,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   ];
 
   // --- Functions / handlers ---
+  /** Increments the refresh signal to trigger a page-0 re-fetch in child tables. */
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**

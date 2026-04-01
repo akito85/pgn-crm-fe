@@ -6,6 +6,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { getGasDepositDetails } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
 
+/**
+ * Level-1 nested detail table rendered inside `GasDepositTable`'s expanded row.
+ * Fetches via `getGasDepositDetails`; skips the initial fetch on re-expand when
+ * `opened` is true and uses cached Redux data instead.
+ *
+ * @param {{ id: number; index: number; opened?: true }} props
+ */
 const GasDepositDetailTable = ({
   id,
   index,
@@ -36,9 +43,13 @@ const GasDepositDetailTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [isLoad, setIsLoad] = useState(!opened);
-
   const [openedMemo, setOpenedMemo] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
+  // --- Handlers ---
   /**
    * @param {string[]} selectedKeys
    * @param {() => {}} confirm
@@ -59,28 +70,8 @@ const GasDepositDetailTable = ({
     });
   };
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: [],
-    left: [],
-  }));
-  
-  const columnDefinitions = useMemo(() =>
-    getGasDepositDetailColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  [search, searchText, searchedColumn]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
-
-  // --- Handlers ---
   /**
-   * Resets pagination to page 0 and re-fetches the gas deposit list with current search/sort/filter state.
+   * Resets pagination to page 0 and re-fetches the detail list with current search/sort/filter state.
    */
   const handleRefresh = () => {
     const body = {
@@ -144,29 +135,6 @@ const GasDepositDetailTable = ({
     setPage(nextPage);
   };
 
-  /**
-   * Renders the expanded child row for a gas deposit record.
-   * @param {object} record - The parent gas deposit row record
-   */
-  const expandedRowRender = (record, detailIndex) => (
-    <GasDepositDetailMutationTable
-      id={id}
-      index={index}
-      detailId={record.id}
-      detailIndex={detailIndex}
-      opened={openedMemo[record.id]}
-    />
-  );
-
-  const onExpand = (expanded, record) => {
-    if (expanded) {
-      setOpenedMemo(prev => ({
-        ...prev,
-        [record.id]: true,
-      }))
-    }
-  }
-
   // --- Effects ---
   // Re-fetch page 0 whenever sort, search, filters, or filterRules change.
   // Abort the in-flight request on cleanup so StrictMode double-mounts and
@@ -181,13 +149,55 @@ const GasDepositDetailTable = ({
         filters,
         filterRules,
       };
-  
+
       setPage(0);
       const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false }));
       return () => { promise.abort(); };
     } else
       setIsLoad(true);
   }, [sort, search, filters, filterRules]);
+
+  // --- Column configuration ---
+  const columnDefinitions = useMemo(() =>
+    getGasDepositDetailColumns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  [search, searchText, searchedColumn]);
+
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
+
+  /**
+   * Renders the expanded child row for a gas deposit detail record.
+   * @param {object} record - The detail row record
+   */
+  const expandedRowRender = (record, detailIndex) => (
+    <GasDepositDetailMutationTable
+      id={id}
+      index={index}
+      detailId={record.id}
+      detailIndex={detailIndex}
+      opened={openedMemo[record.id]}
+    />
+  );
+
+  /**
+   * @param {boolean} expanded
+   * @param {object} record
+   */
+  const onExpand = (expanded, record) => {
+    if (expanded) {
+      setOpenedMemo(prev => ({
+        ...prev,
+        [record.id]: true,
+      }))
+    }
+  }
 
   return (
     <div className="flex flex-col gap-y-4">

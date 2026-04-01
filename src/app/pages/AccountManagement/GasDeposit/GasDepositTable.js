@@ -11,6 +11,18 @@ import GasDepositDetailTable from "./GasDepositDetailTable";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
+/**
+ * Level-0 gas deposit list table with search, sort, filter, and infinite scroll.
+ * Tracks expand state in `openedMemo` to skip redundant detail fetches on re-expand.
+ *
+ * @param {{
+ *   moduleType: "sa" | "ua";
+ *   handleApproval?: (show: boolean) => void;
+ *   accountId?: number;
+ *   cutomerId?: number;
+ *   refreshSignal?: number;
+ * }} props
+ */
 const GasDepositTable = ({
   moduleType,
   handleApproval = () => {},
@@ -271,6 +283,10 @@ const GasDepositTable = ({
     />
   );
 
+  /**
+   * @param {boolean} expanded
+   * @param {object} record
+   */
   const onExpand = (expanded, record) => {
     if (expanded) {
       setOpenedMemo(prev => ({

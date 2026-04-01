@@ -6,9 +6,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { getGasDepositDetailMutations } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
 /**
- * 
- * @param {{detailId: number; index: number; detailIndex: number;}} 
- * @returns 
+ * Level-2 nested mutation table rendered inside `GasDepositDetailTable`'s expanded row.
+ * Fetches via `getGasDepositDetailMutations`; skips the initial fetch on re-expand
+ * when `opened` is true.
+ *
+ * @param {{ detailId: number; index: number; detailIndex: number; opened?: true }} props
  */
 const GasDepositDetailMutationTable = ({
   detailId,
@@ -41,7 +43,12 @@ const GasDepositDetailMutationTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [isLoad, setIsLoad] = useState(!opened);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
+  // --- Handlers ---
   /**
    * @param {string[]} selectedKeys
    * @param {() => {}} confirm
@@ -62,28 +69,8 @@ const GasDepositDetailMutationTable = ({
     });
   };
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: [],
-    left: [],
-  }));
-  
-  const columnDefinitions = useMemo(() =>
-    getGasDepositDetailMutationColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-  [search, searchText, searchedColumn]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
-
-  // --- Handlers ---
   /**
-   * Resets pagination to page 0 and re-fetches the gas deposit list with current search/sort/filter state.
+   * Resets pagination to page 0 and re-fetches the mutation list with current search/sort/filter state.
    */
   const handleRefresh = () => {
     const body = {
@@ -163,13 +150,28 @@ const GasDepositDetailMutationTable = ({
         filters,
         filterRules,
       };
-  
+
       setPage(0);
       const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false }));
       return () => { promise.abort(); };
     } else
       setIsLoad(true)
   }, [sort, search, filters, filterRules]);
+
+  // --- Column configuration ---
+  const columnDefinitions = useMemo(() =>
+    getGasDepositDetailMutationColumns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  [search, searchText, searchedColumn]);
+
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
