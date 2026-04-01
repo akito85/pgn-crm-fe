@@ -19,22 +19,6 @@ const initialState = {
     currentPage: 0,
     pageSize: 10,
   },
-  loading_listGdDetail: false,
-  list_gasDepositDetail: [],
-  pagination_listGdDetail: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10,
-  },
-  loading_listGdDetailMutation: false,
-  list_gasDepositDetailMutation: [],
-  pagination_listGdDetailMutation: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10,
-  },
   loading_listGdHistory: false,
   list_gasDepositHistory: [],
   pagination_listGdHistory: {

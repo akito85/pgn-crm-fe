@@ -40,6 +40,26 @@ const GasDepositDetailMutationTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
+  /**
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(0);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: [],
     left: [],
@@ -83,26 +103,6 @@ const GasDepositDetailMutationTable = ({
       })
     );
     setPage(0);
-  };
-
-  /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
-   */
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
   };
 
   /**
@@ -185,6 +185,7 @@ const GasDepositDetailMutationTable = ({
         setFixedColumns={setFixedColumns}
         loading={loading}
         columnDefinitions={columnDefinitions}
+        onRefresh={handleRefresh}
       />
     </div>
   );

@@ -35,6 +35,26 @@ const GasDepositDetailTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
+  /**
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(0);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: [],
     left: [],
@@ -77,26 +97,6 @@ const GasDepositDetailTable = ({
       })
     );
     setPage(0);
-  };
-
-  /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
-   */
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
   };
 
   /**
@@ -177,7 +177,7 @@ const GasDepositDetailTable = ({
       <NxTable
         idTable="gas-deposit-detail-table"
         dataSource={dataSource}
-        totalData={dataSource.length}
+        totalData={totalElement}
         tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
         onSort={onSort}
         columns={columns}
