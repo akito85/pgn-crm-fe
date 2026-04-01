@@ -781,6 +781,7 @@ const InvoiceTemplateForm = ({ type }) => {
       setListDataCriteria([]);
       setCriteriaValues([]);
       setStoredDataInline(false);
+      setCurrent(0);
       setTabPages([
         {
           value: "Invoice Template",

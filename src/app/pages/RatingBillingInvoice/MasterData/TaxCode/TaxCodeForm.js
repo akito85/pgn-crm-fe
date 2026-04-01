@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Form, Spin } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
+import CardContainer from "../../../../../components/CardContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import TaxCodeSectionForm from "./Form/TaxCodeSectionForm";
-import BaseContainer from "../../../../../components/BaseContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
   createTaxCode,
   getCategory,
@@ -28,7 +27,6 @@ import {
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalBack from "../../../../../components/Modal/ModalBack";
 import {
   showModalError,
@@ -74,13 +72,13 @@ const TaxCodeForm = ({ type }) => {
   const [bodyData, setBodyData] = useState({});
   const [bodyError, setBodyError] = useState({});
   const [dataApphierId, setDataApphierId] = useState("");
-  const [flag, setFlag] = useState("");
+  const flagRef = useRef(false);
   const [storedDataInline, setStoredDataInline] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
-  const [valuePage, setValuePage] = useState("Tax Code");
+  const [current, setCurrent] = useState(0);
   const [tabPages, setTabPages] = useState([
     {
       value: "Tax Code",
@@ -99,6 +97,32 @@ const TaxCodeForm = ({ type }) => {
   ]);
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
+
+  const steps = [
+    { title: "TAX CODE", value: "Tax Code" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  const valuePage = steps[current]?.value;
+
+  const next = () => {
+    const fieldsToValidate = tabPages[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) setCurrent(current + 1);
+        })
+        .catch(() => {});
+    } else {
+      if (current < steps.length - 1) setCurrent(current + 1);
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) setCurrent(current - 1);
+  };
 
   const isLoading = loading || loadingForm;
 
@@ -585,7 +609,7 @@ const TaxCodeForm = ({ type }) => {
       id,
       type,
       dateFormatting,
-      flag,
+      flag: flagRef.current ? "SUBMIT" : "DRAFT",
       data_detail,
       data_detail_draft,
       columnsTableCriteriaTaxCode,
@@ -806,7 +830,7 @@ const TaxCodeForm = ({ type }) => {
       id,
       type,
       dateFormatting,
-      flag,
+      flag: flagRef.current ? "SUBMIT" : "DRAFT",
       data_detail,
       data_detail_draft,
       columnsTableCriteriaTaxCode,
@@ -917,6 +941,16 @@ const TaxCodeForm = ({ type }) => {
     handleMandatory(setTabPages, listDataAttachment, errorFields);
   };
 
+  const handleSubmit = () => {
+    flagRef.current = true;
+    setTimeout(() => form.submit(), 0);
+  };
+
+  const handleSaveDraft = () => {
+    flagRef.current = false;
+    setTimeout(() => form.submit(), 0);
+  };
+
   const handleClear = () => {
     if (type === "create") {
       form.resetFields();
@@ -928,15 +962,16 @@ const TaxCodeForm = ({ type }) => {
       setListDataCriteria([]);
       setCriteriaValues([]);
       setStoredDataInline(false);
+      setCurrent(0);
       setTabPages([
         {
           value: "Tax Code",
           paramValue: [
             "taxCode",
-            "name",
+            "taxCodeName",
             "taxRate",
             "category",
-            "glAccount",
+            // "glAccount",
             "startDate",
             "criteria",
           ],
@@ -992,10 +1027,11 @@ const TaxCodeForm = ({ type }) => {
     <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={tabPages}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
         <Form
           layout="vertical"
@@ -1003,7 +1039,7 @@ const TaxCodeForm = ({ type }) => {
           onFinish={handleSave}
           onFinishFailed={handleError}
         >
-          <div className={`${valuePage !== "Tax Code" ? "hidden" : ""}`}>
+          <div style={{ display: valuePage !== "Tax Code" ? "none" : undefined }}>
             <TaxCodeSectionForm
               type={type}
               form={form}
@@ -1025,8 +1061,8 @@ const TaxCodeForm = ({ type }) => {
             />
           </div>
 
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"Approval Information"}>
+          <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -1034,11 +1070,11 @@ const TaxCodeForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
-            <BaseContainer header={"Attachment Information"}>
+          <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -1052,71 +1088,20 @@ const TaxCodeForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              disabled={storedDataInline}
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline}
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag("DRAFT")}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline}
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag("SUBMIT")}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={() => setModalBack(true)}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+          />
         </Form>
 
         {/* Modal Confirmation */}
@@ -1158,7 +1143,7 @@ const TaxCodeForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
@@ -1168,3 +1153,4 @@ const TaxCodeForm = ({ type }) => {
   );
 };
 export default TaxCodeForm;
+
