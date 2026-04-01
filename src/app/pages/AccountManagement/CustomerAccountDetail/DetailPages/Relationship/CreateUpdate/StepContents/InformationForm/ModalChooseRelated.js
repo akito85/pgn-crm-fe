@@ -70,8 +70,6 @@ const ModalChooseRelated = ({
     const body = {
       page: nextPage,
       size: loadMoreSize,
-      relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
-      relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
       sort,
       searchs: JSON.stringify(search)
     };
@@ -80,6 +78,8 @@ const ModalChooseRelated = ({
       await dispatch(
         getRelatedObjectData({
           accountId,
+          relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
+          relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
           body,
           isLoadMore: true,
         })
@@ -93,8 +93,6 @@ const ModalChooseRelated = ({
       const body = {
         page: 0,
         size: loadMoreSize,
-        relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
-        relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
         sort,
         searchs: JSON.stringify(search),
       }
@@ -103,6 +101,8 @@ const ModalChooseRelated = ({
       dispatch(
         getRelatedObjectData({
           accountId,
+          relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
+          relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
           body,
           isLoadMore: false,
         })

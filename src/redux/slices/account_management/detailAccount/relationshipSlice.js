@@ -411,9 +411,15 @@ export const getAttachmentCategory = createAsyncThunk(
 // Get Related Object Data (Customer or Account based on relationship type)
 export const getRelatedObjectData = createAsyncThunk(
   "GET_RELATED_OBJECT_DATA",
-  async ({ accountId, body, isLoadMore }, thunkAPI) => {
+  async ({ accountId, relationshipType, relationshipCategory, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/relationships/related-object-data`;
+      const queryParams = new URLSearchParams();
+
+      if (relationshipType) queryParams.append("relationshipType", relationshipType);
+      if (relationshipCategory) queryParams.append("relationshipCategory", relationshipCategory);
+
+      let url = `/v1/dbs/api/accounts/${accountId}/relationships/related-object-data`;
+      if (queryParams.toString().length) url += `?${queryParams.toString()}`;
 
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
