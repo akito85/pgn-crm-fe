@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin, Modal } from "antd";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -651,7 +650,7 @@ const FormLateCharges = ({ type }) => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes(type)} />
         <Form
@@ -887,7 +886,7 @@ const FormLateCharges = ({ type }) => {
           : null}
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

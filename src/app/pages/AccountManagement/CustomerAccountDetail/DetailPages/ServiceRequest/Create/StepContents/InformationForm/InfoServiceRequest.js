@@ -1,5 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 
 import { Form, Select, Button, Tooltip, Spin, Tag, Input } from "antd"; // Added Input import
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
@@ -8,11 +7,13 @@ import InputComponent from "../../../../../../../../../components/InputComponent
 import StatusComponent from "../../../../../../../../../components/StatusComponent";
 import DateComponent from "../../../../../../../../../components/DateComponent";
 
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
 import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
+import accountManagementService from "../../../../../../../../../redux/services/account_management/accountManagementService";
 
 import moment from "moment";
 
@@ -35,23 +36,37 @@ export default function InfoServiceRequest({
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedRowKey, setSelectedRowKey] = useState(null);
   const [serviceRequestRef, setServiceRequestRef] = useState("");
-  const navigate = useNavigate();
 
+  // Infinite scroll state for service request reference modal
+  const PAGE_SIZE_REF = 10;
+  const [srRefData, setSrRefData] = useState([]);
+  const [srRefPage, setSrRefPage] = useState(1);
+  const [srRefHasMore, setSrRefHasMore] = useState(true);
+  const [srRefLoading, setSrRefLoading] = useState(false);
+  const srRefLoadingRef = useRef(false);
   // Debug: Log form values when they change
   useEffect(() => {
     const values = form?.getFieldsValue();
-    console.log("InfoServiceRequest - Current form values:", values);
   }, [form]);
 
-  // Create safe accessor functions
+  // Create safe accessor functions that handle both array and { data: [] } formats
+  const getDropdownItems = (dropdownKey) => {
+    const dropdown = dropdowns?.[dropdownKey];
+    if (!dropdown) return [];
+    if (Array.isArray(dropdown)) return dropdown;
+    if (Array.isArray(dropdown?.data)) return dropdown.data;
+    return [];
+  };
+
   const getDropdownOptions = (dropdownKey) => {
-    if (!dropdowns || !dropdowns[dropdownKey] || !dropdowns[dropdownKey].data) {
-      return [];
-    }
-    return dropdowns[dropdownKey].data.map(item => ({
+    return getDropdownItems(dropdownKey).map(item => ({
       value: item.glbTypeValId?.toString() || item.id?.toString(),
       label: item.name || item.glbTypeValName
     }));
+  };
+
+  const isDropdownLoaded = (dropdownKey) => {
+    return getDropdownItems(dropdownKey).length > 0;
   };
 
   // Or use destructuring with defaults
@@ -67,7 +82,7 @@ export default function InfoServiceRequest({
   // Update handleOk to use the selected row
   const handleOk = () => {
     form.setFieldsValue({
-      srr: selectedRow.serviceRequestReference,
+      srr: selectedRow.requestNumber,
     });
 
     setIsOpen(false);
@@ -110,48 +125,43 @@ export default function InfoServiceRequest({
     },
     {
       title: "SERVICE REQUEST NUMBER",
-      dataIndex: "serviceRequestNumber",
+      dataIndex: "requestNumber",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("serviceRequestNumber"),
-      render: (reference, record) => (
-        <div 
-          className="flex items-center gap-2"
-        >
-          <span 
-            className="underline cursor-pointer text-blue-600"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRowClick(record);
-            }}
-          >
-            {reference || "-"}
-          </span>
-          {/*
-          {selectedRowKey === record.key && (
-            <Tag color="blue">Selected</Tag>
-          )}
-          */}
-        </div>
-      ),
+      ...getColumnSearchProps("requestNumber"),
+      // render: (reference, record) => (
+      //   <div
+      //     className="flex items-center gap-2"
+      //   >
+      //     <span
+      //       className="underline cursor-pointer text-blue-600"
+      //       onClick={(e) => {
+      //         e.stopPropagation();
+      //         handleRowClick(record);
+      //       }}
+      //     >
+      //       {reference || "-"}
+      //     </span>
+      //   </div>
+      // ),
     },
     {
       title: "SERVICE REQUEST REFERENCE",
-      dataIndex: "serviceRequestReference",
+      dataIndex: "reference",
       width: 220,
       sorter: true,
-      ...getColumnSearchProps("serviceRequestReference"),
-      render: (reference, record) => (
-        <span 
-          className="underline cursor-pointer text-blue-600"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRowClick(record);
-          }}
-        >
-          {reference || "-"}
-        </span>
-      ),
+      ...getColumnSearchProps("reference"),
+      // render: (reference, record) => (
+      //   <span
+      //     className="underline cursor-pointer text-blue-600"
+      //     onClick={(e) => {
+      //       e.stopPropagation();
+      //       handleRowClick(record);
+      //     }}
+      //   >
+      //     {reference || "-"}
+      //   </span>
+      // ),
     },
     {
       title: "TYPE",
@@ -183,10 +193,10 @@ export default function InfoServiceRequest({
     },
     {
       title: "REQUEST SOURCE",
-      dataIndex: "requestSource",
+      dataIndex: "source",
       width: 150,
       sorter: true,
-      ...getColumnSearchProps("requestSource"),
+      ...getColumnSearchProps("source"),
     },
     {
       title: "REQUEST DATE",
@@ -326,6 +336,7 @@ export default function InfoServiceRequest({
       },
     },
     {
+      key: "action",
       title: "ACTION",
       align: "center",
       width: 120,
@@ -333,26 +344,14 @@ export default function InfoServiceRequest({
       render: (v, r, i) => {
         return (
           <div className="flex w-full justify-center gap-4">
-            <Tooltip title="Detail">
+            <Tooltip title="Select">
               <div className="pt-1 cursor-pointer">
                 <SVGIcon
-                  name="IconDetail"
+                  name="IconActionCreate"
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    navigate("/account-management/account-standard/service-requests/details");
-                  }}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip title="Update">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEdit"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => {
-                    // Handle update action
+                    handleRowClick(r);
                   }}
                 />
               </div>
@@ -363,52 +362,61 @@ export default function InfoServiceRequest({
     },
   ];
 
-  const ServiceRequestData = [
-    {
-      "key": 1,
-      "serviceRequestNumber": "SR-2023-001",
-      "serviceRequestReference": "REF-2023-001",
-      "type": "Installation",
-      "category": "Hardware",
-      "subCategory": "Server",
-      "channel": "Email",
-      "requestSource": "Customer",
-      "requestDate": "2023-10-15T10:30:00",
-      "openDate": "2023-10-15T11:00:00",
-      "resolvedDate": "2023-10-16T15:45:00",
-      "closedDate": "2023-10-17T09:20:00",
-      "age": 48,
-      "description": "Install new server rack in data center",
-      "statusApproval": "approved",
-      "statusPrerequisite": "completed",
-      "status": "closed"
-    },
-    {
-      "key": 2,
-      "serviceRequestNumber": "SR-2023-002",
-      "serviceRequestReference": "REF-2023-002",
-      "type": "Maintenance",
-      "category": "Software",
-      "subCategory": "Application",
-      "channel": "Phone",
-      "requestSource": "Internal",
-      "requestDate": "2023-10-16T09:15:00",
-      "openDate": "2023-10-16T09:30:00",
-      "resolvedDate": "2023-10-16T14:20:00",
-      "closedDate": "2023-10-16T16:00:00",
-      "age": 24,
-      "description": "Update application to latest version",
-      "statusApproval": "approved",
-      "statusPrerequisite": "completed",
-      "status": "closed"
-    }
-  ];
+  const accountId = account?.accountInformation?.accountId;
 
-  // Handle row click
+  const fetchServiceRequestRefs = useCallback(async (page) => {
+    const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/list?page=${page}&size=${PAGE_SIZE_REF}`;
+    const response = await accountManagementService.getAll(url);
+    // Response structure: { success, code, message, data: { result: [...], page: { totalElements } } }
+    // Unwrap the nested data layer first, then handle both Spring Page and custom formats
+    const responseData = response?.data ?? response;
+    const items = (responseData?.content ?? responseData?.result ?? []).map((item, idx) => ({
+      ...item,
+      key: item.id ?? `${page}-${idx}`,
+    }));
+    const totalElements =
+      responseData?.page?.totalElements ??
+      responseData?.totalElements ??
+      responseData?.totalElement ??
+      0;
+    const hasMore = page * PAGE_SIZE_REF < totalElements;
+    return { items, hasMore };
+  }, [accountId]);
+
+  // Load first page when modal opens, reset on close
+  useEffect(() => {
+    if (isOpen) {
+      setSrRefData([]);
+      setSrRefPage(1);
+      setSrRefHasMore(true);
+      setSrRefLoading(true);
+      srRefLoadingRef.current = false;
+      fetchServiceRequestRefs(1).then(({ items, hasMore }) => {
+        setSrRefData(items);
+        setSrRefHasMore(hasMore);
+        setSrRefLoading(false);
+      });
+    }
+  }, [isOpen]);
+
+  const handleLoadMoreSrRef = useCallback(() => {
+    if (srRefLoadingRef.current || !srRefHasMore) return Promise.resolve();
+    srRefLoadingRef.current = true;
+    const nextPage = srRefPage + 1;
+    return fetchServiceRequestRefs(nextPage).then(({ items, hasMore }) => {
+      setSrRefData((prev) => [...prev, ...items]);
+      setSrRefPage(nextPage);
+      setSrRefHasMore(hasMore);
+      srRefLoadingRef.current = false;
+    });
+  }, [srRefPage, srRefHasMore, fetchServiceRequestRefs]);
+
+  // Handle row click — auto select & close modal (like PaymentRelation pattern)
   const handleRowClick = (record) => {
-    console.log('Row clicked:', record);
+    form.setFieldsValue({ srr: record.requestNumber });
     setSelectedRow(record);
     setSelectedRowKey(record.key);
+    setIsOpen(false);
   };
 
   const handleTableRowClick = (record, rowIndex, event) => {
@@ -431,12 +439,13 @@ export default function InfoServiceRequest({
 
   return(
     <Fragment>
-      <NxPanel title={"SERVICE INFORMATION"}>
+      <NxCardContainer header={"SERVICE REQUEST INFORMATION"}>
+        <NxBaseContainer border>
         {/* Remove the wrapper Form component since form is passed as prop */}
-        <div className="w-full grid grid-cols-2 gap-4">
+        <div className="w-full grid grid-cols-3 gap-4">
           {/* Left Column */}
           <div className="space-y-4">
-            <div class="w-full gap-4 flex flex-row items-end">
+            <div className="w-full gap-4 flex flex-row items-end">
               <Form.Item
                 key="serviceRequestReference"
                 name="srr"
@@ -463,6 +472,7 @@ export default function InfoServiceRequest({
                 Select
               </Button>
             </div>
+
             <Form.Item
               key="category"
               name="category"
@@ -477,7 +487,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Category"
-                loading={!dropdowns?.serviceRequestCategories?.data}
+                loading={!isDropdownLoaded('serviceRequestCategories')}
                 options={getDropdownOptions('serviceRequestCategories')}
               />
             </Form.Item>
@@ -496,11 +506,14 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Priorities"
-                loading={!dropdowns?.serviceRequestPriorities?.data}
+                loading={!isDropdownLoaded('serviceRequestPriorities')}
                 options={getDropdownOptions('serviceRequestPriorities')}
               />
             </Form.Item>
+          </div>
 
+          {/* Middle Column */}
+          <div className="space-y-4">
             <Form.Item
               key="srFormAccountCostCenter"
               name="srFormAccountCostCenter"
@@ -530,14 +543,11 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Sub Category"
-                loading={!dropdowns?.serviceRequestSubcategories?.data}
+                loading={!isDropdownLoaded('serviceRequestSubcategories')}
                 options={getDropdownOptions('serviceRequestSubcategories')}
               />
             </Form.Item>
-          </div>
 
-          {/* Right Column */}
-          <div className="space-y-4">
             <Form.Item
               key="requestSource"
               name="requestSource"
@@ -552,11 +562,14 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Sources"
-                loading={!dropdowns?.serviceRequestSources?.data}
+                loading={!isDropdownLoaded('serviceRequestSources')}
                 options={getDropdownOptions('serviceRequestSources')}
               />
             </Form.Item>
+          </div>
 
+          {/* Right Column */}
+          <div className="space-y-4">
             <Form.Item
               key="type"
               name="type"
@@ -571,7 +584,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Types"
-                loading={!dropdowns?.serviceRequestTypes?.data}
+                loading={!isDropdownLoaded('serviceRequestTypes')}
                 options={getDropdownOptions('serviceRequestTypes')}
               />
             </Form.Item>
@@ -590,7 +603,7 @@ export default function InfoServiceRequest({
             >
               <Select
                 placeholder="Select Channels"
-                loading={!dropdowns?.serviceRequestChannels?.data}
+                loading={!isDropdownLoaded('serviceRequestChannels')}
                 options={getDropdownOptions('serviceRequestChannels')}
               />
             </Form.Item>
@@ -628,73 +641,40 @@ export default function InfoServiceRequest({
             />
           </Form.Item>
         </div>
-      </NxPanel>
+        </NxBaseContainer>
+      </NxCardContainer>
 
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        title="CHOOSE SERVICE REQUEST REFERENCE"
+        title={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
-        type="custom"
         footer={[
-          <div className="flex justify-end items-end w-full">
-            <div className="flex flex-row gap-2">
-              <Button onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                type="primary"
-                className="h-9 px-5 justify-center items-center"
-                style={{
-                  backgroundColor: "#0075bf",
-                  borderColor: "#0075bf",
-                  borderRadius: "5px",
-                  minWidth: "112px",
-                  color: "#ffffff"
-                }}
-                onClick={handleOk}
-                disabled={!selectedRow}
-              >
-                Select
-              </Button>
-            </div>
-          </div>
+          <Button key="close" onClick={handleClose}>
+            Close
+          </Button>,
         ]}
       >
-        <div className="mb-4">
-          {selectedRow ? (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-              <span className="font-medium">Selected Service Request:</span> 
-              <span className="ml-2 font-bold">{selectedRow.serviceRequestNumber}</span>
-              <span className="ml-2">({selectedRow.serviceRequestReference})</span>
-            </div>
-          ) : (
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded text-gray-500">
-              Click on a Service Request Number or Reference to select
-            </div>
-          )}
+        <div className="p-4">
+          <NxBaseContainer border>
+            <NxTable
+              idTable="sr-ref-table"
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMoreSrRef}
+              hasMore={srRefHasMore}
+              useSelect={true}
+              dataMain={srRefData}
+              columnMain={columnMain}
+              tablePadding="small"
+              fontSize="small"
+              loading={srRefLoading}
+              tableScrolled={{ x: "max-content", y: 400 }}
+              onRowClicked={handleTableRowClick}
+            />
+          </NxBaseContainer>
         </div>
-        
-        <NxTable
-          className="border-[0.5px] border-[#c8cdd4] border-solid"
-          usePagination={true}
-          useSelect={true}
-          dataMain={ServiceRequestData}
-          columnMain={columnMain}
-          tablePadding="small"
-          fontSize="small"
-          onRowClicked={handleTableRowClick}
-          rowSelection={{
-            type: 'radio',
-            selectedRowKeys: selectedRowKey ? [selectedRowKey] : [],
-            onChange: (selectedRowKeys, selectedRows) => {
-              if (selectedRows.length > 0) {
-                handleRowClick(selectedRows[0]);
-              }
-            },
-          }}
-        />
       </NxModal>
     </Fragment>
   )

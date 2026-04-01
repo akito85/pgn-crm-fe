@@ -7,7 +7,6 @@ import moment from "moment";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
@@ -445,31 +444,58 @@ const ContentManagementForm = ({ type }) => {
   ];
 
   const processData = ({ listDataCriteria, bodyData, id, type, dateFormatting, flag, data_detail, data_detail_draft, columnsTableCriteriaBillingBucket }) => {
+    // Build mapping dari dataIndexForm ke indexValue (criteriaId)
+    const columnDefs = columnsTableCriteriaBillingBucket();
+    const fieldToCriteriaIdMap = {};
+    columnDefs.forEach((col) => {
+      if (col.dataIndexForm && col.indexValue) {
+        fieldToCriteriaIdMap[col.dataIndexForm] = col.indexValue;
+      }
+    });
+
     const mapListDataCriteria = (listDataCriteria, dateFormatting) => {
-      return listDataCriteria?.map((item) => ({
-        id: item?.id || null,
-        startDate: item.startDate ? moment(item.startDate).format(dateFormatting.dateFormal) : null,
-        endDate: item.endDate ? moment(item.endDate).format(dateFormatting.dateFormal) : null,
-        customer: item.customer?.value || null,
-        budget: item.budget?.value || null,
-        subDistrict: item.subDistrict?.value || null,
-        district: item.district?.value || null,
-        city: item.city?.value || null,
-        province: item.province?.value || null,
-        area: item.area?.value || null,
-        costCenter: item.area?.value || null,
-        sor: item.sor?.value || null,
-        industrialSector: item.industrialSector?.value || null,
-        gsizes: item.gsizes?.value || null,
-        customerSegment: item.customerSegment?.value || null,
-        accountGroup: item.accountGroup?.value || null,
-        accountClass: item.accountClass?.value || null,
-        serviceType: item.serviceType?.value || null,
-        accountCategory: item.accountCategory?.value || null,
-        product: item.product?.value || null,
-        accountNumber: item.accountNumber?.value || null,
-        allCriteria: false,
-      }));
+      return listDataCriteria?.map((item) => {
+        // Cari criteriaId berdasarkan field yang memiliki value
+        let criteriaId = item?.criteriaId || null;
+        if (!criteriaId) {
+          for (const [field, idValue] of Object.entries(fieldToCriteriaIdMap)) {
+            const val = item[field];
+            if (val !== null && val !== undefined && val !== "") {
+              const actualVal = typeof val === "object" ? val.value : val;
+              if (actualVal !== null && actualVal !== undefined && actualVal !== "") {
+                criteriaId = String(idValue);
+                break;
+              }
+            }
+          }
+        }
+
+        return {
+          id: item?.id || null,
+          criteriaId: criteriaId,
+          startDate: item.startDate ? moment(item.startDate).format(dateFormatting.dateFormal) : null,
+          endDate: item.endDate ? moment(item.endDate).format(dateFormatting.dateFormal) : null,
+          customer: item.customer?.value || null,
+          budget: item.budget?.value || null,
+          subDistrict: item.subDistrict?.value || null,
+          district: item.district?.value || null,
+          city: item.city?.value || null,
+          province: item.province?.value || null,
+          area: item.area?.value || null,
+          costCenter: item.area?.value || null,
+          sor: item.sor?.value || null,
+          industrialSector: item.industrialSector?.value || null,
+          gsizes: item.gsizes?.value || null,
+          customerSegment: item.customerSegment?.value || null,
+          accountGroup: item.accountGroup?.value || null,
+          accountClass: item.accountClass?.value || null,
+          serviceType: item.serviceType?.value || null,
+          accountCategory: item.accountCategory?.value || null,
+          product: item.product?.value || null,
+          accountNumber: item.accountNumber?.value || null,
+          allCriteria: false,
+        };
+      });
     };
 
     const dataCriteriaObject = mapListDataCriteria(listDataCriteria, dateFormatting);
@@ -782,7 +808,7 @@ const ContentManagementForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -929,7 +955,7 @@ const ContentManagementForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

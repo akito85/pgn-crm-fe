@@ -1,16 +1,17 @@
-import { useRef, useState, useEffect, useMemo, Fragment } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
+import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 const PaymentRelationApprovalModal = ({
   id = 0,
@@ -19,12 +20,13 @@ const PaymentRelationApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading } = useSelector(
-    (state) => state.financialInformation
+  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approvePr, loading_rejectPr } = useSelector(
+    (state) => state.paymentRelation
   );
 
+  const loadingApproval = loading_approvePr || loading_rejectPr;
+
   // Declaration
-  const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
@@ -32,7 +34,6 @@ const PaymentRelationApprovalModal = ({
 
   // State
   const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20); 
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -43,7 +44,8 @@ const PaymentRelationApprovalModal = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
@@ -54,11 +56,12 @@ const PaymentRelationApprovalModal = ({
   useEffect(() => {
     if (isOpen) {
       const body = {
-        inputFields: tempFilters,
         page,
         size: loadMoreSize,
         sort,
         searchs: search,
+        filters,
+        filterRules,
       }
 
       dispatch(
@@ -70,7 +73,7 @@ const PaymentRelationApprovalModal = ({
       );
       setPage(1);
     }
-  }, [dispatch, isOpen, search, sort]);
+  }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -91,16 +94,17 @@ const PaymentRelationApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_paymentRelationApproval?.totalPages || 0;
+    const totalPages = pagination_paymentRelationApproval?.totalPage || 0;
 
     // Check if there's more data to load
     if (nextPage <= totalPages) {
       const body = {
-        inputFields: tempFilters,
         page: nextPage,
         size: loadMoreSize,
         sort,
         searchs: search,
+        filters,
+        filterRules,
       }
 
       dispatch(
@@ -115,7 +119,7 @@ const PaymentRelationApprovalModal = ({
   };
 
   const hasMore =
-    dataSource.length < (pagination_paymentRelationApproval?.totalElements || 0);
+    dataSource.length < (pagination_paymentRelationApproval?.totalElement || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -138,12 +142,8 @@ const PaymentRelationApprovalModal = ({
 
   // Step
   const steps = [
-    {
-      title: "PAYMENT RELATION",
-    },
-    {
-      title: "CONFIRMATION",
-    },
+    { key: "pr", title: "PAYMENT RELATION" },
+    { key: "prc", title: "CONFIRMATION" },
   ];
 
   const formFields = [
@@ -181,38 +181,10 @@ const PaymentRelationApprovalModal = ({
     setCurrent(prev => prev - 1);
   };
 
-  // Scroll Left Handler
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  // Scroll Right Handler
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Scroll Handler
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
-
   // Handle Next
   const handleButtonNext = () => {
     next();
-    scrollRightHandler();
   };
-
-  // Mapping Step
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
 
   // Handle Cancel Form
   const handleCancelForm = () => {
@@ -228,6 +200,19 @@ const PaymentRelationApprovalModal = ({
     form.resetFields();
   };
 
+  const resetForm = () => {
+    afterFinish();
+    setCurrent(0);
+    form.resetFields();
+    handleCancel();
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+  };
 
   const handleSave = async (action) => {
     try {
@@ -245,7 +230,7 @@ const PaymentRelationApprovalModal = ({
         approvalId: row.tappId,
         action,
         description: values.remark,
-      }))
+      }));
 
       dispatch(
         approveOrRejectAllPaymentRelation({
@@ -256,25 +241,15 @@ const PaymentRelationApprovalModal = ({
       )
       .unwrap()
       .then(() => {
-        afterFinish();
-        setCurrent(0);
-        form.resetFields();
-        handleCancel();
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
-        setSearch({});
-        setPage(1);
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
+        resetForm();
       })
-      .catch((error) => {})
+      .catch((error) => {});
     } catch {
 
     }
   };
 
-  const baseColumns = useMemo(
+  const columnDefinitions = useMemo(
     () =>
       getPaymentRelationColumns(
         search,
@@ -284,111 +259,84 @@ const PaymentRelationApprovalModal = ({
         handleSearch,
         false,
       ),
-    [page, loadMoreSize, searchedColumn, searchText]
+    [search, searchInput, searchedColumn, searchText]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
-
-  const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
-      ...item,
-      key: index + 1,
-    }));
-  }, [dataSource]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
-    <Fragment>
+    <>
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Payment Relation Information"
+        title="APPROVAL PAYMENT RELATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
-            <ButtonComponent type={"default"} onClick={handleCancelForm}>
+            <Button type={"menu"} onClick={handleCancelForm} disabled={loadingApproval}>
               Cancel
-            </ButtonComponent>
+            </Button>
 
-            <div className="flex gap-x-4">
-              <ButtonComponent
+            <div className="flex">
+              <Button
                 onClick={() => {
                   prev();
-                  scrollLeftHandler();
                 }}
-                type={"default"}
-                disabled={current < 1}
+                type={"menu"}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
-              </ButtonComponent>
+              </Button>
 
-              { current < steps.length - 1 && (
-                <ButtonComponent
+              {current < steps.length - 1 && (
+                <Button
                   onClick={() => handleButtonNext()}
                   type={"submit"}
-                  disabled={current > steps.length - 1 || steps[current].disabled}
+                  disabled={current > steps.length - 1 || steps[current].disabled || loadingApproval}
                 >
                   Next
-                </ButtonComponent>
+                </Button>
               )}
               {current === steps.length - 1 && (
                 <>
-                  <ButtonComponent
+                  <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
+                    disabled={!loading_rejectPr && loadingApproval}
+                    loading={loading_rejectPr}
                   >
                     Reject
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
+                    disabled={!loading_approvePr && loadingApproval}
+                    loading={loading_approvePr}
                   >
                     Approve
-                  </ButtonComponent>
+                  </Button>
                 </>
               )}
             </div>
           </div>
         }
       >
-        <NxBaseContainer
-          border={{
-            top: false,
-            right: false,
-            left: false,
-          }}
-          rounded={false}
-        >
-          <div className="flex flex-row justify-center">
-            <div
-              onScroll={handleScroll}
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-            >
-              <Steps current={current} items={items} labelPlacement="vertical" />
-            </div>
-          </div>
-        </NxBaseContainer>
+        <NxFormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={handleButtonNext}
+          inModal
+        />
 
         <div className="p-4">
           {/* STEP 1: PAYMENT RELATION INFORMATION */}
@@ -407,15 +355,15 @@ const PaymentRelationApprovalModal = ({
                 >
                   <NxTable
                     className={"[&_.ant-checkbox]:scale-90"}
-                    dataSource={dataSourceWithKeys}
-                    columns={processedColumns}
-                    totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                    tableScrolled={{ y: 400, x: "max-content" }}
+                    dataSource={dataSource}
+                    columns={columns}
+                    totalData={pagination_paymentRelationApproval?.totalElement || 0}
+                    tableScrolled={{ x: dataSource.length ? "max-content" : 1200 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_listPrApproval}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}
@@ -456,9 +404,8 @@ const PaymentRelationApprovalModal = ({
 
                 <NxTable
                   dataSource={selectedRows}
-                  columns={processedColumns}
-                  totalData={pagination_paymentRelationApproval?.totalElements || 0}
-                  tableScrolled={{ y: 400, x: "max-content" }}
+                  columns={columns}
+                  tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}
@@ -475,7 +422,7 @@ const PaymentRelationApprovalModal = ({
           </div>
         </div>
       </NxModal>
-    </Fragment>
+    </>
   );
 };
 

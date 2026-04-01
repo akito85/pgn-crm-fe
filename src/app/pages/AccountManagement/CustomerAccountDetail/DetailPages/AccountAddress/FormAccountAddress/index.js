@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import { Alert, Checkbox, Form, Select, Spin } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
@@ -476,7 +475,7 @@ const FormAccountAddress = ({ type }) => {
 
   return (
     <div>
-      <LayoutMenu>
+      <>
         <Spin spinning={loading}>
           <BreadCrumbAdvanced routes={routes(id)} />
 
@@ -895,7 +894,7 @@ const FormAccountAddress = ({ type }) => {
             </div>
           </div>
         </Spin>
-      </LayoutMenu>
+      </>
 
       <ModalChooseAddress
         dataTable={data_choose_address}

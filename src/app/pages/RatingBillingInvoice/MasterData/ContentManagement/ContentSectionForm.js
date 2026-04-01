@@ -1,12 +1,11 @@
 // path: src/pages/RatingBillingInvoice/MasterData/ContentManagement/Form/ContentSectionForm.jsx
 import React, { useState, useEffect } from "react";
-import { Form, Select } from "antd";
+import { Form, Select, Tabs } from "antd";
 import moment from "moment";
 import DateComponent from "../../../../../components/DateComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 import InputComponent from "../../../../../components/InputComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
-import RadioTabs from "../../../../../components/RadioTabs";
+import CardContainer from "../../../../../components/CardContainer";
 import { useDispatch, useSelector } from "react-redux";
 import ContentInformationForm from "./ContentInformationForm";
 import FunctionalCriteriaBillingBucket from "./Form/FunctionalCriteriaBillingBucket";
@@ -49,10 +48,6 @@ const ContentSectionForm = ({
 
   // State
   const [description, setDescription] = useState("");
-  const [tabPagesEmployee, setTabPagesEmployee] = useState([
-    { value: "Content" },
-    { value: "Criteria" },
-  ]);
   const [valuePage, setValuePage] = useState("Content");
 
   // Use Effect
@@ -120,8 +115,8 @@ const ContentSectionForm = ({
     setCriteriaValues([]);
   };
 
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  const onChange = (key) => {
+    setValuePage(key);
   };
 
   const disabledStartDate = (current) => {
@@ -130,8 +125,8 @@ const ContentSectionForm = ({
 
   return (
     <div>
-      <BaseContainer header={"Content Information"}>
-        <div className="w-full grid grid-cols-3 gap-3">
+      <CardContainer header={"Content Setup"}>
+        <div className="w-full grid grid-cols-5 gap-3">
           <Form.Item
             label={"Name"}
             name={"name"}
@@ -241,7 +236,7 @@ const ContentSectionForm = ({
             />
           </Form.Item>
 
-          <div className="col-span-3">
+          <div className="col-span-5">
             <Form.Item
               label={"Criteria"}
               name={"criteria"}
@@ -266,7 +261,7 @@ const ContentSectionForm = ({
             </Form.Item>
           </div>
 
-          <div className="col-span-3">
+          <div className="col-span-5">
             <Form.Item
               label={"Description"}
               name={"description"}
@@ -280,55 +275,64 @@ const ContentSectionForm = ({
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer
-        header="CONTENT DETAIL INFORMATION"
-        type={"tabs"}
-        element={
-          <RadioTabs
-            disabled={storedDataInline}
-            data={tabPagesEmployee}
-            onChange={onChange}
-            currentPosition={valuePage}
-          />
-        }
+      <CardContainer
+        header="INFORMATION"
       >
-        {valuePage === "Content" ? (
-          <ContentInformationForm
-            form={form}
-            type={type}
-            status={status}
-            statusApproval={statusApproval}
-            listDataCriteria={listDataCriteria}
-            setListDataCriteria={setListDataCriteria}
-            criteriaValues={criteriaValues}
-            storedDataInline={storedDataInline}
-            setStoredDataInline={setStoredDataInline}
-            startDate={startDate}
-            endDate={endDate}
-             subjectValue={subjectValue}
-            setSubjectValue={setSubjectValue}
-            bodyValue={bodyValue}
-            setBodyValue={setBodyValue}
-          />
-        ) : (
-          <FunctionalCriteriaBillingBucket
-            type={type}
-            data={listDataCriteria}
-            dataCriteria={criteriaValues}
-            updateData={setListDataCriteria}
-            setStoredData={setStoredDataInline}
-            storedData={storedDataInline}
-            required={{ required: true, message: "Please input your" }}
-            disableDate={true}
-            status={status}
-            statusApproval={statusApproval}
-            validStartDate={startDate}
-            validEndDate={endDate}
-          />
-        )}
-      </BaseContainer>
+        <Tabs
+          activeKey={valuePage}
+          onChange={onChange}
+          destroyInactiveTabPane={false}
+          items={[
+            {
+              key: "Content",
+              label: "Content",
+              disabled: storedDataInline,
+              children: (
+                <ContentInformationForm
+                  form={form}
+                  type={type}
+                  status={status}
+                  statusApproval={statusApproval}
+                  listDataCriteria={listDataCriteria}
+                  setListDataCriteria={setListDataCriteria}
+                  criteriaValues={criteriaValues}
+                  storedDataInline={storedDataInline}
+                  setStoredDataInline={setStoredDataInline}
+                  startDate={startDate}
+                  endDate={endDate}
+                  subjectValue={subjectValue}
+                  setSubjectValue={setSubjectValue}
+                  bodyValue={bodyValue}
+                  setBodyValue={setBodyValue}
+                />
+              ),
+            },
+            {
+              key: "Criteria",
+              label: "Criteria",
+              disabled: storedDataInline,
+              children: (
+                <FunctionalCriteriaBillingBucket
+                  type={type}
+                  data={listDataCriteria}
+                  dataCriteria={criteriaValues}
+                  updateData={setListDataCriteria}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  required={{ required: true, message: "Please input your" }}
+                  disableDate={true}
+                  status={status}
+                  statusApproval={statusApproval}
+                  validStartDate={startDate}
+                  validEndDate={endDate}
+                />
+              ),
+            },
+          ]}
+        />
+      </CardContainer>
     </div>
   );
 };

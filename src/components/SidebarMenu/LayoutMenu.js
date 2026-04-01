@@ -10,7 +10,7 @@ import {
   Form,
   Input,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SideMenu from "./Sidemenu";
 import {
   MenuUnfoldOutlined,
@@ -20,6 +20,9 @@ import {
   SwitcherOutlined,
 } from "@ant-design/icons";
 import NotificationDropdown from "../Notifications/NotificationDropdown";
+import NotificationInline from "../Notifications/NotificationInline";
+import NotificationPopup from "../Notifications/NotificationPopup";
+import useNotificationDisplayOrchestrator from "../../hooks/useNotificationDisplayOrchestrator";
 import { pgnLogo, pgnLogoKecil } from "../../assets/img/index";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -50,6 +53,61 @@ import { errorCode } from "../../utils";
 
 const { Content, Sider, Header } = Layout;
 
+// Isolated sidebar — React.memo prevents LayoutMenu re-renders from reaching
+// Sider. This stops SiderContext from creating new objects on every navigation/
+// Redux dispatch, which was forcing antd Menu to re-render via context
+// (bypassing React.memo on SideMenu) and triggering SubMenu animation.
+const SidebarContainer = React.memo(({ collapsed, onToggle }) => (
+  <Sider
+    trigger={null}
+    collapsible
+    collapsed={collapsed}
+    className={`site-layout-background ${
+      collapsed === true ? "width-collapsed" : "width-not-collapsed"
+    }`}
+    style={{
+      overflow: "auto",
+      height: "auto",
+      left: 0,
+      top: 0,
+      bottom: 0,
+      minWidth: "255px !important",
+    }}
+  >
+    <div
+      className={`grid grid-cols-3 gap-1 logo ${
+        collapsed
+          ? "my-6 mx-4 justify-center"
+          : "my-6 mx-4 justify-center"
+      }`}
+    >
+      <div className="col-span-2">
+        <Image
+          src={collapsed ? pgnLogoKecil : pgnLogo}
+          preview={false}
+          wrapperClassName={!collapsed ? "w-[120px]" : undefined}
+        />
+      </div>
+      <div className="flex self-center justify-end">
+        {collapsed === false &&
+          React.createElement(
+            collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
+            {
+              className: "trigger",
+              onClick: onToggle,
+              style: {
+                fontSize: "24px",
+                color: "#4B465C",
+                width: "24px",
+              },
+            },
+          )}
+      </div>
+    </div>
+    <SideMenu isCollapsed={collapsed} />
+  </Sider>
+));
+
 const LayoutMenu = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -70,7 +128,20 @@ const LayoutMenu = ({ children }) => {
     data_grant_access,
   } = useSelector((state) => state.general);
   const [form] = Form.useForm();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    // Check if collapsed state is stored in localStorage
+    const savedCollapsed = localStorage.getItem('sidebar_collapsed');
+    return savedCollapsed ? JSON.parse(savedCollapsed) : false;
+  });
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const newState = !prev;
+      // Save the new state to localStorage
+      localStorage.setItem('sidebar_collapsed', JSON.stringify(newState));
+      return newState;
+    });
+  }, []);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token"),
@@ -86,6 +157,51 @@ const LayoutMenu = ({ children }) => {
   // const [showModalExpired, setShowModalExpired] = useState(false);
   const [showModalExtendToken, setShowModalExtendToken] = useState(false);
   const [loadingLogout, setLoadingLogout] = useState(false);
+
+  // Notification display states
+  const [inlineNotifications, setInlineNotifications] = useState([]);
+  const [popupNotification, setPopupNotification] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Notification handlers
+  const handlePopupNotification = (notification) => {
+    setPopupNotification(notification);
+    setShowPopup(true);
+  };
+
+  const handleInlineNotification = (notification) => {
+    setInlineNotifications((prev) => {
+      // Check if notification already exists
+      const exists = prev.find((n) => n.id === notification.id);
+      if (exists) return prev;
+      // Add new notification (keep max 5)
+      return [notification, ...prev].slice(0, 5);
+    });
+  };
+
+  const handleDismissInline = (notificationId) => {
+    setInlineNotifications((prev) =>
+      prev.filter((n) => n.id !== notificationId)
+    );
+  };
+
+  const handleDismissAllInline = () => {
+    setInlineNotifications([]);
+  };
+
+  const handleNavigateNotification = (notification) => {
+    if (notification.redirectUrl) {
+      navigate(notification.redirectUrl);
+    }
+  };
+
+  // Initialize notification display orchestrator
+  useNotificationDisplayOrchestrator({
+    onPopupNotification: handlePopupNotification,
+    onInlineNotification: handleInlineNotification,
+    onNavigate: handleNavigateNotification,
+    enabled: true,
+  });
 
   // use effect check grant access
   useEffect(() => {
@@ -354,52 +470,7 @@ const LayoutMenu = ({ children }) => {
         }}
         className="site-layout"
       >
-        <Sider
-          trigger={null}
-          collapsible
-          collapsed={collapsed}
-          className={`site-layout-background ${collapsed === true ? "width-collapsed" : "width-not-collapsed"
-            }`}
-          style={{
-            overflow: "auto",
-            height: "auto",
-            left: 0,
-            top: 0,
-            bottom: 0,
-            minWidth: "255px !important",
-          }}
-        >
-          <div
-            className={`grid grid-cols-3 gap-1 logo ${collapsed
-                ? "my-6 mx-4 justify-center"
-                : "my-6 mx-4 justify-center"
-              }`}
-          >
-            <div className="col-span-2">
-              <Image
-                src={collapsed ? pgnLogoKecil : pgnLogo}
-                preview={false}
-                wrapperClassName={!collapsed ? "w-[120px]" : undefined}
-              />
-            </div>
-            <div className=".. flex self-center justify-end">
-              {collapsed === false &&
-                React.createElement(
-                  collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
-                  {
-                    className: "trigger",
-                    onClick: () => setCollapsed(!collapsed),
-                    style: {
-                      fontSize: "24px",
-                      color: "#4B465C",
-                      width: "24px",
-                    },
-                  },
-                )}
-            </div>
-          </div>
-          <SideMenu isCollapsed={collapsed} />
-        </Sider>
+        <SidebarContainer collapsed={collapsed} onToggle={toggleCollapsed} />
         <Layout className="site-layout2 p-4">
           <Header
             className="site-layout-background2"
@@ -411,10 +482,10 @@ const LayoutMenu = ({ children }) => {
               <div className="pl-4">
                 {collapsed === true &&
                   React.createElement(
-                    collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
+                    MenuUnfoldOutlined,
                     {
                       className: "trigger",
-                      onClick: () => setCollapsed(!collapsed),
+                      onClick: toggleCollapsed,
                       style: {
                         fontSize: "24px",
                         color: "#FFFFFF",
@@ -426,7 +497,7 @@ const LayoutMenu = ({ children }) => {
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
                 <NotificationDropdown />
                 <Dropdown overlay={menu} trigger={["click"]}>
-                  <a onClick={(e) => e.preventDefault()}>
+                  <button type="button" onClick={(e) => e.preventDefault()} style={{ border: 'none', background: 'transparent' }}>
                     {data_profile?.data?.urlImage2 === null ? (
                       data_profile?.data?.username === "" ? (
                         <Avatar size={"middle"} icon={<UserOutlined />} />
@@ -443,7 +514,7 @@ const LayoutMenu = ({ children }) => {
                         src={data_profile?.data?.urlImage2}
                       />
                     )}
-                  </a>
+                  </button>
                 </Dropdown>
                 {/* <IconArrowNarrowLeft
                   name={"IconArrowNarrowLeft"}
@@ -461,6 +532,18 @@ const LayoutMenu = ({ children }) => {
               overflow: "initial",
             }}
           >
+            {/* Inline Notifications */}
+            {inlineNotifications.length > 0 && (
+              <div style={{ padding: "0 24px", marginTop: "16px" }}>
+                <NotificationInline
+                  notifications={inlineNotifications}
+                  onDismiss={handleDismissInline}
+                  onViewDetails={handleNavigateNotification}
+                  onDismissAll={handleDismissAllInline}
+                />
+              </div>
+            )}
+
             {modalSuccess ? (
               <ModalSuccess
                 isOpen={modalSuccess}
@@ -547,8 +630,12 @@ const LayoutMenu = ({ children }) => {
                 </div>
               </ModalError>
             ) : null}
-            {data_grant_access?.response?.data?.data?.isGranted === false &&
-              !isPublicPath ? (
+            {location.pathname === '/' ? (
+              // Always render dashboard regardless of permission check state
+              <div className="mt-[15px]">{children}</div>
+            ) :
+            (data_grant_access?.response?.data?.data?.isGranted === false &&
+              !isPublicPath) ? (
               <NotFound type={"unauthorized"} />
             ) : (
               <div className="mt-[15px]">{children}</div>
@@ -640,7 +727,13 @@ const LayoutMenu = ({ children }) => {
                   <Input.Password />
                 </Form.Item>
                 <div className={"w-full justify-end flex gap-2"}>
-                  <ButtonComponent type={"default"} onClick={handleLogout}>
+                  <ButtonComponent
+                    type={"default"}
+                    onClick={() => {
+                      setShowModalExtendToken(false);
+                      form.resetFields();
+                    }}
+                  >
                     Logout
                   </ButtonComponent>
                   <ButtonComponent type={"submit"} htmlType={"submit"}>
@@ -650,6 +743,17 @@ const LayoutMenu = ({ children }) => {
               </div>
             </Form>
           </ModalCustom>
+
+          {/* Notification Popup Modal */}
+          <NotificationPopup
+            notification={popupNotification}
+            visible={showPopup}
+            onClose={() => {
+              setShowPopup(false);
+              setPopupNotification(null);
+            }}
+            onViewDetails={handleNavigateNotification}
+          />
         </Layout>
       </Layout>
     </>

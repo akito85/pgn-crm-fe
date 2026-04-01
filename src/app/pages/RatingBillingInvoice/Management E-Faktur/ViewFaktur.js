@@ -12,9 +12,9 @@ import {
   UploadOutlined,
   FileTextOutlined,
   PlusOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -26,6 +26,7 @@ import ModalUploadEFaktur from "./ModalEfaktur/ModalUploadEFaktur";
 import ModalApprovalEFaktur from "./ModalEfaktur/ModalApprovalEFaktur";
 import ModalRequestApprovalEFaktur from "./ModalEfaktur/ModalRequestApprovalEFaktur";
 import LogAktivitasEFaktur from "./LogAktivitasEFaktur";
+import ModalSyncEFaktur from "./ModalEfaktur/ModalSyncEFaktur";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import { getEFakturColumns, getActionColumn } from "./Tabel/EFakturColumns";
@@ -65,6 +66,7 @@ const ViewFaktur = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [logAktivitasOpen, setLogAktivitasOpen] = useState(false);
   const [modalRequest, setModalRequest] = useState(false);
+  const [modalSync, setModalSync] = useState(false);
 
   const [selectedBilling, setSelectedBilling] = useState(null);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
@@ -249,6 +251,10 @@ const ViewFaktur = () => {
     setModalRequest(false);
   };
 
+  const closeModalSync = () => {
+    setModalSync(false);
+  };
+
   // Columns Definition
   const baseColumns = useMemo(
     () =>
@@ -314,7 +320,7 @@ const ViewFaktur = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -340,6 +346,15 @@ const ViewFaktur = () => {
                   onClick={handleBulkApproval}
                 >
                   Approval
+                </ButtonComponent>
+
+                {/* Create E-Faktur Button - Navigate to Form */}
+                <ButtonComponent
+                  icon={<PlusOutlined />}
+                  type="submit"
+                  onClick={handleCreateEFaktur}
+                >
+                  Create E-Faktur
                 </ButtonComponent>
 
                 {/* Upload Attachment Button */}
@@ -368,15 +383,6 @@ const ViewFaktur = () => {
                 >
                   Request Approval
                 </ButtonComponent>
-
-                {/* Create E-Faktur Button - Navigate to Form */}
-                <ButtonComponent
-                  icon={<PlusOutlined />}
-                  type="submit"
-                  onClick={handleCreateEFaktur}
-                >
-                  Create E-Faktur
-                </ButtonComponent>
               </div>
             </div>
           }
@@ -398,6 +404,10 @@ const ViewFaktur = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              showRefresh={true}
+              onRefresh={() => setModalSync(true)}
+              refreshLabel="Sync"
+              refreshIcon={<SyncOutlined style={{ fontSize: "14px" }} />}
             />
           </div>
         </CardContainer>
@@ -456,6 +466,16 @@ const ViewFaktur = () => {
           loading={loading_approval_history}
         />
 
+        {/* Modal Sync E-Faktur */}
+        <ModalSyncEFaktur
+          isOpen={modalSync}
+          handleClose={closeModalSync}
+          onSuccess={() => {
+            closeModalSync();
+            handleRefresh();
+          }}
+        />
+
         {/* Log Aktivitas E-Faktur */}
         <LogAktivitasEFaktur
           isOpen={logAktivitasOpen}
@@ -463,7 +483,7 @@ const ViewFaktur = () => {
           billingData={selectedBilling}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

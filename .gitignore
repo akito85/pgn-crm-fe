@@ -32,9 +32,13 @@ logs/
 docs/
 
 .cla*
+.q*
 *.md
 *.MD
 *.sh
 *.txt
 *.sql
 *.zip
+# Local workspace (mockups, scratch work, design artifacts)
+.workspace/
+.sup*

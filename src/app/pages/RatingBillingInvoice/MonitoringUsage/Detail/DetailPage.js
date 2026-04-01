@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import { RBI_ROUTES } from '../../../../../routes/rating_billing/rbi_routes';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -152,7 +151,7 @@ const DetailPage = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
 
@@ -181,14 +180,6 @@ const DetailPage = () => {
                             <Form.Item>
                                 <ButtonComponent
                                     type={'submit'}
-                                    icon={
-                                        <LeftOutlined
-                                            style={{
-                                                color: "#fff",
-                                                fontSize: 16,
-                                                justifyItems: "left",
-                                            }}
-                                        />}
                                     // onClick={handleBackPage}
                                     onClick={handleBack}>
                                     Back
@@ -270,7 +261,7 @@ const DetailPage = () => {
                     />
                 </Form>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 }
 

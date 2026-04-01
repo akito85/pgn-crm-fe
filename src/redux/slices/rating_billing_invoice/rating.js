@@ -19,10 +19,19 @@ const initialState = {
   data_usageSA: [],
   data_promoSA: [],
   data_periodicSA: [],
-  loading: false,
+  loadingList: false,
+  loadingPeriod: false,
+  loadingCalculation: false,
+  loadingUsage: false,
+  loadingSA: false,
+  loadingPromo: false,
+  loadingPeriodic: false,
+  loadingRatingDetail: false,
+  loadingDownload: false,
   data_detail: null,
   data_downlaod: null,
   loadingExpand: {},
+  currentRequestId: null,
 };
 
 // list gas
@@ -37,13 +46,13 @@ export const getListRatingGasPaginate = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
 
-      // URL dengan parameter period
       const url = `/v1/dbs/api/rating/rating-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&period=${encodeURIComponent(period)}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
+      const responseData = response.data?.data ?? response.data;
 
       return {
-        ...response.data,
+        ...responseData, // spread { result, page, link }
         isLoadMore,
       };
     } catch (error) {
@@ -256,12 +265,17 @@ export const getAllServiceAgreementPaginate = createAsyncThunk(
 
 export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
   "GET_ALL_USAGE_SERVICE_AGREEMENT_PAGINATE",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async (
+    { id, page, pageSize, search, sort, billPeriod, accountNumber },
+    thunkAPI,
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "recordId~desc" : sort;
-      const url = `/v1/dbs/api/rating/list-usage/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
+      const url = `/v1/dbs/api/rating/list-usage/${id}?billPeriod=${encodeURIComponent(billPeriod)}&accountNumber=${accountNumber}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -863,20 +877,26 @@ const ratingSlice = createSlice({
   extraReducers: {
     [getListRatingGasPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loadingList = true;
+        state.currentRequestId = action.meta.requestId;
       }
     },
     [getListRatingGasPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
-      const isLoadMore = action.payload.isLoadMore;
+      const isLoadMore = action.payload?.isLoadMore;
+
+      if (!isLoadMore && action.meta.requestId !== state.currentRequestId) {
+        return;
+      }
+
+      state.loadingList = false;
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
         const existingIds = new Set(
-          (state.data?.result || []).map((item) => item.ratingId),
+          (state.data?.result || []).map((item) => item.ratingCode), // ← pastikan ratingCode
         );
         const uniqueNewData = newResult.filter(
-          (item) => !existingIds.has(item.ratingId),
+          (item) => !existingIds.has(item.ratingCode), // ← pastikan ratingCode
         );
         state.data = {
           ...action.payload,
@@ -887,7 +907,7 @@ const ratingSlice = createSlice({
       }
     },
     [getListRatingGasPaginate.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingList = false;
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }
@@ -895,160 +915,160 @@ const ratingSlice = createSlice({
 
     // Get All Calculation Usage Pagination
     [getAllCalculationUsagePaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingSA = true;
     },
     [getAllCalculationUsagePaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingSA = false;
       state.data_calculationUsage = action.payload;
     },
     [getAllCalculationUsagePaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingSA = false;
     },
 
     // Get All Service Agreement Pagination
     [getAllServiceAgreementPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingSA = true;
     },
     [getAllServiceAgreementPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingSA = false;
       state.data_serviceAgreement = action.payload;
     },
     [getAllServiceAgreementPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingSA = false;
     },
 
     // Get All Usage Service Agreement Pagination
     [getAllUsageServiceAgreementPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingUsage = true;
     },
     [getAllUsageServiceAgreementPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingUsage = false;
       state.data_usageSA = action.payload;
     },
     [getAllUsageServiceAgreementPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingUsage = false;
     },
 
     // Get All Detail Service Agreement Pagination
     [getAllDetailServiceAgreementPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingSA = true;
     },
     [getAllDetailServiceAgreementPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingSA = false;
       state.data_detailServiceAgreement = action.payload;
     },
     [getAllDetailServiceAgreementPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingSA = false;
     },
 
     // Get All TOS Service Agreement Pagination
     [getAllTOSServiceAgreementPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingSA = true;
     },
     [getAllTOSServiceAgreementPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingSA = false;
       state.data_termOfServiceSA = action.payload;
     },
     [getAllTOSServiceAgreementPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingSA = false;
     },
 
     // Get All Pricing Rule Service Agreement Pagination
     [getAllPricingRuleSAPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingSA = true;
     },
     [getAllPricingRuleSAPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingSA = false;
       state.data_pricingRule = action.payload;
     },
     [getAllPricingRuleSAPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingSA = false;
     },
 
     // Get Pricing Service Agreement
     [getDetailPricing.pending]: (state, action) => {
-      state.loading = true;
+      state.loadingSA = true;
       state.data_pricing = action.payload;
     },
     [getDetailPricing.fulfilled]: (state, action) => {
       state.data_pricing = action.payload;
-      state.loading = false;
+      state.loadingSA = false;
     },
     [getDetailPricing.rejected]: (state, action) => {
       state.data_pricing = action.payload;
-      state.loading = false;
+      state.loadingSA = false;
     },
 
     // Get All Calculation Rule Service Agreement Pagination
     [getAllCalculationRuleServiceAgreementPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingSA = true;
     },
     [getAllCalculationRuleServiceAgreementPaginate.fulfilled]: (
       state,
       action,
     ) => {
-      state.loading = false;
+      state.loadingSA = false;
       state.data_calculationRuleServiceAgreement = action.payload;
     },
     [getAllCalculationRuleServiceAgreementPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingSA = false;
     },
 
     // Get All Rating Non Gas Pagination
     [getListRatingNonGasPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingList = true;
     },
     [getListRatingNonGasPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingList = false;
       state.data = action.payload;
     },
     [getListRatingNonGasPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingList = false;
     },
 
     // Download Rating
     [downloadRatingGas.pending]: (state) => {
-      state.loading = true;
+      state.loadingDownload = true;
     },
     [downloadRatingGas.fulfilled]: (state) => {
-      state.loading = false;
+      state.loadingDownload = false;
     },
     [downloadRatingGas.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDownload = false;
     },
 
     // Get List Billing Period For Rating
     [getListBillingPeriodForRating.pending]: (state) => {
-      state.loading = true;
+      state.loadingPeriod = true;
     },
     [getListBillingPeriodForRating.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingPeriod = false;
       state.list_billing_period = action.payload;
     },
     [getListBillingPeriodForRating.rejected]: (state) => {
-      state.loading = false;
+      state.loadingPeriod = false;
       state.list_billing_period = [];
     },
 
     // get detail rating gas
     [getDetailRatingGas.pending]: (state) => {
-      state.loading = true;
+      state.loadingRatingDetail = true;
     },
     [getDetailRatingGas.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingRatingDetail = false;
       state.data_detail = action.payload;
     },
     [getDetailRatingGas.rejected]: (state) => {
-      state.loading = false;
+      state.loadingRatingDetail = false;
     },
     // Get All Calculation Summary
     [getAllCalculationSummaryPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loadingCalculation = true;
       }
     },
     [getAllCalculationSummaryPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingCalculation = false;
       const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
@@ -1071,7 +1091,7 @@ const ratingSlice = createSlice({
       }
     },
     [getAllCalculationSummaryPaginate.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingCalculation = false;
       if (!action.meta.arg?.isLoadMore) {
         state.data_calculationSummary = [];
       }
@@ -1095,51 +1115,51 @@ const ratingSlice = createSlice({
 
     // Get All Calculation Detail Pagination
     [getAllCalculationDetailPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingCalculation = true;
     },
     [getAllCalculationDetailPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingCalculation = false;
       state.data_calculationDetail = action.payload;
     },
     [getAllCalculationDetailPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingCalculation = false;
       state.data_calculationDetail = [];
     },
 
     // Get All Adjustment Pagination
     [getAllAdjustmentPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingCalculation = true;
     },
     [getAllAdjustmentPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingCalculation = false;
       state.data_adjustment = action.payload;
     },
     [getAllAdjustmentPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingCalculation = false;
       state.data_adjustment = [];
     },
     // Get All Promo Service Agreement Pagination
     [getAllPromoServiceAgreementPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingPromo = true;
     },
     [getAllPromoServiceAgreementPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingPromo = false;
       state.data_promoSA = action.payload;
     },
     [getAllPromoServiceAgreementPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingPromo = false;
       state.data_promoSA = [];
     },
     // Get All Periodic Service Agreement Pagination
     [getAllPeriodicServiceAgreementPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingPeriodic = true;
     },
     [getAllPeriodicServiceAgreementPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingPeriodic = false;
       state.data_periodicSA = action.payload;
     },
     [getAllPeriodicServiceAgreementPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingPeriodic = false;
       state.data_periodicSA = [];
     },
   },

@@ -2,6 +2,30 @@ import axios from "axios";
 import { configApp } from "../../../constants/configApp";
 import { tokenHeader } from "../../../utils/tokenHeader";
 
+// Clears localStorage + sessionStorage while preserving keys that should
+// survive a logout or position-switch.  Preserves:
+//   - nxnested__* table column preferences (per-user keys, safe to keep)
+//   - notification_userId / notification_positionId (existing behaviour)
+const PRESERVE_PREFIXES = ["nxnested__", "nxtable__"];
+const PRESERVE_EXACT    = ["notification_userId", "notification_positionId"];
+
+const clearStoragePreserving = () => {
+  const saved = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k) continue;
+    if (
+      PRESERVE_EXACT.includes(k) ||
+      PRESERVE_PREFIXES.some(p => k.startsWith(p))
+    ) {
+      saved.push([k, localStorage.getItem(k)]);
+    }
+  }
+  localStorage.clear();
+  window.sessionStorage.clear();
+  saved.forEach(([k, v]) => localStorage.setItem(k, v));
+};
+
 const login = async (user, level) => {
   let url;
   if (level === "superuser") {
@@ -22,8 +46,7 @@ const logout = async () => {
     null,
     { headers: tokenHeader() }
   );
-  localStorage.clear();
-  window.sessionStorage.clear();
+  clearStoragePreserving();
   return response.data;
 };
 const choosePosition = async (id) => {
@@ -32,8 +55,7 @@ const choosePosition = async (id) => {
     { positionId: id },
     { headers: tokenHeader() }
   );
-  localStorage.clear();
-  window.sessionStorage.clear();
+  clearStoragePreserving();
   return response.data;
 };
 const chooseEntity = async (id) => {
@@ -42,8 +64,7 @@ const chooseEntity = async (id) => {
     { entityId: id },
     { headers: tokenHeader() }
   );
-  localStorage.clear();
-  window.sessionStorage.clear();
+  clearStoragePreserving();
   return response.data;
 };
 const checkGrantedAccess = async (body) => {
@@ -69,10 +90,7 @@ const getAll = async () => {
 };
 
 const injectLogout = async () => {
-  // const response = localStorage.clear() && window.sessionStorage.clear();
-  // return response;
-  localStorage.clear();
-  window.sessionStorage.clear();
+  clearStoragePreserving();
 };
 const authService = {
   getAll,

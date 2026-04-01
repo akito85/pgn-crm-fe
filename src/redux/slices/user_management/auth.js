@@ -38,6 +38,7 @@ const initialState = {
   data_position: [],
   data_extended: null,
   data_switch: null,
+  currentPosition: null, // Position info from switch-pos API { positionId, positionName }
 };
 let remember_me = "";
 export const login = createAsyncThunk(
@@ -61,8 +62,8 @@ export const login = createAsyncThunk(
           })
         );
         if (
-          data.data.token.userType === "Non Employee" &&
-          data.data.token.userLevel !== "Super User"
+          data.data.token.userType === "Non Employee" ||
+          data.data.token.userLevel === "Super User"
         ) {
           thunkAPI.dispatch(
             setData({
@@ -71,6 +72,16 @@ export const login = createAsyncThunk(
               storageType: "local",
             })
           );
+          // Super users also need entities for choose-entity page
+          if (data.data.token.userLevel === "Super User") {
+            thunkAPI.dispatch(
+              setData({
+                key: "entities",
+                data: data.data.entityList,
+                storageType: "local",
+              })
+            );
+          }
         } else {
           level === "superuser" &&
           (data.data.token.userType === "Non Employee" ||
@@ -109,8 +120,8 @@ export const login = createAsyncThunk(
           })
         );
         if (
-          data.data.token.userType === "Non Employee" &&
-          data.data.token.userLevel !== "Super User"
+          data.data.token.userType === "Non Employee" ||
+          data.data.token.userLevel === "Super User"
         ) {
           thunkAPI.dispatch(
             setData({
@@ -119,6 +130,16 @@ export const login = createAsyncThunk(
               storageType: "session",
             })
           );
+          // Super users also need entities for choose-entity page
+          if (data.data.token.userLevel === "Super User") {
+            thunkAPI.dispatch(
+              setData({
+                key: "entities",
+                data: data.data.entityList,
+                storageType: "session",
+              })
+            );
+          }
         } else {
           level === "superuser" &&
           (data.data.token.userType === "Non Employee" ||
@@ -892,6 +913,9 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       state.loading = false;
       state.user = action.payload;
+      // Clear notification userId and positionId persistence
+      localStorage.removeItem("notification_userId");
+      localStorage.removeItem("notification_positionId");
     },
     [logout.rejected]: (state, action) => {
       state.isLoggedIn = false;
@@ -903,7 +927,7 @@ const authSlice = createSlice({
       state.selectedPosition = false;
       state.loading = true;
     },
-    [choosePosition.fulfilled]: (state) => {
+    [choosePosition.fulfilled]: (state, action) => {
       state.loading = false;
       state.isFailed = false;
       state.token =
@@ -911,6 +935,11 @@ const authSlice = createSlice({
       state.side_bar =
         localStorage.getItem("side_bar") ||
         window.sessionStorage.getItem("side_bar");
+      // Persist positionId for notification system (survives page refresh/navigation)
+      if (action.payload?.data?.position?.positionId) {
+        state.currentPosition = action.payload.data.position;
+        localStorage.setItem("notification_positionId", action.payload.data.position.positionId);
+      }
     },
     [choosePosition.rejected]: (state) => {
       state.selectedPosition = false;
@@ -1036,7 +1065,21 @@ const authSlice = createSlice({
     },
     [changePosition.fulfilled]: (state, action) => {
       state.loading = false;
+      state.isFailed = false;
       state.data_switch = action.payload;
+      state.token =
+        localStorage.getItem("token") || window.sessionStorage.getItem("token");
+      state.side_bar =
+        localStorage.getItem("side_bar") ||
+        window.sessionStorage.getItem("side_bar");
+
+      // Store position information for notification filtering
+      // The token doesn't contain positionId, but the full response does at action.payload.position
+      if (action.payload?.position) {
+        state.currentPosition = action.payload.position;
+        // Persist positionId for notification system (survives page refresh/navigation)
+        localStorage.setItem("notification_positionId", action.payload.position.positionId);
+      }
     },
     [changePosition.rejected]: (state) => {
       state.loading = false;

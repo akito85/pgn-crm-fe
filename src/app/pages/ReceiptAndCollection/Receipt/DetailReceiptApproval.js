@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Collapse, Spin } from "antd";
 import { DownOutlined, LeftOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
@@ -17,6 +16,8 @@ import {
     getAllocation,
     approveOrRejectHoldReceipt,
     approveOrRejectReleaseReceipt,
+    approveOrRejectReverseReceipt,
+    approveOrRejectRefundReceipt,
     approveOrRejectReceipt,
     getListApprovalByIdReceipt,
 } from "../../../../redux/slices/receipt_collection/receipt";
@@ -151,6 +152,10 @@ const DetailReceiptApproval = ({ type: propType }) => {
             dispatch(approveOrRejectHoldReceipt({ body: data }));
         } else if (category === "RECEIPT_RELEASE") {
             dispatch(approveOrRejectReleaseReceipt({ body: data }));
+        } else if (category === "RECEIPT_REVERSE") {
+            dispatch(approveOrRejectReverseReceipt({ body: data }));
+        } else if (category === "RECEIPT_REFUND") {
+            dispatch(approveOrRejectRefundReceipt({ body: data }));
         } else {
             dispatch(approveOrRejectReceipt({ body: data }));
         }
@@ -225,6 +230,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                     ? moment(data_detail.receiptDate).format(dateFormatting.date)
                     : "",
                 balance: data_detail?.balance || data_detail?.unAppliedAmountReal,
+                amount: data_detail?.amount || 0,
                 holdAmount: data_detail?.holdAmount || data_detail?.unAppliedAmountReal,
                 account: data_detail?.account,
             },
@@ -257,6 +263,14 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 text ? text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0",
         },
         {
+            title: "AMOUNT",
+            dataIndex: "amount",
+            key: "amount",
+            align: "right",
+            render: (text) =>
+                text ? text.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "0",
+        },
+        {
             title: `${typeLabel.toUpperCase()} AMOUNT`,
             dataIndex: "holdAmount",
             key: "holdAmount",
@@ -267,7 +281,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
 
             <div className="text-xl font-bold text-primary mb-5">
@@ -495,7 +509,7 @@ const DetailReceiptApproval = ({ type: propType }) => {
                 menu={`Receipt ${typeLabel}`}
                 named={data_detail?.receiptNumber}
             />
-        </LayoutMenu>
+        </>
     );
 };
 

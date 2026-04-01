@@ -5,8 +5,8 @@ import { getAllUsageServiceAgreementPaginate } from "../../../../../redux/slices
 import { columnsUsage } from "./Table/TableUsage";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const UsageSection = ({ ratingCode, calculationCode }) => {
-  const { data_usageSA } = useSelector((state) => state.rating);
+const UsageSection = ({ ratingCode, calculationCode, accountNumber, billPeriod }) => {
+  const { data_usageSA, loadingUsage } = useSelector((state) => state.rating);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -32,6 +32,8 @@ const UsageSection = ({ ratingCode, calculationCode }) => {
         page,
         pageSize,
         sort,
+        billPeriod, 
+        accountNumber, 
       })
     );
   }, [dispatch, ratingCode, search, page, pageSize, sort]);
@@ -133,7 +135,7 @@ const UsageSection = ({ ratingCode, calculationCode }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={false}
+          loading={loadingUsage}
         />
       </div>
     </>

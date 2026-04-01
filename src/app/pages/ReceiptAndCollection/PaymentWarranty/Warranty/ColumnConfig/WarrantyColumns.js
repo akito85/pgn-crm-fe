@@ -23,159 +23,115 @@ export const columnWarranty = (
   },
   {
     key: "warrantyCode",
-    title: "PAYMENT WARRANTY CODE",
+    title: "PAYMENT GUARANTEE CODE",
     dataIndex: "warrantyCode",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "warrantyCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("warrantyCode", searchInput, searchedColumn, searchText, handleSearch),
+  },
+  {
+    key: "regNumber",
+    title: "REG NUMBER",
+    dataIndex: "regNumber",
+    sorter: true,
+    ...getColumnSearchPropsPaging("regNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "costCenter",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("costCenter", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "accountNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("accountNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "accountName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("accountName", searchInput, searchedColumn, searchText, handleSearch),
+  },
+  {
+    key: "saNumber",
+    title: "SA NUMBER",
+    dataIndex: "saNumber",
+    sorter: true,
+    ...getColumnSearchPropsPaging("saNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "customerNumber",
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "customerNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("customerNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "customerName",
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "customerName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("customerName", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "customerSegment",
     title: "CUSTOMER SEGMENT",
     dataIndex: "customerSegment",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "customerSegment",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("customerSegment", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "customerGroup",
     title: "CUSTOMER GROUP",
     dataIndex: "customerGroup",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "customerGroup",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("customerGroup", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "type",
     title: "TYPE",
     dataIndex: "type",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "type",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("type", searchInput, searchedColumn, searchText, handleSearch),
+  },
+  {
+    key: "warrantyType",
+    title: "WARRANTY TYPE",
+    dataIndex: "warrantyType",
+    sorter: true,
+    ...getColumnSearchPropsPaging("warrantyType", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "issuerBank",
-    title: "PENERBIT",
+    title: "ISSUER BANK",
     dataIndex: "issuerBank",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "issuerBank",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("issuerBank", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "issuerBranch",
-    title: "CABANG PENERBIT",
+    title: "ISSUER BRANCH",
     dataIndex: "issuerBranch",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "issuerBranch",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("issuerBranch", searchInput, searchedColumn, searchText, handleSearch),
+  },
+  {
+    key: "documentNumber",
+    title: "DOCUMENT NUMBER",
+    dataIndex: "documentNumber",
+    sorter: true,
+    ...getColumnSearchPropsPaging("documentNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "currency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("currency", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "currencyBalance",
@@ -186,12 +142,11 @@ export const columnWarranty = (
     render: (text) => text?.toLocaleString(),
   },
   {
-    key: "rate",
-    title: "RATE",
-    dataIndex: "rate",
-    align: "right",
+    key: "rateType",
+    title: "RATE TYPE",
+    dataIndex: "rateType",
     sorter: true,
-    render: (text) => text?.toLocaleString(),
+    ...getColumnSearchPropsPaging("rateType", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "rateDate",
@@ -201,26 +156,20 @@ export const columnWarranty = (
     render: (text) => (text ? moment(text).format(dateFormatting.dateCapital) : ""),
   },
   {
-    key: "equivalent",
-    title: "EQV. AMOUNT",
-    dataIndex: "equivalent",
-    // width: 150,
+    key: "rate",
+    title: "RATE",
+    dataIndex: "rate",
     align: "right",
     sorter: true,
     render: (text) => text?.toLocaleString(),
   },
   {
-    key: "documentNumber",
-    title: "DOCUMENT NUMBER",
-    dataIndex: "documentNumber",
+    key: "equivalent",
+    title: "EQV. AMOUNT",
+    dataIndex: "equivalent",
+    align: "right",
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "documentNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    render: (text) => text?.toLocaleString(),
   },
   {
     key: "mutationDate",
@@ -251,18 +200,25 @@ export const columnWarranty = (
     render: (text) => (text ? moment(text).format(dateFormatting.dateCapital) : ""),
   },
   {
+    key: "claimPeriodTermType",
+    title: "CLAIM TERM TYPE",
+    dataIndex: "claimPeriodTermType",
+    sorter: true,
+    ...getColumnSearchPropsPaging("claimPeriodTermType", searchInput, searchedColumn, searchText, handleSearch),
+  },
+  {
+    key: "claimPeriodTermValue",
+    title: "CLAIM TERM VALUE",
+    dataIndex: "claimPeriodTermValue",
+    align: "right",
+    sorter: true,
+  },
+  {
     key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
-    // width: 250,
     sorter: true,
-    ...getColumnSearchPropsPaging(
-      "description",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
+    ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "status",

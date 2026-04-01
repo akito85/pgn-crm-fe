@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
@@ -26,7 +25,7 @@ const data = [
   { value: "Service Agreement" },
   { value: "Relationship" },
   { value: "Gas Source" },
-  { value: "Gas Deposit", disabled: true, },
+  { value: "Gas Deposit" },
   { value: "Compensation", disabled: true, },
   { value: "Promo" },
   { value: "Multi Destination" },
@@ -68,7 +67,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             item.value === "Account Statement" ||
             item.value === "Promo" ||
             item.value === "User Access" ||
-            item.value === "Multi Destination"
+            item.value === "Multi Destination" ||
+            item.value === "Gas Deposit"
         )
       );
     } else {
@@ -106,35 +106,33 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
   ];
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
+    <Spin spinning={loading}>
+      <div className="flex flex-col gap-y-4">
+        <NxBreadCrumb routes={routes} />
         <div className="flex flex-col gap-y-4">
-          <NxBreadCrumb routes={routes} />
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            idAccount={id}
+            idCustomer={idCustomer}
+            type={type}
+          />
           <div className="flex flex-col gap-y-4">
-            <HeaderDetail
-              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-              dispatch={dispatch}
-              idAccount={id}
+            <AccountDetailInformation
+              id={id}
+              section={typeAccountInfoDetailSection}
+              options={tabs}
+              handleChangeOption={handleAccountInfoDetailSection}
               idCustomer={idCustomer}
               type={type}
+              setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
+              dispatch = {dispatch}
+              // handleChangeInteraction={handleSetType}
             />
-            <div className="flex flex-col gap-y-4">
-              <AccountDetailInformation
-                id={id}
-                section={typeAccountInfoDetailSection}
-                options={tabs}
-                handleChangeOption={handleAccountInfoDetailSection}
-                idCustomer={idCustomer}
-                type={type}
-                setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
-                dispatch = {dispatch}
-                // handleChangeInteraction={handleSetType}
-              />
-            </div>
           </div>
         </div>
-      </Spin>
-    </LayoutMenu>
+      </div>
+    </Spin>
   );
 };
 

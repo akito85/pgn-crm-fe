@@ -11,7 +11,7 @@ import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const TosSection = ({ SAId }) => {
   // Selector
-  const { data_termOfServiceSA, loading } = useSelector((state) => state.rating);
+  const { data_termOfServiceSA, loadingSA } = useSelector((state) => state.rating);
 
   // Declaration
   const dispatch = useDispatch();
@@ -144,7 +144,7 @@ const TosSection = ({ SAId }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingSA}
           expandable={{
             expandedRowRender: (record) => (
               <div>

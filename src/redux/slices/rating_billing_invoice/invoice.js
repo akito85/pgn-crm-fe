@@ -2,17 +2,22 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import { showModalError, validateError } from "../general_slice";
 import { showModalSuccess } from "../general_slice";
-import axios from "axios";
 
 const initialState = {
   data: [],
   loading: false,
+  loading_detail: false,
   isFailed: false,
   isSuccess: false,
   message: "",
   data_detail: null,
   data_format: null,
   data_billing: [],
+  data_invoice_templates: [],
+  data_cost_center_invoice: [],
+  data_account_segment_invoice: [],
+  data_meter_reading_code_invoice: [],
+  data_account_group_type_invoice: [],
 };
 
 export const getAllInvoicePaginate = createAsyncThunk(
@@ -33,7 +38,7 @@ export const getAllInvoicePaginate = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getDetailInvoice = createAsyncThunk(
   "GET_DETAIL_INVOICE",
@@ -46,7 +51,7 @@ export const getDetailInvoice = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getFormatType = createAsyncThunk(
   "GET_FORMAT_TYPE",
@@ -58,19 +63,98 @@ export const getFormatType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
+);
+export const getInvoiceTemplates = createAsyncThunk(
+  "GET_INVOICE_TEMPLATES",
+  async (search = "", thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/invoice-template?search=${encodeURIComponent(search)}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
+export const getCostCenterInvoice = createAsyncThunk(
+  "GET_COST_CENTER_INVOICE",
+  async (_, thunkAPI) => {
+    try {
+      const response = await ratingBillingHttpService.getAll(
+        `/v1/dbs/api/rbi/invoice/costcenter`,
+      );
+      return Array.isArray(response)
+        ? response
+        : (response?.data ?? response?.result ?? []);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
+export const getAccountSegmentInvoice = createAsyncThunk(
+  "GET_ACCOUNT_SEGMENT_INVOICE",
+  async (_, thunkAPI) => {
+    try {
+      const response = await ratingBillingHttpService.getAll(
+        `/v1/dbs/api/rbi/invoice/accountsegment`,
+      );
+      return Array.isArray(response)
+        ? response
+        : (response?.data ?? response?.result ?? []);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
+export const getMeterReadingCodeInvoice = createAsyncThunk(
+  "GET_METER_READING_CODE_INVOICE",
+  async (ccids = [], thunkAPI) => {
+    try {
+      const response = await ratingBillingHttpService.createData(
+        `/v1/dbs/api/rbi/invoice/meterreadingcode`,
+        ccids,
+      );
+      return Array.isArray(response)
+        ? response
+        : (response?.data ?? response?.result ?? []);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
+export const getAccountGroupTypeInvoice = createAsyncThunk(
+  "GET_ACCOUNT_GROUP_TYPE_INVOICE",
+  async (segmentIds = [], thunkAPI) => {
+    try {
+      const params = segmentIds
+        .map((id) => `idSegment=${encodeURIComponent(id)}`)
+        .join("&");
+      const url = `/v1/dbs/api/rbi/invoice/account-group-type${params ? `?${params}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return Array.isArray(response)
+        ? response
+        : (response?.data ?? response?.result ?? []);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
 );
 export const getBillingApproval = createAsyncThunk(
   "GET_BILLING_APPROVAL",
-  async (id, thunkAPI) => {
+  async (params, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/invoice/billing`;
+      const qs =
+        params && Object.keys(params).some((k) => params[k] !== undefined)
+          ? "?" + new URLSearchParams(params).toString()
+          : "";
+      const url = `/v1/dbs/api/rbi/invoice/billing${qs}`;
       const response = await ratingBillingHttpService.getAll(url);
       return response;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const createRegenerate = createAsyncThunk(
   "CREATE_REGENRATE",
@@ -99,7 +183,7 @@ export const createRegenerate = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const createGenerate = createAsyncThunk(
   "CREATE_GENERATE",
@@ -128,7 +212,7 @@ export const createGenerate = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDownloadList = createAsyncThunk(
@@ -142,7 +226,7 @@ export const getDownloadList = createAsyncThunk(
 
       const response = await ratingBillingHttpService.downloadXlsx(
         url,
-        "invoice_list"
+        "invoice_list",
       );
 
       return response;
@@ -155,7 +239,7 @@ export const getDownloadList = createAsyncThunk(
           error: error?.response,
           action: "DOWNLOAD_INVOICE_LIST",
           back: false,
-        })
+        }),
       );
 
       const errorBody = {
@@ -166,7 +250,7 @@ export const getDownloadList = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 const invoiceSlice = createSlice({
@@ -205,14 +289,14 @@ const invoiceSlice = createSlice({
     },
     // get detail
     [getDetailInvoice.pending]: (state) => {
-      state.loading = true;
+      state.loading_detail = true;
     },
     [getDetailInvoice.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_detail = false;
       state.data_detail = action.payload;
     },
     [getDetailInvoice.rejected]: (state) => {
-      state.loading = false;
+      state.loading_detail = false;
     },
     // get format type
     [getFormatType.pending]: (state) => {
@@ -258,6 +342,41 @@ const invoiceSlice = createSlice({
     },
     [getDownloadList.rejected]: (state) => {
       state.loading = false;
+    },
+    // get invoice templates
+    [getInvoiceTemplates.fulfilled]: (state, action) => {
+      state.data_invoice_templates = action.payload;
+    },
+    [getInvoiceTemplates.rejected]: (state) => {
+      state.data_invoice_templates = [];
+    },
+    // get cost center invoice
+    [getCostCenterInvoice.fulfilled]: (state, action) => {
+      state.data_cost_center_invoice = action.payload;
+    },
+    [getCostCenterInvoice.rejected]: (state) => {
+      state.data_cost_center_invoice = [];
+    },
+    // get account segment invoice
+    [getAccountSegmentInvoice.fulfilled]: (state, action) => {
+      state.data_account_segment_invoice = action.payload;
+    },
+    [getAccountSegmentInvoice.rejected]: (state) => {
+      state.data_account_segment_invoice = [];
+    },
+    // get meter reading code invoice
+    [getMeterReadingCodeInvoice.fulfilled]: (state, action) => {
+      state.data_meter_reading_code_invoice = action.payload;
+    },
+    [getMeterReadingCodeInvoice.rejected]: (state) => {
+      state.data_meter_reading_code_invoice = [];
+    },
+    // get account group type invoice
+    [getAccountGroupTypeInvoice.fulfilled]: (state, action) => {
+      state.data_account_group_type_invoice = action.payload;
+    },
+    [getAccountGroupTypeInvoice.rejected]: (state) => {
+      state.data_account_group_type_invoice = [];
     },
   },
 });

@@ -1,5 +1,5 @@
 import { Spin } from "antd";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import axios from "axios";
 import { tokenHeader } from "../../../../../../../utils/tokenHeader";
@@ -8,30 +8,20 @@ import { previewFileAttachment } from "../../../../../../../utils/previewFileAtt
 import { configApp } from "../../../../../../../constants/configApp";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
-import { getMultiDestinationAttachment } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
-import { useSelector } from "react-redux";
 import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
 
-const MultiDestinationDetailAttch = ({
-  idMd = 0,
-  dispatch = () => {},
-}) => {
-  const {
-    list_mdDetailAttachment,
-    pagination_mdDetailAttachment,
-    loading,
-  } = useSelector(
-    (state) => state.multiDestination
-  );
-
-  const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20);
-  
+/**
+ * Presentational attachment panel for a multi destination record.
+ * Displays, previews, and downloads file attachments.
+ *
+ * @param {object}   props
+ * @param {object[]} [props.attachments=[]] - List of attachment records
+ */
+const MultiDestinationDetailAttch = ({ attachments = [] }) => {
+  // --- State ---
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [tempFilters, setTempFilters] = useState([]);
 
   const [loadingDownload, setLoadingDownload] = useState(false);
 
@@ -42,20 +32,13 @@ const MultiDestinationDetailAttch = ({
 
   const searchInput = useRef(null);
 
-  const currentData = useMemo(() => list_mdDetailAttachment, [list_mdDetailAttachment]);
-  
-  const currentPagination = pagination_mdDetailAttachment;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
-
+  // --- Handlers ---
+  /**
+   * Previews or downloads a file attachment.
+   * Downloads directly if the file type is an Office document (application/vnd);
+   * otherwise fetches the file, converts it to base64, and opens a preview.
+   * @param {object} r - Attachment record containing urlFile1 and fileType/type
+   */
   const handleShow = async (r) => {
     if ((r.fileType || r.type).includes("application/vnd")) {
       accountManagementService.downloadData(r.urlFile1);
@@ -77,26 +60,22 @@ const MultiDestinationDetailAttch = ({
   };
 
   /**
-   * @param {string[]} selectedKeys 
-   * @param {() => {}} confirm 
-   * @param {string} dataIndex 
+   * Confirms a column search and updates the active search state.
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string}   dataIndex
    */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  const baseColumns = useMemo(() =>
+  const columnDefinitions = useMemo(() =>
     getDetailAttachmentColumns(
       search,
       searchInput,
@@ -108,88 +87,25 @@ const MultiDestinationDetailAttch = ({
     [search, searchText, searchedColumn]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
-
-  /**
-   * @param {*} _ 
-   * @param {*} __ 
-   * @param {import("antd/lib/table/interface").SorterResult} sort
-   */
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = pagination_mdDetailAttachment?.totalPages || 0;
-
-    if (nextPage <= totalPages) {
-      await dispatch(
-        getMultiDestinationAttachment({
-          id: idMd,
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          isLoadMore: true,
-        })
-      );
-    }
-    setPage(nextPage);
-  };
-
-  useEffect(() => {
-    if (idMd)
-      dispatch(getMultiDestinationAttachment({
-        id: idMd,
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        isLoadMore: false
-      }));
-  }, [sort, search, tempFilters]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   return (
     <Spin spinning={loadingDownload}>
       <NxTable
         idTable="multi-destination-detail-attachment-table"
-        dataSource={dataSourceWithKeys}
-        totalData={pagination_mdDetailAttachment.totalElements}
-        current={page}
-        tableScrolled={{ y: 400, x: "max-content" }}
-        onSort={onSort}
-        columns={processedColumns}
+        dataSource={attachments}
+        totalData={attachments.length}
+        tableScrolled={{ x: "max-content" }}
+        columns={columns}
         usePagination={false}
-        useInfiniteScroll={true}
-        hasMore={hasMore}
-        onLoadMore={handleLoadMore}
+        useInfiniteScroll={false}
         loadMoreThreshold={20}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
-        loading={loading}
-        showAdvanceSearch={false}
+        showAdvanceSearch={true}
       />
     </Spin>
   );

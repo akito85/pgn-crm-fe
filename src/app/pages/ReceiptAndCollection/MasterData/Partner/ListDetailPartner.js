@@ -13,7 +13,6 @@ import DetailSection from "../../../../../components/DetailSection";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
 import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectPartner,
   approveOrRejectInactivePartner,
@@ -147,7 +146,7 @@ const ListDetailPartner = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <div>
@@ -208,7 +207,7 @@ const ListDetailPartner = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

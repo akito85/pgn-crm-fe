@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { message as antMessage } from "antd";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import {
   showModalError,
@@ -129,12 +130,14 @@ export const getDownloadReceipt = createAsyncThunk(
 
 export const getCollectionAgentDDL = createAsyncThunk(
   "GET_LIST_COLL_AGENT_RECEIPT",
-  async (thunkAPI) => {
+  async ({ paymentTypeId, partnerId } = {}, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/collecting-agent/list`;
-      const response = await receiptCollectionHttpService.getAll(url);
-      const data = response?.data;
-      return { data };
+      const params = new URLSearchParams();
+      if (paymentTypeId) params.append("paymentTypeId", paymentTypeId);
+      if (partnerId) params.append("partnerId", partnerId);
+      const url = `/v1/dbs/api/receipt/list-collection-agent${params.toString() ? `?${params.toString()}` : ""}`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -398,15 +401,11 @@ export const getCusNumberDDL = createAsyncThunk(
 
 export const getPayGetwayDDL = createAsyncThunk(
   "GET_LIST_PAY_GET_RECEIPTS",
-  async (thunkAPI) => {
+  async (paymentTypeId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/partner/list`;
-      const response = await receiptCollectionHttpService.getAll(url);
-      const data = response?.data?.map((item) => ({
-        id: item?.id,
-        name: item?.partnerName,
-      }));
-      return { data };
+      const url = `/v1/dbs/api/receipt/list-payment-gateway${paymentTypeId ? `?paymentTypeId=${paymentTypeId}` : ""}`;
+      const data = await receiptCollectionHttpService.getAll(url);
+      return data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -511,9 +510,9 @@ export const getCurrencyDDL = createAsyncThunk(
 
 export const getBankDDL = createAsyncThunk(
   "GET_LIST_BANK_RECEIPTS",
-  async (thunkAPI) => {
+  async (methodId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/receipt/list-bank`;
+      const url = `/v1/dbs/api/receipt/list-bank${methodId ? `?methodId=${methodId}` : ""}`;
       const data = await receiptCollectionHttpService.getAll(url);
       return data;
     } catch (error) {
@@ -619,13 +618,19 @@ export const getAllocationRecomendationList = createAsyncThunk(
         return response?.data;
       }
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: errorBody(errorCode(error), "created", errorMessage(error)),
-          action: "allocation-list",
-          back: false,
-        })
-      );
+      const isNotFound = error?.response?.data?.message?.toLowerCase()?.includes("data not found");
+
+      if (isNotFound) {
+        antMessage.info("Data allocation not found.");
+      } else {
+        thunkAPI.dispatch(
+          validateError({
+            error: errorBody(errorCode(error), "created", errorMessage(error)),
+            action: "allocation-list",
+            back: false,
+          })
+        );
+      }
       return thunkAPI.rejectWithValue([]);
     }
   }
@@ -857,6 +862,75 @@ export const approveOrRejectReverseReceipt = createAsyncThunk(
         error.message ||
         error.toString();
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVED" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const submitRefundReceipt = createAsyncThunk(
+  "SUBMIT_REFUND_RECEIPT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/refund-submit";
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const successMessage = {
+        title: "Successful",
+        description: "Receipt Refund submitted successfully",
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Failed to submit Receipt Refund. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const approveOrRejectRefundReceipt = createAsyncThunk(
+  "APPROVE_OR_REJECT_REFUND_RECEIPT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/refund/approve-reject";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const successMessage = {
+        title: "Successfull",
+        description: `Your data has been ${body.action === "APPROVED" ? "Approved" : "Rejected"
+          }`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${body.action === "APPROVED" ? "approved" : "rejected"
@@ -1329,6 +1403,32 @@ const receiptSlice = createSlice({
       state.loading = false;
     },
     [approveOrRejectReverseReceipt.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+    // Submit Refund Receipt
+    [submitRefundReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [submitRefundReceipt.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [submitRefundReceipt.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+    // Approve / Reject Refund Receipt
+    [approveOrRejectRefundReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectRefundReceipt.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectRefundReceipt.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;

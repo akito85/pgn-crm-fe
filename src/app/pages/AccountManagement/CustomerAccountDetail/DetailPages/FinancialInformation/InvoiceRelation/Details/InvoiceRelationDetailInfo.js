@@ -1,25 +1,50 @@
-import moment from "moment";
-import { dateFormatting } from "../../../../../../../../utils";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
+import StatusComponent from "../../../../../../../../components/StatusComponent";
 
+/**
+ * Presentational info panel for an invoice relation record.
+ * Displays account details, dates, status, and description.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Invoice relation detail record
+ */
 const InvoiceRelationDetailInfo = ({
-  subjectAccountNumber,
-  dataDetail = {},
+  detail = {},
 }) => {
+  const {
+    accountNumber,
+    accountName,
+    startDate,
+    endDate,
+    status,
+    statusApproval,
+    description,
+  } = detail;
+
   return (
     <NxBaseContainer border>
       <div className="flex flex-col gap-y-4">
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Invoice Relation Information */}
-          <NxDetailText label="Account Number">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountNumber : dataDetail?.accountNumber}</NxDetailText>
-          <NxDetailText label="Account Name">{subjectAccountNumber === dataDetail?.accountNumber ? dataDetail?.relatedAccountName : dataDetail?.accountName}</NxDetailText>
-          <NxDetailText label="Start Date">{dataDetail?.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
-          <NxDetailText label="End Date">{dataDetail?.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</NxDetailText>
-          <NxDetailText label="Status">{dataDetail?.status}</NxDetailText>
+          <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
+          <NxDetailText label="Account Name">{accountName}</NxDetailText>
+          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Status">
+            <StatusComponent colour={status} margin={false}>
+              {status}
+            </StatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <StatusComponent colour={statusApproval} margin={false}>
+              {statusApproval}
+            </StatusComponent>
+          </NxDetailText>
         </div>
         <div className="w-full">
-          <NxDetailText label="Description">{dataDetail?.description}</NxDetailText>
+          <NxDetailText label="Description">{description}</NxDetailText>
         </div>
       </div>
     </NxBaseContainer>

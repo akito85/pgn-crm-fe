@@ -1,4 +1,10 @@
-import React, { useEffect, Fragment, useState, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  Fragment,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
 import { Form } from "antd";
 import moment from "moment";
 import { useSelector } from "react-redux";
@@ -64,7 +70,9 @@ const sorter = (fieldSort, a, b) => {
       case "total":
       case "totalEqvIdr":
       case "totalEqvUsd":
-        return obj[fieldSort] ? (obj[fieldSort] || 0)?.toString()?.toLowerCase() : "0" ;
+        return obj[fieldSort]
+          ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
+          : "0";
       default:
         return obj[fieldSort]?.toLowerCase();
     }
@@ -108,15 +116,19 @@ const PointOfSalesPageDetailPOS = ({
   accountNumber,
   idPos,
   dataUomCodes = [],
+  data_globalCurrency = [],
   customerType = "customer",
 }) => {
-  const { data_calculate, loading } = useSelector((state) => state.pointOfSales);
+  const { data_calculate, loading } = useSelector(
+    (state) => state.pointOfSales,
+  );
 
-  //declare
   const [formCreate] = Form.useForm();
   const searchInput = useRef(null);
+  const ignoreCalculate = useRef(false);
 
-  // Use State
+  const [modalKey, setModalKey] = useState(0);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -138,81 +150,104 @@ const PointOfSalesPageDetailPOS = ({
     item: 0,
   });
 
-  //modal
   const [modalCreate, setModalCreate] = useState(false);
   const [dataItemFilter, setDataItemFilter] = useState([]);
   const [dataTemp, setDataTemp] = useState([]);
+  const [billingCurrency, setBillingCurrency] = useState(null);
 
   useEffect(() => {
     setDataTemp(data);
   }, [data]);
 
-  //useEffect for product
+  // useEffect for product
   useEffect(() => {
-    if (type === 2144 && hasValue(item)) {
+    if (type === 2144 && hasValue(item) && hasValue(quantity) && quantity > 0) {
+      ignoreCalculate.current = false;
+
       const requestData = {
-        ...(customerType === "customer" && hasValue(dataPriority[0]?.data)
-          ? { account: dataPriority[0]?.data }
-          : {}),
+        headerCurrency: currency ? String(currency) : null,
         itemId: item,
-        qty: hasValue(quantity) || quantity > 0 ? parseInt(quantity) : null,
+        qty: parseInt(quantity),
         transactionDate: moment(dataPriority[2]?.data).format(
-          dateFormatting.dateFormal
+          dateFormatting.dateFormal,
         ),
       };
+
+      if (customerType !== "prospective" && dataPriority[0]?.data) {
+        requestData.account = dataPriority[0]?.data;
+      }
+
       dispatch(getCalculate({ ...requestData }));
       formCreate.resetFields([
         "price",
         "reference",
         "uom",
         "currency",
+        "convertedCurrency",
+        "discount",
+        "total",
+        "totalAmountEqv",
         "amountEqvUsd",
         "amountEqvIdr",
         "eqvIdrTaxPurpose",
-        "discount",
-        "total",
         "totalEqvUsd",
         "totalEqvIdr",
         "amount",
       ]);
     }
-  }, [dispatch, item, quantity, dataPriority, formCreate, type, customerType]);
+  }, [
+    dispatch,
+    item,
+    quantity,
+    dataPriority,
+    formCreate,
+    type,
+    customerType,
+    currency,
+  ]);
 
-  //useEffect for billing
+  // useEffect for billing
   useEffect(() => {
-    if (type === 2145 && item && amount && amount > 0) {
+    if (type === 2145 && item && amount && amount > 0 && billingCurrency) {
+      ignoreCalculate.current = false;
+
       const requestData = {
-        currency: dataPriority[1]?.data,
+        currency: billingCurrency,
+        headerCurrency: currency,
         itemCode: item,
         amount: parseInt(amount),
         transactionDate: moment(dataPriority[2]?.data).format(
-          dateFormatting.dateFormal
+          dateFormatting.dateFormal,
         ),
       };
+
+      if (customerType !== "prospective" && dataPriority[0]?.data) {
+        requestData.account = dataPriority[0]?.data;
+      }
       dispatch(getCalculateBilling({ ...requestData }));
       formCreate.resetFields([
         "reference",
         "uom",
-        "currency",
+        "convertedCurrency",
+        "discount",
+        "total",
+        "totalAmountEqv",
         "amountEqvUsd",
         "amountEqvIdr",
         "eqvIdrTaxPurpose",
-        "discount",
-        "total",
         "totalEqvUsd",
         "totalEqvIdr",
-        "amount",
       ]);
     }
-  }, [dispatch, amount, item, dataPriority, formCreate, type]);
-  
+  }, [dispatch, amount, item, billingCurrency, dataPriority, formCreate, type]);
+
   useEffect(() => {
+    if (ignoreCalculate.current) {
+      return;
+    }
+
     if (data_calculate) {
       if (type === 2144) {
-        console.log(hasValue(data_calculate?.priceInformation?.discount), data_calculate?.priceInformation?.discount);
-        console.log(hasValue(data_calculate?.priceInformation?.discount) && data_calculate?.priceInformation?.discount);
-        
-        //product case
         formCreate.setFieldsValue({
           price: data_calculate?.priceInformation?.price || null,
           amount:
@@ -226,20 +261,8 @@ const PointOfSalesPageDetailPOS = ({
               : null,
           uom: data_calculate?.priceInformation?.uom || null,
           currency: data_calculate?.priceInformation?.currency || null,
-          amountEqvUsd:
-            hasValue(quantity) && data_calculate?.priceInformation?.amountEqvUsd
-              ? Number(
-                  data_calculate?.priceInformation?.amountEqvUsd.toFixed(2)
-                )
-              : null,
-          amountEqvIdr:
-            hasValue(quantity) && data_calculate?.priceInformation?.amountEqvIdr
-              ? data_calculate?.priceInformation?.amountEqvIdr
-              : null,
-          eqvIdrTaxPurpose:
-            hasValue(quantity) && data_calculate?.priceInformation?.eqvIdr
-              ? data_calculate?.priceInformation?.eqvIdr
-              : null,
+          convertedCurrency:
+            data_calculate?.priceInformation?.convertedCurrency || null,
           discount:
             hasValue(quantity) &&
             data_calculate?.priceInformation?.discount >= 0
@@ -249,57 +272,80 @@ const PointOfSalesPageDetailPOS = ({
             hasValue(quantity) && data_calculate?.priceInformation?.total
               ? data_calculate?.priceInformation?.total
               : null,
-          totalEqvUsd:
-            hasValue(quantity) && data_calculate?.priceInformation?.totalEqvUsd
-              ? data_calculate?.priceInformation?.totalEqvUsd.toFixed(2)
+          totalAmountEqv:
+            hasValue(quantity) &&
+            data_calculate?.priceInformation?.totalAmountEqv
+              ? data_calculate?.priceInformation?.totalAmountEqv
               : null,
-          totalEqvIdr:
-            hasValue(quantity) && data_calculate?.priceInformation?.totalEqvIdr
-              ? data_calculate?.priceInformation?.totalEqvIdr
-              : null,
+          amountEqvUsd: null,
+          amountEqvIdr: null,
+          eqvIdrTaxPurpose: null,
+          totalEqvUsd: null,
+          totalEqvIdr: null,
         });
-      } else {
+      } else if (type === 2145) {
         formCreate.setFieldsValue({
           amount: data_calculate?.priceInformation?.amount || null,
           reference: data_calculate?.priceInformation?.referenceName || null,
-          uom: data_calculate?.priceInformation?.uom || null,
+          uom: data_calculate?.priceInformation?.uom || "LUMPSUM",
           currency: data_calculate?.priceInformation?.currency || null,
-          amountEqvUsd: data_calculate?.priceInformation?.amountEqvUsd
-            ? Number(data_calculate?.priceInformation?.amountEqvUsd.toFixed(2))
-            : null,
-          amountEqvIdr: data_calculate?.priceInformation?.amountEqvIdr || null,
-          eqvIdrTaxPurpose: data_calculate?.priceInformation?.eqvIdr || null,
+          convertedCurrency:
+            data_calculate?.priceInformation?.convertedCurrency || null,
           discount: data_calculate?.priceInformation?.discount || null,
           total: data_calculate?.priceInformation?.total || null,
-          totalEqvUsd: data_calculate?.priceInformation?.totalEqvUsd
-            ? data_calculate?.priceInformation?.totalEqvUsd.toFixed(2)
-            : null,
-          totalEqvIdr: data_calculate?.priceInformation?.totalEqvIdr || null,
+          totalAmountEqv:
+            data_calculate?.priceInformation?.totalAmountEqv || null,
+          amountEqvUsd: null,
+          amountEqvIdr: null,
+          eqvIdrTaxPurpose: null,
+          totalEqvUsd: null,
+          totalEqvIdr: null,
         });
       }
-      setDataTableTax([
-        ...(data_calculate?.taxInformation || [])?.map((taxData) => {
-          const temp = {
-            ...taxData,
-            amount: Number(taxData?.amount.toFixed(2)),
-            typeId: taxData?.type,
-            type: taxData?.typeName,
-            totalEqvUsd: Number(taxData?.totalEqvUsd.toFixed(2)),
-            amountEqvUsd: Number(taxData?.amountEqvUsd.toFixed(2)),
-            eqvIdr: taxData?.eqvIdr,
-            total: Number(taxData?.total.toFixed(2)),
-            item: taxData?.itemName,
-            itemId: taxData?.item,
-            dataType: "exist",
-          };
-          delete temp?.itemName;
-          return temp;
-        }),
-      ]);
+
+      // Set tax info hanya jika type aktif
+      if (type === 2144 || type === 2145) {
+        setDataTableTax([
+          ...(data_calculate?.taxInformation || [])?.map((taxData) => {
+            const temp = {
+              ...taxData,
+              amount:
+                taxData?.amount != null
+                  ? Number(taxData.amount.toFixed(2))
+                  : 0,
+              total:
+                taxData?.total != null ? Number(taxData.total.toFixed(2)) : 0,
+              totalAmountEqv:
+                taxData?.totalAmountEqv != null
+                  ? Number(taxData.totalAmountEqv.toFixed(4))
+                  : 0,
+              typeId: taxData?.type,
+              type: taxData?.typeName,
+              convertedCurrency: taxData?.convertedCurrency || null,
+              reference: taxData?.reference ?? null,
+              referenceName: taxData?.referenceName || null,
+              quantity: taxData?.quantity ?? null,
+              uom: taxData?.uom || null,
+              currency: taxData?.currency || null,
+              discount: taxData?.discount ?? 0,
+              item: taxData?.itemName,
+              itemId: taxData?.item,
+              dataType: "exist",
+              totalEqvUsd: 0,
+              amountEqvUsd: 0,
+              eqvIdr: 0,
+              totalEqvIdr: 0,
+              amountEqvIdr: 0,
+            };
+            delete temp?.itemName;
+            return temp;
+          }),
+        ]);
+      }
     }
   }, [data_calculate, formCreate, quantity, type]);
 
-  //reset for every changes on data Table or filter
+  // reset for every changes on data Table or filter
   useEffect(() => {
     if (data.length > 0 || (type && type !== undefined)) {
       const tempItem = data
@@ -311,13 +357,17 @@ const PointOfSalesPageDetailPOS = ({
               ? dataItemProduct?.find(
                   (productData) =>
                     productData?.id ===
-                    (isNaN(item.itemId) ? item.itemId : parseInt(item.itemId))
+                    (isNaN(item.itemId) ? item.itemId : parseInt(item.itemId)),
                 )?.name
-              : dataItemBilling?.find((billingData) => billingData?.id === item.itemId)?.name,
+              : dataItemBilling?.find(
+                  (billingData) => billingData?.id === item.itemId,
+                )?.name,
         }));
 
       const temp = (type === 2144 ? dataItemProduct : dataItemBilling)
-        .filter((itemData) => !tempItem.some((item) => item.name === itemData?.name))
+        .filter(
+          (itemData) => !tempItem.some((item) => item.name === itemData?.name),
+        )
         .map((item) => ({ id: item.id, name: item.name }));
 
       if (isUpdate.type) {
@@ -329,7 +379,7 @@ const PointOfSalesPageDetailPOS = ({
                 itemData?.id ===
                 (isNaN(isUpdate?.item)
                   ? isUpdate?.item
-                  : parseInt(isUpdate?.item))
+                  : parseInt(isUpdate?.item)),
             )
             .map((item) => ({ id: item.id, name: item.name })),
         ]);
@@ -341,39 +391,46 @@ const PointOfSalesPageDetailPOS = ({
     }
   }, [data, type, isUpdate, dataItemBilling, dataItemProduct]);
 
-  //for handling data from API if existing to dataTable
-  const handleTypeChanges = useCallback((e) => {
-    formCreate.resetFields([
-      "quantity",
-      "item",
-      "price",
-      "reference",
-      "uom",
-      "currency",
-      "amountEqvUsd",
-      "amountEqvIdr",
-      "eqvIdrTaxPurpose",
-      "discount",
-      "total",
-      "totalEqvUsd",
-      "totalEqvIdr",
-      "amount",
-    ]);
-    if (e === 2144) {
-      setQuantity(null);
-      setItem(null);
-      setAmount();
-    } else if (e === 2145) {
-      formCreate.setFieldsValue({
-        quantity: 1,
-      });
-      setQuantity(1);
-      setItem(null);
-      setAmount();
-    }
-    setDataTableTax([]);
-    setType(e);
-  }, [formCreate]);
+  const handleTypeChanges = useCallback(
+    (e) => {
+      formCreate.resetFields([
+        "quantity",
+        "item",
+        "price",
+        "reference",
+        "uom",
+        "currency",
+        "amountEqvUsd",
+        "amountEqvIdr",
+        "eqvIdrTaxPurpose",
+        "discount",
+        "total",
+        "totalEqvUsd",
+        "totalEqvIdr",
+        "amount",
+        "convertedCurrency",
+        "totalAmountEqv",
+      ]);
+      if (e === 2144) {
+        setQuantity(null);
+        setItem(null);
+        setAmount();
+        setBillingCurrency(null);
+      } else if (e === 2145) {
+        formCreate.setFieldsValue({
+          quantity: 1,
+          uom: "Lumpsum",
+        });
+        setQuantity(1);
+        setItem(null);
+        setAmount();
+        setBillingCurrency(null);
+      }
+      setDataTableTax([]);
+      setType(e);
+    },
+    [formCreate],
+  );
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -394,7 +451,6 @@ const PointOfSalesPageDetailPOS = ({
     });
   };
 
-  // Handle Change Page
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
@@ -410,8 +466,12 @@ const PointOfSalesPageDetailPOS = ({
         type: dataType?.find((typeData) => typeData?.Id === e?.type)?.text,
         item:
           e?.type === 2145
-            ? dataItemBilling?.find((billingData) => billingData?.id === e?.item)?.name
-            : dataItemProduct?.find((productData) => productData?.id === e?.item)?.name,
+            ? dataItemBilling?.find(
+                (billingData) => billingData?.id === e?.item,
+              )?.name
+            : dataItemProduct?.find(
+                (productData) => productData?.id === e?.item,
+              )?.name,
         itemId: e?.item,
         price: e?.price,
         reference: e?.reference,
@@ -421,11 +481,13 @@ const PointOfSalesPageDetailPOS = ({
         amount: e?.amount,
         discount: e?.discount || 0,
         total: e?.total,
-        amountEqvIdr: e?.amountEqvIdr,
-        amountEqvUsd: e?.amountEqvUsd,
+        convertedCurrency: e?.convertedCurrency || null,
+        totalAmountEqv: e?.totalAmountEqv || null,
+        amountEqvIdr: e?.amountEqvIdr || 0,
+        amountEqvUsd: e?.amountEqvUsd || 0,
         eqvIdr: e?.eqvIdrTaxPurpose || 0,
-        totalEqvUsd: e?.totalEqvUsd,
-        totalEqvIdr: e?.totalEqvIdr,
+        totalEqvUsd: e?.totalEqvUsd || 0,
+        totalEqvIdr: e?.totalEqvIdr || 0,
         remark: e?.remark,
       };
       setData((prevData) => {
@@ -439,7 +501,7 @@ const PointOfSalesPageDetailPOS = ({
                 dataItem.reference !==
                   (isNaN(isUpdate.item)
                     ? isUpdate.item
-                    : parseInt(isUpdate.item)))
+                    : parseInt(isUpdate.item))),
           );
           const tempAllNewData = [
             ...temp.slice(0, isUpdate.index + 1),
@@ -456,13 +518,14 @@ const PointOfSalesPageDetailPOS = ({
             .filter(
               (dataItem) =>
                 dataItem.reference !==
-                (isNaN(isUpdate.item) ? isUpdate.item : parseInt(isUpdate.item))
+                (isNaN(isUpdate.item)
+                  ? isUpdate.item
+                  : parseInt(isUpdate.item)),
             )
             .map((dataItem, index) => ({ ...dataItem, lineNumber: index + 1 }));
         }
       });
     } else {
-      //create
       const newData = {
         typeId: e?.type,
         type: dataType?.find((typeData) => typeData?.Id === e?.type)?.text,
@@ -470,8 +533,12 @@ const PointOfSalesPageDetailPOS = ({
         itemId: e?.item,
         item:
           e?.type === 2145
-            ? dataItemBilling?.find((billingData) => billingData?.id === e?.item)?.name
-            : dataItemProduct?.find((productData) => productData?.id === e?.item)?.name,
+            ? dataItemBilling?.find(
+                (billingData) => billingData?.id === e?.item,
+              )?.name
+            : dataItemProduct?.find(
+                (productData) => productData?.id === e?.item,
+              )?.name,
         price: e?.price,
         reference: e?.reference,
         quantity: e?.quantity,
@@ -493,21 +560,20 @@ const PointOfSalesPageDetailPOS = ({
           newData || {},
           ...(e?.type === 2144 ? dataTableTax : []),
         ];
-        return temp.map((dataItem, index) => ({ ...dataItem, lineNumber: index + 1 }));
+        return temp.map((dataItem, index) => ({
+          ...dataItem,
+          lineNumber: index + 1,
+        }));
       });
     }
-    setModalCreate(false);
-    formCreate.resetFields();
-    setType();
-    setItem();
-    setQuantity();
-    setIsUpdate(false);
-    setDataItemFilter([]);
+
+    handleResetAllState();
   };
 
   const handleDelete = (r) => {
     const temp = data.filter(
-      (dataItem) => dataItem.item !== r?.item && dataItem.reference !== parseInt(r?.itemId)
+      (dataItem) =>
+        dataItem.item !== r?.item && dataItem.reference !== parseInt(r?.itemId),
     );
     setData(temp);
   };
@@ -524,16 +590,14 @@ const PointOfSalesPageDetailPOS = ({
     };
   };
 
-  // Debounced version of the function you want to execute on input change
   const handleInputChange = debounce((value, inputType) => {
     if (inputType === "quantity") {
       setQuantity(value);
     } else {
       setAmount(value);
     }
-  }, 500);
+  }, 1500);
 
-  // Event handler for Input component with getValueFromEvent
   const onInputChange = (e, inputType) => {
     let result;
     switch (inputType) {
@@ -547,18 +611,56 @@ const PointOfSalesPageDetailPOS = ({
     handleInputChange(result, inputType);
   };
 
-  const handleCancel = () => {
+  const handleResetAllState = useCallback(() => {
     setModalCreate(false);
     setDataItemFilter([]);
     formCreate.resetFields();
     setType(null);
     setItem(null);
     setQuantity(null);
+    setAmount(null);
+    setBillingCurrency(null);
     setDataTableTax([]);
     setIsUpdate({ type: false, index: null, item: null });
-  };
+    setPosDetailId(undefined);
+    setPosNumber(undefined);
+    setModalKey((prev) => prev + 1);
+  }, [formCreate]);
+
+  const handleCancel = useCallback(() => {
+    handleResetAllState();
+  }, [handleResetAllState]);
+
+  const handleOpenCreate = useCallback(() => {
+    ignoreCalculate.current = true;
+
+    formCreate.resetFields();
+    setType(null);
+    setItem(null);
+    setQuantity(null);
+    setAmount(null);
+    setBillingCurrency(null);
+    setDataTableTax([]);
+    setIsUpdate({ type: false, index: null, item: null });
+    setPosDetailId(undefined);
+    setPosNumber(undefined);
+    setDataItemFilter([]);
+    setModalKey((prev) => prev + 1);
+    setModalCreate(true);
+  }, [formCreate]);
 
   const handleUpdate = (e, index) => {
+    ignoreCalculate.current = false;
+
+    formCreate.resetFields();
+    setType(null);
+    setItem(null);
+    setQuantity(null);
+    setAmount(null);
+    setBillingCurrency(null);
+    setDataTableTax([]);
+    setModalKey((prev) => prev + 1);
+
     setIsUpdate({
       type: true,
       index: index,
@@ -576,8 +678,11 @@ const PointOfSalesPageDetailPOS = ({
     setQuantity(e?.quantity);
     setItem(
       e?.typeId === 2144
-        ? dataItemProduct?.find((productData) => productData?.id === parseInt(e?.itemId))?.id
-        : dataItemBilling?.find((billingData) => billingData?.id === e?.itemId)?.id
+        ? dataItemProduct?.find(
+            (productData) => productData?.id === parseInt(e?.itemId),
+          )?.id
+        : dataItemBilling?.find((billingData) => billingData?.id === e?.itemId)
+            ?.id,
     );
     setType(e?.typeId);
 
@@ -600,7 +705,7 @@ const PointOfSalesPageDetailPOS = ({
         <ButtonComponent
           onClick={() => {
             if (dataMissing.length < 1) {
-              setModalCreate(true);
+              handleOpenCreate();
             } else {
               setModalValidate(true);
             }
@@ -639,12 +744,12 @@ const PointOfSalesPageDetailPOS = ({
             onFilter,
             sorter,
             dataTemp,
-            "editable"
+            "editable",
           )}
         />
       </div>
 
-      {/* modal create */}
+      {/* modal create / update */}
       <ModalCustom
         isOpen={modalCreate}
         type={"confirmation"}
@@ -685,6 +790,7 @@ const PointOfSalesPageDetailPOS = ({
           onFinish={onFinish}
         >
           <CreateAndUpdatePOSDetail
+            key={modalKey}
             data={dataTableTax}
             dispatch={dispatch}
             setData={setDataTableTax}
@@ -699,6 +805,9 @@ const PointOfSalesPageDetailPOS = ({
             dataType={dataType}
             loading={loading}
             dataUomCodes={dataUomCodes}
+            data_globalCurrency={data_globalCurrency}
+            headerCurrency={currency}
+            onCurrencyChange={(val) => setBillingCurrency(val)}
           />
         </Form>
       </ModalCustom>
@@ -715,7 +824,8 @@ const PointOfSalesPageDetailPOS = ({
           </div>
           <p className="pl-[70px]">
             {`You can't create Point of Sales Details. Please fill out the ${
-              dataMissing?.map((missingData) => missingData?.name).join(", ") || ""
+              dataMissing?.map((missingData) => missingData?.name).join(", ") ||
+              ""
             } field first.`}
           </p>
         </div>

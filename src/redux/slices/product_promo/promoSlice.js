@@ -8,6 +8,13 @@ import {
 import productPromoHttpService from "../../services/productPromoHttpService";
 
 const initialState = {
+  list_promo: [],
+  pagination_promo: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data: [],
   data_detail: [],
   data_ApprovalHistory: [],
@@ -52,14 +59,17 @@ const initialState = {
 
 export const getAllPromoPaginate = createAsyncThunk(
   "GET_ALL_PROMO_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/product-promo/list-product-promo?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
       const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -115,7 +125,7 @@ export const approvePromo = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your data has been ${
-          body?.action ? "approved" : "rejected"
+          body?.action === "APPROVE" ? "approved" : "rejected"
         }`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -328,7 +338,7 @@ export const getAvailableApprovalPromo = createAsyncThunk(
 
 export const getSelectedApprovalPromo = createAsyncThunk(
   "GET_SELECTED_APPROVAL_PROMO",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/list-apphier/${id}`;
       const response = await productPromoHttpService.getDetail(url);
@@ -1199,42 +1209,82 @@ const promoSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Promo Pagination
-    [getAllPromoPaginate.pending]: (state) => {
-      state.loading = true;
+    [getAllPromoPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllPromoPaginate.fulfilled]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      // Keep backward compatibility
+      state.data = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          // Append mode: filter duplicates by ID
+          const currentIds = new Set(state.list_promo.map((item) => item.id));
+          const filteredResult = result.filter((item) => !currentIds.has(item.id));
+          state.list_promo = [
+            ...state.list_promo,
+            ...filteredResult,
+          ];
+        } else {
+          // Replace mode
+          state.list_promo = result;
+        }
+      }
+
+      // Update pagination metadata
+      state.pagination_promo = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
     [getAllPromoPaginate.rejected]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
+
+      // Keep backward compatibility
+      state.data = action.payload;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_promo = [];
+        state.pagination_promo = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
 
     // Get Detail Promo
     [getDetailPromo.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
     },
     [getDetailPromo.fulfilled]: (state, action) => {
       state.data_promoDiscountDetail = action.payload;
       state.loading = false;
     },
     [getDetailPromo.rejected]: (state, action) => {
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
       state.loading = false;
     },
 
     [getDetailPromoDraft.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
     },
     [getDetailPromoDraft.fulfilled]: (state, action) => {
       state.data_promoDiscountDetailDraft = action.payload;
       state.loading = false;
     },
     [getDetailPromoDraft.rejected]: (state, action) => {
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
       state.loading = false;
     },
 
@@ -1254,6 +1304,7 @@ const promoSlice = createSlice({
     //GET AVAILABLE APPROVAL
     [getAvailableApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierId = [];
     },
     [getAvailableApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1261,10 +1312,12 @@ const promoSlice = createSlice({
     },
     [getAvailableApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierId = [];
     },
     //GET SELECTED APPROVAL
     [getSelectedApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierDetail = [];
     },
     [getSelectedApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1272,6 +1325,7 @@ const promoSlice = createSlice({
     },
     [getSelectedApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierDetail = [];
     },
 
     //LIST ATTAHCHMENT

@@ -1,11 +1,10 @@
 import { Spin, Checkbox, Tooltip } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
+import { EyeOutlined, DownloadOutlined, CheckSquareOutlined, CloseSquareOutlined, EditOutlined } from "@ant-design/icons";
 import { renderColumn } from "../../../../../utils";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -26,6 +25,7 @@ import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { disabledActionByStatus } from "../../../../../utils";
 import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
+import { APPROVAL_STATUS, RECORD_STATUS } from "../../../../../constants/warrantyPartner";
 
 const ViewPaymentWarrantyPartner = () => {
   const { loading, data, dataApprovalHistory } = useSelector((state) => state.paymentWarrantyPartner);
@@ -46,6 +46,7 @@ const ViewPaymentWarrantyPartner = () => {
   const [id, setId] = useState("");
   const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
+  const [modalHeader, setModalHeader] = useState("Inactive Information");
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["status", "approvalStatus", "action"],
@@ -77,7 +78,7 @@ const ViewPaymentWarrantyPartner = () => {
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_WARRANTY_PARTNER,
-      breadcrumbName: "Payment Warranty Partner",
+      breadcrumbName: "Payment Guarantee Partner",
     },
   ];
 
@@ -106,10 +107,12 @@ const ViewPaymentWarrantyPartner = () => {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PAYMENT_WARRANTY_PARTNER || [],
           inactive: dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_WARRANTY_PARTNER || [],
+          active: dataApprovalHistory?.dataApprover?.ACTIVE_PAYMENT_WARRANTY_PARTNER || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PAYMENT_WARRANTY_PARTNER || [],
           inactive: dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_WARRANTY_PARTNER || [],
+          active: dataApprovalHistory?.dataHistory?.ACTIVE_PAYMENT_WARRANTY_PARTNER || [],
         },
       });
     } else {
@@ -136,15 +139,23 @@ const ViewPaymentWarrantyPartner = () => {
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "PARTNER NAME",
-      dataIndex: "partnerName",
-      key: "partnerName",
+      title: "PARTNER CODE",
+      dataIndex: "partnerCode",
+      key: "partnerCode",
       sorter: true,
-      ...getColumnSearchPropsPaging("partnerName", searchInput, searchedColumn, searchText, handleSearch, true),
-      render: (text) => renderColumn("partnerName", searchedColumn, searchText, text, true, "input", search),
+      ...getColumnSearchPropsPaging("partnerCode", searchInput, searchedColumn, searchText, handleSearch, true),
+      render: (text) => renderColumn("partnerCode", searchedColumn, searchText, text, true, "input", search),
     },
     {
-      title: "TYPE",
+      title: "PARTNER GUARANTEE ISSUER",
+      dataIndex: "partnerGuaranteeIssuer",
+      key: "partnerGuaranteeIssuer",
+      sorter: true,
+      ...getColumnSearchPropsPaging("partnerGuaranteeIssuer", searchInput, searchedColumn, searchText, handleSearch, false),
+      render: (text) => renderColumn("partnerGuaranteeIssuer", searchedColumn, searchText, text, true, "input", search),
+    },
+    {
+      title: "PARTNER TYPE",
       dataIndex: "partnerType",
       key: "partnerType",
       sorter: true,
@@ -152,20 +163,16 @@ const ViewPaymentWarrantyPartner = () => {
       render: (text) => renderColumn("partnerType", searchedColumn, searchText, text, true, "input", search),
     },
     {
-      title: "NPWP",
-      dataIndex: "npwp",
-      key: "npwp",
-      sorter: true,
-      ...getColumnSearchPropsPaging("npwp", searchInput, searchedColumn, searchText, handleSearch, false),
-      render: (text) => renderColumn("npwp", searchedColumn, searchText, text, true, "input", search),
+      title: "START DATE",
+      dataIndex: "startDate",
+      key: "startDate",
+      render: (text, record) => renderColumn("startDate", searchedColumn, searchText, record?.startDate || "-", false, "input", search),
     },
     {
-        title: "LICENSE NUMBER",
-        dataIndex: "licenseNum",
-        key: "licenseNum",
-        sorter: true,
-        ...getColumnSearchPropsPaging("licenseNum", searchInput, searchedColumn, searchText, handleSearch, false),
-        render: (text) => renderColumn("licenseNum", searchedColumn, searchText, text, true, "input", search),
+      title: "END DATE",
+      dataIndex: "endDate",
+      key: "endDate",
+      render: (text, record) => renderColumn("endDate", searchedColumn, searchText, record?.endDate || "-", false, "input", search),
     },
     {
       title: "STATUS",
@@ -191,11 +198,12 @@ const ViewPaymentWarrantyPartner = () => {
     dispatch(getDownloadPaymentWarrantyPartner({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
   };
 
-  const handleInactive = (r) => {
+  const handleInactive = (r, actionType = "inactive") => {
     setOpenModalInactivate(true);
     setId(r?.id);
-    setNameModalActiveOrInactivate(r?.partnerName);
+    setNameModalActiveOrInactivate(r?.partnerGuaranteeIssuer || r?.partnerCode || "");
     setStatus(r?.status);
+    setModalHeader(actionType === "active" ? "Active Information" : "Inactive Information");
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
@@ -222,7 +230,7 @@ const ViewPaymentWarrantyPartner = () => {
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_PAYMENT_WARRANTY_PARTNER}>
           <ButtonComponent icon={<SVGIcon name="IconButtonCreate" width={24} />} type="submit">
-            Create
+            Create Payment Guarantee Partner
           </ButtonComponent>
         </NavLink>
       ),
@@ -239,91 +247,127 @@ const ViewPaymentWarrantyPartner = () => {
       ),
     },
     {
-      action: "Update",
+      action: "update",
       type: "table",
       render: (record, data_length) => {
-        const isEditable = record.approvalStatus === "Draft" || record.approvalStatus === "Rejected";
-        return (
-          data_length > 3 ? (
+        const disabled = disabledActionByStatus("update", record?.status, record?.approvalStatus);
+        return data_length > 3 ? (
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_WARRANTY_PARTNER}
+            state={{ id: record?.id }}
+            className={`flex items-center gap-3 py-2 px-3 w-[200px] ${
+              disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer hover:bg-gray-50"
+            }`}
+            onClick={(e) => {
+              if (disabled) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+          >
+            <EditOutlined style={{ fontSize: "18px", color: "#000" }} />
+            <span className="text-black text-sm text-center">Update</span>
+          </Link>
+        ) : (
+          <Tooltip title={"Update"}>
             <Link
               to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_WARRANTY_PARTNER}
               state={{ id: record?.id }}
-            >
-              <ButtonComponent
-                className="gap-5"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
+              className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+              onClick={(e) => {
+                if (disabled) {
+                  e.preventDefault();
+                  e.stopPropagation();
                 }
-                border={false}
-                disabled={!isEditable}
-                type="action"
-              >
-                <span className={"text-black gap-2 text-center"}>Update</span>
-              </ButtonComponent>
+              }}
+            >
+              <EditOutlined style={{ fontSize: "18px", color: disabled ? "#d9d9d9" : "#0075bf" }} />
             </Link>
-          ) : (
-            <Tooltip title="Update">
-              <div
-                onClick={(e) => {
-                  if (!isEditable) e.preventDefault();
-                }}
-                className={!isEditable ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
-              >
-                <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PAYMENT_WARRANTY_PARTNER} state={{ id: record?.id }} className={!isEditable ? "pointer-events-none" : ""}>
-                   <SVGIcon name="IconEdit" width={24} color={isEditable ? "#ACC424" : "#8D91A0"} />
-                </Link>
-              </div>
-            </Tooltip>
-          )
+          </Tooltip>
         );
       },
     },
     {
       action: "Activate",
       type: "table",
-      render: (record, data_length) => (
-        data_length > 3 ? (
-          <div className="w-full">
-            <ButtonComponent
-              border={false}
-              className={'gap-5'}
-              onClick={() => handleInactive(record)}
-              disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)}
-              type="action"
-            >
-              <Checkbox
-                onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
-                disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)}
-              />
-              <span className={"text-black ml-6 gap-2 text-center"}>
-                {record?.status === "Active" ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
+      render: (record, data_length) => {
+        // 'Activated' button: enabled only when status is Inactive and not waiting approval
+        const isInactive = record?.status === RECORD_STATUS.INACTIVE;
+        const isWaiting = record?.approvalStatus === APPROVAL_STATUS.WAITING_APPROVAL;
+        const disabled = !isInactive || isWaiting;
+        return data_length > 3 ? (
+          <div
+            className={`flex items-center gap-3 py-2 px-3 w-[200px] ${
+              disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:bg-gray-50'
+            }`}
+            onClick={(e) => {
+              if (disabled) { e.preventDefault(); e.stopPropagation(); return; }
+              handleInactive(record, "active");
+            }}
+          >
+            <CheckSquareOutlined style={{ fontSize: '18px', color: '#000' }} />
+            <span className="text-black text-sm text-center">Activated</span>
           </div>
         ) : (
-          <Tooltip title={record?.status === "Active" ? "Inactivate" : "Activate"}>
-            <div>
-              <Checkbox checked={record?.status !== "Active"} onClick={() => handleInactive(record)} disabled={disabledActionByStatus('activate', record?.status, record?.approvalStatus)} />
+          <Tooltip title="Activated">
+            <div
+            onClick={() => { if (!disabled) handleInactive(record, "active"); }}
+              className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+            >
+              <CheckSquareOutlined style={{ fontSize: '18px', color: disabled ? '#d9d9d9' : 'inherit' }} />
             </div>
           </Tooltip>
-        )
-      ),
+        );
+      }
+    },
+    {
+      action: "Activate",
+      type: "table",
+      render: (record, data_length) => {
+        // 'Inactivated' button: enabled only when status is Active and not waiting approval
+        const isActive = record?.status === RECORD_STATUS.ACTIVE;
+        const isWaiting = record?.approvalStatus === APPROVAL_STATUS.WAITING_APPROVAL;
+        const disabled = !isActive || isWaiting;
+        return data_length > 3 ? (
+          <div
+            className={`flex items-center gap-3 py-2 px-3 w-[200px] ${
+              disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer hover:bg-gray-50'
+            }`}
+            onClick={(e) => {
+              if (disabled) { e.preventDefault(); e.stopPropagation(); return; }
+              handleInactive(record, "inactive");
+            }}
+          >
+            <CloseSquareOutlined style={{ fontSize: '18px', color: '#000' }} />
+            <span className="text-black text-sm text-center">Inactivated</span>
+          </div>
+        ) : (
+          <Tooltip title="Inactivated">
+            <div
+            onClick={() => { if (!disabled) handleInactive(record, "inactive"); }}
+              className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+            >
+              <CloseSquareOutlined style={{ fontSize: '18px', color: disabled ? '#d9d9d9' : 'inherit' }} />
+            </div>
+          </Tooltip>
+        );
+      }
     },
     {
       action: "history",
       type: "table",
       render: (record, data_length) => (
         data_length > 3 ? (
-          <ButtonComponent
-            className="gap-5"
-            icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
-            border={false}
-            onClick={() => handleApprovalHistory(record?.id)}
-            type="action"
+          <div
+            className="flex items-center gap-3 py-2 px-3 w-[200px] cursor-pointer hover:bg-gray-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleApprovalHistory(record?.id);
+            }}
           >
-            <span className={"text-black gap-2 text-center"}>Approval History</span>
-          </ButtonComponent>
+            <SVGIcon name="IconLogHistory" color={"#000"} width={18} />
+            <span className="text-black text-sm text-center">Approval History</span>
+          </div>
         ) : (
           <Tooltip title={'Approval History'}>
             <div onClick={() => handleApprovalHistory(record?.id)} className="cursor-pointer">
@@ -342,12 +386,12 @@ const ViewPaymentWarrantyPartner = () => {
   const { renderModal } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">WARRANTY PARTNER LIST</p>
+            <p className="mt-[15px] font-bold">PAYMENT GUARANTEE PARTNER LIST</p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
             </div>
@@ -356,7 +400,7 @@ const ViewPaymentWarrantyPartner = () => {
           <TableRBI
             showExport={true}
             handleDownload={handleDownload}
-            dataSource={data?.result}
+            dataSource={data?.content}
             pageSize={pageSize}
             columns={[...columns, ...useColumnActionPermission(["view", "history", "update", 'activate'], itemActions)]}
             current={page}
@@ -374,6 +418,7 @@ const ViewPaymentWarrantyPartner = () => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"paymentWarrantyPartner"}
+          header={modalHeader}
           alertMessage={`Are you sure you want to change status for ${nameModalActiveOrInactivate}?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={() => setOpenModalInactivate(false)}
@@ -390,7 +435,7 @@ const ViewPaymentWarrantyPartner = () => {
         />
       </Spin>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

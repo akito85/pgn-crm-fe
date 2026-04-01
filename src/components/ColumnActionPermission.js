@@ -1,7 +1,7 @@
-import { MoreOutlined } from "@ant-design/icons";
 import { Popover, Space } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
+import SVGIcon from "../assets/Icon/index";
 
 // render content column
 export const RenderContentActions = (
@@ -11,16 +11,20 @@ export const RenderContentActions = (
   itemRender = [],
   totalLength,
   permissions = [],
-  sliceColumn = "View"
+  sliceColumn = "View",
+  stopClickPropagation = false,
 ) => {
   if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center py-1 gap-4">
+      <div className="w-full flex justify-center items-center gap-2.5">
         <Popover
           trigger={"click"}
           placement="bottomRight"
+          showArrow={false}
+          overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
+          className="text-black hover:text-[#1976D2] transition-colors duration-300"
           content={
-            <Space direction="vertical">
+            <div className="flex flex-col">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.map((item, index) => {
@@ -30,17 +34,16 @@ export const RenderContentActions = (
                     return null;
                   }
                 })}
-            </Space>
+            </div>
           }
         >
-          <div>
-            <MoreOutlined
-              style={{
-                fontSize: "20px",
-                color: "#0075bf",
-                cursor: "pointer",
-              }}
-            />
+          <div
+            className="flex items-center"
+            onClick={(e) => {
+              if (stopClickPropagation) e.stopPropagation();
+            }}
+          >
+            <SVGIcon name="IconTripleDot" width={20} />
           </div>
         </Popover>
         <div>
@@ -61,7 +64,7 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 py-1 items-center">
+      <div className="w-full flex justify-center gap-2.5 items-center">
         {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength, index);
@@ -79,17 +82,18 @@ export const useColumnActionPermission = (
   permissionList = [],
   itemsRender = [],
   sliceColumn = "View",
-  type = "page"
+  type = "page",
+  stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
+    [access],
   );
   const lowerCasePermissionList = useMemo(
     () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
+    [permissionList],
   );
   const lowerCaseItemsRender = useMemo(
     () =>
@@ -99,13 +103,13 @@ export const useColumnActionPermission = (
           action: item?.action?.toLowerCase(),
         }))
         ?.filter((item) => item?.type === "table"),
-    [itemsRender]
+    [itemsRender],
   );
 
   // filter access by permission list
   const arrayActions = useMemo(() => {
     const arrayActions = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
+      lowerCasePermissionList?.includes(item),
     );
 
     return lowerCaseItemsRender
@@ -136,7 +140,8 @@ export const useColumnActionPermission = (
               lowerCaseItemsRender,
               arrayActions?.length,
               arrayActions,
-              sliceColumn
+              sliceColumn,
+              stopClickPropagation,
             ),
         },
       ];

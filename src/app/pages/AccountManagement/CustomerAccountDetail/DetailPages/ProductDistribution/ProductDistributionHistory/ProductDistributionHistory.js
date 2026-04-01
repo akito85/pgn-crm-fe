@@ -1,46 +1,49 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
-import { Tooltip } from "antd";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Highlighter from "react-highlight-words";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import ToolbarAccount from "../../../../ComponentAccount/ToolbarAccount";
-import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import { dateFormatting } from "../../../../../../../utils";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ModalConfirm,
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
-import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
 import ProductDistributionDetail from "./ProductDistributionDetail";
 import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const columns = (
-  page = 1,
-  pageSize = 10,
+  search,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch,
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
+      dataIndex: "no",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "effectiveDate",
       title: "EFFECTIVE DATE",
+      dataIndex: "effectiveDate",
       sorter: true,
       align: "center",
-      dataIndex: "effectiveDate",
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.effectiveDate] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "effectiveDate",
         searchInput,
         searchedColumn,
@@ -49,106 +52,77 @@ const columns = (
         true,
         "date"
       ),
-      render: (text) => {
-        const tempValue = text ? moment(text).format(dateFormatting.date) : "";
-        if (searchedColumn === "effectiveDate") {
-          const highlight = (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={tempValue || ""}
-            />
-          );
-          if (tempValue) {
-            return highlight;
-          }
-          return highlight;
-        } else {
-          if (tempValue) {
-            return tempValue;
-          }
-          return "";
-        }
-      },
     },
     {
+      key: "value1",
       title: "LOCAL (%)",
       dataIndex: "value1",
       sorter: true,
       align: "right",
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.value1] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "value1",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true,
       ),
     },
     {
+      key: "value2",
       title: "EXPORT (%)",
       dataIndex: "value2",
       align: "right",
       sorter: true,
-      ...getColumnSearchPropsPaging(
+      filteredValue: [search?.value2] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "value2",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true,
       ),
     },
     {
+      key: "description",
       title: "DESCRIPTION",
       dataIndex: "description",
       align: "left",
-      ...getColumnSearchPropsPaging(
+      sorter: true,
+      filteredValue: [search?.description] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "description",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true,
       ),
-      ellipsis: {
-        showTitle: false,
-      },
-      sorter: true,
-      render: (text) =>
-        searchedColumn === "description" ? (
-          <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
-            searchWords={[searchText]}
-            autoEscape
-            textToHighlight={text ? text.toString() : ""}
-          />
-        ) : text ? (
-          <Tooltip placement="topLeft" title={text}>
-            {text}
-          </Tooltip>
-        ) : (
-          ""
-        ),
     },
   ];
 };
 
 const ProductDistributionHistory = ({ id, idCustomer }) => {
+  const navigate = useNavigate();
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
-  const { data, data_detail_history } = useSelector(
+  const {
+    list_productDistributionHistory,
+    pagination_productDistributionHistory,
+    data_detail_history,
+    loading
+  } = useSelector(
     (state) => state.productDistribution
   );
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
 
   // State
   const [page, setPage] = useState(1);
@@ -165,7 +139,20 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   const [bodyError, setBodyError] = useState({});
   const [idData, setIdData] = useState();
   const location = useLocation();
+  const [loadMoreSize] = useState(20);
 
+  const currentData = useMemo(() => {
+    if (!Array.isArray(list_productDistributionHistory)) return [];
+
+    return list_productDistributionHistory.map(item => ({
+      ...item,
+      statusApproval: item?.statusApproval ?? "DRAFT",
+    }));
+   }, [list_productDistributionHistory]);
+  const currentPagination = pagination_productDistributionHistory;
+
+  const hashMore = currentData.length < (currentPagination?.totalElements || 0);
+  
   // Use Effect
 
   useEffect(() => {
@@ -182,32 +169,55 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         id: id,
         search: encodeURIComponent(JSON?.stringify(search)),
         page,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
       })
     );
-  }, [dispatch, id, search, page, pageSize, sort]);
+  }, [dispatch, id, search, page, loadMoreSize, sort]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
+
+    let value = selectedKeys[0];
+
+    // convert date field sebelum dikirim ke backend
+    if (dataIndex === "effectiveDate" && value) {
+      value = moment(value, "DD MMM YYYY", true).format("YYYY-MM-DD");
+    }
+
+    setSearchText(value);
+    setSearchedColumn(value ? dataIndex : "");
+
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
+      if (prevState[dataIndex] !== value) {
         setPage(1);
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: value,
       };
     });
   };
 
-  // Function Change Pagination
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination_productDistributionHistory?.totalPages || 0;
+    const reqSearch = encodeURIComponent(JSON?.stringify(search));
+
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getAllPDHistoryPaginate({
+          id: id,
+          search: reqSearch,
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          isLoadMore: true
+        })
+      );
+    }
+    setPage(nextPage);
   };
 
   // Function Sort Table
@@ -219,93 +229,33 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
     setSort(dataSort);
   };
 
-  const itemGrantAccess = [
-    {
-      action: "Create",
-      render: (
-        <NavLink
-          to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_PRODUCT_DISTRIBUTION}
-          state={{
-            accountId: id,
-            idCustomer: idCustomer,
-          }}
-        >
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => handleDetail(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PRODUCT_DISTRIBUTION}
-            state={{ idPD: record.id, accountId: id, idCustomer: idCustomer }}
-          >
-            <Tooltip title="Update">
-              <div className="pt-1">
-                <SVGIcon name="IconEdit" width={24} />
-              </div>
-            </Tooltip>
-          </Link>
-        );
-      },
-    },
-    {
-      action: "Delete",
-      type: "table",
-      render: (record) => {
-        return (
-          <Tooltip title="Delete">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDelete"
-                width={24}
-                onClick={() => handleDelete(record)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
+  const itemGrantAccess = nxGetAccountActions({
+    handleView: ({ id: recordId }) => handleDetail(recordId),
+    handleUpdate: ({ id: recordId }) => navigate(
+      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PRODUCT_DISTRIBUTION,
+      {
+        state: {
+          idPD: recordId,
+          accountId: id,
+          idCustomer: idCustomer,
+        }
+      }
+    ),
+    handleDelete: ({ id: recordId }) => handleDelete(recordId),
+  });
 
   // Handle Detail
   const handleDetail = (record) => {
     setModalDetail(true);
-    dispatch(getDetailPDHistory(record.id));
+    dispatch(getDetailPDHistory(record));
   };
 
   // Handle Delete
   const handleDelete = (record) => {
+    const data = currentData.find((item) => item.id === record);
     setModalDelete(true);
-    setIdData(record?.id);
-    setEffectiveData(record?.effectiveDate);
+    setIdData(data?.id);
+    setEffectiveData(data?.effectiveDate);
   };
 
   const handleDeleteOk = () => {
@@ -353,45 +303,71 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
     setIdData();
     setEffectiveData();
   };
+
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+
+  const actionCols = useColumnActionPermission(["View", "Update", "Delete"], itemGrantAccess, "View", "table").map(
+    (col) => ({
+      ...col,
+      width: 70,
+      align: "center",
+    })
+  );
+
+  const baseColumns = useMemo(() =>
+    columns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+  [search, searchText, searchedColumn]);
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+  
   return (
     <Fragment>
-      <div className="text-primary text-xs font-bold uppercase">
-        Product Distribution History List
-      </div>
-
-      <div className="w-full flex justify-end gap-[20px]">
-        <ToolbarAccount
-          items={itemGrantAccess}
-          advancedAccess={access_account}
+      <NxBaseContainer border header={"PRODUCT DISTRIBUTION HISTORY LIST"}>
+        <NxTable
+          idTable="table-product-distribution-history"
+          dataSource={currentData}
+          totalData={currentPagination}
+          current={page}
+          tableScrolled={{ y: 525, x: currentData?.length ? "max-content" : "100%" }}
+          onSort={onSort}
+          columns={processedColumns}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hashMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={20}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          columnDefinitions={columnDefinitions}
+          loading={loading}
         />
-      </div>
-
-      <TablePaginationNew
-        dataSource={dataSource}
-        totalData={data?.page?.totalElements}
-        current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: 1000 }}
-        onChange={handleChange}
-        onSort={onSort}
-        columns={[
-          ...columns(
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDetail,
-            handleDelete
-          ),
-          ...useColumnActionPermissionAccount(
-            ["View", "Update", "Delete"],
-            itemGrantAccess,
-            access_account
-          ),
-        ]}
-      />
+      </NxBaseContainer>
 
       {/* Modal Detail */}
       <ProductDistributionDetail

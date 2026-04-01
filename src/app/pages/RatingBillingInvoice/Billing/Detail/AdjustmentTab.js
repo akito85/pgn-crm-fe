@@ -5,7 +5,7 @@ import { getAllAdjustmentPaginate } from "../../../../../redux/slices/rating_bil
 import { columnsAdjustment } from "./Table/TableAdjustment";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const AdjustmentTab = ({ billingCodeId }) => {
+const AdjustmentTab = ({ billHeaderId }) => {
   const { data_adjustment } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
@@ -24,17 +24,17 @@ const AdjustmentTab = ({ billingCodeId }) => {
     right: [],
   }));
 
-  useEffect(() => {
+useEffect(() => {
     dispatch(
       getAllAdjustmentPaginate({
-        billingCodeId,
+        id: billHeaderId,
         search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
       })
     );
-  }, [dispatch, billingCodeId, search, page, pageSize, sort]);
+  }, [dispatch, billHeaderId, search, page, pageSize, sort]); 
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();

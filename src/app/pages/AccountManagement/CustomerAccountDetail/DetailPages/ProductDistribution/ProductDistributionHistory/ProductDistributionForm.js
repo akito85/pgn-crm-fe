@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
@@ -28,6 +27,8 @@ import {
   getDetailPDHistory,
   updatePD,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const ProductDistributionForm = ({ type }) => {
   // Selector
@@ -47,6 +48,8 @@ const ProductDistributionForm = ({ type }) => {
 
   // State
   const [description, setDescription] = useState("");
+  const [localVal, setLocalVal] = useState(0);
+  const [exportVal, setExportVal] = useState(0);
   const [storedDataInline, setStoredDataInline] = useState(false);
   const [listDataDetail, setListDataDetail] = useState([]);
   const [startDate, setStartDate] = useState();
@@ -65,7 +68,9 @@ const ProductDistributionForm = ({ type }) => {
 
   useEffect(() => {
     if (idPD && data_detail_history?.id === idPD) {
-      const dataDetail = (data_detail_history?.srcDistDtl || []).map(
+      const dataDetail = (data_detail_history?.srcDistDtl || [])
+      .filter((item) => item.country !== "INDONESIA")
+      .map(
         (item, index) => {
           return {
             key: index + 1,
@@ -90,6 +95,8 @@ const ProductDistributionForm = ({ type }) => {
       setStartDate(moment(data_detail_history?.effectiveDate));
       setListDataDetail(dataDetail);
       setDescription(data_detail_history?.description);
+      setLocalVal(Number(data_detail_history?.value1));
+      setExportVal(Number(data_detail_history?.value2));
     }
   }, [dispatch, id, type, data_detail_history]);
 
@@ -182,7 +189,7 @@ const ProductDistributionForm = ({ type }) => {
       errorBody = {
         title: "Failed",
         description:
-          "Raw Material Source Import Detail Mandatory. Please insert data.",
+          "Product Distribution Source Export Detail Mandatory. Please insert data.",
       };
       dispatch(showModalError(errorBody));
     } else if (storedDataInline) {
@@ -286,8 +293,23 @@ const ProductDistributionForm = ({ type }) => {
     setModalError(false);
     setBodyError({});
   };
+
+  const validatePercentage = (_, value) => {
+    const local = Number(form.getFieldValue("value1") || 0);
+    const exportVal = Number(form.getFieldValue("value2") || 0);
+    const total = local + exportVal;
+
+    if (total !== 100) {
+      return Promise.reject(
+        new Error("Total Local + Export must be exactly 100%")
+      );
+    }
+
+    return Promise.resolve();
+  };
+
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(id)} />
 
@@ -299,124 +321,138 @@ const ProductDistributionForm = ({ type }) => {
           type="standard"
         />
 
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <BaseContainer header={"Raw Material Source Information"}>
-            <div className="w-full grid grid-cols-3 gap-3">
-              <Form.Item
-                label={"Effective Date"}
-                name={"effectiveDate"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Effective Date!",
-                  },
-                ]}
-              >
-                <DateComponent
-                  disabled={type !== "create" ? true : false}
-                  onChange={(e) => handleStartDate(e)}
-                  dateDisable={disabledDate}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label={"Local (%)"}
-                name={"value1"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Local (%)!",
-                  },
-                ]}
-              >
-                <InputComponent type={"number"} />
-              </Form.Item>
-
-              <Form.Item
-                label={"Export (%)"}
-                name={"value2"}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your Export (%)!",
-                  },
-                ]}
-              >
-                <InputComponent type={"number"} />
-              </Form.Item>
-
-              <div className="col-span-3">
-                <Form.Item
-                  label={"Description"}
-                  name={"description"}
-                  className={"w-full"}
-                >
-                  <InputComponent
-                    type="textarea"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </Form.Item>
-              </div>
-            </div>
-          </BaseContainer>
-
-          <BaseContainer header={"Raw Material Source Import Detail"}>
-            <FunctionalPDDetail
-              type={type}
-              data={listDataDetail}
-              updateData={setListDataDetail}
-              setStoredData={setStoredDataInline}
-              storedData={storedDataInline}
-              required={{ required: true, message: "Please input your" }}
-            />
-          </BaseContainer>
-
-          <div className="flex mt-[30px]">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
+        <Form id="form" form={form} layout="vertical" onFinish={handleSubmit}>
+          <div className="flex flex-col gap-y-4 mt-4">
+            <NxCardContainer header={"PRODUCT DISTRIBUTION SOURCE INFORMATION"}>
+              <NxBaseContainer border>
+                <div className="w-full grid grid-cols-3 gap-3">
+                  <Form.Item
+                    label={"Effective Date"}
+                    name={"effectiveDate"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Effective Date!",
+                      },
+                    ]}
+                  >
+                    <DateComponent
+                      disabled={type !== "create" ? true : false}
+                      onChange={(e) => handleStartDate(e)}
+                      dateDisable={disabledDate}
                     />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
+                  </Form.Item>
+
+                  <Form.Item
+                    label={"Local (%)"}
+                    name={"value1"}
+                    dependencies={["value2"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Local (%)!",
+                      },
+                      { validator: validatePercentage },
+                    ]}
+                  >
+                    <InputComponent
+                      type={"number"}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        setLocalVal(val);
+                        form.setFieldValue("value1", val);
+                      }}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label={"Export (%)"}
+                    name={"value2"}
+                    dependencies={["value1"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Export (%)!",
+                      },
+                      { validator: validatePercentage },
+                    ]}
+                  >
+                    <InputComponent
+                      type={"number"}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        setExportVal(val);
+                        form.setFieldValue("value2", val);
+                      }}
+                    />
+                  </Form.Item>
+
+                  <div className="col-span-3">
+                    <Form.Item
+                      label={"Description"}
+                      name={"description"}
+                      className={"w-full"}
+                    >
+                      <InputComponent
+                        type="textarea"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              </NxBaseContainer>
+            </NxCardContainer>
+
+            <NxCardContainer header={"PRODUCT DISTRIBUTION SOURCE EXPORT DETAIL"}>
+              <NxBaseContainer border>
+                <FunctionalPDDetail
+                  type={type}
+                  data={listDataDetail}
+                  updateData={setListDataDetail}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  required={{ required: true, message: "Please input your" }}
+                  localValue={localVal}
+                  exportValue={exportVal}
+                />
+              </NxBaseContainer>
+            </NxCardContainer>
+
+            <NxBaseContainer border>
+              <div className="flex justify-between">
+                <ButtonComponent
+                  type={"menu"}
+                  onClick={()=>{navigate(-1)}}
                 >
-                  {type === "update" ? "Reset" : "Clear"}
+                  Cancel
                 </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
-            </div>
+                <div className="flex w-full justify-end gap-x-4">
+                  <ButtonComponent
+                    disabled={storedDataInline ? true : false}
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update"
+                            ? `IconButtonReset`
+                            : `IconButtonClear`
+                        }
+                        width={20}
+                      />
+                    }
+                    type="reject"
+                    onClick={() => {
+                      handleClear();
+                    }}
+                  >
+                    {type === "update" ? "Reset" : "Clear"}
+                  </ButtonComponent>
+                  <ButtonComponent type="submit" htmlType={"submit"} form={"form"}>
+                    Save
+                  </ButtonComponent>
+                </div>
+              </div>
+            </NxBaseContainer>
           </div>
         </Form>
 
@@ -454,7 +490,7 @@ const ProductDistributionForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

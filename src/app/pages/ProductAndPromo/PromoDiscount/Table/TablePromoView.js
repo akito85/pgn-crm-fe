@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Tooltip, Checkbox } from "antd";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -9,8 +8,6 @@ import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 
 export const TablePromoView = (
   search,
-  page = 1,
-  pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
@@ -19,14 +16,17 @@ export const TablePromoView = (
   // handleInactive = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
-    width: 60,
+    width: 50,
     align: "center",
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    render: (text, object, index) => index + 1,
   },
   {
+    key: "name",
     title: "NAME",
     dataIndex: "name",
+    width: 150,
     sorter: true,
     ellipsis: {
       showTitle: false,
@@ -52,8 +52,10 @@ export const TablePromoView = (
       ),
   },
   {
+    key: "typeName",
     title: "TYPE",
     dataIndex: "typeName",
+    width: 150,
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -77,8 +79,10 @@ export const TablePromoView = (
       ),
   },
   {
+    key: "promotionTypeName",
     title: "PROMOTION TYPE",
     dataIndex: "promotionTypeName",
+    width: 150,
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -102,8 +106,10 @@ export const TablePromoView = (
       ),
   },
   {
+    key: "categoryName",
     title: "PROMO CATEGORY",
     dataIndex: "categoryName",
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -126,8 +132,10 @@ export const TablePromoView = (
       ),
   },
   {
+    key: "criterias",
     title: "CRITERIA",
     dataIndex: "criterias",
+    width: 150,
     sorter: true,
     ellipsis: {
       showTitle: false,
@@ -153,8 +161,10 @@ export const TablePromoView = (
       ),
   },
   {
+    key: "startDate",
     title: "START DATE",
     dataIndex: "startDate",
+    width: 150,
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -178,8 +188,10 @@ export const TablePromoView = (
       ),
   },
   {
+    key: "endDate",
     title: "END DATE",
     dataIndex: "endDate",
+    width: 150,
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -203,8 +215,10 @@ export const TablePromoView = (
       ),
   },
   {
+    key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
+    width: 300,
     sorter: true,
     ellipsis: {
       showTitle: false,
@@ -229,12 +243,12 @@ export const TablePromoView = (
         search
       ),
   },
-
   {
+    key: "status",
     title: "STATUS",
     dataIndex: "status",
     fixed: "right",
-    width: 160,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -271,12 +285,12 @@ export const TablePromoView = (
           )
         : text;
     },
-  },
-  {
+  },  {
+    key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     fixed: "right",
-    width: 240,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -315,107 +329,6 @@ export const TablePromoView = (
         : text;
     },
   },
-  // {
-  //   title: "ACTION",
-  //   dataIndex: "action",
-  //   fixed: "right",
-  //   align: "center",
-  //   dataIndex: "id",
-  //   width: 100,
-  //   render: (id, record) => {
-  //     const isEditable =
-  //       record.statusApproval === "DRAFT" ||
-  //       record.statusApproval === "REJECTED" ||
-  //       (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
-
-  //     const isActivateOrInactivate =
-  //       (record.statusApproval === "APPROVED" && record.status === "ACTIVE") ||
-  //       (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-  //       (record.statusApproval === "REJECTED" && record.status === "ACTIVE");
-
-  //     return (
-  //       <div className="flex w-full justify-center gap-4">
-  //         <Popover
-  //           trigger={"click"}
-  //           placement="bottomRight"
-  //           content={
-  //             <Space direction="vertical">
-  //               <Link
-  //                 to={PRODUCT_PROMO_ROUTES.UPDATE_PROMO_DISCOUNT}
-  //                 state={{
-  //                   id: record.id,
-  //                 }}
-  //               >
-  //                 <ButtonComponent
-  //                   icon={
-  //                     <SVGIcon name="IconEdit" color="#0075bf" width={24} />
-  //                   }
-  //                   border={false}
-  //                   disabled={!isEditable}
-  //                 >
-  //                   <span className="text-black ml-3"> Update</span>
-  //                 </ButtonComponent>
-  //               </Link>
-
-  //               <ButtonComponent
-  //                 icon={
-  //                   <Checkbox
-  //                     className="inactive-check"
-  //                     onClick={() => handleInactive(record)}
-  //                     disabled={record.status === "ACTIVE" ? false : true}
-  //                     checked={record.status === "ACTIVE" ? true : false}
-  //                   />
-  //                 }
-  //                 border={false}
-  //                 disabled={!isActivateOrInactivate}
-  //                 onClick={() => handleInactive(record)}
-  //               >
-  //                 <span className="text-black ml-5">
-  //                   {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-  //                 </span>
-  //               </ButtonComponent>
-
-  //               <ButtonComponent
-  //                 icon={
-  //                   <SVGIcon
-  //                     name="IconLogHistory"
-  //                     color={"#0075bf"}
-  //                     width={24}
-  //                   />
-  //                 }
-  //                 border={false}
-  //                 onClick={() => handleApprovalHistory(id)}
-  //               >
-  //                 <span className={"text-black ml-3"}>Approval History</span>
-  //               </ButtonComponent>
-  //             </Space>
-  //           }
-  //         >
-  //           <div className="pt-1">
-  //             <MoreOutlined
-  //               style={{
-  //                 fontSize: "24px",
-  //                 color: "#0075bf",
-  //                 cursor: "pointer",
-  //               }}
-  //             />
-  //           </div>
-  //         </Popover>
-
-  //         <Link
-  //           to={PRODUCT_PROMO_ROUTES.DETAIL_PROMO_DISCOUNT}
-  //           state={{ id: record.id }}
-  //         >
-  //           <Tooltip title="Detail">
-  //             <div className="pt-1">
-  //               <SVGIcon name="IconDetail" width={24} />
-  //             </div>
-  //           </Tooltip>
-  //         </Link>
-  //       </div>
-  //     );
-  //   },
-  // },
 ];
 
 export const itemsActionView = (

@@ -1,152 +1,130 @@
-import { Checkbox, Tooltip } from "antd";
-import ButtonComponent from "../ButtonComponent";
+import { Button, Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../assets/Icon/index";
-import { Link } from "react-router-dom";
 import { Fragment } from "react";
 
 const nxGetAccountActions = ({
-  idAccount = 0,
-  idCustomer = 0,
-  createRoute = "",
-  updateRoute = "",
-  detailRoute = "",
-  navigate = () => {},
+  handleCreate = () => {},
+  handleUpdate = () => {},
+  handleView = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
+  handleRecalculate = () => {},
+  handleExpire = () => {},
+  handleDelete = () => {}
 }) => [
   {
     action: "Download",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconButtonDownload" width={20} />}
+      <Button
+        icon={<SVGIcon name="IconButtonDownload" width={14} />}
         type="submit"
         onClick={handleDownload}
       >
         Download List
-      </ButtonComponent>
+      </Button>
     )
   },
   {
     action: "Approve",
     render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconRequestApproval" width={20} color="#FFF" />}
+      <Button
+        icon={<SVGIcon name="IconRequestApproval" width={14} />}
         type="submit"
         onClick={() => handleApproval(true)}
       >
         Approval
-      </ButtonComponent>
+      </Button>
     )
   },
   {
     action: "Create",
     render: (
-      <Link to={createRoute} state={{
-        idAccount,
-        idCustomer,
-      }}>
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={20} />}
-          type={"submit"}
-          border={false}
-        >
-          Create
-        </ButtonComponent>
-      </Link>
+      <Button
+        icon={<SVGIcon name="IconButtonCreate" width={14} />}
+        type={"submit"}
+        border={false}
+        onClick={handleCreate}
+      >
+        Create
+      </Button>
     )
   },
   {
-    action: 'View',
-    type: 'table',
+    action: "View",
+    type: "table",
     render: (record, actionLength, index) => {
       return (
-        <Tooltip
-          title="Detail"
-          onClick={
-            () => navigate(detailRoute, {
-              state: {
-                id: record.id,
-                idAccount,
-                idCustomer,
-              }
-            })
-          }
-          key={`table-action-${index}`}
-        >
-          <div className="flex items-center h-full">
+        <Tooltip title="View" key={`table-action-${index}`}>
+          <Button
+            onClick={() =>
+              handleView(record)
+            }
+            type="table-action"
+          >
             <SVGIcon name="IconDetail" width={20} />
-          </div>
+          </Button>
         </Tooltip>
-      )
+      );
     }
   },
   {
-    action: 'Update',
-    type: 'table',
+    action: "Update",
+    type: "table",
     render: (record, actionLength, index) => {
       const isEditable =
-        record.statusApproval === "DRAFT" ||
-        record.statusApproval === "REJECTED";
+        record.status !== "INACTIVE" &&
+        record.statusApproval !== "WAITING_APPROVAL" &&
+        record.statusApproval !== "WAITING_FOR_APPROVAL";
 
-      const content = actionLength > 3 ?
-        (
-          <ButtonComponent
-            icon={<SVGIcon name="IconEdit" color={!isEditable ? "#BDBDBD" : "#0075BF"} width={20} />}
-            border={false}
-            disabled={!isEditable}
-            onClick={() => navigate(updateRoute, {
-              state: {
-                id: record.id,
-                idAccount,
-                idCustomer,
-              }
-            })}
-            type={"action"}
-          >
-            <span className={"text-black ml-3"}>Update</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Update">
-            <div className="flex items-center h-full">
-
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
               <SVGIcon
                 name="IconEdit"
                 width={20}
-                color={!isEditable ? "#8D91A0" : "#ACC424"}
-                className={!isEditable ? "cursor-not-allowed" : undefined}
-                onClick={
-                  isEditable ?
-                    () => navigate(updateRoute, {
-                      state: {
-                        id: record.id,
-                        idAccount,
-                        idCustomer,
-                      }
-                    }) :
-                    () => {}
-                }
               />
-            </div>
+            }
+            disabled={!isEditable}
+            onClick={() =>
+              handleUpdate(record)
+            }
+            type={"action"}
+          >
+            Update
+          </Button>
+        ) : (
+          <Tooltip
+            title={isEditable ? "Update" : ""}
+            key={`table-action-${index}`}
+          >
+            <Button
+              onClick={() =>
+                handleUpdate(record)
+              }
+              disabled={!isEditable}
+              type="table-action"
+            >
+              <SVGIcon name="IconEdit" width={20} />
+            </Button>
           </Tooltip>
         );
 
-      return (
-        <Fragment key={`table-action-${index}`}>{content}</Fragment>          
-      )
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
     }
   },
   {
-    action: 'Inactivate',
-    type: 'table',
+    action: "Inactivate",
+    type: "table",
     render: (record, actionLength, index) => {
       const isInactive = record.status === "INACTIVE";
       const isActive = record.status === "ACTIVE";
 
-      const content = actionLength > 3 ?
-        (
-          <ButtonComponent
+      const content =
+        actionLength > 3 ? (
+          <Button
             icon={
               <Checkbox
                 disabled={!isActive}
@@ -155,64 +133,149 @@ const nxGetAccountActions = ({
                 className="action-checkbox"
               />
             }
-            border={false}
             disabled={!isActive}
-            onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+            onClick={() =>
+              handleInactivate(record)
+            }
             type={"action"}
           >
-            <span className={"text-black ml-3"}>Inactivate</span>
-          </ButtonComponent>
+            Inactivate
+          </Button>
         ) : (
           <Tooltip
-            title="Inactivate"
+            title={isActive ? "Inactivate" : ""}
+            key={`table-action-${index}`}
           >
-            <div className="flex items-center h-full">
-              <Checkbox
-                className="action-checkbox"
-                disabled={isActive ? false : true}
-                checked={isActive ? false : true}
-                onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
-                style={{ transform: "scale(0.9)" }}
-              />
-            </div>
-          </Tooltip>
-        );
-
-      return <Fragment key={`table-action-${index}`}>{content}</Fragment>
-    }
-  },
-  {
-    action: 'History',
-    type: 'table',
-    render: (record, actionLength, index) => {
-      const content = (actionLength > 3) ?
-        (
-          <ButtonComponent
-            icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(true, record?.id)}
-            type={"action"}
-          >
-            <span className={"text-black ml-3"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <SVGIcon
-              name="IconLogHistory"
-              color={"#0075bf"}
-              width={20}
-              onClick={() => handleApprovalHistory(true, record?.id)}
+            <Checkbox
+              className="action-checkbox"
+              disabled={!isActive}
+              checked={isInactive}
+              onClick={() =>
+                handleInactivate(record)
+              }
+              style={{ transform: "scale(0.9)" }}
             />
           </Tooltip>
         );
 
-      return <Fragment key={`table-action-${index}`}>{content}</Fragment>
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
     }
-  }
+  },
+  {
+    action: "History",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon= {
+              <SVGIcon
+                name="IconLogHistory"
+                width={20}
+              />
+            }
+            onClick={() => handleApprovalHistory(record)}
+            type={"action"}
+          >
+            Approval History
+          </Button>
+        ) : (
+          <Tooltip title="Approval History" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleApprovalHistory(record)}
+              type="table-action"
+            >
+              <SVGIcon name="IconLogHistory" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Delete",
+    type: "table",
+    render: (record, _, index) => {
+      return (
+        <Tooltip title="Delete" key={`table-action-${index}`}>
+          <Button onClick={() => handleDelete(record)} type="table-action">
+            <SVGIcon
+              name="IconDelete"
+              className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out"
+              width={20}
+            />
+          </Button>
+        </Tooltip>
+      );
+    }
+  },
+  {
+    action: "Recalculate",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <SVGIcon
+                name="IconRating"
+                width={20}
+              />
+            }
+            border={false}
+            onClick={() => handleRecalculate(record)}
+            type={"action"}
+          >
+            <span className={"text-black ml-3"}>Recalculate</span>
+          </Button>
+        ) : (
+          <Tooltip title="Recalculate" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleRecalculate(record)}
+              type="table-action"
+            >
+              <SVGIcon name="IconRating" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Expire",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <SVGIcon
+                name="IconExpire"
+                width={20}
+              />
+            }
+            border={false}
+            onClick={() => handleExpire(record)}
+            type={"action"}
+          >
+            <span className={"text-black ml-3"}>Recalculate</span>
+          </Button>
+        ) : (
+          <Tooltip title="Recalculate" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleExpire(record)}
+              type="table-action"
+            >
+              <SVGIcon name="IconRating" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
 ];
 
-export {
-  nxGetAccountActions,
-}
+export { nxGetAccountActions };

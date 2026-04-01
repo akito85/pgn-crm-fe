@@ -7,7 +7,6 @@ import BaseContainer from "../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../components/DetailText";
 import { LeftOutlined } from "@ant-design/icons";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../components/BreadCrumbAdvanced";
 import HeaderDetail from "../../HeaderDetail";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
@@ -96,7 +95,7 @@ const PremiseDetail = () =>
     }
 
     return (
-      <LayoutMenu>
+      <>
         <Spin spinning={loading} className={"w-full top-20"}>
           <BreadCrumbAdvanced routes={routes(id)} />
           <div className="w-full">
@@ -271,7 +270,8 @@ const PremiseDetail = () =>
             </Link>
           </div>
         </Spin>
-      </LayoutMenu>
+      </>
     );
   };
 export default PremiseDetail;
+

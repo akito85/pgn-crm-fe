@@ -4,11 +4,9 @@ import { Button, DatePicker, Form, Upload, message, Spin } from "antd";
 import {
   PlusOutlined,
   InboxOutlined,
-  ArrowLeftOutlined,
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import InputComponent from "../../../../components/InputComponent";
 import SelectComponent from "../../../../components/SelectComponent";
@@ -195,7 +193,7 @@ const CreateDeliveryJobPage = () => {
       }
 
       // Submit via API
-      const response = await ratingBillingHttpService.uploadAttachment(
+      await ratingBillingHttpService.uploadAttachment(
         "/v1/dbs/api/rbi/delivery/create-job-delivery",
         formData,
         (percent) => {
@@ -261,7 +259,7 @@ const CreateDeliveryJobPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -637,7 +635,7 @@ const CreateDeliveryJobPage = () => {
           </Form>
         </Spin>
       </CardContainer>
-    </LayoutMenu>
+    </>
   );
 };
 

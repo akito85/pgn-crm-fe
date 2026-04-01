@@ -1,11 +1,11 @@
-import { Form, Pagination, Select, Table } from "antd";
+import { Form } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useContactHooks } from "./useContactHooks";
-import ButtonComponent from "../../ButtonComponent";
-import { PlusOutlined } from "@ant-design/icons";
 import SelectComponent from "../../SelectComponent";
 import InputComponent from "../../InputComponent";
 import { formMessageRequired, hasValue } from "../../../utils";
+import NxTable from "../../Nx/NxTable";
+
 const EditableCell = ({
   editing,
   dataIndex,
@@ -110,55 +110,6 @@ const EditableCell = ({
               }}
             </Form.List>
           );
-          // } else if (formValue?.inputType?.value === 748) {
-          //     return (
-          //         <Form.List name={'values'} initialValue={[{ prefix_1: undefined, value: undefined, prefix_2: undefined }]}>
-          //             {(fields) => {
-          //                 return (
-          //                     <>
-          //                         {fields?.map(({ key, name }, indexList) => {
-          //                             return (
-          //                                 <div className='flex gap-2 w-full'>
-          //                                     <Form.Item
-          //                                         name={[name, 'prefix_1']}
-          //                                         rules={formMessageRequired('Country Code')}
-          //                                         className='w-1/3'
-          //                                     >
-          //                                         <SelectComponent placeholder={"Country Code"} labelInValue options={options?.country_code} onChange={(e) => {
-          //                                             changePrefix(record, formValue, e, [name, 'prefix_1'])
-          //                                             setLengthPrefix_1(e?.label?.split(' ')?.at(-1)?.length)
-          //                                         }} />
-          //                                     </Form.Item>
-          //                                     <Form.Item
-          //                                         name={[name, 'prefix_2']}
-          //                                         rules={formMessageRequired('Zone Code')}
-          //                                         className='w-1/3'
-          //                                     >
-          //                                         <SelectComponent placeholder={"Zone Code"} labelInValue onChange={(e) => {
-          //                                             changePrefix(record, formValue, e, [name, 'prefix_2'])
-          //                                             setLengthPrefix_2(e?.label?.split(' ')?.at(0)?.length)
-          //                                         }} options={options?.country_zone} />
-          //                                     </Form.Item>
-          //                                     <Form.Item
-          //                                         name={[name, 'value']}
-          //                                         rules={formMessageRequired('Value')}
-          //                                         className='w-full'
-          //                                     >
-          //                                         <InputComponent
-          //                                             maxLength={maxLengthValidation()} onInput={(e) =>
-          //                                                 (e.target.value = e.target.value.replace(/[^\d]|^0+/g, ''))
-          //                                             } />
-          //                                     </Form.Item>
-          //                                 </div>
-          //                             )
-          //                         })}
-          //                     </>
-          //                 )
-          //             }
-          //             }
-
-          //         </Form.List>
-          //     )
         } else if (
           formValue?.inputType?.value === 751 ||
           formValue?.inputType?.value === 748
@@ -315,36 +266,25 @@ const TableContact = ({
   dataTable = [],
   setDataTable = () => {},
   cols = [],
-  page,
-  pageSize,
-  onSizeChanger = () => {},
-  onChangePage = () => {},
   form,
   scrollTable = {},
   actionButtons,
-  showButtonCreate = true,
-  useSelect = true,
-  usePagination = true,
   editRecords = () => {},
   changePrefix = () => {},
   isStored = () => {},
+  addRowTrigger = null,
 }) => {
   const [statusStored, setStatusStored] = useState("");
   const [editingKey, setEditingKey] = useState("");
-  const [filterColumn, setFilterColumn] = useState([]);
   const [storedData, setStoredData] = useState(false);
-  const [totalData, setTotalData] = useState(dataTable.length);
-  // set is editing
+
   const isEditing = useCallback(
-    (record) => {
-      return record?.key === editingKey;
-    },
+    (record) => record?.key === editingKey,
     [editingKey]
   );
 
   useEffect(() => {
     isStored(storedData);
-    setTotalData(dataTable?.length);
   }, [dataTable, isStored, statusStored, storedData]);
 
   const setFullValue = useCallback((row) => {
@@ -406,7 +346,6 @@ const TableContact = ({
     console.log(record);
   }, []);
 
-  // handle update
   const handleUpdate = useCallback(
     (record) => {
       editRecords(record);
@@ -418,12 +357,10 @@ const TableContact = ({
     [editRecords, form]
   );
 
-  // handle inactive
   const handleInactivate = useCallback((record) => {
     console.log(record);
   }, []);
 
-  // handle delete
   const handleDelete = useCallback(
     (record) => {
       const newData = dataTable.filter((item) => item?.key !== record?.key);
@@ -435,7 +372,6 @@ const TableContact = ({
     [dataTable, form, setDataTable]
   );
 
-  // handle cancel
   const handleCancel = useCallback(
     (record) => {
       if (statusStored === "add") {
@@ -460,7 +396,6 @@ const TableContact = ({
     actionButtons
   );
 
-  // column table
   const columns = useMemo(() => {
     return [...cols, ...columnAction];
   }, [cols, columnAction]);
@@ -471,143 +406,61 @@ const TableContact = ({
     const newRow = columns.reduce(
       (acc, column) => {
         acc[column.dataIndex] = column.dataIndex === "key" ? newRowKey : null;
-
         return { ...acc, fullValue: null };
       },
       { key: newRowKey }
     );
-
-    setDataTable((prev) => {
-      return [...dataTable, newRow];
-    });
+    setDataTable((prev) => [...dataTable, newRow]);
     setEditingKey(newRow?.key);
     setStoredData(true);
   }, [columns, dataTable, setDataTable]);
 
-  // handle display column
-  const handleDisplayColumn = useCallback((value) => {
-    setFilterColumn(value);
-  }, []);
+  // expose handleAddRow to parent via ref
+  useEffect(() => {
+    if (addRowTrigger) {
+      addRowTrigger.current = handleAddRow;
+    }
+  }, [addRowTrigger, handleAddRow]);
 
-  const handleFilterColumn = useCallback(
-    (columns) => {
-      const filteredColumn = columns?.filter(
-        (item) => !filterColumn?.includes(item?.title)
-      );
-      return filteredColumn;
-    },
-    [filterColumn]
-  );
-
-  const paginationTable = useCallback(
-    (page, pageSize) => {
-      return dataTable?.slice((page - 1) * pageSize, page * pageSize);
-    },
-    [dataTable]
-  );
-
-  const changeTable = (pagination, filters, sorter, extra) => {
-    const filteredData = extra?.currentDataSource?.length || [];
-    setTotalData(filteredData);
-  };
+  const processedColumns = useMemo(() => {
+    return columns.map((item) => ({
+      ...item,
+      onCell: (record) => ({
+        editing: isEditing(record),
+        dataIndex: item?.dataIndex,
+        required: item.required,
+        title: item?.title,
+        inputType: item?.inputType,
+        record,
+        index: item?.index,
+        indexValue: item?.indexValue,
+        options: item?.options,
+        rules: item?.rules,
+        form: form,
+        onCellClicked: item?.onClick,
+        changePrefix: changePrefix,
+      }),
+    }));
+  }, [columns, isEditing, form, changePrefix]);
 
   return (
-    <div className={"w-full flex flex-col gap-4"}>
-      <div className={"w-full flex gap-2 justify-between items-center"}>
-        {useSelect && (
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-2/6"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    filterColumn.length > 3
-                      ? filterColumn.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
-        )}
-
-        <div>
-          <div className={"w-full flex justify-end mb-5"}>
-            {showButtonCreate && (
-              <ButtonComponent
-                onClick={storedData === false && handleAddRow}
-                type={"submit"}
-                border={true}
-                icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-                disabled={storedData}
-              >
-                Create
-              </ButtonComponent>
-            )}
-          </div>
-          {usePagination && totalData > 0 && (
-            <Pagination
-              total={totalData}
-              className={"pr-1"}
-              showSizeChanger
-              current={page}
-              pageSize={pageSize}
-              onChange={(page, pageSize) => onChangePage(page, pageSize)}
-              onShowSizeChange={onSizeChanger}
-              showTotal={(total, range) =>
-                `Showing ${range[0]} to ${range[1]} of ${total} records`
-              }
-            />
-          )}
-        </div>
-      </div>
-      <Form form={form}>
-        <Table
-          dataSource={paginationTable(page, pageSize)}
-          columns={handleFilterColumn(
-            columns?.map((item) => ({
-              ...item,
-              onCell: (record) => ({
-                editing: isEditing(record),
-                dataIndex: item?.dataIndex,
-                required: item.required,
-                title: item?.title,
-                inputType: item?.inputType,
-                record,
-                index: item?.index,
-                indexValue: item?.indexValue,
-                options: item?.options,
-                rules: item?.rules,
-                form: form,
-                onCellClicked: item?.onClick,
-                changePrefix: changePrefix,
-              }),
-            }))
-          )}
-          rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-          components={{
-            body: {
-              cell: EditableCell,
-            },
-          }}
-          scroll={{ x: 1500, y: 500 }}
-          tableLayout="fixed"
-          onChange={changeTable}
-          pagination={false}
-        />
-      </Form>
-    </div>
+    <Form form={form}>
+      <NxTable
+        idTable="table-contact-inline-edit"
+        dataSource={dataTable}
+        columns={processedColumns}
+        components={{ body: { cell: EditableCell } }}
+        totalData={dataTable.length}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={false}
+        useSelect={true}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        tableScrolled={{ x: "max-content", y: 300 }}
+        rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+      />
+    </Form>
   );
 };
 

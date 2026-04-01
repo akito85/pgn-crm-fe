@@ -18,6 +18,7 @@ const StatusComponent = ({
   colour,
   type = "status",
   size = "default",
+  margin = true,
 }) => {
   const { bgcolor, textColor } = useMemo(() => {
     if (!colour || typeof colour !== "string") {
@@ -47,7 +48,38 @@ const StatusComponent = ({
         break;
 
       case "open":
+        bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "in_progress":
+        bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      case "on_hold":
+        bgColor = "bg-[#F2D957]";
+        tColor = "text-black";
+        break;
+
+      case "resolved":
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
+        break;
+
+      case "closed":
         bgColor = "bg-gray-600";
+        tColor = "text-white";
+        break;
+
+      case "waiting_approval":
+      case "waiting_for_approval":
+        bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      case "none":
+        bgColor = "bg-gray-400";
         tColor = "text-white";
         break;
 
@@ -88,10 +120,12 @@ const StatusComponent = ({
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
+      case "waiting_for_approval":
       case "waiting_cancellation_approval":
       case "waiting cancellation approval":
       case "waiting_upload_approval":
       case "waiting upload approval":
+      case "partially paid": // recipt allocation
         bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
@@ -314,7 +348,7 @@ const StatusComponent = ({
   if (!children) return null;
 
   const sizeClasses =
-    size === "small" ? "px-2 py-0 text-xs my-0.5" : "px-3 py-0 my-1";
+    size === "small" ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}` : `px-3 py-0 ${margin ? "my-1" : ""}`;
 
   return (
     <div
@@ -325,7 +359,7 @@ const StatusComponent = ({
       }
     >
       {/* {renderIconStatus()} */}
-      {children.replace("_", " ")}
+      {children.replace(/_/g, " ")}
     </div>
   );
 };
