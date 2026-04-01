@@ -22,6 +22,8 @@ import {
   getApprovalHistory,
   setBillingFilters,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
+import { checkAccountingExists } from "../../../../redux/slices/rating_billing_invoice/accounting";
+import { showModalError } from "../../../../redux/slices/general_slice";
 import { columnsBilling } from "./Table/TableViewBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
@@ -297,12 +299,38 @@ const BillingPage = () => {
               icon={<SVGIcon name="IconButtonCreate" color={"#0075bf"} width={16} />}
               onClick={(e) => {
                 e.domEvent.stopPropagation();
-                navigate(RBI_ROUTES.ACCOUNTING_CREATE, {
+                dispatch(checkAccountingExists(record.invoiceNumber))
+                  .unwrap()
+                  .then((result) => {
+                    if (result?.exists) {
+                      dispatch(
+                        showModalError({
+                          title: "Accounting Already Exists",
+                          description: `An accounting journal already exists for this billing (Status: ${result.status || "-"}). Please use View Accounting to review it.`,
+                        })
+                      );
+                    } else {
+                      navigate(RBI_ROUTES.ACCOUNTING_CREATE, {
+                        state: { billingData: record },
+                      });
+                    }
+                  })
+                  .catch(() => {});
+              }}
+            >
+              Create Accounting
+            </Menu.Item>
+            <Menu.Item
+              key="view-accounting"
+              icon={<SVGIcon name="IconReport" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                navigate(RBI_ROUTES.ACCOUNTING_VIEW, {
                   state: { billingData: record },
                 });
               }}
             >
-              Create Accounting
+              View Accounting
             </Menu.Item>
           </Menu>
         );

@@ -215,6 +215,8 @@ const BillingCreateAccountingForm = () => {
         details: rows,
       })),
       submit: isSubmit,
+      statusApproval: billingData?.statusApproval || null,
+      status: isSubmit ? "SUBMITTED" : "DRAFT",
     };
 
     dispatch(createAccountingJournal(body))

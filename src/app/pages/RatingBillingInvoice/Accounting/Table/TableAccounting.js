@@ -430,6 +430,8 @@ export const columnsAccounting = (
     sorter: true,
     width: 170,
     isNumber: true,
+    render: (value, record) =>
+      separatorNumber(record.currency === "IDR" ? record.amount : value),
     ...makeNumberSearchCol("equivAmountIdr", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {
@@ -439,6 +441,8 @@ export const columnsAccounting = (
     sorter: true,
     width: 170,
     isNumber: true,
+    render: (value, record) =>
+      separatorNumber(record.currency === "USD" ? record.amount : value),
     ...makeNumberSearchCol("equivAmountUsd", search, searchInput, searchedColumn, searchText, handleSearch, handleReset),
   },
   {

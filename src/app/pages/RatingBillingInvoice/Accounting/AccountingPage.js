@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import SVGIcon from "../../../../assets/Icon/index";
 import CardContainer from "../../../../components/CardContainer";
@@ -319,7 +318,7 @@ const AccountingPage = () => {
   }, [dataSource]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -370,7 +369,7 @@ const AccountingPage = () => {
         </div>
       </CardContainer>
 
-    </LayoutMenu>
+    </>
   );
 };
 

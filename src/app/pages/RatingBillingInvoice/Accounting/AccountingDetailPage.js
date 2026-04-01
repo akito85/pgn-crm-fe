@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Table, Tabs, Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import CardContainerNoBorder from "../../../../components/CardContainerNoBorder";
@@ -101,7 +100,7 @@ const AccountingDetailPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer type="tabs" header="ACCOUNTING DETAIL">
@@ -217,7 +216,7 @@ const AccountingDetailPage = () => {
           </ButtonComponent>
         </div>
       </CardContainer>
-    </LayoutMenu>
+    </>
   );
 };
 
