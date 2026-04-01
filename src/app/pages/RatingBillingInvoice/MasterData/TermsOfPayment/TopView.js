@@ -394,9 +394,8 @@ export const columnTOP = (
 
 const TopView = () => {
   const dispatch = useDispatch();
-  const { data_list, dataApprovalHistory, loading } = useSelector(
-    (state) => state.top,
-  );
+  const { data_list, data_list_items, dataApprovalHistory, loading } =
+    useSelector((state) => state.top);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const searchInput = useRef(null);
@@ -404,11 +403,11 @@ const TopView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
-  const [allData, setAllData] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
-  const shouldResetRef = useRef(false);
 
-  const hasMore = allData.length < (data_list?.page?.totalElements || 0);
+  const loadMoreSize = 20;
+  const hasMore =
+    data_list_items.length < (data_list?.page?.totalElements || 0);
 
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
@@ -450,44 +449,26 @@ const TopView = () => {
 
   // Use Effect
   useEffect(() => {
-    shouldResetRef.current = true;
     dispatch(
       getTopPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
+        isLoadMore: false,
       }),
     );
-  }, [search, page, pageSize, sort, dispatch, refreshKey]);
-
-  // Accumulate data for infinite scroll
-  useEffect(() => {
-    if (data_list?.result) {
-      if (shouldResetRef.current) {
-        setAllData(data_list.result);
-        shouldResetRef.current = false;
-      } else {
-        setAllData((prev) => [...prev, ...data_list.result]);
-      }
-    }
-  }, [data_list]);
+  }, [search, sort, dispatch, refreshKey]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    shouldResetRef.current = true;
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   const handleChange = (pageChange, pageSizeChange) => {
@@ -501,28 +482,27 @@ const TopView = () => {
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
-    shouldResetRef.current = true;
-    setPage(1);
     setSort(dataSort);
   };
 
   // Handle Load More (infinite scroll)
-  const handleLoadMore = useCallback(() => {
-    return new Promise((resolve) => {
-      setPage((prev) => prev + 1);
-      resolve();
-    });
-  }, []);
+  const handleLoadMore = useCallback(async () => {
+    const nextPage = Math.floor(data_list_items.length / loadMoreSize) + 1;
+    await dispatch(
+      getTopPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, search, sort, data_list_items.length]);
 
   // Handle Refresh
   const handleRefresh = useCallback(() => {
-    shouldResetRef.current = true;
-    if (page === 1) {
-      setRefreshKey((prev) => prev + 1);
-    } else {
-      setPage(1);
-    }
-  }, [page]);
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
@@ -887,7 +867,7 @@ const TopView = () => {
         >
           <TableRBI
             idTable="topTable"
-            dataSource={allData}
+            dataSource={data_list_items}
             columns={columns}
             current={page}
             pageSize={pageSize}

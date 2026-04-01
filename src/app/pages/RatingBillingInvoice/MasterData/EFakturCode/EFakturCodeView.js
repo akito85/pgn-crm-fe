@@ -32,7 +32,7 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const EFakturCodeView = () => {
   // Selector - Fully integrated with Redux
-  const { data, loading, data_approval_history } = useSelector(
+  const { data, data_list, loading, data_approval_history } = useSelector(
     (state) => state.masterEfakturCode,
   );
 
@@ -48,11 +48,10 @@ const EFakturCodeView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
-  const [allData, setAllData] = useState([]);
   const [refreshKey, setRefreshKey] = useState(0);
-  const shouldResetRef = useRef(true);
 
-  const hasMore = allData.length < (data?.page?.totalElements || 0);
+  const loadMoreSize = 20;
+  const hasMore = data_list.length < (data?.page?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -84,24 +83,13 @@ const EFakturCodeView = () => {
     dispatch(
       getAllEfakturCodePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
+        isLoadMore: false,
       }),
     );
-  }, [page, pageSize, sort, dispatch, search, refreshKey]);
-
-  // Accumulate data for infinite scroll
-  useEffect(() => {
-    if (data?.result) {
-      if (shouldResetRef.current) {
-        setAllData(data.result);
-        shouldResetRef.current = false;
-      } else {
-        setAllData((prev) => [...prev, ...data.result]);
-      }
-    }
-  }, [data]);
+  }, [sort, dispatch, search, refreshKey]);
 
   // Format approval history data
   useEffect(() => {
@@ -145,11 +133,7 @@ const EFakturCodeView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    shouldResetRef.current = true;
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -181,28 +165,27 @@ const EFakturCodeView = () => {
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
-    shouldResetRef.current = true;
-    setPage(1);
     setSort(dataSort);
   };
 
   // Handle Load More (infinite scroll)
-  const handleLoadMore = useCallback(() => {
-    return new Promise((resolve) => {
-      setPage((prev) => prev + 1);
-      resolve();
-    });
-  }, []);
+  const handleLoadMore = useCallback(async () => {
+    const nextPage = Math.floor(data_list.length / loadMoreSize) + 1;
+    await dispatch(
+      getAllEfakturCodePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, search, sort, data_list.length]);
 
   // Handle Refresh
   const handleRefresh = useCallback(() => {
-    shouldResetRef.current = true;
-    if (page === 1) {
-      setRefreshKey((prev) => prev + 1);
-    } else {
-      setPage(1);
-    }
-  }, [page]);
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   const handleOptions = () => {
     const data = dataApprovalHistory?.dataApprover || {};
@@ -236,9 +219,10 @@ const EFakturCodeView = () => {
         dispatch(
           getAllEfakturCodePaginate({
             search: tempSearch,
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           }),
         );
       })
@@ -579,7 +563,7 @@ const EFakturCodeView = () => {
           <div className={"w-full"}>
             <TableRBI
               idTable="efakturCodeTable"
-              dataSource={allData}
+              dataSource={data_list}
               columns={columns}
               current={page}
               pageSize={pageSize}
