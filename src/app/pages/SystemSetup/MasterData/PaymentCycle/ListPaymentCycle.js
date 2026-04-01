@@ -35,6 +35,17 @@ import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 
+const escapeHtml = (text) => {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text ? String(text).replace(/[&<>"']/g, (s) => map[s]) : text;
+};
+
+const getSafeErrorMessage = (error) => {
+    const message = error?.response?.data?.message || error?.message || 'An error occurred';
+    const safeMessages = ['Validation failed', 'Invalid input', 'Unauthorized'];
+    return safeMessages.some((m) => message.includes(m)) ? message : 'An unexpected error occurred';
+};
+
 const ListPaymentCycle = () => {
     const dispatch = useDispatch();
     const searchInput = useRef(null);
@@ -201,12 +212,13 @@ const ListPaymentCycle = () => {
     // Function Search Column
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
-        setSearchText(selectedKeys[0]);
-        setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+        const sanitizedValue = escapeHtml(selectedKeys[0]);
+        setSearchText(sanitizedValue);
+        setSearchedColumn(sanitizedValue ? dataIndex : "");
         setSearch((prevState) => {
             const nextSearch = {
                 ...prevState,
-                [dataIndex]: selectedKeys[0],
+                [dataIndex]: sanitizedValue,
             };
             return nextSearch;
         });

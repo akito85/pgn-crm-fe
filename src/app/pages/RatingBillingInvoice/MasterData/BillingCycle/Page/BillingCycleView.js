@@ -23,6 +23,17 @@ import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../../../components/CardContainer";
 
+const escapeHtml = (text) => {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return text ? String(text).replace(/[&<>"']/g, (s) => map[s]) : text;
+};
+
+const getSafeErrorMessage = (error) => {
+  const message = error?.response?.data?.message || error?.message || 'An error occurred';
+  const safeMessages = ['Validation failed', 'Invalid input', 'Unauthorized'];
+  return safeMessages.some((m) => message.includes(m)) ? message : 'An unexpected error occurred';
+};
+
 const BillingCycleView = ({ type }) => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -112,15 +123,16 @@ const BillingCycleView = ({ type }) => {
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
+    const sanitizedValue = escapeHtml(selectedKeys[0]);
+    setSearchText(sanitizedValue);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
+      if (prevState[dataIndex] !== sanitizedValue) {
         setPage(1);
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: sanitizedValue,
       };
     });
   };
