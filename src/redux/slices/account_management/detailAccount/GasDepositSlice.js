@@ -626,7 +626,14 @@ const gasDepositSlice = createSlice({
           const filteredResult = result.filter((item) => !currentIds.has(item.id));
           const mappedResult = filteredResult.map(item => ({
             ...item,
-            loading_listGdDetail: [],
+            list_gasDepositDetail: [],
+            pagination_listGdDetail: {
+              totalPage: 0,
+              totalElement: 0,
+              currentPage: 0,
+              pageSize: 10,
+            },
+            loading_listGdDetail: false
           }));
 
           state.list_gasDeposit = [
@@ -637,7 +644,14 @@ const gasDepositSlice = createSlice({
         else
           state.list_gasDeposit = result.map(item => ({
             ...item,
-            loading_listGdDetail: [],
+            list_gasDepositDetail: [],
+            pagination_listGdDetail: {
+              totalPage: 0,
+              totalElement: 0,
+              currentPage: 0,
+              pageSize: 10,
+            },
+            loading_listGdDetail: false
           }));
       }
 
@@ -728,6 +742,13 @@ const gasDepositSlice = createSlice({
           const mappedResult = filteredResult.map(item => ({
             ...item,
             list_gasDepositDetailMutation: [],
+            pagination_listGdDetailMutation: {
+              totalPage: 0,
+              totalElement: 0,
+              currentPage: 0,
+              pageSize: 10,
+            },
+            loading_listGdDetailMutation: false
           }));
           
 
@@ -740,6 +761,13 @@ const gasDepositSlice = createSlice({
           gasDeposit.list_gasDepositDetail = result.map(item => ({
             ...item,
             list_gasDepositDetailMutation: [],
+            pagination_listGdDetailMutation: {
+              totalPage: 0,
+              totalElement: 0,
+              currentPage: 0,
+              pageSize: 10,
+            },
+            loading_listGdDetailMutation: false
           }));
       }
 
