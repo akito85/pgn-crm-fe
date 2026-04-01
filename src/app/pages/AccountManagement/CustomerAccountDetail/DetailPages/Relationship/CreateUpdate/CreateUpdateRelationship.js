@@ -319,16 +319,14 @@ const CreateUpdateRelationship = ({
       const body = {
         id: isUpdate ? id : undefined,
         action: submitType,
-        data: {
-          accountId,
-          relationshipType,
-          relationshipCategory,
-          relatedAccountId,
-          description,
-          startDate: NxDate.formatForAPI(startDate),
-          endDate: NxDate.formatForAPI(endDate),
-          appHierId,
-        }
+        accountId,
+        relationshipType,
+        relationshipCategory,
+        relatedAccountId,
+        description,
+        startDate: NxDate.formatForAPI(startDate),
+        endDate: NxDate.formatForAPI(endDate),
+        appHierId,
       };
 
       dispatch(validateCreateUpdate({
