@@ -27,7 +27,7 @@ import CardContainer from "../../../../../components/CardContainer";
 const BillingBucketView = () => {
   // Selector
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -63,7 +63,7 @@ const BillingBucketView = () => {
   useEffect(() => {
     localStorage.setItem(
       "billingBucketFixedColumns",
-      JSON.stringify(fixedColumns)
+      JSON.stringify(fixedColumns),
     );
   }, [fixedColumns]);
 
@@ -75,7 +75,7 @@ const BillingBucketView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, sort, page, pageSize, dispatch]);
 
@@ -193,7 +193,7 @@ const BillingBucketView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -246,7 +246,7 @@ const BillingBucketView = () => {
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   };
 
@@ -257,7 +257,7 @@ const BillingBucketView = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
           onClick={() => handleDownload()}
         >
           Download List
@@ -269,7 +269,7 @@ const BillingBucketView = () => {
       render: (
         <NavLink to={RBI_ROUTES.BILLING_BUCKET_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
             Create Billing Bucket
@@ -308,14 +308,15 @@ const BillingBucketView = () => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               border={false}
               disabled={!isEditable}
+              type={"action"}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -328,7 +329,7 @@ const BillingBucketView = () => {
               <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -379,8 +380,9 @@ const BillingBucketView = () => {
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
+              type={"action"}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -410,12 +412,13 @@ const BillingBucketView = () => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.billingBucketCode)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -423,7 +426,7 @@ const BillingBucketView = () => {
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() =>
                     handleApprovalHistory(record.billingBucketCode)
                   }
@@ -440,7 +443,7 @@ const BillingBucketView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -453,7 +456,7 @@ const BillingBucketView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];

@@ -14,6 +14,7 @@ import {
   getListPriorityPeriod,
   getCriteria,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const BillingBucketSectionForm = ({
   type,
@@ -38,7 +39,7 @@ const BillingBucketSectionForm = ({
 }) => {
   // Selector
   const { data_priority_period, data_criteria } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -206,7 +207,7 @@ const BillingBucketSectionForm = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must before Start date"),
                       ),
               },
             ]}

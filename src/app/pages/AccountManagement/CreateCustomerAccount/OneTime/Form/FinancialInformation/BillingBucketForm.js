@@ -153,7 +153,7 @@ const BillingBucketForm = ({ dataFinancialInfo = [], type }) => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch = () => {}
+      handleSearch = () => {},
     ) => {
       return [
         {
@@ -172,7 +172,7 @@ const BillingBucketForm = ({ dataFinancialInfo = [], type }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -185,7 +185,7 @@ const BillingBucketForm = ({ dataFinancialInfo = [], type }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -198,7 +198,7 @@ const BillingBucketForm = ({ dataFinancialInfo = [], type }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -211,7 +211,7 @@ const BillingBucketForm = ({ dataFinancialInfo = [], type }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
         {
@@ -224,7 +224,7 @@ const BillingBucketForm = ({ dataFinancialInfo = [], type }) => {
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
           ),
         },
       ];
