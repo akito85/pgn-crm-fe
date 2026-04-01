@@ -1,5 +1,11 @@
 import { Checkbox, Spin, Tooltip } from "antd";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -31,7 +37,7 @@ export const columnTOP = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -54,7 +60,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -64,7 +70,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -80,7 +86,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -90,7 +96,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -106,7 +112,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -116,7 +122,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -132,7 +138,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -142,7 +148,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -158,7 +164,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -168,7 +174,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -184,7 +190,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -194,7 +200,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -213,7 +219,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -223,7 +229,7 @@ export const columnTOP = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -241,7 +247,7 @@ export const columnTOP = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -250,7 +256,7 @@ export const columnTOP = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -268,7 +274,7 @@ export const columnTOP = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -277,7 +283,7 @@ export const columnTOP = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -292,7 +298,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -302,7 +308,7 @@ export const columnTOP = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     ellipsis: {
       showTitle: false,
@@ -321,7 +327,7 @@ export const columnTOP = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -342,7 +348,7 @@ export const columnTOP = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -359,7 +365,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       let text;
@@ -380,7 +386,7 @@ export const columnTOP = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -389,7 +395,7 @@ export const columnTOP = (
 const TopView = () => {
   const dispatch = useDispatch();
   const { data_list, dataApprovalHistory, loading } = useSelector(
-    (state) => state.top
+    (state) => state.top,
   );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -398,6 +404,11 @@ const TopView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(false);
+
+  const hasMore = allData.length < (data_list?.page?.totalElements || 0);
 
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
@@ -439,21 +450,35 @@ const TopView = () => {
 
   // Use Effect
   useEffect(() => {
+    shouldResetRef.current = true;
     dispatch(
       getTopPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
-      })
+      }),
     );
-  }, [search, page, pageSize, sort, dispatch]);
+  }, [search, page, pageSize, sort, dispatch, refreshKey]);
+
+  // Accumulate data for infinite scroll
+  useEffect(() => {
+    if (data_list?.result) {
+      if (shouldResetRef.current) {
+        setAllData(data_list.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => [...prev, ...data_list.result]);
+      }
+    }
+  }, [data_list]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    shouldResetRef.current = true;
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -476,8 +501,28 @@ const TopView = () => {
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
+
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setPage((prev) => prev + 1);
+      resolve();
+    });
+  }, []);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
 
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
@@ -556,7 +601,7 @@ const TopView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -566,7 +611,7 @@ const TopView = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={handleDownload}
         >
@@ -579,7 +624,7 @@ const TopView = () => {
       render: (
         <NavLink to={RBI_ROUTES.TERMS_OF_PAYMENT_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Terms of Payment
@@ -626,11 +671,12 @@ const TopView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -692,10 +738,11 @@ const TopView = () => {
                 />
               }
               border={false}
+              type={"action"}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -728,9 +775,10 @@ const TopView = () => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
+              type={"action"}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -753,7 +801,7 @@ const TopView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -768,7 +816,7 @@ const TopView = () => {
         searchText,
         handleSearch,
         handleInactive,
-        handleApprovalHistory
+        handleApprovalHistory,
       ),
       ...actionColumns,
     ];
@@ -832,21 +880,21 @@ const TopView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">
-                TERMS OF PAYMENT LIST
-              </p>
+              <p className="mt-[15px] w-full">TERMS OF PAYMENT LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
           <TableRBI
-            dataSource={data_list?.result}
+            idTable="topTable"
+            dataSource={allData}
             columns={columns}
             current={page}
             pageSize={pageSize}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data_list?.page?.totalElements || 0}
+            loading={loading}
             onSort={onSort}
             tableScrolled={{
               x: 2500,
@@ -856,6 +904,13 @@ const TopView = () => {
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            usePagination={false}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            refreshLabel="Refresh"
           />
         </CardContainer>
 
