@@ -623,15 +623,22 @@ const gasDepositSlice = createSlice({
       if (Array.isArray(result)) {
         if (isLoadMore) {
           const currentIds = new Set(state.list_gasDeposit.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          const filteredResult = result.filter((item) => !currentIds.has(item.id));
+          const mappedResult = filteredResult.map(item => ({
+            ...item,
+            loading_listGdDetail: [],
+          }));
 
           state.list_gasDeposit = [
             ...state.list_gasDeposit,
-            ...filteredResult,
+            ...mappedResult,
           ];
         }
         else
-          state.list_gasDeposit = result;
+          state.list_gasDeposit = result.map(item => ({
+            ...item,
+            loading_listGdDetail: [],
+          }));
       }
 
       state.pagination_listGd = {
@@ -717,15 +724,23 @@ const gasDepositSlice = createSlice({
       if (Array.isArray(result)) {
         if (isLoadMore) {
           const currentIds = new Set(gasDeposit.list_gasDepositDetail.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          const filteredResult = result.filter((item) => !currentIds.has(item.id));
+          const mappedResult = filteredResult.map(item => ({
+            ...item,
+            list_gasDepositDetailMutation: [],
+          }));
+          
 
           gasDeposit.list_gasDepositDetail = [
             ...gasDeposit.list_gasDepositDetail,
-            ...filteredResult,
+            ...mappedResult,
           ];
         }
         else
-          gasDeposit.list_gasDepositDetail = result;
+          gasDeposit.list_gasDepositDetail = result.map(item => ({
+            ...item,
+            list_gasDepositDetailMutation: [],
+          }));
       }
 
       gasDeposit.pagination_listGdDetail = {
