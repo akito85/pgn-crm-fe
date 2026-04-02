@@ -102,7 +102,7 @@ export const getGasDepositApprovals = createAsyncThunk(
 
 export const getGasDepositDetails = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAILS",
-  async ({ id, index, body, isLoadMore, listKey = "list_gasDeposit" }, thunkAPI) => {
+  async ({ id, index, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit-detail/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
@@ -113,6 +113,7 @@ export const getGasDepositDetails = createAsyncThunk(
         index,
         isLoadMore,
         listKey,
+        parentKey,
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -122,7 +123,7 @@ export const getGasDepositDetails = createAsyncThunk(
 
 export const getGasDepositDetailMutations = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATIONS",
-  async ({ detailId, index, detailIndex, body, isLoadMore, listKey = "list_gasDeposit" }, thunkAPI) => {
+  async ({ detailId, index, detailIndex, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${detailId}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
@@ -134,6 +135,7 @@ export const getGasDepositDetailMutations = createAsyncThunk(
         detailIndex,
         isLoadMore,
         listKey,
+        parentKey,
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -718,15 +720,16 @@ const gasDepositSlice = createSlice({
     /** Get Gas Deposit Details */
     [getGasDepositDetails.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        const listKey = action.meta.arg?.listKey || "list_gasDeposit";
-        const gasDeposit = state[listKey][action.meta.arg?.index];
-        gasDeposit.loading_listGdDetail = true;
+        const { parentKey, listKey = "list_gasDeposit", index } = action.meta.arg || {};
+        const parent = parentKey ? state[parentKey] : state[listKey][index];
+        parent.loading_listGdDetail = true;
       }
     },
     [getGasDepositDetails.fulfilled]: (state, action) => {
-      const { result, page, isLoadMore, index, listKey = "list_gasDeposit" } = action.payload;
+      const { result, page, isLoadMore, index, listKey = "list_gasDeposit", parentKey } = action.payload;
 
-      const gasDeposit = state[listKey][index];
+      const parent = parentKey ? state[parentKey] : state[listKey][index];
+      const gasDeposit = parent;
       gasDeposit.loading_listGdDetail = false;
 
       if (Array.isArray(result)) {
@@ -773,8 +776,8 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDepositDetails.rejected]: (state, action) => {
-      const listKey = action.meta.arg?.listKey || "list_gasDeposit";
-      const gasDeposit = state[listKey][action.meta.arg?.index];
+      const { parentKey, listKey = "list_gasDeposit", index } = action.meta.arg || {};
+      const gasDeposit = parentKey ? state[parentKey] : state[listKey][index];
       gasDeposit.loading_listGdDetail = false;
 
       if (!action.meta.arg?.isLoadMore) {
@@ -791,15 +794,15 @@ const gasDepositSlice = createSlice({
     /** Get Gas Deposit Detail Mutations */
     [getGasDepositDetailMutations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        const listKey = action.meta.arg?.listKey || "list_gasDeposit";
-        const gasDeposit = state[listKey][action.meta.arg?.index];
-        const gasDepositDetail = gasDeposit.list_gasDepositDetail[action.meta.arg?.detailIndex];
+        const { parentKey, listKey = "list_gasDeposit", index, detailIndex } = action.meta.arg || {};
+        const parent = parentKey ? state[parentKey] : state[listKey][index];
+        const gasDepositDetail = parent.list_gasDepositDetail[detailIndex];
         gasDepositDetail.loading_listGdDetailMutation = true;
       }
     },
     [getGasDepositDetailMutations.fulfilled]: (state, action) => {
-      const { result, page, isLoadMore, index, detailIndex, listKey = "list_gasDeposit" } = action.payload;
-      const gasDeposit = state[listKey][index]
+      const { result, page, isLoadMore, index, detailIndex, listKey = "list_gasDeposit", parentKey } = action.payload;
+      const gasDeposit = parentKey ? state[parentKey] : state[listKey][index]
       const gasDepositDetail = gasDeposit.list_gasDepositDetail[detailIndex];
       gasDepositDetail.loading_listGdDetailMutation = false;
 
@@ -825,9 +828,9 @@ const gasDepositSlice = createSlice({
       }
     },
     [getGasDepositDetailMutations.rejected]: (state, action) => {
-      const listKey = action.meta.arg?.listKey || "list_gasDeposit";
-      const gasDeposit = state[listKey][action.meta.arg?.index];
-      const gasDepositDetail = gasDeposit.list_gasDepositDetail[action.meta.arg?.detailIndex];
+      const { parentKey, listKey = "list_gasDeposit", index, detailIndex } = action.meta.arg || {};
+      const gasDeposit = parentKey ? state[parentKey] : state[listKey][index];
+      const gasDepositDetail = gasDeposit.list_gasDepositDetail[detailIndex];
       gasDepositDetail.loading_listGdDetailMutation = false;
 
       if (!action.meta.arg?.isLoadMore) {
@@ -893,7 +896,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailGd = true;
     },
     [getGasDeposit.fulfilled]: (state, action) => {
-      state.detail_gasDeposit = action.payload || {};
+      state.detail_gasDeposit = {
+        ...(action.payload || {}),
+        list_gasDepositDetail: [],
+        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: false,
+      };
       state.loading_detailGd = false;
     },
     [getGasDeposit.rejected]: (state) => {
@@ -907,7 +915,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailDraftGd = true;
     },
     [getGasDepositDraft.fulfilled]: (state, action) => {
-      state.detailDraft_gasDeposit = action.payload || {};
+      state.detailDraft_gasDeposit = {
+        ...(action.payload || {}),
+        list_gasDepositDetail: [],
+        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: false,
+      };
       state.loading_detailDraftGd = false;
     },
     [getGasDepositDraft.rejected]: (state) => {

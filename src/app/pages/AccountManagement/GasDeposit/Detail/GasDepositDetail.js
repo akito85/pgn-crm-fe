@@ -26,7 +26,6 @@ import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import NxApproveOrRejectModal from "../../../../../components/Nx/NxApproveOrRejectModal";
 import NxTabs from "../../../../../components/Nx/NxTabs";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
-import GasDepositDetailMutationTable from "../GasDepositDetailMutationTable";
 import GasDepositDetailTable from "../GasDepositDetailTable";
 
 /**
@@ -72,7 +71,6 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const [activeKey, setActiveKey] = useState(originalKey || "");
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
-  const [selectedDetailId, setSelectedDetailId] = useState();
 
   // Computed (depends on state + selectors)
   const detail =
@@ -90,7 +88,6 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
     updatedDate,
     updatedBy,
     tappId,
-    details,
   } = detail;
 
   const routes = [
@@ -286,26 +283,15 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           )}
           <GasDepositDetailTabs detail={detail} />
 
-          {activeKey === originalKey && (
-            <>
-              <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
-                <NxBaseContainer border>
-                  <GasDepositDetailTable
-                    dataSource={details}
-                  />
-                </NxBaseContainer>
-              </NxCardContainer>
-              {selectedDetailId && (
-                <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
-                  <NxBaseContainer border>
-                    <GasDepositDetailMutationTable
-                      detailId={selectedDetailId}
-                      />
-                  </NxBaseContainer>
-                </NxCardContainer>
+          <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
+            <NxBaseContainer border>
+              {activeKey === originalKey ? (
+                <GasDepositDetailTable id={idGd} parentKey="detail_gasDeposit" />
+              ) : (
+                <GasDepositDetailTable id={idGd} parentKey="detailDraft_gasDeposit" />
               )}
-            </>
-          )}
+            </NxBaseContainer>
+          </NxCardContainer>
 
           {/* Detail mutation table — rendered only when a row is selected */}
 
