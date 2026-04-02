@@ -696,7 +696,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
                     type={"reject"}
                     icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    {isUpdate ? "Reset" : "Clear"}
+                    {isUpdate ? "Reset" : "Clear"} Data
                   </Button>
                   <Button
                     onClick={() =>
@@ -726,16 +726,14 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
                     </Button>
                   )}
                   {current === steps.length - 1 && (
-                    <>
-                      <Button
-                        onClick={() =>
-                          handleSetShowConfirmationModal(true, "submit")
-                        }
-                        type={"submit"}
-                      >
-                        Save & Submit
-                      </Button>
-                    </>
+                    <Button
+                      onClick={() =>
+                        handleSetShowConfirmationModal(true, "submit")
+                      }
+                      type={"approve"}
+                    >
+                      Submit
+                    </Button>
                   )}
                 </div>
               </div>
