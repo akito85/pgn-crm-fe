@@ -47,10 +47,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const isCreate = formType === "create";
   const isUpdate = formType === "update";
 
-  const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
-  );
-
   const {
     loading_listPrApprovalOption,
     loading_detailPrApprovalHierarchyDetails,
