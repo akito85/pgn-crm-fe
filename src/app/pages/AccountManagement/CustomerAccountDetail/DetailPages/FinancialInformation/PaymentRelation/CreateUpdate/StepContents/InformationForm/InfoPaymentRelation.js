@@ -230,7 +230,7 @@ export default function InfoPaymentRelation({
           <NxDate
             disabled={!isDraft && isUpdate}
             onChange={date => {
-              if (date && endDate && date.isSameOrAfter(endDate, "day"))
+              if (date && endDate && date.isAfter(endDate, "day"))
                 form.resetFields(["endDate"])
             }}
           />
