@@ -116,7 +116,7 @@ const CreateUpdateRelationship = ({
   useEffect(() => {
     if (
       isUpdate &&
-      detail?.appHierId &&
+      detail.appHierId &&
       data_approvalHierarchies?.length
     ) {
       form.setFieldsValue({
@@ -127,27 +127,6 @@ const CreateUpdateRelationship = ({
         description: detail.description || "",
         appHierId: detail.appHierId,
       });
-
-      const appHierOption = data_approvalHierarchies.find(
-        (option) => option.appHierId === detail.appHierId
-      );
-
-      if (appHierOption)
-        form.setFieldValue("appHierName", appHierOption.approvalName);
-
-      const relationshipTypeOption = data_relationshipType.find(
-        (option) => option.id === detail.relationshipType
-      );
-
-      if (relationshipTypeOption)
-        form.setFieldValue("relationshipTypeName", relationshipTypeOption.text);
-
-      const relationshipCategoryOption = data_relationshipCategory.find(
-        (option) => option.id === detail.relationshipCategory
-      );
-
-      if (relationshipCategoryOption)
-        form.setFieldValue("relationshipCategoryName", relationshipCategoryOption.text);
 
       if (detail.relatedDetail && detail.relatedDetail.length > 0)
         setRelatedDetails(detail.relatedDetail);

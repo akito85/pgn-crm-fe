@@ -7,7 +7,6 @@ import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import { getCustomerColumns } from "./getCustomerColumns";
 import { getAccountColumns } from "./getAccountColumns";
 import { Button } from "antd";
-import { convertToSnakeCase } from "../../../../../../../../../utils";
 
 const ModalChooseRelated = ({
   isOpen = false,
@@ -16,6 +15,7 @@ const ModalChooseRelated = ({
   accountId = null,
   relationshipType,
   relationshipCategory,
+  relationshipTypeName,
 }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -30,9 +30,9 @@ const ModalChooseRelated = ({
   const { list_relatedObject, pagination_relatedObject, loading_listRelatedObject } =
     useSelector((state) => state.relationship);
 
-  // Normalize relationshipType for comparison (convert "Child Of" to "CHILD_OF")
-  const normalizedRelationType = relationshipType
-    ? relationshipType.trim().toUpperCase().replace(/\s+/g, "_")
+  // Normalize relationshipTypeName for comparison (convert "Child Of" to "CHILD_OF")
+  const normalizedRelationType = relationshipTypeName
+    ? relationshipTypeName.trim().toUpperCase().replace(/\s+/g, "_")
     : null;
 
   // CHILD_OF, PARENT_OF = Account columns
@@ -78,8 +78,8 @@ const ModalChooseRelated = ({
       await dispatch(
         getRelatedObjectData({
           accountId,
-          relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
-          relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
+          relationshipType,
+          relationshipCategory,
           body,
           isLoadMore: true,
         })
@@ -101,8 +101,8 @@ const ModalChooseRelated = ({
       dispatch(
         getRelatedObjectData({
           accountId,
-          relationshipType: convertToSnakeCase(relationshipType).toUpperCase(),
-          relationshipCategory: convertToSnakeCase(relationshipCategory).toUpperCase(),
+          relationshipType,
+          relationshipCategory,
           body,
           isLoadMore: false,
         })
