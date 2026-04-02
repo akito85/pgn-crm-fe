@@ -1,19 +1,20 @@
 import React from "react";
-import { Button, Dropdown, Menu } from "antd";
+import { Popover, Menu, Typography } from "antd";
 import {
-  EllipsisOutlined,
   EditOutlined,
   RedoOutlined,
-  EyeOutlined,
   FileProtectOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import StatusComponent from "../../../../../components/StatusComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
 
 export const getEMeteraiColumns = ({
   onDetails,
   onProcessStamping,
   onProcessSigning,
   onRetry,
+  onApprovalHistory,
 }) => {
   return [
     {
@@ -238,16 +239,10 @@ export const getEMeteraiColumns = ({
     {
       key: "actions",
       title: "Actions",
-      width: 80,
+      width: 100,
       isClassification: true,
       render: (_, record) => {
         const menuItems = [
-          {
-            key: "details",
-            label: "Details",
-            icon: <EyeOutlined />,
-            onClick: () => onDetails(record),
-          },
           {
             key: "process-stamping",
             label: "Process Stamping",
@@ -272,22 +267,36 @@ export const getEMeteraiColumns = ({
             disabled: record.stampingStatus !== "Failed",
             onClick: () => onRetry(record),
           },
+          {
+            key: "approval-history",
+            label: "Approval History",
+            icon: <HistoryOutlined />,
+            onClick: () => onApprovalHistory(record),
+          },
         ];
 
-        const menu = <Menu items={menuItems} />;
+        const popoverContent = (
+          <Menu
+            items={menuItems}
+            style={{ border: "none", boxShadow: "none", minWidth: 180 }}
+          />
+        );
 
         return (
-          <Dropdown
-            overlay={menu}
-            trigger={["click"]}
-            placement="bottomRight"
-            className="p-0"
-          >
-            <Button
-              type="text"
-              icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}
-            />
-          </Dropdown>
+          <div className="flex items-center gap-2 justify-center">
+            <Popover
+              content={popoverContent}
+              trigger="click"
+              placement="bottomRight"
+            >
+              <div className="cursor-pointer pt-1">
+                <SVGIcon name="IconTripleDot" width={20} />
+              </div>
+            </Popover>
+            <Typography.Link onClick={() => onDetails(record)} className="pt-1">
+              <SVGIcon name="IconDetail" width={20} />
+            </Typography.Link>
+          </div>
         );
       },
     },

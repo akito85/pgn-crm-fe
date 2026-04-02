@@ -2,11 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Spin } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LeftOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import moment from "moment";
-import RadioTabs from "../../../../../components/RadioTabs";
 import InvoiceTemplateSectionForm from "./Form/InvoiceTemplateSectionForm";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
@@ -15,7 +14,10 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ModalBack from "../../../../../components/Modal/ModalBack";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../components/FormStepNavigation";
 import {
   showModalError,
   validateCreateUpdate,
@@ -38,7 +40,7 @@ import {
   getTemplate,
   updateInvoiceTemplate,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/invoiceTemplate";
-import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import { ModalError, ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 
 const InvoiceTemplateForm = ({ type }) => {
   // Selector
@@ -73,7 +75,8 @@ const InvoiceTemplateForm = ({ type }) => {
   const [criteriaOptions, setCriteriaOptions] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [dataApphierId, setDataApphierId] = useState("");
-  const [flag, setFlag] = useState(false);
+  const flagRef = React.useRef(false);
+  const [current, setCurrent] = useState(0);
   const [valuePage, setValuePage] = useState("Invoice Template");
   const [tabPages, setTabPages] = useState([
     {
@@ -103,6 +106,58 @@ const InvoiceTemplateForm = ({ type }) => {
   const [endDate, setEndDate] = useState();
 
   const isLoading = loading || loadingForm;
+
+  const steps = [
+    { title: "INVOICE TEMPLATE", value: "Invoice Template" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  const next = () => {
+    const fieldsToValidate = tabPages[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {});
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
+
+  const handleSubmit = () => {
+    flagRef.current = true;
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleSaveDraft = () => {
+    flagRef.current = false;
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleBack = () => {
+    setModalBack(true);
+  };
 
   // Use Effect
   useEffect(() => {
@@ -513,7 +568,7 @@ const InvoiceTemplateForm = ({ type }) => {
       id,
       type,
       dateFormatting,
-      flag,
+      flag: flagRef.current,
       data_detail,
       data_detail_draft,
       columnsTableCriteriaInvoiceTemplate,
@@ -726,6 +781,7 @@ const InvoiceTemplateForm = ({ type }) => {
       setListDataCriteria([]);
       setCriteriaValues([]);
       setStoredDataInline(false);
+      setCurrent(0);
       setTabPages([
         {
           value: "Invoice Template",
@@ -757,7 +813,7 @@ const InvoiceTemplateForm = ({ type }) => {
       id,
       type,
       dateFormatting,
-      flag,
+      flag: flagRef.current,
       data_detail,
       data_detail_draft,
       columnsTableCriteriaInvoiceTemplate,
@@ -913,10 +969,11 @@ const InvoiceTemplateForm = ({ type }) => {
     <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={tabPages}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
 
         <Form
@@ -926,7 +983,10 @@ const InvoiceTemplateForm = ({ type }) => {
           onFinishFailed={handleError}
         >
           <div
-            className={`${valuePage !== "Invoice Template" ? "hidden" : ""}`}
+            style={{
+              display:
+                valuePage !== tabPages[0].value ? "none" : undefined,
+            }}
           >
             <InvoiceTemplateSectionForm
               type={type}
@@ -947,8 +1007,13 @@ const InvoiceTemplateForm = ({ type }) => {
             />
           </div>
 
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"Approval Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== tabPages[1].value ? "none" : undefined,
+            }}
+          >
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -956,11 +1021,16 @@ const InvoiceTemplateForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
-            <BaseContainer header={"Attachment Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== tabPages[2].value ? "none" : undefined,
+            }}
+          >
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -974,71 +1044,20 @@ const InvoiceTemplateForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              disabled={storedDataInline}
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline}
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(false)}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline}
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(true)}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+          />
         </Form>
 
         {/* Modal Confirmation */}
@@ -1063,11 +1082,19 @@ const InvoiceTemplateForm = ({ type }) => {
         />
 
         {/* Modal Back */}
-        <ModalBack
+        <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-        />
+          width={600}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
 
         {/* Modal Retry */}
         <ModalError
@@ -1082,7 +1109,7 @@ const InvoiceTemplateForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>

@@ -9,6 +9,8 @@ import ratingBillingHttpService from "../../../services/ratingBillingHttpService
 
 const initialState = {
   data: [],
+  data_list: [],
+  data_pagination: null,
   dataForm: [],
   data_detail: [],
   data_approval_history: [],
@@ -116,14 +118,14 @@ export const updateInvoiceTemplate = createAsyncThunk(
 
 export const getInvoiceTemplatePaginate = createAsyncThunk(
   "GET_INVOICE_TEMPLATE_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/invoice-template/get-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -946,6 +948,12 @@ export const getCustomer = createAsyncThunk(
 const invoiceTemplateSlice = createSlice({
   name: "invoice_template",
   initialState,
+  reducers: {
+    resetInvoiceTemplateList: (state) => {
+      state.data_list = [];
+      state.data_pagination = null;
+    },
+  },
   extraReducers: {
     // Create Invoice Template
     [createInvoiceTemplate.pending]: (state) => {
@@ -1020,6 +1028,13 @@ const invoiceTemplateSlice = createSlice({
     [getInvoiceTemplatePaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
+      const newResults = action.payload?.result || [];
+      if (action.payload?.isLoadMore) {
+        state.data_list = [...state.data_list, ...newResults];
+      } else {
+        state.data_list = newResults;
+      }
+      state.data_pagination = action.payload?.page || null;
     },
     [getInvoiceTemplatePaginate.rejected]: (state) => {
       state.loading = false;
@@ -1386,5 +1401,6 @@ const invoiceTemplateSlice = createSlice({
   },
 });
 
-const { reducer } = invoiceTemplateSlice;
+const { reducer, actions } = invoiceTemplateSlice;
+export const { resetInvoiceTemplateList } = actions;
 export default reducer;

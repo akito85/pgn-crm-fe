@@ -106,6 +106,10 @@ const InvoiceRelationDetail = ({
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
           : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
+      state: {
+        idAccount: accountId,
+        idCustomer: customerId
+      }
     },
     {
       path: "",

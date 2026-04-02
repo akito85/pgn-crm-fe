@@ -110,7 +110,7 @@ const ConfirmationBillingBucket = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (data) => data.value === selectedHierarchy
+                  (data) => data.value === selectedHierarchy,
                 )?.[0].name || ""
               }
               dataTable={listDataAppHierDetail}
@@ -165,7 +165,7 @@ const ConfirmationBillingBucket = ({
       handleCancel={handleCancel}
       handleConfirm={handleConfirm}
       footer={
-        <div className={"w-full flex justify-end gap-5"}>
+        <div className={"w-full flex justify-end gap-2"}>
           <ButtonComponent type={"default"} onClick={handleCancel}>
             Cancel
           </ButtonComponent>

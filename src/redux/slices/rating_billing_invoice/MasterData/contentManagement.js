@@ -46,6 +46,8 @@ const initialState = {
   data_AttachmentDetail: [],
   data_approval_history: [],
   data_detail_draft: [],
+  content_list: [],
+  content_pagination: null,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -64,19 +66,19 @@ export const getDetailDraftContentManagement = createAsyncThunk(
       thunkAPI.dispatch(setBodyError(error));
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 export const getAllContentManagementPaginate = createAsyncThunk(
   "GET_ALL_CONTENT_MANAGEMENT_PAGINATE",
-  async ({ page, pageSize, sort, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, isLoadMore = false }, thunkAPI) => {
     const searchParams = search === undefined ? "" : search;
     const sortParams =
       sort === undefined || sort === "" ? "createdDate~desc" : sort;
     try {
       const url = `/v1/dbs/api/content?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -93,7 +95,7 @@ export const getAllContentManagementPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // Get List Format
@@ -121,7 +123,7 @@ export const getListFormat = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 // Get List Category
@@ -149,7 +151,7 @@ export const getListCategory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 // Get List Media
@@ -177,7 +179,7 @@ export const getListMedia = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 export const getListCurrency = createAsyncThunk(
@@ -203,7 +205,7 @@ export const getListCurrency = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getCriteria = createAsyncThunk(
@@ -229,7 +231,7 @@ export const getCriteria = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getIndustrialSector = createAsyncThunk(
@@ -255,7 +257,7 @@ export const getIndustrialSector = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getGsizes = createAsyncThunk("GET_GSIZES", async (thunkAPI) => {
@@ -304,7 +306,7 @@ export const getCostCenter = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getSor = createAsyncThunk("GET_SOR", async (thunkAPI) => {
@@ -353,7 +355,7 @@ export const getCustomerSegment = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const updateContentManagement = createAsyncThunk(
@@ -392,7 +394,7 @@ export const updateContentManagement = createAsyncThunk(
         return thunkApi.rejectWithValue(response.response.data);
       }
     }
-  }
+  },
 );
 
 export const getAccountGroup = createAsyncThunk(
@@ -418,7 +420,7 @@ export const getAccountGroup = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAccountCategory = createAsyncThunk(
@@ -444,7 +446,7 @@ export const getAccountCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getProvince = createAsyncThunk(
@@ -470,7 +472,7 @@ export const getProvince = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getCity = createAsyncThunk("GET_CITY", async (id, thunkAPI) => {
@@ -519,7 +521,7 @@ export const getDistrict = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getSubDistrict = createAsyncThunk(
@@ -545,7 +547,7 @@ export const getSubDistrict = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getServiceType = createAsyncThunk(
@@ -571,7 +573,7 @@ export const getServiceType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getBudget = createAsyncThunk("GET_BUDGET", async (thunkAPI) => {
@@ -620,7 +622,7 @@ export const getCustomer = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailContentManagement = createAsyncThunk(
@@ -646,7 +648,7 @@ export const getDetailContentManagement = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailDraftBillingBucket = createAsyncThunk(
@@ -672,7 +674,7 @@ export const getDetailDraftBillingBucket = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAvailableApproval = createAsyncThunk(
@@ -698,7 +700,7 @@ export const getAvailableApproval = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getSelectedApproval = createAsyncThunk(
@@ -724,7 +726,7 @@ export const getSelectedApproval = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getAttachmentCategory = createAsyncThunk(
@@ -753,7 +755,7 @@ export const getAttachmentCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 // Get Approval History
@@ -781,7 +783,7 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchy = createAsyncThunk(
@@ -807,7 +809,7 @@ export const getListApprovalHierarchy = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchyDetail = createAsyncThunk(
@@ -833,7 +835,7 @@ export const getListApprovalHierarchyDetail = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const inactiveContentManagement = createAsyncThunk(
@@ -843,7 +845,7 @@ export const inactiveContentManagement = createAsyncThunk(
       const url = `/v1/dbs/api/content/inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successBody = {
         title: "Successful",
@@ -872,7 +874,7 @@ export const inactiveContentManagement = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 // Approve or Reject Content Management
@@ -883,7 +885,7 @@ export const approveRejectContentManagement = createAsyncThunk(
       const url = `/v1/dbs/api/content/approve`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successApprove = {
         title: `Successful`,
@@ -917,7 +919,7 @@ export const approveRejectContentManagement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 // Approve or Reject Inactive Content Management
@@ -928,7 +930,7 @@ export const approveRejectInactiveContentManagement = createAsyncThunk(
       const url = "/v1/dbs/api/content/approve-inactive";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successMessage = {
         title: `Successful`,
@@ -960,7 +962,7 @@ export const approveRejectInactiveContentManagement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const createContentManagement = createAsyncThunk(
@@ -999,7 +1001,7 @@ export const createContentManagement = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 const contentManagementSlice = createSlice({
@@ -1007,12 +1009,22 @@ const contentManagementSlice = createSlice({
   initialState,
   extraReducers: {
     // get all content management
-    [getAllContentManagementPaginate.pending]: (state) => {
-      state.loading = true;
+    [getAllContentManagementPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllContentManagementPaginate.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+      const newResult = action.payload?.result || [];
+      const isLoadMore = action.payload?.isLoadMore;
+      if (isLoadMore) {
+        state.content_list = [...state.content_list, ...newResult];
+      } else {
+        state.content_list = newResult;
+      }
+      state.content_pagination = action.payload?.page || null;
     },
     [getAllContentManagementPaginate.rejected]: (state) => {
       state.loading = false;

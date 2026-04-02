@@ -100,6 +100,7 @@ const InputComponent = ({
           placeholder={placeholder}
           disabled={disabled}
           type={numericFormatType}
+          {...restProps}
         ></NumericFormat>
       ) : type === "number" ? (
         <NumericFormat

@@ -35,12 +35,12 @@ import TableRBI from "../../../../../components/TableRBI";
 
 const AllocationSection = ({
   dataTable,
-  setDataTable = () => {},
-  setIsInsert = () => {},
+  setDataTable = () => { },
+  setIsInsert = () => { },
   isInsert,
   amount,
   totalAllocationAmount,
-  setTotalAllocationAmount = () => {},
+  setTotalAllocationAmount = () => { },
   accountNumberSelected,
   rateAmountValue,
   formValues,
@@ -327,10 +327,10 @@ const AllocationSection = ({
     setDataTable((prev) => {
       // Cek dulu, apakah row ini ada di tabel utama?
       const isExist = prev.some((item) => item.key === rowKey);
-      
+
       // Kalau nggak ada (artinya kita lagi ngedit di dalam modal),
       // STOP di sini. Jangan return array baru biar useEffect nggak ke-trigger & nge-reset datanya!
-      if (!isExist) return prev; 
+      if (!isExist) return prev;
 
       // Kalau ada, baru update angkanya
       return prev.map((item) =>
@@ -362,7 +362,7 @@ const AllocationSection = ({
   );
 
   // handle open modal allocation
-  const handleOpen = () => {};
+  const handleOpen = () => { };
 
   // handle close modal allocation
   const handleCancel = () => {
@@ -444,6 +444,10 @@ const AllocationSection = ({
 
       setDataTable((prev) => [...prev, ...enrichedData]);
 
+      setSelectedRowKeys([]);
+      setSelectDataTable([]);
+      setTotalAllocationAmount(0);
+
       // handleCancel();
       setOpenModalAllocation(false);
       setPageChoose(1);
@@ -460,11 +464,11 @@ const AllocationSection = ({
       try {
         // Validate specific fields from the Receipt form (tab 1)
         await form.validateFields([
-          "miscellaneous", "accNumber", "cusNumber", "cusName", "accountName", 
-          "segment", "accountGroupType", "accountType", "sor", "costCenterCode", 
-          "costCenterName", "receiptCode", "receiptChannel", "paymentType", 
-          "paymentGateway", "collectingAgent", "deliveryChannel", "method", 
-          "bank", "receiptDate", "currency", "amount", "rateType", "rateDate", 
+          "miscellaneous", "accNumber", "cusNumber", "cusName", "accountName",
+          "segment", "accountGroupType", "accountType", "sor", "costCenterCode",
+          "costCenterName", "receiptCode", "receiptChannel", "paymentType",
+          "paymentGateway", "collectingAgent", "deliveryChannel", "method",
+          "bank", "receiptDate", "currency", "amount", "rateType", "rateDate",
           "rateAmount", "convertedCurrency", "eqAmount", "description",
           "registrationNumber", "customerType", "partner"
         ]);
@@ -489,13 +493,18 @@ const AllocationSection = ({
         };
         dispatch(showModalError(errorBody));
       } else {
+        setSelectedRowKeys([]);
+        setSelectDataTable([]);
+        setTotalAllocationAmount(0);
         await dispatch(
           getAllocationRecomendationList({
             search: encodeURIComponent(JSON?.stringify(search)),
             pageChoose,
             pageSizeChoose,
             sort: sort,
-            accountNumberSelected: accountNumberSelected?.split(" - ")[0],
+            accountNumberSelected: accountNumberSelected?.includes(" - ")
+              ? (!isNaN(accountNumberSelected?.split(" - ")[0]) ? accountNumberSelected?.split(" - ")[0] : accountNumberSelected?.split(" - ")[1])
+              : accountNumberSelected,
             balance: balance,
             currencyId: formValues?.currency,
             rateAmount: rateAmountValue,
@@ -605,9 +614,9 @@ const AllocationSection = ({
               {balance === 0
                 ? 0
                 : balance?.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
             </strong>
           </span>
         </div>
@@ -850,22 +859,22 @@ const AllocationSection = ({
                   Next
                 </Button>
               ) : (
-                  <Button
-                    key="btn-confirm"
-                    htmlType="button"
-                    onClick={handleSaveDataTable}
-                    type="primary"
-                    style={{
-                      backgroundColor: "#28a745",
-                      borderColor: "#28a745",
-                      color: "#fff",
-                      borderRadius: "6px",
-                      height: "32px",
-                      fontSize: "12px",
-                    }}
-                  >
-                    Confirm
-                  </Button>
+                <Button
+                  key="btn-confirm"
+                  htmlType="button"
+                  onClick={handleSaveDataTable}
+                  type="primary"
+                  style={{
+                    backgroundColor: "#28a745",
+                    borderColor: "#28a745",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Confirm
+                </Button>
               )}
             </div>
           </div>

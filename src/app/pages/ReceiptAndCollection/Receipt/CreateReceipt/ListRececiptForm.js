@@ -34,9 +34,13 @@ import {
   resetConvertedAmount,
   resetDataAccountNumber,
   getAccountTypeDDL,
-  getUnifiedCreateReceiptDdl,
   getAllAccountNumberDDL,
   getRateTypeDDL,
+  getPayTypeDDL,
+  getPayGetwayDDL,
+  getCollectionAgentDDL,
+  getPayDeliverDDL,
+  getPayMethodDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
@@ -149,13 +153,18 @@ const ListRececiptForm = ({ type }) => {
     dispatch(resetDataAccountNumber());
     dispatch(getAllApprovalListReceipt());
     dispatch(getRateTypeDDL());
-    dispatch(getBankDDL());
     dispatch(getCusNumberDDL());
     dispatch(getCurrencyDDL());
-    dispatch(getUnifiedCreateReceiptDdl());
     dispatch(getReceiptChanelDDL());
     dispatch(getAccountTypeDDL());
     dispatch(getAllAccountNumberDDL());
+    // Dispatched directly to populate dropdown defaults
+    dispatch(getPayTypeDDL());
+    dispatch(getPayGetwayDDL());
+    dispatch(getCollectionAgentDDL());
+    dispatch(getPayDeliverDDL());
+    dispatch(getPayMethodDDL());
+    dispatch(getBankDDL());
   }, [dispatch]);
 
   // APPROVAL HIERARCHY
