@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../components/InputComponent";
 import DetailText from "../../../../components/DetailText";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -13,6 +13,8 @@ import { getGasDepositColumns } from "./getGasDepositColumns";
 import { showModalError } from "../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../assets/Icon/index";
 
 /**
  * Modal for approving or rejecting pending gas deposit records.
@@ -33,6 +35,8 @@ const GasDepositApprovalModal = ({
     loading_listGdApproval,
     loading_approveRejectGd
   } = useSelector((state) => state.gasDeposit);
+
+  const loadingApproval = loading_approveRejectGd;
 
   const searchInput = useRef(null);
   const [form] = Form.useForm();
@@ -212,10 +216,19 @@ const GasDepositApprovalModal = ({
   };
 
   /**
-   * Delegates to `handleCancel()` to close the modal without saving.
+   * Closes the modal and resets all local state without triggering `afterFinish`.
    */
   const handleCancelForm = () => {
     handleCancel();
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setCurrent(0);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+    form.resetFields();
   };
 
   /**
@@ -249,7 +262,7 @@ const GasDepositApprovalModal = ({
         approveOrRejectAllGasDeposit({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected"
+          action
         })
       )
         .unwrap()
@@ -281,7 +294,7 @@ const GasDepositApprovalModal = ({
   useEffect(() => {
     if (isOpen) {
       const body = {
-        page,
+        page: 0,
         size: loadMoreSize,
         sort,
         searchs: search,
@@ -309,9 +322,10 @@ const GasDepositApprovalModal = ({
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
-            <Button type={"menu"} onClick={handleCancelForm}>
+            <Button type={"menu"} onClick={handleCancelForm} disabled={loadingApproval}>
               Cancel
             </Button>
 
@@ -319,7 +333,7 @@ const GasDepositApprovalModal = ({
               <Button
                 onClick={prev}
                 type={"menu"}
-                disabled={current < 1}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
               </Button>
@@ -329,7 +343,7 @@ const GasDepositApprovalModal = ({
                   onClick={() => handleButtonNext()}
                   type={"submit"}
                   disabled={
-                    current > steps.length - 1 || steps[current].disabled
+                    current > steps.length - 1 || steps[current].disabled || loadingApproval
                   }
                 >
                   Next
@@ -340,14 +354,20 @@ const GasDepositApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading_approveRejectGd}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
+                    disabled={loadingApproval}
+                    loading={loadingApproval}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading_approveRejectGd}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
+                    disabled={loadingApproval}
+                    loading={loadingApproval}
                   >
                     Approve
                   </Button>
@@ -357,22 +377,13 @@ const GasDepositApprovalModal = ({
           </div>
         }
       >
-        <NxBaseContainer
-          border={{
-            top: false,
-            right: false,
-            left: false
-          }}
-          rounded={false}
-        >
-          <div className="flex flex-row justify-center">
-            <Steps
-              current={current}
-              items={steps}
-              labelPlacement="vertical"
-            />
-          </div>
-        </NxBaseContainer>
+        <NxFormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={handleButtonNext}
+          inModal
+        />
 
         <div className="p-4">
           {/* STEP 1: GAS DEPOSIT INFORMATION */}
