@@ -1,9 +1,6 @@
 // ProformaInvoice.js
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Spin, Form, Select, Dropdown, Button, Menu } from "antd";
-import axios from "axios";
-import DocViewer from "react-doc-viewer";
+import React, { useRef, useState, useMemo } from "react";
+import { Spin, Form, Select, Tooltip } from "antd";
 import SelectComponent from "../../../../components/SelectComponent";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -11,37 +8,21 @@ import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsInvoice } from "./TableViewInvoice";
 import DetailInvoice from "./DetailInvoice";
-import {
-  createRegenerate,
-  getAllInvoicePaginate,
-  getBillingApproval,
-  getDetailInvoice,
-  getDownloadList,
-  getFormatType,
-} from "../../../../redux/slices/rating_billing_invoice/invoice";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import {
-  DownloadOutlined,
-  EyeOutlined,
-  ReloadOutlined,
-  EllipsisOutlined,
-} from "@ant-design/icons";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
-import { configApp } from "../../../../constants/configApp";
-import { tokenHeader } from "../../../../utils/tokenHeader";
 
 const ProformaInvoice = () => {
-  // Selector
-  const { data, loading, data_detail, data_format } = useSelector(
-    (state) => state.invoice
-  );
+  // No API yet — placeholder state
+  const data_detail = null;
+  const data_format = [];
+  const loading = false;
+  const dataSource = [];
 
   // Declaration
-  const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result || [];
 
   // State
   const [page, setPage] = useState(1);
@@ -75,51 +56,7 @@ const ProformaInvoice = () => {
   });
 
   // ✅ Save to localStorage when fixedColumns change
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "proformaFixedColumns",
-        JSON.stringify(fixedColumns)
-      );
-    } catch (e) {
-      // ignore storage errors
-    }
-  }, [fixedColumns]);
-
-  // Use Effect - fetch page
-  useEffect(() => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-
-    let searchParam = undefined;
-    if (tempSearch) {
-      searchParam = encodeURIComponent(JSON.stringify(search));
-    }
-    dispatch(
-      getAllInvoicePaginate({
-        search: searchParam,
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [search, page, pageSize, sort, dispatch]);
-
-  useEffect(() => {
-    if (modalReGenerate) {
-      dispatch(getFormatType());
-    } else if (modalGenerate) {
-      dispatch(getBillingApproval());
-    }
-  }, [modalReGenerate, modalGenerate, dispatch]);
+  // (no API to fetch yet for Proforma Invoice)
 
   // Breadcrumbs
   const routes = [
@@ -166,20 +103,12 @@ const ProformaInvoice = () => {
 
   // Handle Download
   const handleDownload = () => {
-    dispatch(
-      getDownloadList({
-        page,
-        pageSize,
-        sort,
-        search: encodeURIComponent(JSON.stringify(search)),
-      })
-    );
+    // TODO: implement when proforma invoice API is available
   };
 
   // Handle Detail
   const handleDetail = (record) => {
     setPageDetail(true);
-    dispatch(getDetailInvoice(record?.invoiceNumber));
     setInvoiceNumber(record?.invoiceNumber);
   };
 
@@ -191,38 +120,7 @@ const ProformaInvoice = () => {
 
   // Handle Preview File
   const handlePreviewFile = async (record) => {
-    try {
-      const response = await axios.get(
-        configApp.RATING_BILLING_SERVICE +
-          `/v1/dbs/api/rbi/invoice/${record?.invoiceNumber}/preview`,
-        {
-          headers: tokenHeader(),
-          responseType: "arraybuffer",
-        }
-      );
-      const responseBlob = await response.data;
-      const blobText =
-        responseBlob instanceof Blob ? await responseBlob.text() : responseBlob;
-      const contentType = response.headers["content-type"];
-      const blob = new Blob([blobText], {
-        type: contentType ? "application/pdf" : "application/rtf",
-      });
-      const blobUrl = URL.createObjectURL(blob);
-      const newTab = window.open(blobUrl, "_blank");
-
-      if (newTab) {
-        newTab.document.title = "PDF Preview";
-        const viewerContainer = document.createElement("div");
-        newTab.document.body.appendChild(viewerContainer);
-        // eslint-disable-next-line no-undef
-        ReactDOM.render(
-          <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching document:", error);
-    }
+    // TODO: implement when proforma invoice API is available
   };
 
   // Handle Cancel Modal ReGenerate
@@ -245,63 +143,19 @@ const ProformaInvoice = () => {
   const handleConfirmReGenerate = async (res, handleClear) => {
     try {
       setModalReGenerate(false);
-
-      const body = {
-        formatOption: res.formatOption,
-        action: "REGENERATE",
-        remark: res.remark,
-      };
-      await dispatch(
-        createRegenerate({ id: invoiceNumber, body: body })
-      )?.unwrap();
-      await handleClear();
-      await dispatch(
-        getAllInvoicePaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      )?.unwrap();
+      if (handleClear) await handleClear();
+      // TODO: implement when proforma invoice API is available
     } catch (error) {
-      if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
-        const message =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-        setBodyError({ message });
-        setModalError(true);
-      } else {
-        setBodyError({ message: error?.message || "Error" });
-        setModalError(true);
-      }
+      setBodyError({ message: error?.message || "Error" });
+      setModalError(true);
     }
   };
 
   const refreshTable = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      getAllInvoicePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
+    // TODO: implement when proforma invoice API is available
   };
 
-  // ✅ Get base columns with key property including action column
+  // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
     const invoiceCols = columnsInvoice(
       search,
@@ -310,76 +164,193 @@ const ProformaInvoice = () => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     );
 
-    // ✅ Single action column with Dropdown menu
-    const actionColumn = {
-      key: "actions",
-      title: "Actions",
-      width: 80,
-      isClassification: true,
-      render: (_, record) => {
-        const menuItems = [
-          {
-            key: "detail",
-            label: "Detail",
-            icon: <EyeOutlined />,
-            onClick: () => {
-              handleDetail(record);
-              setTimeout(
-                () =>
-                  window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: "smooth",
-                  }),
-                100
-              );
-            },
-          },
-          {
-            key: "regenerate",
-            label: "Re-Generate",
-            icon: <ReloadOutlined />,
-            onClick: () => handleReGenerate(record),
-          },
-          {
-            key: "preview",
-            label: "Preview/Download",
-            icon: <DownloadOutlined />,
-            onClick: () => handlePreviewFile(record),
-          },
-        ];
-
-        const menu = <Menu items={menuItems} />;
-
-        return (
-          <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
-            <Button
-              type="text"
-              icon={<EllipsisOutlined style={{ fontSize: "18px" }} />}
-            />
-          </Dropdown>
-        );
-      },
-    };
-
-    // Add 'key' property to columns that don't have it
-    const columnsWithKeys = [...invoiceCols, actionColumn].map((col) => ({
+    return invoiceCols.map((col) => ({
       ...col,
-      key: col.key || col.dataIndex || col.title, // Fallback to dataIndex or title if no key
+      key: col.key || col.dataIndex || col.title,
     }));
-
-    return columnsWithKeys;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page, pageSize, searchedColumn, searchText]);
 
+  const itemGrantAccess = [
+    {
+      action: "View",
+      type: "table",
+      render: (record, data) => {
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={<SVGIcon name="IconDetail" width={20} />}
+              border={false}
+              onClick={() => {
+                handleDetail(record);
+                setTimeout(
+                  () =>
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: "smooth",
+                    }),
+                  100,
+                );
+              }}
+            >
+              <span className="text-black ml-3">Detail</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Detail" placement="left">
+              <div
+                onClick={() => {
+                  handleDetail(record);
+                  setTimeout(
+                    () =>
+                      window.scrollTo({
+                        top: document.body.scrollHeight,
+                        behavior: "smooth",
+                      }),
+                    100,
+                  );
+                }}
+                style={{
+                  cursor: "pointer",
+                  display: "inline-block",
+                  lineHeight: 0,
+                }}
+              >
+                <SVGIcon name="IconDetail" width={20} />
+              </div>
+            </Tooltip>
+          );
+        return Content;
+      },
+    },
+    {
+      action: "Regenerate",
+      type: "table",
+      render: (record, data) => {
+        const isFailed = record?.status?.toLowerCase() === "failed";
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconReGenerate"
+                  width={20}
+                  color={isFailed ? undefined : "#8D91A0"}
+                />
+              }
+              border={false}
+              disabled={!isFailed}
+              onClick={isFailed ? () => handleReGenerate(record) : undefined}
+            >
+              <span
+                className={isFailed ? "text-black ml-3" : "text-gray-400 ml-3"}
+              >
+                Re-Generate
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={
+                isFailed
+                  ? "Re-Generate"
+                  : "Re-Generate (only available when status is Failed)"
+              }
+              placement="left"
+            >
+              <div
+                onClick={() => isFailed && handleReGenerate(record)}
+                style={{
+                  display: "inline-block",
+                  lineHeight: 0,
+                  cursor: isFailed ? "pointer" : "not-allowed",
+                  opacity: isFailed ? 1 : 0.4,
+                }}
+              >
+                <SVGIcon name="IconReGenerate" width={20} />
+              </div>
+            </Tooltip>
+          );
+        return Content;
+      },
+    },
+    {
+      action: "Download",
+      type: "table",
+      render: (record, data) => {
+        const isCompleted = record?.status?.toLowerCase() === "completed";
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconDownload"
+                  width={20}
+                  color={isCompleted ? undefined : "#8D91A0"}
+                />
+              }
+              border={false}
+              disabled={!isCompleted}
+              onClick={
+                isCompleted ? () => handlePreviewFile(record) : undefined
+              }
+            >
+              <span
+                className={
+                  isCompleted ? "text-black ml-3" : "text-gray-400 ml-3"
+                }
+              >
+                Preview/Download
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={
+                isCompleted
+                  ? "Preview/Download"
+                  : "Preview/Download (only available when status is Completed)"
+              }
+              placement="left"
+            >
+              <div
+                onClick={() => isCompleted && handlePreviewFile(record)}
+                style={{
+                  display: "inline-block",
+                  lineHeight: 0,
+                  cursor: isCompleted ? "pointer" : "not-allowed",
+                  opacity: isCompleted ? 1 : 0.4,
+                }}
+              >
+                <SVGIcon name="IconEye" width={20} />
+              </div>
+            </Tooltip>
+          );
+        return Content;
+      },
+    },
+  ];
+
+  const actionCols = useColumnActionPermission(
+    ["view", "regenerate", "download"],
+    itemGrantAccess,
+  ).map((col) => ({
+    ...col,
+    key: col.key || col.title,
+    width: 120,
+    align: "center",
+  }));
+
+  const allColumns = useMemo(() => {
+    return [...baseColumns, ...actionCols];
+  }, [baseColumns, actionCols]);
+
   const columnDefinitions = useMemo(() => {
-    return baseColumns.map((col) => ({
+    return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [baseColumns]);
+  }, [allColumns]);
 
   const columns = useMemo(() => {
     // Separate columns into categories
@@ -387,7 +358,7 @@ const ProformaInvoice = () => {
     const rightFixed = [];
     const normal = [];
 
-    baseColumns.forEach((col) => {
+    allColumns.forEach((col) => {
       const colKey = col.key || col.dataIndex || col.title;
 
       if (fixedColumns.left.includes(colKey)) {
@@ -417,7 +388,7 @@ const ProformaInvoice = () => {
 
       return newCol;
     });
-  }, [baseColumns, fixedColumns]);
+  }, [allColumns, fixedColumns]);
 
   return (
     <>
@@ -427,12 +398,12 @@ const ProformaInvoice = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">Proforma Invoice List</p>
+              <p className="mt-[15px]">Proforma Invoice List</p>
               <div className="flex gap-2">
                 <ButtonComponent
                   type={"submit"}
                   border={false}
-                  icon={<SVGIcon name="IconButtonDownload" width={24} />}
+                  icon={<SVGIcon name="IconButtonDownload" width={20} />}
                   onClick={() => {
                     handleDownload();
                   }}
@@ -440,7 +411,7 @@ const ProformaInvoice = () => {
                   Download List
                 </ButtonComponent>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                  icon={<SVGIcon name="IconButtonCreate" width={20} />}
                   type="submit"
                   onClick={() => {
                     // Open new page instead of modal
@@ -462,13 +433,14 @@ const ProformaInvoice = () => {
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements}
+              totalData={0}
               tableScrolled={{ y: 525, x: 7000 }}
               onSort={onSortApi}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              useInfiniteScroll
             />
           </div>
         </CardContainer>

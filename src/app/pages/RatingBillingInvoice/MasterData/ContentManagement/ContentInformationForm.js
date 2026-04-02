@@ -22,7 +22,6 @@ const ContentInformationForm = ({
   type, 
   status, 
   statusApproval,
-  // ✅ Terima props untuk subject & body
   subjectValue,
   setSubjectValue,
   bodyValue,
@@ -133,31 +132,33 @@ const ContentInformationForm = ({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-4">
-      {/* Subject Field - TANPA Form.Item */}
-      <div>
-        <label className="block mb-2">
-          <span className="font-medium">Subject</span>
-          <span className="text-red-500 ml-1">*</span>
-        </label>
-        <Input
-          ref={subjectInputRef}
-          value={subjectValue}
-          onChange={handleSubjectChange}
-          placeholder="Billing {billingPeriod}: {customerName}: {customerNumber}"
-          disabled={status === "view" || statusApproval === "view"}
-          className="rounded-md"
-          size="large"
-          onFocus={() => setLastFocus("subject")}
-        />
-        {!subjectValue && (
-          <div className="text-red-500 text-sm mt-1">Please input subject!</div>
-        )}
-      </div>
+    <>
+    <div className="flex gap-4">
+      {/* Left side: Subject + Body */}
+      <div className="flex-1 flex flex-col gap-4">
+        {/* Subject Field */}
+        <div>
+          <label className="block mb-2">
+            <span className="font-medium">Subject</span>
+            <span className="text-red-500 ml-1">*</span>
+          </label>
+          <Input
+            ref={subjectInputRef}
+            value={subjectValue}
+            onChange={handleSubjectChange}
+            placeholder="Billing {billingPeriod}: {customerName}: {customerNumber}"
+            disabled={status === "view" || statusApproval === "view"}
+            className="rounded-md"
+            size="large"
+            onFocus={() => setLastFocus("subject")}
+          />
+          {!subjectValue && (
+            <div className="text-red-500 text-sm mt-1">Please input subject!</div>
+          )}
+        </div>
 
-      {/* Body Field - TANPA Form.Item */}
-      <div className="flex gap-4">
-        <div className="flex-1">
+        {/* Body Field */}
+        <div>
           <label className="block mb-2">
             <span className="font-medium">Body</span>
             <span className="text-red-500 ml-1">*</span>
@@ -189,50 +190,67 @@ const ContentInformationForm = ({
             <div className="text-red-500 text-sm mt-1">Please input body content!</div>
           )}
         </div>
+      </div>
 
         {/* Variable Sidebar */}
         <div
-          className="w-64 bg-blue-600 rounded-lg shadow-lg overflow-hidden flex flex-col"
-          style={{ height: "fit-content" }}
+          className="rounded-lg overflow-hidden flex flex-col"
+          style={{ height: "fit-content", flexShrink: 0, width: "180px", border: "1px solid #d9d9d9" }}
         >
-          <div className="bg-blue-600 px-4 py-3 flex items-center justify-between border-b border-blue-500">
-            <h3 className="font-bold text-sm text-white uppercase tracking-wide">
+          <div
+            className="px-3 py-2 flex items-center justify-between"
+            style={{ background: "linear-gradient(135deg, #0075bf, #0069ab)", borderRadius: "6px 6px 0 0" }}
+          >
+            <span className="font-bold text-xs text-white uppercase tracking-wide">
               VARIABLE
-            </h3>
-            <button
-              type="button"
-              className="bg-blue-700 hover:bg-blue-800 rounded-full p-1.5 transition-colors"
-            >
-              <SVGIcon name="IconInfo" width={14} className="text-white" />
-            </button>
+            </span>
+            <span
+              style={{
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                background: "white",
+                border: "2px solid #0075bf",
+                display: "inline-block",
+              }}
+            />
           </div>
 
-          <div className="bg-white p-3 space-y-1.5 max-h-96 overflow-y-auto variable-scrollbar">
-            {variables.map((variable, index) => (
-              <button
-                key={variable.value}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleInsertVariable(variable)}
-                disabled={status === "view" || statusApproval === "view"}
-                className={`
-                  w-full text-left px-3 py-2.5 text-sm font-normal
-                  transition-colors duration-150
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  ${index % 2 === 0 ? "bg-blue-50 hover:bg-blue-100" : "bg-white hover:bg-blue-50"}
-                  text-gray-700 hover:text-blue-600
-                  rounded border border-transparent hover:border-blue-200
-                `}
-              >
-                {variable.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="bg-blue-600 px-4 py-3 border-t border-blue-500">
-            <p className="text-xs text-white leading-relaxed opacity-90">
-              Click on a variable to insert it at cursor position
-            </p>
+          <div className="bg-white overflow-y-auto variable-scrollbar" style={{ maxHeight: "450px", padding: "8px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {variables.map((variable, index) => (
+                <button
+                  key={variable.value}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handleInsertVariable(variable)}
+                  disabled={status === "view" || statusApproval === "view"}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    color: "#0075bf",
+                    background: index % 2 === 0 ? "#eaf5fb" : "#ffffff",
+                    border: "1px solid #d9d9d9",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#d4ecf7";
+                    e.currentTarget.style.borderColor = "#0075bf";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = index % 2 === 0 ? "#eaf5fb" : "#ffffff";
+                    e.currentTarget.style.borderColor = "#d9d9d9";
+                  }}
+                >
+                  {variable.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -325,7 +343,7 @@ const ContentInformationForm = ({
           border-color: #1890ff;
         }
       `}</style>
-    </div>
+    </>
   );
 };
 

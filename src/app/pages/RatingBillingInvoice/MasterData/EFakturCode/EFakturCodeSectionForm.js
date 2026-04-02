@@ -3,6 +3,7 @@ import { Form } from "antd";
 import BaseContainer from "../../../../../components/BaseContainer";
 import InputComponent from "../../../../../components/InputComponent";
 import FunctionalAdditionalCode from "./FunctionalConditionalCode";
+import CardContainer from "../../../../../components/CardContainer";
 
 const EFakturCodeSectionForm = ({
   type,
@@ -17,7 +18,7 @@ const EFakturCodeSectionForm = ({
   return (
     <div className="flex flex-col gap-3">
       {/* E-Faktur Code Information */}
-      <BaseContainer header="EFAKTUR CODE INFORMATION">
+      <CardContainer header="EFAKTUR CODE INFORMATION">
         <div className="grid grid-cols-2 gap-4">
           <Form.Item
             label="Efaktur Code"
@@ -50,10 +51,10 @@ const EFakturCodeSectionForm = ({
             />
           </Form.Item>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
       {/* Additional Code Information */}
-      <BaseContainer header="ADDITIONAL CODE INFORMATION">
+      <CardContainer header="ADDITIONAL CODE INFORMATION">
         <FunctionalAdditionalCode
           type={type}
           data={listAdditionalCode}
@@ -63,7 +64,7 @@ const EFakturCodeSectionForm = ({
           status={status}
           statusApproval={statusApproval}
         />
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

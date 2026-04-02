@@ -206,7 +206,7 @@ const ScheduleRecurring = ({ remark, setRemark }) => {
               >
                 {unit}
               </Button>
-            )
+            ),
           )}
         </div>
       </div>
@@ -545,7 +545,7 @@ const GenerateProformaInvoicePage = () => {
     try {
       localStorage.setItem(
         "generateProformaFixedColumns",
-        JSON.stringify(fixedColumns)
+        JSON.stringify(fixedColumns),
       );
     } catch (e) {
       // ignore
@@ -585,7 +585,7 @@ const GenerateProformaInvoicePage = () => {
       dummyData.map((item, index) => ({
         key: index + 1,
         ...item,
-      }))
+      })),
     );
 
     const style = document.createElement("style");
@@ -658,7 +658,7 @@ const GenerateProformaInvoicePage = () => {
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     );
 
     // ensure key exists for each column
@@ -675,7 +675,7 @@ const GenerateProformaInvoicePage = () => {
         title: c.title,
         width: c.width,
       })),
-    [computedColumns]
+    [computedColumns],
   );
 
   return (
@@ -683,36 +683,20 @@ const GenerateProformaInvoicePage = () => {
       <Form layout="vertical" form={form}>
         <CardContainer header="GENERATE PROFORMA INFORMATION">
           <Form.Item label="Export Format" required>
-            <Select value={exportFormat} onChange={setExportFormat}>
+            <Select value={exportFormat} disabled onChange={setExportFormat}>
               <Option value="PDF">PDF</Option>
-              <Option value="Excel">Excel</Option>
             </Select>
           </Form.Item>
         </CardContainer>
 
         <CardContainer header="SCHEDULE INFORMATION">
           <Form.Item label="Type" required>
-            <Select value={scheduleType} onChange={setScheduleType}>
+            <Select value={scheduleType} disabled onChange={setScheduleType}>
               <Option value="Immediate">Immediate</Option>
-              <Option value="Schedule">Schedule</Option>
-              <Option value="Recurring">Recurring</Option>
             </Select>
           </Form.Item>
 
-          {scheduleType === "Immediate" && (
-            <ScheduleImmediate remark={remark} setRemark={setRemark} />
-          )}
-          {scheduleType === "Schedule" && (
-            <ScheduleSchedule
-              schedule={schedule}
-              setSchedule={setSchedule}
-              remark={remark}
-              setRemark={setRemark}
-            />
-          )}
-          {scheduleType === "Recurring" && (
-            <ScheduleRecurring remark={remark} setRemark={setRemark} />
-          )}
+          <ScheduleImmediate remark={remark} setRemark={setRemark} />
         </CardContainer>
 
         <CardContainer header="Select billing">
@@ -737,12 +721,12 @@ const GenerateProformaInvoicePage = () => {
           </div>
         </CardContainer>
 
-        <div className="my-6 pb-5 flex justify-between gap-4">
-          <Button type="default" onClick={() => window.history.back()}>
+        <div className="my-6 flex justify-between bg-white rounded-md p-3 gap-4">
+          <Button type="primary" onClick={() => window.history.back()}>
             Back
           </Button>
           <Button type="primary" htmlType="submit">
-            Save Changes
+            Confirm
           </Button>
         </div>
       </Form>

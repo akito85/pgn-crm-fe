@@ -289,6 +289,9 @@ export const getApprovalHistory = createAsyncThunk(
       const response = await ratingBillingHttpService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
+      if (error?.response?.status === 404) {
+        return thunkAPI.rejectWithValue(null);
+      }
       thunkAPI.dispatch(
         validateError({ error, action: "GET_APPROVAL_HISTORY" }),
       );

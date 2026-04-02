@@ -14,6 +14,7 @@ import FooterDetail from "../../../../../components/FooterDetail";
 import {
     getDetailPaymentCycle,
     approveOrRejectPaymentCycle,
+    approveOrRejectInactivePaymentCycle,
 } from "../../../../../redux/slices/receipt_collection/paymentCycle";
 import { dateFormatting } from "../../../../../utils";
 import { configApp } from "../../../../../constants/configApp";
@@ -110,7 +111,10 @@ const ViewPaymentCycle = () => {
             approvalId: detail.approvalId
         };
 
-        dispatch(approveOrRejectPaymentCycle(body))
+        const isInactive = detail.status?.toUpperCase() === "ACTIVE";
+        const thunk = isInactive ? approveOrRejectInactivePaymentCycle : approveOrRejectPaymentCycle;
+
+        dispatch(thunk(body))
             .unwrap()
             .then(() => {
                 handleClear();

@@ -24,7 +24,11 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
 
     useEffect(() => {
         if (customerData && customerData.result) {
-            setDataSource(customerData.result);
+            const withKeys = customerData.result.map((item, index) => ({
+                ...item,
+                key: item.id || item.receiptId || index,
+            }));
+            setDataSource(withKeys);
         } else {
             setDataSource([]);
         }
@@ -98,7 +102,8 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
                     totalData={customerData?.page?.totalElements || 0}
                     onChange={onPageChange}
                     tableScrolled={{ x: 1800, y: 400 }}
-                    rowKey="id"
+                    rowKey="key"
+                    size="small"
                 />
             </div>
         </ModalCustom>
