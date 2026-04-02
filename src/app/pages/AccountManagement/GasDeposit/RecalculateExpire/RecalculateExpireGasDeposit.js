@@ -23,7 +23,6 @@ import { NxFormStepper } from "../../../../../components/Nx/NxFormStepNavigation
 import HeaderDetail from "../HeaderDetail";
 import { nxRemoveKeys } from "../../../../../components/Nx/NxRemoveKeys";
 import GasDepositDetailTable from "../GasDepositDetailTable";
-import GasDepositDetailMutationTable from "../GasDepositDetailMutationTable";
 import NxApprovalInput from "../../../../../components/Nx/NxApprovalInput";
 import {
   getGdAttachmentCategory,
@@ -37,7 +36,7 @@ import {
 import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../assets/Icon/index";
 
-const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
+const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
   const [current, setCurrent] = useState(0);
@@ -83,6 +82,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   const isDraftApproval = location.state?.statusApproval === "DRAFT" || statusApproval === "DRAFT";
   const isRejectApproval = location.state?.statusApproval === "REJECT" || statusApproval === "REJECT";
 
+  
   //state
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
@@ -92,11 +92,22 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   
   const attachmentIsRequired = true;
   
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const rowSelection = {
+    fixed: true,
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys) => {
+      setSelectedRowKeys([...newSelectedRowKeys]);
+    },
+    preserveSelectedRowKeys: true
+  };
+
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_gasDeposit : detail_gasDeposit;
   const { details, attachments } = detail;
-
+  
   const [selectedDetailId, setSelectedDetailId] = useState();
-
+  
   const formFields = [
     [],
     ["appHierId"],
@@ -320,7 +331,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     {
       title: "Gas Deposit",
       cards: [
-        {
+        !isBulk && {
           header: "Gas Deposit Information",
           content: (
             <InfoGasDeposit
@@ -329,7 +340,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
             />
           )
         },
-        {
+        !isBulk && {
           header: "Gas Deposit Detail",
           content: (
             <GasDepositDetailTable
@@ -339,16 +350,6 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
             />
           )
         },
-        selectedDetailId &&
-        {
-          header: "Gas Deposit Detail Mutation",
-          content: (
-            <GasDepositDetailMutationTable
-              detailId={selectedDetailId}
-              key="tab-0-card-2"
-            />  
-          )
-        }
       ].filter(Boolean),
       disabled: false,
       key: "tab-0",
@@ -525,13 +526,15 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     <div>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
-        <HeaderDetail
-          data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-          dispatch={dispatch}
-          accountId={accountId}
-          customerId={customerId}
-          type={accountType}
-        />
+        {!isBulk && accountId && customerId (
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            accountId={accountId}
+            customerId={customerId}
+            type={accountType}
+          />
+        )}
         <Spin spinning={loading}>
           <Form
             id="gasDepositForm"
