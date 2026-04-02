@@ -17,12 +17,11 @@ const GasDepositDetailMutationTable = ({
   index,
   detailIndex,
   opened,
+  listKey = "list_gasDeposit",
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
-  const {
-    list_gasDeposit: parents,
-  } = useSelector((state) => state.gasDeposit);
+  const parents = useSelector((state) => state.gasDeposit[listKey]);
 
   const dataSource = parents[index]?.list_gasDepositDetail[detailIndex].list_gasDepositDetailMutation || [];
   const pagination = parents[index]?.list_gasDepositDetail[detailIndex].pagination_listGdDetailMutation || {};
@@ -89,6 +88,7 @@ const GasDepositDetailMutationTable = ({
         detailIndex,
         body,
         isLoadMore: false,
+        listKey,
       })
     );
     setPage(0);
@@ -130,6 +130,7 @@ const GasDepositDetailMutationTable = ({
           detailIndex,
           body,
           isLoadMore: true,
+          listKey,
         })
       ).unwrap();
     }
@@ -152,7 +153,7 @@ const GasDepositDetailMutationTable = ({
       };
 
       setPage(0);
-      const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false }));
+      const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false, listKey }));
       return () => { promise.abort(); };
     } else
       setIsLoad(true)

@@ -17,12 +17,11 @@ const GasDepositDetailTable = ({
   id,
   index,
   opened,
+  listKey = "list_gasDeposit",
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
-  const {
-    list_gasDeposit: parents,
-  } = useSelector((state) => state.gasDeposit);
+  const parents = useSelector((state) => state.gasDeposit[listKey]);
 
   const dataSource = parents[index].list_gasDepositDetail || [];
   const pagination = parents[index].pagination_listGdDetail || {};
@@ -89,6 +88,7 @@ const GasDepositDetailTable = ({
         index,
         body,
         isLoadMore: false,
+        listKey,
       })
     );
     setPage(0);
@@ -129,6 +129,7 @@ const GasDepositDetailTable = ({
           index,
           body,
           isLoadMore: true,
+          listKey,
         })
       ).unwrap();
     }
@@ -151,7 +152,7 @@ const GasDepositDetailTable = ({
       };
 
       setPage(0);
-      const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false }));
+      const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false, listKey }));
       return () => { promise.abort(); };
     } else
       setIsLoad(true);
@@ -183,6 +184,7 @@ const GasDepositDetailTable = ({
       detailId={record.id}
       detailIndex={detailIndex}
       opened={openedMemo[record.id]}
+      listKey={listKey}
     />
   );
 
