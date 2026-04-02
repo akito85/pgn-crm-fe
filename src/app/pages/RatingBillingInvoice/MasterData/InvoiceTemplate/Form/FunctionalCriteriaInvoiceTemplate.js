@@ -527,18 +527,17 @@ const FunctionalCriteriaInvoiceTemplate = ({
   };
 
   const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-    // if (hasValue(formHeaderValue?.endDate)) {
-    if (moment(rowValue?.startDate) < moment(formHeaderValue?.startDate)) {
+    if (moment(rowValue?.startDate).startOf("day") < moment(formHeaderValue?.startDate).startOf("day")) {
       return true;
     } else if (
-      moment(rowValue?.endDate) > moment(formHeaderValue?.endDate) &&
+      hasValue(rowValue?.endDate) &&
+      moment(rowValue?.endDate).startOf("day") > moment(formHeaderValue?.endDate).startOf("day") &&
       hasValue(formHeaderValue?.endDate)
     ) {
       return true;
     } else {
       return false;
     }
-    // }
   }, []);
 
   // Function Save Data
@@ -571,11 +570,10 @@ const FunctionalCriteriaInvoiceTemplate = ({
           updateData(newData);
           setEditingKey("");
         }
+        setStoredData(false);
+        setStatusAction("");
+        formTableCriteria.resetFields();
       }
-
-      setStoredData(false);
-      setStatusAction("");
-      formTableCriteria.resetFields();
     } catch (errInfo) {}
   };
 

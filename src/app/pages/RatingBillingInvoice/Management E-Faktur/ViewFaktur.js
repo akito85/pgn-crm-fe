@@ -73,7 +73,7 @@ const ViewFaktur = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["efakturStatus", "action"],
+    right: ["status", "statusApproval", "action"],
   }));
 
   // Breadcrumbs

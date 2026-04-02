@@ -38,9 +38,10 @@ export const getEFakturColumns = ({
       isClassification: true,
       render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
+    // 1. FAKTUR CODE
     {
       key: "efakturNo",
-      title: "KODE FAKTUR",
+      title: "FAKTUR CODE",
       dataIndex: "efakturNo",
       width: 180,
       sorter: true,
@@ -65,6 +66,7 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 2. FAKTUR TYPE
     {
       key: "type",
       title: "FAKTUR TYPE",
@@ -92,6 +94,7 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 3. BILLING CODE
     {
       key: "billingCode",
       title: "BILLING CODE",
@@ -119,6 +122,7 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 4. INVOICE NUMBER
     {
       key: "invoiceNumber",
       title: "INVOICE NUMBER",
@@ -146,6 +150,7 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 5. ACCOUNT NUMBER
     {
       key: "accountNumber",
       title: "ACCOUNT NUMBER",
@@ -173,9 +178,10 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 6. CUSTOMER
     {
       key: "name",
-      title: "CUSTOMER NAME",
+      title: "CUSTOMER",
       dataIndex: "name",
       width: 250,
       sorter: true,
@@ -201,16 +207,17 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 7. CUSTOMER IDENTIFICATION NUMBER
     {
-      key: "sor",
-      title: "SOR",
-      dataIndex: "sor",
-      width: 150,
+      key: "npwpCust",
+      title: "CUSTOMER IDENTIFICATION NUMBER",
+      dataIndex: "npwpCust",
+      width: 220,
       sorter: true,
-      filteredValue: [search?.sor] || null,
+      filteredValue: [search?.npwpCust] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "sor",
+        "npwpCust",
         searchInput,
         searchedColumn,
         searchText,
@@ -219,8 +226,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "sor",
-          hasValue(search["sor"]),
+          "npwpCust",
+          hasValue(search["npwpCust"]),
           searchText,
           text || " ",
           false,
@@ -228,99 +235,18 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 8. ACCOUNT GROUP TYPE (new)
     {
-      key: "costCenter",
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.costCenter] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "costCenter",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) =>
-        renderColumn(
-          "costCenter",
-          hasValue(search["costCenter"]),
-          searchText,
-          text || " ",
-          false,
-          "input",
-          search,
-        ),
-    },
-    {
-      key: "meterReadingCode",
-      title: "METER READING",
-      dataIndex: "meterReadingCode",
-      width: 150,
-      sorter: true,
-      filteredValue: [search?.meterReadingCode] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "meterReadingCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) =>
-        renderColumn(
-          "meterReadingCode",
-          hasValue(search["meterReadingCode"]),
-          searchText,
-          text || " ",
-          false,
-          "input",
-          search,
-        ),
-    },
-    {
-      key: "accountName",
-      title: "ACCOUNT NAME",
-      dataIndex: "accountName",
-      width: 250,
-      sorter: true,
-      filteredValue: [search?.accountName] || null,
-      ellipsis: { showTitle: false },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "accountName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) =>
-        renderColumn(
-          "accountName",
-          hasValue(search["accountName"]),
-          searchText,
-          text || " ",
-          true,
-          "input",
-          search,
-        ),
-    },
-    {
-      key: "typePpn",
-      title: "TYPE PPN",
-      dataIndex: "typePpn",
+      key: "accountGroupType",
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
       width: 180,
       isClassification: true,
       sorter: true,
-      filteredValue: [search?.typePpn] || null,
+      filteredValue: [search?.accountGroupType] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "typePpn",
+        "accountGroupType",
         searchInput,
         searchedColumn,
         searchText,
@@ -329,15 +255,73 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "typePpn",
-          hasValue(search["typePpn"]),
+          "accountGroupType",
+          hasValue(search["accountGroupType"]),
           searchText,
-          text,
+          text || " ",
           false,
           "input",
           search,
         ),
     },
+    // 9. IDENTITY NUMBER
+    {
+      key: "nikPasport",
+      title: "IDENTITY NUMBER",
+      dataIndex: "nikPasport",
+      width: 180,
+      sorter: true,
+      filteredValue: [search?.nikPasport] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "nikPasport",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "nikPasport",
+          hasValue(search["nikPasport"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    // 10. TYPE OF IDENTITY (new)
+    {
+      key: "typeOfIdentity",
+      title: "TYPE OF IDENTITY",
+      dataIndex: "typeOfIdentity",
+      width: 180,
+      isClassification: true,
+      sorter: true,
+      filteredValue: [search?.typeOfIdentity] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "typeOfIdentity",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "typeOfIdentity",
+          hasValue(search["typeOfIdentity"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    // 11. SEGMENT
     {
       key: "accountSegment",
       title: "SEGMENT",
@@ -366,16 +350,17 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 12. SOR
     {
-      key: "npwpCust",
-      title: "NPWP CUSTOMER",
-      dataIndex: "npwpCust",
-      width: 180,
+      key: "sor",
+      title: "SOR",
+      dataIndex: "sor",
+      width: 150,
       sorter: true,
-      filteredValue: [search?.npwpCust] || null,
+      filteredValue: [search?.sor] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "npwpCust",
+        "sor",
         searchInput,
         searchedColumn,
         searchText,
@@ -384,8 +369,8 @@ export const getEFakturColumns = ({
       ),
       render: (text) =>
         renderColumn(
-          "npwpCust",
-          hasValue(search["npwpCust"]),
+          "sor",
+          hasValue(search["sor"]),
           searchText,
           text || " ",
           false,
@@ -393,6 +378,244 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 13. NITKU
+    {
+      key: "tkuCode",
+      title: "NITKU",
+      dataIndex: "tkuCode",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.tkuCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "tkuCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "tkuCode",
+          hasValue(search["tkuCode"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    // 14. COST CENTER
+    {
+      key: "costCenter",
+      title: "COST CENTER",
+      dataIndex: "costCenter",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.costCenter] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "costCenter",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "costCenter",
+          hasValue(search["costCenter"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    // 15. METER READING
+    {
+      key: "meterReadingCode",
+      title: "METER READING",
+      dataIndex: "meterReadingCode",
+      width: 150,
+      sorter: true,
+      filteredValue: [search?.meterReadingCode] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "meterReadingCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "meterReadingCode",
+          hasValue(search["meterReadingCode"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    // 16. ACCOUNT NAME
+    {
+      key: "accountName",
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      width: 250,
+      sorter: true,
+      filteredValue: [search?.accountName] || null,
+      ellipsis: { showTitle: false },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "accountName",
+          hasValue(search["accountName"]),
+          searchText,
+          text || " ",
+          true,
+          "input",
+          search,
+        ),
+    },
+    // 17. BILLING CYCLE (new)
+    {
+      key: "billingCycle",
+      title: "BILLING CYCLE",
+      dataIndex: "billingCycle",
+      width: 150,
+      isClassification: true,
+      sorter: true,
+      filteredValue: [search?.billingCycle] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "billingCycle",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "billingCycle",
+          hasValue(search["billingCycle"]),
+          searchText,
+          text || " ",
+          false,
+          "input",
+          search,
+        ),
+    },
+    // 18. DPP (new)
+    {
+      key: "dpp",
+      title: "DPP",
+      dataIndex: "dpp",
+      width: 180,
+      isNumber: true,
+      sorter: true,
+      filteredValue: [search?.dpp] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "dpp",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (value) => {
+        const formattedValue = (
+          <span>Rp {currencyFormatting(value, "idr")}</span>
+        );
+        return renderColumn(
+          "dpp",
+          hasValue(search["dpp"]),
+          searchText,
+          formattedValue,
+          false,
+          "input",
+          search,
+        );
+      },
+    },
+    // 19. PPN (new)
+    {
+      key: "ppn",
+      title: "PPN",
+      dataIndex: "ppn",
+      width: 180,
+      isNumber: true,
+      sorter: true,
+      filteredValue: [search?.ppn] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "ppn",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (value) => {
+        const formattedValue = (
+          <span>Rp {currencyFormatting(value, "idr")}</span>
+        );
+        return renderColumn(
+          "ppn",
+          hasValue(search["ppn"]),
+          searchText,
+          formattedValue,
+          false,
+          "input",
+          search,
+        );
+      },
+    },
+    // 20. TYPE OF TAXPAYER
+    {
+      key: "typePpn",
+      title: "TYPE OF TAXPAYER",
+      dataIndex: "typePpn",
+      width: 180,
+      isClassification: true,
+      sorter: true,
+      filteredValue: [search?.typePpn] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "typePpn",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "typePpn",
+          hasValue(search["typePpn"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    // 21. TAX ADDRESS
     {
       key: "fullAddress",
       title: "TAX ADDRESS",
@@ -421,60 +644,205 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 22. TAX BASIS IDR (new)
     {
-      key: "nikPasport",
-      title: "NIK/PASSPORT",
-      dataIndex: "nikPasport",
+      key: "taxBasisIdr",
+      title: "TAX BASIS IDR",
+      dataIndex: "taxBasisIdr",
       width: 180,
+      isNumber: true,
       sorter: true,
-      filteredValue: [search?.nikPasport] || null,
+      filteredValue: [search?.taxBasisIdr] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "nikPasport",
+        "taxBasisIdr",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
       ),
-      render: (text) =>
-        renderColumn(
-          "nikPasport",
-          hasValue(search["nikPasport"]),
+      render: (value) => {
+        const formattedValue = (
+          <span>Rp {currencyFormatting(value, "idr")}</span>
+        );
+        return renderColumn(
+          "taxBasisIdr",
+          hasValue(search["taxBasisIdr"]),
           searchText,
-          text || " ",
+          formattedValue,
           false,
           "input",
           search,
-        ),
+        );
+      },
     },
+    // 23. TAX BASIS USD (new)
     {
-      key: "tkuCode",
-      title: "TKU CODE",
-      dataIndex: "tkuCode",
-      width: 150,
+      key: "taxBasisUsd",
+      title: "TAX BASIS USD",
+      dataIndex: "taxBasisUsd",
+      width: 180,
+      isNumber: true,
       sorter: true,
-      filteredValue: [search?.tkuCode] || null,
+      filteredValue: [search?.taxBasisUsd] || null,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "tkuCode",
+        "taxBasisUsd",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
       ),
-      render: (text) =>
-        renderColumn(
-          "tkuCode",
-          hasValue(search["tkuCode"]),
+      render: (value) => {
+        const formattedValue = (
+          <span>$ {currencyFormatting(value, "usd")}</span>
+        );
+        return renderColumn(
+          "taxBasisUsd",
+          hasValue(search["taxBasisUsd"]),
           searchText,
-          text || " ",
+          formattedValue,
           false,
           "input",
           search,
-        ),
+        );
+      },
     },
+    // 24. TAX BASIS EQV IDR (new)
+    {
+      key: "taxBasisEqvIdr",
+      title: "TAX BASIS EQV IDR",
+      dataIndex: "taxBasisEqvIdr",
+      width: 200,
+      isNumber: true,
+      sorter: true,
+      filteredValue: [search?.taxBasisEqvIdr] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "taxBasisEqvIdr",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (value) => {
+        const formattedValue = (
+          <span>Rp {currencyFormatting(value, "idr")}</span>
+        );
+        return renderColumn(
+          "taxBasisEqvIdr",
+          hasValue(search["taxBasisEqvIdr"]),
+          searchText,
+          formattedValue,
+          false,
+          "input",
+          search,
+        );
+      },
+    },
+    // 25. VAT IDR (new)
+    {
+      key: "vatIdr",
+      title: "VAT IDR",
+      dataIndex: "vatIdr",
+      width: 180,
+      isNumber: true,
+      sorter: true,
+      filteredValue: [search?.vatIdr] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatIdr",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (value) => {
+        const formattedValue = (
+          <span>Rp {currencyFormatting(value, "idr")}</span>
+        );
+        return renderColumn(
+          "vatIdr",
+          hasValue(search["vatIdr"]),
+          searchText,
+          formattedValue,
+          false,
+          "input",
+          search,
+        );
+      },
+    },
+    // 26. VAT USD (new)
+    {
+      key: "vatUsd",
+      title: "VAT USD",
+      dataIndex: "vatUsd",
+      width: 180,
+      isNumber: true,
+      sorter: true,
+      filteredValue: [search?.vatUsd] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatUsd",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (value) => {
+        const formattedValue = (
+          <span>$ {currencyFormatting(value, "usd")}</span>
+        );
+        return renderColumn(
+          "vatUsd",
+          hasValue(search["vatUsd"]),
+          searchText,
+          formattedValue,
+          false,
+          "input",
+          search,
+        );
+      },
+    },
+    // 27. VAT EQV IDR (new)
+    {
+      key: "vatEqvIdr",
+      title: "VAT EQV IDR",
+      dataIndex: "vatEqvIdr",
+      width: 180,
+      isNumber: true,
+      sorter: true,
+      filteredValue: [search?.vatEqvIdr] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatEqvIdr",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (value) => {
+        const formattedValue = (
+          <span>Rp {currencyFormatting(value, "idr")}</span>
+        );
+        return renderColumn(
+          "vatEqvIdr",
+          hasValue(search["vatEqvIdr"]),
+          searchText,
+          formattedValue,
+          false,
+          "input",
+          search,
+        );
+      },
+    },
+    // 28. BILLING PERIOD
     {
       key: "billPeriode",
       title: "BILLING PERIOD",
@@ -503,6 +871,7 @@ export const getEFakturColumns = ({
           search,
         ),
     },
+    // 29. INVOICE DATE
     {
       key: "invoiceDate",
       title: "INVOICE DATE",
@@ -533,6 +902,7 @@ export const getEFakturColumns = ({
         );
       },
     },
+    // 30. TOTAL AMOUNT (IDR)
     {
       key: "totalAmount",
       title: "TOTAL AMOUNT (IDR)",
@@ -566,6 +936,7 @@ export const getEFakturColumns = ({
         );
       },
     },
+    // STATUS E-FAKTUR
     {
       key: "status",
       title: "STATUS E-FAKTUR",
@@ -596,6 +967,7 @@ export const getEFakturColumns = ({
         );
       },
     },
+    // STATUS APPROVAL
     {
       key: "statusApproval",
       title: "STATUS APPROVAL",
