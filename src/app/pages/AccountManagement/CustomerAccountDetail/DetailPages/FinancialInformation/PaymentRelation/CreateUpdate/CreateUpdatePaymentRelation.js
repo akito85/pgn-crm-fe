@@ -51,8 +51,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     (state) => state.accountManagement
   );
 
-  const accountId = data_accountDetail?.accountInformation?.accountId;
-
   const {
     loading_listPrApprovalOption,
     loading_detailPrApprovalHierarchyDetails,
@@ -75,8 +73,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idPr = location?.state?.id;
 
   const status = detail_paymentRelation.status || "DRAFT";
@@ -112,20 +110,6 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     ["appHierId"],
     []
   ];
-
-  useEffect(() => {
-    if (idCustomer) dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
-
-  useEffect(() => {
-    if (idAccount && idCustomer) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-      } else if (isOneTime) {
-        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
-      }
-    }
-  }, [idAccount, idCustomer]);
 
   useEffect(() => {
     if (isUpdate && idPr) {
@@ -196,8 +180,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
       state: {
-        idAccount,
-        idCustomer
+        idAccount: accountId,
+        idCustomer: customerId
       }
     },
     {
@@ -329,7 +313,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             <InfoPaymentRelation
               form={form}
               setAccount={setAccount}
-              accountId={idAccount}
+              accountId={accountId}
               isUpdate={isUpdate}
               isDraft={isDraft}
               key={`payment-relation-tab-0`}
@@ -563,8 +547,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount,
-                idCustomer
+                idAccount: accountId,
+                idCustomer: customerId
               }
             });
           }, 2000);
@@ -584,8 +568,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount,
-                idCustomer
+                idAccount: accountId,
+                idCustomer: customerId
               }
             });
           }, 2000);
@@ -646,8 +630,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         <HeaderDetail
           data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
           dispatch={dispatch}
-          idAccount={idAccount}
-          idCustomer={idCustomer}
+          idAccount={accountId}
+          idCustomer={customerId}
           type={accountType}
         />
         <Spin spinning={loading}>
