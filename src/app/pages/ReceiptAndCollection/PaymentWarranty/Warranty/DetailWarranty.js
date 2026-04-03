@@ -19,12 +19,11 @@ import { WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 import { 
     getDetailWarrantyMutation,
     deleteMutation,
-    getDetailMutation,
     getMutationApprovalHistory,
     getPaymentWarrantyPartnerBranchList,
-    submitApproval
+    submitApproval,
+    getServiceAgreementByAccountId
 } from "../../../../../redux/slices/receipt_collection/warranty";
-import { getListServiceAgreement } from "../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import ModalMutation from "./Modal/ModalMutation";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -34,9 +33,8 @@ const DetailWarranty = ({ data_detail }) => {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { dataMutation, loadingMutation, dataApprovalHistory, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
+  const { dataMutation, loadingMutation, dataApprovalHistory, dataPaymentWarrantyPartnerBranch, dataServiceAgreement } = useSelector((state) => state.warranty);
   const { currencyDDL } = useSelector((state) => state.receipt);
-  const { data: dataServiceAgreement } = useSelector((state) => state.accountServiceAgreement);
   const [selectedSA, setSelectedSA] = useState({});
   const [selectedBranchName, setSelectedBranchName] = useState(null);
   const [isModalMutationOpen, setIsModalMutationOpen] = useState(false);
@@ -52,7 +50,7 @@ const DetailWarranty = ({ data_detail }) => {
 
   useEffect(() => {
     if (data_detail?.accountId) {
-      dispatch(getListServiceAgreement({ id: data_detail.accountId, page: 1, pageSize: 999 }));
+      dispatch(getServiceAgreementByAccountId({ id: data_detail.accountId }));
     }
     dispatch(getCurrencyDDL());
   }, [dispatch, data_detail?.accountId]);

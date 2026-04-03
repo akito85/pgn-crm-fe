@@ -70,6 +70,7 @@ const initialState = warrantyAdapter.getInitialState({
   isFailed: false,
   isSuccess: false,
   message: "",
+  dataServiceAgreement: null,
 });
 
 
@@ -568,6 +569,25 @@ export const getMutationCategoryOptions = createAsyncThunk(
         thunkAPI.dispatch(setBodyError(error));
       }
       return error;
+    }
+  }
+);
+
+export const getServiceAgreementByAccountId = createAsyncThunk(
+  "GET_SERVICE_AGREEMENT_BY_ACCOUNT_ID",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty/service-agreement/${id}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
@@ -1409,6 +1429,18 @@ const warrantySlice = createSlice({
     },
     [getWarrantySummary.rejected]: (state) => {
       state.loadingSummary = false;
+    },
+
+    // Get Service Agreement By Account Id
+    [getServiceAgreementByAccountId.pending]: (state) => {
+      state.loading = true;
+    },
+    [getServiceAgreementByAccountId.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataServiceAgreement = action.payload;
+    },
+    [getServiceAgreementByAccountId.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });
