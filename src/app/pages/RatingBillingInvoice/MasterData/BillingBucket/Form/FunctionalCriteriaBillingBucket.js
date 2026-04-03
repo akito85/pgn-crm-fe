@@ -905,7 +905,7 @@ const FunctionalCriteriaBillingBucket = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`You can't add Criteria. Start date and enda date can't be overlap`}</p>
+          <p className="pl-[70px]">{`You can't add Criteria. Start date and end date can't be overlap`}</p>
         </div>
       </ModalError>
     </div>

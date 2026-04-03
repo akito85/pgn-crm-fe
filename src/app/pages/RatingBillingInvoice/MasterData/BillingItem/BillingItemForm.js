@@ -79,6 +79,7 @@ const BillingItemForm = (props) => {
     data_classificationTypeList,
     data_accountTypeList,
     loading,
+    loadingDetail,
   } = useSelector((state) => state.billing_item);
 
   const currentPosition = useSelector(
@@ -156,7 +157,7 @@ const BillingItemForm = (props) => {
   const [dataSend, setDataSend] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
 
-  const isLoading = loading || loadingForm;
+  const isLoading = loading || loadingForm || loadingDetail;
 
   // Initial data fetch
   useEffect(() => {
@@ -1169,7 +1170,7 @@ const BillingItemForm = (props) => {
               <p className="text-[18px] font-bold">Failed</p>
             </div>
             <p className="pl-[70px]">
-              You can't create Mapping Information. Please fill out the start date first
+              Can't add detail data. Please select a start date.
             </p>
           </div>
         </ModalError>

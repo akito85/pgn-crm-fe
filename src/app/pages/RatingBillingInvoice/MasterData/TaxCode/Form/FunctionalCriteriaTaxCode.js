@@ -513,8 +513,8 @@ const FunctionalCriteriaTaxCode = ({
   }, []);
 
 
-  // Function Save Data
-  const save = async (key) => {
+  // Function Execute Save Data
+  const executeSave = async (key) => {
     try {
       const row = await formTableCriteria.validateFields();
       const newData = [...data];
@@ -547,6 +547,24 @@ const FunctionalCriteriaTaxCode = ({
 
       }
     } catch (errInfo) { }
+  };
+
+  // Function Save Data
+  const save = async (key) => {
+    const requiredHiddenCols = columns().filter(
+      (col) => col.required === true && optionSelectedCol.includes(col.title)
+    );
+
+    if (requiredHiddenCols.length > 0) {
+      setOptionSelectedCol((prev) =>
+        prev.filter((title) => !requiredHiddenCols.some((col) => col.title === title))
+      );
+      setTimeout(() => {
+        executeSave(key);
+      }, 50);
+    } else {
+      executeSave(key);
+    }
   };
 
 
@@ -912,7 +930,7 @@ const FunctionalCriteriaTaxCode = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`You can't add Criteria. Start date and enda date can't be overlap`}</p>
+          <p className="pl-[70px]">{`You can't add Criteria. Start date and end date can't be overlap`}</p>
         </div>
       </ModalError>
     </div>
