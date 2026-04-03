@@ -43,6 +43,7 @@ import {
   getCollectionAgentDDL,
   getPayDeliverDDL,
   getPayMethodDDL,
+  getAllPosRegistrationNumbersDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import ModalConfirmManualReceipt from "./ModalConfirmManualReceipt";
 import { configApp } from "../../../../../constants/configApp";
@@ -162,6 +163,7 @@ const ListRececiptForm = ({ type }) => {
     dispatch(getReceiptChanelDDL());
     dispatch(getAccountTypeDDL());
     dispatch(getAllAccountNumberDDL());
+    dispatch(getAllPosRegistrationNumbersDDL()); // Fetch POS registration numbers
     // Dispatched directly to populate dropdown defaults
     dispatch(getPayTypeDDL());
     dispatch(getPayGetwayDDL());
