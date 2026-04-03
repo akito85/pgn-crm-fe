@@ -8,9 +8,6 @@ import SelectComponent from "../../../../../components/SelectComponent";
 const DeductionForm = (props) => {
   const { form, isEmbedded, dataType, dataPeriod } = props;
 
-  const periodOptions = dataPeriod?.map(item => ({ label: item.p_label || item.label, value: item.p_value || item.value })) || [];
-  const typeOptions = dataType?.map(item => ({ label: item.p_label || item.label, value: item.p_value || item.value })) || [];
-
   const content = (
     <div className="w-full">
       <div className="grid grid-cols-3 gap-5">
@@ -21,7 +18,7 @@ const DeductionForm = (props) => {
         >
           <SelectComponent
             placeholder="Select Period"
-            options={periodOptions}
+            options={dataPeriod}
           />
         </Form.Item>
 
@@ -32,7 +29,7 @@ const DeductionForm = (props) => {
         >
           <SelectComponent
             placeholder="Select Type"
-            options={typeOptions}
+            options={dataType}
           />
         </Form.Item>
 
