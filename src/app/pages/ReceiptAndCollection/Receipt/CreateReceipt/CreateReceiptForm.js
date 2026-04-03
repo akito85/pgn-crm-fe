@@ -104,11 +104,6 @@ const CreateReceiptForm = ({
 
   }, [form, dispatch, setAccNumb]);
 
-  // Debug: Log POS registration numbers data
-  React.useEffect(() => {
-    console.log("allPosRegistrationNumbersDDL:", allPosRegistrationNumbersDDL);
-  }, [allPosRegistrationNumbersDDL]);
-
   const handleMiscChange = (value) => {
     setMiscType(value);
     
@@ -147,7 +142,6 @@ const CreateReceiptForm = ({
 
     if (value === "Prospective") {
       // Fetch all POS registration numbers when switching to Prospective Customer
-      console.log("Fetching POS registration numbers...");
       dispatch(getAllPosRegistrationNumbersDDL());
       
       form.setFieldsValue({
