@@ -671,11 +671,13 @@ const BillingItemForm = (props) => {
   const handleMappingInfo = (data) => {
     return dataTable.map((item) => ({
       category: item?.category,
+      categoryName: item?.categoryName,
       startDate: item?.startDate || null,
       endDate: item?.endDate || null,
       description: item?.description || null,
       detail: (data[item?.category] || []).map((detail) => ({
         item: detail?.item,
+        itemName: detail?.itemName,
         startDate: detail?.startDate || null,
         endDate: detail?.endDate || null,
       })),
