@@ -35,7 +35,7 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
-import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons"; // eslint-disable-line no-unused-vars
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 
 dayjs.extend(weekday);
@@ -134,13 +134,15 @@ const CalendarView = () => {
     if (data_approval_history?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_approval_history?.dataApprover?.CALENDAR || [],
+          create: data_approval_history?.dataApprover?.MASTER_CALLENDAR || [],
           inactive:
-            data_approval_history?.dataApprover?.INACTIVE_CALENDAR || [],
+            data_approval_history?.dataApprover?.INACTIVE_MASTER_CALLENDAR ||
+            [],
         },
         dataHistory: {
-          create: data_approval_history?.dataHistory?.CALENDAR || [],
-          inactive: data_approval_history?.dataHistory?.INACTIVE_CALENDAR || [],
+          create: data_approval_history?.dataHistory?.MASTER_CALLENDAR || [],
+          inactive:
+            data_approval_history?.dataHistory?.INACTIVE_MASTER_CALLENDAR || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -157,13 +159,9 @@ const CalendarView = () => {
     }));
   };
 
-  const handleApprovalHistory = async (record) => {
-    try {
-      await dispatch(getApprovalHistory(record.id)).unwrap();
-      setOpenModalHistory(true);
-    } catch (error) {
-      setOpenModalHistory(false);
-    }
+  const handleApprovalHistory = (record) => {
+    dispatch(getApprovalHistory(record.calendarId));
+    setOpenModalHistory(true);
   };
 
   const handleCancelInactive = () => {
@@ -173,10 +171,9 @@ const CalendarView = () => {
 
   const handleOk = (res, handleClear) => {
     const dataValue = {
-      id: chooseId.id,
+      id: chooseId.calendarId,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
-      status: chooseId.status,
     };
     dispatch(inactiveCalendar(dataValue))
       .unwrap()
@@ -422,7 +419,14 @@ const CalendarView = () => {
         sort: sortArray,
         search: searchObject,
       }),
-    );
+    )
+      .unwrap()
+      .catch((error) => {
+        const message =
+          error?.message || error?.response?.data?.message || "Download failed";
+        setBodyError({ message });
+        setModalError(true);
+      });
   };
 
   // Breadcrumbs
@@ -439,7 +443,9 @@ const CalendarView = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontsSize: "20" }} />
+          }
           onClick={() => handleDownload()}
         >
           Download List
@@ -451,7 +457,9 @@ const CalendarView = () => {
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_CALENDAR}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontsSize: "20" }} />
+            }
             type="submit"
           >
             Create Calendar
@@ -467,7 +475,7 @@ const CalendarView = () => {
       render: (record) => (
         <Link
           to={SYSTEM_SETUP_ROUTES.DETAIL_CALENDAR}
-          state={{ id: record.id }}
+          state={{ id: record.calendarId }}
         >
           <Tooltip title="Detail">
             <SVGIcon name="IconDetail" width={20} />
@@ -932,7 +940,7 @@ const CalendarView = () => {
 
         {/* Modal Approval History */}
         <ModalHistory
-          isOpen={openModalHistory && !!dataApprovalHistoryFix}
+          isOpen={openModalHistory && dataApprovalHistoryFix}
           handleClose={() => setOpenModalHistory(false)}
           header={"Approval History"}
           width={1000}

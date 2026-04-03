@@ -7,8 +7,11 @@ const initialState = {
   data: [],
   pagination: {},
   data_detail: {},
+  data_detail_draft: {},
   data_approval_history: {},
   data_by_month_year: [],
+  data_holiday_type: [],
+  dataListCategory: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   loading: false,
@@ -173,6 +176,193 @@ export const downloadCalendar = createAsyncThunk(
   },
 );
 
+export const getDetailCalendar = createAsyncThunk(
+  "GET_DETAIL_CALENDAR",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/detail/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_DETAIL_CALENDAR",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
+export const getDetailDraftCalendar = createAsyncThunk(
+  "GET_DETAIL_DRAFT_CALENDAR",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/detail-draft/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (response) {
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
+export const getHolidayType = createAsyncThunk(
+  "GET_HOLIDAY_TYPE_CALENDAR",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/holiday-type`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (response) {
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
+export const getAttachmentCategoryCalendar = createAsyncThunk(
+  "GET_ATTACHMENT_CATEGORY_CALENDAR",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/category-list`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (response) {
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
+export const createCalendar = createAsyncThunk(
+  "CREATE_CALENDAR",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/save`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successMessage = {
+        title: "Successful",
+        description: response?.message || "Calendar has been created.",
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "created",
+            errorMessage(response),
+          ),
+          action: "CREATE_CALENDAR",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
+export const updateCalendar = createAsyncThunk(
+  "UPDATE_CALENDAR",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/save`;
+      const response = await ratingBillingHttpService.updateData(url, body);
+      const successMessage = {
+        title: "Successful",
+        description: response?.message || "Calendar has been updated.",
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            "updated",
+            errorMessage(response),
+          ),
+          action: "UPDATE_CALENDAR",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
+export const approveRejectCalendar = createAsyncThunk(
+  "APPROVE_REJECT_CALENDAR",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/${body.id}/approve`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const successMessage = {
+        title: "Successful",
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            body.action === "APPROVE" ? "approved" : "rejected",
+            errorMessage(response),
+          ),
+          action: "APPROVE_REJECT_CALENDAR",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
+export const approveRejectInactiveCalendar = createAsyncThunk(
+  "APPROVE_REJECT_INACTIVE_CALENDAR",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/${body.id}/approval-inactive`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const successMessage = {
+        title: "Successful",
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(
+            errorCode(response),
+            body.action === "APPROVE" ? "approved" : "rejected",
+            errorMessage(response),
+          ),
+          action: "APPROVE_REJECT_INACTIVE_CALENDAR",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
 const calendarSlice = createSlice({
   name: "calendar",
   initialState,
@@ -217,6 +407,32 @@ const calendarSlice = createSlice({
       state.loading = false;
     },
 
+    // available approval list
+    [getAvailableApproval.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAvailableApproval.fulfilled]: (state, action) => {
+      state.dataListAppHierId = action.payload || [];
+      state.loading = false;
+    },
+    [getAvailableApproval.rejected]: (state) => {
+      state.dataListAppHierId = [];
+      state.loading = false;
+    },
+
+    // selected approval detail
+    [getSelectedApproval.pending]: (state) => {
+      state.loading = true;
+    },
+    [getSelectedApproval.fulfilled]: (state, action) => {
+      state.dataListAppHierDetail = action.payload || [];
+      state.loading = false;
+    },
+    [getSelectedApproval.rejected]: (state) => {
+      state.dataListAppHierDetail = [];
+      state.loading = false;
+    },
+
     // inactive
     [inactiveCalendar.pending]: (state) => {
       state.loading = true;
@@ -251,6 +467,113 @@ const calendarSlice = createSlice({
     [getCalendarByMonthYear.rejected]: (state) => {
       state.data_by_month_year = [];
       state.loading_calendar = false;
+    },
+
+    // get detail
+    [getDetailCalendar.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailCalendar.fulfilled]: (state, action) => {
+      state.data_detail = action.payload || {};
+      state.loading = false;
+    },
+    [getDetailCalendar.rejected]: (state) => {
+      state.data_detail = {};
+      state.loading = false;
+    },
+
+    // get detail draft
+    [getDetailDraftCalendar.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailDraftCalendar.fulfilled]: (state, action) => {
+      state.data_detail_draft = action.payload || {};
+      state.loading = false;
+    },
+    [getDetailDraftCalendar.rejected]: (state) => {
+      state.data_detail_draft = {};
+      state.loading = false;
+    },
+
+    // get holiday type
+    [getHolidayType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getHolidayType.fulfilled]: (state, action) => {
+      state.data_holiday_type = action.payload || [];
+      state.loading = false;
+    },
+    [getHolidayType.rejected]: (state) => {
+      state.data_holiday_type = [];
+      state.loading = false;
+    },
+
+    // get attachment category
+    [getAttachmentCategoryCalendar.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAttachmentCategoryCalendar.fulfilled]: (state, action) => {
+      state.dataListCategory = (action.payload || []).map((item) => ({
+        Id: item.id,
+        text: item.name,
+      }));
+      state.loading = false;
+    },
+    [getAttachmentCategoryCalendar.rejected]: (state) => {
+      state.dataListCategory = [];
+      state.loading = false;
+    },
+
+    // create
+    [createCalendar.pending]: (state) => {
+      state.loading = true;
+    },
+    [createCalendar.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [createCalendar.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
+    },
+
+    // update
+    [updateCalendar.pending]: (state) => {
+      state.loading = true;
+    },
+    [updateCalendar.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [updateCalendar.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
+    },
+
+    // approve / reject
+    [approveRejectCalendar.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveRejectCalendar.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [approveRejectCalendar.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
+    },
+
+    // approve / reject inactive
+    [approveRejectInactiveCalendar.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveRejectInactiveCalendar.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [approveRejectInactiveCalendar.rejected]: (state) => {
+      state.loading = false;
+      state.isFailed = true;
     },
   },
 });

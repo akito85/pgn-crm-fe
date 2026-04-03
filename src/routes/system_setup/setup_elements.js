@@ -41,6 +41,8 @@ import ListBillingItemCategory from "../../app/pages/SystemSetup/MasterData/Bill
 import BillingItemCategoryForm from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryForm";
 import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryDetail";
 import CalendarView from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarView";
+import CalendarForm from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarForm";
+import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarDetail";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -138,4 +140,7 @@ export const SYSTEM_SETUP_ELEMENTS = {
 
   // Calendar
   VIEW_CALENDAR_PAGE: <CalendarView />,
+  DETAIL_CALENDAR_PAGE: <CalendarDetail />,
+  CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
+  UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
 };
