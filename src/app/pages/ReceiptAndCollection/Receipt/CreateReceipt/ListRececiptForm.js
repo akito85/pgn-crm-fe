@@ -23,6 +23,8 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import CreateReceiptForm from "./CreateReceiptForm";
 import {
   createReceipt,
+  updateReceipt,
+  getReceiptForUpdate,
   getAllApprovalListReceipt,
   getBankDDL,
   getConvertedCurrency,
@@ -68,6 +70,7 @@ const ListRececiptForm = ({ type }) => {
     loading,
     data_converted_currency,
     accountTypeDDL,
+    data_detail,
   } = useSelector((state) => state.receipt);
   const { bodyError } = useSelector((state) => state?.general);
 
@@ -164,8 +167,19 @@ const ListRececiptForm = ({ type }) => {
     dispatch(getCollectionAgentDDL());
     dispatch(getPayDeliverDDL());
     dispatch(getPayMethodDDL());
-    dispatch(getBankDDL());
-  }, [dispatch]);
+    const method = form.getFieldValue("method");
+    if (method) {
+        dispatch(getBankDDL(method));
+    }
+
+  }, [form, dispatch, setAccNumb]);
+
+  // Fetch detail for update
+  useEffect(() => {
+    if (type === "update" && id) {
+      dispatch(getReceiptForUpdate(id));
+    }
+  }, [dispatch, type, id]);
 
   // APPROVAL HIERARCHY
   useEffect(() => {
@@ -199,6 +213,68 @@ const ListRececiptForm = ({ type }) => {
       setAppHierDataDetail([]);
     }
   }, [dataListAppHierDetail]);
+
+  // Populate form for update
+  useEffect(() => {
+    if (type === "update" && data_detail && data_detail.id) {
+      const receipt = data_detail;
+      
+      // Map basic fields
+      form.setFieldsValue({
+        miscellaneous: receipt.isMisc ? "Yes" : "No",
+        custType: receipt.registrationNumber ? "Prospective" : "Customer",
+        registrationNumber: receipt.registrationNumber,
+        accNumber: receipt.accountId,
+        cusNumber: receipt.customerId,
+        cusName: receipt.customerName,
+        accountName: receipt.accountName,
+        area: receipt.area,
+        segment: receipt.segment,
+        accountType: receipt.accountType,
+        accountGroupType: receipt.accountGroupType,
+        classificationType: receipt.classificationType,
+        meterReadingCode: receipt.meterReadingCode,
+        sor: receipt.sor,
+        costCenterCode: receipt.costCenterCode,
+        
+        method: receipt.paymentMethodId,
+        receiptCode: receipt.receiptCode,
+        receiptDate: receipt.receiptDate ? moment(receipt.receiptDate, "DD MMM YYYY HH:mm:ss") : null,
+        receiptChannel: receipt.receiptChannelId,
+        paymentType: receipt.paymentTypeId,
+        paymentGateway: receipt.paymentGatewayId,
+        collectingAgent: receipt.collectingAgentId,
+        deliveryChannel: receipt.deliveryChannelId,
+        bank: receipt.bankId,
+        remark: receipt.remark || receipt.description,
+        
+        currency: receipt.currencyId,
+        amount: receipt.amount?.toLocaleString("id-ID") || "0",
+        convertedCurrency: receipt.convertedCurrency ? currencyDDL?.data?.find(c => c.name === receipt.convertedCurrency)?.id : null,
+        rateType: receipt.rateTypeId,
+        rateDate: receipt.rateDate ? moment(receipt.rateDate, "DD MMM YYYY") : null,
+        rateAmount: receipt.rateAmount?.toLocaleString("id-ID", { minimumFractionDigits: 2 }) || "0",
+        eqAmount: receipt.equivalentAmount?.toLocaleString("id-ID", { minimumFractionDigits: 2 }) || "0",
+        description: receipt.description,
+      });
+
+      // Set internal states
+      setAmount(receipt.amount);
+      setAccNumb({ id: receipt.accountId, name: receipt.accountName });
+      setCusNumb({ id: receipt.customerId, name: receipt.customerName });
+      setSelectedHierarchy(receipt.appHierId);
+      
+      if (receipt.allocationDtoList) {
+        setDataTable(receipt.allocationDtoList.map(item => ({
+          ...item,
+          id: item.id,
+          allocationAmount: item.allocationAmount,
+        })));
+        const total = receipt.allocationDtoList.reduce((sum, item) => sum + (item.allocationAmount || 0), 0);
+        setTotalAllocationAmount(total);
+      }
+    }
+  }, [type, data_detail, form, currencyDDL, setAmount, setAccNumb, setCusNumb, setSelectedHierarchy, setDataTable, setTotalAllocationAmount]);
 
   useEffect(() => {
     if (
@@ -322,7 +398,7 @@ const ListRececiptForm = ({ type }) => {
         });
       }
     }
-  }, [data_converted_currency, form, amount]);
+  }, [data_converted_currency, form, amount, formValue?.amount, formValue?.convertedCurrency, formValue?.currency]);
 
   // trigger modal try again
   useEffect(() => {
@@ -474,11 +550,11 @@ const ListRececiptForm = ({ type }) => {
     const dataValue = {
       // receiptId: ,
       appHierId: selectedHierarchy,
-      areaId: dataAccountNumber?.data?.areaId,
-      customerId: dataAccountNumber?.data?.customerId,
+      areaId: dataAccountNumber?.data?.areaId || data_detail?.areaId,
+      customerId: dataAccountNumber?.data?.customerId || data_detail?.customerId,
       accountId: formValue?.accNumber,
       customerName: formValue?.cusName,
-      segmentId: dataAccountNumber?.data?.segmentId,
+      segmentId: dataAccountNumber?.data?.segmentId || data_detail?.segmentId,
       accountType: formValue?.accountType,
       accountName: formValue?.accountName,
       customerNumber: formValue?.cusNumber,
@@ -498,11 +574,11 @@ const ListRececiptForm = ({ type }) => {
       deliveryChannelId: formValue?.deliveryChannel,
       rateTypeId: formValue?.rateType,
       rateDate: moment(formValue?.rateDate).format(dateFormatting.date),
-      rateAmount: convertAndTrimString(formValue?.rateAmount),
+      rateAmount: parseMonetaryValue(formValue?.rateAmount),
       convertedCurrency: currencyDDL?.data?.filter(
         (item) => item?.id === formValue?.convertedCurrency
       )[0]?.name,
-      equivalentAmount: formValue?.eqAmount || 0,
+      equivalentAmount: parseMonetaryValue(formValue?.eqAmount),
       referenceNumber: formValue?.reference,
       paymentGatewayId: formValue?.paymentGateway,
       allocationDtoList: dataTable?.map((item) => ({
@@ -519,14 +595,14 @@ const ListRececiptForm = ({ type }) => {
       accountGroupType: formValue?.accountGroupType,
       classificationType: formValue?.classificationType,
       meterReadingCode: formValue?.meterReadingCode,
-      unappliedAmount: formValue?.unappliedAmount,
-      appliedAmount: formValue?.appliedAmount,
-      appliedEqvAmount: formValue?.appliedEqvAmount,
-      unappliedEqvAmount: formValue?.unappliedEqvAmount,
-      unidentifiedAmount: formValue?.unidentifiedAmount,
-      holdAmount: formValue?.holdAmount,
-      refundAmount: formValue?.refundAmount,
-      transferAmount: formValue?.transferAmount,
+      unappliedAmount: parseMonetaryValue(formValue?.unappliedAmount),
+      appliedAmount: parseMonetaryValue(formValue?.appliedAmount),
+      appliedEqvAmount: parseMonetaryValue(formValue?.appliedEqvAmount),
+      unappliedEqvAmount: parseMonetaryValue(formValue?.unappliedEqvAmount),
+      unidentifiedAmount: parseMonetaryValue(formValue?.unidentifiedAmount),
+      holdAmount: parseMonetaryValue(formValue?.holdAmount),
+      refundAmount: parseMonetaryValue(formValue?.refundAmount),
+      transferAmount: parseMonetaryValue(formValue?.transferAmount),
     };
 
     setBodyData(dataValue);
@@ -568,7 +644,9 @@ const ListRececiptForm = ({ type }) => {
       areaId: dataAccountNumber?.data?.areaId,
       segmentId: dataAccountNumber?.data?.segmentId,
     };
-    dispatch(createReceipt(modifiedBody))
+    const actionThunk = type === "update" ? updateReceipt({ id, body: modifiedBody }) : createReceipt(modifiedBody);
+    
+    dispatch(actionThunk)
       .unwrap()
       .then(async (dataForm) => {
         const billingBucketCode = dataForm?.id;
@@ -590,13 +668,17 @@ const ListRececiptForm = ({ type }) => {
         handleClear();
       })
       .catch((error) => {
-        dispatch(
-          validateError({
-            error: error,
-            actions: "UPLOAD_ATTACHMENT",
-            back: false,
-          })
-        );
+        // Only dispatch UPLOAD_ATTACHMENT error if it explicitly failed during upload
+        // (if create/update fails, the thunk already dispatches the correct error)
+        if (error?.config?.url?.includes("upload-attachment")) {
+          dispatch(
+            validateError({
+              error: error,
+              actions: "UPLOAD_ATTACHMENT",
+              back: false,
+            })
+          );
+        }
       });
   };
 

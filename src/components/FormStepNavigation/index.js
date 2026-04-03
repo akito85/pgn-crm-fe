@@ -158,9 +158,7 @@ export const FormFooter = ({
             <Button
               icon={
                 <SVGIcon
-                  name={
-                    type === "update" ? `IconButtonReset` : `IconButtonClear`
-                  }
+                  name={`IconButtonClear`}
                   width={18}
                 />
               }
@@ -176,7 +174,7 @@ export const FormFooter = ({
                 fontSize: "12px",
               }}
             >
-              {type === "update" ? "Reset Data" : "Clear Data"}
+              Clear Data
             </Button>
           )}
           {!isApprover && useSaveDraft && (
