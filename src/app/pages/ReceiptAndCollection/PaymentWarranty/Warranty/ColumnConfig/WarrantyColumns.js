@@ -29,13 +29,6 @@ export const columnWarranty = (
     ...getColumnSearchPropsPaging("warrantyCode", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
-    key: "regNumber",
-    title: "REG NUMBER",
-    dataIndex: "regNumber",
-    sorter: true,
-    ...getColumnSearchPropsPaging("regNumber", searchInput, searchedColumn, searchText, handleSearch),
-  },
-  {
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",

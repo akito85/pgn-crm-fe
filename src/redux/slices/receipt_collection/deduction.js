@@ -129,6 +129,7 @@ export const deleteDeduction = createAsyncThunk(
       const successBody = {
         title: "Successfull",
         description: `Your data has been deleted`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -151,7 +152,7 @@ export const deleteDeduction = createAsyncThunk(
 
 export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY_METHOD",
-  async (id, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/deduction/get-approval-history/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
@@ -461,7 +462,12 @@ const deductionSlice = createSlice({
       state.loading = true;
     },
     [getTypeDDL.fulfilled]: (state, action) => {
-      state.dataType = action.payload?.data?.result || action.payload?.data || action.payload;
+      const actualData = action.payload?.data?.result || action.payload?.data || action.payload;
+      state.dataType = Array.isArray(actualData) ? actualData.map(item => ({
+        ...item,
+        label: item.name || item.label || item.p_label,
+        value: item.name || item.label || item.p_label
+      })) : [];
       state.loading = false;
     },
     [getTypeDDL.rejected]: (state) => {
@@ -472,7 +478,12 @@ const deductionSlice = createSlice({
       state.loading = true;
     },
     [getPeriodDDL.fulfilled]: (state, action) => {
-      state.dataPeriod = action.payload?.data?.result || action.payload?.data || action.payload;
+      const actualData = action.payload?.data?.result || action.payload?.data || action.payload;
+      state.dataPeriod = Array.isArray(actualData) ? actualData.map(item => ({
+        ...item,
+        label: item.name || item.label || item.p_label,
+        value: item.id || item.value || item.p_value
+      })) : [];
       state.loading = false;
     },
     [getPeriodDDL.rejected]: (state) => {

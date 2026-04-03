@@ -56,17 +56,17 @@ const ViewDeduction = () => {
   ];
 
   useEffect(() => {
-    dispatch(getPaginateDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+    handleRefresh();
   }, [dispatch, page, pageSize, search]);
 
   useEffect(() => {
     if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
       setDataApprovalHistoryFix({
         dataApprover: {
-          creation: dataApprovalHistory?.dataApprover?.DEDUCTION_CREATION || [],
+          creation: dataApprovalHistory?.dataApprover?.WARRANTY_DEDUCTION || [],
         },
         dataHistory: {
-          creation: dataApprovalHistory?.dataHistory?.DEDUCTION_CREATION || [],
+          creation: dataApprovalHistory?.dataHistory?.WARRANTY_DEDUCTION || [],
         },
       });
     } else {
@@ -103,12 +103,17 @@ const ViewDeduction = () => {
     setOpenModalDelete(true);
   };
 
+  const handleRefresh = () => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(
+      getPaginateDeduction({ search: reqSearch, page, pageSize })
+    );
+  };
+
   const handleConfirmDelete = () => {
-    dispatch(deleteDeduction(selectedRecord.id)).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        setOpenModalDelete(false);
-        dispatch(getPaginateDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
-      }
+    dispatch(deleteDeduction(selectedRecord.id)).unwrap().then(() => {
+      setOpenModalDelete(false);
+      handleRefresh();
     });
   };
 
