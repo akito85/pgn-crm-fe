@@ -313,18 +313,12 @@ const CreateReceiptForm = ({
                   disabled={customerType !== "Prospective"}
                   placeholder="Select Registration Number"
                   options={
-                    (() => {
-                      const options = allPosRegistrationNumbersDDL && customerType === "Prospective"
-                        ? allPosRegistrationNumbersDDL?.data?.map((item) => ({
-                            label: item?.name,
-                            value: item?.id,
-                          }))
-                        : [];
-                      console.log("Registration Number options:", options);
-                      console.log("customerType:", customerType);
-                      console.log("allPosRegistrationNumbersDDL:", allPosRegistrationNumbersDDL);
-                      return options;
-                    })()
+                    allPosRegistrationNumbersDDL && customerType === "Prospective"
+                      ? allPosRegistrationNumbersDDL?.data?.map((item) => ({
+                          label: item?.name,
+                          value: item?.id,
+                        }))
+                      : []
                   }
                 />
               </Form.Item>
