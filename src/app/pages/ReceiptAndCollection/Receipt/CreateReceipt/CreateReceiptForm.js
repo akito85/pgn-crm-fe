@@ -1,6 +1,6 @@
-import { Checkbox, DatePicker, Form, Input, InputNumber, Select } from "antd";
+import { DatePicker, Form, Input, InputNumber, Select } from "antd";
 import moment from "moment";
-import React, { useState, Fragment } from "react";
+import React, { useState } from "react";
 // Sesuaikan path import CardContainer dengan struktur project lo, 
 // asumsi satu folder dengan BaseContainer/InputComponent
 import CardContainer from "../../../../../components/CardContainer"; 
@@ -18,17 +18,15 @@ import {
   getAccountNumberDDL,
   getAllAccountNumberDDL,
   resetDataAccountNumber,
-  getCusNumberDDL,
-  getAccountNumberByTypeDDL,
   getPayGetwayDDL,
   getCollectionAgentDDL,
   getPayMethodDDL,
   getBankDDL,
+  getAllPosRegistrationNumbersDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import { useDispatch } from "react-redux";
 
 const CreateReceiptForm = ({
-  cusNumb,
   setCusNumb,
   colAgentDDL,
   cusNumberDDL,
@@ -55,12 +53,11 @@ const CreateReceiptForm = ({
   setRequestBodyConverted = () => { },
   rateAmountValues,
   formValues,
-  accountTypeDDL,
+  allPosRegistrationNumbersDDL,
 }) => {
   const dispatch = useDispatch();
   const formValue = form?.getFieldsValue();
   const [filteredConvertedDDL, setFilteredConvertedDDL] = useState([]);
-  const [value, setValue] = useState(null);
 
   const [customerType, setCustomerType] = useState("Customer");
   const [miscType, setMiscType] = useState("No");
@@ -107,6 +104,11 @@ const CreateReceiptForm = ({
 
   }, [form, dispatch, setAccNumb]);
 
+  // Debug: Log POS registration numbers data
+  React.useEffect(() => {
+    console.log("allPosRegistrationNumbersDDL:", allPosRegistrationNumbersDDL);
+  }, [allPosRegistrationNumbersDDL]);
+
   const handleMiscChange = (value) => {
     setMiscType(value);
     
@@ -144,6 +146,10 @@ const CreateReceiptForm = ({
     setCusNumb({ id: null, name: null });
 
     if (value === "Prospective") {
+      // Fetch all POS registration numbers when switching to Prospective Customer
+      console.log("Fetching POS registration numbers...");
+      dispatch(getAllPosRegistrationNumbersDDL());
+      
       form.setFieldsValue({
         accNumber: null,
         cusNumber: null,
@@ -155,7 +161,8 @@ const CreateReceiptForm = ({
         classificationType: null,
         sor: null,
         costCenterCode: null,
-        meterReadingCode: null
+        meterReadingCode: null,
+        registrationNumber: null
       });
     } else {
       form.setFieldsValue({ 
@@ -308,7 +315,24 @@ const CreateReceiptForm = ({
                 rules={customerType === "Prospective" ? formMessageRequired("Registration Number") : []}
                 style={{ marginBottom: 0 }}
               >
-                <InputComponent disabled={customerType !== "Prospective"} placeholder="Input Registration Number" />
+                <SelectComponent
+                  disabled={customerType !== "Prospective"}
+                  placeholder="Select Registration Number"
+                  options={
+                    (() => {
+                      const options = allPosRegistrationNumbersDDL && customerType === "Prospective"
+                        ? allPosRegistrationNumbersDDL?.data?.map((item) => ({
+                            label: item?.name,
+                            value: item?.id,
+                          }))
+                        : [];
+                      console.log("Registration Number options:", options);
+                      console.log("customerType:", customerType);
+                      console.log("allPosRegistrationNumbersDDL:", allPosRegistrationNumbersDDL);
+                      return options;
+                    })()
+                  }
+                />
               </Form.Item>
 
               <Form.Item

@@ -34,6 +34,7 @@ const initialState = {
   data_converted_currency: null,
   data_customer_list: null,
   accountTypeDDL: [],
+  allPosRegistrationNumbersDDL: [],
 };
 
 export const getPaginateReceipt = createAsyncThunk(
@@ -1105,6 +1106,34 @@ export const getUnifiedCreateReceiptDdl = createAsyncThunk(
   }
 );
 
+// Get All POS Registration Numbers for Prospective Customer dropdown
+export const getAllPosRegistrationNumbersDDL = createAsyncThunk(
+  "GET_ALL_POS_REGISTRATION_NUMBERS_DDL",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/pos/registration-numbers`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response; // Return the full response object to match other DDL actions
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 const receiptSlice = createSlice({
   name: "receipt",
   initialState,
@@ -1663,6 +1692,18 @@ const receiptSlice = createSlice({
       state.bankDDL = { data: action.payload.banks };
     },
     [getUnifiedCreateReceiptDdl.rejected]: (state) => {
+      state.loading = false;
+    },
+    // All POS Registration Numbers DDL
+    [getAllPosRegistrationNumbersDDL.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllPosRegistrationNumbersDDL.fulfilled]: (state, action) => {
+      state.allPosRegistrationNumbersDDL = action.payload;
+      state.loading = false;
+    },
+    [getAllPosRegistrationNumbersDDL.rejected]: (state, action) => {
+      state.allPosRegistrationNumbersDDL = action.payload;
       state.loading = false;
     },
   },

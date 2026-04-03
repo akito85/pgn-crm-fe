@@ -70,6 +70,7 @@ const ListRececiptForm = ({ type }) => {
     loading,
     data_converted_currency,
     accountTypeDDL,
+    allPosRegistrationNumbersDDL,
     data_detail,
   } = useSelector((state) => state.receipt);
   const { bodyError } = useSelector((state) => state?.general);
@@ -777,6 +778,7 @@ const ListRececiptForm = ({ type }) => {
               rateAmountValues={data_converted_currency?.convertedRate}
               formValues={allValues}
               accountTypeDDL={accountTypeDDL}
+              allPosRegistrationNumbersDDL={allPosRegistrationNumbersDDL}
             />
           </div>
 
