@@ -88,7 +88,24 @@ const CreateReceiptForm = ({
         setAccNumb({ id: currentAccId, name: currentAccName });
     }
     
-  }, [form, storedData]);
+    // Trigger dependent dropdowns for update
+    const paymentType = form.getFieldValue("paymentType");
+    const partner = form.getFieldValue("paymentGateway");
+    const deliveryChannel = form.getFieldValue("deliveryChannel");
+    const method = form.getFieldValue("method");
+
+    if (paymentType) {
+        dispatch(getPayGetwayDDL(paymentType));
+        dispatch(getCollectionAgentDDL({ paymentTypeId: paymentType, partnerId: partner }));
+    }
+    if (deliveryChannel) {
+        dispatch(getPayMethodDDL(deliveryChannel));
+    }
+    if (method) {
+        dispatch(getBankDDL(method));
+    }
+
+  }, [form, dispatch, setAccNumb]);
 
   const handleMiscChange = (value) => {
     setMiscType(value);
