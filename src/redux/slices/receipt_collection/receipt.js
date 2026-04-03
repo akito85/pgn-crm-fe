@@ -34,6 +34,7 @@ const initialState = {
   data_converted_currency: null,
   data_customer_list: null,
   accountTypeDDL: [],
+  allPosRegistrationNumbersDDL: [],
 };
 
 export const getPaginateReceipt = createAsyncThunk(
@@ -717,6 +718,28 @@ export const updateReceipt = createAsyncThunk(
   }
 );
 
+// save draft receipt
+export const saveDraftReceipt = createAsyncThunk(
+  "SAVE_DRAFT_RECEIPT",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/save-draft";
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: response?.message || "Receipt saved as draft successfully",
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "SAVE_DRAFT_RECEIPT", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // create receipt
 export const createAllocation = createAsyncThunk(
   "CREATE_ALLOCATION",
@@ -1101,6 +1124,34 @@ export const getUnifiedCreateReceiptDdl = createAsyncThunk(
         validateError({ error: error, action: "GET_UNIFIED_CREATE_RECEIPT_DDL" })
       );
       return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+// Get All POS Registration Numbers for Prospective Customer dropdown
+export const getAllPosRegistrationNumbersDDL = createAsyncThunk(
+  "GET_ALL_POS_REGISTRATION_NUMBERS_DDL",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/pos/registration-numbers`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response; // Return the full response object to match other DDL actions
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
@@ -1510,6 +1561,18 @@ const receiptSlice = createSlice({
       state.data = action.payload;
       state.loading = false;
     },
+    // Save Draft Receipt
+    [saveDraftReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [saveDraftReceipt.fulfilled]: (state, action) => {
+      state.data = action.payload;
+      state.loading = false;
+    },
+    [saveDraftReceipt.rejected]: (state, action) => {
+      state.data = action.payload;
+      state.loading = false;
+    },
     // Get Receipt For Update
     [getReceiptForUpdate.pending]: (state) => {
       state.loading = true;
@@ -1663,6 +1726,18 @@ const receiptSlice = createSlice({
       state.bankDDL = { data: action.payload.banks };
     },
     [getUnifiedCreateReceiptDdl.rejected]: (state) => {
+      state.loading = false;
+    },
+    // All POS Registration Numbers DDL
+    [getAllPosRegistrationNumbersDDL.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllPosRegistrationNumbersDDL.fulfilled]: (state, action) => {
+      state.allPosRegistrationNumbersDDL = action.payload;
+      state.loading = false;
+    },
+    [getAllPosRegistrationNumbersDDL.rejected]: (state, action) => {
+      state.allPosRegistrationNumbersDDL = action.payload;
       state.loading = false;
     },
   },
