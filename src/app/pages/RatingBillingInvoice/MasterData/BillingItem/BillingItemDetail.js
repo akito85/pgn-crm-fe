@@ -32,6 +32,7 @@ const BillingItemDetail = () => {
     data_typeList,
     data_criteriaList,
     loading,
+    loadingDetail,
   } = useSelector((state) => state.billing_item);
 
   const dispatch = useDispatch();
@@ -256,7 +257,7 @@ const BillingItemDetail = () => {
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
-      <Spin spinning={loading}>
+      <Spin spinning={loading || loadingDetail}>
         <BreadCrumb routes={routes} />
         {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") &&
           data_BillingItemDetail?.approvalDto?.isApprover && (

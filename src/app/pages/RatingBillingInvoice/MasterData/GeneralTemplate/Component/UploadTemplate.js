@@ -7,10 +7,8 @@ import FileSaver from "file-saver";
 import { tokenHeader } from "../../../../../../utils/tokenHeader";
 import axios from "axios";
 import { PreviewFile } from "../Utils/PreviewFile";
-import { previewGeneralTemplate } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/general_template";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import ExtensionFile from "../../../../../../utils/ExtensionFile";
 
 const UploadTemplate = ({
   fileList,
@@ -88,31 +86,16 @@ const UploadTemplate = ({
       }
     } else {
       try {
-        if (r.type && fileTypeCheck.some((v) => r.type.includes(v))) {
-          let filename = r?.fileName;
-          let extension = filename.match(/\.([^.]+)$/);
-          dispatch(
-            previewGeneralTemplate({
-              url: r.urlFile1,
-              extension: extension[1],
-              filename: filename,
-            })
-          );
-        } else {
-          const response = await axios.get(
-            configApplication + r.urlFile1,
-            {
-              headers: tokenHeader(),
-              responseType: "blob",
-            }
-          );
-          // console.log(response);
-          const base64 = await getBase64(response.data);
-          // console.log(base64);
-          PreviewFile(base64, r.fileName);
-        }
+        const response = await axios.get(
+          configApplication + r.urlFile1,
+          {
+            headers: tokenHeader(),
+            responseType: "blob",
+          }
+        );
+        FileSaver.saveAs(response.data, r.fileName);
       } catch (error) {
-        console.error("Error fetching document:", error);
+        console.error("Error downloading document:", error);
       }
     }
   };
@@ -120,8 +103,18 @@ const UploadTemplate = ({
   return (
     <div className="w-full flex flex-row items-center gap-5 justify-start">
       {type ? (
-        <div>
-          <p style={{ margin: 0 }}>{`${fileList[0]?.fileName || ""}`}</p>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p
+            style={{
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+            title={fileList[0]?.fileName || ""}
+          >
+            {`${fileList[0]?.fileName || ""}`}
+          </p>
         </div>
       ) : (
         <Upload
@@ -199,7 +192,7 @@ const UploadTemplate = ({
         </Upload>
       )}
       {fileList.length > 0 ? (
-        <span className={"text-gray-500 text-xs ml-2"}>
+        <span className={"text-gray-500 text-xs ml-2"} style={{ flexShrink: 0 }}>
           <EyeOutlined
             style={{ fontSize: "24px", color: "#8D91A0" }}
             onClick={() => handleShow(fileList[0])}
