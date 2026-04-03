@@ -1,7 +1,19 @@
-import { Tooltip, Spin, Checkbox, Tabs } from "antd";
+import {
+  Tooltip,
+  Spin,
+  Checkbox,
+  Tabs,
+  Calendar,
+  Badge,
+  Select,
+  Radio,
+} from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
+import dayjs from "dayjs";
+import weekday from "dayjs/plugin/weekday";
+import localeData from "dayjs/plugin/localeData";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -15,6 +27,7 @@ import {
   getApprovalHistory,
   getAvailableApproval,
   getSelectedApproval,
+  getCalendarByMonthYear,
 } from "../../../../../redux/slices/system_setup/master_data/calendar";
 import { renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
@@ -24,6 +37,9 @@ import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
+
+dayjs.extend(weekday);
+dayjs.extend(localeData);
 
 const { TabPane } = Tabs;
 
@@ -39,6 +55,8 @@ const CalendarView = () => {
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const [activeTab, setActiveTab] = useState("table");
+  const [calendarMode, setCalendarMode] = useState("month");
+  const [calendarDate, setCalendarDate] = useState(dayjs());
 
   // Modal States
   const [modalInactive, setModalInactive] = useState(false);
@@ -63,9 +81,14 @@ const CalendarView = () => {
     localStorage.setItem("calendarFixedColumns", JSON.stringify(fixedColumns));
   }, [fixedColumns]);
 
-  const { loading, data, pagination, data_approval_history } = useSelector(
-    (state) => state.calendar,
-  );
+  const {
+    loading,
+    data,
+    pagination,
+    data_approval_history,
+    data_by_month_year,
+    loading_calendar,
+  } = useSelector((state) => state.calendar);
 
   // Handle Refresh
   const handleRefresh = useCallback(() => {
@@ -93,6 +116,18 @@ const CalendarView = () => {
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
+
+  // Fetch calendar events when calendar tab is active or date changes
+  useEffect(() => {
+    if (activeTab === "calendar") {
+      dispatch(
+        getCalendarByMonthYear({
+          month: calendarDate.month() + 1,
+          year: calendarDate.year(),
+        }),
+      );
+    }
+  }, [activeTab, calendarDate, dispatch]);
 
   // Approval History Effect
   useEffect(() => {
@@ -235,6 +270,138 @@ const CalendarView = () => {
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
+  };
+
+  // Calendar helpers
+  const HOLIDAY_TYPE_STATUS = {
+    NATIONAL: "error", // red
+    JOINT: "processing", // blue
+    OTHER: "success", // green
+  };
+
+  const getEventsForDate = (date) => {
+    if (!Array.isArray(data_by_month_year)) return [];
+    return data_by_month_year.filter((event) => {
+      const start = dayjs(event.startDate).startOf("day");
+      const end = dayjs(event.endDate).endOf("day");
+      return (
+        (date.isAfter(start) || date.isSame(start, "day")) &&
+        (date.isBefore(end) || date.isSame(end, "day"))
+      );
+    });
+  };
+
+  const dateCellRender = (date) => {
+    const events = getEventsForDate(date);
+    if (!events.length) return null;
+    return (
+      <ul
+        className="events"
+        style={{ listStyle: "none", padding: 0, margin: 0 }}
+      >
+        {events.slice(0, 3).map((event, i) => {
+          const status = HOLIDAY_TYPE_STATUS[event.holidayType] || "default";
+          return (
+            <li key={i}>
+              <Tooltip
+                title={`${event.calendarName} (${event.startDate ? dayjs(event.startDate).format("DD MMM") : ""} - ${event.endDate ? dayjs(event.endDate).format("DD MMM YYYY") : ""})`}
+              >
+                <Badge status={status} text={event.calendarName} />
+              </Tooltip>
+            </li>
+          );
+        })}
+        {events.length > 3 && (
+          <li style={{ color: "#8c8c8c", fontSize: 11 }}>
+            +{events.length - 3} more
+          </li>
+        )}
+      </ul>
+    );
+  };
+
+  const monthCellRender = (date) => {
+    const monthEvents = Array.isArray(data_by_month_year)
+      ? data_by_month_year.filter((event) => {
+          const start = dayjs(event.startDate);
+          const end = dayjs(event.endDate);
+          return (
+            (start.year() === date.year() && start.month() === date.month()) ||
+            (end.year() === date.year() && end.month() === date.month())
+          );
+        })
+      : [];
+    if (!monthEvents.length) return null;
+    return (
+      <div className="notes-month">
+        {monthEvents.slice(0, 3).map((event, i) => {
+          const status = HOLIDAY_TYPE_STATUS[event.holidayType] || "default";
+          return (
+            <div key={i}>
+              <Badge status={status} text={event.calendarName} />
+            </div>
+          );
+        })}
+        {monthEvents.length > 3 && (
+          <span style={{ color: "#8c8c8c", fontSize: 11 }}>
+            +{monthEvents.length - 3} more
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  const calendarHeaderRender = ({ value, onChange }) => {
+    const currentYear = value.year();
+    const currentMonth = value.month();
+
+    const yearOptions = [];
+    for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+      yearOptions.push({ label: String(y), value: y });
+    }
+
+    const monthOptions = dayjs.months
+      ? dayjs.months().map((m, i) => ({ label: m, value: i }))
+      : Array.from({ length: 12 }, (_, i) => ({
+          label: dayjs().month(i).format("MMM"),
+          value: i,
+        }));
+
+    return (
+      <div className="flex justify-end items-center gap-2 px-2 pb-2">
+        <Select
+          size="small"
+          value={currentYear}
+          options={yearOptions}
+          onChange={(y) => {
+            const next = value.year(y);
+            onChange(next);
+            setCalendarDate(next);
+          }}
+          style={{ width: 90 }}
+        />
+        <Select
+          size="small"
+          value={currentMonth}
+          options={monthOptions}
+          onChange={(m) => {
+            const next = value.month(m);
+            onChange(next);
+            setCalendarDate(next);
+          }}
+          style={{ width: 90 }}
+        />
+        <Radio.Group
+          size="small"
+          value={calendarMode}
+          onChange={(e) => setCalendarMode(e.target.value)}
+          buttonStyle="solid"
+        >
+          <Radio.Button value="month">Month</Radio.Button>
+          <Radio.Button value="year">Year</Radio.Button>
+        </Radio.Group>
+      </div>
+    );
   };
 
   // Handle Download
@@ -727,9 +894,38 @@ const CalendarView = () => {
             </TabPane>
 
             <TabPane tab="Calendar View" key="calendar">
-              <div className="w-full flex items-center justify-center py-16 text-gray-400">
-                Calendar view coming soon.
-              </div>
+              <Spin spinning={loading_calendar}>
+                <Calendar
+                  value={calendarDate}
+                  mode={calendarMode}
+                  onPanelChange={(date, mode) => {
+                    setCalendarDate(date);
+                    setCalendarMode(mode);
+                  }}
+                  dateCellRender={dateCellRender}
+                  monthCellRender={monthCellRender}
+                  headerRender={calendarHeaderRender}
+                />
+                {/* Legend */}
+                <div className="flex gap-4 px-4 pb-3 pt-1 flex-wrap">
+                  <span className="flex items-center gap-1 text-xs">
+                    <Badge status="error" />
+                    <span>National Holiday</span>
+                  </span>
+                  <span className="flex items-center gap-1 text-xs">
+                    <Badge status="processing" />
+                    <span>Joint Holiday</span>
+                  </span>
+                  <span className="flex items-center gap-1 text-xs">
+                    <Badge status="success" />
+                    <span>Other</span>
+                  </span>
+                  <span className="flex items-center gap-1 text-xs">
+                    <Badge status="default" />
+                    <span>Normal Event</span>
+                  </span>
+                </div>
+              </Spin>
             </TabPane>
           </Tabs>
         </CardContainer>

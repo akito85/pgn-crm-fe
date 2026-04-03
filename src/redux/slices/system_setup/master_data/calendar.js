@@ -8,9 +8,11 @@ const initialState = {
   pagination: {},
   data_detail: {},
   data_approval_history: {},
+  data_by_month_year: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   loading: false,
+  loading_calendar: false,
   isFailed: false,
   isSuccess: false,
 };
@@ -121,6 +123,26 @@ export const inactiveCalendar = createAsyncThunk(
   },
 );
 
+export const getCalendarByMonthYear = createAsyncThunk(
+  "GET_CALENDAR_BY_MONTH_YEAR",
+  async ({ month, year }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/calendar/by-month-year?month=${month}&year=${year}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_CALENDAR_BY_MONTH_YEAR",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  },
+);
+
 export const downloadCalendar = createAsyncThunk(
   "DOWNLOAD_CALENDAR",
   async ({ sort, page, size, search }, thunkAPI) => {
@@ -216,6 +238,19 @@ const calendarSlice = createSlice({
     },
     [downloadCalendar.rejected]: (state) => {
       state.loading = false;
+    },
+
+    // get by month year
+    [getCalendarByMonthYear.pending]: (state) => {
+      state.loading_calendar = true;
+    },
+    [getCalendarByMonthYear.fulfilled]: (state, action) => {
+      state.data_by_month_year = action.payload || [];
+      state.loading_calendar = false;
+    },
+    [getCalendarByMonthYear.rejected]: (state) => {
+      state.data_by_month_year = [];
+      state.loading_calendar = false;
     },
   },
 });
