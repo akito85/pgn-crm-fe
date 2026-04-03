@@ -60,7 +60,7 @@ const CreateReceiptForm = ({
   const [filteredConvertedDDL, setFilteredConvertedDDL] = useState([]);
 
   const [customerType, setCustomerType] = useState("Customer");
-  const [miscType, setMiscType] = useState("No");
+  const [receiptType, setReceiptType] = useState("Standard");
   const selectedCurrencyId = Form.useWatch("currency", form);
   const selectedCurrencyName = currencyDDL?.data?.find(
     (c) => c.id === selectedCurrencyId
@@ -69,11 +69,11 @@ const CreateReceiptForm = ({
 
   // Sinkronisasi state saat form pertama kali dimuat
   React.useEffect(() => {
-    const currentMisc = form.getFieldValue("miscellaneous");
+    const currentReceiptType = form.getFieldValue("receiptType");
     const currentCustType = form.getFieldValue("custType");
 
-    if (currentMisc) {
-      setMiscType(currentMisc);
+    if (currentReceiptType) {
+      setReceiptType(currentReceiptType);
     }
     if (currentCustType) {
       setCustomerType(currentCustType);
@@ -104,13 +104,13 @@ const CreateReceiptForm = ({
 
   }, [form, dispatch, setAccNumb]);
 
-  const handleMiscChange = (value) => {
-    setMiscType(value);
+  const handleReceiptTypeChange = (value) => {
+    setReceiptType(value);
     
     setAccNumb(null);
     setCusNumb({ id: null, name: null });
 
-    if (value === "Yes") {
+    if (value === "Miscellaneous") {
       form.setFieldsValue({
         custType: "Customer", 
         accNumber: null,
@@ -276,19 +276,19 @@ const CreateReceiptForm = ({
         <div className="w-full grid grid-cols-5 gap-2">
           {/* Row 1 */}
           <Form.Item
-            label={"Miscellaneous"}
-            name={"miscellaneous"}
-            rules={formMessageRequired("Miscellaneous")}
-            initialValue={"No"}
+            label={"Receipt Type"}
+            name={"receiptType"}
+            rules={formMessageRequired("Receipt Type")}
+            initialValue={"Standard"}
             style={{ marginBottom: 0 }}
           >
-            <SelectComponent placeholder="Select Miscellaneous" onChange={handleMiscChange}>
-              <Select.Option value="Yes">Yes</Select.Option>
-              <Select.Option value="No">No</Select.Option>
+            <SelectComponent placeholder="Select Receipt Type" onChange={handleReceiptTypeChange}>
+              <Select.Option value="Standard">Standard</Select.Option>
+              <Select.Option value="Miscellaneous">Miscellaneous</Select.Option>
             </SelectComponent>
           </Form.Item>
           
-          {miscType === "No" && (
+          {receiptType === "Standard" && (
             <>
               <Form.Item
                 label={"Customer Type"}
@@ -442,6 +442,26 @@ const CreateReceiptForm = ({
                   </Form.Item>
             </>
           )}
+
+          {receiptType === "Miscellaneous" && (
+            <>
+              <Form.Item
+                label={"Customer Type"}
+                name={"custType"}
+                initialValue={"Customer"}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent disabled placeholder="Customer Type">
+                  <Select.Option value="Customer">Customer</Select.Option>
+                </SelectComponent>
+              </Form.Item>
+              
+              {/* Empty cells to maintain grid layout */}
+              <div></div>
+              <div></div>
+              <div></div>
+            </>
+          )}
         </div>
       </CardContainer>
 
@@ -456,8 +476,8 @@ const CreateReceiptForm = ({
             <SelectComponent onChange={handleReceiptMethodChange} placeholder="Select Receipt Method">
               {payMethodDDL?.data
                 ?.filter((data) => {
-                  const miscellaneous = form.getFieldValue("miscellaneous");
-                  if (miscellaneous === "Yes" && data.name === "From Customer") {
+                  const receiptType = form.getFieldValue("receiptType");
+                  if (receiptType === "Miscellaneous" && data.name === "From Customer") {
                     return false;
                   }
                   return true;

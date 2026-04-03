@@ -24,6 +24,7 @@ import CreateReceiptForm from "./CreateReceiptForm";
 import {
   createReceipt,
   updateReceipt,
+  saveDraftReceipt,
   getReceiptForUpdate,
   getAllApprovalListReceipt,
   getBankDDL,
@@ -119,7 +120,7 @@ const ListRececiptForm = ({ type }) => {
     {
       value: "Receipt",
       paramValue: [
-        "miscellaneous",
+        "receiptType",
         "accNumber",
         "cusNumber",
         "cusName",
@@ -224,7 +225,7 @@ const ListRececiptForm = ({ type }) => {
       
       // Map basic fields
       form.setFieldsValue({
-        miscellaneous: receipt.isMisc ? "Yes" : "No",
+        receiptType: receipt.receiptType || (receipt.isMisc ? "Miscellaneous" : "Standard"),
         custType: receipt.registrationNumber ? "Prospective" : "Customer",
         registrationNumber: receipt.registrationNumber,
         accNumber: receipt.accountId,
@@ -329,7 +330,12 @@ const ListRececiptForm = ({ type }) => {
   // use effect to get converted rate
   const handleChangeRequestConverted = useCallback(
     (changedValues, allValues) => {
-      setAllValues(allValues);
+      // For update mode, add receipt ID to allValues
+      const enrichedValues = {
+        ...allValues,
+        ...(type === "update" && id ? { receiptId: id } : {})
+      };
+      setAllValues(enrichedValues);
     },
     []
   );
@@ -511,6 +517,105 @@ const ListRececiptForm = ({ type }) => {
     }
   };
 
+  const handleSaveDraft = async () => {
+    setFlag(1);
+    try {
+      // For draft, we don't validate all fields - just get current form values
+      const values = form.getFieldsValue();
+      
+      handleSaveDraftForm(values);
+    } catch (errorInfo) {
+      const errorBody = {
+        title: "Save Draft Failed",
+        description: "Unable to save draft. Please try again.",
+      };
+      dispatch(showModalError(errorBody));
+    }
+  };
+
+  const handleSaveDraftForm = (formValue) => {
+    // For draft, we don't need approval hierarchy or attachment validation
+    // Just save the basic receipt data, allowing null/undefined values
+    
+    const dataValue = {
+      // For draft, don't send appHierId if not selected to avoid validation issues
+      // appHierId: selectedHierarchy || 1, // Use default hierarchy if not selected
+      areaId: dataAccountNumber?.data?.areaId || data_detail?.areaId || null,
+      customerId: dataAccountNumber?.data?.customerId || data_detail?.customerId || null,
+      accountId: formValue?.accNumber || null,
+      customerName: formValue?.cusName || null,
+      segmentId: dataAccountNumber?.data?.segmentId || data_detail?.segmentId || null,
+      accountType: formValue?.accountType || null,
+      accountName: formValue?.accountName || null,
+      customerNumber: formValue?.cusNumber || null,
+      sor: formValue?.sor || null,
+      area: formValue?.area || null,
+      segment: formValue?.segment || null,
+      receiptDate: formValue?.receiptDate ? moment(formValue?.receiptDate).format(dateFormatting.dateTime) : null,
+      currencyId: formValue?.currency || null,
+      amount: formValue?.amount ? parseMonetaryValue(formValue?.amount) : null,
+      paymentTypeId: formValue?.paymentType || null,
+      paymentMethodId: formValue?.method || null,
+      receiptChannelId: formValue?.receiptChannel || null,
+      bankId: formValue?.bank || null,
+      collectingAgentId: formValue?.collectingAgent || null,
+      deliveryChannelId: formValue?.deliveryChannel || null,
+      rateTypeId: formValue?.rateType || null,
+      rateDate: formValue?.rateDate ? moment(formValue?.rateDate).format(dateFormatting.date) : null,
+      rateAmount: formValue?.rateAmount ? parseMonetaryValue(formValue?.rateAmount) : null,
+      convertedCurrency: formValue?.convertedCurrency ? currencyDDL?.data?.filter(
+        (item) => item?.id === formValue?.convertedCurrency
+      )[0]?.name : null,
+      equivalentAmount: formValue?.eqAmount ? parseMonetaryValue(formValue?.eqAmount) : null,
+      referenceNumber: formValue?.custType === "Prospective" ? formValue?.registrationNumber : formValue?.reference,
+      paymentGatewayId: formValue?.paymentGateway || null,
+      allocationDtoList: dataTable?.length > 0 ? dataTable?.map((item) => ({
+        id: item?.id,
+        allocationAmount: item?.allocationAmount,
+      })) : [],
+      description: formValue?.description || null,
+      remark: formValue?.remark || null,
+      receiptCode: formValue?.receiptCode || null,
+      isMisc: formValue?.receiptType === "Miscellaneous",
+      receiptType: formValue?.receiptType || "Standard",
+      customerType: formValue?.custType || "Customer",
+      registrationNumber: formValue?.registrationNumber || null,
+      accountGroupType: formValue?.accountGroupType || null,
+      classificationType: formValue?.classificationType || null,
+      meterReadingCode: formValue?.meterReadingCode || null,
+      unappliedAmount: formValue?.unappliedAmount ? parseMonetaryValue(formValue?.unappliedAmount) : null,
+      appliedAmount: formValue?.appliedAmount ? parseMonetaryValue(formValue?.appliedAmount) : null,
+      appliedEqvAmount: formValue?.appliedEqvAmount ? parseMonetaryValue(formValue?.appliedEqvAmount) : null,
+      unappliedEqvAmount: formValue?.unappliedEqvAmount ? parseMonetaryValue(formValue?.unappliedEqvAmount) : null,
+      unidentifiedAmount: formValue?.unidentifiedAmount ? parseMonetaryValue(formValue?.unidentifiedAmount) : null,
+      holdAmount: formValue?.holdAmount ? parseMonetaryValue(formValue?.holdAmount) : null,
+      refundAmount: formValue?.refundAmount ? parseMonetaryValue(formValue?.refundAmount) : null,
+      transferAmount: formValue?.transferAmount ? parseMonetaryValue(formValue?.transferAmount) : null,
+    };
+
+    // Only add appHierId if it's selected, otherwise omit it for draft
+    if (selectedHierarchy) {
+      dataValue.appHierId = selectedHierarchy;
+    }
+
+    const modifiedBody = {
+      ...dataValue,
+      areaId: dataAccountNumber?.data?.areaId || null,
+      segmentId: dataAccountNumber?.data?.segmentId || null,
+    };
+
+    // Save as draft - no confirmation modal needed
+    dispatch(saveDraftReceipt(modifiedBody))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT);
+      })
+      .catch((error) => {
+        console.error("Save draft failed:", error);
+      });
+  };
+
   const handleSubmitForm = (formValue) => {
     // 1. Validasi Allocation Table
     // if (dataTable?.length === 0 && formValue?.custType !== "Prospective") {
@@ -582,7 +687,7 @@ const ListRececiptForm = ({ type }) => {
         (item) => item?.id === formValue?.convertedCurrency
       )[0]?.name,
       equivalentAmount: parseMonetaryValue(formValue?.eqAmount),
-      referenceNumber: formValue?.reference,
+      referenceNumber: formValue?.custType === "Prospective" ? formValue?.registrationNumber : formValue?.reference,
       paymentGatewayId: formValue?.paymentGateway,
       allocationDtoList: dataTable?.map((item) => ({
         id: item?.id,
@@ -591,8 +696,8 @@ const ListRececiptForm = ({ type }) => {
       description: formValue?.description,
       remark: formValue?.remark,
       receiptCode: formValue?.receiptCode,
-      isMisc: formValue?.miscellaneous === "Yes",
-      miscellaneous: formValue?.miscellaneous,
+      isMisc: formValue?.receiptType === "Miscellaneous",
+      receiptType: formValue?.receiptType,
       customerType: formValue?.custType,
       registrationNumber: formValue?.registrationNumber,
       accountGroupType: formValue?.accountGroupType,
@@ -613,6 +718,7 @@ const ListRececiptForm = ({ type }) => {
       {
         value: "Receipt",
         paramValue: [
+          "receiptType",
           "cusNumber",
           "accNumber",
           "cusName",
@@ -823,8 +929,11 @@ const ListRececiptForm = ({ type }) => {
             onCancel={handleBack}
             onClear={handleClear}
             onSubmit={handleSaveSubmit} 
+            onSaveDraft={type === "create" ? handleSaveDraft : undefined}
+            useSaveDraft={type === "create"}
             type={type}
             disableSubmit={storedData || totalAllocationAmount > amount}
+            disableSaveDraft={false} // Draft can always be saved regardless of validation
           />
         </Form>
       </Spin>

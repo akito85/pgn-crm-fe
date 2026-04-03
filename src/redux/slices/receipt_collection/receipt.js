@@ -718,6 +718,28 @@ export const updateReceipt = createAsyncThunk(
   }
 );
 
+// save draft receipt
+export const saveDraftReceipt = createAsyncThunk(
+  "SAVE_DRAFT_RECEIPT",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/receipt/save-draft";
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: response?.message || "Receipt saved as draft successfully",
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "SAVE_DRAFT_RECEIPT", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // create receipt
 export const createAllocation = createAsyncThunk(
   "CREATE_ALLOCATION",
@@ -1536,6 +1558,18 @@ const receiptSlice = createSlice({
       state.loading = false;
     },
     [updateReceipt.rejected]: (state, action) => {
+      state.data = action.payload;
+      state.loading = false;
+    },
+    // Save Draft Receipt
+    [saveDraftReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [saveDraftReceipt.fulfilled]: (state, action) => {
+      state.data = action.payload;
+      state.loading = false;
+    },
+    [saveDraftReceipt.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
     },
