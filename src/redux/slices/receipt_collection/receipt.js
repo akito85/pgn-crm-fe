@@ -54,7 +54,6 @@ export const getPaginateReceipt = createAsyncThunk(
     }
   }
 );
-
 export const getReceiptDetail = createAsyncThunk(
   "GET_RECEIPT_DETAIL",
   async (id, thunkAPI) => {
@@ -65,6 +64,22 @@ export const getReceiptDetail = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "GET_RECEIPT_DETAIL" })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getReceiptForUpdate = createAsyncThunk(
+  "GET_RECEIPT_FOR_UPDATE",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/edit-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "GET_RECEIPT_FOR_UPDATE" })
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
@@ -679,6 +694,29 @@ export const createReceipt = createAsyncThunk(
     }
   }
 );
+
+// update receipt
+export const updateReceipt = createAsyncThunk(
+  "UPDATE_RECEIPT",
+  async ({ id, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/update/${id}`;
+      const response = await receiptCollectionHttpService.updateData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: response?.message || "Receipt updated successfully",
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, action: "UPDATE_RECEIPT", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // create receipt
 export const createAllocation = createAsyncThunk(
   "CREATE_ALLOCATION",
@@ -1458,6 +1496,30 @@ const receiptSlice = createSlice({
     },
     [createReceipt.rejected]: (state, action) => {
       state.data = action.payload;
+      state.loading = false;
+    },
+    // Update Receipt
+    [updateReceipt.pending]: (state) => {
+      state.loading = true;
+    },
+    [updateReceipt.fulfilled]: (state, action) => {
+      state.data = action.payload;
+      state.loading = false;
+    },
+    [updateReceipt.rejected]: (state, action) => {
+      state.data = action.payload;
+      state.loading = false;
+    },
+    // Get Receipt For Update
+    [getReceiptForUpdate.pending]: (state) => {
+      state.loading = true;
+    },
+    [getReceiptForUpdate.fulfilled]: (state, action) => {
+      state.data_detail = action.payload;
+      state.loading = false;
+    },
+    [getReceiptForUpdate.rejected]: (state, action) => {
+      state.data_detail = action.payload;
       state.loading = false;
     },
     // Reverse Allocation
