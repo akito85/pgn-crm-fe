@@ -3,7 +3,7 @@ import moment from "moment";
 import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Form, Tabs } from "antd";
+import { Form, Tabs, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
@@ -241,8 +241,9 @@ const ListDetailDeduction = () => {
 
   return (
     <>
-      <BreadCrumb routes={routes} />
-      <div className="w-full">
+      <Spin spinning={loading || !data_detail || !customerData}>
+        <BreadCrumb routes={routes} />
+        <div className="w-full">
         <CardContainerNoBorder 
           header="DEDUCTION DETAIL" 
           collapsible={true}
@@ -291,7 +292,8 @@ const ListDetailDeduction = () => {
             updatedBy: dataHeader?.updatedBy || "-"
           }}
         />
-      </div>
+        </div>
+      </Spin>
 
       <ModalApproveOrReject
         isOpen={modalApprove}

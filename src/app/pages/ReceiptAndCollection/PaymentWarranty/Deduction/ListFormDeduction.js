@@ -55,7 +55,7 @@ const ListFormDeduction = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
+  const approvalHierarchy = Form.useWatch("approvalHierarchy", form);
   const location = useLocation();
   const { id } = location?.state || {};
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -65,6 +65,7 @@ const ListFormDeduction = (props) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
   const [current, setCurrent] = useState(0);
   const [sendBody, setSendBody] = useState();
   const [tabData, setTabData] = useState([
@@ -129,15 +130,15 @@ const ListFormDeduction = (props) => {
 
   useEffect(() => {
     if (
-      formValue.approvalHierarchy &&
+      approvalHierarchy &&
       !appHierOptions
         .map((item) => item.value)
-        .includes(formValue.approvalHierarchy)
+        .includes(approvalHierarchy)
     ) {
       form.setFieldsValue({ approvalHierarchy: null });
       setSelectedHierarchy(null);
     }
-  }, [formValue, appHierOptions, form]);
+  }, [approvalHierarchy, appHierOptions, form]);
 
   useEffect(() => {
     if (id && data_detail) {
@@ -259,6 +260,9 @@ const ListFormDeduction = (props) => {
     const filterDataAttach = listDataAttachment.filter(
       (item) => item.dataType !== "exist"
     );
+
+    const failedUploads = [];
+
     for (let i = 0; i < filterDataAttach.length; i++) {
       const element = filterDataAttach[i];
       const body = {
@@ -267,16 +271,33 @@ const ListFormDeduction = (props) => {
         category: "WARRANTY_DEDUCTION",
         fileCategoryId: element.fileCategoryId,
       };
-      await receiptCollectionHttpService.uploadImage(
-        `/v1/dbs/api/attachment/upload/v1`,
-        body
+
+      try {
+        await receiptCollectionHttpService.uploadImage(
+          `/v1/dbs/api/attachment/upload/v1`,
+          body
+        );
+      } catch (error) {
+        console.error(`Failed to upload file ${i + 1}:`, error);
+        failedUploads.push(element);
+      }
+    }
+
+    if (failedUploads.length > 0) {
+      dispatch(
+        showModalError({
+          title: "Upload Warning",
+          description: `${failedUploads.length} file(s) failed to upload. Please try again.`,
+          return: false,
+        })
       );
     }
+
+    return failedUploads;
   };
 
   const handleSave = async () => {
     setLoadingSave(true);
-    setModalConfirm(false);
 
     const body = {
       ...sendBody,
@@ -285,30 +306,38 @@ const ListFormDeduction = (props) => {
       deductionPeriod: sendBody?.deductionPeriod?.toString(),
     };
 
-    dispatch(saveDeduction(body))
-      .unwrap()
-      .then(async (data) => {
-        const id = data?.id;
-        if (id) {
-          await uploadFiles(id);
-        }
-        dispatch(showModalSuccess({
+    try {
+      const data = await dispatch(saveDeduction(body)).unwrap();
+      const id = data?.id;
+
+      if (id) {
+        await uploadFiles(id);
+      }
+
+      setModalConfirm(false);
+      dispatch(
+        showModalSuccess({
           title: "Successful",
           description: "Your data has been submitted",
           return: false,
-        }));
-        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
-      })
-      .catch(() => {
-        setLoadingSave(false);
-      })
-      .finally(() => {
-        setLoadingSave(false);
-      });
+        })
+      );
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+    } catch (error) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Failed to submit data. Please try again.",
+          return: false,
+        })
+      );
+    } finally {
+      setLoadingSave(false);
+    }
   };
 
-  const handleSaveDraft = () => {
-    setLoadingSave(true);
+  const handleSaveDraft = async () => {
+    setLoadingDraft(true);
     const values = form.getFieldsValue();
     const body = {
       ...values,
@@ -319,26 +348,33 @@ const ListFormDeduction = (props) => {
       deductionPeriod: values?.deductionPeriod?.toString(),
     };
 
-    dispatch(saveDeduction(body))
-      .unwrap()
-      .then(async (data) => {
-        const id = data?.id;
-        if (id) {
-          await uploadFiles(id);
-        }
-        dispatch(showModalSuccess({
+    try {
+      const data = await dispatch(saveDeduction(body)).unwrap();
+      const id = data?.id;
+
+      if (id) {
+        await uploadFiles(id);
+      }
+
+      dispatch(
+        showModalSuccess({
           title: "Successful",
           description: "Draft has been saved",
           return: false,
-        }));
-        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
-      })
-      .catch(() => {
-        setLoadingSave(false);
-      })
-      .finally(() => {
-        setLoadingSave(false);
-      });
+        })
+      );
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+    } catch (error) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Failed to save draft. Please try again.",
+          return: false,
+        })
+      );
+    } finally {
+      setLoadingDraft(false);
+    }
   };
 
   const handleCustomerAmountChange = (id, value) => {
@@ -373,7 +409,7 @@ const ListFormDeduction = (props) => {
   return (
     <>
       <BreadCrumb routes={routes} />
-      <Spin spinning={loadingSave}>
+      <Spin spinning={loadingSave || loadingDraft}>
         <FormStepper 
           steps={steps} 
           current={current} 
