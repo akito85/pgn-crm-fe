@@ -293,7 +293,7 @@ const CalendarDetail = () => {
               <FunctionalCriteriaBillingBucket
                 data={criteriaData}
                 dataCriteria={criteriaIndexValues}
-                type={"show"}
+                type={"detail"}
                 showAction={"show"}
               />
             </CardContainer>
