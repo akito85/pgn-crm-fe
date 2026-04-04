@@ -10,6 +10,34 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import SVGIcon from "../../../src/assets/Icon/index";
 
+const isDataOrHttpUrl = (str) =>
+  typeof str === "string" &&
+  (str.startsWith("data:") || str.startsWith("http://") || str.startsWith("https://"));
+
+const renderIcon = (icon, width, style, className) => {
+  if (!icon) return null;
+  if (isDataOrHttpUrl(icon)) {
+    return (
+      <img
+        src={icon}
+        alt=""
+        width={width}
+        height={width}
+        style={{ ...style, objectFit: "contain" }}
+        className={className}
+      />
+    );
+  }
+  return (
+    <SVGIcon
+      name={icon}
+      width={width}
+      style={style}
+      className={className}
+    />
+  );
+};
+
 /** Whitelist Sidemenu */
 const whitelistMenu = [
   "Profile",
@@ -127,12 +155,7 @@ const SubMenuItem = ({
             className="ant-menu-item-icon"
             style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
           >
-            <SVGIcon
-              name={item?.icon}
-              width={24}
-              style={{ display: "block" }}
-              className="sidebar-icon"
-            />
+            {renderIcon(item?.icon, 24, { display: "block" }, "sidebar-icon")}
           </span>
         </div>
         {isHovered && (
@@ -168,12 +191,7 @@ const SubMenuItem = ({
           className="ant-menu-item-icon"
           style={{ display: "flex", alignItems: "center" }}
         >
-          <SVGIcon
-            name={item?.icon}
-            width={20}
-            style={{ marginRight: "12px", display: "block" }}
-            className="sidebar-icon"
-          />
+          {renderIcon(item?.icon, 20, { marginRight: "12px", display: "block" }, "sidebar-icon")}
         </span>
         <span className="ant-menu-title-content">
           <span>{item.name}</span>
@@ -574,12 +592,12 @@ const SideMenu = ({ isCollapsed }) => {
                     : { display: "flex", alignItems: "center" }
                 }
               >
-                <SVGIcon
-                  name={item.icon}
-                  width={inCollapsed ? 24 : 20}
-                  style={inCollapsed ? { display: "block" } : { marginRight: "12px", display: "block" }}
-                  className="sidebar-icon"
-                />
+                {renderIcon(
+                  item.icon,
+                  inCollapsed ? 24 : 20,
+                  inCollapsed ? { display: "block" } : { marginRight: "12px", display: "block" },
+                  "sidebar-icon"
+                )}
               </span>
             ) : null}
             {!inCollapsed && (
