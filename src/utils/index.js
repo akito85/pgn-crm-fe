@@ -153,9 +153,10 @@ export const errorCode = (error) => {
   return code;
 };
 
-export const errorBody = (code, status, message) => ({
+export const errorBody = (code, status, message, data = null) => ({
   code: code,
   message: `Your data was not ${status}. ${errorMessage(message)}.`,
+  data: data,
 });
 
 export const renderDateColumn = (
