@@ -151,6 +151,9 @@ const EditableCell = ({
             filterOption={filterOption}
             labelInValue
             size="small"
+            style={{
+              lineHeight: "32px",
+            }}
           >
             {options.map((option) => (
               <Select.Option key={option.value} value={option.value}>
@@ -167,9 +170,8 @@ const EditableCell = ({
             controls={false}
             style={{
               width: "100%",
-              height: 34,
+              height: "34px",
               lineHeight: "32px",
-              textAlign: "left",
             }}
           />
         );
