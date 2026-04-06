@@ -29,6 +29,7 @@ const initialState = {
   data_detailDraft: [],
   getConfigFile: {},
   loading: false,
+  loadingDetail: false,
 };
 
 export const getBillingItemList = createAsyncThunk(
@@ -808,14 +809,14 @@ const billingItemSlice = createSlice({
     },
 
     [getBillingItemDetail.pending]: (state) => {
-      state.loading = true;
+      state.loadingDetail = true;
     },
     [getBillingItemDetail.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_BillingItemDetail = action.payload;
     },
     [getBillingItemDetail.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDetail = false;
     },
 
     [getAttachmentDetail.pending]: (state) => {
@@ -866,14 +867,14 @@ const billingItemSlice = createSlice({
     },
 
     [getDetailDraft.pending]: (state) => {
-      state.loading = true;
+      state.loadingDetail = true;
     },
     [getDetailDraft.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_detailDraft = action.payload;
     },
     [getDetailDraft.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDetail = false;
     },
 
     [getConfigFileRBIBillingItem.pending]: (state) => {

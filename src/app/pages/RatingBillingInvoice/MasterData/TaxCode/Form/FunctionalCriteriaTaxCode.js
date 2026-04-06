@@ -499,21 +499,22 @@ const FunctionalCriteriaTaxCode = ({
 
 
   const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-
-    // if (hasValue(formHeaderValue?.endDate)) {
-    if (moment(rowValue?.startDate) < moment(formHeaderValue?.startDate)) {
-      return true
-    } else if (moment(rowValue?.endDate) > moment(formHeaderValue?.endDate)?.add(1, 'days') && hasValue(formHeaderValue?.endDate)) {
-      return true
+    if (moment(rowValue?.startDate).startOf("day") < moment(formHeaderValue?.startDate).startOf("day")) {
+      return true;
+    } else if (
+      hasValue(rowValue?.endDate) &&
+      moment(rowValue?.endDate).startOf("day") > moment(formHeaderValue?.endDate).startOf("day").add(1, "days") &&
+      hasValue(formHeaderValue?.endDate)
+    ) {
+      return true;
     } else {
-      return false
+      return false;
     }
-    // }
   }, []);
 
 
-  // Function Save Data
-  const save = async (key) => {
+  // Function Execute Save Data
+  const executeSave = async (key) => {
     try {
       const row = await formTableCriteria.validateFields();
       const newData = [...data];
@@ -546,6 +547,24 @@ const FunctionalCriteriaTaxCode = ({
 
       }
     } catch (errInfo) { }
+  };
+
+  // Function Save Data
+  const save = async (key) => {
+    const requiredHiddenCols = columns().filter(
+      (col) => col.required === true && optionSelectedCol.includes(col.title)
+    );
+
+    if (requiredHiddenCols.length > 0) {
+      setOptionSelectedCol((prev) =>
+        prev.filter((title) => !requiredHiddenCols.some((col) => col.title === title))
+      );
+      setTimeout(() => {
+        executeSave(key);
+      }, 50);
+    } else {
+      executeSave(key);
+    }
   };
 
 
@@ -911,7 +930,7 @@ const FunctionalCriteriaTaxCode = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`You can't add Criteria. Start date and enda date can't be overlap`}</p>
+          <p className="pl-[70px]">{`You can't add Criteria. Start date and end date can't be overlap`}</p>
         </div>
       </ModalError>
     </div>

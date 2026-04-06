@@ -282,7 +282,7 @@ const getServiceRequestColumns = (
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <StatusComponent colour={status} size="small">
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
@@ -321,7 +321,7 @@ const getServiceRequestColumns = (
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <StatusComponent colour={status} size="small">
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
@@ -362,7 +362,7 @@ const getServiceRequestColumns = (
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <StatusComponent colour={status} size="small">
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>

@@ -55,7 +55,7 @@ const ListFormDeduction = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
+  const approvalHierarchy = Form.useWatch("approvalHierarchy", form);
   const location = useLocation();
   const { id } = location?.state || {};
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -64,7 +64,8 @@ const ListFormDeduction = (props) => {
   const [modalBack, setModalBack] = useState(false);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
-  const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
   const [current, setCurrent] = useState(0);
   const [sendBody, setSendBody] = useState();
   const [tabData, setTabData] = useState([
@@ -129,15 +130,15 @@ const ListFormDeduction = (props) => {
 
   useEffect(() => {
     if (
-      formValue.approvalHierarchy &&
+      approvalHierarchy &&
       !appHierOptions
         .map((item) => item.value)
-        .includes(formValue.approvalHierarchy)
+        .includes(approvalHierarchy)
     ) {
       form.setFieldsValue({ approvalHierarchy: null });
       setSelectedHierarchy(null);
     }
-  }, [formValue, appHierOptions, form]);
+  }, [approvalHierarchy, appHierOptions, form]);
 
   useEffect(() => {
     if (id && data_detail) {
@@ -255,21 +256,125 @@ const ListFormDeduction = (props) => {
   ];
 
 
+  const uploadFiles = async (id) => {
+    const filterDataAttach = listDataAttachment.filter(
+      (item) => item.dataType !== "exist"
+    );
+
+    const failedUploads = [];
+
+    for (let i = 0; i < filterDataAttach.length; i++) {
+      const element = filterDataAttach[i];
+      const body = {
+        referensiId: id,
+        files: element.file,
+        category: "WARRANTY_DEDUCTION",
+        fileCategoryId: element.fileCategoryId,
+      };
+
+      try {
+        await receiptCollectionHttpService.uploadImage(
+          `/v1/dbs/api/attachment/upload/v1`,
+          body
+        );
+      } catch (error) {
+        console.error(`Failed to upload file ${i + 1}:`, error);
+        failedUploads.push(element);
+      }
+    }
+
+    if (failedUploads.length > 0) {
+      dispatch(
+        showModalError({
+          title: "Upload Warning",
+          description: `${failedUploads.length} file(s) failed to upload. Please try again.`,
+          return: false,
+        })
+      );
+    }
+
+    return failedUploads;
+  };
+
   const handleSave = async () => {
-    setModalConfirm(false);
+    setLoadingSave(true);
+
     const body = {
       ...sendBody,
-      apphierId: selectedHierarchy,
-      attachments: listDataAttachment.map(a => ({
-        attachmentId: a.attachmentId,
-        category: a.category
-      }))
+      appHierId: selectedHierarchy,
+      type: sendBody?.type?.toString(),
+      deductionPeriod: sendBody?.deductionPeriod?.toString(),
     };
-    dispatch(saveDeduction({ body })).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+
+    try {
+      const data = await dispatch(saveDeduction(body)).unwrap();
+      const id = data?.id;
+
+      if (id) {
+        await uploadFiles(id);
       }
-    });
+
+      setModalConfirm(false);
+      dispatch(
+        showModalSuccess({
+          title: "Successful",
+          description: "Your data has been submitted",
+          return: false,
+        })
+      );
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+    } catch (error) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Failed to submit data. Please try again.",
+          return: false,
+        })
+      );
+    } finally {
+      setLoadingSave(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    setLoadingDraft(true);
+    const values = form.getFieldsValue();
+    const body = {
+      ...values,
+      customerList: customerList,
+      appHierId: selectedHierarchy,
+      isDraft: true,
+      type: values?.type?.toString(),
+      deductionPeriod: values?.deductionPeriod?.toString(),
+    };
+
+    try {
+      const data = await dispatch(saveDeduction(body)).unwrap();
+      const id = data?.id;
+
+      if (id) {
+        await uploadFiles(id);
+      }
+
+      dispatch(
+        showModalSuccess({
+          title: "Successful",
+          description: "Draft has been saved",
+          return: false,
+        })
+      );
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+    } catch (error) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Failed to save draft. Please try again.",
+          return: false,
+        })
+      );
+    } finally {
+      setLoadingDraft(false);
+    }
   };
 
   const handleCustomerAmountChange = (id, value) => {
@@ -304,7 +409,7 @@ const ListFormDeduction = (props) => {
   return (
     <>
       <BreadCrumb routes={routes} />
-      <Spin spinning={loadingForm}>
+      <Spin spinning={loadingSave || loadingDraft}>
         <FormStepper 
           steps={steps} 
           current={current} 
@@ -400,6 +505,7 @@ const ListFormDeduction = (props) => {
             onNext={next}
             onCancel={onBack}
             onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
             onSubmit={() => form.submit()}
             type={type}
           />
@@ -416,7 +522,12 @@ const ListFormDeduction = (props) => {
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleSave}>
+            <ButtonComponent 
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+              isPrimary 
+              onClick={handleSave}
+              loading={loadingSave}
+            >
               Confirm
             </ButtonComponent>
           </div>

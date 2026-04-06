@@ -273,6 +273,7 @@ const BillingCycleView = ({ type }) => {
           type={"submit"}
           border={false}
           icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          onClick={handleDownload}
         >
           Download List
         </ButtonComponent>
