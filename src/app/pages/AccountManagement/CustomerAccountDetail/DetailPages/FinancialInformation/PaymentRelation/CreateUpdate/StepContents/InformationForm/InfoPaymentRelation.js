@@ -246,12 +246,8 @@ export default function InfoPaymentRelation({
           <NxDate
             placeholder="Select date"
             dateDisable={(current) => {
-              if (!current) return false;
-              const dateToCheck = current.toDate ? current.toDate() : current;
-              const minDate = new Date(startDate);
-              minDate.setDate(minDate.getDate() + 1); 
-              minDate.setHours(0, 0, 0, 0);
-              return dateToCheck < minDate;
+              if (!moment.isMoment(current)) return false;
+              return current.isSameOrAfter(startDate, "day");
             }}
           />
         </Form.Item>
