@@ -872,7 +872,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailGd = true;
     },
     [getGasDeposit.fulfilled]: (state, action) => {
-      state.detail_gasDeposit = action.payload.result || {};
+      state.detail_gasDeposit = {
+        ...(action.payload.result || {}),
+        list_gasDepositDetail: [],
+        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: false,
+      };
       state.loading_detailGd = false;
     },
     [getGasDeposit.rejected]: (state) => {
@@ -886,7 +891,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailDraftGd = true;
     },
     [getGasDepositDraft.fulfilled]: (state, action) => {
-      state.detailDraft_gasDeposit = action.payload.result || {};
+      state.detailDraft_gasDeposit = {
+        ...(action.payload.result || {}),
+        list_gasDepositDetail: [],
+        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: false,
+      };;
       state.loading_detailDraftGd = false;
     },
     [getGasDepositDraft.rejected]: (state) => {
