@@ -63,20 +63,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
     updatedBy
   } = detail_gasDepositHistory;
 
-  const tabOptions = [
-    {
-      key: 0,
-      label: "Gas Deposit List",
-    },
-    {
-      key: 1,
-      label: "Recalculate/Expire Request History",
-      children: (
-        <></>
-      )
-    }
-  ];
-
   // --- Functions / handlers ---
   /** Increments the refresh signal to trigger a page-0 re-fetch in child tables. */
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
@@ -125,50 +111,21 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
       dispatch(getGrantedAccessAccount(path));
   }, []);
 
-  // Reshape raw API approval history into { create, inactive } buckets.
-  useEffect(() => {
-    if (detail_gdApprovalHistory && detail_gdApprovalHistory?.dataApprover) {
-      const temp = {
-        dataApprover: {
-          create: detail_gdApprovalHistory?.dataApprover?.GAS_DEPOSIT || [],
-          inactive:
-            detail_gdApprovalHistory?.dataApprover?.INACTIVE_GAS_DEPOSIT || [],
-        },
-        dataHistory: {
-          create: detail_gdApprovalHistory?.dataHistory?.GAS_DEPOSIT || [],
-          inactive:
-            detail_gdApprovalHistory?.dataHistory?.INACTIVE_GAS_DEPOSIT || [],
-        },
-      };
-
-      setDataApprovalHistoryFix(temp);
-    } else {
-      setDataApprovalHistoryFix({});
-    }
-  }, [detail_gdApprovalHistory]);
-
-  return (
-    <div className="flex flex-col gap-y-4">
-      <NxBaseContainer border padding={false}>
-        <NxTabs
-          activeKey={activeKey}
-          onChange={setActiveKey}
-          items={tabOptions}
-        />
-      </NxBaseContainer>
-      {activeKey === 0 ? (
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Gas Deposit List",
+      children: (
         <>
-          <NxCardContainer header={"GAS DEPOSIT"}>
-            <NxBaseContainer border>
-              <GasDepositTable
-                moduleType={moduleType}
-                accountId={accountId}
-                cutomerId={customerId}
-                handleApproval={setShowApprovalModal}
-                refreshSignal={refreshSignal}
-              />
-            </NxBaseContainer>
-          </NxCardContainer>
+          <NxBaseContainer border>
+            <GasDepositTable
+              moduleType={moduleType}
+              accountId={accountId}
+              cutomerId={customerId}
+              handleApproval={setShowApprovalModal}
+              refreshSignal={refreshSignal}
+            />
+          </NxBaseContainer>
     
           <GasDepositApprovalModal
             accountId={accountId}
@@ -177,20 +134,22 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
             afterFinish={triggerRefresh}
           />
         </>
-      ) : activeKey === 1 ? (
+      )
+    },
+    {
+      key: 1,
+      label: "Recalculate/Expire Request History",
+      children: (
         <>
-          <NxCardContainer header={"RECALCULATE/EXPIRE REQUEST HISTORY"}>
-            <NxBaseContainer border>
-              <GasDepositHistoryTable
-                accountId={accountId}
-                handleApprovalHistoryModal={handleApprovalHistoryModal}
-                handleDetailModal={handleHistoryDetailModal}
-                refreshSignal={refreshSignal}
-                moduleType={moduleType}
-              />
-            </NxBaseContainer>
-          </NxCardContainer>
-
+          <NxBaseContainer border>
+            <GasDepositHistoryTable
+              accountId={accountId}
+              handleApprovalHistoryModal={handleApprovalHistoryModal}
+              handleDetailModal={handleHistoryDetailModal}
+              refreshSignal={refreshSignal}
+              moduleType={moduleType}
+            />
+          </NxBaseContainer>
           
           {/* Detail Modal */}
           <NxModal
@@ -254,7 +213,41 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
             dataHistory={dataApprovalHistoryFix?.dataHistory}
           />
         </>
-      ) : <></>}
+      )
+    }
+  ];
+
+  // Reshape raw API approval history into { create, inactive } buckets.
+  useEffect(() => {
+    if (detail_gdApprovalHistory && detail_gdApprovalHistory?.dataApprover) {
+      const temp = {
+        dataApprover: {
+          create: detail_gdApprovalHistory?.dataApprover?.GAS_DEPOSIT || [],
+          inactive:
+            detail_gdApprovalHistory?.dataApprover?.INACTIVE_GAS_DEPOSIT || [],
+        },
+        dataHistory: {
+          create: detail_gdApprovalHistory?.dataHistory?.GAS_DEPOSIT || [],
+          inactive:
+            detail_gdApprovalHistory?.dataHistory?.INACTIVE_GAS_DEPOSIT || [],
+        },
+      };
+
+      setDataApprovalHistoryFix(temp);
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [detail_gdApprovalHistory]);
+
+  return (
+    <div className="flex flex-col gap-y-4">
+      <NxCardContainer header="GAS DEPOSIT" withoutPadding>
+        <NxTabs
+          activeKey={activeKey}
+          onChange={setActiveKey}
+          items={tabOptions}
+        />
+      </NxCardContainer>
     </div>
   );
 };
