@@ -461,7 +461,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
         try {
           await handleSendDataFile(data);
           handleDescriptionSuccess(body, type);
-          handleClearOrReset();
+          handleClearOrReset(type);
         } catch (error) {
           const message =
             error?.response?.data?.data ||
@@ -525,7 +525,8 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
 
   const handleClearOrReset = (type_action = "create") => {
     if (type_action === "update") {
-      handleFormSetUpdate(data_detail, data_template_type, id);
+      dispatch(getDetailGeneralTemplate(id));
+      dispatch(getDetailDraftGeneralTemplate(id));
     } else {
       form.resetFields();
       setFileList([]);
@@ -533,7 +534,23 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       setDataListDetailApproval([]);
       setDataAttachment([]);
       setTypeSubmit(false);
+      setStartDate(undefined);
+      setTabData([
+        {
+          value: "General Template",
+          paramValue: [
+            "name",
+            "templateType",
+            "startDate",
+            "endDate",
+            "description",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
     }
+    setCurrent(0);
     setLoadingForm(false);
   };
 
