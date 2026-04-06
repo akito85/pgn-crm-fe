@@ -91,7 +91,7 @@ import criteriaReducer from "../slices/criteria_slice";
 import { reportCustomerSlice } from "../slices/report/report_customer_slice";
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { reportCustomerAgreementSlice } from "../slices/report/report_customer_agreement";
-import { tasklistSlice } from "../slices/tasklist/tasklistSlice";   
+import { tasklistSlice } from "../slices/tasklist/tasklistSlice";
 import emeteraiReducer from "../slices/rating_billing_invoice/emeterai";
 import taxExemptionReducer from "../slices/rating_billing_invoice/taxExemption";
 import gracePeriodReducer from "../slices/debt_and_collection/gracePeriod";
@@ -125,8 +125,8 @@ import transferToReceiptReducer from "../slices/receipt_collection/transferToRec
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
 import restructureReducer from "../slices/receipt_collection/restructure";
 import notificationsReducer from "../slices/notifications";
-import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice"
-import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice"
+import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice";
+import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice";
 import deductionReducer from "../slices/receipt_collection/deduction";
 import gapuraManagementReducer from "../slices/receipt_collection/gapuraManagement";
 import historyWarrantyReducer from "../slices/receipt_collection/historyWarranty";
@@ -142,6 +142,7 @@ import serviceRequestReducer from "../slices/account_management/detailAccount/Se
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
+import calendarReducer from "../slices/system_setup/master_data/calendar";
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
@@ -221,7 +222,7 @@ const reducer = combineReducers({
   relationship: relationshipReducer,
   multiDestination: multiDestinationReducer,
   gasDeposit: gasDepositReducer,
-  
+
   //Account Management ( Customer )
   customerAccount: customerAccountReducer,
 
@@ -234,7 +235,7 @@ const reducer = combineReducers({
   accounting_rules: accountingRulesReducer,
   tax_implication: taxImplicationReducer,
   assets: assetsReducer,
-  
+
   // Global reducer
   globalProp: globalPropReducer,
 
@@ -300,6 +301,7 @@ const reducer = combineReducers({
   paymentCycle: paymentCycleReducer,
   paymentPeriod: paymentPeriodReducer,
   billingItemCategory: billingItemCategoryReducer,
+  calendar: calendarReducer,
   caCiMapping: caCiMappingReducer,
 
   // Attachment

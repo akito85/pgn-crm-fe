@@ -375,12 +375,26 @@ const ViewReceipt = () => {
     <Menu>
       <Menu.Item
         key="Update"
-        disabled={!(record?.status === "Draft" && record?.statusApproval === "Rejected")}
+        disabled={!(
+          (record?.status === "Draft" && record?.statusApproval === "Rejected") ||
+          (record?.status === "Draft" && record?.statusApproval === "Waiting Approval") ||
+          (record?.status === "Draft" && record?.statusApproval === "Draft") ||
+          (record?.status === "Unidentified" && record?.statusApproval === "Rejected") ||
+          (record?.status === "Unidentified" && record?.statusApproval === "Waiting Approval") ||
+          (record?.status === "Unidentified" && record?.statusApproval === "Draft")
+        )}
       >
         <Link
           to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_RECEIPT}
           state={{ id: record?.id }}
-          className={`flex items-center gap-2 ${!(record?.status === "Draft" && record?.statusApproval === "Rejected") ? 'pointer-events-none opacity-50' : ''}`}
+          className={`flex items-center gap-2 ${!(
+            (record?.status === "Draft" && record?.statusApproval === "Rejected") ||
+            (record?.status === "Draft" && record?.statusApproval === "Waiting Approval") ||
+            (record?.status === "Draft" && record?.statusApproval === "Draft") ||
+            (record?.status === "Unidentified" && record?.statusApproval === "Rejected") ||
+            (record?.status === "Unidentified" && record?.statusApproval === "Waiting Approval") ||
+            (record?.status === "Unidentified" && record?.statusApproval === "Draft")
+          ) ? 'pointer-events-none opacity-50' : ''}`}
         >
           <SVGIcon name="IconEdit" color={"#000000"} width={16} />
           <span>Update</span>
@@ -460,7 +474,8 @@ const ViewReceipt = () => {
           <span>Approval History</span>
         </div>
       </Menu.Item>
-      {record?.status === "Draft" && record?.statusApproval === "Rejected" && (
+      {((record?.status === "Draft" && record?.statusApproval === "Rejected") ||
+        (record?.status === "Unidentified" && record?.statusApproval === "Rejected")) && (
         <Menu.Item key="Delete" onClick={() => handleDeleteReceipt(record)}>
           <div className="flex items-center gap-2">
             <SVGIcon name="IconDelete" color={"#BE3036"} width={16} />

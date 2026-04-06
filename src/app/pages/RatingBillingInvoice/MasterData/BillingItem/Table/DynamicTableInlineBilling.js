@@ -352,7 +352,7 @@ const DynamicTableInlineBilling = ({
     });
   };
 
-  const save = async (key) => {
+  const executeSave = async (key) => {
     try {
       const row = await form.validateFields();
       const newData = [...tableData];
@@ -396,6 +396,23 @@ const DynamicTableInlineBilling = ({
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
+    }
+  };
+
+  const save = async (key) => {
+    const requiredHiddenCols = cols.filter(
+      (col) => col.required === true && optionSelectedCol.includes(col.title)
+    );
+
+    if (requiredHiddenCols.length > 0) {
+      setOptionSelectedCol((prev) =>
+        prev.filter((title) => !requiredHiddenCols.some((col) => col.title === title))
+      );
+      setTimeout(() => {
+        executeSave(key);
+      }, 50);
+    } else {
+      executeSave(key);
     }
   };
 

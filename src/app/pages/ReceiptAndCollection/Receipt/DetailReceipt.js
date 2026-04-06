@@ -9,12 +9,15 @@ const DetailReceipt = ({ data_detail }) => {
     <div className="flex flex-col gap-4 pb-5 px-5 pt-5">
       <SectionCard title="CUSTOMER INFORMATION">
         <div className="grid grid-cols-5 w-full gap-y-4 gap-x-4">
-          <DetailText label="Miscellaneous">{data_detail?.miscellaneous || "-"}</DetailText>
-          <DetailText label="Customer Type">{data_detail?.customerType || "-"}</DetailText>
-          <DetailText label="Account / Registration Number">{data_detail?.accountNumber || "-"}</DetailText>
-          <DetailText label="Account Name">{data_detail?.accountName || "-"}</DetailText>
+          <DetailText label="Receipt Type">{data_detail?.receiptType || "-"}</DetailText>
+          <DetailText label="Customer Type">
+            {data_detail?.registrationNumber ? "Prospective Customer" : "Customer"}
+          </DetailText>
+          <DetailText label="Registration Number">{data_detail?.registrationNumber || "-"}</DetailText>
+          <DetailText label="Account Number">{data_detail?.accountNumber || "-"}</DetailText>
           <DetailText label="Customer Number">{data_detail?.customerNumber || "-"}</DetailText>
           <DetailText label="Customer Name">{data_detail?.customerName || "-"}</DetailText>
+          <DetailText label="Account Name">{data_detail?.accountName || "-"}</DetailText>
           <DetailText label="Account Segment">{data_detail?.accountSegment || "-"}</DetailText>
           <DetailText label="Account Group Type">{data_detail?.accountGroupType || "-"}</DetailText>
           <DetailText label="Account Type">{data_detail?.accountType || "-"}</DetailText>
