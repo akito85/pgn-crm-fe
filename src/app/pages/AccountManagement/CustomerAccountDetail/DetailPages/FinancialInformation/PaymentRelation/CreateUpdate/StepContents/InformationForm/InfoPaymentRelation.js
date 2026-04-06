@@ -247,7 +247,7 @@ export default function InfoPaymentRelation({
             placeholder="Select date"
             dateDisable={(current) => {
               if (!moment.isMoment(current)) return false;
-              return current.isSameOrAfter(startDate, "day");
+              return current.isBefore(startDate, "day");
             }}
           />
         </Form.Item>
