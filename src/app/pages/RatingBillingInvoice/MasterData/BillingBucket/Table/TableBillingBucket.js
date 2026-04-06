@@ -19,7 +19,7 @@ export const columnsBillingBucket = (
       title: "NO",
       align: "center",
       width: 60,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "BILLING BUCKET CODE",

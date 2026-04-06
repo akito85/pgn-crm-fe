@@ -266,6 +266,7 @@ const TaxCodeForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.startDate));
+      setEndDate(data_detail_draft?.endDate ? moment(data_detail_draft?.endDate) : undefined);
       setSelectedHierarchy(data_detail_draft?.appHierId);
       setListDataAttachment(dataAttachmentDraft);
       setCriteriaValues(mappingCriteria);
@@ -376,6 +377,7 @@ const TaxCodeForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.startDate));
+      setEndDate(data_detail?.endDate ? moment(data_detail?.endDate) : undefined);
       setSelectedHierarchy(data_detail?.appHierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
@@ -720,11 +722,10 @@ const TaxCodeForm = ({ type }) => {
   // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
+        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
       ) {
         dataOverlap?.push(item);
       }
@@ -735,7 +736,6 @@ const TaxCodeForm = ({ type }) => {
     } else {
       return false;
     }
-    // }
   }, []);
   const handleSave = async (formValue) => {
     let errorBody = {};
