@@ -141,10 +141,10 @@ export const getGasDepositDetailMutations = createAsyncThunk(
 
 export const getGasDepositHistories = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORIES",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit-history/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+      const url = `/v1/dbs/api/gas-deposit/request-history`;
+      const response = await accountManagementService.getPagination(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
         });
       return {
