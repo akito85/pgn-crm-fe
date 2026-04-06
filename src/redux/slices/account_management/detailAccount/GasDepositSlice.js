@@ -61,12 +61,10 @@ export const getGasDeposits = createAsyncThunk(
       body = {
         ...body,
         listType: "all"
-      }
+      };
 
-      const url = `/v1/dbs/api/gas-deposit/list/${accountId}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = "/v1/dbs/api/gas-deposit/list" + (accountId ? `/${accountId}` : "");
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         isLoadMore,
@@ -143,10 +141,8 @@ export const getGasDepositHistories = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORIES",
   async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit/request-history`;
-      const response = await accountManagementService.getPagination(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = "/v1/dbs/api/gas-deposit/request-history" + (accountId ? `/${accountId}` : "");
+      const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,
         isLoadMore,
