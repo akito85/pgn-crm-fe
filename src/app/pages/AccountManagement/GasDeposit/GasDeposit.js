@@ -69,12 +69,12 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
 
   /**
    * @param {boolean} show
-   * @param {number} gdHistoryId
+   * @param {number} historyId
    */
-  const handleApprovalHistoryModal = (show, gdHistoryId = 0) => {
+  const handleApprovalHistoryModal = ({ show, historyId }) => {
     if (show) {
-      if (gdHistoryId)
-        dispatch(getGdApprovalHistory(gdHistoryId));
+      if (historyId)
+        dispatch(getGdApprovalHistory(historyId));
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
@@ -83,12 +83,12 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
 
   /**
    * @param {boolean} show
-   * @param {number} gdHistoryId
+   * @param {number} historyId
    */
-  const handleHistoryDetailModal = (show, gdHistoryId) => {
+  const handleHistoryDetailModal = ({ show, historyId }) => {
     if (show) {
-      if (gdHistoryId) {
-        dispatch(getGdApprovalHistory(gdHistoryId));
+      if (historyId) {
+        dispatch(getGdApprovalHistory(historyId));
         setShowHistoryDetailModal(true);
       }
     } else {
@@ -158,50 +158,53 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
             loading={loading_detailGdHistory}
             handleCancel={(() => handleHistoryDetailModal(false))}
           >
-            <NxBaseContainer border header="GAS DEPOSIT DETAIL">
-              <div className="grid grid-cols-3">
-                <NxDetailText label="Period">
-                  {period}
+            <div className="flex flex-col gap-y-4 p-4">
+
+              <NxBaseContainer border header="GAS DEPOSIT DETAIL">
+                <div className="grid grid-cols-3">
+                  <NxDetailText label="Period">
+                    {period}
+                  </NxDetailText>
+                  <NxDetailText label="Balance (M3)">
+                    {balanceM3}
+                  </NxDetailText>
+                  <NxDetailText label="Balance (MSCF)">
+                    {balanceMscf}
+                  </NxDetailText>
+                  <NxDetailText label="Balance (MMBTU)">
+                    {balanceMmbtu}
+                  </NxDetailText>
+                  <NxDetailText label="Balance Amount">
+                    {balanceAmmount}
+                  </NxDetailText>
+                  <NxDetailText label="Available Amount">
+                    {availableAmount}
+                  </NxDetailText>
+                </div>
+                <NxDetailText label="Remark">
+                  {remark}
                 </NxDetailText>
-                <NxDetailText label="Balance (M3)">
-                  {balanceM3}
-                </NxDetailText>
-                <NxDetailText label="Balance (MSCF)">
-                  {balanceMscf}
-                </NxDetailText>
-                <NxDetailText label="Balance (MMBTU)">
-                  {balanceMmbtu}
-                </NxDetailText>
-                <NxDetailText label="Balance Amount">
-                  {balanceAmmount}
-                </NxDetailText>
-                <NxDetailText label="Available Amount">
-                  {availableAmount}
-                </NxDetailText>
-              </div>
-              <NxDetailText label="Remark">
-                {remark}
-              </NxDetailText>
-            </NxBaseContainer>
-            <NxBaseContainer border header="HISTORY INFORMATION">
-              <div className="grid grid-cols-5">
-                <NxDetailText label="Record ID">
-                  {id}
-                </NxDetailText>
-                <NxDetailText label="Created Date">
-                  {NxDate.formatDate(createdDate, "DD MMM YYYY")}
-                </NxDetailText>
-                <NxDetailText label="Created By">
-                  {createdBy}
-                </NxDetailText>
-                <NxDetailText label="Updated Date">
-                  {NxDate.formatDate(updatedDate, "DD MMM YYYY")}
-                </NxDetailText>
-                <NxDetailText label="Updated By">
-                  {updatedBy}
-                </NxDetailText>
-              </div>
-            </NxBaseContainer>
+              </NxBaseContainer>
+              <NxBaseContainer border header="HISTORY INFORMATION">
+                <div className="grid grid-cols-5">
+                  <NxDetailText label="Record ID">
+                    {id}
+                  </NxDetailText>
+                  <NxDetailText label="Created Date">
+                    {NxDate.formatDate(createdDate, "DD MMM YYYY")}
+                  </NxDetailText>
+                  <NxDetailText label="Created By">
+                    {createdBy}
+                  </NxDetailText>
+                  <NxDetailText label="Updated Date">
+                    {NxDate.formatDate(updatedDate, "DD MMM YYYY")}
+                  </NxDetailText>
+                  <NxDetailText label="Updated By">
+                    {updatedBy}
+                  </NxDetailText>
+                </div>
+              </NxBaseContainer>
+            </div>
           </NxModal>
 
           {/* Approval History Modal */}
@@ -222,14 +225,14 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
     if (detail_gdApprovalHistory && detail_gdApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: detail_gdApprovalHistory?.dataApprover?.GAS_DEPOSIT || [],
-          inactive:
-            detail_gdApprovalHistory?.dataApprover?.INACTIVE_GAS_DEPOSIT || [],
+          recalculate: detail_gdApprovalHistory?.dataApprover?.RECALCULATE_GAS_DEPOSIT || [],
+          expire:
+            detail_gdApprovalHistory?.dataApprover?.EXPIRE_GAS_DEPOSIT || [],
         },
         dataHistory: {
-          create: detail_gdApprovalHistory?.dataHistory?.GAS_DEPOSIT || [],
-          inactive:
-            detail_gdApprovalHistory?.dataHistory?.INACTIVE_GAS_DEPOSIT || [],
+          recalculate: detail_gdApprovalHistory?.dataHistory?.RECALCULATE_GAS_DEPOSIT || [],
+          expire:
+            detail_gdApprovalHistory?.dataHistory?.EXPIRE_GAS_DEPOSIT || [],
         },
       };
 

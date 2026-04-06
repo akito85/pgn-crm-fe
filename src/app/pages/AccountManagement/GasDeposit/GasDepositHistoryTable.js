@@ -171,8 +171,8 @@ const GasDepositHistoryTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => handleDetailModal({ show: true, id }),
-    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal({ show: true, id }),
+    handleView: ({ id }) => handleDetailModal({ show: true, historyId: id }),
+    handleApprovalHistory: ({ gasDepositId }) => handleApprovalHistoryModal({ show: true, historyId: gasDepositId }),
     handleDownload,
   });
 
