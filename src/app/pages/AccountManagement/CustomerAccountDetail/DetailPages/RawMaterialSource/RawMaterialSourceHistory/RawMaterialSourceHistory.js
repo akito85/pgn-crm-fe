@@ -385,6 +385,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}
         handleOk={handleDeleteOk}
+        header={"DELETE RAW MATERIAL SOURCE"}
         width={500}
         type={"confirmation"}
         footer={
