@@ -1,189 +1,348 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import hc_deduction_list from "./temp_hardcoded_json/deduction/get-deduction-list.json";
-import hc_customer_list from "./temp_hardcoded_json/deduction/get-customer-list.json";
-import hc_deduction_detail from "./temp_hardcoded_json/deduction/get-detail-deduction.json";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
-import { setBodyError, showModalError, validateError } from "../general_slice";
-
 import {
+  setBodyError,
+  showModalError,
   showModalSuccess,
+  validateError,
 } from "../general_slice";
+import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 const initialState = {
   loading: false,
-  data: {
-    result: [],
-    page: {
-      totalElements: 0
-    }
-  },
-  customerData: {
-    result: [],
-    page: {
-      totalElements: 0
-    }
-  },
+  data: null,
   data_detail: null,
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   dataListCategory: [],
+  dataApprovalHistory: [],
   dataType: [],
-  error: null,
-  isSuccess: false,
-  isFailed: false,
-  message: null,
+  // custom
+  customerData: null,
+  dataPeriod: [],
 };
 
-
-
-export const getDeductionList = createAsyncThunk(
-  "deduction/getDeductionList",
-  async ({ page = 1, pageSize = 10, search = "", sort = "" }, thunkAPI) => {
+export const getPaginateDeduction = createAsyncThunk(
+  "GET_ALL_DEDUCTION",
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-      return {
-        data: {
-          result: hc_deduction_list.data.result.slice(start, end),
-          page: {
-            size: pageSize,
-            totalElements: hc_deduction_list.data.result.length,
-            totalPages: Math.ceil(hc_deduction_list.data.result.length / pageSize),
-            number: page - 1
-          }
-        }
-      };
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/deduction/get-list?searchs=${searchParams}&page=${page - 1}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return { ...response.data, isLoadMore: !!isLoadMore };
     } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_ALL_DEDUCTION_PAGING",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getDownloadDeduction = createAsyncThunk(
+  "DOWNLOAD_DEDUCTION",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/deduction/download?searchs=${searchParams}&page=${page - 1}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.downloadData(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_DEDUCTION",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(response.response);
+    }
+  }
+);
+
+export const getDetailDeduction = createAsyncThunk(
+  "GET_DETAIL_DEDUCTION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/deduction/detail/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const createDeduction = createAsyncThunk(
+  "CREATE_DEDUCTION",
+  async (body, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/deduction/save";
+      const data = await receiptCollectionHttpService.createData(url, body);
+      return data.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        data: error.response.data.data,
+        description: `Your data was not created. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
-export const downloadDeductionList = createAsyncThunk(
-  "deduction/downloadDeductionList",
-  async (params, thunkAPI) => {
+export const deleteDeduction = createAsyncThunk(
+  "DELETE_DEDUCTION",
+  async (id, thunkAPI) => {
     try {
-      console.log("Download triggered with params:", params);
-      return true;
+      const url = `/v1/dbs/api/deduction/delete/${id}`;
+      const response = await receiptCollectionHttpService.deleteData(url);
+      const successBody = {
+        title: "Successfull",
+        description: `Your data has been deleted`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
     } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not deleted. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getApprovalHistory = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_METHOD",
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/deduction/get-approval-history/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_APPROVAL_HISTORY",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
 export const searchCustomerDeduction = createAsyncThunk(
-  "deduction/searchCustomerDeduction",
-  async ({ page = 1, pageSize = 10 }, thunkAPI) => {
+  "SEARCH_CUSTOMER_DEDUCTION",
+  async ({ page, pageSize, searchs }, thunkAPI) => {
     try {
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const customerList = hc_customer_list.data.map(customer => ({
-        ...customer,
-        id: customer.receiptId
-      }));
-      return {
-        data: {
-          result: customerList.slice(start, end),
-          allResult: customerList,
-          page: {
-            size: pageSize,
-            totalElements: customerList.length,
-            totalPages: Math.ceil(customerList.length / pageSize),
-            number: page - 1
-          }
-        }
-      };
+      const url = `/v1/dbs/api/deduction/search-customer?page=${page - 1}&size=${pageSize}${searchs ? `&searchs=${searchs}` : ""}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
 export const getTypeDDL = createAsyncThunk(
-  "deduction/getTypeDDL",
-  async (_, thunkAPI) => {
+  "GET_LIST_TYPE",
+  async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/settings/list-type`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data;
+      const url = `/v1/dbs/api/deduction/get-type-list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response;
     } catch (error) {
-      thunkAPI.dispatch(setBodyError(error));
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getPeriodDDL = createAsyncThunk(
+  "GET_LIST_PERIOD",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/deduction/get-period-list`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
 export const getAllApprovalList = createAsyncThunk(
-  "deduction/getAllApprovalList",
-  async (_, thunkAPI) => {
+  "GET_ALL_APPROVAL_LIST_METHOD",
+  async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-list-approval-hierarchies`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(setBodyError(error));
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
 export const getListApprovalById = createAsyncThunk(
-  "deduction/getListApprovalById",
+  "GET_LIST_APPROVAL_BY_ID_METHOD",
   async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
       return response.data;
     } catch (error) {
-      thunkAPI.dispatch(setBodyError(error));
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
 export const getListCategory = createAsyncThunk(
-  "deduction/getListCategory",
-  async (_, thunkAPI) => {
+  "GET_LIST_CATEGORY",
+  async (thunkAPI) => {
     try {
       const url = "/v1/dbs/api/attachment/list-category";
       const response = await receiptCollectionHttpService.getAll(url);
-      return response?.data?.data?.map((item) => ({
+      const mapsCategory = response?.data?.data?.map((item) => ({
         Id: item?.glbTypeValId,
         text: item?.name,
       }));
+      return mapsCategory;
     } catch (error) {
-      thunkAPI.dispatch(setBodyError(error));
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
       return thunkAPI.rejectWithValue(error.response);
     }
   }
 );
 
-export const getDetailDeduction = createAsyncThunk(
-  "deduction/getDetailDeduction",
-  async (id, thunkAPI) => {
+export const getCustomerDeductionList = createAsyncThunk(
+  "GET_CUSTOMER_DEDUCTION_LIST",
+  async ({ page, pageSize, id }, thunkAPI) => {
     try {
-      // For development, use dummy data
-      return hc_deduction_detail.data;
-
-      // Real API call:
-      // const url = `/v1/dbs/api/settings/detail-get/${id}`;
-      // const response = await receiptCollectionHttpService.getDetail(url);
-      // return response.data;
+      if (!id) return { data: { result: [], page: { totalElements: 0 } } };
+      const url = `/v1/dbs/api/deduction/get-customer-list/${id}?page=${page - 1}&size=${pageSize}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
     } catch (error) {
-      thunkAPI.dispatch(setBodyError(error));
-      return thunkAPI.rejectWithValue(error.response);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
 export const approveOrRejectDeduction = createAsyncThunk(
-  "deduction/approveOrRejectDeduction",
+  "APPROVE_OR_REJECT_DEDUCTION",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/settings/approve-reject";
+      const url = "/v1/dbs/api/deduction/approve-reject";
       const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
-      const message = response?.message;
+      const message = response?.message || "Action processed successfully";
       const successMessage = {
         title: "Successfull",
         description: `${message}`,
@@ -201,7 +360,7 @@ export const approveOrRejectDeduction = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
+          description: `Your data was not processed. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -214,75 +373,180 @@ export const approveOrRejectDeduction = createAsyncThunk(
 const deductionSlice = createSlice({
   name: "deduction",
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(getDeductionList.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(getDeductionList.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload.data;
-      })
-      .addCase(getDeductionList.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(searchCustomerDeduction.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(searchCustomerDeduction.fulfilled, (state, action) => {
-        state.loading = false;
-        state.customerData = action.payload.data;
-      })
-      .addCase(searchCustomerDeduction.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(getTypeDDL.fulfilled, (state, action) => {
-        state.dataType = action.payload;
-        state.loading = false;
-      })
-      .addCase(getAllApprovalList.fulfilled, (state, action) => {
-        state.dataListAppHierId = action.payload;
-        state.loading = false;
-      })
-      .addCase(getListApprovalById.fulfilled, (state, action) => {
-        state.dataListAppHierDetail = action.payload;
-        state.loading = false;
-      })
-      .addCase(getListCategory.fulfilled, (state, action) => {
-        state.dataListCategory = action.payload;
-        state.loading = false;
-      })
-      .addCase(getDetailDeduction.fulfilled, (state, action) => {
-        state.data_detail = action.payload;
-        state.loading = false;
-      })
-      .addCase(approveOrRejectDeduction.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(approveOrRejectDeduction.fulfilled, (state) => {
-        state.isSuccess = true;
-        state.loading = false;
-      })
-      .addCase(approveOrRejectDeduction.rejected, (state, action) => {
-        state.isFailed = true;
-        state.loading = false;
-        state.message = action.payload;
-      })
-      .addMatcher(
-        (action) => action.type.endsWith("/pending"),
-        (state) => {
-          state.loading = true;
-        }
-      )
-      .addMatcher(
-        (action) => action.type.endsWith("/rejected"),
-        (state) => {
-          state.loading = false;
-        }
-      );
+  extraReducers: {
+    [getPaginateDeduction.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPaginateDeduction.fulfilled]: (state, action) => {
+      const { isLoadMore, ...rest } = action.payload || {};
+      const actualData = rest.data || rest;
+      if (isLoadMore && state.data?.result) {
+        const existingIds = new Set(state.data.result.map((item) => item.id));
+        const newItems = (actualData.result || []).filter((item) => !existingIds.has(item.id));
+        state.data = {
+          ...actualData,
+          result: [...state.data.result, ...newItems],
+        };
+      } else {
+        state.data = actualData;
+      }
+      state.loading = false;
+    },
+    [getPaginateDeduction.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getDownloadDeduction.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [getDownloadDeduction.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getDetailDeduction.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailDeduction.fulfilled]: (state, action) => {
+      state.data_detail = action.payload.data || action.payload;
+      state.loading = false;
+    },
+    [getDetailDeduction.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [createDeduction.pending]: (state) => {
+      state.loading = true;
+    },
+    [createDeduction.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [createDeduction.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [deleteDeduction.pending]: (state) => {
+      state.loading = true;
+    },
+    [deleteDeduction.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [deleteDeduction.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getApprovalHistory.pending]: (state) => {
+      state.loading = true;
+    },
+    [getApprovalHistory.fulfilled]: (state, action) => {
+      state.dataApprovalHistory = action.payload.data || action.payload;
+      state.loading = false;
+    },
+    [getApprovalHistory.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [searchCustomerDeduction.pending]: (state) => {
+      state.loading = true;
+    },
+    [searchCustomerDeduction.fulfilled]: (state, action) => {
+      state.customerData = action.payload.data || action.payload;
+      state.loading = false;
+    },
+    [searchCustomerDeduction.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getTypeDDL.pending]: (state) => {
+      state.loading = true;
+    },
+    [getTypeDDL.fulfilled]: (state, action) => {
+      const actualData = action.payload?.data?.result || action.payload?.data || action.payload;
+      state.dataType = Array.isArray(actualData) ? actualData.map(item => ({
+        ...item,
+        label: item.name || item.label || item.p_label,
+        value: item.name || item.label || item.p_label
+      })) : [];
+      state.loading = false;
+    },
+    [getTypeDDL.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getPeriodDDL.pending]: (state) => {
+      state.loading = true;
+    },
+    [getPeriodDDL.fulfilled]: (state, action) => {
+      const actualData = action.payload?.data?.result || action.payload?.data || action.payload;
+      state.dataPeriod = Array.isArray(actualData) ? actualData.map(item => ({
+        ...item,
+        label: item.name || item.label || item.p_label,
+        value: item.id || item.value || item.p_value
+      })) : [];
+      state.loading = false;
+    },
+    [getPeriodDDL.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getAllApprovalList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getAllApprovalList.fulfilled]: (state, action) => {
+      state.dataListAppHierId = action.payload.data || action.payload;
+      state.loading = false;
+    },
+    [getAllApprovalList.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getListApprovalById.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListApprovalById.fulfilled]: (state, action) => {
+      state.dataListAppHierDetail = action.payload.data || action.payload;
+      state.loading = false;
+    },
+    [getListApprovalById.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getListCategory.pending]: (state) => {
+      state.loadingProduct = true;
+    },
+    [getListCategory.fulfilled]: (state, action) => {
+      state.dataListCategory = action.payload.data || action.payload;
+      state.loadingProduct = false;
+    },
+    [getListCategory.rejected]: (state) => {
+      state.loadingProduct = false;
+    },
+
+    [getCustomerDeductionList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getCustomerDeductionList.fulfilled]: (state, action) => {
+      state.customerData = action.payload.data || action.payload;
+      state.loading = false;
+    },
+    [getCustomerDeductionList.rejected]: (state) => {
+      state.loading = false;
+    },
+
+
+    [approveOrRejectDeduction.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectDeduction.fulfilled]: (state) => {
+      state.loading = false;
+      state.isSuccess = true;
+    },
+    [approveOrRejectDeduction.rejected]: (state, action) => {
+      state.loading = false;
+      state.isFailed = true;
+      state.message = action.payload;
+    },
   },
 });
 

@@ -2,7 +2,6 @@ import { Checkbox, Tooltip } from "antd";
 import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
@@ -15,7 +14,7 @@ import {
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
   getAllApprovalListCaCiMapping,
   getListApprovalByIdCaCiMapping,
@@ -51,6 +50,7 @@ const ViewCaCiMapping = () => {
   const { bodyError } = useSelector((state) => state?.general);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
@@ -62,7 +62,7 @@ const ViewCaCiMapping = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
-  const [status, setStatus] = useState("");
+  const statusRef = useRef("");
   const [id, setId] = useState("");
   const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
@@ -78,7 +78,7 @@ const ViewCaCiMapping = () => {
 
     const fetchData = async () => {
       try {
-        await dispatch(
+        dispatch(
           getPaginateCaCiMapping({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
@@ -90,9 +90,9 @@ const ViewCaCiMapping = () => {
         if (isMounted) {
           setPage(1);
         }
-      } catch (error) {
+      } catch {
         if (isMounted) {
-          // Handle error silently - error sudah di-handle di slice
+          setPage(1);
         }
       }
     };
@@ -110,7 +110,7 @@ const ViewCaCiMapping = () => {
     if (!hasMore) return;
     const currentDataLength = data?.result?.length || 0;
     const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
-    await dispatch(
+    dispatch(
       getPaginateCaCiMapping({
         search: encodeURIComponent(JSON.stringify(search)),
         page: nextPage,
@@ -147,20 +147,34 @@ const ViewCaCiMapping = () => {
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
+    const escapeUnsafe = (s) =>
+      String(s ?? "").replaceAll(/[<>"'&]/g, (char) => {
+        const escapeMap = { "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "&": "&amp;" };
+        return escapeMap[char] ?? char;
+      });
     return keyData.map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      value: escapeUnsafe(
+        item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
+      ),
     }));
   };
 
   const handleSearch = useMemo(
-    () => debounce((selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      setSearchedColumn(dataIndex);
-      setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
-    }, 500),
+    () =>
+      debounce((selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+        setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
+      }, 500),
     []
   );
+
+  useEffect(() => {
+    return () => {
+      handleSearch.cancel?.();
+    };
+  }, [handleSearch]);
 
   const handleReset = useCallback((clearFilters, dataIndex) => {
     clearFilters();
@@ -173,7 +187,7 @@ const ViewCaCiMapping = () => {
   }, []);
 
   useEffect(() => {
-    if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+    if (dataApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.CA_CI_MAPPING || [],
@@ -194,7 +208,7 @@ const ViewCaCiMapping = () => {
     try {
       await dispatch(getApprovalHistoryCaCiMapping(data))?.unwrap();
       setOpenModalHistory(true);
-    } catch (error) {
+    } catch {
       setOpenModalHistory(false);
     }
   };
@@ -208,7 +222,7 @@ const ViewCaCiMapping = () => {
         width: COLUMN_WIDTH.PARTNER,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.partnerName !== undefined ? [search.partnerName] : null,
+        filteredValue: search?.partnerName == null ? null : [search.partnerName],
         ...getColumnSearchPropsUseFilteredValue(
           search, "partnerName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -223,7 +237,7 @@ const ViewCaCiMapping = () => {
         width: COLUMN_WIDTH.COLLECTING_AGENT,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.collectingAgentName !== undefined ? [search.collectingAgentName] : null,
+        filteredValue: search?.collectingAgentName == null ? null : [search.collectingAgentName],
         ...getColumnSearchPropsUseFilteredValue(
           search, "collectingAgentName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -238,7 +252,7 @@ const ViewCaCiMapping = () => {
         width: COLUMN_WIDTH.DELIVERY_CHANNEL,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.deliveryChannelName !== undefined ? [search.deliveryChannelName] : null,
+        filteredValue: search?.deliveryChannelName == null ? null : [search.deliveryChannelName],
         ...getColumnSearchPropsUseFilteredValue(
           search, "deliveryChannelName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -253,7 +267,7 @@ const ViewCaCiMapping = () => {
         width: COLUMN_WIDTH.NAME,
         sorter: true,
         isClassification: true,
-        filteredValue: search?.name !== undefined ? [search.name] : null,
+        filteredValue: search?.name == null ? null : [search.name],
         ...getColumnSearchPropsUseFilteredValue(
           search, "name", searchInput, searchedColumn, searchText, handleSearch, true, "input", [], handleReset
         ),
@@ -268,7 +282,7 @@ const ViewCaCiMapping = () => {
         sorter: true,
         isClassification: true,
         align: "center",
-        filteredValue: search?.effStartDate !== undefined ? [search.effStartDate] : null,
+        filteredValue: search?.effStartDate == null ? null : [search.effStartDate],
         ...getColumnSearchPropsUseFilteredValue(
           search, "effStartDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
         ),
@@ -283,7 +297,7 @@ const ViewCaCiMapping = () => {
         sorter: true,
         isClassification: true,
         align: "center",
-        filteredValue: search?.effEndDate !== undefined ? [search.effEndDate] : null,
+        filteredValue: search?.effEndDate == null ? null : [search.effEndDate],
         ...getColumnSearchPropsUseFilteredValue(
           search, "effEndDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
         ),
@@ -298,7 +312,7 @@ const ViewCaCiMapping = () => {
         sorter: true,
         isClassification: true,
         fixed: "right",
-        filteredValue: search?.status !== undefined ? [search.status] : null,
+        filteredValue: search?.status == null ? null : [search.status],
         ...getColumnSearchPropsUseFilteredValue(
           search, "status", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -313,7 +327,7 @@ const ViewCaCiMapping = () => {
         sorter: true,
         isClassification: true,
         fixed: "right",
-        filteredValue: search?.statusApproval !== undefined ? [search.statusApproval] : null,
+        filteredValue: search?.statusApproval == null ? null : [search.statusApproval],
         ...getColumnSearchPropsUseFilteredValue(
           search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
@@ -325,10 +339,11 @@ const ViewCaCiMapping = () => {
   );
 
   const onSort = (_, __, sorter) => {
-    const dataSort =
-      sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-        : "";
+    let dataSort = "";
+    if (sorter.order != null) {
+      const direction = sorter.order === "ascend" ? "asc" : "desc";
+      dataSort = `${sorter.field}~${direction}`;
+    }
     setSort(dataSort);
   };
 
@@ -347,7 +362,7 @@ const ViewCaCiMapping = () => {
     setOpenModalInactivate(true);
     setId(r?.id);
     setNameModalActiveOrInactivate(r?.name);
-    setStatus(r?.status);
+    statusRef.current = r?.status ?? "";
   };
 
   const handleCancelModalInactivate = () => {
@@ -358,7 +373,7 @@ const ViewCaCiMapping = () => {
     const body = {
       id,
       appHierId: res.approvalHierarchy,
-      status: status === "Inactive" ? "Active" : "Inactive",
+      status: statusRef.current === "Inactive" ? "Active" : "Inactive",
       remark: res.remark,
     };
     dispatch(inactiveCaCiMapping({ body }))
@@ -427,7 +442,7 @@ const ViewCaCiMapping = () => {
           <Link
             to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_CA_CI_MAPPING}
             state={{ id: record?.id }}
-            className={!isEditable ? "pointer-events-none" : ""}
+            className={isEditable ? "" : "pointer-events-none"}
           >
             <ButtonComponent
               className="gap-5"
@@ -441,18 +456,21 @@ const ViewCaCiMapping = () => {
           </Link>
         ) : (
           <Tooltip title="Update">
-            <div
-              onClick={(e) => { if (!isEditable) e.preventDefault(); }}
-              className={!isEditable ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+            <button
+              type="button"
+              onClick={() => {
+                if (isEditable) {
+                  navigate(RECEIPT_AND_COLLECTION_ROUTES.UPDATE_CA_CI_MAPPING, {
+                    state: { id: record?.id },
+                  });
+                }
+              }}
+              disabled={!isEditable}
+              className={isEditable ? "cursor-pointer" : "cursor-not-allowed opacity-50"}
+              style={{ background: "transparent", border: "none", padding: 0 }}
             >
-              <Link
-                to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_CA_CI_MAPPING}
-                state={{ id: record?.id }}
-                className={!isEditable ? "pointer-events-none" : ""}
-              >
-                <SVGIcon name="IconEdit" color={isEditable ? "#ACC424" : "#8D91A0"} width={20} />
-              </Link>
-            </div>
+              <SVGIcon name="IconEdit" color={isEditable ? "#ACC424" : "#8D91A0"} width={20} />
+            </button>
           </Tooltip>
         );
       },
@@ -509,9 +527,14 @@ const ViewCaCiMapping = () => {
           </ButtonComponent>
         ) : (
           <Tooltip title={"Approval History"}>
-            <div onClick={() => handleApprovalHistory(record?.id)} className="cursor-pointer">
+            <button
+              type="button"
+              onClick={() => handleApprovalHistory(record?.id)}
+              className="cursor-pointer"
+              style={{ background: "transparent", border: "none", padding: 0 }}
+            >
               <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-            </div>
+            </button>
           </Tooltip>
         )
       ),
@@ -525,7 +548,7 @@ const ViewCaCiMapping = () => {
         handleDownload();
       }
       handleRefresh();
-    } catch (error) {
+    } catch {
       handleRefresh();
     }
   };
@@ -617,7 +640,7 @@ const ViewCaCiMapping = () => {
   }, [allColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <CardContainer
         header={
@@ -630,6 +653,7 @@ const ViewCaCiMapping = () => {
         }
       >
         <TableRBI
+          key="ca-ci-mapping-table"
           idTable="ca-ci-mapping-table"
           size="small"
           dataSource={data?.result}
@@ -676,7 +700,7 @@ const ViewCaCiMapping = () => {
         onFinish={handleSubmitModalInactivate}
       />
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

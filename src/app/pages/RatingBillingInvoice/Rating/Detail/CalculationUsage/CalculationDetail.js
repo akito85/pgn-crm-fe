@@ -6,11 +6,9 @@ import { columnsCalculationDetail } from "./columns/ColumnsCalculationDetail";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const CalculationDetail = ({ calculationCode }) => {
-  const { data_calculationDetail, loading } = useSelector((state) => state.rating);
+  const { data_calculationDetail, loadingCalculation } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  
-  const dataSource = data_calculationDetail?.result || [];
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -82,6 +80,7 @@ const CalculationDetail = ({ calculationCode }) => {
 
   // Process dataSource untuk menambahkan rowSpan pada Time Unit
   const processedDataSource = useMemo(() => {
+    const dataSource = data_calculationDetail?.result || [];
     if (!dataSource || dataSource.length === 0) return [];
 
     // Deep copy untuk menghindari error "object is not extensible"
@@ -116,7 +115,7 @@ const CalculationDetail = ({ calculationCode }) => {
     }
 
     return processed;
-  }, [dataSource]);
+  }, [data_calculationDetail?.result]);
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = baseColumns.map((col) => {
@@ -192,7 +191,7 @@ const CalculationDetail = ({ calculationCode }) => {
         columnDefinitions={columnDefinitions}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
-        loading={loading}
+        loading={loadingCalculation}
       />
     </div>
   );

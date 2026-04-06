@@ -5,7 +5,7 @@ import InputComponent from "../../../../components/InputComponent";
 import DetailText from "../../../../components/DetailText";
 import NxTable from "../../../../components/Nx/NxTable";
 import {
-  getGasDepositApproval,
+  getGasDepositApprovals,
   approveOrRejectAllGasDeposit
 } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
@@ -29,7 +29,7 @@ const GasDepositApprovalModal = ({
   // --- Hooks ---
   const {
     list_gasDepositApproval: gasDepositApprovals,
-    pagination_gasDepositApproval: pagination,
+    pagination_listGdApproval: pagination,
     loading_listGdApproval,
     loading_approveRejectGd
   } = useSelector((state) => state.gasDeposit);
@@ -129,7 +129,7 @@ const GasDepositApprovalModal = ({
       };
 
       dispatch(
-        getGasDepositApproval({
+        getGasDepositApprovals({
           id: accountId,
           body,
           isLoadMore: true
@@ -290,7 +290,7 @@ const GasDepositApprovalModal = ({
       };
 
       dispatch(
-        getGasDepositApproval({
+        getGasDepositApprovals({
           id: accountId,
           body,
           isLoadMore: false

@@ -7,10 +7,8 @@ import FileSaver from "file-saver";
 import { tokenHeader } from "../../../../../../utils/tokenHeader";
 import axios from "axios";
 import { PreviewFile } from "../Utils/PreviewFile";
-import { previewGeneralTemplate } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/general_template";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import ExtensionFile from "../../../../../../utils/ExtensionFile";
 
 const UploadTemplate = ({
   fileList,
@@ -28,14 +26,14 @@ const UploadTemplate = ({
   isMultiList = false,
   maxCount = 1,
   allowedFile = "png, jpeg, jpg",
-  accept = ".pdf, .rtf",
+  accept = ".rtf, .docx",
   type = false,
   acceptFile = "file",
   allowSize = 5,
   configApplication,
   getAPIGuard,
   typeRBI,
-  fileTypeCheck = ["application/msword", "application/rtf"],
+  fileTypeCheck = ["application/msword", "application/rtf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
 }) => {
   // Selector
   const { dataConfigRBIDataGeneralTemplate } = useSelector(
@@ -68,10 +66,10 @@ const UploadTemplate = ({
       }, "");
     const tempSize = parseInt(valueGuard?.size || "0") * 1000000;
     setDataGuard({
-      fileExt: tempFileExt === "." ? ExtensionFile : tempFileExt,
+      fileExt: tempFileExt === "." ? accept : tempFileExt,
       size: tempSize || 5000000,
     });
-  }, [valueGuard]);
+  }, [valueGuard, accept]);
 
   const getFileExtension = (file) => {
     return file.slice(((file.lastIndexOf(".") - 1) >>> 0) + 2)?.toLowerCase();
@@ -88,31 +86,16 @@ const UploadTemplate = ({
       }
     } else {
       try {
-        if (r.type && fileTypeCheck.some((v) => r.type.includes(v))) {
-          let filename = r?.fileName;
-          let extension = filename.match(/\.([^.]+)$/);
-          dispatch(
-            previewGeneralTemplate({
-              url: r.urlFile1,
-              extension: extension[1],
-              filename: filename,
-            })
-          );
-        } else {
-          const response = await axios.get(
-            configApplication + r.urlFile1,
-            {
-              headers: tokenHeader(),
-              responseType: "blob",
-            }
-          );
-          // console.log(response);
-          const base64 = await getBase64(response.data);
-          // console.log(base64);
-          PreviewFile(base64, r.fileName);
-        }
+        const response = await axios.get(
+          configApplication + r.urlFile1,
+          {
+            headers: tokenHeader(),
+            responseType: "blob",
+          }
+        );
+        FileSaver.saveAs(response.data, r.fileName);
       } catch (error) {
-        console.error("Error fetching document:", error);
+        console.error("Error downloading document:", error);
       }
     }
   };
@@ -120,21 +103,31 @@ const UploadTemplate = ({
   return (
     <div className="w-full flex flex-row items-center gap-5 justify-start">
       {type ? (
-        <div>
-          <p style={{ margin: 0 }}>{`${fileList[0]?.fileName || ""}`}</p>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p
+            style={{
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+            title={fileList[0]?.fileName || ""}
+          >
+            {`${fileList[0]?.fileName || ""}`}
+          </p>
         </div>
       ) : (
         <Upload
           fileList={fileList}
           showUploadList={showUploadList}
-          accept={dataGuard.fileExt}
+          accept={accept}
           // listType={acceptFile}
           beforeUpload={async (file) => {
-            const allowed_file = allowedFile.toLowerCase()?.split(",");
+            const allowed_file = allowedFile.toLowerCase()?.split(",").map(ext => ext.trim());
             const file_extension = getFileExtension(file?.name);
             if (
-              dataGuard.fileExt?.includes(file_extension) &&
-              file.size / (1024 * 1024) <= parseInt(valueGuard?.size) // file in Mb
+              allowed_file?.includes(file_extension) &&
+              file.size / (1024 * 1024) <= parseInt(valueGuard?.size || allowSize) // file in Mb
             ) {
               setValidateFile(true);
               setFileName(file?.name);
@@ -164,13 +157,13 @@ const UploadTemplate = ({
                 setValidateFile(false);
                 const errorBody = {
                   title: "Failed",
-                  description: `Format file not valid`,
+                  description: `Format file not valid, please upload file with format ${allowedFile.split(",").map(ext => ext.trim()).join(" or ")}`,
                 };
                 dispatch(showModalError(errorBody));
               }
               if (
                 allowed_file?.includes(file_extension) === true &&
-                file.size / (1024 * 1024) > parseInt(valueGuard?.size)
+                file.size / (1024 * 1024) > parseInt(valueGuard?.size || allowSize)
               ) {
                 setValidateFile(false);
                 const errorBody = {
@@ -199,7 +192,7 @@ const UploadTemplate = ({
         </Upload>
       )}
       {fileList.length > 0 ? (
-        <span className={"text-gray-500 text-xs ml-2"}>
+        <span className={"text-gray-500 text-xs ml-2"} style={{ flexShrink: 0 }}>
           <EyeOutlined
             style={{ fontSize: "24px", color: "#8D91A0" }}
             onClick={() => handleShow(fileList[0])}

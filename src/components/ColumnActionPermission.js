@@ -15,14 +15,16 @@ export const RenderContentActions = (
   stopClickPropagation = false,
 ) => {
 
+
   if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center gap-4">
+      <div className="w-full flex justify-center items-center gap-2.5">
         <Popover
           trigger={"click"}
           placement="bottomRight"
           showArrow={false}
           overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
+          className="text-black hover:text-[#1976D2] transition-colors duration-300"
           content={
             <div className="flex flex-col">
               {itemRender
@@ -38,7 +40,7 @@ export const RenderContentActions = (
           }
         >
           <div
-            className="group"
+            className="flex items-center"
             onClick={(e) => {
               if (stopClickPropagation) e.stopPropagation();
             }}
@@ -64,7 +66,7 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 items-center">
+      <div className="w-full flex justify-center gap-2.5 items-center">
         {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength, index);

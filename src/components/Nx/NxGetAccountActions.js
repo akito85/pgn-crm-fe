@@ -12,6 +12,8 @@ const nxGetAccountActions = ({
   handleApprovalHistory = () => {},
   handleRecalculate = () => {},
   handleExpire = () => {},
+  handleBulkRecalculate = () => {},
+  handleBulkExpire = () => {},
   handleDelete = () => {}
 }) => [
   {
@@ -48,6 +50,30 @@ const nxGetAccountActions = ({
         onClick={handleCreate}
       >
         Create
+      </Button>
+    )
+  },
+  {
+    action: "Recalculate",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkRecalculate}
+      >
+        Recalculate
+      </Button>
+    )
+  },
+  {
+    action: "Expire",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkExpire}
+      >
+        Expire
       </Button>
     )
   },

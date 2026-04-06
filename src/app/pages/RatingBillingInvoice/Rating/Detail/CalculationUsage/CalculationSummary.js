@@ -18,7 +18,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
     data_calculationSummary, 
     data_calculationSummaryExpand,
     loadingExpand,
-    loading 
+    loadingCalculation 
   } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -165,7 +165,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
         searchText,
         handleSearch,
       ),
-    [searchedColumn, searchText, search]
+    [searchedColumn, searchText, search, page]
   );
 
   const allColumns = useMemo(() => {
@@ -200,7 +200,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
         columnDefinitions={columnDefinitions}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
-        loading={loading}
+        loading={loadingCalculation}
         usePagination={false}
         useInfiniteScroll={true}
         onLoadMore={handleLoadMore}

@@ -46,6 +46,11 @@ import {
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ConfirmationSa from "../shared/Modal/ConfirmationSa";
 import { dateFormatting, hasValue } from "../../../../../../../utils";
+import {
+	isSelectedOptionSemantic,
+	SERVICE_AGREEMENT_TYPE_VALUE,
+	SERVICE_TYPE_VALUE,
+} from "../idResolver";
 
 import { IconModal } from "../../../../../../../utils/Icon";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
@@ -69,9 +74,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 		{ value: "Tax Implication" },
 	]);
 
-	const [valuePageSaDetail, setValuePageSaDetail] = useState(
-		tabPagesSaDetail[0].value
-	);
+	const [valuePageSaDetail, setValuePageSaDetail] = useState("pricing");
 	const [modalSaDetail, setModalSaDetail] = useState(false);
 
 	const [modalChooseProduct, setModalChooseProduct] = useState(false);
@@ -173,6 +176,16 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const saReferenceNumber = location?.state?.saReferenceNumber;
 	const saRecordData = location?.state;
 	const idSa = location?.state?.idSa;
+	const isGasServiceType = isSelectedOptionSemantic(
+		data_service_type,
+		saInfoObj?.serviceType,
+		SERVICE_TYPE_VALUE.GAS
+	);
+	const isPjbgServiceAgreementType = isSelectedOptionSemantic(
+		data_sa_type,
+		saInfoObj?.serviceAgreementType,
+		SERVICE_AGREEMENT_TYPE_VALUE.PJBG
+	);
 
 	// Use Effect
 	useEffect(() => {
@@ -592,9 +605,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 
 	useEffect(() => {
-		if (data_approval_detail?.length > 0) {
-			setDataTableApproval(data_approval_detail);
-		}
+		setDataTableApproval(data_approval_detail || []);
 	}, [data_approval_detail]);
 
 	// handle get detail approval
@@ -700,7 +711,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	};
 	const validateGasInPlanDate = () => {
 		let obj2 = saInfoObj.gasInPlanDate;
-		if (saInfoObj.serviceType === 608 && (obj2 !== undefined || obj2 !== null) && !saInfoObj.alreadyGasIn) {
+		if (isGasServiceType && (obj2 !== undefined || obj2 !== null) && !saInfoObj.alreadyGasIn) {
 			return obj2;
 		} else {
 			return true;
@@ -1219,6 +1230,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					ddlPriceCode={ddlPriceCode}
 					ddlPriceRule={ddlPriceRule}
 					dataListVersion={dataListVersion}
+					setDataListVersion={setDataListVersion}
 					setDdlPriceRule={setDdlPriceRule}
 					isMain={isMain}
 					data_detail={data_detail}
@@ -1279,9 +1291,10 @@ const UpdateServiceAgreement = ({ saType }) => {
 	];
 
 	const navigate = useNavigate();
-	const next = () => {
-		if (current === 0 && saInfoObj.serviceType === 608 && isMain === "Y") {
-			const body = {
+
+	const getCheckValidateCreateSaBody = (step = current) => {
+		if (step === 0 && isGasServiceType && isMain === "Y") {
+			return {
 				saId: idSa,
 				accountId: idAccount,
 				isMain: true,
@@ -1290,30 +1303,10 @@ const UpdateServiceAgreement = ({ saType }) => {
 				endDate: null,
 				saType: "main",
 			};
-			dispatch(checkValidateCreateSa({ body }))
-				.unwrap()
-				.then((data) => {
-					if (data?.isCreated === true) {
-						setCurrent(current + 1);
-					} else {
-						setModalValidateSa(true);
-						setMessageValidateSa(data?.message);
-						setCurrent((current = 0));
-					}
-				})
-				.catch((error) => {
-					if (error?.data) {
-						setLoadingNext(false);
-						let message = error?.data?.message;
-						if (error?.data?.isCreated === false) {
-							setModalValidateSa(true);
-							setMessageValidateSa(message);
-							setCurrent((current = 0));
-						}
-					}
-				});
-		} else if (saRecordData?.saType === "Amendment") {
-			const body = {
+		}
+
+		if (saRecordData?.saType === "Amendment") {
+			return {
 				saId: idSa,
 				accountId: idAccount,
 				isMain: false,
@@ -1323,30 +1316,10 @@ const UpdateServiceAgreement = ({ saType }) => {
 				saType: "Amendment",
 				saReferenceNumber: saReferenceNumber,
 			};
-			dispatch(checkValidateCreateSa({ body }))
-				.unwrap()
-				.then((data) => {
-					if (data?.isCreated === true) {
-						setCurrent(current + 1);
-					} else {
-						setModalValidateSa(true);
-						setMessageValidateSa(data?.message);
-						setCurrent((current = 0));
-					}
-				})
-				.catch((error) => {
-					if (error?.data) {
-						setLoadingNext(false);
-						let message = error?.data?.message;
-						if (error?.data?.data?.isCreated === false) {
-							setModalValidateSa(true);
-							setMessageValidateSa(message);
-							setCurrent((current = 0));
-						}
-					}
-				});
-		} else if (current === 1 && saRecordData?.saType === "Addon") {
-			const body = {
+		}
+
+		if (step === 1 && saRecordData?.saType === "Addon") {
+			return {
 				saId: idSa,
 				accountId: idAccount,
 				isMain: false,
@@ -1356,31 +1329,71 @@ const UpdateServiceAgreement = ({ saType }) => {
 				saType: "addon",
 				saReferenceNumber: saReferenceNumber,
 			};
-			dispatch(checkValidateCreateSa({ body }))
-				.unwrap()
-				.then((data) => {
-					if (data?.isCreated === true) {
-						setCurrent(current + 1);
-					} else {
-						setModalValidateSa(true);
-						setMessageValidateSa(data?.message);
-						setCurrent((current = 1));
-					}
-				})
-				.catch((error) => {
-					if (error?.data) {
-						setLoadingNext(false);
-						let message = error?.data?.message;
-						if (error?.data?.data?.isCreated === false) {
-							setModalValidateSa(true);
-							setMessageValidateSa(message);
-							setCurrent((current = 1));
-						}
-					}
-				});
-		} else {
-			setCurrent(current + 1);
 		}
+
+		return null;
+	};
+
+	const runCheckValidateCreateSa = async (step = current) => {
+		const body = getCheckValidateCreateSaBody(step);
+
+		if (!body) {
+			return true;
+		}
+
+		try {
+			const data = await dispatch(checkValidateCreateSa({ body })).unwrap();
+
+			if (data?.isCreated === true) {
+				return true;
+			}
+
+			setModalValidateSa(true);
+			setMessageValidateSa(data?.message);
+			return false;
+		} catch (error) {
+			if (error?.data) {
+				const message = error?.data?.message;
+				const isCreated = error?.data?.data?.isCreated;
+
+				if (isCreated === false || hasValue(message)) {
+					setModalValidateSa(true);
+					setMessageValidateSa(message);
+				}
+			}
+
+			return false;
+		}
+	};
+
+	const handleSaveAsDraft = async () => {
+		setLoadingNext(true);
+		setTypeSubmit("draft");
+
+		try {
+			await form.validateFields(["serviceType", "serviceAgreementNumber"]);
+
+			const isCreateValid = await runCheckValidateCreateSa();
+			if (!isCreateValid) {
+				return;
+			}
+
+			handleSubmitForm(form.getFieldsValue(true), "draft");
+		} catch (_error) {
+			return;
+		} finally {
+			setLoadingNext(false);
+		}
+	};
+
+	const next = () => {
+		runCheckValidateCreateSa(current).then((isCreated) => {
+			if (!isCreated) {
+				return;
+			}
+
+			setCurrent(current + 1);
+		});
 	};
 	const prev = () => {
 		setCurrent(current - 1);
@@ -1488,16 +1501,14 @@ const UpdateServiceAgreement = ({ saType }) => {
 		];
 	}
 
-  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
-	if (saInfoObj?.serviceAgreementType === 1170) {
+	if (isPjbgServiceAgreementType) {
 		saInformationFields = [
 			...saInformationFields,
 			'pjbgType'
 		];
 	}
 
-  // ToDo : must disscuss with BE and Sen Dev about hardcoded id.
-	if (saInfoObj?.serviceType === 608 && saRecordData?.isMain === "Y" && !saInfoObj?.alreadyGasIn) {
+	if (isGasServiceType && saRecordData?.isMain === "Y" && !saInfoObj?.alreadyGasIn) {
 		saInformationFields = [
 			...saInformationFields,
 			'gasInPlanDate'
@@ -1579,7 +1590,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	};
 
 	// Save/show to confirmation modal
-	const handleSubmitForm = (formValue) => {
+	const handleSubmitForm = (formValue, submitType = typeSubmit) => {
 
 		const objPaymentType = {
 			name: {
@@ -1622,7 +1633,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 		const bodyIsDraft = {
 			saId: saRecordData?.idSa,
-			isSubmit: typeSubmit !== "draft" && true,
+			isSubmit: submitType !== "draft",
 			saInfo: {
 				saReferenceNumber: saReferenceNumber ? saReferenceNumber : null,
 				accountId: idAccount,
@@ -1907,16 +1918,13 @@ const UpdateServiceAgreement = ({ saType }) => {
 											Previous
 										</ButtonComponent>
 									)}
-									{current === filteredItems.length - 1 && (
-										<ButtonComponent
-											htmlType="submit"
-											type="secondary"
-											onClick={() => setTypeSubmit("draft")}
-										>
-											Save as Draft
-										</ButtonComponent>
-										
-									)}
+									<ButtonComponent
+										type="secondary"
+										onClick={handleSaveAsDraft}
+										loading={loadingNext}
+									>
+										Save as Draft
+									</ButtonComponent>
 									{current < filteredItems.length - 1 && (
 										<ButtonComponent
 											onClick={handleButtonNext}

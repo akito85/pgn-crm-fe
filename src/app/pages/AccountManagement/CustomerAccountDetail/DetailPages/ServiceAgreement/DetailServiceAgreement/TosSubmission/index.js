@@ -47,7 +47,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   });
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [openModalHistory, setOpenModalHistory] = useState(false);
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [dataInactivate, setDataInactivate] = useState({});
@@ -170,9 +170,14 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     setPage(1);
   };
 
-  const handleApprovalHistory = (data) => {
-    dispatch(getApprovalHistory(data.id));
-    setOpenModalHistory(true);
+  const handleApprovalHistoryModal = (show, tosSubmissionId = 0) => {
+    if (show) {
+      dispatch(getApprovalHistory(tosSubmissionId));
+      setShowApprovalHistoryModal(true);
+      return;
+    }
+
+    setShowApprovalHistoryModal(false);
   };
   const handleOpenModalInactivate = (data) => {
     setDataInactivate(data);
@@ -601,7 +606,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
               />
             }
             border={false}
-            onClick={() => handleApprovalHistory(record)}
+            onClick={() => handleApprovalHistoryModal(true, record?.id)}
           >
             <span className={"text-black"}>Approval History</span>
           </ButtonComponent>
@@ -617,7 +622,7 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
                   />
                 }
                 border={false}
-                onClick={() => handleApprovalHistory(record)}
+                onClick={() => handleApprovalHistoryModal(true, record?.id)}
               >
               </ButtonComponent>
             </span>
@@ -729,8 +734,8 @@ const TosSubmission = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
           )}
         />
         <NxHistoryModal
-          isOpen={openModalHistory && dataApprovalHistoryFix}
-          handleClose={() => setOpenModalHistory(false)}
+          isOpen={showApprovalHistoryModal}
+          handleClose={() => handleApprovalHistoryModal(false)}
           header={"Approval History"}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}

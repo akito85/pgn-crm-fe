@@ -176,7 +176,6 @@ export const columnsInvoice = (
       key: "customerName",
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
-      isClassification: true,
       width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -228,7 +227,6 @@ export const columnsInvoice = (
       key: "accountName",
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
-      isClassification: true,
       width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -749,7 +747,7 @@ export const columnsInvoice = (
       key: "status",
       title: "STATUS GENERATE INVOICE",
       dataIndex: "status",
-      width: 220,
+      width: 100,
       isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(

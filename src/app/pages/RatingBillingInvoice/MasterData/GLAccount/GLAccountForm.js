@@ -10,7 +10,7 @@ import {
 } from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../../constants/configApp";
@@ -393,19 +393,19 @@ const GLAccountForm = ({ type }) => {
 
           {/* Approval Section */}
           <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
-            <BaseContainer header={"Approval Information"}>
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           {/* Attachment Section */}
           <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
-            <BaseContainer header={"Attachment Information"}>
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -419,7 +419,7 @@ const GLAccountForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           <FormFooter

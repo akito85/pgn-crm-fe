@@ -138,10 +138,12 @@ export const errorMessage = (error) => {
   let message =
     dataError ||
     error?.response?.data?.message ||
+    error?.data?.message ||
     error?.response?.data?.error ||
+    error?.data?.error ||
     error?.message ||
     error?.description ||
-    error?.toString();
+    (typeof error === "string" ? error : error?.toString());
   return message;
 };
 export const errorCode = (error) => {

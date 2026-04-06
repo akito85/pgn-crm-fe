@@ -79,6 +79,7 @@ const BillingItemForm = (props) => {
     data_classificationTypeList,
     data_accountTypeList,
     loading,
+    loadingDetail,
   } = useSelector((state) => state.billing_item);
 
   const currentPosition = useSelector(
@@ -156,7 +157,7 @@ const BillingItemForm = (props) => {
   const [dataSend, setDataSend] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
 
-  const isLoading = loading || loadingForm;
+  const isLoading = loading || loadingForm || loadingDetail;
 
   // Initial data fetch
   useEffect(() => {
@@ -579,7 +580,8 @@ const BillingItemForm = (props) => {
 
       setdataTable(temp);
       setStartDateMap(moment(temp?.find((item) => item.category === category)?.startDate));
-      setEndDateMap(moment(temp?.find((item) => item.category === category)?.endDate));
+      const rowEndDate1 = temp?.find((item) => item.category === category)?.endDate;
+      setEndDateMap(rowEndDate1 ? moment(rowEndDate1) : endDate || null);
     }
   };
 
@@ -617,7 +619,8 @@ const BillingItemForm = (props) => {
     } else {
       dispatch(getDetailMappingCategory(e.category));
       setStartDateMap(moment(dataTable?.find((item) => item.category === e.category)?.startDate));
-      setEndDateMap(moment(dataTable?.find((item) => item.category === e.category)?.endDate));
+      const rowEndDate2 = dataTable?.find((item) => item.category === e.category)?.endDate;
+      setEndDateMap(rowEndDate2 ? moment(rowEndDate2) : endDate || null);
       setCategory(e.category);
       setDetailMapping(true);
     }
@@ -669,11 +672,13 @@ const BillingItemForm = (props) => {
   const handleMappingInfo = (data) => {
     return dataTable.map((item) => ({
       category: item?.category,
+      categoryName: item?.categoryName,
       startDate: item?.startDate || null,
       endDate: item?.endDate || null,
       description: item?.description || null,
       detail: (data[item?.category] || []).map((detail) => ({
         item: detail?.item,
+        itemName: detail?.itemName,
         startDate: detail?.startDate || null,
         endDate: detail?.endDate || null,
       })),
@@ -861,7 +866,6 @@ const BillingItemForm = (props) => {
       setdataTable([]);
       setdataDetailTable([]);
       setAppHierDataDetail([]);
-      setAppHierOptions([]);
       setSelectedHierarchy();
       setListDataAttachment([]);
       setIsEditable(false);
@@ -876,6 +880,24 @@ const BillingItemForm = (props) => {
       setSelectedCriteria(null);
       setDataCriteriaTable([]);
       setIsCriteriaEditing(false);
+      setCurrent(0);
+      setListSectionInfo([
+        {
+          value: "Billing Item",
+          paramValue: [
+            "billingItemCategory",
+            "type",
+            "name",
+            "billType",
+            "criteria",
+            "startDate",
+            "endDate",
+            "description",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
     } else {
       setDetailMapping(false);
       setCategory("");
@@ -1148,7 +1170,7 @@ const BillingItemForm = (props) => {
               <p className="text-[18px] font-bold">Failed</p>
             </div>
             <p className="pl-[70px]">
-              You can't create Mapping Information. Please fill out the start date first
+              Can't add detail data. Please select a start date.
             </p>
           </div>
         </ModalError>

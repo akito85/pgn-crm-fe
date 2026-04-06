@@ -25,12 +25,6 @@ export const getHoldDetailColumns = (
       ...getColumnSearchPropsPaging("warrantyCode", searchInput, searchedColumn, searchText, handleSearch),
     },
     { 
-      title: "REG NUMBER", 
-      dataIndex: "regNumber",
-      sorter: true,
-      ...getColumnSearchPropsPaging("regNumber", searchInput, searchedColumn, searchText, handleSearch),
-    },
-    { 
       title: "COST CENTER", 
       dataIndex: "costCenter",
       sorter: true,

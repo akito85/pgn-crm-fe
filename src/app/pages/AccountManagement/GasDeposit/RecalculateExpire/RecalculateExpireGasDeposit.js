@@ -48,8 +48,8 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   const isExpire = formType === "expire";
 
   const {
-    loading_listGdApprovalOption,
-    loading_detailGdApprovalHierarchyDetails,
+    loading_listGdApprovalHierarchy,
+    loading_detailGdApprovalHierarchy,
     loading_detailGd,
     loading_detailDraftGd,
     loading_recalculateExpireGd,
@@ -61,8 +61,8 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   } = useSelector((state) => state.gasDeposit);
   
   const loading =
-    loading_listGdApprovalOption ||
-    loading_detailGdApprovalHierarchyDetails ||
+    loading_listGdApprovalHierarchy ||
+    loading_detailGdApprovalHierarchy ||
     loading_detailGd ||
     loading_detailDraftGd ||
     loading_recalculateExpireGd;
@@ -633,6 +633,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_recalculateExpireGd}
               detail={detail}
+              details={details}
               handleSubmitForm={handleSubmitForm}
             />
           </Form>

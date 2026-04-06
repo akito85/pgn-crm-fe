@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Input, Form, Alert, Spin, InputNumber, Button } from "antd";
+import { Input, Form, Alert, Spin, Button } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { FormStepper } from "../../../../../components/FormStepNavigation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -160,8 +160,16 @@ const ModalHoldReceipt = ({
     }, [dataListAppHierDetail]);
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
+        const updatedRows = newSelectedRows.map(item => ({
+            ...item,
+            holdAmount:
+                parseFloat(item.unAppliedAmountReal) ||
+                parseFloat(item.unAppliedAmount) ||
+                0
+        }));
+
         setSelectedRowKeys(newSelectedRowKeys);
-        setLocalSelectedData(newSelectedRows);
+        setLocalSelectedData(updatedRows);
     };
 
     const rowSelection = {
@@ -240,69 +248,19 @@ const ModalHoldReceipt = ({
         },
     ];
 
-    const handleHoldAmountChange = (value, key) => {
-        const newData = localSelectedData.map(item => {
-            if ((item.key || item.id) === key) {
-                // Validate: Hold Amount cannot exceed Balance (unAppliedAmountReal)
-                const balance = parseFloat(item.unAppliedAmountReal) || parseFloat(item.unAppliedAmount) || 0;
-                
-                // Validasi: Hold Amount tidak boleh melebihi Balance
-                let validatedValue = value;
-                if (value > balance) {
-                    validatedValue = balance;
-                } else if (value < 0) {
-                    validatedValue = 0;
-                }
-                
-                return { ...item, holdAmount: validatedValue };
-            }
-            return item;
-        });
-        setLocalSelectedData(newData);
-    };
-
     const columnsStep2 = [
         ...columnsSimplified,
         {
             title: "Hold Amount",
             dataIndex: "holdAmount",
             key: "holdAmount",
-            render: (_, record) => {
-                // Parse balance dengan benar dari unAppliedAmountReal
-                const maxBalance = parseFloat(record.unAppliedAmountReal) || parseFloat(record.unAppliedAmount) || 0;
-                
-                return (
-                    <InputNumber
-                        style={{ width: "100%" }}
-                        value={record.holdAmount}
-                        max={maxBalance}
-                        min={0}
-                        formatter={(value) =>
-                            value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
-                        }
-                        parser={(value) => value?.replace(/\./g, "")}
-                        onChange={(value) => handleHoldAmountChange(value, record.key || record.id)}
-                        onKeyDown={(e) => {
-                            // Allow: backspace, delete, tab, escape, enter
-                            if (['Delete', 'Backspace', 'Tab', 'Escape', 'Enter'].includes(e.key) ||
-                                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Command+A, etc.
-                                (e.ctrlKey === true || e.metaKey === true) ||
-                                // Allow: home, end, left, right, arrow keys
-                                ['Home', 'End', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-                                return;
-                            }
-                            // Ensure that it is a number and stop the keypress
-                            if (e.shiftKey || !/^[0-9]$/.test(e.key)) {
-                                e.preventDefault();
-                            }
-                        }}
-                        placeholder="Input Amount"
-                        controls={false}
-                    />
-                );
-            }
+            render: (value) =>
+                value
+                    ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                    : "0"
         }
     ];
+
     const columnsStep4 = [
         ...columnsSimplified,
         {

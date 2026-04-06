@@ -9,6 +9,11 @@ import moment from "moment";
 import { hasValue } from '../../../../../../../../utils'
 import { getTaxImplication } from '../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice'
 import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer'
+import {
+  isSelectedOptionSemantic,
+  SERVICE_AGREEMENT_TYPE_VALUE,
+  SERVICE_TYPE_VALUE,
+} from '../../idResolver';
 
 const SaInformation = ({
   saType,
@@ -38,6 +43,16 @@ const SaInformation = ({
 }) => {
   const [isGas, setIsGas] = useState('')
   const [inputValue, setInputValue] = useState('');
+  const isGasServiceType = isSelectedOptionSemantic(
+    dataServiceType,
+    saInfoObj?.serviceType,
+    SERVICE_TYPE_VALUE.GAS
+  );
+  const isPjbgServiceAgreementType = isSelectedOptionSemantic(
+    dataSaType,
+    saInfoObj?.serviceAgreementType,
+    SERVICE_AGREEMENT_TYPE_VALUE.PJBG
+  );
 
   // console.log(`SA Type ${saType}`)
 
@@ -306,11 +321,11 @@ const SaInformation = ({
               rules={[
                 {
                   message: "Please input your PJBG Type",
-                  required: saInfoObj?.serviceAgreementType === 1170 ? true : false,
+                  required: isPjbgServiceAgreementType ? true : false,
                 },
               ]}
             >
-              <SelectComponent disabled={(saInfoObj?.serviceAgreementType === 1170) ? false : true}>
+              <SelectComponent disabled={!isPjbgServiceAgreementType}>
                 {dataPjbg &&
                   dataPjbg?.map((item, index) => (
                     <Select.Option value={item.id} key={index}>
@@ -381,16 +396,14 @@ const SaInformation = ({
                   rules={[
                   {
                     message: "Please input Gas In Plan Date",
-                    // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? saInfoObj?.alreadyGasIn: true
-                    required : saInfoObj?.serviceType === 608 ? (!saInfoObj?.alreadyGasIn) : false
+                    required : isGasServiceType ? (!saInfoObj?.alreadyGasIn) : false
                   }
                   ]}
                 >
                   <DateComponent
                     dateDisable={handleRangeStartEnd}
                     onChange={(e) => handleDateValidation(e, "gasInPlanDate")}
-                    // disabled={(saInfoObj?.serviceType !== 608 || saRecordData?.typeSa !== "main" || saInfoObj?.alreadyGasIn === true) && true} 
-                    disabled={(saInfoObj?.serviceType !== 608 || saInfoObj?.alreadyGasIn === true) && true}
+                    disabled={(!isGasServiceType || saInfoObj?.alreadyGasIn === true) && true}
                   />
                 </Form.Item>
                 <Form.Item

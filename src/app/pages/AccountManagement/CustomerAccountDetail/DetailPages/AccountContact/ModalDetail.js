@@ -1,6 +1,6 @@
 import React,{useRef, useState} from "react";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import CardComponent from "../../../../../../components/Card/CardComponent";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import DetailText from "../../../../../../components/DetailText";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import moment from 'moment'
@@ -104,17 +104,19 @@ const ModalDetail = ({
         </ButtonComponent>
       }
     >
-      <CardComponent header={"CONTACT INFORMATION"} cols={3}>
-        <DetailText label="First Name">{dataDetail?.contact?.firstName}</DetailText>
-        <DetailText label="Middle Name">{dataDetail?.contact?.middleName}</DetailText>
-        <DetailText label="Last Name">{dataDetail?.contact?.lastName}</DetailText>
-        <DetailText label="Job">{dataDetail?.contact?.jobName}</DetailText>
-        <DetailText label="Position">{dataDetail?.contact?.positionName}</DetailText>
-      </CardComponent>
+      <div className="flex flex-col gap-4">
 
-      <div className="mb-6">
-        <div className="text-primary text-xs font-semibold uppercase py-[30px]">CONTACT DETAIL INFORMATION</div>
-        <div className="flex flex-col gap-y-4">
+        <NxCardContainer header="CONTACT INFORMATION">
+          <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+            <DetailText label="First Name">{dataDetail?.contact?.firstName}</DetailText>
+            <DetailText label="Middle Name">{dataDetail?.contact?.middleName}</DetailText>
+            <DetailText label="Last Name">{dataDetail?.contact?.lastName}</DetailText>
+            <DetailText label="Job">{dataDetail?.contact?.jobName}</DetailText>
+            <DetailText label="Position">{dataDetail?.contact?.positionName}</DetailText>
+          </div>
+        </NxCardContainer>
+
+        <NxCardContainer header="CONTACT DETAIL INFORMATION" withoutPadding>
           <NxTable
             idTable="account-contact-detail-modal-table"
             useSelect
@@ -123,25 +125,31 @@ const ModalDetail = ({
             showSearchBar={false}
             dataSource={dataDetail?.contact?.contactDetail}
             totalData={dataDetail?.contact?.contactDetail?.length || 0}
-            tableScrolled={{ y: 400, x: "max-content" }}
+            tableScrolled={{ y: 300, x: "max-content" }}
             columns={columns}
           />
-        </div>
-      </div>
+        </NxCardContainer>
 
-      <CardComponent header={"CONTACT PURPOSE INFORMATION"} cols={2}>
-        <DetailText label="Contact Address">{dataDetail?.contactAddress}</DetailText>
-        <DetailText label="Contact Address Additional Note">{dataDetail?.additionalNote}</DetailText>
-        <DetailText label="Description">{dataDetail?.description}</DetailText>
-        <DetailText label="Primary">{dataDetail?.primaryFlagValue ? "Yes" : "No"}</DetailText>
-      </CardComponent>
-      <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-        <DetailText label="Record ID">{dataDetail?.accountContactId}</DetailText>
-        <DetailText label="Created Date">{moment(dataDetail?.cretedDate).format(dateFormatting.dateTime)}</DetailText>
-        <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-        <DetailText label="Updated Date">{dataDetail?.updatedDate !== null ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ""}</DetailText>
-        <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
-      </CardComponent>
+        <NxCardContainer header="CONTACT PURPOSE INFORMATION">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-4">
+            <DetailText label="Contact Address">{dataDetail?.contactAddress}</DetailText>
+            <DetailText label="Contact Address Additional Note">{dataDetail?.additionalNote}</DetailText>
+            <DetailText label="Primary">{dataDetail?.primaryFlagValue ? "Yes" : "No"}</DetailText>
+          </div>
+          <DetailText label="Description">{dataDetail?.description}</DetailText>
+        </NxCardContainer>
+
+        <NxCardContainer header="HISTORY LOG INFORMATION">
+          <div className="grid grid-cols-5 gap-x-6 gap-y-4">
+            <DetailText label="Record ID">{dataDetail?.accountContactId}</DetailText>
+            <DetailText label="Created Date">{moment(dataDetail?.cretedDate).format(dateFormatting.dateTime)}</DetailText>
+            <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
+            <DetailText label="Updated Date">{dataDetail?.updatedDate !== null ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ""}</DetailText>
+            <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
+          </div>
+        </NxCardContainer>
+
+      </div>
     </ModalCustom>
   );
 };

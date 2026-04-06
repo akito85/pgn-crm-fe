@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
@@ -26,8 +32,8 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const EFakturCodeView = () => {
   // Selector - Fully integrated with Redux
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.masterEfakturCode
+  const { data, data_list, loading, data_approval_history } = useSelector(
+    (state) => state.masterEfakturCode,
   );
 
   // Declaration
@@ -42,6 +48,10 @@ const EFakturCodeView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const loadMoreSize = 20;
+  const hasMore = data_list.length < (data?.page?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -65,7 +75,7 @@ const EFakturCodeView = () => {
   useEffect(() => {
     localStorage.setItem(
       "efakturCodeFixedColumns",
-      JSON.stringify(fixedColumns)
+      JSON.stringify(fixedColumns),
     );
   }, [fixedColumns]);
 
@@ -73,12 +83,13 @@ const EFakturCodeView = () => {
     dispatch(
       getAllEfakturCodePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [page, pageSize, sort, dispatch, search]);
+  }, [sort, dispatch, search, refreshKey]);
 
   // Format approval history data
   useEffect(() => {
@@ -123,9 +134,6 @@ const EFakturCodeView = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -160,6 +168,25 @@ const EFakturCodeView = () => {
     setSort(dataSort);
   };
 
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    const nextPage = Math.floor(data_list.length / loadMoreSize) + 1;
+    await dispatch(
+      getAllEfakturCodePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, search, sort, data_list.length]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
+
   const handleOptions = () => {
     const data = dataApprovalHistory?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -192,10 +219,11 @@ const EFakturCodeView = () => {
         dispatch(
           getAllEfakturCodePaginate({
             search: tempSearch,
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
-          })
+            isLoadMore: false,
+          }),
         );
       })
       .catch((error) => {
@@ -248,7 +276,7 @@ const EFakturCodeView = () => {
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   };
 
@@ -260,7 +288,7 @@ const EFakturCodeView = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -274,7 +302,7 @@ const EFakturCodeView = () => {
       render: (
         <NavLink to={RBI_ROUTES.EFAKTUR_CODE_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
             Create E-Faktur Code
@@ -319,11 +347,12 @@ const EFakturCodeView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -382,11 +411,12 @@ const EFakturCodeView = () => {
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -418,10 +448,11 @@ const EFakturCodeView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.einvoiceCodeId)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -444,7 +475,7 @@ const EFakturCodeView = () => {
   // Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // Get base columns with key property
@@ -457,7 +488,7 @@ const EFakturCodeView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];
@@ -521,7 +552,7 @@ const EFakturCodeView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
+              <p className="w-full mt-[15px] text-primary">
                 LIST E-FAKTUR CODE
               </p>
 
@@ -531,19 +562,28 @@ const EFakturCodeView = () => {
         >
           <div className={"w-full"}>
             <TableRBI
-              dataSource={dataSource}
+              idTable="efakturCodeTable"
+              dataSource={data_list}
               columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
+              loading={loading}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 1000 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              useInfiniteScroll={true}
+              usePagination={false}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>

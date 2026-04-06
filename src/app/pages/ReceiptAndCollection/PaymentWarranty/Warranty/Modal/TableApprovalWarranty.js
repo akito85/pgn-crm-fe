@@ -26,13 +26,6 @@ export const tableApprovalWarranty = (
     ...getColumnSearchPropsUseFilteredValue(search, "warrantyCode", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
-    key: "regNumber",
-    title: "REG NUMBER",
-    dataIndex: "regNumber",
-    width: 150,
-    ...getColumnSearchPropsUseFilteredValue(search, "regNumber", searchInput, searchedColumn, searchText, handleSearch),
-  },
-  {
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",

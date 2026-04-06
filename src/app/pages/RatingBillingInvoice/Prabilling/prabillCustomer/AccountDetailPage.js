@@ -255,7 +255,6 @@ const AccountDetailPage = () => {
   }, []);
 
   // Data dari Redux
-  const headerData = customer_account_detail?.headerData || {};
   const saData = customer_account_detail?.saData?.result || [];
   const saPage = customer_account_detail?.saData?.page || {};
   const usageData = customer_account_detail?.usageData?.result || [];
@@ -268,11 +267,12 @@ const AccountDetailPage = () => {
   const billingItemPage = customer_account_detail?.billingItemData?.page || {};
 
   const firstHeaderData = useMemo(() => {
+    const headerData = customer_account_detail?.headerData || {};
     if (Array.isArray(headerData) && headerData.length > 0) {
       return headerData[0];
     }
     return headerData || {};
-  }, [headerData]);
+  }, [customer_account_detail?.headerData]);
 
   // Base Columns
   const saColumnsBase = useMemo(() => createSAColumns(renderValue), []);
@@ -293,9 +293,10 @@ const AccountDetailPage = () => {
         render: (text, record) => (
           <div className="flex w-full justify-center gap-6">
             <Tooltip title="Detail">
-              <div className="pt-1 cursor-pointer">
+              <div className="pt-0 cursor-pointer">
                 <SVGIcon
                   name="IconDetail"
+                  color="#0075BF"
                   width={20}
                   onClick={() => handleViewSaDetail(record)}
                 />
