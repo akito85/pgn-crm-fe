@@ -499,7 +499,7 @@ const CalendarView = () => {
               <Link
                 to={SYSTEM_SETUP_ROUTES.UPDATE_CALENDAR}
                 state={{
-                  id: record.id,
+                  id: record.calendarId,
                   status: record.status,
                   statusApproval: record.statusApproval,
                 }}
@@ -527,7 +527,7 @@ const CalendarView = () => {
               <Link
                 to={SYSTEM_SETUP_ROUTES.UPDATE_CALENDAR}
                 state={{
-                  id: record.id,
+                  id: record.calendarId,
                   status: record.status,
                   statusApproval: record.statusApproval,
                 }}

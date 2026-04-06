@@ -48,17 +48,21 @@ export const validateError = createAsyncThunk(
       if (action === "CHECK_GRANTED_ACCESS") {
         // Grant check returned 500 — path not registered in backend.
         // Fall back to view-only so the action column still renders.
-        thunkAPI.dispatch(grantedAccess({
-          isGranted: true,
-          actionList: [{ name: "view" }],
-        }));
+        thunkAPI.dispatch(
+          grantedAccess({
+            isGranted: true,
+            actionList: [{ name: "view" }],
+          }),
+        );
       }
     } else if (
       errorLog === 503 ||
       (errorLog === 404 && error?.response?.data?.data?.isGranted === false)
     ) {
       if (action !== "CHECK_GRANTED_ACCESS") {
-        thunkAPI.dispatch(grantedAccessDetail(serializeGrantAccessError(error)));
+        thunkAPI.dispatch(
+          grantedAccessDetail(serializeGrantAccessError(error)),
+        );
       } else {
         thunkAPI.dispatch(grantedAccess(serializeGrantAccessError(error)));
       }
@@ -87,7 +91,7 @@ export const validateError = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalError(errorBody));
     }
-  }
+  },
 );
 
 export const validateCreateUpdate = createAsyncThunk(
@@ -102,23 +106,26 @@ export const validateCreateUpdate = createAsyncThunk(
           error: errorBody(
             errorCode(error),
             type === "update" ? "updated" : "created",
-            errorMessage(error)
+            errorMessage(error),
           ),
           action: "VALIDATE_CREATE_UPDATE",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-});
+  },
+);
 
-export const checkGrantedAccessDetail = createAsyncThunk('CHECK_GRANTED_ACCESS_DETAIL', async (_, thunkAPI) => {
-  try {
-    
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error);
-  }
-});
+export const checkGrantedAccessDetail = createAsyncThunk(
+  "CHECK_GRANTED_ACCESS_DETAIL",
+  async (_, thunkAPI) => {
+    try {
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
 
 const generalSlice = createSlice({
   name: "general",
