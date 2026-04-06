@@ -244,7 +244,7 @@ const GasDepositTable = ({
     handleDownload,
   });
 
-  const actionCols = useColumnActionPermission(["Recalculate", "Expire"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View", "Recalculate", "Expire"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
