@@ -104,10 +104,8 @@ export const getGasDepositDetails = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAILS",
   async ({ id, index, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit-detail/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = `/v1/dbs/api/gas-deposit/detail-list/${id}`;
+      const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,
         index,
@@ -125,10 +123,8 @@ export const getGasDepositDetailMutations = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATIONS",
   async ({ detailId, index, detailIndex, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit-detail-mutation/list/${detailId}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = `/v1/dbs/api/gas-deposit/detail-mutation-list/${detailId}`;
+      const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,
         index,
@@ -165,7 +161,7 @@ export const getGasDeposit = createAsyncThunk(
   "GET_GAS_DEPOSIT",
   async ({ id, subjectId, objectId }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
+      const queryParams = new URLSearchParams();
 
       if (subjectId)
         queryParams.append("subjectId", subjectId);
@@ -189,7 +185,7 @@ export const getGasDepositDraft = createAsyncThunk(
   "GET_GAS_DEPOSIT_DRAFT",
   async ({ id, subjectId, objectId }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
+      const queryParams = new URLSearchParams();
 
       if (subjectId)
         queryParams.append("subjectId", subjectId);
@@ -343,7 +339,7 @@ export const expireGasDeposit = createAsyncThunk(
 
 export const getGdApprovalHierarchies = createAsyncThunk(
   "GET_GD_APPROVAL_HIERARCHIES",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
@@ -369,7 +365,7 @@ export const getGdApprovalHierarchy = createAsyncThunk(
 
 export const getGdAttachmentCategories = createAsyncThunk(
   "GET_GD_ATTACHMENT_CATEGORY",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/attachment-category`;
       const response = await accountManagementService.getAll(url);

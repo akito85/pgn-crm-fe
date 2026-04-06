@@ -16,7 +16,6 @@ import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
 const GasDepositDetailTable = ({
   id,
   index,
-  opened,
   listKey = "list_gasDeposit",
   parentKey,
 }) => {
@@ -44,12 +43,11 @@ const GasDepositDetailTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-  const [isLoad, setIsLoad] = useState(!opened);
-  const [openedMemo, setOpenedMemo] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: [],
+
+  const fixedColumns = {
+    right: ["status"],
     left: [],
-  }));
+  };
 
   // --- Handlers ---
   /**
@@ -146,21 +144,18 @@ const GasDepositDetailTable = ({
   // Abort the in-flight request on cleanup so StrictMode double-mounts and
   // rapid filter changes don't produce stale or duplicate page-0 fetches.
   useEffect(() => {
-    if (isLoad) {
-      const body = {
-        page: 0,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        filters,
-        filterRules,
-      };
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
 
-      setPage(0);
-      const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false, listKey, parentKey }));
-      return () => { promise.abort(); };
-    } else
-      setIsLoad(true);
+    setPage(0);
+    const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false, listKey, parentKey }));
+    return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
   // --- Column configuration ---
@@ -176,7 +171,7 @@ const GasDepositDetailTable = ({
 
   const columns = useMemo(() => {
     return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
+  }, [columnDefinitions]);
 
   /**
    * Renders the expanded child row for a gas deposit detail record.
@@ -188,24 +183,10 @@ const GasDepositDetailTable = ({
       index={index}
       detailId={record.id}
       detailIndex={detailIndex}
-      opened={openedMemo[record.id]}
       listKey={listKey}
       parentKey={parentKey}
     />
   );
-
-  /**
-   * @param {boolean} expanded
-   * @param {object} record
-   */
-  const onExpand = (expanded, record) => {
-    if (expanded) {
-      setOpenedMemo(prev => ({
-        ...prev,
-        [record.id]: true,
-      }))
-    }
-  }
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -217,16 +198,17 @@ const GasDepositDetailTable = ({
         onSort={onSort}
         columns={columns}
         usePagination={false}
-        loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
-        onLoadMore={handleLoadMore}
-        hasMore={hasMore}
-        loading={loading}
-        expandable={{ expandedRowRender, onExpand }}
-        onRefresh={handleRefresh}
         useInfiniteScroll
+        hasMore={hasMore}
+        loadMoreThreshold={20}
+        onLoadMore={handleLoadMore}
+        loading={loading}
+        expandable={{ expandedRowRender }}
+        onRefresh={handleRefresh}
+        columnDefinitions={columnDefinitions}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        useSelect={false}
       />
     </div>
   );
