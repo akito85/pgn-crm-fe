@@ -67,6 +67,11 @@ export const getDefaultServiceAgreementTypeSemantic = (typeSa) => {
     return SERVICE_AGREEMENT_TYPE_VALUE.ADDON;
   }
 
+  if (SERVICE_AGREEMENT_TYPE_ALIASES[SERVICE_AGREEMENT_TYPE_VALUE.AMENDMENT]
+    ?.includes(normalizedType)) {
+    return SERVICE_AGREEMENT_TYPE_VALUE.AMENDMENT;
+  }
+
   return SERVICE_AGREEMENT_TYPE_VALUE.MAIN;
 };
 
