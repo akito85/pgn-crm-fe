@@ -121,7 +121,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
             <GasDepositTable
               moduleType={moduleType}
               accountId={accountId}
-              cutomerId={customerId}
+              customerId={customerId}
               handleApproval={setShowApprovalModal}
               refreshSignal={refreshSignal}
             />

@@ -1,6 +1,6 @@
 import { Form } from "antd";
-import InputComponent from "../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../utils";
+import InputComponent from "../../../../../../components/InputComponent";
+import { requiredMessage } from "../../../../../../utils";
 
 const ConfirmationModalRemark = ({ disabled = false }) => {
   return (

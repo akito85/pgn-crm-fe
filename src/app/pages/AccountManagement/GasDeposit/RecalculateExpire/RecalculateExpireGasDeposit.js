@@ -4,11 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import InfoGasDeposit from "./StepContents/InformationForm/InfoGasDeposit";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
-import { getCustomerDetail } from "../../../../../redux/slices/account_management/Customer/customerAccount";
-import {
-  getAccountStandardDetail,
-  getAccountOneTimeDetail
-} from "../../../../../redux/slices/account_management/accountManagement";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   showModalError,
@@ -20,23 +15,23 @@ import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../components/Nx/NxFormStepNavigation";
-import HeaderDetail from "../HeaderDetail";
 import { nxRemoveKeys } from "../../../../../components/Nx/NxRemoveKeys";
 import GasDepositDetailTable from "../GasDepositDetailTable";
 import NxApprovalInput from "../../../../../components/Nx/NxApprovalInput";
 import {
-  getGdAttachmentCategory,
+  getGdAttachmentCategories,
   recalculateGasDeposit,
   expireGasDeposit,
-  getDetailGasDeposit,
-  getDetailDraftGasDeposit,
-  getDetailGdApprovalHierarchy,
+  getGasDeposit,
+  getGasDepositDraft,
   getGdApprovalHierarchy,
+  getGdApprovalHierarchies,
 } from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../assets/Icon/index";
+import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
 
-const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
+const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
   const [current, setCurrent] = useState(0);
@@ -52,7 +47,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
     loading_detailGd,
     loading_detailDraftGd,
     loading_recalculateExpireGd,
-    list_gdApprovalOptions,
+    list_gdApprovalHierarchy,
     detail_gdApprovalHierarchy,
     detail_gasDeposit,
     detailDraft_gasDeposit,
@@ -65,13 +60,17 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
     loading_detailGd ||
     loading_detailDraftGd ||
     loading_recalculateExpireGd;
-    
+
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
   const accountId = location?.state?.accountId;
   const customerId = location?.state?.customerId;
-  const idGd = location?.state?.id;
+  const id = location?.state?.id;
+
+  useEffect(() => {
+    console.log({ accountId, customerId })
+  }, [accountId, customerId])
   
   const status = detail_gasDeposit.status || "DRAFT";
   const statusApproval = detail_gasDeposit.statusApproval || "DRAFT";
@@ -106,8 +105,6 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_gasDeposit : detail_gasDeposit;
   const { details, attachments } = detail;
   
-  const [selectedDetailId, setSelectedDetailId] = useState();
-  
   const formFields = [
     [],
     ["appHierId"],
@@ -115,20 +112,16 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
   ];
 
   useEffect(() => {
-    if (customerId) dispatch(getCustomerDetail(customerId));
-  }, [customerId]);
-
-  useEffect(() => {
-    if (idGd) {
+    if (id) {
       if (isActive && (isDraftApproval || isRejectApproval))
-        dispatch(getDetailDraftGasDeposit(idGd));
+        dispatch(getGasDepositDraft({ id }));
       else  
-        dispatch(getDetailGasDeposit(idGd));
+        dispatch(getGasDeposit({ id }));
     }
-  }, [idGd]);
+  }, [id]);
 
   useEffect(() => {
-    if (list_gdApprovalOptions.length) {
+    if (list_gdApprovalHierarchy.length) {
       const {
         accountId,
         appHierId,
@@ -139,14 +132,14 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
         appHierId
       });
 
-      const appHierOption = list_gdApprovalOptions.find(
+      const appHierOption = list_gdApprovalHierarchy.find(
         (option) => option.appHierId === appHierId
       );
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, list_gdApprovalOptions]);
+  }, [detail, list_gdApprovalHierarchy]);
 
   useEffect(() => {
     if (Array.isArray(attachments))
@@ -157,7 +150,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
   }, [attachments]);
 
   useEffect(() => {
-    dispatch(getGdApprovalHierarchy());
+    dispatch(getGdApprovalHierarchies());
   }, []);
 
   const routes = [
@@ -221,7 +214,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
               const body = {
                 stepNumber: current + 1,
                 type: formType.toUpperCase(),
-                id: idGd,
+                id,
                 data : {
                   accountId, 
                   appHierId,
@@ -248,7 +241,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
         form.getFieldsValue(true);
 
       const body = {
-        id: idGd,
+        id,
         accountId,
         appHierId,
         action: submitType
@@ -274,17 +267,6 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
     }
   };
 
-  // Fetch Account Standard/OneTime Detail
-  useEffect(() => {
-    if (accountId && customerId && accountType) {
-      if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ customerId, accountId }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ customerId, accountId }));
-      }
-    }
-  }, [dispatch, accountId, customerId, accountType]);
-
   const setAccount = (accountId, accountNumber, accountName) => {
     form.setFieldValue("accountId", accountId);
     form.setFieldValue("accountNumber", accountNumber);
@@ -292,7 +274,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailGdApprovalHierarchy(appHierId));
+    dispatch(getGdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -303,12 +285,12 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
       form.resetFields();
       setCurrent(0);
     } else if (isExpire) {
-      if (list_gdApprovalOptions?.length) {
+      if (list_gdApprovalHierarchy?.length) {
         const { accountId, appHierId } = detail;
 
         form.setFieldsValue({ accountId, appHierId });
 
-        const appHierOption = list_gdApprovalOptions.find(
+        const appHierOption = list_gdApprovalHierarchy.find(
           (option) => option.appHierId === appHierId
         );
 
@@ -345,7 +327,6 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
           content: (
             <GasDepositDetailTable
               dataSource={details}
-              handleView={({ id }) => setSelectedDetailId(id)}
               key="tab-0-card-1"
             />
           )
@@ -363,7 +344,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
             <NxApprovalInput
               form={form}
               hierarchyDetails={detail_gdApprovalHierarchy}
-              options={list_gdApprovalOptions}
+              options={list_gdApprovalHierarchy}
               handleSelectHiararchy={handleSelectHiararchy}
               key="tab-1-card-0"
             />
@@ -383,7 +364,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
               data={attachmentDataSource}
               updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
-              getAPICategory={getGdAttachmentCategory}
+              getAPICategory={getGdAttachmentCategories}
               categoryData={list_gdAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
@@ -422,7 +403,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
         const body = {
           stepNumber: current + 1,
           type: formType.toUpperCase(),
-          id: idGd,
+          id,
           data : {
             accountId, 
             appHierId,
@@ -484,7 +465,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
         : "";
 
     if (isRecalculate)
-      dispatch(recalculateGasDeposit({ id: idGd, body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
+      dispatch(recalculateGasDeposit({ id, body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
         .unwrap()
         .then((data) => {
           setTimeout(() => {
@@ -500,7 +481,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
     else if (isExpire)
       dispatch(
         expireGasDeposit({
-          id: idGd,
+          id,
           body,
           attachments: attachmentDataSource.filter(
             (attachment) => attachment.dataType === "new"
@@ -526,12 +507,12 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
     <div>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
-        {!isBulk && accountId && customerId (
+        {!isBulk && accountId && customerId && (
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            accountId={accountId}
-            customerId={customerId}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
         )}

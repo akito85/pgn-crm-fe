@@ -28,7 +28,7 @@ const initialState = {
     pageSize: 10,
   },
   loading_listGdApprovalHierarchy: false,
-  list_gdApprovalHierarchies: [],
+  list_gdApprovalHierarchy: [],
   loading_detailGdApprovalHierarchy: false,
   detail_gdApprovalHierarchy: [],
   loading_listGdAttachmentCategory: false,
@@ -936,16 +936,16 @@ const gasDepositSlice = createSlice({
 
     /** Get Gas Deposit Approval Hierarchy */
     [getGdApprovalHierarchies.pending]: (state) => {
-      state.list_gdApprovalHierarchies = [];
-      state.loading_listGdApprovalOption = true;
+      state.list_gdApprovalHierarchy = [];
+      state.loading_listGdApprovalHierarchy = true;
     },
     [getGdApprovalHierarchies.fulfilled]: (state, action) => {
-      state.list_gdApprovalHierarchies = action.payload;
-      state.loading_listGdApprovalOption = false;
+      state.list_gdApprovalHierarchy = action.payload;
+      state.loading_listGdApprovalHierarchy = false;
     },
     [getGdApprovalHierarchies.rejected]: (state) => {
-      state.list_gdApprovalHierarchies = [];
-      state.loading_listGdApprovalOption = false;
+      state.list_gdApprovalHierarchy = [];
+      state.loading_listGdApprovalHierarchy = false;
     },
 
     /** Get Gas Deposit Detail Approval Hierarchy */
