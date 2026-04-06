@@ -159,19 +159,9 @@ export const getGasDepositHistories = createAsyncThunk(
 
 export const getGasDeposit = createAsyncThunk(
   "GET_GAS_DEPOSIT",
-  async ({ id, subjectId, objectId }, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams();
-
-      if (subjectId)
-        queryParams.append("subjectId", subjectId);
-      if (objectId)
-        queryParams.append("objectId", objectId);
-
-      let url = `/v1/dbs/api/gas-deposit/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
+      const url = `/v1/dbs/api/gas-deposit/detail/${id}`;
 
       const response = await accountManagementService.getDetail(url);
       return response.data;
@@ -183,19 +173,9 @@ export const getGasDeposit = createAsyncThunk(
 
 export const getGasDepositDraft = createAsyncThunk(
   "GET_GAS_DEPOSIT_DRAFT",
-  async ({ id, subjectId, objectId }, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams();
-
-      if (subjectId)
-        queryParams.append("subjectId", subjectId);
-      if (objectId)
-        queryParams.append("objectId", objectId);
-
-      let url = `/v1/dbs/api/gas-deposit/detail-draft/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
+      const url = `/v1/dbs/api/gas-deposit/detail-draft/${id}`;
 
       const response = await accountManagementService.getDetail(url);
       return response.data;
@@ -892,12 +872,7 @@ const gasDepositSlice = createSlice({
       state.loading_detailGd = true;
     },
     [getGasDeposit.fulfilled]: (state, action) => {
-      state.detail_gasDeposit = {
-        ...(action.payload || {}),
-        list_gasDepositDetail: [],
-        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
-        loading_listGdDetail: false,
-      };
+      state.detail_gasDeposit = action.payload.result || {};
       state.loading_detailGd = false;
     },
     [getGasDeposit.rejected]: (state) => {
@@ -911,12 +886,7 @@ const gasDepositSlice = createSlice({
       state.loading_detailDraftGd = true;
     },
     [getGasDepositDraft.fulfilled]: (state, action) => {
-      state.detailDraft_gasDeposit = {
-        ...(action.payload || {}),
-        list_gasDepositDetail: [],
-        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
-        loading_listGdDetail: false,
-      };
+      state.detailDraft_gasDeposit = action.payload.result || {};
       state.loading_detailDraftGd = false;
     },
     [getGasDepositDraft.rejected]: (state) => {

@@ -62,7 +62,7 @@ const GasDepositTable = ({
   const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status"],
+    right: ["statusApproval", "status", "action"],
     left: [],
   }));
 

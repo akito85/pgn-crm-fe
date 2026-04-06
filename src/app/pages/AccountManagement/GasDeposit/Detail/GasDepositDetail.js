@@ -52,7 +52,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const isLoading = loading || loadingAccount;
   const accountId = location.state?.accountId;
   const customerId = location.state?.customerId;
-  const idGd = location.state?.id;
+  const id = location.state?.id;
 
   const tabOptions = [
     {
@@ -82,7 +82,6 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const {
     approvalType,
     relatedAccountNumber,
-    id,
     createdDate,
     createdBy,
     updatedDate,
@@ -183,8 +182,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getGasDeposit(idGd));
-          dispatch(getGasDepositDraft(idGd));
+          dispatch(getGasDeposit({ id }));
+          dispatch(getGasDepositDraft({ id }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -198,8 +197,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getGasDeposit(idGd));
-          dispatch(getGasDepositDraft(idGd));
+          dispatch(getGasDeposit({ id }));
+          dispatch(getGasDepositDraft({ id }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -249,14 +248,14 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [accountId, customerId]);
 
   useEffect(() => {
-    if (idGd)
-      dispatch(getGasDeposit(idGd))
-  }, [idGd]);
+    if (id)
+      dispatch(getGasDeposit({ id }))
+  }, [id]);
 
   useEffect(() => {
-    if (idGd && draftExist)
-      dispatch(getGasDepositDraft(idGd));
-  }, [idGd, draftExist])
+    if (id && draftExist)
+      dispatch(getGasDepositDraft({ id }));
+  }, [id, draftExist])
 
   return (
     <>
@@ -286,9 +285,9 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
             <NxBaseContainer border>
               {activeKey === originalKey ? (
-                <GasDepositDetailTable id={idGd} parentKey="detail_gasDeposit" />
+                <GasDepositDetailTable id={id} parentKey="detail_gasDeposit" />
               ) : (
-                <GasDepositDetailTable id={idGd} parentKey="detailDraft_gasDeposit" />
+                <GasDepositDetailTable id={id} parentKey="detailDraft_gasDeposit" />
               )}
             </NxBaseContainer>
           </NxCardContainer>
