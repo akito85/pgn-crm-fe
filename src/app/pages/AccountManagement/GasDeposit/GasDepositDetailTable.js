@@ -156,7 +156,7 @@ const GasDepositDetailTable = ({
     setPage(0);
     const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false, listKey, parentKey }));
     return () => { promise.abort(); };
-  }, [sort, search, filters, filterRules]);
+  }, [sort, search, filters, filterRules, parentKey]);
 
   // --- Column configuration ---
   const columnDefinitions = useMemo(() =>

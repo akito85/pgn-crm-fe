@@ -103,7 +103,10 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
   };
 
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_gasDeposit : detail_gasDeposit;
-  const { details, attachments } = detail;
+  const parentKey = (isActive && (isDraftApproval || isRejectApproval))
+    ? "detailDraft_gasDeposit"
+    : "detail_gasDeposit";
+  const { attachments } = detail;
   
   const formFields = [
     [],
@@ -112,13 +115,13 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
   ];
 
   useEffect(() => {
-    if (id) {
-      if (isActive && (isDraftApproval || isRejectApproval))
-        dispatch(getGasDepositDraft({ id }));
-      else  
-        dispatch(getGasDeposit({ id }));
-    }
+    if (id) dispatch(getGasDeposit({ id }));
   }, [id]);
+
+  useEffect(() => {
+    if (id && isActive && (isDraftApproval || isRejectApproval))
+      dispatch(getGasDepositDraft({ id }));
+  }, [id, isActive, isDraftApproval, isRejectApproval]);
 
   useEffect(() => {
     if (list_gdApprovalHierarchy.length) {
@@ -326,7 +329,8 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
           header: "Gas Deposit Detail",
           content: (
             <GasDepositDetailTable
-              dataSource={details}
+              id={id}
+              parentKey={parentKey}
               key="tab-0-card-1"
             />
           )
@@ -617,7 +621,8 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_recalculateExpireGd}
               detail={detail}
-              details={details}
+              id={id}
+              parentKey={parentKey}
               handleSubmitForm={handleSubmitForm}
             />
           </Form>

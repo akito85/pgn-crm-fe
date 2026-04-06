@@ -5,13 +5,12 @@ import NxAttachmentInput from "../../../../../../components/Nx/NxAttachmentInput
 import NxApprovalInput from "../../../../../../components/Nx/NxApprovalInput";
 import InfoGasDeposit from "../StepContents/InformationForm/InfoGasDeposit";
 import GasDepositDetailTable from "../../GasDepositDetailTable";
-import GasDepositDetailMutationTable from "../../GasDepositDetailMutationTable";
-import { useState } from "react";
 
 const ConfirmationModalTabs = ({
   form,
   detail,
-  details,
+  id,
+  parentKey,
   approvalData,
   attachmentDataSource,
   service,
@@ -21,8 +20,6 @@ const ConfirmationModalTabs = ({
   setActiveTab = () => {},
   disabled = false,
 }) => {
-  const [selectedDetailId, setSelectedDetailId] = useState();
-
   const tabOptions = [
     {
       key: 0,
@@ -34,18 +31,14 @@ const ConfirmationModalTabs = ({
         {
           content: (
             <GasDepositDetailTable
-              dataSource={details}
-              handleView={({ id }) => setSelectedDetailId(id)}
+              id={id}
+              parentKey={parentKey}
               key="tab-0-card-1"
             />
           ),
-          header: "Gas Deposit Information",
+          header: "Gas Deposit Detail",
         },
-        selectedDetailId && {
-          content: <GasDepositDetailMutationTable detailId={selectedDetailId} confirmationModalView />,
-          header: "Gas Deposit Information",
-        },
-      ].filter(Boolean),
+      ],
       disabled,
     },
     {
