@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
-import NxModal from "../../../../../components/Nx/NxModal";
+import NxModal from "../../../../../../components/Nx/NxModal";
 import { Button } from "antd";
 
 const ConfirmationModal = ({

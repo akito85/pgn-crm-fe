@@ -35,13 +35,30 @@ const getGasDepositColumns = ({
     width: 40,
     render: (_, __, index) => index + 1,
   },
-  isUnderAccount && {
+  !isUnderAccount && {
+    key: "accountNumber",
+    title: "ACCOUNT NUMBER",
+    dataIndex: "accountNumber",
+    width: 200,
+    sorter: true,
+    align: "right ",
+    filteredValue: [search?.accountNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "accountNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+  },
+  !isUnderAccount && {
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     width: 200,
     sorter: true,
-    align: "center",
     filteredValue: [search?.accountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -53,7 +70,7 @@ const getGasDepositColumns = ({
       true
     ),
   },
-  isUnderAccount && {
+  {
     key: "earnPeriodStart",
     title: "EARN PERIOD START",
     dataIndex: "earnPeriodStart",

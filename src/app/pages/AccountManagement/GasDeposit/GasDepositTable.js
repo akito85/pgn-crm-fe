@@ -19,7 +19,7 @@ import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/acc
  *   moduleType: "sa" | "ua";
  *   handleApproval?: (show: boolean) => void;
  *   accountId?: number;
- *   cutomerId?: number;
+ *   customerId?: number;
  *   refreshSignal?: number;
  * }} props
  */
@@ -27,7 +27,7 @@ const GasDepositTable = ({
   moduleType,
   handleApproval = () => {},
   accountId,
-  cutomerId,
+  customerId,
   refreshSignal = 0,
 }) => {
   // --- Hooks ---
@@ -203,12 +203,12 @@ const GasDepositTable = ({
       {
         state: {
           accountId,
-          cutomerId,
+          customerId,
           id,
         }
       }
     ),
-    handleRecalculate: ({ id, recordAccountId, recordCustomerId }) => navigate(
+    handleRecalculate: ({ id, objectAccountId: recordAccountId, customerId: recordCustomerId }) => navigate(
       isStandAlone ?
         ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_SA :
       isStandard ?
@@ -218,13 +218,13 @@ const GasDepositTable = ({
         "",
       {
         state: {
-          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
-          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
+          accountId: isUnderAccount ? accountId : isUnderAccount ? recordAccountId : undefined,
+          customerId: isUnderAccount ? customerId : isUnderAccount ? recordCustomerId : undefined,
           id,
         }
       }
     ),
-    handleExpire: ({ id, recordAccountId, recordCustomerId }) => navigate(
+    handleExpire: ({ id, objectAccountId: recordAccountId, customerId: recordCustomerId }) => navigate(
       isStandAlone ?
         ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_SA :
       isStandard ?
@@ -234,8 +234,8 @@ const GasDepositTable = ({
         "",
       {
         state: {
-          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
-          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
+          accountId: isUnderAccount ? accountId : isUnderAccount ? recordAccountId : undefined,
+          customerId: isUnderAccount ? customerId : isUnderAccount ? recordCustomerId : undefined,
           id,
         }
       }

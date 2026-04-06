@@ -28,7 +28,7 @@ const initialState = {
     pageSize: 10,
   },
   loading_listGdApprovalHierarchy: false,
-  list_gdApprovalHierarchies: [],
+  list_gdApprovalHierarchy: [],
   loading_detailGdApprovalHierarchy: false,
   detail_gdApprovalHierarchy: [],
   loading_listGdAttachmentCategory: false,
@@ -61,12 +61,10 @@ export const getGasDeposits = createAsyncThunk(
       body = {
         ...body,
         listType: "all"
-      }
+      };
 
-      const url = `/v1/dbs/api/gas-deposit/list/${accountId}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = "/v1/dbs/api/gas-deposit/list" + (accountId ? `/${accountId}` : "");
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         isLoadMore,
@@ -141,12 +139,10 @@ export const getGasDepositDetailMutations = createAsyncThunk(
 
 export const getGasDepositHistories = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORIES",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit-history/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = "/v1/dbs/api/gas-deposit/request-history" + (accountId ? `/${accountId}` : "");
+      const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,
         isLoadMore,
@@ -872,7 +868,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailGd = true;
     },
     [getGasDeposit.fulfilled]: (state, action) => {
-      state.detail_gasDeposit = action.payload.result || {};
+      state.detail_gasDeposit = {
+        ...(action.payload.result || {}),
+        list_gasDepositDetail: [],
+        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: false,
+      };
       state.loading_detailGd = false;
     },
     [getGasDeposit.rejected]: (state) => {
@@ -886,7 +887,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailDraftGd = true;
     },
     [getGasDepositDraft.fulfilled]: (state, action) => {
-      state.detailDraft_gasDeposit = action.payload.result || {};
+      state.detailDraft_gasDeposit = {
+        ...(action.payload.result || {}),
+        list_gasDepositDetail: [],
+        pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: false,
+      };;
       state.loading_detailDraftGd = false;
     },
     [getGasDepositDraft.rejected]: (state) => {
@@ -930,16 +936,16 @@ const gasDepositSlice = createSlice({
 
     /** Get Gas Deposit Approval Hierarchy */
     [getGdApprovalHierarchies.pending]: (state) => {
-      state.list_gdApprovalHierarchies = [];
-      state.loading_listGdApprovalOption = true;
+      state.list_gdApprovalHierarchy = [];
+      state.loading_listGdApprovalHierarchy = true;
     },
     [getGdApprovalHierarchies.fulfilled]: (state, action) => {
-      state.list_gdApprovalHierarchies = action.payload;
-      state.loading_listGdApprovalOption = false;
+      state.list_gdApprovalHierarchy = action.payload;
+      state.loading_listGdApprovalHierarchy = false;
     },
     [getGdApprovalHierarchies.rejected]: (state) => {
-      state.list_gdApprovalHierarchies = [];
-      state.loading_listGdApprovalOption = false;
+      state.list_gdApprovalHierarchy = [];
+      state.loading_listGdApprovalHierarchy = false;
     },
 
     /** Get Gas Deposit Detail Approval Hierarchy */

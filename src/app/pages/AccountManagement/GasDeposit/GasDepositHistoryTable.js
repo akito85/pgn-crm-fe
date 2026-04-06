@@ -41,7 +41,7 @@ const GasDepositHistoryTable = ({
   const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status"],
+    right: ["statusApproval", "action"],
     left: [],
   }));
 
@@ -171,14 +171,14 @@ const GasDepositHistoryTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => handleDetailModal({ show: true, id }),
-    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal({ show: true, id }),
+    handleView: ({ id }) => handleDetailModal({ show: true, historyId: id }),
+    handleApprovalHistory: ({ gasDepositId }) => handleApprovalHistoryModal({ show: true, historyId: gasDepositId }),
     handleDownload,
   });
 
   const toolbarItemActions = itemActions.filter(item => item.action === "Download");
 
-  const actionCols = useColumnActionPermission(["History"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View", "History"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
@@ -206,7 +206,7 @@ const GasDepositHistoryTable = ({
     <div className="flex flex-col gap-y-4">
       <Toolbar items={toolbarItemActions} type="detail" />
       <NxTable
-        idTable="gas-deposit-table"
+        idTable="gas-deposit-history-table"
         dataSource={dataSource}
         totalData={totalElement}
         current={page}

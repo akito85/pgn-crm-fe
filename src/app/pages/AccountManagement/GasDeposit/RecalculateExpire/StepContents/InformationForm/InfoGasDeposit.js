@@ -1,4 +1,6 @@
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import StatusComponent from "../../../../../../../components/StatusComponent";
 
 const InfoGasDeposit = ({ detail }) => {
   const {

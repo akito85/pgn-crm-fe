@@ -63,6 +63,7 @@ import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/Cust
 import CreateUpdateRelationship from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/CreateUpdate/CreateUpdateRelationship";
 import GasDeposit from "../../app/pages/AccountManagement/GasDeposit/GasDeposit";
 import GasDepositDetail from "../../app/pages/AccountManagement/GasDeposit/Detail/GasDepositDetail";
+import RecalculateExpireGasDeposit from "../../app/pages/AccountManagement/GasDeposit/RecalculateExpire/RecalculateExpireGasDeposit";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -149,13 +150,13 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   
   // Gas Deposit Account Standard
   VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail moduleType="ua" accountType="standard" />,
-  RECALCULATE_GAS_DEPOSIT_PAGE: "/account-management/account-standard/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT_PAGE: "/account-management/account-standard/gas-deposit/expire",
+  RECALCULATE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="standard" />,
+  EXPIRE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="standard" />,
 
   // Gas Deposit Account One Time
   VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail moduleType="ua" accountType="oneTime" />,
-  RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: "/account-management/account-onetime/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: "/account-management/account-onetime/gas-deposit/expire",
+  RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="oneTime" />,
+  EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="oneTime" />,
 
   // Multi Destination Account Standard
   VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetail accountType="standard" />,
