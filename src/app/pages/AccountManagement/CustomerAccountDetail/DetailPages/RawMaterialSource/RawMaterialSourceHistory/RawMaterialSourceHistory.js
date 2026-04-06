@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
@@ -25,6 +25,8 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import { WarningOutlined } from "@ant-design/icons";
 
 const columns = (
   search,
@@ -379,22 +381,34 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
       />
 
       {/* Modal Delete */}
-      <ModalConfirm
+      <ModalCustom
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}
         handleOk={handleDeleteOk}
-        width={550}
-        useOk={true}
+        width={500}
+        type={"confirmation"}
+        footer={
+          <div className='flex justify-between'>
+            <Button key="cancel" onClick={()=>{
+              // setIdSelected('')
+              // setDeleteItemData(null)
+              setModalDelete(false)
+            }}>
+              Cancel
+            </Button>,
+            <Button key="ok" type="primary" danger onClick={handleDeleteOk}>
+              Delete
+            </Button>
+          </div>
+        }
       >
         <div className="flex justify-center gap-[20px] mt-6">
-          <SVGIcon name="IconAlertTriangle" width={48} />
-          <p className={"text-[18px] font-bold"}>
-            {`Are you sure you want to delete Raw Material Source with effective date ${moment(
-              effectiveData
-            ).format(dateFormatting.date)}?`}
-          </p>
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <div className="text-[18px] font-bold">
+            <p>Are you sure want to delete raw material source, with Effective Date: {moment(effectiveData).format(dateFormatting.date)}?</p>
+          </div>
         </div>
-      </ModalConfirm>
+      </ModalCustom>
 
       {/* Modal Retry */}
       <ModalError
