@@ -84,6 +84,7 @@ export const validateError = createAsyncThunk(
         return: back,
         loadPage: load,
         action: action || error?.action,
+        data: error?.data || null,
       };
       thunkAPI.dispatch(showModalError(errorBody));
     }
@@ -102,7 +103,8 @@ export const validateCreateUpdate = createAsyncThunk(
           error: errorBody(
             errorCode(error),
             type === "update" ? "updated" : "created",
-            errorMessage(error)
+            errorMessage(error),
+            error?.response?.data?.data || null
           ),
           action: "VALIDATE_CREATE_UPDATE",
           back: false,
@@ -110,7 +112,8 @@ export const validateCreateUpdate = createAsyncThunk(
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-});
+  });
+
 
 export const checkGrantedAccessDetail = createAsyncThunk('CHECK_GRANTED_ACCESS_DETAIL', async (_, thunkAPI) => {
   try {

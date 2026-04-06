@@ -229,6 +229,10 @@ export default function InfoPaymentRelation({
         >
           <NxDate
             disabled={!isDraft && isUpdate}
+            onChange={date => {
+              if (date && endDate && date.isAfter(endDate, "day"))
+                form.resetFields(["endDate"])
+            }}
           />
         </Form.Item>
 
@@ -241,6 +245,10 @@ export default function InfoPaymentRelation({
         >
           <NxDate
             placeholder="Select date"
+            dateDisable={(current) => {
+              if (!moment.isMoment(current)) return false;
+              return current.isSameOrAfter(startDate, "day");
+            }}
           />
         </Form.Item>
       </div>

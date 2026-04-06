@@ -27,7 +27,9 @@ const useGrantAccessHooks = (type = 'page') => {
     }, [hasGranted, type])
 
 
-    return { isGranted, actions };
+    const loading = data_grant_access === null && grant_access_detail === null;
+
+    return { isGranted, actions, loading };
 }
 
 export default useGrantAccessHooks;

@@ -411,29 +411,17 @@ export const getAttachmentCategory = createAsyncThunk(
 // Get Related Object Data (Customer or Account based on relationship type)
 export const getRelatedObjectData = createAsyncThunk(
   "GET_RELATED_OBJECT_DATA",
-  async ({ accountId, page, size, relationshipType, relationshipCategory, sort, searchs, isLoadMore }, thunkAPI) => {
+  async ({ accountId, relationshipType, relationshipCategory, body, isLoadMore }, thunkAPI) => {
     try {
       const queryParams = new URLSearchParams();
 
-      if (Number.isSafeInteger(page) && page >= 0) queryParams.append("page", page);
-      if (size) queryParams.append("size", size);
-      if (sort) queryParams.append("sort", sort);
-      if (searchs) queryParams.append("searchs", searchs);
-
-      const typeParam = relationshipType
-        ? relationshipType.trim().toUpperCase().replace(/\s+/g, "_")
-        : "";
-      if (typeParam) queryParams.append("relationshipType", typeParam);
-
-      const categoryParam = relationshipCategory
-        ? relationshipCategory.toUpperCase()
-        : "";
-      if (categoryParam) queryParams.append("relationshipCategory", categoryParam);
+      if (relationshipType) queryParams.append("relationshipType", relationshipType);
+      if (relationshipCategory) queryParams.append("relationshipCategory", relationshipCategory);
 
       let url = `/v1/dbs/api/accounts/${accountId}/relationships/related-object-data`;
       if (queryParams.toString().length) url += `?${queryParams.toString()}`;
 
-      const response = await accountManagementService.getPagination(url);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response?.data,
         isLoadMore,

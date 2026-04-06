@@ -9,30 +9,23 @@ import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActio
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import GasDepositDetailTable from "./GasDepositDetailTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getGasDeposit, downloadGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
 /**
- * Gas deposit list table (container + presentational component).
- * Owns search, pagination, sort, filter, and download state/logic.
- * The parent (`GasDepositModule`) is responsible only for modals, permissions,
- * and the detail mutation table.
+ * Level-0 gas deposit list table with search, sort, filter, and infinite scroll.
+ * Tracks expand state in `openedMemo` to skip redundant detail fetches on re-expand.
  *
- * @param {object}    props
- * @param {"sa"|"ua"} props.moduleType                    - Module context: standalone ("sa") or under-account ("ua")
- * @param {Function}  [props.handleInactivateModal]       - Opens the inactivate confirmation modal
- * @param {Function}  [props.handleApprovalHistoryModal]  - Opens the approval history modal
- * @param {Function}  [props.handleApproval]              - Triggers the approval action
- * @param {Function}  [props.handleSelectDetail]          - Row click / select-detail handler
- * @param {number}    [props.accountId]                   - Account ID (used when moduleType is "ua")
- * @param {number}    [props.cutomerId]                   - Customer ID
- * @param {number}    [props.refreshSignal=0]             - Increment to trigger a page-0 refresh from the parent
+ * @param {{
+ *   moduleType: "sa" | "ua";
+ *   handleApproval?: (show: boolean) => void;
+ *   accountId?: number;
+ *   cutomerId?: number;
+ *   refreshSignal?: number;
+ * }} props
  */
 const GasDepositTable = ({
   moduleType,
-  handleInactivateModal = () => {},
-  handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
-  handleSelectDetail = () => {},
   accountId,
   cutomerId,
   refreshSignal = 0,
@@ -43,7 +36,7 @@ const GasDepositTable = ({
   const dispatch = useDispatch();
   const {
     list_gasDeposit: dataSource,
-    pagination_gasDeposit: pagination,
+    pagination_listGd: pagination,
     loading_listGd: loading,
   } = useSelector((state) => state.gasDeposit);
 
@@ -69,7 +62,7 @@ const GasDepositTable = ({
   const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status"],
+    right: ["statusApproval", "status", "action"],
     left: [],
   }));
 
@@ -88,8 +81,8 @@ const GasDepositTable = ({
     };
 
     dispatch(
-      getGasDeposit({
-        id: isUnderAccount ? accountId : undefined,
+      getGasDeposits({
+        accountId: isUnderAccount ? accountId : undefined,
         body,
         isLoadMore: false,
       })
@@ -147,8 +140,8 @@ const GasDepositTable = ({
       };
 
       await dispatch(
-        getGasDeposit({
-          id: isUnderAccount ? accountId : undefined,
+        getGasDeposits({
+          accountId: isUnderAccount ? accountId : undefined,
           body,
           isLoadMore: true,
         })
@@ -188,7 +181,7 @@ const GasDepositTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDeposit({ id: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDeposits({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
@@ -248,12 +241,10 @@ const GasDepositTable = ({
       }
     ),
     handleApproval,
-    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
-  const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View", "Recalculate", "Expire"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
@@ -282,14 +273,12 @@ const GasDepositTable = ({
    * Renders the expanded child row for a gas deposit record.
    * @param {object} record - The parent gas deposit row record
    */
-  const expandedRowRender = (record) => {
-    return (
-      <GasDepositDetailTable
-        dataSource={record.details}
-        handleView={handleSelectDetail}
-      />
-    );
-  };
+  const expandedRowRender = (record, index) => (
+    <GasDepositDetailTable
+      id={record.id}
+      index={index}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-y-4">

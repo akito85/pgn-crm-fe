@@ -699,16 +699,14 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
                     </Button>
                   )}
                   {current === steps.length - 1 && (
-                    <>
-                      <Button
-                        onClick={() =>
-                          handleSetShowConfirmationModal(true, "submit")
-                        }
-                        type={"approve"}
-                      >
-                        Submit
-                      </Button>
-                    </>
+                    <Button
+                      onClick={() =>
+                        handleSetShowConfirmationModal(true, "submit")
+                      }
+                      type={"approve"}
+                    >
+                      Submit
+                    </Button>
                   )}
                 </div>
               </div>

@@ -186,22 +186,10 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/relationship/create"
+          "/account-management/account-standard/relationship"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/relationship/update"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/relationship/details"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-onetime/relationship/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-onetime/relationship/update"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-onetime/relationship/details"
+          "/account-management/account-onetime/relationship"
         )
       )
     ) {
@@ -210,22 +198,10 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/view"
+          "/account-management/account-standard/financial-information"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/update"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/invoice-relation/view"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/invoice-relation/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/invoice-relation/update"
+          "/account-management/account-onetime/financial-information"
         )
       )
     ) {
@@ -234,17 +210,26 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/multi-destination/view"
+          "/account-management/account-standard/multi-destination"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/multi-destination/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/multi-destination/update"
+          "/account-management/account-onetime/multi-destination"
         )
       )
     ) {
       setTypeAccountInfoDetailSection(dataTabs.md);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/gas-deposit"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/gas-deposit"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.gd);
     }
     else {
       setTypeAccountInfoDetailSection(dataTabs.ai);

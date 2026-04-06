@@ -15,6 +15,7 @@ const ModalChooseRelated = ({
   accountId = null,
   relationshipType,
   relationshipCategory,
+  relationshipTypeName,
 }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -29,9 +30,9 @@ const ModalChooseRelated = ({
   const { list_relatedObject, pagination_relatedObject, loading_listRelatedObject } =
     useSelector((state) => state.relationship);
 
-  // Normalize relationshipType for comparison (convert "Child Of" to "CHILD_OF")
-  const normalizedRelationType = relationshipType
-    ? relationshipType.trim().toUpperCase().replace(/\s+/g, "_")
+  // Normalize relationshipTypeName for comparison (convert "Child Of" to "CHILD_OF")
+  const normalizedRelationType = relationshipTypeName
+    ? relationshipTypeName.trim().toUpperCase().replace(/\s+/g, "_")
     : null;
 
   // CHILD_OF, PARENT_OF = Account columns
@@ -66,16 +67,20 @@ const ModalChooseRelated = ({
     const nextPage = page + 1;
     const totalPages = pagination_relatedObject?.totalPages || 0;
 
+    const body = {
+      page: nextPage,
+      size: loadMoreSize,
+      sort,
+      searchs: search
+    };
+    
     if (nextPage <= totalPages) {
       await dispatch(
         getRelatedObjectData({
           accountId,
-          page: nextPage,
-          size: loadMoreSize,
           relationshipType,
           relationshipCategory,
-          sort,
-          searchs: JSON.stringify(search),
+          body,
           isLoadMore: true,
         })
       );
@@ -85,16 +90,20 @@ const ModalChooseRelated = ({
 
   useEffect(() => {
     if (accountId && relationshipType && relationshipCategory) {
+      const body = {
+        page: 0,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+      }
+      
       setPage(0);
       dispatch(
         getRelatedObjectData({
           accountId,
-          page: 0,
-          size: loadMoreSize,
           relationshipType,
           relationshipCategory,
-          sort,
-          searchs: JSON.stringify(search),
+          body,
           isLoadMore: false,
         })
       );

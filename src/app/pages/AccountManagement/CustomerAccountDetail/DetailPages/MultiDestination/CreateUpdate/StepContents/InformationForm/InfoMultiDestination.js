@@ -388,10 +388,16 @@ export default function InfoMultiDestination({
           ]}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateForm)
+            value: value && moment(value, dateFormatting.dateFormal)
           })}
         >
-          <NxDate disabled={!isDraft && isUpdate} />
+          <NxDate
+            disabled={!isDraft && isUpdate}
+            onChange={date => {
+              if (date && endDate && date.isAfter(endDate, "day"))
+                form.resetFields(["endDate"])
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -400,10 +406,15 @@ export default function InfoMultiDestination({
           label={"End Date"}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateForm)
+            value: value && moment(value, dateFormatting.dateFormal)
           })}
         >
-          <NxDate disabled={!isDraft && isUpdate} />
+          <NxDate
+            dateDisable={(current) => {
+              if (!moment.isMoment(current)) return false;
+              return current.isBefore(startDate, "day");
+            }}
+          />
         </Form.Item>
       </div>
 

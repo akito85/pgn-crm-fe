@@ -219,7 +219,13 @@ export default function InfoInvoiceRelation({
           })}
           className="no-margin-form"
         >
-          <NxDate disabled={!isDraft && isUpdate} />
+          <NxDate
+            disabled={!isDraft && isUpdate}
+            onChange={date => {
+              if (date && endDate && date.isAfter(endDate, "day"))
+                form.resetFields(["endDate"])
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -231,7 +237,12 @@ export default function InfoInvoiceRelation({
           })}
           className="no-margin-form"
         >
-          <NxDate />
+          <NxDate
+            dateDisable={(current) => {
+              if (!moment.isMoment(current)) return false;
+              return current.isBefore(startDate, "day");
+            }}
+          />
         </Form.Item>
       </div>
 

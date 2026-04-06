@@ -223,7 +223,7 @@ export const createEmployee = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          error: errorBody(errorCode(error), "created", errorMessage(error), error?.response?.data?.data || null),
           action: "CREATE_EMPLOYEE",
           back: false,
         })
@@ -248,7 +248,7 @@ export const updateEmployee = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          error: errorBody(errorCode(error), "updated", errorMessage(error), error?.response?.data?.data || null),
           action: "UPDATE_EMPLOYEE",
           back: false,
         })
