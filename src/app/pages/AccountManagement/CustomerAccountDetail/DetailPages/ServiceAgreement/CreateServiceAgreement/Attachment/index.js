@@ -309,6 +309,7 @@ const Attachment = ({ data = [], updateData = () => { }, type }) => {
         {/* ATTACHMENT LIST TABLE */}
         <div className="pt-2">
           <NxTable
+            idTable="sa-create-attachment-table"
             columns={columnAttachment(
               searchInput,
               searchedColumn,

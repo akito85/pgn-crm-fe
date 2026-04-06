@@ -10,6 +10,8 @@ import { hasValue } from '../../../../../../../../utils'
 import { getTaxImplication } from '../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice'
 import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer'
 import {
+  isAmendmentServiceAgreementType,
+  isAddonServiceAgreementType,
   isSelectedOptionSemantic,
   SERVICE_AGREEMENT_TYPE_VALUE,
   SERVICE_TYPE_VALUE,
@@ -132,8 +134,12 @@ const SaInformation = ({
   const validateEndDate = (rule, value, callback) => {
   }
 
+  const isAddonOrAmendment =
+    isAddonServiceAgreementType(saRecordData?.typeSa) ||
+    isAmendmentServiceAgreementType(saRecordData?.typeSa);
+
   const handleDisableSaDate = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       return current &&
         (current.isBefore(moment(saRecordData.saDate), 'day') ||
           current.isAfter(moment(saRecordData.endDate), 'day'))
@@ -143,7 +149,7 @@ const SaInformation = ({
     }
   };
   const handleValidateMoreSaDate = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       // if(moment(saRecordData.startDate).diff(moment(), 'days') < 30){
 
       //   return current && (current < moment(saRecordData.startDate) || current > moment(saRecordData.endDate));
@@ -162,7 +168,7 @@ const SaInformation = ({
     }
   };
   const handleValidateMore = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       return current && (current < moment(saInfoObj.startDate) || current > moment(saRecordData.endDate).add(1, "days"));
     } else {
       if (saInfoObj.startDate !== null) {
@@ -172,7 +178,7 @@ const SaInformation = ({
   };
 
   const handleRangeStartEnd = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       return current &&
         (current.isBefore(moment(saInfoObj?.startDate), 'day') ||
           current.isAfter(moment(saRecordData.endDate), 'day'))

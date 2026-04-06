@@ -162,7 +162,7 @@ const CreateServiceAgreement = ({ saType }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
-  const isLoading = loading || loadingForm;
+  const isLoading = loadingForm || (loading && !modalChooseProduct);
 
   // set Reset if amandemen / addon
   const [isReset, setIsReset] = useState(false);
