@@ -101,7 +101,7 @@ export const inactiveCalendar = createAsyncThunk(
   async (body, thunkAPI) => {
     const status = body?.status === "INACTIVE" ? "activated" : "inactivated";
     try {
-      const url = `/v1/dbs/api/calendar/active/inactive`;
+      const url = `/v1/dbs/api/calendar/inactive`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
         body,

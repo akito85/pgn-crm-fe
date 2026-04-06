@@ -204,10 +204,13 @@ const CalendarDetail = () => {
 
   const handleConfirm = (res, handleClear) => {
     setModalConfirm(false);
+    const actionValue = approveOrReject.startsWith("Approve")
+      ? "APPROVE"
+      : approveOrReject.toUpperCase();
     const body = {
       id: calendarId,
       remark: res.remark,
-      action: approveOrReject.toUpperCase(),
+      action: actionValue,
       approvalId: bodyApproval.tAppId,
     };
     const thunk =
@@ -258,7 +261,7 @@ const CalendarDetail = () => {
           <>
             {/* Calendar Information */}
             <CardContainer header={"CALENDAR INFORMATION"}>
-              <div className="w-full grid grid-cols-5 gap-3">
+              <div className="w-full grid grid-cols-5 gap-2">
                 <DetailText label={"Name"}>
                   {calendarData?.calendarName || "-"}
                 </DetailText>
@@ -353,7 +356,7 @@ const CalendarDetail = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="flex flex-col w-full gap-4">
+        <div className="flex flex-col w-full gap-0">
           <RadioTabs
             data={listSectionInfo}
             onChange={(e) => setValuePage(e.target.value)}
@@ -362,16 +365,8 @@ const CalendarDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{ color: "#fff", fontSize: 24, justifyItems: "center" }}
-              />
-            }
-          >
+        <div className="flex mt-[0px]">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 
@@ -389,11 +384,17 @@ const CalendarDetail = () => {
               <ButtonComponent
                 type="approve"
                 onClick={() => {
-                  setApproveOrReject("Approve");
+                  setApproveOrReject(
+                    bodyApproval.approvalType === "INACTIVE_MASTER_CALLENDAR"
+                      ? "Approve Inactive"
+                      : "Approve",
+                  );
                   setModalConfirm(true);
                 }}
               >
-                Approve
+                {bodyApproval.approvalType === "INACTIVE_MASTER_CALLENDAR"
+                  ? "Approve Inactive"
+                  : "Approve"}
               </ButtonComponent>
             </div>
           )}
