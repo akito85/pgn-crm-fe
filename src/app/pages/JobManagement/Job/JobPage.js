@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { Dropdown } from "antd";
+import { Dropdown, Skeleton } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -45,8 +45,16 @@ const JobPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch { return null; }
+  }, [rawToken]);
+
   // Permission check
-  const { actions } = useGrantAccessHooks();
+  const { actions, loading: permissionsLoading } = useGrantAccessHooks();
   const permissions = useMemo(
     () => (actions ?? []).map((a) => a.toLowerCase()),
     [actions]
@@ -177,6 +185,21 @@ const JobPage = () => {
 
   // Action column (permission-gated)
   const actionColumn = useMemo(() => {
+    if (permissionsLoading) {
+      return {
+        title: "ACTIONS",
+        key: "actions",
+        width: 120,
+        align: "center",
+        fixed: "right",
+        render: () => (
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
+          </div>
+        ),
+      };
+    }
+
     const hasAnyAction = canCreate || canUpdate || canDelete || canView;
     if (!hasAnyAction) return null;
 
@@ -245,7 +268,7 @@ const JobPage = () => {
         );
       },
     };
-  }, [toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
+  }, [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
 
   const baseColumns = useMemo(
     () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
@@ -301,6 +324,7 @@ const JobPage = () => {
       >
         <NxTable
           idTable="job-list-table"
+          userId={userId}
           dataSource={accumulatedData}
           totalData={data?.totalElements}
           current={page + 1}

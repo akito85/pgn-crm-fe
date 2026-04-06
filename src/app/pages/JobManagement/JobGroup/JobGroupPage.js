@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
-import { Dropdown } from "antd";
+import { Dropdown, Skeleton } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTableNested from "../../../../components/Nx/NxTableNested";
@@ -54,7 +54,7 @@ const JobGroupPage = () => {
   const [deleteJobGroup, { isLoading: deleteLoading }] = useDeleteJobGroupMutation();
 
   // Permission check
-  const { actions } = useGrantAccessHooks();
+  const { actions, loading: permissionsLoading } = useGrantAccessHooks();
   const permissions = useMemo(
     () => (actions ?? []).filter(Boolean).map((a) => a.toLowerCase()),
     [actions]
@@ -178,6 +178,21 @@ const JobGroupPage = () => {
 
   // Action column with three-dots menu and view button (permission-gated)
   const actionColumn = useMemo(() => {
+    if (permissionsLoading) {
+      return {
+        title: "ACTIONS",
+        key: "actions",
+        width: 120,
+        align: "center",
+        fixed: "right",
+        render: () => (
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
+          </div>
+        ),
+      };
+    }
+
     const hasAnyAction = canUpdate || canDelete || canView;
     if (!hasAnyAction) return null;
 
@@ -261,7 +276,7 @@ const JobGroupPage = () => {
         );
       },
     };
-  }, [navigate, canUpdate, canDelete, canView]);
+  }, [permissionsLoading, navigate, canUpdate, canDelete, canView]);
 
   // Parent column definitions (memoized — stable reference, not re-created on every render)
   const parentColumns = useMemo(
