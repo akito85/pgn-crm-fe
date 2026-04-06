@@ -124,31 +124,30 @@ export const useColumnActionPermission = (
   }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
 
   const columns = useMemo(() => {
-    if (arrayActions?.length === 0) {
+    if (!arrayActions || arrayActions.length === 0) {
       return [];
-    } else {
-      return [
-        {
-          key: "action",
-          title: "ACTION",
-          dataIndex: "action",
-          fixed: "right",
-          width: 150,
-          render: (text, record, index) =>
-            RenderContentActions(
-              text,
-              record,
-              index,
-              lowerCaseItemsRender,
-              arrayActions?.length,
-              arrayActions,
-              sliceColumn,
-              stopClickPropagation,
-            ),
-        },
-      ];
     }
-  }, [arrayActions, lowerCaseItemsRender, sliceColumn]);
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        dataIndex: "action",
+        fixed: "right",
+        width: 150,
+        render: (text, record, index) =>
+          RenderContentActions(
+            text,
+            record,
+            index,
+            lowerCaseItemsRender,
+            arrayActions.length,
+            arrayActions,
+            sliceColumn,
+            stopClickPropagation,
+          ),
+      },
+    ];
+  }, [arrayActions, lowerCaseItemsRender, sliceColumn, stopClickPropagation]);
 
   return columns;
 };
