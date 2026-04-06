@@ -1,4 +1,4 @@
-import { Popover, Space } from "antd";
+import { Popover, Skeleton, Space } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
 import IconThreeDots from "../assets/Icon/Nx/IconThreeDots";
@@ -88,6 +88,7 @@ export const useColumnActionPermission = (
   stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
+  const isLoading = access?.loading;
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
@@ -124,9 +125,7 @@ export const useColumnActionPermission = (
   }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
 
   const columns = useMemo(() => {
-    if (arrayActions?.length === 0) {
-      return [];
-    } else {
+    if (isLoading) {
       return [
         {
           key: "action",
@@ -134,21 +133,39 @@ export const useColumnActionPermission = (
           dataIndex: "action",
           fixed: "right",
           width: 150,
-          render: (text, record, index) =>
-            RenderContentActions(
-              text,
-              record,
-              index,
-              lowerCaseItemsRender,
-              arrayActions?.length,
-              arrayActions,
-              sliceColumn,
-              stopClickPropagation,
-            ),
+          render: () => (
+            <div className="w-full flex justify-center items-center gap-2.5">
+              <Skeleton.Avatar active size="small" shape="circle" />
+              <Skeleton.Avatar active size="small" shape="circle" />
+            </div>
+          ),
         },
       ];
     }
-  }, [arrayActions, lowerCaseItemsRender, sliceColumn]);
+    if (!arrayActions || arrayActions.length === 0) {
+      return [];
+    }
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        dataIndex: "action",
+        fixed: "right",
+        width: 150,
+        render: (text, record, index) =>
+          RenderContentActions(
+            text,
+            record,
+            index,
+            lowerCaseItemsRender,
+            arrayActions.length,
+            arrayActions,
+            sliceColumn,
+            stopClickPropagation,
+          ),
+      },
+    ];
+  }, [isLoading, arrayActions, lowerCaseItemsRender, sliceColumn, stopClickPropagation]);
 
   return columns;
 };

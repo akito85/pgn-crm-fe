@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Tooltip } from "antd";
 import NxTable from "../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../components/StatusComponent";
@@ -194,7 +195,10 @@ export const TableEmployee = ({
     itemActions
   );
 
-  const allColumns = [...columnsEmployee, ...actionColumns];
+  const allColumns = useMemo(
+    () => [...columnsEmployee, ...actionColumns],
+    [actionColumns]
+  );
 
   return (
     <NxTable

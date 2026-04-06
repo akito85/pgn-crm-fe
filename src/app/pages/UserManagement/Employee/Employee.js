@@ -222,7 +222,7 @@ const Employee = () => {
     { path: "", breadcrumbName: "Employee" },
   ];
 
-  const itemActions = [
+  const itemActions = useMemo(() => [
     // Toolbar actions (no type: "table")
     {
       action: "Upload",
@@ -335,7 +335,7 @@ const Employee = () => {
         </Tooltip>
       ),
     },
-  ];
+  ], []);
 
   return (
     <>
