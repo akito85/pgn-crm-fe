@@ -1,7 +1,7 @@
 import { Popover, Space } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
-import SVGIcon from "../assets/Icon/index";
+import IconThreeDots from "../assets/Icon/Nx/IconThreeDots";
 
 // render content column
 export const RenderContentActions = (
@@ -14,6 +14,8 @@ export const RenderContentActions = (
   sliceColumn = "View",
   stopClickPropagation = false,
 ) => {
+
+
   if (totalLength > 3) {
     return (
       <div className="w-full flex justify-center items-center gap-2.5">
@@ -43,7 +45,7 @@ export const RenderContentActions = (
               if (stopClickPropagation) e.stopPropagation();
             }}
           >
-            <SVGIcon name="IconTripleDot" width={20} />
+            <IconThreeDots />
           </div>
         </Popover>
         <div>

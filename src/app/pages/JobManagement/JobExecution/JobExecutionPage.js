@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PlusCircleOutlined } from "@ant-design/icons";
-import { Dropdown, Tag, Spin } from "antd";
+import { useNavigate } from "react-router-dom";
+import { PlusCircleOutlined, EyeOutlined } from "@ant-design/icons";
+import { Dropdown, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
+import StatusComponent from "../../../../components/StatusComponent";
 import ModalRunJob from "./ModalRunJob";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -40,22 +42,11 @@ const formatDate = (val) => {
   return `${date} ${hh}:${mm}:${ss}.${cs}`;
 };
 
-const STATUS_COLORS = {
-  PENDING:    "blue",
-  SCHEDULED:  "geekblue",
-  PROCESSING: "orange",
-  SUCCEEDED:  "green",
-  FAILED:     "red",
-  CANCELLED:  "default",
-  DELETED:    "default",
-  ON_HOLD:    "purple",
-  SUSPENDED:  "gold",
-};
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const JobExecutionPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { data, loading, actionLoading } = useSelector((state) => state.jobExecution);
 
   const [page, setPage] = useState(1);
@@ -132,6 +123,15 @@ const JobExecutionPage = () => {
 
       const menuItems = [
         {
+          key: "view",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EyeOutlined /> View Details
+            </span>
+          ),
+          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
+        },
+        {
           key: "stop",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: status === "PROCESSING" ? 1 : 0.4 }}>
@@ -145,7 +145,7 @@ const JobExecutionPage = () => {
           key: "suspend",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: (status === "SCHEDULED" && isRecurring) ? 1 : 0.4 }}>
-              <IconSuspend width="14" height="14" /> Suspend
+              <IconSuspend width="16" height="16" /> Suspend
             </span>
           ),
           disabled: !(status === "SCHEDULED" && isRecurring),
@@ -165,7 +165,7 @@ const JobExecutionPage = () => {
           key: "cancel",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
-              <IconCancel width="12" height="12" /> Cancel
+              <IconCancel width="16" height="16" /> Cancel
             </span>
           ),
           disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
@@ -234,10 +234,27 @@ const JobExecutionPage = () => {
       dataIndex: "status",
       key: "status",
       align: "center",
-      width: 120,
-      render: (val) => val
-        ? <Tag color={STATUS_COLORS[val] || "default"}>{val}</Tag>
-        : "—",
+      width: 160,
+      render: (val) => {
+        if (!val) return "—";
+        const text = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+        const colourMap = {
+          succeeded: "completed",
+          failed: "failed",
+          cancelled: "cancelled",
+          deleted: "inactive",
+          pending: "pending",
+          scheduled: "scheduled",
+          processing: "processing",
+          on_hold: "hold",
+          suspended: "suspended",
+        };
+        return (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
+            <StatusComponent colour={colourMap[val.toLowerCase()] || val.toLowerCase()} size="small">{text.replace("_", " ")}</StatusComponent>
+          </div>
+        );
+      },
     },
     {
       title: "STARTED",

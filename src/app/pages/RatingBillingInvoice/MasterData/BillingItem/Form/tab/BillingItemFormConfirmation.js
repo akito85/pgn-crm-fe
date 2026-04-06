@@ -96,7 +96,7 @@ const sorterDetail = (fieldSort, a, b) => {
 };
 
 const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
-  const { data_billingItemCategoryDdl, data_billType } = useSelector(
+  const { data_billingItemCategoryDdl, data_billType, data_typeList, data_criteriaList, data_categoryList } = useSelector(
     (state) => state.billing_item
   );
 
@@ -194,30 +194,49 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
       </div>
 
       <div className="w-full grid grid-cols-3 gap-3">
-        <DetailText label="Billing Item Category">
-          {
-            (data_billingItemCategoryDdl || [])?.find(
-              (item) => item.id === dataConfirm?.billingItemCategory
-            )?.name
-          }
+        <DetailText label="Category">
+           {
+             (data_categoryList || data_billingItemCategoryDdl || [])?.find(
+               (item) => item.categoryId === dataConfirm?.billingItemCategory || item.id === dataConfirm?.billingItemCategory
+             )?.name || "-"
+           }
         </DetailText>
-        <DetailText label="Name">{dataConfirm?.name}</DetailText>
+        <DetailText label="Type">
+           {
+             (data_typeList || [])?.find(
+               (item) => item.code === dataConfirm?.transMappingType || item.id === dataConfirm?.transMappingType
+             )?.name || "-"
+           }
+        </DetailText>
+        <DetailText label="Transaction Mapping Code">
+           {dataConfirm?.billingItemCode || "-"}
+        </DetailText>
+
+        <DetailText label="Name">{dataConfirm?.name || "-"}</DetailText>
         <DetailText label="Bill Type">
           {
             (data_billType || [])?.find(
               (item) => item.id === dataConfirm?.billType
-            )?.name
+            )?.name || "-"
           }
         </DetailText>
-        <DetailText label="Start Date">{dataConfirm?.startDate}</DetailText>
-        <DetailText label="End Date">
-          {dataConfirm?.endDate ? dataConfirm?.endDate : ""}
+        <DetailText label="Criteria">
+          {
+            (data_criteriaList || [])?.find(
+              (item) => item.code === (dataConfirm?.criteria?.[0]?.criteriaCode) || item.id === (dataConfirm?.criteria?.[0]?.criteriaCode)
+            )?.name || "-"
+          }
         </DetailText>
 
+        <DetailText label="Start Date">{dataConfirm?.startDate || "-"}</DetailText>
+        <DetailText label="End Date">
+          {dataConfirm?.endDate ? dataConfirm?.endDate : "-"}
+        </DetailText>
+        <div />
+
         <div className="col-span-3">
-          <DetailText label="GL Account">{dataConfirm?.glAccount}</DetailText>
           <DetailText label="Description">
-            {dataConfirm?.description}
+            {dataConfirm?.description || "-"}
           </DetailText>
         </div>
 
@@ -226,6 +245,9 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
         </DetailText>
         <DetailText label="Payment Warranty Deduction Object">
           {dataConfirm?.paymentWarranty ? "Yes" : "No"}
+        </DetailText>
+        <DetailText label="Installment / Restructure">
+          {dataConfirm?.installment ? "Yes" : "No"}
         </DetailText>
       </div>
 

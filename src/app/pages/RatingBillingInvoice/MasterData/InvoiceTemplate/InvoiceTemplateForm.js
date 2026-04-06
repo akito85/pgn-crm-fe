@@ -41,6 +41,7 @@ import {
   updateInvoiceTemplate,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/invoiceTemplate";
 import { ModalError, ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
+import ModalBack from "../../../../../components/Modal/ModalBack";
 
 const InvoiceTemplateForm = ({ type }) => {
   // Selector
@@ -736,7 +737,7 @@ const InvoiceTemplateForm = ({ type }) => {
       } else if (hasOverlapping) {
         const errorBody = {
           title: "Failed",
-          description: `You can't add Criteria. Start date and enda date can't be overlap`,
+          description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
       } else {
@@ -1082,19 +1083,11 @@ const InvoiceTemplateForm = ({ type }) => {
         />
 
         {/* Modal Back */}
-        <ModalConfirm
+        <ModalBack
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-          width={600}
-        >
-          <div className="flex justify-center mt-5 gap-[20px]">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className="text-[18px] font-bold">
-              Are you sure you want to back?
-            </p>
-          </div>
-        </ModalConfirm>
+        />
 
         {/* Modal Retry */}
         <ModalError

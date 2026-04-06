@@ -61,10 +61,8 @@ const GasDepositTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [openedMemo, setOpenedMemo] = useState({});
-
   const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status"],
+    right: ["statusApproval", "status", "action"],
     left: [],
   }));
 
@@ -246,7 +244,7 @@ const GasDepositTable = ({
     handleDownload,
   });
 
-  const actionCols = useColumnActionPermission(["Recalculate", "Expire"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View", "Recalculate", "Expire"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
@@ -279,22 +277,8 @@ const GasDepositTable = ({
     <GasDepositDetailTable
       id={record.id}
       index={index}
-      opened={openedMemo[record.id]}
     />
   );
-
-  /**
-   * @param {boolean} expanded
-   * @param {object} record
-   */
-  const onExpand = (expanded, record) => {
-    if (expanded) {
-      setOpenedMemo(prev => ({
-        ...prev,
-        [record.id]: true,
-      }))
-    }
-  }
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -316,7 +300,7 @@ const GasDepositTable = ({
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
-        expandable={{ expandedRowRender, onExpand }}
+        expandable={{ expandedRowRender }}
       />
     </div>
   );

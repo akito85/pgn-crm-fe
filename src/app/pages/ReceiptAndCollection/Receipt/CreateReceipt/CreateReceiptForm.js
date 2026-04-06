@@ -1,6 +1,6 @@
-import { Checkbox, DatePicker, Form, Input, InputNumber, Select } from "antd";
+import { DatePicker, Form, Input, InputNumber, Select } from "antd";
 import moment from "moment";
-import React, { useState, Fragment } from "react";
+import React, { useState } from "react";
 // Sesuaikan path import CardContainer dengan struktur project lo, 
 // asumsi satu folder dengan BaseContainer/InputComponent
 import CardContainer from "../../../../../components/CardContainer"; 
@@ -18,17 +18,15 @@ import {
   getAccountNumberDDL,
   getAllAccountNumberDDL,
   resetDataAccountNumber,
-  getCusNumberDDL,
-  getAccountNumberByTypeDDL,
   getPayGetwayDDL,
   getCollectionAgentDDL,
   getPayMethodDDL,
   getBankDDL,
+  getAllPosRegistrationNumbersDDL,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 import { useDispatch } from "react-redux";
 
 const CreateReceiptForm = ({
-  cusNumb,
   setCusNumb,
   colAgentDDL,
   cusNumberDDL,
@@ -55,15 +53,14 @@ const CreateReceiptForm = ({
   setRequestBodyConverted = () => { },
   rateAmountValues,
   formValues,
-  accountTypeDDL,
+  allPosRegistrationNumbersDDL,
 }) => {
   const dispatch = useDispatch();
   const formValue = form?.getFieldsValue();
   const [filteredConvertedDDL, setFilteredConvertedDDL] = useState([]);
-  const [value, setValue] = useState(null);
 
   const [customerType, setCustomerType] = useState("Customer");
-  const [miscType, setMiscType] = useState("No");
+  const [receiptType, setReceiptType] = useState("Standard");
   const selectedCurrencyId = Form.useWatch("currency", form);
   const selectedCurrencyName = currencyDDL?.data?.find(
     (c) => c.id === selectedCurrencyId
@@ -72,11 +69,11 @@ const CreateReceiptForm = ({
 
   // Sinkronisasi state saat form pertama kali dimuat
   React.useEffect(() => {
-    const currentMisc = form.getFieldValue("miscellaneous");
+    const currentReceiptType = form.getFieldValue("receiptType");
     const currentCustType = form.getFieldValue("custType");
 
-    if (currentMisc) {
-      setMiscType(currentMisc);
+    if (currentReceiptType) {
+      setReceiptType(currentReceiptType);
     }
     if (currentCustType) {
       setCustomerType(currentCustType);
@@ -88,15 +85,32 @@ const CreateReceiptForm = ({
         setAccNumb({ id: currentAccId, name: currentAccName });
     }
     
-  }, [form, storedData]);
+    // Trigger dependent dropdowns for update
+    const paymentType = form.getFieldValue("paymentType");
+    const partner = form.getFieldValue("paymentGateway");
+    const deliveryChannel = form.getFieldValue("deliveryChannel");
+    const method = form.getFieldValue("method");
 
-  const handleMiscChange = (value) => {
-    setMiscType(value);
+    if (paymentType) {
+        dispatch(getPayGetwayDDL(paymentType));
+        dispatch(getCollectionAgentDDL({ paymentTypeId: paymentType, partnerId: partner }));
+    }
+    if (deliveryChannel) {
+        dispatch(getPayMethodDDL(deliveryChannel));
+    }
+    if (method) {
+        dispatch(getBankDDL(method));
+    }
+
+  }, [form, dispatch, setAccNumb]);
+
+  const handleReceiptTypeChange = (value) => {
+    setReceiptType(value);
     
     setAccNumb(null);
     setCusNumb({ id: null, name: null });
 
-    if (value === "Yes") {
+    if (value === "Miscellaneous") {
       form.setFieldsValue({
         custType: "Customer", 
         accNumber: null,
@@ -127,6 +141,9 @@ const CreateReceiptForm = ({
     setCusNumb({ id: null, name: null });
 
     if (value === "Prospective") {
+      // Fetch all POS registration numbers when switching to Prospective Customer
+      dispatch(getAllPosRegistrationNumbersDDL());
+      
       form.setFieldsValue({
         accNumber: null,
         cusNumber: null,
@@ -138,7 +155,8 @@ const CreateReceiptForm = ({
         classificationType: null,
         sor: null,
         costCenterCode: null,
-        meterReadingCode: null
+        meterReadingCode: null,
+        registrationNumber: null
       });
     } else {
       form.setFieldsValue({ 
@@ -258,19 +276,19 @@ const CreateReceiptForm = ({
         <div className="w-full grid grid-cols-5 gap-2">
           {/* Row 1 */}
           <Form.Item
-            label={"Miscellaneous"}
-            name={"miscellaneous"}
-            rules={formMessageRequired("Miscellaneous")}
-            initialValue={"No"}
+            label={"Receipt Type"}
+            name={"receiptType"}
+            rules={formMessageRequired("Receipt Type")}
+            initialValue={"Standard"}
             style={{ marginBottom: 0 }}
           >
-            <SelectComponent placeholder="Select Miscellaneous" onChange={handleMiscChange}>
-              <Select.Option value="Yes">Yes</Select.Option>
-              <Select.Option value="No">No</Select.Option>
+            <SelectComponent placeholder="Select Receipt Type" onChange={handleReceiptTypeChange}>
+              <Select.Option value="Standard">Standard</Select.Option>
+              <Select.Option value="Miscellaneous">Miscellaneous</Select.Option>
             </SelectComponent>
           </Form.Item>
           
-          {miscType === "No" && (
+          {receiptType === "Standard" && (
             <>
               <Form.Item
                 label={"Customer Type"}
@@ -291,7 +309,18 @@ const CreateReceiptForm = ({
                 rules={customerType === "Prospective" ? formMessageRequired("Registration Number") : []}
                 style={{ marginBottom: 0 }}
               >
-                <InputComponent disabled={customerType !== "Prospective"} placeholder="Input Registration Number" />
+                <SelectComponent
+                  disabled={customerType !== "Prospective"}
+                  placeholder="Select Registration Number"
+                  options={
+                    allPosRegistrationNumbersDDL && customerType === "Prospective"
+                      ? allPosRegistrationNumbersDDL?.data?.map((item) => ({
+                          label: item?.name,
+                          value: item?.id,
+                        }))
+                      : []
+                  }
+                />
               </Form.Item>
 
               <Form.Item
@@ -413,6 +442,26 @@ const CreateReceiptForm = ({
                   </Form.Item>
             </>
           )}
+
+          {receiptType === "Miscellaneous" && (
+            <>
+              <Form.Item
+                label={"Customer Type"}
+                name={"custType"}
+                initialValue={"Customer"}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent disabled placeholder="Customer Type">
+                  <Select.Option value="Customer">Customer</Select.Option>
+                </SelectComponent>
+              </Form.Item>
+              
+              {/* Empty cells to maintain grid layout */}
+              <div></div>
+              <div></div>
+              <div></div>
+            </>
+          )}
         </div>
       </CardContainer>
 
@@ -427,8 +476,8 @@ const CreateReceiptForm = ({
             <SelectComponent onChange={handleReceiptMethodChange} placeholder="Select Receipt Method">
               {payMethodDDL?.data
                 ?.filter((data) => {
-                  const miscellaneous = form.getFieldValue("miscellaneous");
-                  if (miscellaneous === "Yes" && data.name === "From Customer") {
+                  const receiptType = form.getFieldValue("receiptType");
+                  if (receiptType === "Miscellaneous" && data.name === "From Customer") {
                     return false;
                   }
                   return true;

@@ -188,7 +188,7 @@ const CriteriaDetailTab = ({
       isDynamicEditable={isEditabled}
       setInserted={setIsEditabled}
       handleValidateUpdate={() => true}
-      startDateLock={startDateLock || "bypass"}
+      startDateLock={startDateLock}
       endDateLock={endDateLock}
       setModalRequired={setModalRequired}
       onCancelEdit={onCancelEdit}

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../components/InputComponent";
 import DetailText from "../../../../components/DetailText";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -13,6 +13,9 @@ import { getGasDepositColumns } from "./getGasDepositColumns";
 import { showModalError } from "../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../assets/Icon/index";
+import GasDepositDetailTable from "./GasDepositDetailTable";
 
 /**
  * Modal for approving or rejecting pending gas deposit records.
@@ -34,6 +37,8 @@ const GasDepositApprovalModal = ({
     loading_approveRejectGd
   } = useSelector((state) => state.gasDeposit);
 
+  const loadingApproval = loading_approveRejectGd;
+
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
@@ -47,7 +52,8 @@ const GasDepositApprovalModal = ({
   const [search, setSearch] = useState({});
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
+
+  const [openedMemo, setOpenedMemo] = useState({});
 
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
@@ -61,14 +67,16 @@ const GasDepositApprovalModal = ({
   const totalElement = pagination.totalElement;
   const hasMore = gasDepositApprovals.length < totalElement;
 
+  const approvalIndexById = useMemo(
+    () => Object.fromEntries(gasDepositApprovals.map((item, index) => [item.id, index])),
+    [gasDepositApprovals]
+  );
+
   const rowSelection = {
     fixed: true,
     selectedRowKeys,
-    onChange: (newSelectedRowKeys, newSelectedRows) => {
+    onChange: (newSelectedRowKeys) => {
       setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(
-        newSelectedRows.map((newSelectedRow) => ({ ...newSelectedRow }))
-      );
     },
     preserveSelectedRowKeys: true
   };
@@ -164,12 +172,12 @@ const GasDepositApprovalModal = ({
     form.resetFields();
     handleCancel();
     setSelectedRowKeys([]);
-    setSelectedRows([]);
     setSearch({});
     setPage(1);
     setSort("");
     setSearchText("");
     setSearchedColumn("");
+    setOpenedMemo({});
   };
 
   /**
@@ -212,10 +220,41 @@ const GasDepositApprovalModal = ({
   };
 
   /**
-   * Delegates to `handleCancel()` to close the modal without saving.
+   * Renders the nested GasDepositDetailTable inside an expanded approval row.
+   * @param {object} record - The approval row record
+   */
+  const expandedRowRender = (record) => (
+    <GasDepositDetailTable
+      id={record.id}
+      index={approvalIndexById[record.id]}
+      opened={openedMemo[record.id]}
+      listKey="list_gasDepositApproval"
+    />
+  );
+
+  /**
+   * Records row expansions so re-expands skip the fetch and use cached data.
+   * @param {boolean} expanded
+   * @param {object} record
+   */
+  const onExpand = (expanded, record) => {
+    if (expanded) setOpenedMemo((prev) => ({ ...prev, [record.id]: true }));
+  };
+
+  /**
+   * Closes the modal and resets all local state without triggering `afterFinish`.
    */
   const handleCancelForm = () => {
     handleCancel();
+    setSelectedRowKeys([]);
+    setCurrent(0);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+    setOpenedMemo({});
+    form.resetFields();
   };
 
   /**
@@ -227,7 +266,11 @@ const GasDepositApprovalModal = ({
     try {
       const values = await form.validateFields();
 
-      const body = selectedRows
+      const selectedApprovalRows = gasDepositApprovals.filter((row) =>
+        selectedRowKeys.includes(row.id)
+      );
+
+      const body = selectedApprovalRows
         .filter((row) => row.approvalType === "GAS_DEPOSIT")
         .map((row) => ({
           id: row.id,
@@ -236,7 +279,7 @@ const GasDepositApprovalModal = ({
           description: values.remark
         }));
 
-      const inactiveBody = selectedRows
+      const inactiveBody = selectedApprovalRows
         .filter((row) => row.approvalType === "INACTIVE_GAS_DEPOSIT")
         .map((row) => ({
           id: row.id,
@@ -249,7 +292,7 @@ const GasDepositApprovalModal = ({
         approveOrRejectAllGasDeposit({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected"
+          action
         })
       )
         .unwrap()
@@ -281,7 +324,7 @@ const GasDepositApprovalModal = ({
   useEffect(() => {
     if (isOpen) {
       const body = {
-        page,
+        page: 0,
         size: loadMoreSize,
         sort,
         searchs: search,
@@ -309,9 +352,10 @@ const GasDepositApprovalModal = ({
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
-            <Button type={"menu"} onClick={handleCancelForm}>
+            <Button type={"menu"} onClick={handleCancelForm} disabled={loadingApproval}>
               Cancel
             </Button>
 
@@ -319,7 +363,7 @@ const GasDepositApprovalModal = ({
               <Button
                 onClick={prev}
                 type={"menu"}
-                disabled={current < 1}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
               </Button>
@@ -329,7 +373,7 @@ const GasDepositApprovalModal = ({
                   onClick={() => handleButtonNext()}
                   type={"submit"}
                   disabled={
-                    current > steps.length - 1 || steps[current].disabled
+                    current > steps.length - 1 || steps[current].disabled || loadingApproval
                   }
                 >
                   Next
@@ -340,14 +384,20 @@ const GasDepositApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading_approveRejectGd}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
+                    disabled={loadingApproval}
+                    loading={loadingApproval}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading_approveRejectGd}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
+                    disabled={loadingApproval}
+                    loading={loadingApproval}
                   >
                     Approve
                   </Button>
@@ -357,22 +407,13 @@ const GasDepositApprovalModal = ({
           </div>
         }
       >
-        <NxBaseContainer
-          border={{
-            top: false,
-            right: false,
-            left: false
-          }}
-          rounded={false}
-        >
-          <div className="flex flex-row justify-center">
-            <Steps
-              current={current}
-              items={steps}
-              labelPlacement="vertical"
-            />
-          </div>
-        </NxBaseContainer>
+        <NxFormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={handleButtonNext}
+          inModal
+        />
 
         <div className="p-4">
           {/* STEP 1: GAS DEPOSIT INFORMATION */}
@@ -403,6 +444,7 @@ const GasDepositApprovalModal = ({
                     onLoadMore={handleLoadMore}
                     hasMore={hasMore}
                     loadMoreThreshold={20}
+                    expandable={{ expandedRowRender, onExpand }}
                   />
                   <Form.Item
                     key="remark"
@@ -429,10 +471,10 @@ const GasDepositApprovalModal = ({
             <NxBaseContainer border header={"Confirmation"}>
               <div className="flex flex-col gap-y-4">
                 <NxTable
-                  dataSource={selectedRows}
+                  dataSource={gasDepositApprovals.filter((item) => selectedRowKeys.includes(item.id))}
                   columns={columns}
                   tableScrolled={{
-                    x: selectedRows.length ? "max-content" : 5000
+                    x: selectedRowKeys.length ? "max-content" : 5000
                   }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
@@ -441,6 +483,7 @@ const GasDepositApprovalModal = ({
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}
+                  expandable={{ expandedRowRender, onExpand }}
                 />
                 <DetailText label={"Remark"} className="flex flex-col gap-y-2">
                   {form.getFieldValue().remark}

@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import { getAllocationRecomendationList } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getAllocationRecomendationList, createAllocation } from "../../../../../redux/slices/receipt_collection/receipt";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import { columnRecommendation } from "./ColumnRecomendation";
 import { updatePagination } from "../../../../../utils/updatePagination";
@@ -427,36 +427,81 @@ const AllocationSection = ({
   // handle save data table
   const handleSaveDataTable = () => {
     if (totalAllocationAmount > parsedAmount) {
+      const errorBody = {
+        title: "Alert",
+        description: `Total allocation amount cannot be greater than receipt amount!`,
+      };
+      dispatch(showModalError(errorBody));
     } else {
-      // dispatch(setDataAllocation(selectDataTable));
-      // Merge new data (Approval, Remark, Attachment) into the selected rows
-      // Note: Since these are technically "header" info for the allocation SET,
-      // we might need to attach them to EACH row, or the backend expects them differently.
-      // Based on typical table-inline patterns, we'll attach them to the objects.
+      // Check if we're in update mode and have a receipt ID
+      const receiptId = formValues?.id; // Assuming receipt ID is available in formValues
+      
+      if (receiptId) {
+        // Call API to create allocation in database
+        const allocationRequest = {
+          receiptId: receiptId,
+          allocationDtoList: selectDataTable.map((row) => ({
+            id: row.id,
+            allocationAmount: row.allocationAmount,
+            remark: forceObj.remark,
+            approvalHierarchyId: forceObj.approvalHierarchy,
+            createdBy: userData?.userName,
+          })),
+          remark: forceObj.remark,
+          approvalHierarchyId: forceObj.approvalHierarchy,
+          attachmentIds: listDataAttachment?.map(att => att.id) || [],
+        };
 
-      const enrichedData = selectDataTable.map((row) => ({
-        ...row,
-        remark: forceObj.remark,
-        approvalHierarchyId: forceObj.approvalHierarchy,
-        attachments: listDataAttachment,
-        createdBy: userData?.userName,
-      }));
+        dispatch(createAllocation(allocationRequest))
+          .unwrap()
+          .then(() => {
+            // Success - update local state
+            const enrichedData = selectDataTable.map((row) => ({
+              ...row,
+              remark: forceObj.remark,
+              approvalHierarchyId: forceObj.approvalHierarchy,
+              attachments: listDataAttachment,
+              createdBy: userData?.userName,
+            }));
 
-      setDataTable((prev) => [...prev, ...enrichedData]);
+            setDataTable((prev) => [...prev, ...enrichedData]);
+            handleResetModal();
+          })
+          .catch((error) => {
+            console.error("Create allocation failed:", error);
+            const errorBody = {
+              title: "Error",
+              description: error?.message || "Failed to create allocation. Please try again.",
+            };
+            dispatch(showModalError(errorBody));
+          });
+      } else {
+        // For create mode, just update local state (will be saved with receipt)
+        const enrichedData = selectDataTable.map((row) => ({
+          ...row,
+          remark: forceObj.remark,
+          approvalHierarchyId: forceObj.approvalHierarchy,
+          attachments: listDataAttachment,
+          createdBy: userData?.userName,
+        }));
 
-      setSelectedRowKeys([]);
-      setSelectDataTable([]);
-      setTotalAllocationAmount(0);
-
-      // handleCancel();
-      setOpenModalAllocation(false);
-      setPageChoose(1);
-      setPageSizeChoose(10);
-      setCurrentStep(0);
-      setForceObj({});
-      setListDataAttachment([]);
-      modalForm.resetFields();
+        setDataTable((prev) => [...prev, ...enrichedData]);
+        handleResetModal();
+      }
     }
+  };
+
+  const handleResetModal = () => {
+    setSelectedRowKeys([]);
+    setSelectDataTable([]);
+    setTotalAllocationAmount(0);
+    setOpenModalAllocation(false);
+    setPageChoose(1);
+    setPageSizeChoose(10);
+    setCurrentStep(0);
+    setForceObj({});
+    setListDataAttachment([]);
+    modalForm.resetFields();
   };
 
   const handleOpenModalAllocation = async () => {

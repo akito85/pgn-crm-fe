@@ -1,4 +1,5 @@
 import React from "react";
+import StatusComponent from "../../../components/StatusComponent";
 import { getJobManagementColumns } from "./jobManagementColumns";
 
 /**
@@ -52,24 +53,17 @@ export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
     dataIndex: "isActive",
     key: "isActive",
     align: "center",
-    width: 100,
+    width: 120,
     fixed: "right",
-    render: (val) => (
-      <span
-        style={{
-          display: "inline-block",
-          padding: "2px 10px",
-          borderRadius: 12,
-          fontSize: 11,
-          fontWeight: 600,
-          background: val === "Y" ? "#e8f5e9" : "#f5f5f5",
-          color: val === "Y" ? "#2e7d32" : "#757575",
-          border: `1px solid ${val === "Y" ? "#c8e6c9" : "#e0e0e0"}`,
-        }}
-      >
-        {val === "Y" ? "Active" : "Inactive"}
-      </span>
-    ),
+    render: (val) => {
+      const colour = val === "Y" ? "active" : "inactive";
+      const text = val === "Y" ? "Active" : "Inactive";
+      return (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
+          <StatusComponent colour={colour} size="small">{text}</StatusComponent>
+        </div>
+      );
+    },
   },
 ];
 

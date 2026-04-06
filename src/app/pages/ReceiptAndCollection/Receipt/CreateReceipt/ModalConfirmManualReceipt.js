@@ -94,8 +94,10 @@ const ModalConfirmManualReceipt = ({
           <div className="w-full flex flex-col gap-4">
             <SectionCard title="CUSTOMER INFORMATION">
               <div className="grid grid-cols-5 w-full gap-5">
-                <DetailText label={"Miscellaneous"}>{data?.miscellaneous}</DetailText>
-                <DetailText label={"Customer Type"}>{data?.customerType}</DetailText>
+                <DetailText label={"Receipt Type"}>{data?.receiptType}</DetailText>
+                <DetailText label={"Customer Type"}>
+                  {data?.registrationNumber ? "Prospective Customer" : "Customer"}
+                </DetailText>
                 <DetailText label={"Registration Number"}>{data?.registrationNumber}</DetailText>
                 <DetailText label={"Account Number"}>{accNumb}</DetailText>
                 <DetailText label={"Customer Number"}>{data?.customerNumber}</DetailText>

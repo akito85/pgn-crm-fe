@@ -16,17 +16,18 @@ const GasDepositDetailMutationTable = ({
   detailId,
   index,
   detailIndex,
-  opened,
+  listKey = "list_gasDeposit",
+  parentKey,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
-  const {
-    list_gasDeposit: parents,
-  } = useSelector((state) => state.gasDeposit);
+  const parent = useSelector((state) =>
+    parentKey ? state.gasDeposit[parentKey] : state.gasDeposit[listKey][index]
+  );
 
-  const dataSource = parents[index]?.list_gasDepositDetail[detailIndex].list_gasDepositDetailMutation || [];
-  const pagination = parents[index]?.list_gasDepositDetail[detailIndex].pagination_listGdDetailMutation || {};
-  const loading = parents[index]?.list_gasDepositDetail[detailIndex].loading_listGdDetailMutation || false;
+  const dataSource = parent?.list_gasDepositDetail?.[detailIndex]?.list_gasDepositDetailMutation || [];
+  const pagination = parent?.list_gasDepositDetail?.[detailIndex]?.pagination_listGdDetailMutation || {};
+  const loading = parent?.list_gasDepositDetail?.[detailIndex]?.loading_listGdDetailMutation || false;
 
   // --- Derived values ---
   const totalElement = pagination.totalElement;
@@ -42,11 +43,6 @@ const GasDepositDetailMutationTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-  const [isLoad, setIsLoad] = useState(!opened);
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: [],
-    left: [],
-  }));
 
   // --- Handlers ---
   /**
@@ -89,6 +85,8 @@ const GasDepositDetailMutationTable = ({
         detailIndex,
         body,
         isLoadMore: false,
+        listKey,
+        parentKey,
       })
     );
     setPage(0);
@@ -130,6 +128,8 @@ const GasDepositDetailMutationTable = ({
           detailIndex,
           body,
           isLoadMore: true,
+          listKey,
+          parentKey,
         })
       ).unwrap();
     }
@@ -141,21 +141,18 @@ const GasDepositDetailMutationTable = ({
   // Abort the in-flight request on cleanup so StrictMode double-mounts and
   // rapid filter changes don't produce stale or duplicate page-0 fetches.
   useEffect(() => {
-    if (isLoad) {
-      const body = {
-        page: 0,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        filters,
-        filterRules,
-      };
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
 
-      setPage(0);
-      const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false }));
-      return () => { promise.abort(); };
-    } else
-      setIsLoad(true)
+    setPage(0);
+    const promise = dispatch(getGasDepositDetailMutations({ detailId, index, detailIndex, body, isLoadMore: false, listKey, parentKey }));
+    return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
   // --- Column configuration ---
@@ -169,9 +166,7 @@ const GasDepositDetailMutationTable = ({
     ),
   [search, searchText, searchedColumn]);
 
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
+  const columns = [...columnDefinitions];
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -179,20 +174,20 @@ const GasDepositDetailMutationTable = ({
         idTable="gas-deposit-detail-mutation-table"
         dataSource={dataSource}
         totalData={totalElement}
-        current={page}
         tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}
-        useInfiniteScroll={true}
+        useInfiniteScroll
         hasMore={hasMore}
-        onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
+        onLoadMore={handleLoadMore}
         loading={loading}
         columnDefinitions={columnDefinitions}
         onRefresh={handleRefresh}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        useSelect={false}
       />
     </div>
   );
