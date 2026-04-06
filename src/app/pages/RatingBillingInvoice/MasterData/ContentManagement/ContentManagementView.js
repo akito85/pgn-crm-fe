@@ -302,8 +302,7 @@ const ContentManagementView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVE");
+          record.statusApproval === "REJECTED";
 
         const linkContent = (
           <div className="flex items-center gap-2">

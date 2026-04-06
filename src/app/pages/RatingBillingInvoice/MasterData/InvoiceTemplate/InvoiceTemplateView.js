@@ -324,8 +324,7 @@ const InvoiceTemplateView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (

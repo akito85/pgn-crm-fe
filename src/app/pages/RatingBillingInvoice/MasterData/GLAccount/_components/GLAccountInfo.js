@@ -11,7 +11,7 @@ const GLAccountInfo = ({ data }) => {
       <DetailText label="GL Account Description">
         {data?.glAccountDesc || "-"}
       </DetailText>
-      <DetailText label="Reference">{data?.reference || "-"}</DetailText>
+      <DetailText label="Description">{data?.remark || " "}</DetailText>
     </CardComponent>
   );
 };

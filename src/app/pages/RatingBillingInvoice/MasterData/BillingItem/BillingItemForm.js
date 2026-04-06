@@ -470,21 +470,53 @@ const BillingItemForm = (props) => {
 
   const next = () => {
     const fieldsToValidate = listSectionInfo[current]?.paramValue;
+
+    const proceedNext = () => {
+      if (current === 0) {
+        if (selectedCriteria && dataCriteriaTable.length === 0) {
+          dispatch(
+            showModalError({
+              title: "Failed",
+              description: "Criteria Table is mandatory and cannot be empty.",
+            })
+          );
+          return;
+        }
+
+        if (dataTable.length > 0) {
+          const missingCategories = dataTable.filter(
+            (item) => !allDataDetailTable[item.category] || allDataDetailTable[item.category].length === 0
+          );
+
+          if (missingCategories.length > 0) {
+            const categoryNames = missingCategories.map((c) => c.categoryName || c.category).join(", ");
+            dispatch(
+              showModalError({
+                title: "Failed",
+                description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
+              })
+            );
+            return;
+          }
+        }
+      }
+
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    };
+
     if (fieldsToValidate) {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
-          if (current < steps.length - 1) {
-            setCurrent(current + 1);
-          }
+          proceedNext();
         })
         .catch((error) => {
           console.log("Validation failed:", error);
         });
     } else {
-      if (current < steps.length - 1) {
-        setCurrent(current + 1);
-      }
+      proceedNext();
     }
   };
 
@@ -780,6 +812,7 @@ const BillingItemForm = (props) => {
   const onFinish = async (e) => {
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
+      setCurrent(2);
       return;
     }
 
@@ -801,6 +834,24 @@ const BillingItemForm = (props) => {
 
   const onFinishFailed = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields && errorFields.length > 0) {
+      const fieldName0 = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex(
+        (item) => item.paramValue && item.paramValue.includes(fieldName0)
+      );
+
+      if (stepIndex !== -1 && stepIndex !== current) {
+        setCurrent(stepIndex);
+        setTimeout(() => {
+          form.scrollToField(errorFields[0].name, { behavior: "smooth", block: "center" });
+        }, 100);
+      } else {
+        form.scrollToField(errorFields[0].name, { behavior: "smooth", block: "center" });
+      }
+    } else if (listDataAttachment.length === 0) {
+      setCurrent(2);
+    }
   };
 
   const handleDescriptionSuccess = useCallback(

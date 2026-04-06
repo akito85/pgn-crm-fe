@@ -286,8 +286,7 @@ const BillingItemView = () => {
       render: (record) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const isActivateOrInactivate =
           (record.statusApproval === "APPROVED" &&
