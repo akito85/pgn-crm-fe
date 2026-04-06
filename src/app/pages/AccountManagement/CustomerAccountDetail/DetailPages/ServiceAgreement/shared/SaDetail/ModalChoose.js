@@ -1,17 +1,17 @@
-import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react'
+import {useState, useEffect, useRef, useMemo, useCallback} from 'react'
 import { FilterOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import Highlighter from 'react-highlight-words'
-import { DatePicker, Input, Tooltip } from 'antd'
+import { DatePicker, Input, Spin, Tooltip } from 'antd'
 import moment from 'moment'
 import ModalCustom from '../../../../../../../../components/Modal/ModalCustom'
 import ButtonComponent from '../../../../../../../../components/ButtonComponent'
 import NxTable from '../../../../../../../../components/Nx/NxTable'
 import { dateFormatting } from '../../../../../../../../utils'
-import { isAmendmentServiceAgreementType } from '../../idResolver'
 
 const ModalChooseProduct = ({
   modalChooseProduct,
   setModalChooseProduct,
+  loadingChooseProduct = false,
   dataProduct=[],
   getProductDetailById,
   getListProduct,
@@ -44,7 +44,7 @@ const ModalChooseProduct = ({
       serviceTypeId: serviceType,
       idProductType: isMain ? 245 : 287
     }
-    if(!isAmendmentServiceAgreementType(saRecordData?.typeSa)){
+    if(saRecordData.typeSa != "amandemen"){
       dispatch(getListProduct({body:body})).finally(() => setIsLoading(false));
     } else {
       setIsLoading(false);
@@ -89,7 +89,7 @@ const ModalChooseProduct = ({
   // Search Column Table
   const getColumnSearchProps = (dataIndex, type) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
-      const onDataChange = (value, dateString) => {
+      const onDataChange = (_, dateString) => {
         setSelectedKeys(dateString ? [dateString] : []);
         handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
       };
@@ -171,7 +171,7 @@ const ModalChooseProduct = ({
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "PRODUCT NAME",
@@ -230,11 +230,14 @@ const ModalChooseProduct = ({
       align: "center",
       width: 100,
       fixed: "right",
-      render: (v, r, i) => {
+      render: (_, r) => {
         return (
           <div className="flex justify-center align-middle gap-2">
             <Tooltip title="Choose">
-              <PlusCircleOutlined onClick={()=>getProductDetailById(r?.id)} style={{color: "#0075BF", cursor: "pointer"}}/>
+              <PlusCircleOutlined onClick={() => {
+                if (loadingChooseProduct) return;
+                getProductDetailById(r?.id)
+              }} style={{color: "#0075BF", cursor: "pointer"}}/>
             </Tooltip>
           </div>
         );
@@ -260,6 +263,7 @@ const ModalChooseProduct = ({
       {/* Modal Choose Product */}
       <ModalCustom
         isOpen={modalChooseProduct}
+        loading={loadingChooseProduct}
         type="confirmation"
         header={"CHOOSE PRODUCT"}
         width={1200}
@@ -268,6 +272,7 @@ const ModalChooseProduct = ({
           <div className={"w-full flex justify-end gap-5"}>
             <ButtonComponent
               type={"default"}
+              disabled={loadingChooseProduct}
               onClick={() => setModalChooseProduct(false)}
             >
               Cancel
@@ -275,37 +280,39 @@ const ModalChooseProduct = ({
           </div>
         }
       >
-        <span className="text-primary uppercase font-bold pb-4">
-          PRODUCT INFORMATION
-        </span>
+        <Spin spinning={loadingChooseProduct}>
+          <span className="text-primary uppercase font-bold pb-4">
+            PRODUCT INFORMATION
+          </span>
 
-        <div className="w-full py-4">
-          <NxTable
-            idTable="modal-choose-product-table"
-            dataSource={displayData}
-            columns={columns}
-            totalData={processedData.length}
-            tableScrolled={{
-              x: "max-content",
-              y: 400,
-            }}
-            usePagination={false}
-            useInfiniteScroll={true}
-            hasMore={hasMore}
-            onLoadMore={handleLoadMore}
-            loadMoreThreshold={2}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            columnDefinitions={columns.map((col) => ({
-              key: col.key || col.dataIndex || col.title,
-              title: col.title,
-            }))}
-            onChange={onSort}
-            loading={isLoading}
-            showAdvanceSearch={false}
-            showSearchBar={false}
-          />
-        </div>
+          <div className="w-full py-4">
+            <NxTable
+              idTable="modal-choose-product-table"
+              dataSource={displayData}
+              columns={columns}
+              totalData={processedData.length}
+              tableScrolled={{
+                x: "max-content",
+                y: 400,
+              }}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={2}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              columnDefinitions={columns.map((col) => ({
+                key: col.key || col.dataIndex || col.title,
+                title: col.title,
+              }))}
+              onChange={onSort}
+              loading={isLoading}
+              showAdvanceSearch={false}
+              showSearchBar={false}
+            />
+          </div>
+        </Spin>
       </ModalCustom>
     </div>
   )

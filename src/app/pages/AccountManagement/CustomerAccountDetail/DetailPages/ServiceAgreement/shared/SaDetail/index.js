@@ -798,6 +798,7 @@ const SaDetail = ({
             <ModalChooseProduct
               modalChooseProduct={modalChooseProduct}
               setModalChooseProduct={setModalChooseProduct}
+              loadingChooseProduct={loadingChooseProduct}
               dataProduct={data_product}
               getProductDetailById={getProductDetailById}
               getListProduct={getListProduct}

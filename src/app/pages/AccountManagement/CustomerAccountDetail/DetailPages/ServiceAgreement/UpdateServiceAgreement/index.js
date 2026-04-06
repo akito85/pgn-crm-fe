@@ -165,7 +165,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const [bodyError, setBodyError] = useState({});
 	const [loadingChooseProduct, setLoadingChooseProduct] = useState(false);
 	const [loadingForm, setLoadingForm] = useState(false);
-	const isLoading = loading || loadingForm;
+	const isLoading = loadingForm || (loading && !modalChooseProduct);
 
 	// State Location
 	const location = useLocation();
