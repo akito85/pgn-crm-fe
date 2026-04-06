@@ -204,7 +204,7 @@ const EditableCell = ({
       {...restProps}
       style={{
         padding: "0 8px",
-        height: "34",
+        height: "34px",
         lineHeight: "32px",
         fontSize: 12,
       }}
