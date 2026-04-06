@@ -7,6 +7,7 @@ import ModalCustom from '../../../../../../../../components/Modal/ModalCustom'
 import ButtonComponent from '../../../../../../../../components/ButtonComponent'
 import NxTable from '../../../../../../../../components/Nx/NxTable'
 import { dateFormatting } from '../../../../../../../../utils'
+import { isAmendmentServiceAgreementType } from '../../idResolver'
 
 const ModalChooseProduct = ({
   modalChooseProduct,
@@ -43,7 +44,7 @@ const ModalChooseProduct = ({
       serviceTypeId: serviceType,
       idProductType: isMain ? 245 : 287
     }
-    if(saRecordData.typeSa != "amandemen"){
+    if(!isAmendmentServiceAgreementType(saRecordData?.typeSa)){
       dispatch(getListProduct({body:body})).finally(() => setIsLoading(false));
     } else {
       setIsLoading(false);
