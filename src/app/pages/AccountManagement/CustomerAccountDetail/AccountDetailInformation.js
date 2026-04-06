@@ -245,6 +245,30 @@ const AccountDetailInformation = ({
       )
     ) {
       setTypeAccountInfoDetailSection(dataTabs.md);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/gas-deposit/view"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/gas-deposit/view"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/gas-deposit/recalculate"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/gas-deposit/recalculate"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-standard/gas-deposit/expire"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/gas-deposit/expire"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.gd);
     }
     else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
