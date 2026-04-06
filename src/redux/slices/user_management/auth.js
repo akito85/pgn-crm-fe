@@ -425,6 +425,7 @@ export const confirmNewPassword = createAsyncThunk(
 export const checkGrantedAccess = createAsyncThunk(
   "CHECK_GRANTED_ACCESS",
   async (body, thunkAPI) => {
+    thunkAPI.dispatch(grantedAccess(null));
     try {
       const data = await authService.checkGrantedAccess(body);
       thunkAPI.dispatch(grantedAccess(data?.data));
