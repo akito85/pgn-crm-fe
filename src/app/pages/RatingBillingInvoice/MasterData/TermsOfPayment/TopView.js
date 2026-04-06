@@ -638,8 +638,7 @@ const TopView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "Draft" ||
-          record.statusApproval === "Rejected" ||
-          (record.status === "ACTIVE" && record.statusApproval === "Approved");
+          record.statusApproval === "Rejected";
 
         const linkContent =
           data > 3 ? (

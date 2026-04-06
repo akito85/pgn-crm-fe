@@ -339,8 +339,7 @@ const GLAccountView = () => {
       render: (record, data) => {
         const isEditable =
           record.approvalStatus === "DRAFT" ||
-          record.approvalStatus === "REJECTED" ||
-          (record.status === "ACTIVE" && record.approvalStatus === "APPROVED");
+          record.approvalStatus === "REJECTED";
         const linkContent =
           data > 3 ? (
             <ButtonComponent
