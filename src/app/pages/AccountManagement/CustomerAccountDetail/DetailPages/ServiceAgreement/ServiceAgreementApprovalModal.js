@@ -439,6 +439,7 @@ const ServiceAgreementApprovalModal = ({
                                     header={"Service Agreement List - Ready to Approve"}
                                 >
                                     <NxTable
+                                        idTable="sa-approval-list-table"
                                         className={"[&_.ant-checkbox]:scale-90"}
                                         dataSource={dataSourceWithKeys}
                                         columns={processedColumns}
@@ -494,6 +495,7 @@ const ServiceAgreementApprovalModal = ({
                                 </p>
                             </div>
                             <NxTable
+                                idTable="sa-approval-confirmation-table"
                                 dataSource={selectedRows}
                                 columns={processedColumns}
                                 totalData={pagination_saApproval?.totalElements || 0}
