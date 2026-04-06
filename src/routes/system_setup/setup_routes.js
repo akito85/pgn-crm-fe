@@ -1,5 +1,4 @@
 export const SYSTEM_SETUP_ROUTES = {
-
   // menus routes
   VIEW_MENU: "/system-setup/menu",
   CREATE_MENU: "/system-setup/menu/create",
@@ -93,4 +92,10 @@ export const SYSTEM_SETUP_ROUTES = {
     "/system-setup/transaction-mapping-category/create",
   UPDATE_BILLING_ITEM_CATEGORY:
     "/system-setup/transaction-mapping-category/update",
+
+  // Calendar
+  VIEW_CALENDAR: "/system-setup/calendar",
+  DETAIL_CALENDAR: "/system-setup/calendar/view",
+  CREATE_CALENDAR: "/system-setup/calendar/create",
+  UPDATE_CALENDAR: "/system-setup/calendar/update",
 };
