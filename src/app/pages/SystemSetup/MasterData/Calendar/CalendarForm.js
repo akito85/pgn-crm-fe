@@ -720,6 +720,8 @@ const CalendarForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
