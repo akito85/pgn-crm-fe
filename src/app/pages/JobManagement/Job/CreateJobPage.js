@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Input, Select, InputNumber, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -82,6 +82,28 @@ const PARAMETER_COLUMNS = [
   },
 ];
 
+// Map Oracle data type string to the PARAMETER_COLUMNS type options
+const mapOracleTypeToParamType = (dataType) => {
+  if (!dataType) return 'String';
+  const upper = dataType.toUpperCase();
+  if (upper.includes('CHAR') || upper.includes('CLOB') || upper.includes('TEXT')) return 'String';
+  if (upper.includes('NUMBER') || upper.includes('INTEGER') || upper.includes('FLOAT') ||
+      upper.includes('DECIMAL') || upper.includes('NUMERIC')) return 'Number';
+  if (upper.includes('DATE') || upper.includes('TIMESTAMP')) return 'Date';
+  if (upper === 'BOOLEAN') return 'Boolean';
+  return 'String';
+};
+
+const mapSpParamToParameter = (spParam, index) => ({
+  key: index + 1,
+  name: spParam.name,
+  code: spParam.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
+  type: mapOracleTypeToParamType(spParam.dataType),
+  length: null,
+  description: spParam.direction?.oracleValue ?? spParam.direction ?? '',
+  required: !spParam.hasDefault,
+});
+
 const SP_PARAM_COLUMNS = [
   { title: 'Parameter', dataIndex: 'name',       editable: false, width: 200 },
   { title: 'Data Type', dataIndex: 'dataType',   editable: false, width: 140 },
@@ -144,6 +166,9 @@ const CreateJobPage = () => {
   const groupList = groupAccessData?.result ?? [];
   const [selectedSchema,    setSelectedSchema]    = useState(null);
   const [selectedProcedure, setSelectedProcedure] = useState(null);
+  // Set to true only when the user explicitly selects a procedure — guards against
+  // overwriting saved parameters when an existing job is loaded in edit mode.
+  const shouldAutoPopulateParamsRef = useRef(false);
 
   useEffect(() => {
     dispatch(fetchTaskQueues());
@@ -214,12 +239,23 @@ const CreateJobPage = () => {
 
   const handleProcedureChange = (procedure) => {
     setSelectedProcedure(procedure);
+    shouldAutoPopulateParamsRef.current = true;
     dispatch(fetchProcedureParameters({ schema: selectedSchema, procedure }));
   };
 
   const spParams = selectedSchema && selectedProcedure
     ? (spParametersMap[`${selectedSchema}/${selectedProcedure}`] ?? [])
     : [];
+
+  // When SP parameters load after the user explicitly picks a procedure, copy them
+  // into the editable parameters table (non-edit mode — autoEditOnAppend is false).
+  useEffect(() => {
+    if (!shouldAutoPopulateParamsRef.current) return;
+    if (spParams.length > 0) {
+      setParameters(spParams.map(mapSpParamToParameter));
+      shouldAutoPopulateParamsRef.current = false;
+    }
+  }, [spParams]);
 
   const updateNotification = (key) => (checked) =>
     setNotificationSettings(prev => ({ ...prev, [key]: checked }));
@@ -524,6 +560,7 @@ const CreateJobPage = () => {
               onDataChange={setParameters}
               columns={PARAMETER_COLUMNS}
               emptyText='No parameters defined. Click Create to add one.'
+              autoEditOnAppend={false}
             />
           </NxBaseContainer>
 

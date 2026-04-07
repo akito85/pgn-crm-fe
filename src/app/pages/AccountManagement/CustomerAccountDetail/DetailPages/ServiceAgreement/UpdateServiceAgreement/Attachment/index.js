@@ -311,6 +311,7 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
             </div>
           </div>
           <NxTable
+            idTable="sa-update-attachment-table"
             columns={
               columnAttachment(
                 searchInput,

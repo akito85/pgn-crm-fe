@@ -13,8 +13,8 @@ import {
   getGrantedAccessAccount
 } from "../../../../../redux/slices/account_management/accountManagement";
 import {
-  getDetailGasDeposit,
-  getDetailDraftGasDeposit,
+  getGasDeposit,
+  getGasDepositDraft,
   approveOrRejectGasDeposit,
   approveOrRejectInactiveGasDeposit
 } from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
@@ -26,7 +26,6 @@ import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import NxApproveOrRejectModal from "../../../../../components/Nx/NxApproveOrRejectModal";
 import NxTabs from "../../../../../components/Nx/NxTabs";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
-import GasDepositDetailMutationTable from "../GasDepositDetailMutationTable";
 import GasDepositDetailTable from "../GasDepositDetailTable";
 
 /**
@@ -53,7 +52,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const isLoading = loading || loadingAccount;
   const accountId = location.state?.accountId;
   const customerId = location.state?.customerId;
-  const idGd = location.state?.id;
+  const id = location.state?.id;
 
   const tabOptions = [
     {
@@ -72,7 +71,6 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const [activeKey, setActiveKey] = useState(originalKey || "");
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
-  const [selectedDetailId, setSelectedDetailId] = useState();
 
   // Computed (depends on state + selectors)
   const detail =
@@ -84,13 +82,11 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const {
     approvalType,
     relatedAccountNumber,
-    id,
     createdDate,
     createdBy,
     updatedDate,
     updatedBy,
     tappId,
-    details,
   } = detail;
 
   const routes = [
@@ -186,8 +182,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getDetailGasDeposit(idGd));
-          dispatch(getDetailDraftGasDeposit(idGd));
+          dispatch(getGasDeposit({ id }));
+          dispatch(getGasDepositDraft({ id }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -201,8 +197,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getDetailGasDeposit(idGd));
-          dispatch(getDetailDraftGasDeposit(idGd));
+          dispatch(getGasDeposit({ id }));
+          dispatch(getGasDepositDraft({ id }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -252,14 +248,14 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [accountId, customerId]);
 
   useEffect(() => {
-    if (idGd)
-      dispatch(getDetailGasDeposit(idGd))
-  }, [idGd]);
+    if (id)
+      dispatch(getGasDeposit({ id }))
+  }, [id]);
 
   useEffect(() => {
-    if (idGd && draftExist)
-      dispatch(getDetailDraftGasDeposit(idGd));
-  }, [idGd, draftExist])
+    if (id && draftExist)
+      dispatch(getGasDepositDraft({ id }));
+  }, [id, draftExist])
 
   return (
     <>
@@ -286,26 +282,15 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           )}
           <GasDepositDetailTabs detail={detail} />
 
-          {activeKey === originalKey && (
-            <>
-              <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
-                <NxBaseContainer border>
-                  <GasDepositDetailTable
-                    dataSource={details}
-                  />
-                </NxBaseContainer>
-              </NxCardContainer>
-              {selectedDetailId && (
-                <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
-                  <NxBaseContainer border>
-                    <GasDepositDetailMutationTable
-                      detailId={selectedDetailId}
-                      />
-                  </NxBaseContainer>
-                </NxCardContainer>
+          <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
+            <NxBaseContainer border>
+              {activeKey === originalKey ? (
+                <GasDepositDetailTable id={id} parentKey="detail_gasDeposit" />
+              ) : (
+                <GasDepositDetailTable id={id} parentKey="detailDraft_gasDeposit" />
               )}
-            </>
-          )}
+            </NxBaseContainer>
+          </NxCardContainer>
 
           {/* Detail mutation table — rendered only when a row is selected */}
 

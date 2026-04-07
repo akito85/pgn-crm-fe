@@ -12,6 +12,8 @@ const nxGetAccountActions = ({
   handleApprovalHistory = () => {},
   handleRecalculate = () => {},
   handleExpire = () => {},
+  handleBulkRecalculate = () => {},
+  handleBulkExpire = () => {},
   handleDelete = () => {}
 }) => [
   {
@@ -48,6 +50,30 @@ const nxGetAccountActions = ({
         onClick={handleCreate}
       >
         Create
+      </Button>
+    )
+  },
+  {
+    action: "Recalculate",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkRecalculate}
+      >
+        Recalculate
+      </Button>
+    )
+  },
+  {
+    action: "Expire",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkExpire}
+      >
+        Expire
       </Button>
     )
   },
@@ -263,12 +289,12 @@ const nxGetAccountActions = ({
             <span className={"text-black ml-3"}>Recalculate</span>
           </Button>
         ) : (
-          <Tooltip title="Recalculate" key={`table-action-${index}`}>
+          <Tooltip title="Expire" key={`table-action-${index}`}>
             <Button
               onClick={() => handleExpire(record)}
               type="table-action"
             >
-              <SVGIcon name="IconRating" width={20} />
+              <SVGIcon name="IconExpire" width={20} />
             </Button>
           </Tooltip>
         );

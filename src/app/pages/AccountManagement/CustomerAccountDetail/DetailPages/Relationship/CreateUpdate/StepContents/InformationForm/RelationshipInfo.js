@@ -37,8 +37,8 @@ const RelationshipInfo = ({
   const relationshipCategory = Form.useWatch("relationshipCategory", { form });
   const relationshipTypeName = Form.useWatch("relationshipTypeName", { form, preserve: true });
   const relationshipCategoryName = Form.useWatch("relationshipCategoryName", { form, preserve: true });
-  const objectName = Form.useWatch("objectName", { form, preserve: true });
-  const objectNumber = Form.useWatch("objectNumber", { form, preserve: true });
+  const relatedName = Form.useWatch("relatedName", { form, preserve: true });
+  const relatedNumber = Form.useWatch("relatedNumber", { form, preserve: true });
   const startDate = Form.useWatch("startDate", { form });
   const endDate = Form.useWatch("endDate", { form });
   const description = Form.useWatch("description", { form });
@@ -193,19 +193,22 @@ const RelationshipInfo = ({
         <ModalChooseRelated
           isOpen={modalChoose}
           accountId={accountId}
-          relationshipType={relationshipTypeName}
-          relationshipCategory={relationshipCategoryName}
+          relationshipType={relationshipType}
+          relationshipCategory={relationshipCategory}
+          relationshipTypeName={relationshipTypeName}
           handleCancel={() => setModalChoose(false)}
           handleSelect={(selected) => {
             // Handle different data structure based on source
             const isCustomer = selected.source === "CUSTOMER";
-            const displayName = isCustomer ? selected.customerName : selected.accountName;
-            const displayNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+
+            const relatedName = isCustomer ? selected.customerName : selected.accountName;
+            const relatedNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+            const accountId = isCustomer ? selected.id : selected.accountId;
 
             form.setFieldsValue({
-              accountName: displayName,
-              accountNumber: displayNumber,
-              accountId: selected.id,
+              relatedName,
+              relatedNumber,
+              accountId,
             });
 
             // Pass allAccount data to parent for display in RelatedDetailCard
@@ -226,8 +229,8 @@ const RelationshipInfo = ({
         <div className="grid grid-cols-3 gap-4">
           <NxDetailText label="Relationship Type">{relationshipTypeName}</NxDetailText>
           <NxDetailText label="Relationship Category">{relationshipCategoryName}</NxDetailText>
-          <NxDetailText label="Related Name">{objectName}</NxDetailText>
-          <NxDetailText label="Related Number">{objectNumber}</NxDetailText>
+          <NxDetailText label="Related Name">{relatedName}</NxDetailText>
+          <NxDetailText label="Related Number">{relatedNumber}</NxDetailText>
           <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
           <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
         </div>

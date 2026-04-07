@@ -88,6 +88,7 @@ export const validateError = createAsyncThunk(
         return: back,
         loadPage: load,
         action: action || error?.action,
+        data: error?.data || null,
       };
       thunkAPI.dispatch(showModalError(errorBody));
     }
@@ -107,6 +108,7 @@ export const validateCreateUpdate = createAsyncThunk(
             errorCode(error),
             type === "update" ? "updated" : "created",
             errorMessage(error),
+            error?.response?.data?.data || null,
           ),
           action: "VALIDATE_CREATE_UPDATE",
           back: false,

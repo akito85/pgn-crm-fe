@@ -48,12 +48,13 @@ const ConfirmationModalTabs = ({
       key: 3,
       label: "Remark",
       disabled,
-      children: <ConfirmationModalRemark disabled={disabled} />
+      children: <ConfirmationModalRemark disabled={disabled} />,
+      required: true
     },
   ].filter(Boolean).map((tabOption) => ({
     ...tabOption,
     children:
-      <NxBaseContainer border header={tabOption.label}>
+      <NxBaseContainer border header={tabOption.label} required={tabOption.required}>
         {tabOption.children}
       </NxBaseContainer>
   }));

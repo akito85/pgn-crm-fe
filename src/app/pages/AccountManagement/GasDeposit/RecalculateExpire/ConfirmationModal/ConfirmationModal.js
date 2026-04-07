@@ -16,6 +16,7 @@ const ConfirmationModal = ({
   configApplication,
   loading = false,
   detail,
+  details,
   handleSubmitForm = () => {},
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
@@ -81,6 +82,7 @@ const ConfirmationModal = ({
       <ConfirmationModalTabs
         form={form}
         detail={detail}
+        details={details}
         approvalData={approvalData}
         attachmentDataSource={attachmentDataSource}
         service={service}
