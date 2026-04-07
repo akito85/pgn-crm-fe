@@ -31,7 +31,7 @@ import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../assets/Icon/index";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
 
-const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) => {
+const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
   const [current, setCurrent] = useState(0);
@@ -68,14 +68,9 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
   const customerId = location?.state?.customerId;
   const id = location?.state?.id;
 
-  useEffect(() => {
-    console.log({ accountId, customerId })
-  }, [accountId, customerId])
-  
   const status = detail_gasDeposit.status || "DRAFT";
   const statusApproval = detail_gasDeposit.statusApproval || "DRAFT";
 
-  const isDraft = location.state?.status === "DRAFT" || status === "DRAFT";
   const isActive = location.state?.status === "ACTIVE" || status === "ACTIVE";
   
   const isDraftApproval = location.state?.statusApproval === "DRAFT" || statusApproval === "DRAFT";
@@ -89,18 +84,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
   
-  const attachmentIsRequired = true;
-  
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
-  const rowSelection = {
-    fixed: true,
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-    },
-    preserveSelectedRowKeys: true
-  };
+  const attachmentIsRequired = false;
 
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_gasDeposit : detail_gasDeposit;
   const parentKey = (isActive && (isDraftApproval || isRejectApproval))
@@ -250,30 +234,25 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         action: submitType
       };
 
-      dispatch(
-        validateCreateUpdate({
-          body,
-          services: accountManagementService,
-          endPoint: `/v1/dbs/api/gas-deposit/validate-${formType}`,
-          type: formType
-        })
-      )
-        .unwrap()
-        .then((data) => {
-          setShowConfirmationModal(show);
-          setConfirmationType(submitType);
-        })
-        .catch(() => {});
+      try {
+        await dispatch(
+          validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/gas-deposit/validate-${formType}`,
+            type: formType
+          })
+        ).unwrap()
+      } catch {
+        return;
+      }
+      
+      setShowConfirmationModal(show);
+      setConfirmationType(submitType);
     } else {
       setShowConfirmationModal(show);
       setConfirmationType("");
     }
-  };
-
-  const setAccount = (accountId, accountNumber, accountName) => {
-    form.setFieldValue("accountId", accountId);
-    form.setFieldValue("accountNumber", accountNumber);
-    form.setFieldValue("accountName", accountName);
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
@@ -316,7 +295,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
     {
       title: "Gas Deposit",
       cards: [
-        !isBulk && {
+        {
           header: "Gas Deposit Information",
           content: (
             <InfoGasDeposit
@@ -325,7 +304,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
             />
           )
         },
-        !isBulk && {
+        {
           header: "Gas Deposit Detail",
           content: (
             <GasDepositDetailTable
@@ -335,7 +314,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
             />
           )
         },
-      ].filter(Boolean),
+      ],
       disabled: false,
       key: "tab-0",
     },
@@ -438,7 +417,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
     await next();
   };
 
-  const handleSubmitForm = () => {
+  const handleSubmitForm = async () => {
     const {
       appHierId,
       remark
@@ -452,9 +431,9 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
     ]);
 
     const body = {
-      accountId,
       appHierId,
       action: confirmationType,
+      gasDepositIds: [ id ],
       remark,
       attachments
     };
@@ -468,50 +447,46 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
         : "";
 
-    if (isRecalculate)
-      dispatch(recalculateGasDeposit({ id, body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
-        .unwrap()
-        .then((data) => {
-          setTimeout(() => {
-            navigate(navigateTarget, {
-              state: {
-                accountId,
-                customerId
-              }
-            });
-          }, 2000);
-        })
-        .catch((error) => {});
-    else if (isExpire)
-      dispatch(
-        expireGasDeposit({
-          id,
-          body,
-          attachments: attachmentDataSource.filter(
-            (attachment) => attachment.dataType === "new"
-          ),
-          action: confirmationType.toUpperCase()
-        })
-      )
-        .unwrap()
-        .then((data) => {
-          setTimeout(() => {
-            navigate(navigateTarget, {
-              state: {
-                accountId,
-                customerId
-              }
-            });
-          }, 2000);
-        })
-        .catch((error) => {});
+    try {
+      if (isRecalculate) {
+        await dispatch(
+          recalculateGasDeposit({
+            body,
+            attachments: newAttachments,
+            action: confirmationType.toUpperCase()
+          })
+        ).unwrap();
+      } else if (isExpire) {
+          await dispatch(
+          expireGasDeposit({
+            body,
+            attachments: attachmentDataSource.filter(
+              (attachment) => attachment.dataType === "new"
+            ),
+            action: confirmationType.toUpperCase()
+          })
+        ).unwrap();
+      } else
+        return
+    } catch {
+      return
+    }
+
+    setTimeout(() => {
+      navigate(navigateTarget, {
+        state: {
+          accountId,
+          customerId
+        }
+      });
+    }, 2000);
   };
 
   return (
     <div>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
-        {!isBulk && accountId && customerId && (
+        {accountId && customerId && (
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}

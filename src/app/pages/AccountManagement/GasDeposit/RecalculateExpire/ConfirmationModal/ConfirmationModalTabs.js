@@ -23,6 +23,7 @@ const ConfirmationModalTabs = ({
   const tabOptions = [
     {
       key: 0,
+      label: "Gas Deposit",
       cards: [
         {
           content: <InfoGasDeposit detail={detail} />,
@@ -43,6 +44,7 @@ const ConfirmationModalTabs = ({
     },
     {
       key: 1,
+      label: "Approval",
       cards: [
         {
           content: <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />,
@@ -53,6 +55,7 @@ const ConfirmationModalTabs = ({
     },
     {
       key: 2,
+      label: "Attachment",
       cards: [
         {
           content: (
@@ -70,10 +73,12 @@ const ConfirmationModalTabs = ({
     },
     type === "submit" && {
       key: 3,
+      label: "Remark",
       cards: [
         {
           content: <ConfirmationModalRemark disabled={disabled} />,
           header: "Remark",
+          required: true,
         },
       ],
       disabled,
@@ -87,11 +92,13 @@ const ConfirmationModalTabs = ({
         onChange={setActiveTab}
         activeKey={activeTab}
       />
-      {tabOptions[activeTab].cards.map((card, index) => (
-        <NxBaseContainer border header={card.header} key={`modal-card-${index}`}>
-          {card.content}
-        </NxBaseContainer>
-      ))}
+      <div className="flex flex-col gap-y-4 p-4">
+        {tabOptions[activeTab].cards.map((card, index) => (
+          <NxBaseContainer border header={card.header} key={`modal-card-${index}`} required={card.required} >
+            {card.content}
+          </NxBaseContainer>
+        ))}
+      </div>
     </>
   );
 };
