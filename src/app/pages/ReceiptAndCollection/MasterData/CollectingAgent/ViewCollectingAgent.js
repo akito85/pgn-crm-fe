@@ -411,10 +411,26 @@ const ViewCollectingAgent = () => {
         {
             action: "Update",
             type: "table",
-            render: (record) => {
+            render: (record, data_length) => {
                 const isEditable =
                     record.statusApproval === "Draft" || record.statusApproval === "Rejected";
-                return (
+                return data_length > 3 ? (
+                    <Link
+                        to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_COLLECTING_AGENT}
+                        state={{ id: record?.id }}
+                        className={!isEditable ? "pointer-events-none" : ""}
+                    >
+                        <ButtonComponent
+                            className="gap-5"
+                            icon={<SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />}
+                            border={false}
+                            disabled={!isEditable}
+                            type="action"
+                        >
+                            <span className="text-black gap-2 text-center">Update</span>
+                        </ButtonComponent>
+                    </Link>
+                ) : (
                     <Tooltip title="Update">
                         <div
                             onClick={(e) => { if (!isEditable) e.preventDefault(); }}
@@ -438,25 +454,34 @@ const ViewCollectingAgent = () => {
         {
             action: "Activate",
             type: "table",
-            render: (record) => {
+            render: (record, data_length) => {
                 const statusLowerCase = record?.status?.toLowerCase();
-                return (
-                    <Tooltip
-                        title={
-                            statusLowerCase === "active" || statusLowerCase === "draft"
-                                ? "Inactivate"
-                                : "Activate"
-                        }
-                    >
+                return data_length > 3 ? (
+                    <div className="w-full">
+                        <ButtonComponent
+                            border={false}
+                            className="gap-5"
+                            onClick={() => handleInactive(record)}
+                            disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+                            type="action"
+                        >
+                            <Checkbox
+                                onClick={() => handleInactive(record)}
+                                checked={record?.status !== "Active"}
+                                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+                            />
+                            <span className="text-black ml-6 gap-2 text-center">
+                                {statusLowerCase === "active" ? "Inactivate" : "Activate"}
+                            </span>
+                        </ButtonComponent>
+                    </div>
+                ) : (
+                    <Tooltip title={statusLowerCase === "active" ? "Inactivate" : "Activate"}>
                         <div>
                             <Checkbox
                                 onClick={() => handleInactive(record)}
                                 checked={record?.status !== "Active"}
-                                disabled={disabledActionByStatus(
-                                    "activate",
-                                    record?.status,
-                                    record?.statusApproval
-                                )}
+                                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
                             />
                         </div>
                     </Tooltip>
@@ -466,16 +491,27 @@ const ViewCollectingAgent = () => {
         {
             action: "history",
             type: "table",
-            render: (record) => (
-                <Tooltip title="Approval History">
-                    <div
-                        style={{ lineHeight: 0 }}
+            render: (record, data_length) =>
+                data_length > 3 ? (
+                    <ButtonComponent
+                        className="gap-5"
+                        icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
+                        border={false}
                         onClick={() => handleApprovalHistory(record?.id)}
+                        type="action"
                     >
-                        <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
-                    </div>
-                </Tooltip>
-            ),
+                        <span className="text-black gap-2 text-center">Approval History</span>
+                    </ButtonComponent>
+                ) : (
+                    <Tooltip title="Approval History">
+                        <div
+                            style={{ lineHeight: 0 }}
+                            onClick={() => handleApprovalHistory(record?.id)}
+                        >
+                            <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
+                        </div>
+                    </Tooltip>
+                ),
         },
     ];
 
