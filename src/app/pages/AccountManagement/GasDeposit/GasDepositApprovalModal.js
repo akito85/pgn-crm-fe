@@ -26,6 +26,7 @@ import GasDepositDetailTable from "./GasDepositDetailTable";
 const GasDepositApprovalModal = ({
   accountId,
   isOpen,
+  isUnderAccount,
   handleCancel = () => {},
   afterFinish = () => {}
 }) => {
@@ -270,28 +271,34 @@ const GasDepositApprovalModal = ({
         selectedRowKeys.includes(row.id)
       );
 
-      const body = selectedApprovalRows
-        .filter((row) => row.approvalType === "GAS_DEPOSIT")
-        .map((row) => ({
-          id: row.id,
-          approvalId: row.tappId,
-          action,
-          description: values.remark
-        }));
+      const recalculateRecords = selectedApprovalRows
+        .filter((row) => row.approvalType === "RECALCULATE_GAS_DEPOSIT");
 
-      const inactiveBody = selectedApprovalRows
-        .filter((row) => row.approvalType === "INACTIVE_GAS_DEPOSIT")
-        .map((row) => ({
-          id: row.id,
-          approvalId: row.tappId,
-          action,
-          description: values.remark
-        }));
+      const expireRecords = selectedApprovalRows
+        .filter((row) => row.approvalType === "EXPIRE_GAS_DEPOSIT");
+
+      const recalculateBody = recalculateRecords.length ? {
+        action,
+        remark: values.remark,
+        data: recalculateRecords.map(({id, tappId}) => ({
+          id,
+          approvalId: tappId
+        }))
+      } : undefined;
+
+      const expireBody = expireRecords.length ? {
+        action,
+        remark: values.remark,
+        data: expireRecords.map(({id, tappId}) => ({
+          id,
+          approvalId: tappId
+        }))
+      } : undefined;
 
       dispatch(
         approveOrRejectAllGasDeposit({
-          body,
-          inactiveBody,
+          recalculateBody,
+          expireBody,
           action
         })
       )
@@ -309,7 +316,8 @@ const GasDepositApprovalModal = ({
         searchedColumn,
         searchText,
         handleSearch,
-        includeStatus: false
+        includeStatus: false,
+        isUnderAccount
       }),
     [search, searchInput, searchedColumn, searchText]
   );
@@ -425,12 +433,13 @@ const GasDepositApprovalModal = ({
                   header={"Gas Deposit List - Ready to Approve"}
                 >
                   <NxTable
+                    idTable="gas-deposit-approval-table"
                     className={"[&_.ant-checkbox]:scale-90"}
                     dataSource={gasDepositApprovals}
                     columns={columns}
                     totalData={totalElement}
                     tableScrolled={{
-                      x: gasDepositApprovals.length ? "max-content" : 5000
+                      x: gasDepositApprovals.length ? "max-content" : 3000
                     }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
@@ -471,10 +480,11 @@ const GasDepositApprovalModal = ({
             <NxBaseContainer border header={"Confirmation"}>
               <div className="flex flex-col gap-y-4">
                 <NxTable
+                  idTable="gas-deposit-selected-approval-table"
                   dataSource={gasDepositApprovals.filter((item) => selectedRowKeys.includes(item.id))}
                   columns={columns}
                   tableScrolled={{
-                    x: selectedRowKeys.length ? "max-content" : 5000
+                    x: selectedRowKeys.length ? "max-content" : 3000
                   }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}

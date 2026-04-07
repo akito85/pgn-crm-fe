@@ -234,20 +234,6 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isUnderAccount && customerId) dispatch(getCustomerDetail(customerId));
-  }, [customerId]);
-
-  useEffect(() => {
-    if (isUnderAccount && accountId && customerId) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ accountId, customerId }));
-      } else if (isOneTime) {
-        dispatch(getAccountOneTimeDetail({ accountId, customerId }));
-      }
-    }
-  }, [accountId, customerId]);
-
-  useEffect(() => {
     if (id)
       dispatch(getGasDeposit({ id }))
   }, [id]);

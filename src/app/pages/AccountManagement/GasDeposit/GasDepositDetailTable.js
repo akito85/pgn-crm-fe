@@ -156,7 +156,7 @@ const GasDepositDetailTable = ({
     setPage(0);
     const promise = dispatch(getGasDepositDetails({ id, index, body, isLoadMore: false, listKey, parentKey }));
     return () => { promise.abort(); };
-  }, [sort, search, filters, filterRules]);
+  }, [sort, search, filters, filterRules, parentKey]);
 
   // --- Column configuration ---
   const columnDefinitions = useMemo(() =>
@@ -194,7 +194,7 @@ const GasDepositDetailTable = ({
         idTable="gas-deposit-detail-table"
         dataSource={dataSource}
         totalData={totalElement}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 1500 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}

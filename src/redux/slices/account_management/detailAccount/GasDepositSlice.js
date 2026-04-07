@@ -28,7 +28,7 @@ const initialState = {
     pageSize: 10,
   },
   loading_listGdApprovalHierarchy: false,
-  list_gdApprovalHierarchies: [],
+  list_gdApprovalHierarchy: [],
   loading_detailGdApprovalHierarchy: false,
   detail_gdApprovalHierarchy: [],
   loading_listGdAttachmentCategory: false,
@@ -61,12 +61,10 @@ export const getGasDeposits = createAsyncThunk(
       body = {
         ...body,
         listType: "all"
-      }
+      };
 
-      const url = `/v1/dbs/api/gas-deposit/list/${accountId}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = "/v1/dbs/api/gas-deposit/list" + (accountId ? `/${accountId}` : "");
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         isLoadMore,
@@ -105,7 +103,7 @@ export const getGasDepositDetails = createAsyncThunk(
   async ({ id, index, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/detail-list/${id}`;
-      const response = await accountManagementService.getPagination(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         index,
@@ -124,7 +122,7 @@ export const getGasDepositDetailMutations = createAsyncThunk(
   async ({ detailId, index, detailIndex, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/detail-mutation-list/${detailId}`;
-      const response = await accountManagementService.getPagination(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         index,
@@ -141,12 +139,10 @@ export const getGasDepositDetailMutations = createAsyncThunk(
 
 export const getGasDepositHistories = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORIES",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit-history/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
-          headers: { "Accept": "application/json, text/plain, */*" }
-        });
+      const url = "/v1/dbs/api/gas-deposit/request-history" + (accountId ? `/${accountId}` : "");
+      const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,
         isLoadMore,
@@ -453,18 +449,18 @@ export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
 
 export const approveOrRejectAllGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_GAS_DEPOSIT",
-  async ({ body, inactiveBody, action }, thunkAPI) => {
+  async ({ recalculateBody, expireBody, action }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/gas-deposit/approve";
-      const inactiveUrl = "/v1/dbs/api/gas-deposit/approve-inactive";
-      
+      const recalculateUrl = "/v1/dbs/api/gas-deposit/approve";
+      const expireUrl = "/v1/dbs/api/gas-deposit/approve-expire";
+
       await Promise.all([
-        body.length ? accountManagementService.activationWithRemark(url, body, {
+        recalculateBody ? accountManagementService.activationWithRemark(recalculateUrl, recalculateBody, {
           headers: {
             "Accept": "application/json"
           }
         }) : null,
-        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody, {
+        expireBody ? accountManagementService.activationWithRemark(expireUrl, expireBody, {
           headers: {
             "Accept": "application/json"
           }
@@ -872,7 +868,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailGd = true;
     },
     [getGasDeposit.fulfilled]: (state, action) => {
-      state.detail_gasDeposit = action.payload.result || {};
+      state.detail_gasDeposit = {
+        ...(action.payload.result || {}),
+        list_gasDepositDetail: state.detail_gasDeposit.list_gasDepositDetail ?? [],
+        pagination_listGdDetail: state.detail_gasDeposit.pagination_listGdDetail ?? { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: state.detail_gasDeposit.loading_listGdDetail ?? false,
+      };
       state.loading_detailGd = false;
     },
     [getGasDeposit.rejected]: (state) => {
@@ -886,7 +887,12 @@ const gasDepositSlice = createSlice({
       state.loading_detailDraftGd = true;
     },
     [getGasDepositDraft.fulfilled]: (state, action) => {
-      state.detailDraft_gasDeposit = action.payload.result || {};
+      state.detailDraft_gasDeposit = {
+        ...(action.payload.result || {}),
+        list_gasDepositDetail: state.detailDraft_gasDeposit.list_gasDepositDetail ?? [],
+        pagination_listGdDetail: state.detailDraft_gasDeposit.pagination_listGdDetail ?? { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+        loading_listGdDetail: state.detailDraft_gasDeposit.loading_listGdDetail ?? false,
+      };
       state.loading_detailDraftGd = false;
     },
     [getGasDepositDraft.rejected]: (state) => {
@@ -930,16 +936,16 @@ const gasDepositSlice = createSlice({
 
     /** Get Gas Deposit Approval Hierarchy */
     [getGdApprovalHierarchies.pending]: (state) => {
-      state.list_gdApprovalHierarchies = [];
-      state.loading_listGdApprovalOption = true;
+      state.list_gdApprovalHierarchy = [];
+      state.loading_listGdApprovalHierarchy = true;
     },
     [getGdApprovalHierarchies.fulfilled]: (state, action) => {
-      state.list_gdApprovalHierarchies = action.payload;
-      state.loading_listGdApprovalOption = false;
+      state.list_gdApprovalHierarchy = action.payload;
+      state.loading_listGdApprovalHierarchy = false;
     },
     [getGdApprovalHierarchies.rejected]: (state) => {
-      state.list_gdApprovalHierarchies = [];
-      state.loading_listGdApprovalOption = false;
+      state.list_gdApprovalHierarchy = [];
+      state.loading_listGdApprovalHierarchy = false;
     },
 
     /** Get Gas Deposit Detail Approval Hierarchy */

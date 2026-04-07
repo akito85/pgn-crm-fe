@@ -1,5 +1,5 @@
 import { toTitleCase } from "../../../../utils";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue, getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../components/StatusComponent";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 
@@ -16,6 +16,8 @@ import NxDate from "../../../../components/Nx/NxDatePicker";
  * @param {string} searchText - The current search text value.
  * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
  * @param {boolean} [includeStatus=true] - Whether to include the statusApproval and status columns.
+ * @param {boolean} [isUnderAccount=false] - Whether to define that the table is inside a stand alone module or an under account one.
+ * @param {boolean} [isFrontEnd=false] - Whether to define that the table logic is FE only.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
 const getGasDepositColumns = ({
@@ -26,6 +28,7 @@ const getGasDepositColumns = ({
   handleSearch,
   includeStatus = true,
   isUnderAccount = false,
+  isFrontEnd = false,
 }) => [
   {
     key: "no",
@@ -35,32 +38,45 @@ const getGasDepositColumns = ({
     width: 40,
     render: (_, __, index) => index + 1,
   },
-  isUnderAccount && {
+  !isUnderAccount && {
+    key: "accountNumber",
+    title: "ACCOUNT NUMBER",
+    dataIndex: "accountNumber",
+    width: 200,
+    sorter: true,
+    align: "right ",
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+      search,
+      "accountNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  !isUnderAccount && {
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
     width: 200,
     sorter: true,
-    align: "center",
-    filteredValue: [search?.accountName] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "accountName",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
-  isUnderAccount && {
+  {
     key: "earnPeriodStart",
     title: "EARN PERIOD START",
     dataIndex: "earnPeriodStart",
     width: 180,
+    sorter: true,
     align: "center",
-    filteredValue: [search?.earnPeriodStart] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "earnPeriodStart",
       searchInput,
@@ -77,9 +93,9 @@ const getGasDepositColumns = ({
     title: "EARN PERIOD END",
     dataIndex: "earnPeriodEnd",
     width: 180,
+    sorter: true,
     align: "center",
-    filteredValue: [search?.earnPeriodEnd] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "earnPeriodEnd",
       searchInput,
@@ -96,9 +112,9 @@ const getGasDepositColumns = ({
     title: "REDEEM PERIOD START",
     dataIndex: "redeemPeriodStart",
     width: 200,
+    sorter: true,
     align: "center",
-    filteredValue: [search?.redeemPeriodStart] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "redeemPeriodStart",
       searchInput,
@@ -115,9 +131,9 @@ const getGasDepositColumns = ({
     title: "REDEEM PERIOD END",
     dataIndex: "redeemPeriodEnd",
     width: 200,
+    sorter: true,
     align: "center",
-    filteredValue: [search?.redeemPeriodEnd] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "redeemPeriodEnd",
       searchInput,
@@ -136,15 +152,13 @@ const getGasDepositColumns = ({
     width: 120,
     sorter: true,
     align: "center",
-    filteredValue: [search?.currency] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "currency",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -154,15 +168,13 @@ const getGasDepositColumns = ({
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceM3] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "balanceM3",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -172,15 +184,13 @@ const getGasDepositColumns = ({
     width: 160,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceMscf] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "balanceMscf",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -190,15 +200,13 @@ const getGasDepositColumns = ({
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceMmbtu] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "balanceMmbtu",
+      "balanceAmount",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -208,15 +216,13 @@ const getGasDepositColumns = ({
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceAmount] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "balanceAmount",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -226,15 +232,13 @@ const getGasDepositColumns = ({
     width: 180,
     sorter: true,
     align: "center",
-    filteredValue: [search?.availableAmount] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "availableAmount",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -244,15 +248,13 @@ const getGasDepositColumns = ({
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.remark] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "remark",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   includeStatus && {
@@ -262,15 +264,14 @@ const getGasDepositColumns = ({
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "statusApproval",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (status) => {
       const displayText = {
@@ -296,15 +297,14 @@ const getGasDepositColumns = ({
     dataIndex: "status",
     width: 120,
     sorter: true,
-    filteredValue: [search?.status] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "status",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (status) => {
       const displayText = {

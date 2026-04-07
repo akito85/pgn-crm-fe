@@ -340,7 +340,7 @@ const GasUtilizationTableInline = ({
   };
 
   const edit = (record, field) => {
-    const dataEdit = dataTableGasUtilization[record - 1];
+    const dataEdit = dataTableGasUtilization.find(item => String(item.key) === String(record));
     setStatusAction("edit");
     setIsEdit(true)
     formTable.setFieldsValue(dataEdit);
