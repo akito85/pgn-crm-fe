@@ -25,7 +25,6 @@ const getRelationshipColumns = (
     dataIndex: "relationshipTypeName",
     width: 150,
     sorter: true,
-    filteredValue: [search?.relationshipTypeName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "relationshipTypeName",
@@ -33,7 +32,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (text) => text ? text.toUpperCase() : "-",
   },
@@ -43,7 +41,6 @@ const getRelationshipColumns = (
     dataIndex: "relationshipCategoryName",
     width: 150,
     sorter: true,
-    filteredValue: [search?.relationshipCategoryName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "relationshipCategoryName",
@@ -51,7 +48,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (text) => text ? text.toUpperCase() : "-",
   },
@@ -61,7 +57,6 @@ const getRelationshipColumns = (
     dataIndex: "subjectName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.subjectName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "subjectName",
@@ -69,7 +64,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (text, record) => record.subjectName || record.objectName || "-",
   },
@@ -79,7 +73,6 @@ const getRelationshipColumns = (
     dataIndex: "subjectNumber",
     width: 200,
     sorter: true,
-    filteredValue: [search?.subjectNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "subjectNumber",
@@ -87,7 +80,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (text, record) => record.subjectNumber || record.objectNumber || "-",
   },
@@ -97,7 +89,6 @@ const getRelationshipColumns = (
     dataIndex: "startDate",
     width: 150,
     sorter: true,
-    filteredValue: [search?.startDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -105,7 +96,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (startDate) => startDate ? moment(startDate).format(dateFormatting.date) : "-",
   },
@@ -115,7 +105,6 @@ const getRelationshipColumns = (
     dataIndex: "endDate",
     width: 150,
     sorter: true,
-    filteredValue: [search?.endDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -123,7 +112,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (endDate) => endDate ? moment(endDate).format(dateFormatting.date) : "-",
   },
@@ -133,7 +121,6 @@ const getRelationshipColumns = (
     dataIndex: "statusApproval",
     width: 180,
     sorter: true,
-    filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -141,7 +128,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
@@ -169,7 +155,6 @@ const getRelationshipColumns = (
     dataIndex: "status",
     width: 120,
     sorter: true,
-    filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
@@ -177,7 +162,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {

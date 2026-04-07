@@ -25,7 +25,6 @@ const getPaymentRelationColumns = (
     dataIndex: "accountName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.accountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -33,7 +32,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -42,7 +40,6 @@ const getPaymentRelationColumns = (
     dataIndex: "accountNumber",
     width: 200,
     sorter: true,
-    filteredValue: [search?.accountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -50,7 +47,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -60,7 +56,6 @@ const getPaymentRelationColumns = (
     width: 150,
     align: "center",
     sorter: true,
-    filteredValue: [search?.priority] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "priority",
@@ -68,7 +63,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -77,7 +71,6 @@ const getPaymentRelationColumns = (
     dataIndex: "startDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.startDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -85,7 +78,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
@@ -95,7 +87,6 @@ const getPaymentRelationColumns = (
     dataIndex: "endDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.endDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -103,7 +94,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
@@ -114,7 +104,6 @@ const getPaymentRelationColumns = (
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -122,7 +111,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
@@ -148,7 +136,6 @@ const getPaymentRelationColumns = (
     dataIndex: "status",
     width: 120,
     sorter: true,
-    filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
@@ -156,7 +143,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {

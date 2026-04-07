@@ -24,7 +24,6 @@ const getInvoiceRelationColumns = (
     dataIndex: "accountName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.accountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -32,7 +31,6 @@ const getInvoiceRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -41,7 +39,6 @@ const getInvoiceRelationColumns = (
     dataIndex: "accountNumber",
     width: 200,
     sorter: true,
-    filteredValue: [search?.accountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -49,7 +46,6 @@ const getInvoiceRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -58,7 +54,6 @@ const getInvoiceRelationColumns = (
     dataIndex: "startDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.startDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -66,7 +61,6 @@ const getInvoiceRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
@@ -76,7 +70,6 @@ const getInvoiceRelationColumns = (
     dataIndex: "endDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.endDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -84,7 +77,6 @@ const getInvoiceRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
@@ -95,7 +87,6 @@ const getInvoiceRelationColumns = (
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -103,7 +94,6 @@ const getInvoiceRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
@@ -129,7 +119,6 @@ const getInvoiceRelationColumns = (
     dataIndex: "status",
     width: 120,
     sorter: true,
-    filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -137,7 +126,6 @@ const getInvoiceRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
