@@ -205,7 +205,7 @@ const EFakturCodeForm = ({ type }) => {
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getApprovalHierarchyDetail(selectedHierarchy));
+      dispatch(getApprovalHierarchyDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
