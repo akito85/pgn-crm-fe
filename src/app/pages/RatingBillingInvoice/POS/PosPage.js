@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Alert, Spin, Tooltip, Dropdown } from "antd";
+import { Spin, Tooltip, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
-import { WarningOutlined, MoreOutlined } from "@ant-design/icons";
+import { MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -27,9 +27,9 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
-  ModalConfirm,
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
+import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
@@ -290,6 +290,7 @@ const PosPage = () => {
       .unwrap()
       .then(() => {
         setModalDelete(false);
+        setDataDelete(undefined);
         dispatch(
           getListPointOfSales({
             page: 0,
@@ -320,6 +321,11 @@ const PosPage = () => {
     deletePos(bodyError?.value);
     setModalError(false);
     setBodyError({});
+  };
+
+  const handleCloseDeleteModal = () => {
+    setModalDelete(false);
+    setDataDelete(undefined);
   };
 
   const handleApprovalHistory = (r) => {
@@ -650,24 +656,17 @@ const PosPage = () => {
         />
 
         {/* Modal Delete */}
-        <ModalConfirm
+        <ModalApproveOrReject
           isOpen={modalDelete}
-          handleCancel={() => setModalDelete(false)}
-          handleOk={() => deletePos(dataDelete)}
-          width={500}
-          useOk={true}
-        >
-          <div className="flex justify-center gap-[20px] mt-6">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
-            </p>
-          </div>
-          <Alert
-            message="Warning! if you delete this data, it will be permanently."
-            type={"error"}
-          />
-        </ModalConfirm>
+          handleCloseModal={handleCloseDeleteModal}
+          onFinish={() => deletePos(dataDelete)}
+          header={"Delete Point Of Sales"}
+          approveOrReject={"delete"}
+          menu={"Point Of Sales"}
+          named={dataDelete?.posNumber || "-"}
+          customMessage={"Warning! if you delete this data, it will be permanently."}
+          width={700}
+        />
 
         {/* Modal Customer Type */}
         <ModalCustomerType

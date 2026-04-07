@@ -74,7 +74,7 @@ const EMeteraiManagement = () => {
 
   // Fixed column settings
   const [fixedColumns, setFixedColumns] = useState({
-    left: ["invoiceNumber"],
+    left: ["no"],
     right: ["actions"],
   });
 
