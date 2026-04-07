@@ -101,6 +101,66 @@ export const createAccountInformation = createAsyncThunk(
   }
 );
 
+export const updateBankAccountInfo = createAsyncThunk(
+  "UPDATE_BANK_ACCOUNT_INFO",
+  async ({ id, data }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank-accounts/${id}`;
+      const res = await receiptCollectionHttpService.updateData(url, data);
+      return res.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const updateBankAccountNomenklatur = createAsyncThunk(
+  "UPDATE_BANK_ACCOUNT_NOMENKLATUR",
+  async ({ id, data }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank-accounts/${id}/nomenklatur`;
+      const res = await receiptCollectionHttpService.updateData(url, data);
+      return res.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const updateBankAccountGLAccounts = createAsyncThunk(
+  "UPDATE_BANK_ACCOUNT_GL",
+  async ({ id, data }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank-accounts/${id}/gl-accounts`;
+      const res = await receiptCollectionHttpService.createData(url, data);
+      return res.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const updateBankAccountCriteria = createAsyncThunk(
+  "UPDATE_BANK_ACCOUNT_CRITERIA",
+  async ({ id, data }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank-accounts/${id}/criteria`;
+      const res = await receiptCollectionHttpService.createData(url, data);
+      return res.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 export const getAccountInformationPaging = createAsyncThunk(
   "GET_ALL_ACCOUNT_INFORMATION",
   async ({ id, search, page, pageSize, sort }, thunkAPI) => {

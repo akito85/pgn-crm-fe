@@ -28,6 +28,10 @@ import {
   getNomenklatur2Options,
   getTypeList,
   getVACategoryOptions,
+  updateBankAccountInfo,
+  updateBankAccountNomenklatur,
+  updateBankAccountGLAccounts,
+  updateBankAccountCriteria,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
@@ -54,7 +58,11 @@ const AccountInformation = ({ type, bankId }) => {
     loading,
     data_modal,
     message,
-    data_list_gl
+    data_list_gl,
+    dataGLAccount,
+    dataGLType,
+    data_va_category,
+    data_billing_item,
   } = useSelector((state) => state.bank);
 
   const dispatch = useDispatch();
@@ -153,6 +161,28 @@ console.log(data_list_gl, ' data list gl');
   const [listDataGLAccountInfo, setListDataGLAccountInfo] = useState([]);
   const [listDataCategoryInfo, setListDataCategoryInfo] = useState([]);
 
+  // dirty flags — track which groups have been modified by the user
+  const [bankInfoDirty, setBankInfoDirty] = useState(false);
+  const [glDirty, setGlDirty] = useState(false);
+  const [categoryDirty, setCategoryDirty] = useState(false);
+  const [criteriaDirty, setCriteriaDirty] = useState(false);
+  // payload cache used between confirm-modal open and actual submission
+  const [updatePayloads, setUpdatePayloads] = useState({});
+
+  // wrappers that mark a group dirty when the user makes changes
+  const handleUpdateGL = (newData) => {
+    setListDataGLAccountInfo(newData);
+    if (type === "update") setGlDirty(true);
+  };
+  const handleUpdateCategory = (newData) => {
+    setListDataCategoryInfo(newData);
+    if (type === "update") setCategoryDirty(true);
+  };
+  const handleUpdateCriteria = (newData) => {
+    setListDataCriteria(newData);
+    if (type === "update") setCriteriaDirty(true);
+  };
+
   const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
   // const [disabled, setdisabled] = useState((disabled = true));
 
@@ -193,7 +223,9 @@ console.log(data_list_gl, ' data list gl');
           };
         }
       );
-      const mappingCriteria = criteriaSelect?.map((a) => Number(a.id));
+      const mappingCriteria = (criteriaSelect ?? [])
+        .map((a) => Number(a.id))
+        .filter((n) => n && !isNaN(n));
       const dataCriteriaList = (
         data_modal?.accountBankDto?.criteriaDataDtoList || []
       )
@@ -281,37 +313,55 @@ console.log(data_list_gl, ' data list gl');
       setCriteriaValues(mappingCriteria);
 
       // hydrate GL Account Information table
+      const glTypeOpts = (dataGLType || []).map((t) => ({ value: t.id, label: t.name }));
+      const glAccountOpts = (dataGLAccount || []).map((a) => ({
+        value: a.id,
+        label: a.accountNumber ?? a.name ?? "",
+        description: a.description ?? a.accountDescription ?? "",
+      }));
       const dataGLList = (
         data_modal?.accountBankDto?.glAccountDataDtoList || []
-      ).map((item, index) => ({
-        id: item.id,
-        key: index + 1,
-        type: item.typeId ? { value: item.typeId } : null,
-        glAccountNumber: item.glAccountId ? { value: item.glAccountId } : null,
-        glAccountDescription: null,
-        description: item.description || "",
-        flag: 2,
-      }));
+      ).map((item, index) => {
+        const typeLabel = glTypeOpts.find((o) => String(o.value) === String(item.typeId))?.label ?? null;
+        const glAcc = glAccountOpts.find((o) => String(o.value) === String(item.glAccountId));
+        return {
+          id: item.id,
+          key: index + 1,
+          type: item.typeId ? { value: item.typeId, label: typeLabel } : null,
+          glAccountNumber: item.glAccountId ? { value: item.glAccountId, label: glAcc?.label ?? null } : null,
+          glAccountDescription: glAcc?.description ?? "",
+          description: item.description || "",
+          flag: 2,
+        };
+      });
       setListDataGLAccountInfo(dataGLList);
 
       // hydrate Category Information table
+      const vaCatOpts = (data_va_category || []).map((c) => ({ value: c.id ?? c.Id, label: c.name ?? c.text ?? "" }));
+      const billingOpts = (data_billing_item || []).map((b) => ({ value: b.id ?? b.Id, label: b.name ?? b.text ?? "" }));
       const dataCategoryList = (
         data_modal?.accountBankDto?.categoryDataDtoList || []
-      ).map((item, index) => ({
-        id: item.id,
-        key: index + 1,
-        category: item.categoryId ? { value: item.categoryId } : null,
-        totalDigit: item.totalDigit ? String(item.totalDigit) : "",
-        staticCode: item.staticCode || "",
-        nomenklatur1: item.nomenklatur1 ? { value: item.nomenklatur1, label: item.nomenklatur1 } : null,
-        nomenklatur2: item.nomenklatur2 ? { value: item.nomenklatur2, label: item.nomenklatur2 } : null,
-        display: item.display ? { value: item.display, label: item.display } : null,
-        billingItem: (item.billingItemIds || []).map((bid) => ({ value: bid })),
-        flag: 2,
-      }));
+      ).map((item, index) => {
+        const catLabel = vaCatOpts.find((o) => String(o.value) === String(item.categoryId))?.label ?? null;
+        return {
+          id: item.id,
+          key: index + 1,
+          category: item.categoryId ? { value: item.categoryId, label: catLabel } : null,
+          totalDigit: item.totalDigit ? String(item.totalDigit) : "",
+          staticCode: item.staticCode || "",
+          nomenklatur1: item.nomenklatur1 ? { value: item.nomenklatur1, label: item.nomenklatur1 } : null,
+          nomenklatur2: item.nomenklatur2 ? { value: item.nomenklatur2, label: item.nomenklatur2 } : null,
+          display: item.display ? { value: item.display, label: item.display } : null,
+          billingItem: (item.billingItemIds || []).map((bid) => {
+            const billingLabel = billingOpts.find((o) => String(o.value) === String(bid))?.label ?? String(bid);
+            return { value: bid, label: billingLabel };
+          }),
+          flag: 2,
+        };
+      });
       setListDataCategoryInfo(dataCategoryList);
     }
-  }, [id, data_modal, form, isVA, type]);
+  }, [id, data_modal, form, isVA, type, dataGLAccount, dataGLType, data_va_category, data_billing_item]);
 
   // Breadcrumbs
   const routes = (id) => {
@@ -486,6 +536,32 @@ console.log(data_list_gl, ' data list gl');
             }
             setModalConfirm(true);
           });
+      } else if (type === "update") {
+        // build per-group payloads and store them; show confirmation modal
+        const bankInfoPayload = {
+          id,
+          accountNumber: formValue?.accountNumber,
+          accountName: formValue?.accountName,
+          currencyId: formValue?.currency,
+          entityId: formValue?.entity,
+          branchName: formValue?.branch,
+          typeId: formValue?.type,
+          startDate: startDate,
+          endDate: endDate,
+          description: formValue?.description,
+          appHierId: selectedHierarchy,
+        };
+        const criteriaPayload = {
+          criteriaDtoList: (formValue?.criteria || []).map((criteriaId) => ({ criteria: criteriaId })),
+          criteriaDataDtoList: dataCriteriaObject.map((item) => ({ ...item, id: item.id || null })),
+        };
+        setUpdatePayloads({
+          bankInfo: bankInfoPayload,
+          glAccounts: dataGLObject,
+          nomenklatur: dataCategoryObject,
+          criteria: criteriaPayload,
+        });
+        setModalConfirm(true);
       }
     }
   };
@@ -514,13 +590,39 @@ console.log(data_list_gl, ' data list gl');
     });
   };
 
-  const handleProcessModalConfirm = () => {
+  const handleProcessModalConfirm = async () => {
     setModalConfirm(false);
-    const successMessageCreate = {
+    const successMessage = {
       title: "Successfull",
       description: `Your data has been submitted`,
       return: true,
     };
+
+    if (type === "update") {
+      try {
+        const calls = [];
+        if (bankInfoDirty) calls.push(dispatch(updateBankAccountInfo({ id, data: updatePayloads.bankInfo })).unwrap());
+        if (glDirty) calls.push(dispatch(updateBankAccountGLAccounts({ id, data: updatePayloads.glAccounts })).unwrap());
+        if (categoryDirty) calls.push(dispatch(updateBankAccountNomenklatur({ id, data: updatePayloads.nomenklatur })).unwrap());
+        if (criteriaDirty) calls.push(dispatch(updateBankAccountCriteria({ id, data: updatePayloads.criteria })).unwrap());
+        if (calls.length === 0) {
+          dispatch(showModalError({ title: "No Changes", description: "No changes detected to save." }));
+          return;
+        }
+        await Promise.all(calls);
+        dispatch(showModalSuccess(successMessage));
+        // reset dirty flags
+        setBankInfoDirty(false);
+        setGlDirty(false);
+        setCategoryDirty(false);
+        setCriteriaDirty(false);
+      } catch (error) {
+        // errors are already shown by individual thunks
+      }
+      return;
+    }
+
+    // create flow
     let temp = { ...kirimBody };
     if ((temp.criteriaIdList || []).includes(24)) {
       temp = {
@@ -550,7 +652,7 @@ console.log(data_list_gl, ' data list gl');
         setId(id);
         handleCancelModalConfirm();
         handleClear();
-        dispatch(showModalSuccess(successMessageCreate));
+        dispatch(showModalSuccess(successMessage));
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -576,8 +678,9 @@ console.log(data_list_gl, ' data list gl');
       outputArray = outputArray.includes(24) ? [24] : outputArray;
       setCriteriaValues(outputArray);
       form.setFieldsValue({ criteria: outputArray });
+      if (type === "update") setCriteriaDirty(true);
     },
-    [criteriaValues, form, setCriteriaValues]
+    [criteriaValues, form, setCriteriaValues, type]
   );
 
   const handleDeselectCriteria = useCallback(
@@ -591,8 +694,9 @@ console.log(data_list_gl, ' data list gl');
       outputArray = outputArray.includes(24) ? [24] : outputArray;
       setCriteriaValues(outputArray);
       form.setFieldsValue({ criteria: outputArray });
+      if (type === "update") setCriteriaDirty(true);
     },
-    [criteriaValues, form, setCriteriaValues]
+    [criteriaValues, form, setCriteriaValues, type]
   );
 
   const handleClearCriteria = () => {
@@ -613,6 +717,7 @@ console.log(data_list_gl, ' data list gl');
           form={form}
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
+          onValuesChange={() => { if (type === "update") setBankInfoDirty(true); }}
         >
           <div className={`${valuePage !== "Account" ? "hidden" : ""}`}>
             <AccountForm
@@ -634,14 +739,14 @@ console.log(data_list_gl, ' data list gl');
               setValueOrUnlimited={setValueOrUnlimited}
               valueOrUnlimited={valueOrUnlimited}
               listDataCriteria={listDataCriteria}
-              setListDataCriteria={setListDataCriteria}
+              setListDataCriteria={type === "update" ? handleUpdateCriteria : setListDataCriteria}
               formValue={formValue}
               storedData={storedData}
               setStoredData={setStoredData}
               listDataGLAccountInfo={listDataGLAccountInfo}
-              setListDataGLAccountInfo={setListDataGLAccountInfo}
+              setListDataGLAccountInfo={type === "update" ? handleUpdateGL : setListDataGLAccountInfo}
               listDataCategoryInfo={listDataCategoryInfo}
-              setListDataCategoryInfo={setListDataCategoryInfo}
+              setListDataCategoryInfo={type === "update" ? handleUpdateCategory : setListDataCategoryInfo}
             />
             {/* <ContactListCreate
             /> */}
