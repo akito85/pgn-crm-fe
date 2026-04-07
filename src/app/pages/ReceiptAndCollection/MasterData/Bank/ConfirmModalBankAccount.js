@@ -1,12 +1,17 @@
 import moment from "moment";
 import { Fragment, useState } from "react";
+import { Collapse } from "antd";
 import DetailText from "../../../../../components/DetailText";
 import RadioTabs from "../../../../../components/RadioTabs";
 import { dateFormatting } from "../../../../../utils";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
+import FunctionalTableGLAccountInformation from "./Table/FunctionalTableGLAccountInformation";
+import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
 import { useSelector } from "react-redux";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+
+const { Panel } = Collapse;
 
 const ConfirmModalBankAccount = ({
   data,
@@ -26,11 +31,13 @@ const ConfirmModalBankAccount = ({
   data_entity,
   data_currency,
   selectedHierarchy,
+  listDataGLAccountInfo = [],
+  listDataCategoryInfo = [],
 }) => {
   const [valuePage, setValuePage] = useState(tabData[0].value);
   // find data criteria
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    data?.criteria?.includes(obj?.Id)
+    data?.criteria?.includes(obj?.id)
   );
   const matchedNamesCriteria = matchedObjectsCriteria
     ?.map((obj) => obj.text)
@@ -138,16 +145,51 @@ const ConfirmModalBankAccount = ({
         {showSection()}
       </div>
       {valuePage === tabData[0].value ? (
-        <div className="flex flex-col gap-4">
-          <div className="text-primary text-xs font-bold uppercase">
-            {"Criteria Information"}
-          </div>
-          <FunctionalTableCriteriaPayment
-            type={"detail"}
-            data={listDataCriteria}
-            dataCriteria={criteriaValues}
-          />
-        </div>
+        <Collapse
+          defaultActiveKey={["gl", "category", "criteria"]}
+          className="flex flex-col gap-2"
+        >
+          <Panel
+            key="category"
+            header={
+              <span className="text-primary text-xs font-bold uppercase">
+                Category Information
+              </span>
+            }
+          >
+            <FunctionalTableCategoryInformation
+              type="detail"
+              data={listDataCategoryInfo}
+            />
+          </Panel>
+          <Panel
+            key="gl"
+            header={
+              <span className="text-primary text-xs font-bold uppercase">
+                GL Account Information
+              </span>
+            }
+          >
+            <FunctionalTableGLAccountInformation
+              type="detail"
+              data={listDataGLAccountInfo}
+            />
+          </Panel>
+          <Panel
+            key="criteria"
+            header={
+              <span className="text-primary text-xs font-bold uppercase">
+                Criteria Information
+              </span>
+            }
+          >
+            <FunctionalTableCriteriaPayment
+              type={"detail"}
+              data={listDataCriteria}
+              dataCriteria={criteriaValues}
+            />
+          </Panel>
+        </Collapse>
       ) : null}
     </div>
   );

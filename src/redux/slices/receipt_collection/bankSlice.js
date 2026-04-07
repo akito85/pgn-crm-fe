@@ -61,7 +61,17 @@ const initialState = {
   dataGLAccount: [],
   dataGLType: [],
   data_contactAddress: [],
+  // Category Information
+  data_va_category: [],
+  data_nomenklatur1: [],
+  data_nomenklatur2: [],
+  data_display: [],
+  data_billing_item: [],
+  // VA Account / VA Transaction sub-tabs
+  dataVAAccount: [],
+  dataVATransaction: [],
   // ------------------------------------------
+  dataCriteriaView: [],
 };
 
 export const createAccountInformation = createAsyncThunk(
@@ -153,6 +163,102 @@ export const getAccountVApagging = createAsyncThunk(
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/bank/account/va/get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getVAAccountList = createAsyncThunk(
+  "GET_VA_ACCOUNT_LIST",
+  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "activationDate~desc" : sort;
+      const url = `/v1/dbs/api/bank/va-account/get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getVATransactionList = createAsyncThunk(
+  "GET_VA_TRANSACTION_LIST",
+  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "activationDate~desc" : sort;
+      const url = `/v1/dbs/api/bank/va-transaction/get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const approveVaActivation = createAsyncThunk(
+  "APPROVE_VA_ACTIVATION",
+  async ({ bankId, vaNumbers, attachments }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/virtual-accounts/${bankId}/approve`;
+      const response = await receiptCollectionHttpService.createData(url, {
+        vaNumbers,
+        attachments,
+      });
+      thunkAPI.dispatch(
+        showModalSuccess({
+          title: "Success",
+          description: "VA Account activation approved successfully.",
+        })
+      );
       return response.data;
     } catch (error) {
       const message =
@@ -1515,7 +1621,103 @@ export const getContactAddress = createAsyncThunk(
     }
   }
 );
-// ----------------------------------------------------------------------------
+// --- CATEGORY INFORMATION THUNKS ---
+export const getVACategoryOptions = createAsyncThunk(
+  "GET_VA_CATEGORY_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/va-category/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_VA_CATEGORY_OPTIONS", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getNomenklatur1Options = createAsyncThunk(
+  "GET_NOMENKLATUR1_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/nomenklatur1/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_NOMENKLATUR1_OPTIONS", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getNomenklatur2Options = createAsyncThunk(
+  "GET_NOMENKLATUR2_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/nomenklatur2/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_NOMENKLATUR2_OPTIONS", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getDisplayOptions = createAsyncThunk(
+  "GET_DISPLAY_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/display/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_DISPLAY_OPTIONS", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getBillingItemOptions = createAsyncThunk(
+  "GET_BILLING_ITEM_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/bank/billing-item/get";
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_BILLING_ITEM_OPTIONS", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+// ------------------------------------
+
+export const getAccountCriteriaView = createAsyncThunk(
+  "GET_ACCOUNT_CRITERIA_VIEW",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank/account-criteria-view/get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_ACCOUNT_CRITERIA_VIEW", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
 
 const bankSlice = createSlice({
   name: "bank",
@@ -2233,6 +2435,72 @@ const bankSlice = createSlice({
       state.loading = false;
       state.data_contactAddress = [];
     },
+    // Category Information
+    [getVACategoryOptions.pending]: (state) => { state.loading = true; },
+    [getVACategoryOptions.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_va_category = action.payload ?? [];
+    },
+    [getVACategoryOptions.rejected]: (state) => { state.loading = false; },
+
+    [getNomenklatur1Options.pending]: (state) => { state.loading = true; },
+    [getNomenklatur1Options.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_nomenklatur1 = action.payload ?? [];
+    },
+    [getNomenklatur1Options.rejected]: (state) => { state.loading = false; },
+
+    [getNomenklatur2Options.pending]: (state) => { state.loading = true; },
+    [getNomenklatur2Options.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_nomenklatur2 = action.payload ?? [];
+    },
+    [getNomenklatur2Options.rejected]: (state) => { state.loading = false; },
+
+    [getDisplayOptions.pending]: (state) => { state.loading = true; },
+    [getDisplayOptions.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_display = action.payload ?? [];
+    },
+    [getDisplayOptions.rejected]: (state) => { state.loading = false; },
+
+    [getBillingItemOptions.pending]: (state) => { state.loading = true; },
+    [getBillingItemOptions.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_billing_item = action.payload ?? [];
+    },
+    [getBillingItemOptions.rejected]: (state) => { state.loading = false; },
+
+    [getAccountCriteriaView.pending]: (state) => { state.loading = true; },
+    [getAccountCriteriaView.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataCriteriaView = action.payload ?? [];
+    },
+    [getAccountCriteriaView.rejected]: (state) => {
+      state.loading = false;
+      state.dataCriteriaView = [];
+    },
+
+    // VA Account sub-tab
+    [getVAAccountList.pending]: (state) => { state.loading = true; },
+    [getVAAccountList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataVAAccount = action.payload;
+    },
+    [getVAAccountList.rejected]: (state) => { state.loading = false; },
+
+    // VA Transaction sub-tab
+    [getVATransactionList.pending]: (state) => { state.loading = true; },
+    [getVATransactionList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataVATransaction = action.payload;
+    },
+    [getVATransactionList.rejected]: (state) => { state.loading = false; },
+
+    // Approve VA Activation
+    [approveVaActivation.pending]: (state) => { state.loading = true; },
+    [approveVaActivation.fulfilled]: (state) => { state.loading = false; },
+    [approveVaActivation.rejected]: (state) => { state.loading = false; },
     // ----------------------------------------
   },
 });

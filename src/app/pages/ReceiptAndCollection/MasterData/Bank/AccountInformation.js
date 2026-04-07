@@ -1,6 +1,6 @@
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -13,14 +13,21 @@ import {
   createAccountInformation,
   createValidasiBankAccount,
   getAllApprovalList,
+  getAllGLAccount,
+  getAllGLType,
+  getBillingItemOptions,
   getDetailAccountInformation,
+  getDisplayOptions,
   getGLAccount,
   getListApprovalById,
   getListCategory,
   getListCriteria,
   getListCurrency,
   getListEntity,
+  getNomenklatur1Options,
+  getNomenklatur2Options,
   getTypeList,
+  getVACategoryOptions,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
@@ -78,6 +85,13 @@ console.log(data_list_gl, ' data list gl');
     dispatch(getTypeList());
     dispatch(getListCriteria());
     dispatch(getGLAccount());
+    dispatch(getAllGLAccount());
+    dispatch(getAllGLType());
+    dispatch(getVACategoryOptions());
+    dispatch(getNomenklatur1Options());
+    dispatch(getNomenklatur2Options());
+    dispatch(getDisplayOptions());
+    dispatch(getBillingItemOptions());
   }, [dispatch]);
   // approval
 
@@ -136,6 +150,8 @@ console.log(data_list_gl, ' data list gl');
   const [data, setData] = useState([]);
   const [valueOrUnlimited, setValueOrUnlimited] = useState(false);
   const [listDataCriteria, setListDataCriteria] = useState([]);
+  const [listDataGLAccountInfo, setListDataGLAccountInfo] = useState([]);
+  const [listDataCategoryInfo, setListDataCategoryInfo] = useState([]);
 
   const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
   // const [disabled, setdisabled] = useState((disabled = true));
@@ -177,7 +193,7 @@ console.log(data_list_gl, ' data list gl');
           };
         }
       );
-      const mappingCriteria = criteriaSelect?.map((a) => a.id);
+      const mappingCriteria = criteriaSelect?.map((a) => Number(a.id));
       const dataCriteriaList = (
         data_modal?.accountBankDto?.criteriaDataDtoList || []
       )
@@ -263,6 +279,37 @@ console.log(data_list_gl, ' data list gl');
       setListDataAttachment(dataAttachment);
       setListDataCriteria(dataCriteriaList);
       setCriteriaValues(mappingCriteria);
+
+      // hydrate GL Account Information table
+      const dataGLList = (
+        data_modal?.accountBankDto?.glAccountDataDtoList || []
+      ).map((item, index) => ({
+        id: item.id,
+        key: index + 1,
+        type: item.typeId ? { value: item.typeId } : null,
+        glAccountNumber: item.glAccountId ? { value: item.glAccountId } : null,
+        glAccountDescription: null,
+        description: item.description || "",
+        flag: 2,
+      }));
+      setListDataGLAccountInfo(dataGLList);
+
+      // hydrate Category Information table
+      const dataCategoryList = (
+        data_modal?.accountBankDto?.categoryDataDtoList || []
+      ).map((item, index) => ({
+        id: item.id,
+        key: index + 1,
+        category: item.categoryId ? { value: item.categoryId } : null,
+        totalDigit: item.totalDigit ? String(item.totalDigit) : "",
+        staticCode: item.staticCode || "",
+        nomenklatur1: item.nomenklatur1 ? { value: item.nomenklatur1, label: item.nomenklatur1 } : null,
+        nomenklatur2: item.nomenklatur2 ? { value: item.nomenklatur2, label: item.nomenklatur2 } : null,
+        display: item.display ? { value: item.display, label: item.display } : null,
+        billingItem: (item.billingItemIds || []).map((bid) => ({ value: bid })),
+        flag: 2,
+      }));
+      setListDataCategoryInfo(dataCategoryList);
     }
   }, [id, data_modal, form, isVA, type]);
 
@@ -362,6 +409,30 @@ console.log(data_list_gl, ' data list gl');
         };
       });
 
+      let dataGLObject = listDataGLAccountInfo.map((item) => ({
+        id: item?.id || null,
+        typeId: item.type?.value || null,
+        glAccountId: item.glAccountNumber?.value || null,
+        description: item.description || null,
+        flag: item.flag || null,
+      }));
+
+      let dataCategoryObject = listDataCategoryInfo.map((item) => ({
+        id: item?.id || null,
+        categoryId: item.category?.value || null,
+        totalDigit: item.totalDigit ? parseInt(item.totalDigit) : null,
+        staticCode: item.staticCode || null,
+        nomenklatur1: item.nomenklatur1?.label || null,
+        nomenklatur2: item.nomenklatur2?.label || null,
+        display: item.display?.label || null,
+        billingItemIds: Array.isArray(item.billingItem)
+          ? item.billingItem.map((b) => b?.value || b).filter(Boolean)
+          : item.billingItem?.value
+          ? [item.billingItem.value]
+          : [],
+        flag: item.flag || null,
+      }));
+
       const startDate = moment(formValue?.startDate).format("DD MMM YYYY");
       const endDate = formValue?.endDate
         ? moment(formValue?.endDate).format("DD MMM YYYY")
@@ -382,6 +453,8 @@ console.log(data_list_gl, ' data list gl');
         isVa: isVA,
         staticCode: formValue?.staticCode || null,
         appHierId: selectedHierarchy,
+        glAccountDataDtoList: dataGLObject,
+        categoryDataDtoList: dataCategoryObject,
         criteriaIdList: formValue?.criteria,
         criteriaDataDtoList: dataCriteriaObject,
       };
@@ -492,6 +565,40 @@ console.log(data_list_gl, ' data list gl');
       });
   };
 
+  const handleSelectCriteria = useCallback(
+    (value) => {
+      let res = [...criteriaValues, value];
+      if (res.includes(13)) res.push(14);
+      if (res.includes(14)) res.push(39);
+      if (res.includes(39)) res.push(15);
+      if (res.includes(20)) res.push(19);
+      let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+      outputArray = outputArray.includes(24) ? [24] : outputArray;
+      setCriteriaValues(outputArray);
+      form.setFieldsValue({ criteria: outputArray });
+    },
+    [criteriaValues, form, setCriteriaValues]
+  );
+
+  const handleDeselectCriteria = useCallback(
+    (value) => {
+      let res = criteriaValues.filter((item) => item !== value);
+      if (!res.includes(15)) res = res.filter((item) => item !== 39);
+      if (!res.includes(39)) res = res.filter((item) => item !== 14);
+      if (!res.includes(14)) res = res.filter((item) => item !== 13);
+      if (!res.includes(19)) res = res.filter((item) => item !== 20);
+      let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+      outputArray = outputArray.includes(24) ? [24] : outputArray;
+      setCriteriaValues(outputArray);
+      form.setFieldsValue({ criteria: outputArray });
+    },
+    [criteriaValues, form, setCriteriaValues]
+  );
+
+  const handleClearCriteria = () => {
+    setCriteriaValues([]);
+  };
+
   return (
     <LayoutMenu>
       <BreadCrumbAdvanced routes={routes(id)} />
@@ -518,6 +625,9 @@ console.log(data_list_gl, ' data list gl');
               form={form}
               criteriaValues={criteriaValues}
               setCriteriaValues={setCriteriaValues}
+              handleSelectCriteria={handleSelectCriteria}
+              handleDeselectCriteria={handleDeselectCriteria}
+              handleClearCriteria={handleClearCriteria}
               type={"create"}
               setData={setData}
               data={data}
@@ -528,6 +638,10 @@ console.log(data_list_gl, ' data list gl');
               formValue={formValue}
               storedData={storedData}
               setStoredData={setStoredData}
+              listDataGLAccountInfo={listDataGLAccountInfo}
+              setListDataGLAccountInfo={setListDataGLAccountInfo}
+              listDataCategoryInfo={listDataCategoryInfo}
+              setListDataCategoryInfo={setListDataCategoryInfo}
             />
             {/* <ContactListCreate
             /> */}
@@ -639,6 +753,8 @@ console.log(data_list_gl, ' data list gl');
             data_currency={dataCurrency}
             selectedHierarchy={selectedHierarchy}
             listDataAppHierDetail={appHierDataDetail}
+            listDataGLAccountInfo={listDataGLAccountInfo}
+            listDataCategoryInfo={listDataCategoryInfo}
           />
         </ModalCustom>
 

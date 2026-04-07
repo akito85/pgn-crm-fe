@@ -1,4 +1,4 @@
-import { MoreOutlined } from "@ant-design/icons";
+import { DownOutlined, MoreOutlined, UpOutlined } from "@ant-design/icons";
 import { Checkbox, Popover, Space, Spin, Tooltip } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
@@ -22,12 +22,17 @@ import {
   getListApprovalById,
   getAllApprovalList,
   inactiveBankAccount,
+  getAccountCriteriaView,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../components/Card/CardComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
-import TableVA from "./TableVA";
+import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
+import FunctionalTableGLAccountInformation from "./Table/FunctionalTableGLAccountInformation";
+import FunctionalTableVAAccount from "./Table/FunctionalTableVAAccount";
+import FunctionalTableVATransaction from "./Table/FunctionalTableVATransaction";
+import CriteriaViewTable from "./Table/CriteriaViewTable";
+import RadioTabs from "../../../../../components/RadioTabs";
 import { intToNPWP } from "../../../../../utils/npwp";
 import {
   getColumnSearchProps,
@@ -60,7 +65,14 @@ const DetailBank = ({
     dataAccountInfoPaging,
     loading,
     dataApprovalHistoryBankAccount,
-    dataGLType // Tarik dataGLType dari redux untuk mapping nama GL
+    dataGLType,
+    dataGLAccount,
+    data_va_category,
+    data_nomenklatur1,
+    data_nomenklatur2,
+    data_display,
+    data_billing_item,
+    dataCriteriaView,
   } = useSelector((state) => state.bank);
   
   const dispatch = useDispatch();
@@ -96,6 +108,13 @@ const DetailBank = ({
   const [bankAccountName, setBankAccountName] = useState();
   const [idBankAccount, setIdBankAccount] = useState();
   const [statusBank, setStatusBank] = useState();
+
+  const [listDataCategoryInfoModal, setListDataCategoryInfoModal] = useState([]);
+  const [listDataGLAccountInfoModal, setListDataGLAccountInfoModal] = useState([]);
+  const [modalCategoryCollapsed, setModalCategoryCollapsed] = useState(false);
+  const [categoryInfoTab, setCategoryInfoTab] = useState("VA Account");
+  const [modalGLAccountCollapsed, setModalGLAccountCollapsed] = useState(false);
+  const [modalCriteriaCollapsed, setModalCriteriaCollapsed] = useState(false);
 
   useEffect(() => {
     if (id && data_modal?.accountBankDto?.id) {
@@ -137,8 +156,57 @@ const DetailBank = ({
       });
       setListDataCriteria(dataCriteriaList);
       setCriteriaValues(mappingCriteria);
+
+      const glTypeOpts = (dataGLType || []).map((t) => ({ value: t.id, label: t.name }));
+      const glAccountOpts = (dataGLAccount || []).map((a) => ({
+        value: a.id,
+        label: a.accountNumber ?? a.name ?? "",
+        description: a.description ?? a.accountDescription ?? "",
+      }));
+
+      const dataGLList = (
+        data_modal?.accountBankDto?.glAccountDataDtoList || []
+      ).map((item, index) => {
+        const typeLabel = glTypeOpts.find((o) => String(o.value) === String(item.typeId))?.label ?? null;
+        const glAcc = glAccountOpts.find((o) => String(o.value) === String(item.glAccountId));
+        return {
+          id: item.id,
+          key: index + 1,
+          type: item.typeId ? { value: item.typeId, label: typeLabel } : null,
+          glAccountNumber: item.glAccountId ? { value: item.glAccountId, label: glAcc?.label ?? null } : null,
+          glAccountDescription: glAcc?.description ?? "",
+          description: item.description || "",
+        };
+      });
+      setListDataGLAccountInfoModal(dataGLList);
+
+      const vaCatOpts = (data_va_category || []).map((c) => ({ value: c.id ?? c.Id, label: c.name ?? c.text ?? "" }));
+
+      const billingOpts = (data_billing_item || []).map((b) => ({ value: b.id ?? b.Id, label: b.name ?? b.text ?? "" }));
+
+      const dataCategoryList = (
+        data_modal?.accountBankDto?.categoryDataDtoList || []
+      ).map((item, index) => {
+        const catLabel = vaCatOpts.find((o) => String(o.value) === String(item.categoryId))?.label ?? null;
+
+        return {
+          id: item.id,
+          key: index + 1,
+          category: item.categoryId ? { value: item.categoryId, label: catLabel } : null,
+          totalDigit: item.totalDigit ? String(item.totalDigit) : "",
+          staticCode: item.staticCode || "",
+          nomenklatur1: item.nomenklatur1 ? { value: item.nomenklatur1, label: item.nomenklatur1 } : null,
+          nomenklatur2: item.nomenklatur2 ? { value: item.nomenklatur2, label: item.nomenklatur2 } : null,
+          display: item.display ? { value: item.display, label: item.display } : null,
+          details: (item.billingItemIds || []).map((bid, bidIndex) => {
+            const billingLabel = billingOpts.find((o) => String(o.value) === String(bid))?.label ?? String(bid);
+            return { key: bidIndex + 1, billingItem: { value: bid, label: billingLabel } };
+          }),
+        };
+      });
+      setListDataCategoryInfoModal(dataCategoryList);
     }
-  }, [id, data_modal]);
+  }, [id, data_modal, dataGLType, dataGLAccount, data_va_category, data_nomenklatur1, data_nomenklatur2, data_display, data_billing_item]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -267,7 +335,12 @@ const DetailBank = ({
   const handleDetailAccount = (record) => {
     setOpenModal(true);
     setIdVA(record);
+    setModalCategoryCollapsed(false);
+    setModalGLAccountCollapsed(false);
+    setModalCriteriaCollapsed(false);
+    setCategoryInfoTab("VA Account");
     dispatch(getDetailAccountInformation(record));
+    dispatch(getAccountCriteriaView(record));
   };
 
   const columnContact = (
@@ -487,7 +560,7 @@ const DetailBank = ({
         (pageBank - 1) * pageSizeBank + index + 1,
     },
     {
-      title: "BANK ACCOUNT NUMBER",
+      title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       sorter: true,
       align: "left",
@@ -514,7 +587,7 @@ const DetailBank = ({
         ),
     },
     {
-      title: "BANK ACCOUNT NAME",
+      title: "ACCOUNT NAME",
       dataIndex: "accountName",
       sorter: true,
       align: "left",
@@ -622,12 +695,12 @@ const DetailBank = ({
         ),
     },
     {
-      title: "TOTAL DIGIT",
-      dataIndex: "totalDigit",
+      title: "CATEGORY",
+      dataIndex: "category",
       sorter: true,
-      align: "right",
+      align: "left",
       ...getColumnSearchPropsPaging(
-        "totalDigit",
+        "category",
         searchInput,
         searchedColumn,
         searchText,
@@ -635,7 +708,7 @@ const DetailBank = ({
         true
       ),
       render: (text) =>
-        searchedColumn === "totalDigit" ? (
+        searchedColumn === "category" ? (
           <Highlighter
             highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
@@ -709,12 +782,12 @@ const DetailBank = ({
         ),
     },
     {
-      title: "FIRST STATIC CODE",
-      dataIndex: "staticCode",
+      title: "PARENT",
+      dataIndex: "parent",
       sorter: true,
-      align: "right",
+      align: "left",
       ...getColumnSearchPropsPaging(
-        "staticCode",
+        "parent",
         searchInput,
         searchedColumn,
         searchText,
@@ -722,7 +795,34 @@ const DetailBank = ({
         true
       ),
       render: (text) =>
-        searchedColumn === "staticCode" ? (
+        searchedColumn === "parent" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    {
+      title: "CRITERIA",
+      dataIndex: "criteria",
+      sorter: true,
+      align: "left",
+      ...getColumnSearchPropsPaging(
+        "criteria",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearchBank,
+        true
+      ),
+      render: (text) =>
+        searchedColumn === "criteria" ? (
           <Highlighter
             highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
@@ -759,52 +859,6 @@ const DetailBank = ({
           />
         ) : text ? (
           <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
-        ) : (
-          ""
-        ),
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      sorter: true,
-      fixed:'right',
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearchBank,
-        true
-      ),
-      render: (text) =>
-        text ? (
-          <div className="flex justify-center">
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          ""
-        ),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      key: "statusApproval",
-      sorter: true,
-      fixed: 'right',
-      ...getColumnSearchPropsPaging(
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearchBank,
-        true
-      ),
-      render: (text) =>
-        text ? (
-          <div className="flex justify-center">
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
         ) : (
           ""
         ),
@@ -916,41 +970,6 @@ const DetailBank = ({
       },
     },
   ];
-
-  const renderSection = (segmentedPage) => {
-    switch (segmentedPage) {
-      case "VA":
-        return (
-          <TableVA
-            data_detail={data_detail}
-            id={idVA}
-            dataSource={dataSource}
-          />
-        );
-      case "Criteria":
-        return (
-          <FunctionalTableCriteriaPayment
-            type={"detail"}
-            data={listDataCriteria}
-            dataCriteria={criteriaValues}
-            updateData={setListDataCriteria}
-          />
-        );
-      default:
-        return <></>;
-    }
-  };
-
-  const [tabData, setTabData] = useState([
-    { value: "VA" },
-    { value: "Criteria" },
-  ]);
-
-  const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
-
-  const handleSegmentedPage = (e) => {
-    setSegmentedPage(e.target.value);
-  };
 
   const criteriaSelect =
     data_modal?.accountBankDto?.criteriaDtoList?.map((item) => {
@@ -1110,8 +1129,7 @@ const DetailBank = ({
         </BaseContainer>
         {/* ------------------------------------------- */}
 
-        {data_detail?.statusApproval === "Approved" ? (
-          <BaseContainer header={"BANK ACCOUNT INFORMATION"}>
+        <BaseContainer header={"BANK ACCOUNT INFORMATION"}>
             <div className="w-full flex justify-end gap-5">
               <NavLink
                 to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNT_INFORMATION}
@@ -1151,7 +1169,6 @@ const DetailBank = ({
               />
             </div>
           </BaseContainer>
-        ) : null}
 
         <BaseContainer header={"CONTACT LIST"}>
           <TablePagination
@@ -1181,11 +1198,7 @@ const DetailBank = ({
           handleCancel={() => {
             setOpenModal(false);
           }}
-          header={
-            segmentedPage === "Criteria"
-              ? "ACCOUNT DETAIL"
-              : "BANK ACCOUNT DETAIL"
-          }
+          header={"BANK ACCOUNT DETAIL"}
           width={1000}
           type={"detail"}
           footer={
@@ -1310,8 +1323,86 @@ const DetailBank = ({
           </CardComponent>
 
           <div className="w-full gap-5">
-            <RadioTabs data={tabData} onChange={handleSegmentedPage} />
-            <div className="my-5">{renderSection(segmentedPage)}</div>
+            {/* Category Information */}
+            <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setModalCategoryCollapsed(!modalCategoryCollapsed)}
+              >
+                <div className="text-primary text-xs font-bold uppercase">CATEGORY INFORMATION</div>
+                <div className="text-primary">
+                  {modalCategoryCollapsed ? <DownOutlined /> : <UpOutlined />}
+                </div>
+              </div>
+              {!modalCategoryCollapsed && (
+                <div className="mt-4">
+                  <RadioTabs
+                    data={[
+                      { value: "VA Account" },
+                      { value: "VA Transaction" },
+                      { value: "Nomenklatur" },
+                    ]}
+                    onChange={(e) => setCategoryInfoTab(e.target.value)}
+                    currentPosition={categoryInfoTab}
+                  />
+                  <div className="mt-3">
+                    {categoryInfoTab === "VA Account" && (
+                      <FunctionalTableVAAccount id={id} />
+                    )}
+                    {categoryInfoTab === "VA Transaction" && (
+                      <FunctionalTableVATransaction id={id} />
+                    )}
+                    {categoryInfoTab === "Nomenklatur" && (
+                      <FunctionalTableCategoryInformation
+                        type="detail"
+                        data={listDataCategoryInfoModal}
+                        updateData={() => {}}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* GL Account Information */}
+            <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setModalGLAccountCollapsed(!modalGLAccountCollapsed)}
+              >
+                <div className="text-primary text-xs font-bold uppercase">GL ACCOUNT INFORMATION</div>
+                <div className="text-primary">
+                  {modalGLAccountCollapsed ? <DownOutlined /> : <UpOutlined />}
+                </div>
+              </div>
+              {!modalGLAccountCollapsed && (
+                <div className="mt-4">
+                  <FunctionalTableGLAccountInformation
+                    type="detail"
+                    data={listDataGLAccountInfoModal}
+                    updateData={() => {}}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Criteria Information */}
+            <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setModalCriteriaCollapsed(!modalCriteriaCollapsed)}
+              >
+                <div className="text-primary text-xs font-bold uppercase">CRITERIA INFORMATION</div>
+                <div className="text-primary">
+                  {modalCriteriaCollapsed ? <DownOutlined /> : <UpOutlined />}
+                </div>
+              </div>
+              {!modalCriteriaCollapsed && (
+                <div className="mt-4">
+                  <CriteriaViewTable data={dataCriteriaView} loading={loading} />
+                </div>
+              )}
+            </div>
           </div>
         </ModalCustom>
 

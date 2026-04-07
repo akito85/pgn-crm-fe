@@ -1,12 +1,15 @@
 import { Checkbox, Form, Input, Select } from "antd";
+import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import moment from "moment";
-import React from "react";
+import React, { useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DateComponent from "../../../../../components/DateComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 import { formMessageRequired, requiredMessage } from "../../../../../utils";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
+import FunctionalTableGLAccountInformation from "./Table/FunctionalTableGLAccountInformation";
+import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
 
 const AccountForm = ({
   listDataCriteria,
@@ -25,58 +28,17 @@ const AccountForm = ({
   form,
   storedData,
   setStoredData,
-  // handleSelectCriteria = () => {},
-  // handleDeselectCriteria = () => {},
-  // handleClearCriteria = () => {},
+  listDataGLAccountInfo,
+  setListDataGLAccountInfo,
+  listDataCategoryInfo,
+  setListDataCategoryInfo,
+  handleSelectCriteria = () => {},
+  handleDeselectCriteria = () => {},
+  handleClearCriteria = () => {},
 }) => {
-  //dependensi kriteria
-  const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(13)) {
-      res.push(14);
-    }
-    if (res.includes(14)) {
-      res.push(39);
-    }
-    if (res.includes(39)) {
-      res.push(15);
-    }
-    if (res.includes(20)) {
-      res.push(19);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
-    setCriteriaValues(outputArray);
-    form.setFieldsValue({
-      criteria: outputArray,
-    });
-  };
-
-  const handleDeselectCriteria = (value) => {
-    let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(15)) {
-      res = res.filter((item) => item !== 39);
-    }
-    if (!res.includes(39)) {
-      res = res.filter((item) => item !== 14);
-    }
-    if (!res.includes(14)) {
-      res = res.filter((item) => item !== 13);
-    }
-    if (!res.includes(19)) {
-      res = res.filter((item) => item !== 20);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
-    setCriteriaValues(outputArray);
-    form.setFieldsValue({
-      criteria: outputArray,
-    });
-  };
-
-  const handleClearCriteria = () => {
-    setCriteriaValues([]);
-  };
+  const [categoryCollapsed, setCategoryCollapsed] = useState(false);
+  const [glAccountCollapsed, setGLAccountCollapsed] = useState(false);
+  const [criteriaCollapsed, setCriteriaCollapsed] = useState(false);
 
   const handlePage = (e) => {
     setIsVA(e.target.checked);
@@ -176,7 +138,7 @@ const AccountForm = ({
               >
                 {data_select_criteria &&
                   data_select_criteria?.map((data, index) => (
-                    <Select.Option value={data.Id} key={index}>
+                    <Select.Option value={data.id} key={index}>
                       {data.text}
                     </Select.Option>
                   ))}
@@ -254,183 +216,74 @@ const AccountForm = ({
       </BaseContainer>
       {/* GL Account section */}
 
-      <BaseContainer header={"GL Accounts"}>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Cash"} name={"cash"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            label={"Receipt Confirmation"}
-            name={"receiptConfirmation"}
-          >
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Remittance"} name={"remittance"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
+      {/* Category Information */}
+      <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+        <div className="flex justify-between items-center cursor-pointer" onClick={() => setCategoryCollapsed(!categoryCollapsed)}>
+          <div className="text-primary text-xs font-bold uppercase">CATEGORY INFORMATION</div>
+          <div className="text-primary">
+            {categoryCollapsed ? <DownOutlined /> : <UpOutlined />}
+          </div>
         </div>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Factoring"} name={"factoring"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Short Term Debt"} name={"shortTermDebt"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Bank Charges"} name={"bankCharges"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Unapplied Receipt"} name={"unappliedReceipt"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            label={"Unidentified Receipt"}
-            name={"unidentifiedReceipt"}
-          >
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"On Account Receipt"} name={"onAccountReceipt"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Unearned Discount"} name={"unearnedDiscount"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Earned Discount"} name={"earnedDiscount"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.name}
-                </Select.Option>
-              ))} */}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-        <Form.Item label={"Description"} name={"description"}>
-          <InputComponent type={"textarea"} />
-        </Form.Item>
-      </BaseContainer>
+        {!categoryCollapsed && (
+          <div className="mt-4">
+            <FunctionalTableCategoryInformation
+              type={type}
+              data={listDataCategoryInfo}
+              updateData={setListDataCategoryInfo}
+              storedData={storedData}
+              setStoredData={setStoredData}
+              status={status}
+            />
+          </div>
+        )}
+      </div>
 
-      {/* criteria information */}
-      <BaseContainer header={"CRITERIA INFORMATION"}>
-        <FunctionalTableCriteriaPayment
-          type={type}
-          data={listDataCriteria}
-          dataCriteria={criteriaValues}
-          updateData={setListDataCriteria}
-          endDateHeader={form.getFieldValue("endDate")}
-          storedData={storedData}
-          setStoredData={setStoredData}
-          disableDate={true}
-          required={{ required: true, message: "Please input your" }}
-        />
-      </BaseContainer>
+      {/* GL Account Information */}
+      <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+        <div className="flex justify-between items-center cursor-pointer" onClick={() => setGLAccountCollapsed(!glAccountCollapsed)}>
+          <div className="text-primary text-xs font-bold uppercase">GL ACCOUNT INFORMATION</div>
+          <div className="text-primary">
+            {glAccountCollapsed ? <DownOutlined /> : <UpOutlined />}
+          </div>
+        </div>
+        {!glAccountCollapsed && (
+          <div className="mt-4">
+            <FunctionalTableGLAccountInformation
+              type={type}
+              data={listDataGLAccountInfo}
+              updateData={setListDataGLAccountInfo}
+              storedData={storedData}
+              setStoredData={setStoredData}
+              status={status}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Criteria Information */}
+      <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+        <div className="flex justify-between items-center cursor-pointer" onClick={() => setCriteriaCollapsed(!criteriaCollapsed)}>
+          <div className="text-primary text-xs font-bold uppercase">CRITERIA INFORMATION</div>
+          <div className="text-primary">
+            {criteriaCollapsed ? <DownOutlined /> : <UpOutlined />}
+          </div>
+        </div>
+        {!criteriaCollapsed && (
+          <div className="mt-4">
+            <FunctionalTableCriteriaPayment
+              type={type}
+              data={listDataCriteria}
+              dataCriteria={criteriaValues}
+              updateData={setListDataCriteria}
+              endDateHeader={form.getFieldValue("endDate")}
+              storedData={storedData}
+              setStoredData={setStoredData}
+              disableDate={true}
+              required={{ required: true, message: "Please input your" }}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
