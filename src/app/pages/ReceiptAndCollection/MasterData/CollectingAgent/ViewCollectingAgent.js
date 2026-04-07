@@ -4,7 +4,6 @@ import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { EyeOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
     hasValue,
@@ -141,10 +140,12 @@ const ViewCollectingAgent = () => {
                 dataApprover: {
                     create: dataApprovalHistory?.dataApprover?.COLLECTING_AGENT || [],
                     inactive: dataApprovalHistory?.dataApprover?.INACTIVE_COLLECTING_AGENT || [],
+                    active: dataApprovalHistory?.dataApprover?.ACTIVE_COLLECTING_AGENT || [],
                 },
                 dataHistory: {
                     create: dataApprovalHistory?.dataHistory?.COLLECTING_AGENT || [],
                     inactive: dataApprovalHistory?.dataHistory?.INACTIVE_COLLECTING_AGENT || [],
+                    active: dataApprovalHistory?.dataHistory?.ACTIVE_COLLECTING_AGENT || [],
                 },
             };
             setDataApprovalHistoryFix(temp);
@@ -175,10 +176,11 @@ const ViewCollectingAgent = () => {
     };
 
     const handleSubmitModalInactivate = (res, handleClear) => {
+        const isCurrentlyInactive = (status || "").toLowerCase() === "inactive";
         const reqBody = {
             id,
             appHierId: res.approvalHierarchy,
-            status: status === "Inactive" ? "Active" : "Inactive",
+            status: isCurrentlyInactive ? "Active" : "Inactive",
             remark: res.remark,
         };
         setBody({ body: reqBody });
@@ -403,7 +405,7 @@ const ViewCollectingAgent = () => {
                     style={{ lineHeight: 0 }}
                 >
                     <Tooltip title="Detail">
-                        <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+                        <SVGIcon name="IconDetail" width={20} />
                     </Tooltip>
                 </Link>
             ),
@@ -606,7 +608,8 @@ const ViewCollectingAgent = () => {
                 getAPIOption={getAllApprovalListCollectingAgent}
                 getAPIDetail={getListApprovalByIdCollectingAgent}
                 selector="collectingAgent"
-                alertMessage={`Are you sure you want to inactivate this Collecting Agent with CA Code ${nameModalActiveOrInactivate}?`}
+                header={(status || "").toLowerCase() === "inactive" ? "Activate Information" : "Inactive Information"}
+                alertMessage={`Are you sure you want to ${(status || "").toLowerCase() === "inactive" ? "activate" : "inactivate"} this Collecting Agent with CA Code ${nameModalActiveOrInactivate}?`}
                 openModalInactivate={openModalInactivate}
                 handleCloseModalInactivate={handleCancelModalInactivate}
                 onFinish={handleSubmitModalInactivate}

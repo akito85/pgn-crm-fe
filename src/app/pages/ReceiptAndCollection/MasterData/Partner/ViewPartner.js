@@ -7,7 +7,6 @@ import CardContainer from "../../../../../components/CardContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { EyeOutlined } from "@ant-design/icons";
 import {
   renderColumn,
   renderDateColumn,
@@ -161,11 +160,15 @@ const ViewPartner = () => {
           create: dataApprovalHistory?.dataApprover?.PARTNER || [],
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER || [],
+          active:
+            dataApprovalHistory?.dataApprover?.ACTIVE_PARTNER || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PARTNER || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER || [],
+          active:
+            dataApprovalHistory?.dataHistory?.ACTIVE_PARTNER || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -412,7 +415,7 @@ const ViewPartner = () => {
           style={{ lineHeight: 0 }}
         >
           <Tooltip title="Detail">
-            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+            <SVGIcon name="IconDetail" width={20} />
           </Tooltip>
         </Link>
       ),

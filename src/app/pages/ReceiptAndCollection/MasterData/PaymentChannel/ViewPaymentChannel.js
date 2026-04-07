@@ -8,9 +8,6 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
-  EyeOutlined,
-} from "@ant-design/icons";
-import {
   renderColumn,
   renderDateColumn,
   hasValue,
@@ -370,7 +367,7 @@ const ViewPaymentChannel = () => {
           style={{ lineHeight: 0 }}
         >
           <Tooltip title="Detail">
-            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+            <SVGIcon name="IconDetail" width={20} />
           </Tooltip>
         </Link>
       ),
