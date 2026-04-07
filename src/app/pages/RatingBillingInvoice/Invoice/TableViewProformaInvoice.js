@@ -16,6 +16,13 @@ export const columnsProformaInvoice = (
 ) => {
   return [
     {
+      key: "no",
+      title: "NO",
+      isClassification: true,
+      width: 50,
+      render: (text, object, index) => index + 1,
+    },
+    {
       key: "invoiceNumber",
       title: "PROFORMA INVOICE NUMBER",
       dataIndex: "invoiceNumber",
