@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 // Utils
@@ -107,12 +108,38 @@ const ModalRelease = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
+      const nextState = { ...prevState };
+      if (nextState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
       }
+      nextState[dataIndex] = selectedKeys[0];
+      return nextState;
+    });
+  };
+
+  const handleGlobalSearch = useMemo(() => 
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        setPage(1);
+        return nextState;
+      });
+    }, 500), [setSearch, setSearchText, setSearchedColumn, setPage]
+  );
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        advanceSearch: searchData
       };
     });
   };
@@ -346,12 +373,7 @@ const ModalRelease = ({
   // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
-      const finalSearch = Object.keys(search).length > 0 
-        ? Object.entries(search)
-            .filter(([_, value]) => value !== undefined && value !== "")
-            .map(([key, value]) => `${key}~${value}`)
-            .join("|") 
-        : "";
+      const finalSearch = encodeURIComponent(JSON.stringify(search));
 
       dispatch(
         getReleaseListPaginate({
@@ -704,6 +726,10 @@ const ModalRelease = ({
                 setFixedColumns={setFixedColumns}
                 loading={loadingReleaseList}
                 showExport={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 rowSelection={rowSelectionWarrantyInfo}
               />
             </div>

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip } from "antd";
 import { NavLink, Link } from "react-router-dom";
 import { EyeOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -72,12 +73,38 @@ const ViewTransferToReceipt = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
+      const nextState = { ...prevState };
+      if (nextState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
       }
+      nextState[dataIndex] = selectedKeys[0];
+      return nextState;
+    });
+  };
+
+  const handleGlobalSearch = useMemo(() => 
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        setPage(1);
+        return nextState;
+      });
+    }, 500), [setSearch, setSearchText, setSearchedColumn, setPage]
+  );
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        advanceSearch: searchData
       };
     });
   };
@@ -198,6 +225,10 @@ const ViewTransferToReceipt = () => {
             totalData={data?.page?.totalElements || 0}
             onSort={onSort}
             showExport={true}
+            showSearchBar={true}
+            showAdvanceSearch={true}
+            onSearch={(e) => handleGlobalSearch(e.target.value)}
+            onAdvanceSearch={handleAdvanceSearch}
             handleDownload={handleDownload}
             tableScrolled={{
               x: 2500,

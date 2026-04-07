@@ -43,6 +43,10 @@ const ListDetailDeduction = () => {
 
   const {
     loading,
+    loadingDetail,
+    loadingAppHier,
+    loadingAppHierDetail,
+    loadingCustomerList,
     data_detail,
     dataListAppHierId,
     dataListAppHierDetail,
@@ -241,7 +245,7 @@ const ListDetailDeduction = () => {
 
   return (
     <>
-      <Spin spinning={loading || !data_detail || !customerData}>
+      <Spin spinning={loading || loadingDetail || loadingAppHier || loadingAppHierDetail || loadingCustomerList || !data_detail}>
         <BreadCrumb routes={routes} />
         <div className="w-full">
         <CardContainerNoBorder 

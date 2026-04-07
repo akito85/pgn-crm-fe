@@ -1,13 +1,26 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button, message } from "antd";
+import {
+  Popover,
+  Tabs,
+  Menu,
+  Steps,
+  Form,
+  Button,
+  message,
+  Tooltip,
+} from "antd";
 import { FormStepper } from "../../../../../../components/FormStepNavigation";
-import { RightOutlined } from "@ant-design/icons";
-import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
+import { RightOutlined, EditOutlined } from "@ant-design/icons";
+import { ModalError, ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
+import { debounce } from "lodash";
 import { IconModal } from "../../../../../../utils/Icon";
 import {
   submitApproval,
   getListApprovalWarranty,
+  getDetailWarranty,
+  getApprovalHistory,
+  deleteWarranty,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 import { tableApprovalWarranty } from "./TableApprovalWarranty";
 import { formMessageRequired } from "../../../../../../utils";
@@ -18,7 +31,14 @@ import InputComponent from "../../../../../../components/InputComponent";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../components/DetailText";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import { WARRANTY_APPROVAL_STATUS } from "../../../../../../constants/warranty";
+import { WARRANTY_STATUS, WARRANTY_APPROVAL_STATUS } from "../../../../../../constants/warranty";
+import { useNavigate, Link } from "react-router-dom";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../../routes/Receipt&Collection/rc_routes";
+import useGrantAccessHooks from "../../../../../../components/useGrantAccessHooks";
+import ModalRefund from "./ModalRefund";
+import ModalHold from "./ModalHold";
+import ModalRelease from "./ModalRelease";
+import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 
 
 const ModalApprovalWarranty = ({
@@ -33,6 +53,7 @@ const ModalApprovalWarranty = ({
   const containerRef = useRef(null);
   const searchInput = useRef(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const dataApproval = data_approval_list?.result || [];
 
@@ -41,7 +62,7 @@ const ModalApprovalWarranty = ({
   const [pageSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
 
   const [current, setCurrent] = useState(0);
@@ -54,10 +75,26 @@ const ModalApprovalWarranty = ({
   const [bodyError, setBodyError] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState({
-    approvalStatus: "right",
+    no: "left",
+    // warrantyCode: "left",
+    // approvalStatus: "right",
+    action: "right",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalHold, setModalHold] = useState(false);
+  const [modalRelease, setModalRelease] = useState(false);
+  const [modalRefund, setModalRefund] = useState(false);
+  const [activeRowKey, setActiveRowKey] = useState(null);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [openModalHistory, setOpenModalHistory] = useState(false);
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [modalDelete, setModalDelete] = useState(false);
+  const [selectedRecordDelete, setSelectedRecordDelete] = useState(null);
+
+  const { data: dataWarranty } = useSelector((state) => state.warranty);
+  const { dataApprovalHistory } = useSelector((state) => state.warranty);
+  const { actions: accessList } = useGrantAccessHooks("page");
 
   // Initial fetch
   useEffect(() => {
@@ -66,12 +103,13 @@ const ModalApprovalWarranty = ({
         getListApprovalWarranty({
           page: 0,
           pageSize: 100,
+          search: encodeURIComponent(JSON.stringify(search)),
           isLoadMore: false,
         })
       );
       setPage(1);
     }
-  }, [dispatch, isOpen]);
+  }, [dispatch, isOpen, search]);
 
   // Load more handler
   const handleLoadMore = async () => {
@@ -98,12 +136,38 @@ const ModalApprovalWarranty = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
+      const nextState = { ...prevState };
+      if (nextState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
       }
+      nextState[dataIndex] = selectedKeys[0];
+      return nextState;
+    });
+  };
+
+  const handleGlobalSearch = useMemo(() => 
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        setPage(1);
+        return nextState;
+      });
+    }, 500), [setSearch, setSearchText, setSearchedColumn, setPage]
+  );
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        advanceSearch: searchData
       };
     });
   };
@@ -141,6 +205,209 @@ const ModalApprovalWarranty = ({
     },
   };
 
+  const handleDetail = (record) => {
+    navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY, { state: { id: record.id } });
+  };
+
+  const handleRefresh = () => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(
+      getListApprovalWarranty({
+        page: 0,
+        pageSize: 100,
+        search: reqSearch,
+        isLoadMore: false,
+      })
+    );
+  };
+
+  const handleHistory = (record) => {
+    setOpenModalHistory(true);
+    dispatch(getApprovalHistory({ id: record.id }));
+  };
+
+  const handleDelete = (record) => {
+    setSelectedRecordDelete(record);
+    setModalDelete(true);
+  };
+
+  const handleConfirmDelete = () => {
+    dispatch(deleteWarranty(selectedRecordDelete.id)).unwrap().then(() => {
+      setModalDelete(false);
+      handleRefresh();
+    });
+  };
+
+  const itemActions = [
+    {
+       action: "Update",
+       render: (record) => {
+          const isDraft = record?.status === WARRANTY_STATUS.DRAFT;
+          const isApprDraft = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+          const isApprRejected = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.REJECTED;
+          const isActive = record?.status === WARRANTY_STATUS.ACTIVE;
+          const isApprApproved = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.APPROVED;
+
+          const isDraftFullyEditable = isDraft && (isApprDraft || isApprRejected);
+          const isPartialEditable = isActive && isApprApproved;
+          
+          const disabled = !(isDraftFullyEditable || isPartialEditable);
+
+          return (
+            <ButtonComponent
+              border={false}
+              className="gap-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled) {
+                  navigate(RECEIPT_AND_COLLECTION_ROUTES.UPDATE_WARRANTY, { state: { id: record?.id } });
+                }
+              }}
+              type="action"
+              disabled={disabled}
+              icon={<EditOutlined style={{ fontSize: "16px", color: disabled ? "#D3D3D3" : "#000" }} />}
+            >
+              <span className={disabled ? "text-gray-400" : "text-black"}>Update</span>
+            </ButtonComponent>
+          );
+       }
+    },
+    {
+      action: "Refund",
+      render: (record) => {
+        const isDisabled = record?.approvalStatus !== "Approved" ||
+          (parseFloat(record?.unAppliedAmountReal || record?.unAppliedAmount || 0) <= 0);
+        return (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isDisabled) {
+                setActiveRowKey(record.id);
+                setSelectedRecord(record);
+                setModalRefund(true);
+              }
+            }}
+            type="action"
+            disabled={isDisabled}
+            icon={<SVGIcon name="IconRefund" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+          >
+            <span className={isDisabled ? "text-gray-400" : "text-black"}>Refund</span>
+          </ButtonComponent>
+        );
+      },
+    },
+    {
+      action: "Hold",
+      render: (record) => {
+        const isDisabled = !(record?.approvalStatus === "Approved" && record?.status?.toUpperCase() === "UNAPPLIED");
+        return (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isDisabled) {
+                setActiveRowKey(record.id);
+                setSelectedRecord(record);
+                setModalHold(true);
+              }
+            }}
+            type="action"
+            disabled={isDisabled}
+            icon={<SVGIcon name="IconHold" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+          >
+            <span className={isDisabled ? "text-gray-400" : "text-black"}>Hold</span>
+          </ButtonComponent>
+        );
+      },
+    },
+    {
+      action: "Release",
+      render: (record) => {
+        const isDisabled = !(record?.status === "Hold" && record?.approvalStatus === "Approved");
+        return (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isDisabled) {
+                setActiveRowKey(record.id);
+                setSelectedRecord(record);
+                setModalRelease(true);
+              }
+            }}
+            type="action"
+            disabled={isDisabled}
+            icon={<SVGIcon name="IconSend" color={isDisabled ? "#D3D3D3" : "#000000"} width={16} />}
+          >
+            <span className={isDisabled ? "text-gray-400" : "text-black"}>Release</span>
+          </ButtonComponent>
+        );
+      },
+    },
+    {
+      action: "history",
+      render: (record) => (
+        <ButtonComponent
+          border={false}
+          className="gap-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleHistory(record);
+          }}
+          type="action"
+          icon={<SVGIcon name="IconLogHistory" color={"#000"} width={16} />}
+        >
+          <span className="text-black">Approval History</span>
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Delete",
+      render: (record) => {
+        const isDraft = record?.status === WARRANTY_STATUS.DRAFT;
+        const isApprDraft = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+        const disabled = !(isDraft && isApprDraft);
+
+        return (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!disabled) {
+                handleDelete(record);
+              }
+            }}
+            type="action"
+            disabled={disabled}
+            icon={<SVGIcon name="IconDelete" color={disabled ? "#D3D3D3" : "#BE3036"} width={16} />}
+          >
+            <span className={disabled ? "text-gray-400" : "text-[#BE3036]"}>Delete</span>
+          </ButtonComponent>
+        );
+      }
+    },
+    {
+      action: "View",
+      render: (record) => (
+        <ButtonComponent
+          className="gap-5"
+          icon={<SVGIcon name="IconDetail" width={24} color={"#0075bf"} />}
+          border={false}
+          type="action"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDetail(record);
+          }}
+        />
+      ),
+    },
+  ];
+
   const baseColumns = useMemo(() => {
     return tableApprovalWarranty(
       search,
@@ -149,13 +416,71 @@ const ModalApprovalWarranty = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
+      handleDetail
     );
   }, [search, page, pageSize, searchedColumn, searchText]);
 
+  const actionColumns = useMemo(() => {
+    const permissions = accessList?.map(a => a.toLowerCase()) || [];
+    // We filter items that have permissions or are standard (View/history)
+    const tableActions = itemActions.filter(item => {
+      const act = item.action.toLowerCase();
+      if (act === "view" || act === "history") return true;
+      return permissions.includes(act);
+    });
+    
+    if (tableActions.length === 0) return [];
+
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        fixed: "right",
+        width: 100,
+        render: (_, record) => {
+          const detailAction = tableActions.find(a => a.action.toLowerCase() === "view");
+          const otherActions = tableActions.filter(a => a.action.toLowerCase() !== "view");
+          
+          return (
+            <div className="flex justify-center items-center gap-4">
+              {otherActions.length > 0 && (
+                <Popover
+                  trigger="click"
+                  placement="bottomRight"
+                  showArrow={false}
+                  content={
+                    <div className="flex flex-col">
+                      {otherActions.map(action => (
+                        <div key={action.action} onClick={(e) => e.stopPropagation()}>
+                           {action.render(record)}
+                        </div>
+                      ))}
+                    </div>
+                  }
+                >
+                  <div className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                    <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                  </div>
+                </Popover>
+              )}
+              {detailAction && (
+                <div onClick={(e) => e.stopPropagation()}>
+                   {detailAction.render(record)}
+                </div>
+              )}
+            </div>
+          );
+        }
+      }
+    ];
+  }, [accessList, itemActions]);
+
   const processedColumns = useMemo(() => {
-    return applyFixedColumns(baseColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
+    // Filter out the original "action" column from baseColumns if it exists
+    const filteredBase = baseColumns.filter(col => col.key !== "action");
+    return applyFixedColumns([...filteredBase, ...actionColumns], fixedColumns);
+  }, [baseColumns, actionColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -373,6 +698,10 @@ const ModalApprovalWarranty = ({
                 tableScrolled={{ x: 1500, y: 300 }}
                 onSort={onSort}
                 showExport={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
@@ -434,6 +763,40 @@ const ModalApprovalWarranty = ({
           </div>
         </div>
       </ModalCustom>
+
+      {/* Auxiliary Modals */}
+      <ModalRefund
+        isOpen={modalRefund}
+        handleCancel={() => setModalRefund(false)}
+        handleRefresh={handleRefresh}
+        data={selectedRecord}
+      />
+      <ModalHold
+        isOpen={modalHold}
+        handleCancel={() => setModalHold(false)}
+        handleRefresh={handleRefresh}
+        data={selectedRecord}
+      />
+      <ModalRelease
+        isOpen={modalRelease}
+        handleCancel={() => setModalRelease(false)}
+        handleRefresh={handleRefresh}
+        data={selectedRecord}
+      />
+      <ModalHistory
+        isOpen={openModalHistory}
+        handleCancel={() => setOpenModalHistory(false)}
+        data={dataApprovalHistoryFix}
+        title="Approval History"
+      />
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleConfirm={handleConfirmDelete}
+        type="delete"
+        header="Delete Guarantee"
+        message="Are you sure you want to delete this guarantee?"
+      />
     </div>
   );
 };
