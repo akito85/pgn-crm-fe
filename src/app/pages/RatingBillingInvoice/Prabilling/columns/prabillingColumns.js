@@ -135,7 +135,7 @@ export const getAllTabColumns = (
   },
   {
     key: "costCenter",
-    title: "Cost Center",
+    title: "COST CENTER",
     dataIndex: "costCenter",
     isClassification: true,
     sorter: true,
@@ -164,7 +164,7 @@ export const getAllTabColumns = (
   },
   {
     key: "meterReadingCode",
-    title: "Meter Reading Code",
+    title: "METER READING CODE",
     dataIndex: "meterReadingCode",
     isClassification: true,
     sorter: true,
@@ -193,7 +193,7 @@ export const getAllTabColumns = (
   },
   {
     key: "customerSegment",
-    title: "Customer Segment",
+    title: "CUSTOMER SEGMENT",
     dataIndex: "customerSegment",
     isClassification: true,
     sorter: true,
@@ -222,7 +222,7 @@ export const getAllTabColumns = (
   },
   {
     key: "accountGroupType",
-    title: "Account Group Type",
+    title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
     isClassification: true,
     sorter: true,
@@ -251,7 +251,7 @@ export const getAllTabColumns = (
   },
   {
     key: "specificAccount",
-    title: "Specific Account",
+    title: "SPECIFIC ACCOUNT",
     dataIndex: "specificAccount",
     isClassification: true,
     sorter: true,
@@ -400,7 +400,7 @@ export const getAllTabColumns = (
   },
   {
     key: "updatedDtm",
-    title: "Completion Date",
+    title: "COMPLETION DATE",
     dataIndex: "updatedDtm",
     isClassification: true,
     sorter: true,

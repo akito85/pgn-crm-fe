@@ -170,6 +170,14 @@ const TaxCodeSectionForm = ({
                 required: true,
                 message: "Please input your Tax Rate!",
               },
+              {
+                validator: (_, value) => {
+                  if (value !== undefined && value !== null && value > 100) {
+                    return Promise.reject("Tax Rate must not exceed 100%.");
+                  }
+                  return Promise.resolve();
+                },
+              },
             ]}
             getValueFromEvent={(e) => {
               return e.floatValue;

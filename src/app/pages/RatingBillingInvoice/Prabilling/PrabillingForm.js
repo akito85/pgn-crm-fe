@@ -36,6 +36,9 @@ import { IconModal } from "../../../../utils/Icon";
 import CardContainer from "../../../../components/CardContainer";
 import { FormFooter } from "../../../../components/FormStepNavigation";
 
+const DEFAULT_SEARCH_LIMIT = 10;
+const MAX_SEARCH_LENGTH = 50;
+
 const PrabillingForm = ({ type }) => {
   const {
     loading,
@@ -64,10 +67,6 @@ const PrabillingForm = ({ type }) => {
   const [billingCycle, setBillingCycle] = useState();
   const [selectedScheduleType, setSelectedScheduleType] = useState(null);
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
-
-  const DEFAULT_SEARCH_LIMIT = 10;
-  const MAX_SEARCH_LENGTH = 50;
 
   const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
     sorId: null,
@@ -136,7 +135,7 @@ const PrabillingForm = ({ type }) => {
       };
       dispatch(getListMeterReadingCode(body));
     }
-  }, [data_user_calculation]);
+  }, [data_user_calculation, dispatch, form]);
 
   useEffect(() => {
     if (
@@ -432,22 +431,24 @@ const PrabillingForm = ({ type }) => {
         }
       })
       .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message });
-          setModalError(true);
-        }
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          error?.toString() ||
+          "Terjadi kesalahan. Silakan coba lagi.";
+        setBodyError({ message });
+        setModalError(true);
       });
   };
 
   const handleBackPage = () => {
-    if (Object.values(formValue).length > 0) {
+    const currentValues = form.getFieldsValue();
+    const hasFilledValue = Object.values(currentValues).some(
+      (v) => v !== undefined && v !== null && v !== ""
+    );
+    if (hasFilledValue) {
       setOpenBack(true);
     } else {
-      setOpenBack(false);
       navigate(-1);
     }
   };
@@ -561,7 +562,7 @@ const PrabillingForm = ({ type }) => {
   const handleScheduleTypeChange = (value) => {
     setSelectedScheduleType(value);
     const selectedType = list_scheduler_type?.find((item) => item.id === value);
-    if (selectedType?.name?.toLowerCase() !== "schedule") {
+    if (selectedType?.name?.toLowerCase() !== "scheduler") {
       form.setFieldValue("scheduleDateTime", null);
     }
   };
