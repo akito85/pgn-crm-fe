@@ -1613,7 +1613,7 @@ const NxTableNested = ({
     return baseCols;
   }, [filteredParentColumns, parentHiddenCols, parentColumnOrder, safeFixed, parentColumnWidths,
       parentHandleResize, handleParentDragStart, handleParentDragOver, handleParentDrop,
-      handleParentDragEnd, buildDisplayColumns, autoMeasuredWidths]);
+      handleParentDragEnd, buildDisplayColumns, autoMeasuredWidths, actionColumn]);
 
   // ── Build processed child columns ─────────────────────────────────────────
   const processedChildColumns = useMemo(() => {

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined, EyeOutlined } from "@ant-design/icons";
-import { Dropdown, Spin } from "antd";
+import { Dropdown, Skeleton, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -20,6 +20,7 @@ import {
   restartExecution,
 } from "../../../../redux/slices/job_management/jobExecutionSlice";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
+import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
 import IconStop from "../../../../assets/Icon/Nx/IconStop";
 import IconRestart from "../../../../assets/Icon/Nx/IconRestart";
@@ -48,6 +49,16 @@ const JobExecutionPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data, loading, actionLoading } = useSelector((state) => state.jobExecution);
+
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch { return null; }
+  }, [rawToken]);
+
+  const { loading: permissionsLoading } = useGrantAccessHooks();
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("");
@@ -115,6 +126,13 @@ const JobExecutionPage = () => {
     align: "center",
     fixed: "right",
     render: (_, record) => {
+      if (permissionsLoading) {
+        return (
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
+          </div>
+        );
+      }
       if (!record || !record.executionId) return <span>—</span>;
 
       const status = record.status;
@@ -197,7 +215,7 @@ const JobExecutionPage = () => {
         </div>
       );
     },
-  }), [handleAction]);
+  }), [permissionsLoading, handleAction, navigate]);
 
   const baseColumns = useMemo(() => [
     {
@@ -324,6 +342,7 @@ const JobExecutionPage = () => {
         )}
         <NxTable
           idTable="job-execution-list-table"
+          userId={userId}
           dataSource={accumulatedData}
           totalData={data?.totalElements}
           current={page}

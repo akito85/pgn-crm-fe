@@ -107,6 +107,7 @@ const GasDepositBulkTable = ({
       handleSearch,
       includeStatus: false,
       isUnderAccount: !!accountId,
+      isFrontEnd: readOnly
     }),
     [readOnly, search, searchInput, searchedColumn, searchText]
   );
