@@ -449,18 +449,18 @@ export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
 
 export const approveOrRejectAllGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_GAS_DEPOSIT",
-  async ({ body, inactiveBody, action }, thunkAPI) => {
+  async ({ recalculateBody, expireBody, action }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/gas-deposit/approve";
-      const inactiveUrl = "/v1/dbs/api/gas-deposit/approve-inactive";
-      
+      const recalculateUrl = "/v1/dbs/api/gas-deposit/approve";
+      const expireUrl = "/v1/dbs/api/gas-deposit/approve-expire";
+
       await Promise.all([
-        body.length ? accountManagementService.activationWithRemark(url, body, {
+        recalculateBody ? accountManagementService.activationWithRemark(recalculateUrl, recalculateBody, {
           headers: {
             "Accept": "application/json"
           }
         }) : null,
-        inactiveBody.length ? accountManagementService.activationWithRemark(inactiveUrl, inactiveBody, {
+        expireBody ? accountManagementService.activationWithRemark(expireUrl, expireBody, {
           headers: {
             "Accept": "application/json"
           }

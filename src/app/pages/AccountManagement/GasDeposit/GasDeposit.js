@@ -130,6 +130,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
           <GasDepositApprovalModal
             accountId={accountId}
             isOpen={showApprovalModal}
+            isUnderAccount={isUnderAccount}
             handleCancel={() => setShowApprovalModal(false)}
             afterFinish={triggerRefresh}
           />
