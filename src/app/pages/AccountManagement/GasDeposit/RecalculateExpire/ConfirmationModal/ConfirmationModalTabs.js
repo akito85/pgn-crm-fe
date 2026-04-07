@@ -4,9 +4,9 @@ import NxTabs from "../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxAttachmentInput from "../../../../../../components/Nx/NxAttachmentInput";
 import NxApprovalInput from "../../../../../../components/Nx/NxApprovalInput";
-import NxTable from "../../../../../../components/Nx/NxTable";
 import InfoGasDeposit from "../StepContents/InformationForm/InfoGasDeposit";
 import GasDepositDetailTable from "../../GasDepositDetailTable";
+import GasDepositBulkTable from "../StepContents/InformationForm/GasDepositBulkTable";
 
 const ConfirmationModalTabs = ({
   form,
@@ -16,6 +16,7 @@ const ConfirmationModalTabs = ({
   approvalData,
   attachmentDataSource,
   service,
+  accountId,
   type = "",
   configApplication,
   activeTab = 0,
@@ -23,11 +24,8 @@ const ConfirmationModalTabs = ({
   disabled = false,
   isBulk = false,
   selectedRowKeys = [],
-  columns,
-  columnDefinitions,
-  openedMemo,
-  onExpand,
-  gdIndexById,
+  openedMemo = {},
+  onExpand = () => {},
 }) => {
   const { list_gasDeposit } = useSelector((state) => state.gasDeposit);
 
@@ -44,26 +42,12 @@ const ConfirmationModalTabs = ({
             {
               header: "Gas Deposit List",
               content: (
-                <NxTable
-                  idTable="bulk-gas-deposit-confirm-table"
+                <GasDepositBulkTable
+                  readOnly
                   dataSource={selectedRows}
-                  columns={columns}
-                  tableScrolled={{ x: selectedRows.length ? "max-content" : 3000 }}
-                  columnDefinitions={columnDefinitions}
-                  loading={false}
-                  usePagination={false}
-                  useInfiniteScroll={false}
-                  showExport={false}
-                  expandable={{
-                    expandedRowRender: (record) => (
-                      <GasDepositDetailTable
-                        id={record.id}
-                        index={gdIndexById[record.id]}
-                        opened={openedMemo[record.id]}
-                      />
-                    ),
-                    onExpand,
-                  }}
+                  openedMemo={openedMemo}
+                  onExpand={onExpand}
+                  accountId={accountId}
                 />
               ),
             },

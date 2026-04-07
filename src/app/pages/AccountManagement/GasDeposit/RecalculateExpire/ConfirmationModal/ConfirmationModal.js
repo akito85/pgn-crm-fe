@@ -13,6 +13,7 @@ const ConfirmationModal = ({
   attachmentDataSource,
   type = "",
   service,
+  accountId,
   configApplication,
   loading = false,
   detail,
@@ -21,11 +22,8 @@ const ConfirmationModal = ({
   handleSubmitForm = () => {},
   isBulk = false,
   selectedRowKeys = [],
-  columns,
-  columnDefinitions,
   openedMemo,
   onExpand,
-  gdIndexById,
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
@@ -95,6 +93,7 @@ const ConfirmationModal = ({
         approvalData={approvalData}
         attachmentDataSource={attachmentDataSource}
         service={service}
+        accountId={accountId}
         type={type}
         configApplication={configApplication}
         activeTab={activeTab}
@@ -102,11 +101,8 @@ const ConfirmationModal = ({
         disabled={loading}
         isBulk={isBulk}
         selectedRowKeys={selectedRowKeys}
-        columns={columns}
-        columnDefinitions={columnDefinitions}
         openedMemo={openedMemo}
         onExpand={onExpand}
-        gdIndexById={gdIndexById}
       />
     </NxModal>
   )
