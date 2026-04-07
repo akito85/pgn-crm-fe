@@ -271,13 +271,15 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
         setModalDetail(false);
         setIdData();
         setEffectiveData();
+        setPage(1);
         dispatch(
           getAllRMSHistoryPaginate({
             id: id,
             search: encodeURIComponent(JSON?.stringify(search)),
-            page,
+            page: 1,
             pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           })
         );
       })
