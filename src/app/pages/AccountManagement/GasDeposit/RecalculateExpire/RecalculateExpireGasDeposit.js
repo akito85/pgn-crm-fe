@@ -98,15 +98,18 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     []
   ];
 
+  // Fetch gas deposit record
   useEffect(() => {
     if (id) dispatch(getGasDeposit({ id }));
   }, [id]);
 
+  // Fetch draft when record is active with pending approval
   useEffect(() => {
     if (id && isActive && (isDraftApproval || isRejectApproval))
       dispatch(getGasDepositDraft({ id }));
   }, [id, isActive, isDraftApproval, isRejectApproval]);
 
+  // Pre-fill form fields when record and hierarchy are loaded
   useEffect(() => {
     if (list_gdApprovalHierarchy.length) {
       const {
@@ -128,6 +131,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     }
   }, [detail, list_gdApprovalHierarchy]);
 
+  // Sync attachment list from loaded record
   useEffect(() => {
     if (Array.isArray(attachments))
       setAttachmentDataSource([...attachments.map((attachment) => ({
@@ -136,6 +140,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
       }))]);
   }, [attachments]);
 
+  // Fetch approval hierarchy options
   useEffect(() => {
     dispatch(getGdApprovalHierarchies());
   }, []);
