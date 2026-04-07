@@ -103,7 +103,7 @@ export const getGasDepositDetails = createAsyncThunk(
   async ({ id, index, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/detail-list/${id}`;
-      const response = await accountManagementService.getPagination(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         index,
@@ -122,7 +122,7 @@ export const getGasDepositDetailMutations = createAsyncThunk(
   async ({ detailId, index, detailIndex, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/detail-mutation-list/${detailId}`;
-      const response = await accountManagementService.getPagination(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         index,
