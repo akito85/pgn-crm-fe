@@ -95,7 +95,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
         }
       }
     ),
-    handleDelete: ({ id: recordId }) => handleOpenDelete(recordId),
+    handleDelete: (record) => handleOpenDelete(record),
   });
 
   const [page, setPage] = useState(1);
@@ -207,11 +207,12 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     .then((data) => {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getListGasUtilizationHistory({
-          id:idAccount, search: reqSearch, sort, page, pageSize: loadMoreSize
+        getListGasUtilizationHistoryNew({
+          id:idAccount, search: reqSearch, sort, page: 1, pageSize: loadMoreSize, isLoadMore: false
         })
       );
-    })  
+      setPage(1);
+    })
     .catch((err) => {
       console.log(err)
       return;
