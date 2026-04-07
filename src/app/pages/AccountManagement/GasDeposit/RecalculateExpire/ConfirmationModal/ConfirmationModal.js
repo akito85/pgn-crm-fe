@@ -19,6 +19,13 @@ const ConfirmationModal = ({
   id,
   parentKey,
   handleSubmitForm = () => {},
+  isBulk = false,
+  selectedRowKeys = [],
+  columns,
+  columnDefinitions,
+  openedMemo,
+  onExpand,
+  gdIndexById,
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
@@ -93,6 +100,13 @@ const ConfirmationModal = ({
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         disabled={loading}
+        isBulk={isBulk}
+        selectedRowKeys={selectedRowKeys}
+        columns={columns}
+        columnDefinitions={columnDefinitions}
+        openedMemo={openedMemo}
+        onExpand={onExpand}
+        gdIndexById={gdIndexById}
       />
     </NxModal>
   )

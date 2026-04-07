@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
@@ -23,6 +23,7 @@ import {
   recalculateGasDeposit,
   expireGasDeposit,
   getGasDeposit,
+  getGasDeposits,
   getGasDepositDraft,
   getGdApprovalHierarchy,
   getGdApprovalHierarchies,
@@ -30,6 +31,9 @@ import {
 import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../assets/Icon/index";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
+import NxTable from "../../../../../components/Nx/NxTable";
+import { getGasDepositColumns } from "../getGasDepositColumns";
+import { nxApplyFixedColumns } from "../../../../../utils/Nx/nxApplyFixedColumns";
 
 /**
  * Three-step form (Gas Deposit → Approval → Attachment) for submitting a
@@ -37,9 +41,9 @@ import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
  * Supports Standard and One-Time account types. Navigates back to the
  * appropriate account detail page on success.
  *
- * @param {{ formType: "recalculate" | "expire"; accountType: "standard" | "oneTime" }} props
+ * @param {{ formType: "recalculate" | "expire"; accountType?: "standard" | "oneTime"; isBulk?: boolean; }} props
  */
-const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
+const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
   const location = useLocation();
@@ -51,11 +55,14 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     loading_detailGd,
     loading_detailDraftGd,
     loading_recalculateExpireGd,
+    loading_listGd,
     list_gdApprovalHierarchy,
     detail_gdApprovalHierarchy,
     detail_gasDeposit,
     detailDraft_gasDeposit,
     list_gdAttachmentCategory,
+    list_gasDeposit,
+    pagination_listGd,
   } = useSelector((state) => state.gasDeposit);
 
   // --- State ---
@@ -64,6 +71,20 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   const [deletedAttachments, setDeletedAttachments] = useState([]);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmationType, setConfirmationType] = useState("");
+
+  // Bulk-only state
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [openedMemo, setOpenedMemo] = useState({});
+  const [fixedColumns, setFixedColumns] = useState({ left: ["no"], right: [] });
+  const searchInput = useRef(null);
 
   // --- Derived values ---
   const isStandard = accountType === "standard";
@@ -104,11 +125,78 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     []
   ];
 
+  // --- Bulk table helpers ---
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
+  };
+
+  const onSort = (_, __, sorter) => {
+    setSort(sorter.order
+      ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+      : "");
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    if (nextPage <= (pagination_listGd.totalPage || 0)) {
+      dispatch(getGasDeposits({
+        accountId: accountId || undefined,
+        body: { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules },
+        isLoadMore: true,
+      }));
+      setPage(nextPage);
+    }
+  };
+
+  const onExpand = (expanded, record) => {
+    if (expanded) setOpenedMemo((prev) => ({ ...prev, [record.id]: true }));
+  };
+
+  const gdIndexById = useMemo(
+    () => Object.fromEntries(list_gasDeposit.map((item, idx) => [item.id, idx])),
+    [list_gasDeposit]
+  );
+
+  const expandedRowRender = (record) => (
+    <GasDepositDetailTable
+      id={record.id}
+      index={gdIndexById[record.id]}
+      opened={openedMemo[record.id]}
+    />
+  );
+
+  const rowSelection = {
+    fixed: true,
+    selectedRowKeys,
+    onChange: (newKeys) => setSelectedRowKeys([...newKeys]),
+    preserveSelectedRowKeys: true,
+  };
+
+  const columnDefinitions = useMemo(() =>
+    getGasDepositColumns({
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      isUnderAccount: !!accountId,
+    }),
+    [search, searchInput, searchedColumn, searchText]
+  );
+
+  const columns = useMemo(
+    () => nxApplyFixedColumns(columnDefinitions, fixedColumns),
+    [columnDefinitions, fixedColumns]
+  );
+
   // --- Effects ---
-  // Fetch gas deposit record
+  // Fetch gas deposit record (single mode only)
   useEffect(() => {
-    if (id) dispatch(getGasDeposit({ id }));
-  }, [id]);
+    if (!isBulk && id) dispatch(getGasDeposit({ id }));
+  }, [id, isBulk]);
 
   // Fetch draft when record is active with pending approval
   useEffect(() => {
@@ -151,6 +239,19 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
   useEffect(() => {
     dispatch(getGdApprovalHierarchies());
   }, []);
+
+  // Fetch bulk list (bulk mode only); re-fetches on sort/search/filter changes
+  useEffect(() => {
+    if (!isBulk) return;
+    const body = { page: 0, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+    setPage(0);
+    const promise = dispatch(getGasDeposits({
+      accountId: accountId || undefined,
+      body,
+      isLoadMore: false,
+    }));
+    return () => { promise.abort(); };
+  }, [isBulk, sort, search, filters, filterRules]);
 
   // --- Functions / handlers ---
   /**
@@ -288,6 +389,15 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
    * before advancing to the next step.
    */
   const next = async () => {
+    if (isBulk && current === 0) {
+      if (!selectedRowKeys.length) {
+        dispatch(showModalError({ title: "Failed", description: "Please select at least one record" }));
+        return;
+      }
+      setCurrent(current + 1);
+      return;
+    }
+
     try {
       if (current === 2) {
         if (attachmentIsRequired && !attachmentDataSource.length) {
@@ -362,7 +472,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     const body = {
       appHierId,
       action: confirmationType,
-      gasDepositIds: [ id ],
+      gasDepositIds: isBulk ? selectedRowKeys : [id],
       remark,
       attachments
     };
@@ -374,7 +484,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
       : isOneTime
         ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
-        : "";
+        : ACCOUNT_MANAGEMENT_ROUTES.VIEW_GAS_DEPOSIT_SA;
 
     try {
       if (isRecalculate) {
@@ -447,7 +557,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     {
       title: "Gas Deposit",
       cards: [
-        {
+        !isBulk && {
           header: "Gas Deposit Information",
           content: (
             <InfoGasDeposit
@@ -456,7 +566,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
             />
           )
         },
-        {
+        !isBulk && {
           header: "Gas Deposit Detail",
           content: (
             <GasDepositDetailTable
@@ -466,7 +576,32 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
             />
           )
         },
-      ],
+        {
+          header: "Gas Deposit List",
+          content: (
+            <NxTable
+              idTable="bulk-gas-deposit-select-table"
+              dataSource={list_gasDeposit}
+              columns={columns}
+              totalData={pagination_listGd.totalElement}
+              tableScrolled={{ x: list_gasDeposit.length ? "max-content" : 3000 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading_listGd}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hasMore={list_gasDeposit.length < (pagination_listGd.totalElement || 0)}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
+              rowSelection={rowSelection}
+              expandable={{ expandedRowRender, onExpand }}
+              showExport={false}
+            />
+          )
+        }
+      ].filter(Boolean),
       disabled: false,
       key: "tab-0",
     },
@@ -518,7 +653,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
     <div>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
-        {accountId && customerId && (
+        {!isBulk && accountId && customerId && (
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
@@ -631,6 +766,13 @@ const RecalculateExpireGasDeposit = ({ formType, accountType }) => {
               id={id}
               parentKey={parentKey}
               handleSubmitForm={handleSubmitForm}
+              isBulk={isBulk}
+              selectedRowKeys={selectedRowKeys}
+              columns={columns}
+              columnDefinitions={columnDefinitions}
+              openedMemo={openedMemo}
+              onExpand={onExpand}
+              gdIndexById={gdIndexById}
             />
           </Form>
         </Spin>

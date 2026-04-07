@@ -96,16 +96,22 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   VIEW_DETAIL_GAS_DEPOSIT_SA: "/account-management/gas-deposit/view",
   RECALCULATE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/recalculate",
   EXPIRE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/expire",
+  BULK_RECALCULATE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/recalculate/bulk",
+  BULK_EXPIRE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/expire/bulk",
   
   // Gas Deposit Account Standard
   VIEW_DETAIL_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/view",
   RECALCULATE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/recalculate",
   EXPIRE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/expire",
+  BULK_RECALCULATE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/recalculate/bulk",
+  BULK_EXPIRE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/expire/bulk",
 
   // Gas Deposit Account One Time
   VIEW_DETAIL_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/view",
   RECALCULATE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/recalculate",
   EXPIRE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/expire",
+  BULK_RECALCULATE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/recalculate/bulk",
+  BULK_EXPIRE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/expire/bulk",
 
   // Multi Destination
   VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/view",

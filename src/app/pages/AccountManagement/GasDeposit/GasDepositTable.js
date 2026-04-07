@@ -240,6 +240,18 @@ const GasDepositTable = ({
         }
       }
     ),
+    handleBulkRecalculate: () => navigate(
+      isStandAlone ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT_SA :
+      isStandard   ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT :
+      isOneTime    ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT_ONETIME : "",
+      { state: { accountId, customerId } }
+    ),
+    handleBulkExpire: () => navigate(
+      isStandAlone ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT_SA :
+      isStandard   ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT :
+      isOneTime    ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT_ONETIME : "",
+      { state: { accountId, customerId } }
+    ),
     handleApproval,
     handleDownload,
   });

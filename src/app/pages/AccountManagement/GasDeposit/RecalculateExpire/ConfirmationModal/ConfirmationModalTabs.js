@@ -1,8 +1,10 @@
+import { useSelector } from "react-redux";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxAttachmentInput from "../../../../../../components/Nx/NxAttachmentInput";
 import NxApprovalInput from "../../../../../../components/Nx/NxApprovalInput";
+import NxTable from "../../../../../../components/Nx/NxTable";
 import InfoGasDeposit from "../StepContents/InformationForm/InfoGasDeposit";
 import GasDepositDetailTable from "../../GasDepositDetailTable";
 
@@ -19,27 +21,69 @@ const ConfirmationModalTabs = ({
   activeTab = 0,
   setActiveTab = () => {},
   disabled = false,
+  isBulk = false,
+  selectedRowKeys = [],
+  columns,
+  columnDefinitions,
+  openedMemo,
+  onExpand,
+  gdIndexById,
 }) => {
+  const { list_gasDeposit } = useSelector((state) => state.gasDeposit);
+
+  const selectedRows = isBulk
+    ? list_gasDeposit.filter((item) => selectedRowKeys.includes(item.id))
+    : [];
+
   const tabOptions = [
     {
       key: 0,
       label: "Gas Deposit",
-      cards: [
-        {
-          content: <InfoGasDeposit detail={detail} />,
-          header: "Gas Deposit Information",
-        },
-        {
-          content: (
-            <GasDepositDetailTable
-              id={id}
-              parentKey={parentKey}
-              key="tab-0-card-1"
-            />
-          ),
-          header: "Gas Deposit Detail",
-        },
-      ],
+      cards: isBulk
+        ? [
+            {
+              header: "Gas Deposit List",
+              content: (
+                <NxTable
+                  idTable="bulk-gas-deposit-confirm-table"
+                  dataSource={selectedRows}
+                  columns={columns}
+                  tableScrolled={{ x: selectedRows.length ? "max-content" : 3000 }}
+                  columnDefinitions={columnDefinitions}
+                  loading={false}
+                  usePagination={false}
+                  useInfiniteScroll={false}
+                  showExport={false}
+                  expandable={{
+                    expandedRowRender: (record) => (
+                      <GasDepositDetailTable
+                        id={record.id}
+                        index={gdIndexById[record.id]}
+                        opened={openedMemo[record.id]}
+                      />
+                    ),
+                    onExpand,
+                  }}
+                />
+              ),
+            },
+          ]
+        : [
+            {
+              content: <InfoGasDeposit detail={detail} />,
+              header: "Gas Deposit Information",
+            },
+            {
+              content: (
+                <GasDepositDetailTable
+                  id={id}
+                  parentKey={parentKey}
+                  key="tab-0-card-1"
+                />
+              ),
+              header: "Gas Deposit Detail",
+            },
+          ],
       disabled,
     },
     {
