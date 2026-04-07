@@ -54,7 +54,7 @@ const nxGetAccountActions = ({
     )
   },
   {
-    action: "Recalculate",
+    action: "Bulk-Recalculate",
     render: (
       <Button
         type={"submit"}
@@ -66,7 +66,7 @@ const nxGetAccountActions = ({
     )
   },
   {
-    action: "Expire",
+    action: "Bulk-Expire",
     render: (
       <Button
         type={"submit"}
