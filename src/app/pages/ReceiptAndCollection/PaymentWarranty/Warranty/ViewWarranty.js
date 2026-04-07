@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Dropdown, Menu, Tooltip, Checkbox, Tabs, Popover } from "antd";
 import { debounce } from "lodash";
@@ -11,6 +11,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import SearchBar from "../../../../../components/SearchBar";
 
 // Utils
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
@@ -134,18 +135,48 @@ const ViewWarranty = () => {
     }
   ];
 
-  const handleSearch = useMemo(() => 
-    debounce((selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      const nextState = { ...prevState };
+      if (selectedKeys[0]) {
+        nextState[dataIndex] = selectedKeys[0];
+      } else {
+        delete nextState[dataIndex];
+      }
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
+      return nextState;
+    });
+  }, []);
+
+  const handleGlobalSearch = useMemo(() => 
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
       setSearch((prevState) => {
-        if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
-        return { ...prevState, [dataIndex]: selectedKeys[0] };
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        setPage(1);
+        return nextState;
       });
     }, 500),
     []
   );
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => ({
+        ...prevState,
+        advanceSearch: searchData,
+    }));
+    setPage(1);
+  };
+  
 
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -154,9 +185,10 @@ const ViewWarranty = () => {
   };
 
   const onSort = (_, __, sorter) => {
+    const field = sorter.field || sorter.columnKey;
     const dataSort =
       sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        ? `${field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -795,6 +827,9 @@ const ViewWarranty = () => {
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
                     loading={loadingList}
+                    showSearchBar={true}
+                    onAdvanceSearch={handleAdvanceSearch}
+                    onSearch={(e) => handleGlobalSearch(e.target.value)}
                     onRow={(record) => {
                       const recordKey = record.billingCode || record.invoiceNumber || record.id;
                       const isActive = activeRowKey === recordKey;

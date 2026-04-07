@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip, Dropdown, Menu } from "antd";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { EyeOutlined, WarningOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -26,7 +27,7 @@ import { getPaginateDeduction, getDownloadDeduction, deleteDeduction, getApprova
 const ViewDeduction = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data, loading, dataApprovalHistory } = useSelector((state) => state.deduction);
+  const { data, loading, dataApprovalHistory, loadingHistory } = useSelector((state) => state.deduction);
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
@@ -108,6 +109,33 @@ const ViewDeduction = () => {
     dispatch(
       getPaginateDeduction({ search: reqSearch, page, pageSize })
     );
+  };
+
+  const handleGlobalSearch = useMemo(() => 
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        setPage(1);
+        return nextState;
+      });
+    }, 500), [setSearch, setSearchText, setSearchedColumn, setPage]
+  );
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
+      return {
+        ...prevState,
+        advanceSearch: searchData
+      };
+    });
   };
 
   const handleConfirmDelete = () => {
@@ -263,6 +291,10 @@ const ViewDeduction = () => {
             columns={[...baseColumns, ...actionCols]}
             dataSource={data?.result?.map((item, index) => ({ ...item, key: index })) || []}
             showExport={true}
+            showSearchBar={true}
+            showAdvanceSearch={true}
+            onSearch={(e) => handleGlobalSearch(e.target.value)}
+            onAdvanceSearch={handleAdvanceSearch}
             handleDownload={handleDownload}
             current={page}
             pageSize={pageSize}
@@ -278,7 +310,12 @@ const ViewDeduction = () => {
       <ModalHistory
         isOpen={openModalHistory}
         handleClose={() => setOpenModalHistory(false)}
-        header={"Approval History"}
+        header={
+          <div className="flex items-center gap-2">
+            <span>Approval History</span>
+            {loadingHistory && <Spin size="small" />}
+          </div>
+        }
         width={850}
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}

@@ -47,6 +47,10 @@ const ListFormDeduction = (props) => {
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
+    loadingDetail,
+    loadingType,
+    loadingPeriod,
+    loadingAppHier,
     dataType,
     dataPeriod,
   } = useSelector((state) => state.deduction);
@@ -205,6 +209,7 @@ const ListFormDeduction = (props) => {
       setSelectedHierarchy("");
       setListDataAttachment([]);
       setCustomerList([]);
+      setCurrent(0);
     } else {
       // Logic for reset update
     }
@@ -409,7 +414,7 @@ const ListFormDeduction = (props) => {
   return (
     <>
       <BreadCrumb routes={routes} />
-      <Spin spinning={loadingSave || loadingDraft}>
+      <Spin spinning={loading || loadingDetail || loadingType || loadingPeriod || loadingAppHier || loadingSave || loadingDraft}>
         <FormStepper 
           steps={steps} 
           current={current} 
