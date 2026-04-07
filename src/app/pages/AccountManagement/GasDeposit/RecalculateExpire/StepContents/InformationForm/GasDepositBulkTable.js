@@ -37,9 +37,11 @@ const GasDepositBulkTable = ({
   readOnly = false,
   dataSource: externalDataSource,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
   const { list_gasDeposit, pagination_listGd, loading_listGd } = useSelector((state) => state.gasDeposit);
 
+  // --- State ---
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [sort, setSort] = useState("");
@@ -48,9 +50,11 @@ const GasDepositBulkTable = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [filters] = useState([]);
   const [filterRules] = useState([]);
-  const [fixedColumns, setFixedColumns] = useState({ left: ["no"], right: [] });
-  const searchInput = useRef(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: ["no"], right: [] }); // tracks which columns are pinned left/right
+  const searchInput = useRef(null); // ref forwarded to filter dropdowns for auto-focus
 
+  // --- Functions / handlers ---
+  /** Updates active search state and triggers column highlight. */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -58,12 +62,14 @@ const GasDepositBulkTable = ({
     setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
   };
 
+  /** Converts Ant Design sorter object to a `field~asc|desc` sort string. */
   const onSort = (_, __, sorter) => {
     setSort(sorter.order
       ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
       : "");
   };
 
+  /** Loads the next page of records when the infinite scroll threshold is reached. */
   const handleLoadMore = () => {
     const nextPage = page + 1;
     if (nextPage <= (pagination_listGd.totalPage || 0)) {
@@ -76,6 +82,7 @@ const GasDepositBulkTable = ({
     }
   };
 
+  // --- Derived values ---
   // gdIndexById always references list_gasDeposit so GasDepositDetailTable
   // can locate nested detail data regardless of which mode we're in.
   const gdIndexById = useMemo(
@@ -83,6 +90,7 @@ const GasDepositBulkTable = ({
     [list_gasDeposit]
   );
 
+  /** Renders the nested detail table for an expanded row. */
   const expandedRowRender = (record) => (
     <GasDepositDetailTable
       id={record.id}
@@ -117,6 +125,8 @@ const GasDepositBulkTable = ({
     [columnDefinitions, fixedColumns]
   );
 
+  // --- Effects ---
+  // Fetch gas deposits on filter/sort change (selection mode only)
   useEffect(() => {
     if (readOnly) return;
     const body = { page: 0, size: loadMoreSize, sort, searchs: search, filters, filterRules };
