@@ -1,6 +1,6 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import { NavLink, Link } from "react-router-dom";
-import { Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, Tooltip } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -143,39 +143,38 @@ export const buildServiceAgreementTableActions = ({
             const linkState = variant.stateBuilders.update({ record, scope });
 
             const content =
-              actionLength > 2 ? (
+              actionLength > 3 ? (
                 isEditable ? (
                   <Link to={variant.routes.update} state={linkState}>
-                    <ButtonComponent
-                      icon={<SVGIcon name="IconEdit" color="#ACC424" width={20} />}
-                      border={false}
+                    <Button
+                      icon={<SVGIcon name="IconEdit" width={20} />}
+                      type="action"
                     >
-                      <span className="text-black ml-3">Update</span>
-                    </ButtonComponent>
+                      Update
+                    </Button>
                   </Link>
                 ) : (
-                  <ButtonComponent
-                    icon={<SVGIcon name="IconEdit" color="#8D91A0" width={20} />}
-                    border={false}
+                  <Button
+                    icon={<SVGIcon name="IconEdit" width={20} />}
+                    type="action"
                     disabled
                   >
-                    <span className="text-black ml-3">Update</span>
-                  </ButtonComponent>
+                    Update
+                  </Button>
                 )
               ) : isEditable ? (
                 <Link to={variant.routes.update} state={linkState}>
-                  <Tooltip title="Update">
-                    <SVGIcon name="IconEdit" width={20} color="#ACC424" />
+                  <Tooltip title="Update" key={`table-action-update-${index}`}>
+                    <Button type="table-action">
+                      <SVGIcon name="IconEdit" width={20} />
+                    </Button>
                   </Tooltip>
                 </Link>
               ) : (
-                <Tooltip title="Update">
-                  <SVGIcon
-                    name="IconEdit"
-                    width={20}
-                    color="#8D91A0"
-                    className="cursor-not-allowed"
-                  />
+                <Tooltip title="" key={`table-action-update-${index}`}>
+                  <Button disabled type="table-action">
+                    <SVGIcon name="IconEdit" width={20} />
+                  </Button>
                 </Tooltip>
               );
 
@@ -196,30 +195,24 @@ export const buildServiceAgreementTableActions = ({
                 record?.approvalStatus === "REJECTED");
 
             const content =
-              actionLength > 2 ? (
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconDelete"
-                      width={20}
-                      color={canDelete ? "#be3036" : "#c2cad2"}
-                    />
-                  }
-                  border={false}
+              actionLength > 3 ? (
+                <Button
+                  icon={<SVGIcon name="IconDelete" width={20} />}
+                  type="action"
                   disabled={!canDelete}
                   onClick={canDelete ? () => handleOpenDeleteDraft(record?.id) : undefined}
                 >
-                  <span className="text-black ml-3">Delete</span>
-                </ButtonComponent>
+                  Delete
+                </Button>
               ) : (
-                <Tooltip title={canDelete ? "Delete" : ""}>
-                  <SVGIcon
-                    name="IconDelete"
-                    width={20}
-                    color={canDelete ? "#be3036" : "#c2cad2"}
-                    className={canDelete ? undefined : "disabled cursor-not-allowed"}
+                <Tooltip title={canDelete ? "Delete" : ""} key={`table-action-delete-${index}`}>
+                  <Button
+                    type="table-action"
+                    disabled={!canDelete}
                     onClick={canDelete ? () => handleOpenDeleteDraft(record?.id) : undefined}
-                  />
+                  >
+                    <SVGIcon name="IconDelete" width={20} />
+                  </Button>
                 </Tooltip>
               );
 
@@ -245,47 +238,50 @@ export const buildServiceAgreementTableActions = ({
         const linkState = variant.stateBuilders.createAddon({ record, scope });
 
         const content =
-          actionLength > 2 ? (
+          actionLength > 3 ? (
             isCreate ? (
               <Link to={variant.routes.createAddon} state={linkState}>
-                <ButtonComponent
+                <Button
                   icon={
                     <PlusCircleOutlined
                       style={{ fontSize: "20px", color: "#0075BF" }}
                     />
                   }
-                  border={false}
+                  type="action"
                 >
-                  <span className="text-black ml-3">Create Child</span>
-                </ButtonComponent>
+                  Create Child
+                </Button>
               </Link>
             ) : (
-              <ButtonComponent
+              <Button
                 icon={
                   <PlusCircleOutlined
                     style={{ fontSize: "20px", color: "#8D91A0" }}
                   />
                 }
-                border={false}
+                type="action"
                 disabled
               >
-                <span className="text-black ml-3">Create Child</span>
-              </ButtonComponent>
+                Create Child
+              </Button>
             )
           ) : isCreate ? (
-            <Tooltip title="Create Child">
+            <Tooltip title="Create Child" key={`table-action-addon-${index}`}>
               <Link to={variant.routes.createAddon} state={linkState}>
-                <PlusCircleOutlined
-                  style={{ fontSize: "20px", color: "#bbce4b" }}
-                />
+                <Button type="table-action">
+                  <PlusCircleOutlined
+                    style={{ fontSize: "20px", color: "#0075BF" }}
+                  />
+                </Button>
               </Link>
             </Tooltip>
           ) : (
-            <Tooltip title="Create Child">
-              <PlusCircleOutlined
-                style={{ fontSize: "20px", color: "#c2cad2" }}
-                className="cursor-not-allowed"
-              />
+            <Tooltip title="Create Child" key={`table-action-addon-${index}`}>
+              <Button type="table-action" disabled>
+                <PlusCircleOutlined
+                  style={{ fontSize: "20px", color: "#c2cad2" }}
+                />
+              </Button>
             </Tooltip>
           );
 
@@ -306,47 +302,50 @@ export const buildServiceAgreementTableActions = ({
         const linkState = variant.stateBuilders.createAmendment({ record, scope });
 
         const content =
-          actionLength > 2 ? (
+          actionLength > 3 ? (
             isCreate ? (
               <Link to={variant.routes.createAmendment} state={linkState}>
-                <ButtonComponent
+                <Button
                   icon={
                     <PlusCircleOutlined
                       style={{ fontSize: "20px", color: "#0075BF" }}
                     />
                   }
-                  border={false}
+                  type="action"
                 >
-                  <span className="text-black ml-3">Create Amendment</span>
-                </ButtonComponent>
+                  Create Amendment
+                </Button>
               </Link>
             ) : (
-              <ButtonComponent
+              <Button
                 icon={
                   <PlusCircleOutlined
                     style={{ fontSize: "20px", color: "#8D91A0" }}
                   />
                 }
-                border={false}
+                type="action"
                 disabled
               >
-                <span className="text-black ml-3">Create Amendment</span>
-              </ButtonComponent>
+                Create Amendment
+              </Button>
             )
           ) : isCreate ? (
-            <Tooltip title="Create Amendment">
+            <Tooltip title="Create Amendment" key={`table-action-amendment-${index}`}>
               <Link to={variant.routes.createAmendment} state={linkState}>
-                <PlusCircleOutlined
-                  style={{ fontSize: "20px", color: "#0075BF" }}
-                />
+                <Button type="table-action">
+                  <PlusCircleOutlined
+                    style={{ fontSize: "20px", color: "#0075BF" }}
+                  />
+                </Button>
               </Link>
             </Tooltip>
           ) : (
-            <Tooltip title="Create Amendment">
-              <PlusCircleOutlined
-                style={{ fontSize: "20px", color: "#c2cad2" }}
-                className="cursor-not-allowed"
-              />
+            <Tooltip title="Create Amendment" key={`table-action-amendment-${index}`}>
+              <Button type="table-action" disabled>
+                <PlusCircleOutlined
+                  style={{ fontSize: "20px", color: "#c2cad2" }}
+                />
+              </Button>
             </Tooltip>
           );
 
@@ -368,17 +367,17 @@ export const buildServiceAgreementTableActions = ({
             record?.approvalStatus === "DRAFT");
 
         const content =
-          actionLength > 2 ? (
-            <ButtonComponent
+          actionLength > 3 ? (
+            <Button
               icon={
                 <Checkbox
-                  className="inactive-check"
+                  className="action-checkbox"
                   disabled={!canInactivate}
                   checked={!isActive}
                   style={{ transform: "scale(0.9)" }}
                 />
               }
-              border={false}
+              type="action"
               disabled={!canInactivate}
               onClick={
                 canInactivate
@@ -386,14 +385,12 @@ export const buildServiceAgreementTableActions = ({
                   : undefined
               }
             >
-              <span className="text-black ml-3">
-                {isActive ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
+              {isActive ? "Inactivate" : "Activate"}
+            </Button>
           ) : (
-            <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            <Tooltip title={isActive ? "Inactivate" : "Activate"} key={`table-action-activate-${index}`}>
               <Checkbox
-                className="inactive-check"
+                className="action-checkbox"
                 disabled={!canInactivate}
                 checked={!isActive}
                 onClick={
