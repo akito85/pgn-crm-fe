@@ -176,84 +176,61 @@ const JobGroupPage = () => {
       }));
   }, [accessGroupsMap]);
 
-  // Action column with three-dots menu and view button (permission-gated)
-  const actionColumn = useMemo(() => {
-    if (permissionsLoading) {
-      return {
-        title: "ACTIONS",
-        key: "actions",
-        width: 120,
-        align: "center",
-        fixed: "right",
-        render: () => (
+  // Action column — always present so the fixed-right column never
+  // appears/disappears (no layout shift). Skeleton and permission checks
+  // live inside render so only cell content changes during loading.
+  const actionColumn = useMemo(() => ({
+    title: "ACTIONS",
+    key: "actions",
+    width: 120,
+    align: "center",
+    fixed: "right",
+    render: (_, record) => {
+      if (permissionsLoading) {
+        return (
           <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
             <Skeleton.Button active size="small" shape="round" block />
           </div>
-        ),
-      };
-    }
+        );
+      }
 
-    const hasAnyAction = canUpdate || canDelete || canView;
-    if (!hasAnyAction) return null;
+      const hasAnyAction = canUpdate || canDelete || canView;
+      if (!hasAnyAction) return null;
 
-    return {
-      title: "ACTIONS",
-      key: "actions",
-      width: 120,
-      align: "center",
-      fixed: "right",
-      render: (_, record) => {
-        if (!record || !record.id) return <span>—</span>;
+      if (!record || !record.id) return <span>—</span>;
 
-        const menuItems = [
-          canUpdate && {
-            key: "update",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <EditMenuIcon /> Update
-              </span>
-            ),
-            onClick: () => navigate(JOB_MGMT_ROUTES.UPDATE_JOB_GROUP, { state: { id: record.id } }),
+      const menuItems = [
+        canUpdate && {
+          key: "update",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EditMenuIcon /> Update
+            </span>
+          ),
+          onClick: () => navigate(JOB_MGMT_ROUTES.UPDATE_JOB_GROUP, { state: { id: record.id } }),
+        },
+        canDelete && {
+          key: "delete",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <DeleteMenuIcon /> Delete
+            </span>
+          ),
+          onClick: () => {
+            setGroupToDelete({
+              id: record.id,
+              name: record.name || "—",
+              code: record.code || "—",
+            });
+            setDeleteModalOpen(true);
           },
-          canDelete && {
-            key: "delete",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <DeleteMenuIcon /> Delete
-              </span>
-            ),
-            onClick: () => {
-              setGroupToDelete({
-                id: record.id,
-                name: record.name || "—",
-                code: record.code || "—",
-              });
-              setDeleteModalOpen(true);
-            },
-          },
-        ].filter(Boolean);
+        },
+      ].filter(Boolean);
 
-        return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {menuItems.length > 0 && (
-              <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 4,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  type="button"
-                >
-                  <IconThreeDots />
-                </button>
-              </Dropdown>
-            )}
-            {canView && (
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          {menuItems.length > 0 && (
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
               <button
                 style={{
                   background: "none",
@@ -263,20 +240,36 @@ const JobGroupPage = () => {
                   display: "flex",
                   alignItems: "center",
                 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(JOB_MGMT_ROUTES.VIEW_JOB_GROUP_DETAIL, { state: { id: record.id } });
-                }}
+                onClick={(e) => e.stopPropagation()}
                 type="button"
               >
-                <ViewListIcon />
+                <IconThreeDots />
               </button>
-            )}
-          </div>
-        );
-      },
-    };
-  }, [permissionsLoading, navigate, canUpdate, canDelete, canView]);
+            </Dropdown>
+          )}
+          {canView && (
+            <button
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(JOB_MGMT_ROUTES.VIEW_JOB_GROUP_DETAIL, { state: { id: record.id } });
+              }}
+              type="button"
+            >
+              <ViewListIcon />
+            </button>
+          )}
+        </div>
+      );
+    },
+  }), [permissionsLoading, navigate, canUpdate, canDelete, canView]);
 
   // Parent column definitions (memoized — stable reference, not re-created on every render)
   const parentColumns = useMemo(

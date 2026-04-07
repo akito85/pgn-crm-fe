@@ -183,95 +183,90 @@ const JobPage = () => {
     }
   }, [createJobMutation]);
 
-  // Action column (permission-gated)
-  const actionColumn = useMemo(() => {
-    if (permissionsLoading) {
-      return {
-        title: "ACTIONS",
-        key: "actions",
-        width: 120,
-        align: "center",
-        fixed: "right",
-        render: () => (
+  // Action column — always present in baseColumns so the fixed-right column
+  // never appears/disappears (no layout shift). Skeleton and permission checks
+  // live inside render so only cell content changes during loading.
+  const actionColumn = useMemo(() => ({
+    title: "ACTIONS",
+    key: "actions",
+    width: 120,
+    align: "center",
+    fixed: "right",
+    render: (_, record) => {
+      if (permissionsLoading) {
+        return (
           <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
             <Skeleton.Button active size="small" shape="round" block />
           </div>
-        ),
-      };
-    }
+        );
+      }
 
-    const hasAnyAction = canCreate || canUpdate || canDelete || canView;
-    if (!hasAnyAction) return null;
+      const hasAnyAction = canCreate || canUpdate || canDelete || canView;
+      if (!hasAnyAction) return null;
 
-    return {
-      title: "ACTIONS",
-      key: "actions",
-      width: 120,
-      align: "center",
-      fixed: "right",
-      render: (_, record) => {
-        const menuItems = [
-          canCreate && {
-            key: "copy",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
-                <IconCopy width="18" height="18" /> Copy
-              </span>
-            ),
-            onClick: () => handleCopy(record),
-            disabled: copyingId === record.id,
+      const menuItems = [
+        canCreate && {
+          key: "copy",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
+              <IconCopy width="18" height="18" /> Copy
+            </span>
+          ),
+          onClick: () => handleCopy(record),
+          disabled: copyingId === record.id,
+        },
+        canUpdate && {
+          key: "update",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EditMenuIcon /> Update
+            </span>
+          ),
+          onClick: () => toUpdate(record.id),
+        },
+        canDelete && {
+          key: "delete",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <DeleteMenuIcon /> Delete
+            </span>
+          ),
+          onClick: () => {
+            setJobToDelete({ id: record.id, name: record.name, code: record.code });
+            setDeleteModalOpen(true);
           },
-          canUpdate && {
-            key: "update",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <EditMenuIcon /> Update
-              </span>
-            ),
-            onClick: () => toUpdate(record.id),
-          },
-          canDelete && {
-            key: "delete",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <DeleteMenuIcon /> Delete
-              </span>
-            ),
-            onClick: () => {
-              setJobToDelete({ id: record.id, name: record.name, code: record.code });
-              setDeleteModalOpen(true);
-            },
-          },
-        ].filter(Boolean);
+        },
+      ].filter(Boolean);
 
-        return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {menuItems.length > 0 && (
-              <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-                <button
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <IconThreeDots />
-                </button>
-              </Dropdown>
-            )}
-            {canView && (
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          {menuItems.length > 0 && (
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
               <button
                 style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-                onClick={() => toView(record.id)}
+                onClick={(e) => e.stopPropagation()}
+                type="button"
               >
-                <ViewListIcon />
+                <IconThreeDots />
               </button>
-            )}
-          </div>
-        );
-      },
-    };
-  }, [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
+            </Dropdown>
+          )}
+          {canView && (
+            <button
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+              onClick={() => toView(record.id)}
+              type="button"
+            >
+              <ViewListIcon />
+            </button>
+          )}
+        </div>
+      );
+    },
+  }), [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
+    () => [...getJobManagementColumns(accessGroupsMap), actionColumn],
     [actionColumn, accessGroupsMap]
   );
 
