@@ -7,10 +7,6 @@ import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInp
 import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import {
-  getAccountStandardDetail,
-  getAccountOneTimeDetail
-} from "../../../../../../../../redux/slices/account_management/accountManagement";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createInvoiceRelation,
@@ -274,17 +270,6 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       setConfirmationType("");
     }
   };
-
-  // Fetch Account Standard/OneTime Detail
-  useEffect(() => {
-    if (accountId && customerId && accountType) {
-      if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ customerId, accountId }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ customerId, accountId }));
-      }
-    }
-  }, [dispatch, accountId, customerId, accountType]);
 
   const setAccount = (accountId, accountNumber, accountName) => {
     form.setFieldValue("accountId", accountId);

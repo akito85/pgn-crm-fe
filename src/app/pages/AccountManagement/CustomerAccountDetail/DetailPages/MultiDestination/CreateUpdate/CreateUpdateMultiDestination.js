@@ -7,10 +7,6 @@ import NxApprovalInput from "../../../../../../../components/Nx/NxApprovalInput"
 import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import {
-  getAccountStandardDetail,
-  getAccountOneTimeDetail,
-} from "../../../../../../../redux/slices/account_management/accountManagement";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createMultiDestination,
@@ -330,17 +326,6 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       setConfirmationType("");
     }
   };
-
-  // Fetch Account Standard/OneTime Detail
-  useEffect(() => {
-    if (accountId && customerId && accountType) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ idCustomer: customerId, idAccount: accountId }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer: customerId, idAccount: accountId }));
-      }
-    }
-  }, [dispatch, accountId, customerId, accountType]);
 
   const setAccount = (
     {

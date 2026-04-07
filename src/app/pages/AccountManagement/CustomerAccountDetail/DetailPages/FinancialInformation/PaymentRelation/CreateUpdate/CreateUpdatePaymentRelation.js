@@ -7,11 +7,6 @@ import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInp
 import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import {
-  getAccountStandardDetail,
-  getAccountOneTimeDetail
-} from "../../../../../../../../redux/slices/account_management/accountManagement";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createPaymentRelation,
