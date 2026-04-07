@@ -1,10 +1,10 @@
-import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
 import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import RelationshipInfo from "../StepContents/InformationForm/RelationshipInfo";
 import RelatedDetailCard from "../StepContents/InformationForm/RelatedDetailCard";
+import NxRemarkInput from "../../../../../../../../components/Nx/NxRemarkIInput";
 
 const ConfirmationModalTabs = ({
   form,
@@ -57,7 +57,7 @@ const ConfirmationModalTabs = ({
       key: 3,
       label: "Remark",
       disabled,
-      children: <ConfirmationModalRemark disabled={disabled} />,
+      children: <NxRemarkInput disabled={disabled} />,
     },
   ]
     .filter(Boolean)
