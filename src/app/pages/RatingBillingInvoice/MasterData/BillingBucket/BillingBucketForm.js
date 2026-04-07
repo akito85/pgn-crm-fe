@@ -739,10 +739,22 @@ const BillingBucketForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
-      ) {
+      let isOverlap = false;
+
+      if (moment(item?.startDate).startOf("day") < moment(formHeader?.startDate).startOf("day")) {
+        isOverlap = true;
+      }
+
+      if (formHeader?.endDate) {
+        if (
+          !item?.endDate ||
+          moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day")
+        ) {
+          isOverlap = true;
+        }
+      }
+
+      if (isOverlap) {
         dataOverlap?.push(item);
       }
     });
@@ -771,9 +783,13 @@ const BillingBucketForm = ({ type }) => {
   // Handle Save Form
   const handleSave = async (formValue) => {
     let errorBody = {};
-    const hasOverlapping = checkOverlappingData(
+    const hasOverlappingCriteria = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
       listDataCriteria,
+    );
+    const hasOverlappingBI = checkOverlappingData(
+      { startDate: formValue?.startDate, endDate: formValue?.endDate },
+      listDataBI,
     );
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
@@ -805,10 +821,16 @@ const BillingBucketForm = ({ type }) => {
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
-      } else if (hasOverlapping) {
+      } else if (hasOverlappingCriteria) {
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
+        };
+        dispatch(showModalError(errorBody));
+      } else if (hasOverlappingBI) {
+        const errorBody = {
+          title: "Failed",
+          description: `You can't add Billing Item Detail. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
       } else {
@@ -966,6 +988,7 @@ const BillingBucketForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
@@ -1011,12 +1034,70 @@ const BillingBucketForm = ({ type }) => {
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
     setStartDate(value);
+
+    // Auto adjust details start date
+    if (value) {
+      const newHeaderStart = moment(value);
+      const formattedValue = newHeaderStart.format(dateFormatting.dateFormal);
+
+      if (listDataCriteria?.length > 0) {
+        const adjustedCriteria = listDataCriteria.map((item) => {
+          let newStartDate = item.startDate;
+          if (item.startDate && moment(item.startDate) < newHeaderStart) {
+            newStartDate = formattedValue;
+          }
+          return { ...item, startDate: newStartDate };
+        });
+        setListDataCriteria(adjustedCriteria);
+      }
+
+      if (listDataBI?.length > 0) {
+        const adjustedBI = listDataBI.map((item) => {
+          let newStartDate = item.startDate;
+          if (item.startDate && moment(item.startDate) < newHeaderStart) {
+            newStartDate = formattedValue;
+          }
+          return { ...item, startDate: newStartDate };
+        });
+        setListDataBI(adjustedBI);
+      }
+    }
+
     return value;
   };
 
   // Function Get Data EndDate
   const handleEndDate = (value) => {
     setEndDate(value);
+
+    // Auto adjust details end date
+    if (value) {
+      const newHeaderEnd = moment(value);
+      const formattedValue = newHeaderEnd.format(dateFormatting.dateFormal);
+
+      if (listDataCriteria?.length > 0) {
+        const adjustedCriteria = listDataCriteria.map((item) => {
+          let newEndDate = item.endDate;
+          if (!item.endDate || moment(item.endDate) > newHeaderEnd) {
+            newEndDate = formattedValue;
+          }
+          return { ...item, endDate: newEndDate };
+        });
+        setListDataCriteria(adjustedCriteria);
+      }
+
+      if (listDataBI?.length > 0) {
+        const adjustedBI = listDataBI.map((item) => {
+          let newEndDate = item.endDate;
+          if (!item.endDate || moment(item.endDate) > newHeaderEnd) {
+            newEndDate = formattedValue;
+          }
+          return { ...item, endDate: newEndDate };
+        });
+        setListDataBI(adjustedBI);
+      }
+    }
+
     return value;
   };
 

@@ -7,6 +7,7 @@ import SelectComponent from "../../../../../../components/SelectComponent";
 import { formMessageRequired, requiredMessage } from "../../../../../../utils";
 import FunctionalTableCriteriaTOP from "../TableCriteria/FunctionalTableCriteriaTOP";
 import DateComponent from "../../../../../../components/DateComponent";
+import CardContainer from "../../../../../../components/CardContainer";
 // import FunctionalTableCriteriaTOP from "../TableCriteria/FunctionalTableCriteriaTOP";
 
 const CreateTOP = ({
@@ -32,8 +33,8 @@ const CreateTOP = ({
   startDate,
   endDate,
   handleStartDate = () => {},
-  handleEndDate = () => { },
-  disbaledDate
+  handleEndDate = () => {},
+  disbaledDate,
 }) => {
   // Dependency Data Criteria
   const handleSelectCriteria = (value) => {
@@ -107,14 +108,17 @@ const CreateTOP = ({
   };
   return (
     <div>
-      <BaseContainer header={"TERMS OF PAYMENT INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-2">
+      <CardContainer header={"TERMS OF PAYMENT INFORMATION"}>
+        <div className="w-full grid grid-cols-3 gap-1">
           <Form.Item
             label={"Name"}
             name={"name"}
             rules={formMessageRequired("Name")}
           >
-            <InputComponent disabled={status === "Active" ? true : false} maxLength={100}/>
+            <InputComponent
+              disabled={status === "Active" ? true : false}
+              maxLength={100}
+            />
           </Form.Item>
 
           <Form.Item
@@ -138,7 +142,7 @@ const CreateTOP = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must before Start date"),
                       ),
               },
             ]}
@@ -178,7 +182,7 @@ const CreateTOP = ({
           </Form.Item>
           <div>
             <label>Exclude</label>
-            <div className="w-full grid grid-cols-3 gap-2 pt-4">
+            <div className="w-full grid grid-cols-3 gap-2 pt-2">
               <Form name={"calendar"} valuePropName="checked">
                 <div>
                   <Checkbox
@@ -230,14 +234,14 @@ const CreateTOP = ({
             </Form.Item>
           </div>
         </div>
-        <div className="w-full grid grid-cols-1 gap-2 pt-[24px]">
+        <div className="w-full grid grid-cols-1 gap-2">
           <Form.Item label={"Description"} name={"description"}>
             <InputComponent type="textarea" cols={4} />
           </Form.Item>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"CRITERIA INFORMATION"}>
+      <CardContainer header={"CRITERIA INFORMATION"}>
         <FunctionalTableCriteriaTOP
           type={type}
           data={listDataCriteria}
@@ -252,7 +256,7 @@ const CreateTOP = ({
           validStartDate={startDate}
           validEndDate={endDate}
         />
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

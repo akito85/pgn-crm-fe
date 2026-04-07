@@ -58,18 +58,18 @@ const GLAccountSectionForm = ({ type, form }) => {
           </div>
 
           <Form.Item
-            label="Reference"
+            label="Description"
             name="remark"
             rules={[
               {
                 required: true,
-                message: "Please input Reference!",
+                message: "Please input Description!",
               },
             ]}
           >
             <InputComponent
               type="textarea"
-              placeholder="Reference.."
+              placeholder="Description.."
               maxLength={255}
             />
           </Form.Item>

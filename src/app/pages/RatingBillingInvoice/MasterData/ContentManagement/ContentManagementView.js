@@ -55,23 +55,29 @@ const ContentManagementView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("contentManagementFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["NO"],
-          right: ["action"],
+    try {
+      const saved = localStorage.getItem("contentManagementFixedColumns");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          left: parsed.left || [],
+          right: parsed.right || [],
         };
+      }
+      return { left: ["NO"], right: ["action"] };
+    } catch (e) {
+      return { left: ["NO"], right: ["action"] };
+    }
   });
 
-  // ✅ Save to localStorage when fixedColumns change
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem(
-      "contentManagementFixedColumns",
-      JSON.stringify(fixedColumns),
-    );
+    try {
+      localStorage.setItem("contentManagementFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   // Use Effect
@@ -302,8 +308,7 @@ const ContentManagementView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVE");
+          record.statusApproval === "REJECTED";
 
         const linkContent = (
           <div className="flex items-center gap-2">

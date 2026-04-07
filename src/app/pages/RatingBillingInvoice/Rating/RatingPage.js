@@ -47,10 +47,23 @@ const RatingPage = () => {
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["action"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("ratingFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("ratingFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   const detailRef = useRef(null);
 

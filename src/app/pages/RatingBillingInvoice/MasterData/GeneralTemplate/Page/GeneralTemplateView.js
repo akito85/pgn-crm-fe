@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
@@ -21,7 +21,6 @@ import {
 import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import TableRBI from "../../../../../../components/TableRBI";
-import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../../../components/CardContainer";
 import { clearBodyMessage } from "../../../../../../redux/slices/general_slice";
 
@@ -40,15 +39,26 @@ const GeneralTemplateView = () => {
 
   // Use State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["statusApproval", "action"],
-  }));
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
+
+  const hasMore = allData.length < (data_list?.page?.totalElements || 0);
+
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("generalTemplateFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["statusApproval", "action"] };
+    }
+  });
 
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [dataInactivate, setDataInactivate] = useState({});
@@ -62,16 +72,43 @@ const GeneralTemplateView = () => {
   const [modalError, setModalError] = useState(false);
 
   //useEffect
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("generalTemplateFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
+
   useEffect(() => {
     dispatch(
       getAllGeneralTemplatePaginate({
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
       })
     );
-  }, [dispatch, page, pageSize, sort, search]);
+  }, [dispatch, sort, search, refreshKey]);
+
+  // Accumulate data for infinite scroll
+  useEffect(() => {
+    if (data_list?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data_list.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.templateId));
+          const newItems = data_list.result.filter(
+            (item) => !ids.has(item.templateId)
+          );
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data_list, page]);
 
   // trigger modal try again from general slice
   useEffect(() => {
@@ -118,7 +155,7 @@ const GeneralTemplateView = () => {
       getDownloadGeneralTemplateList({
         search: tempSearch,
         page,
-        pageSize,
+        pageSize: initialPageSize,
         sort,
       })
     );
@@ -128,6 +165,7 @@ const GeneralTemplateView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    shouldResetRef.current = true;
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -139,10 +177,8 @@ const GeneralTemplateView = () => {
     });
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
   };
 
   const onSort = (_, __, sorter) => {
@@ -150,8 +186,35 @@ const GeneralTemplateView = () => {
       sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
+
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data_list?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getAllGeneralTemplatePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      })
+    );
+  }, [allData.length, data_list?.page?.totalElements, search, sort, dispatch, loadMoreSize]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
 
   const handleRetry = () => {
     if (bodyError?.value) {
@@ -201,23 +264,14 @@ const GeneralTemplateView = () => {
 
     dispatch(activationGeneralTemplate(body))
       .unwrap()
-      .then(async (data) => {
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+      .then(async () => {
+        shouldResetRef.current = true;
         dispatch(
           getAllGeneralTemplatePaginate({
-            page,
-            pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             sort,
-            search: tempSearch,
+            search: encodeURIComponent(JSON.stringify(search)),
           })
         );
         setModalInactivate(false);
@@ -297,9 +351,7 @@ const GeneralTemplateView = () => {
             }}
           >
             <Tooltip title="Detail">
-              <div>
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -311,8 +363,7 @@ const GeneralTemplateView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -321,15 +372,16 @@ const GeneralTemplateView = () => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               border={false}
               disabled={!isEditable}
+              type={"action"}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
+                className={`ml-0 ${
+                  isEditable ? "text-black" : "text-[#8D91A0]"
                 }`}
               >
                 {" "}
@@ -338,10 +390,10 @@ const GeneralTemplateView = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div>
+              <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -392,8 +444,9 @@ const GeneralTemplateView = () => {
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleOpenModalInactivate(record)}
+              type={"action"}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -401,7 +454,7 @@ const GeneralTemplateView = () => {
             <Tooltip
               title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
             >
-              <div>
+              <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleOpenModalInactivate(record)}
@@ -423,20 +476,21 @@ const GeneralTemplateView = () => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div>
+              <div className="pt-1">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() => handleApprovalHistory(record)}
                 />
               </div>
@@ -449,41 +503,66 @@ const GeneralTemplateView = () => {
   ];
 
   // Get base columns from GeneralTemplateTableView
-  const baseColumns = useMemo(() => {
-    return GeneralTemplateTableView(
-      search,
-      page,
-      pageSize,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    );
-  }, [search, page, pageSize, searchedColumn, searchText]);
-
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
     itemGrantAccess
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+  const baseColumns = useMemo(() => {
+    const cols = [
+      ...GeneralTemplateTableView(
+        search,
+        page,
+        initialPageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      ...actionCols,
+    ];
+    return cols.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
-  }, [baseColumns, actionCols]);
-
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
+  }, [search, page, searchedColumn, searchText, actionCols]);
 
   const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [allColumns]);
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    return [...leftFixed, ...normal, ...rightFixed].map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
 
   return (
     <>
@@ -502,12 +581,13 @@ const GeneralTemplateView = () => {
         >
           <div className="my-0">
             <TableRBI
-              dataSource={data_list?.result || []}
-              columns={processedColumns}
+              idTable="generalTemplateTable"
+              dataSource={allData}
+              columns={columns}
               current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
+              pageSize={initialPageSize}
+              onChange={handleChange}
+              onSizeChanger={handleChange}
               totalData={data_list?.page?.totalElements || 0}
               tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
@@ -516,21 +596,26 @@ const GeneralTemplateView = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              useInfiniteScroll={true}
+              usePagination={false}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
 
-        {ModalHistory ? (
-          <ModalHistory
-            isOpen={openModalHistory && dataApprovalHistory}
-            handleClose={() => setOpenModalHistory(false)}
-            header={"Approval History"}
-            width={1000}
-            tabOptions={handleOptions()}
-            dataApprover={dataApprovalHistory?.dataApprover}
-            dataHistory={dataApprovalHistory?.dataHistory}
-          />
-        ) : null}
+        <ModalHistory
+          isOpen={openModalHistory && dataApprovalHistory}
+          handleClose={() => setOpenModalHistory(false)}
+          header={"Approval History"}
+          width={1000}
+          tabOptions={handleOptions()}
+          dataApprover={dataApprovalHistory?.dataApprover}
+          dataHistory={dataApprovalHistory?.dataHistory}
+        />
 
         {/** Modal Retry */}
         {modalError ? (

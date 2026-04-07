@@ -49,17 +49,21 @@ const TaxCodeView = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
 
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("taxCodeFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["no"],
-          right: ["action"],
-        };
+    try {
+      const saved = localStorage.getItem("taxCodeFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
   });
 
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem("taxCodeFixedColumns", JSON.stringify(fixedColumns));
+    try {
+      localStorage.setItem("taxCodeFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   const routes = [
@@ -290,8 +294,7 @@ const TaxCodeView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (

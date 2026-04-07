@@ -41,6 +41,7 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../../../components/Modal/ModalPopUp";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DailyRateForm = ({ type }) => {
   const {
@@ -420,6 +421,7 @@ const DailyRateForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
@@ -657,19 +659,19 @@ const DailyRateForm = ({ type }) => {
 
           {/* Step 2: Approval - Conditional Rendering */}
           {valuePage === tabData[1].value && (
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+            <CardContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* Step 3: Attachment - Conditional Rendering */}
           {valuePage === tabData[2].value && (
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+            <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -683,7 +685,7 @@ const DailyRateForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* FormFooter menggantikan tombol manual */}

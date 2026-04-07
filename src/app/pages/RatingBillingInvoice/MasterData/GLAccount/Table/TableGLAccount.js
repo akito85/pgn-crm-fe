@@ -69,7 +69,7 @@ export const columnsGLAccount = (
         ),
     }, 
     {
-      title: "REFERENCE",
+      title: "DESCRIPTION",
       dataIndex: "remark",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(

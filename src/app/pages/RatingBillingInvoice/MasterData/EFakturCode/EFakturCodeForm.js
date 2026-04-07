@@ -205,7 +205,7 @@ const EFakturCodeForm = ({ type }) => {
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getApprovalHierarchyDetail(selectedHierarchy));
+      dispatch(getApprovalHierarchyDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
@@ -519,6 +519,7 @@ const EFakturCodeForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);

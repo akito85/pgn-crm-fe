@@ -135,21 +135,23 @@ const GLAccountForm = ({ type }) => {
         fileCategoryId: item.fileCategoryId || null,
         fileCategoryName: item.fileCategoryName || "-",
         pathFile: item.pathFile || "",
-        urlFile1: item.urlFile1 || "",
+        urlFile1: `/v1/dbs/api/gl-account/download-attachment/${item.id}` || "",
         urlFile2: item.urlFile2 || "",
         uploadBy: item.createdBy || "-",
         uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
         dataType: "exist",
       }));
 
+      const hierarchyId = glAccount?.apphierId || glAccount?.appHierId || glAccount?.approvalHierarchy || approvalInfo?.apphierId || approvalInfo?.appHierId || null;
+
       form.setFieldsValue({
         glAccount: glAccount?.glAccount || "",
         glAccountDesc: glAccount?.glAccountDesc || "",
         remark: glAccount?.remark || "",
-        apphierId: approvalInfo?.tAppId || null,
+        apphierId: hierarchyId,
       });
 
-      setSelectedHierarchy(approvalInfo?.tAppId);
+      setSelectedHierarchy(hierarchyId);
       setListDataAttachment(mappedAttachment);
     }
   }, [id, type, form, data_detail]);
