@@ -38,7 +38,6 @@ const getGasDepositDetailMutationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.period] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "period",
@@ -46,7 +45,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -55,7 +53,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "mutationDate",
     width: 200,
     align: "center",
-    filteredValue: [search?.mutationDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mutationDate",
@@ -73,7 +70,6 @@ const getGasDepositDetailMutationColumns = (
     title: "TYPE",
     dataIndex: "type",
     width: 100,
-    filteredValue: [search?.type] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "type",
@@ -81,7 +77,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
     ),
   },
   {
@@ -89,7 +84,6 @@ const getGasDepositDetailMutationColumns = (
     title: "SOURCE",
     dataIndex: "source",
     width: 200,
-    filteredValue: [search?.source] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "source",
@@ -97,7 +91,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
     ),
   },
   {
@@ -106,7 +99,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "m3",
     width: 150,
     align: "right",
-    filteredValue: [search?.m3] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "m3",
@@ -114,7 +106,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
     ),
   },
   {
@@ -123,7 +114,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "mscf",
     width: 150,
     align: "right",
-    filteredValue: [search?.mscf] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mscf",
@@ -131,7 +121,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -140,7 +129,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "mmbtu",
     width: 150,
     align: "right",
-    filteredValue: [search?.mmbtu] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mmbtu",
@@ -148,7 +136,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -157,7 +144,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "price",
     width: 200,
     align: "right",
-    filteredValue: [search?.price] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "price",
@@ -165,7 +151,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -174,7 +159,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "amount",
     width: 200,
     align: "right",
-    filteredValue: [search?.amount] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amount",
@@ -182,7 +166,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -190,7 +173,6 @@ const getGasDepositDetailMutationColumns = (
     title: "REMARK",
     dataIndex: "remark",
     width: 300,
-    filteredValue: [search?.remark] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "remark",
@@ -198,7 +180,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
 ];

@@ -24,7 +24,6 @@ const getAccountStandardColumns = (
     dataIndex: "customerNumber",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -32,7 +31,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -41,7 +39,6 @@ const getAccountStandardColumns = (
     dataIndex: "customerIdentificationType",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerIdentificationType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerIdentificationType",
@@ -49,7 +46,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -58,7 +54,6 @@ const getAccountStandardColumns = (
     dataIndex: "customerIdentificationNumber",
     width: 220,
     sorter: true,
-    filteredValue: [search?.customerIdentificationNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerIdentificationNumber",
@@ -66,7 +61,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -75,7 +69,6 @@ const getAccountStandardColumns = (
     dataIndex: "customerName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -83,7 +76,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -92,7 +84,6 @@ const getAccountStandardColumns = (
     dataIndex: "customerType",
     width: 160,
     sorter: true,
-    filteredValue: [search?.customerType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerType",
@@ -100,7 +91,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -109,7 +99,6 @@ const getAccountStandardColumns = (
     dataIndex: "accountNumber",
     width: 250,
     sorter: true,
-    filteredValue: [search?.accountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -117,7 +106,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -126,7 +114,6 @@ const getAccountStandardColumns = (
     dataIndex: "accountName",
     width: 250,
     sorter: true,
-    filteredValue: [search?.accountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -134,7 +121,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -143,7 +129,6 @@ const getAccountStandardColumns = (
     dataIndex: "accountCategory",
     width: 200,
     sorter: true,
-    filteredValue: [search?.accountCategory] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountCategory",
@@ -151,7 +136,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -160,7 +144,6 @@ const getAccountStandardColumns = (
     dataIndex: "sor",
     width: 200,
     sorter: true,
-    filteredValue: [search?.sor] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "sor",
@@ -168,7 +151,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -177,7 +159,6 @@ const getAccountStandardColumns = (
     dataIndex: "costCenter",
     width: 200,
     sorter: true,
-    filteredValue: [search?.costCenter] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "costCenter",
@@ -185,7 +166,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -194,7 +174,6 @@ const getAccountStandardColumns = (
     dataIndex: "meterReadingCode",
     width: 200,
     sorter: true,
-    filteredValue: [search?.meterReadingCode] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "meterReadingCode",
@@ -202,7 +181,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -211,7 +189,6 @@ const getAccountStandardColumns = (
     dataIndex: "customerManagement",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerManagement] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerManagement",
@@ -219,7 +196,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -228,7 +204,6 @@ const getAccountStandardColumns = (
     dataIndex: "classificationType",
     width: 200,
     sorter: true,
-    filteredValue: [search?.classificationType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "classificationType",
@@ -236,7 +211,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -245,7 +219,6 @@ const getAccountStandardColumns = (
     dataIndex: "accountSegment",
     width: 200,
     sorter: true,
-    filteredValue: [search?.accountSegment] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountSegment",
@@ -253,7 +226,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -262,7 +234,6 @@ const getAccountStandardColumns = (
     dataIndex: "accountGroupType",
     width: 200,
     sorter: true,
-    filteredValue: [search?.accountGroupType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountGroupType",
@@ -270,7 +241,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -279,7 +249,6 @@ const getAccountStandardColumns = (
     dataIndex: "premiseAddress",
     width: 200,
     sorter: true,
-    filteredValue: [search?.premiseAddress] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "premiseAddress",
@@ -287,7 +256,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -296,7 +264,6 @@ const getAccountStandardColumns = (
     dataIndex: "subDistrict",
     width: 200,
     sorter: true,
-    filteredValue: [search?.subDistrict] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "subDistrict",
@@ -304,7 +271,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -313,7 +279,6 @@ const getAccountStandardColumns = (
     dataIndex: "district",
     width: 200,
     sorter: true,
-    filteredValue: [search?.district] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "district",
@@ -321,7 +286,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -330,7 +294,6 @@ const getAccountStandardColumns = (
     dataIndex: "city",
     width: 200,
     sorter: true,
-    filteredValue: [search?.city] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "city",
@@ -338,7 +301,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -347,7 +309,6 @@ const getAccountStandardColumns = (
     dataIndex: "province",
     width: 200,
     sorter: true,
-    filteredValue: [search?.province] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "province",
@@ -355,7 +316,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -364,7 +324,6 @@ const getAccountStandardColumns = (
     dataIndex: "country",
     width: 200,
     sorter: true,
-    filteredValue: [search?.country] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "country",
@@ -372,7 +331,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -381,7 +339,6 @@ const getAccountStandardColumns = (
     dataIndex: "longitude",
     width: 200,
     sorter: true,
-    filteredValue: [search?.longitude] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "longitude",
@@ -389,7 +346,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -398,7 +354,6 @@ const getAccountStandardColumns = (
     dataIndex: "latitude",
     width: 200,
     sorter: true,
-    filteredValue: [search?.latitude] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "latitude",
@@ -406,7 +361,6 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {

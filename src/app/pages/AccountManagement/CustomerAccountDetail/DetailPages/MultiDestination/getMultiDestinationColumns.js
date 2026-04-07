@@ -41,7 +41,6 @@ const getMultiDestinationColumns = (
     dataIndex: "customerNumber",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -49,7 +48,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -59,7 +57,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.identificationType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "identificationType",
@@ -67,7 +64,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -77,7 +73,6 @@ const getMultiDestinationColumns = (
     width: 250,
     sorter: true,
     align: "center",
-    filteredValue: [search?.customerIdentificationNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerIdentificationNumber",
@@ -85,7 +80,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -95,7 +89,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.customerName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -103,7 +96,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -113,7 +105,6 @@ const getMultiDestinationColumns = (
     width: 180,
     sorter: true,
     align: "center",
-    filteredValue: [search?.customerType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerType",
@@ -121,7 +112,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -131,7 +121,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.accountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -139,7 +128,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -149,7 +137,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.accountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -157,7 +144,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -167,7 +153,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.category] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "category",
@@ -175,7 +160,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -185,7 +169,6 @@ const getMultiDestinationColumns = (
     width: 120,
     sorter: true,
     align: "center",
-    filteredValue: [search?.sor] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "sor",
@@ -193,7 +176,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -203,7 +185,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.costCenter] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "costCenter",
@@ -211,7 +192,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -221,7 +201,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.meterReadingCodes] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "meterReadingCodes",
@@ -229,7 +208,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -239,7 +217,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.customerManagement] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerManagement",
@@ -247,7 +224,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -257,7 +233,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.classificationType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "classificationType",
@@ -265,7 +240,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -275,7 +249,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.segment] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "segment",
@@ -283,7 +256,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -293,7 +265,6 @@ const getMultiDestinationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.accountGroupType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountGroupType",
@@ -301,7 +272,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -311,7 +281,6 @@ const getMultiDestinationColumns = (
     width: 250,
     sorter: true,
     align: "center",
-    filteredValue: [search?.premiseAddress] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "premiseAddress",
@@ -319,7 +288,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -329,7 +297,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.subDistrict] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "subDistrict",
@@ -337,7 +304,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -347,7 +313,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.district] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "district",
@@ -355,7 +320,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -365,7 +329,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.city] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "city",
@@ -373,7 +336,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -383,7 +345,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.country] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "country",
@@ -391,7 +352,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -401,7 +361,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.longitude] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "longitude",
@@ -409,7 +368,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -419,7 +377,6 @@ const getMultiDestinationColumns = (
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.latitude] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "latitude",
@@ -427,7 +384,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -436,7 +392,6 @@ const getMultiDestinationColumns = (
     dataIndex: "startDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.startDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -444,7 +399,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
@@ -454,7 +408,6 @@ const getMultiDestinationColumns = (
     dataIndex: "endDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.endDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -462,7 +415,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
@@ -473,7 +425,6 @@ const getMultiDestinationColumns = (
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -481,7 +432,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
@@ -507,7 +457,6 @@ const getMultiDestinationColumns = (
     dataIndex: "status",
     width: 120,
     sorter: true,
-    filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
@@ -515,7 +464,6 @@ const getMultiDestinationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {

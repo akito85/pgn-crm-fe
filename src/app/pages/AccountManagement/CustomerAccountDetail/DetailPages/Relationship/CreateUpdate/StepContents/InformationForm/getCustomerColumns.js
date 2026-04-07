@@ -24,7 +24,6 @@ const getCustomerColumns = (
     dataIndex: "customerNumber",
     width: 220,
     sorter: true,
-    filteredValue: [search?.customerNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -32,7 +31,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -41,7 +39,6 @@ const getCustomerColumns = (
     dataIndex: "partyType",
     width: 231,
     sorter: true,
-    filteredValue: [search?.partyType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "partyType",
@@ -49,7 +46,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -58,7 +54,6 @@ const getCustomerColumns = (
     dataIndex: "customerIdentificationNumber",
     width: 343,
     sorter: true,
-    filteredValue: [search?.customerIdentificationNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerIdentificationNumber",
@@ -66,7 +61,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -75,7 +69,6 @@ const getCustomerColumns = (
     dataIndex: "customerName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -83,7 +76,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -92,7 +84,6 @@ const getCustomerColumns = (
     dataIndex: "customerType",
     width: 194,
     sorter: true,
-    filteredValue: [search?.customerType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerType",
@@ -100,7 +91,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {

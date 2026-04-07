@@ -23,7 +23,6 @@ const getDetailAttachmentColumns = (
     dataIndex: "fileCategoryName",
     width: 150,
     sorter: true,
-    filteredValue: [search?.fileCategoryName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fileCategoryName",
@@ -31,7 +30,6 @@ const getDetailAttachmentColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -40,7 +38,6 @@ const getDetailAttachmentColumns = (
     dataIndex: "fileName",
     width: 300,
     sorter: true,
-    filteredValue: [search?.fileName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fileName",
@@ -48,7 +45,6 @@ const getDetailAttachmentColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -58,7 +54,6 @@ const getDetailAttachmentColumns = (
     width: 100,
     sorter: true,
     align: "center",
-    filteredValue: [search?.fileSize] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fileSize",
@@ -66,7 +61,6 @@ const getDetailAttachmentColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
