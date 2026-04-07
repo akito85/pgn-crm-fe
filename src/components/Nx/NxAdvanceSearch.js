@@ -22,7 +22,7 @@ const NxAdvanceSearch = ({
     {
       id: Date.now(),
       column: "",
-      operator: "Equal to",
+      operator: "Contains",
       value: "",
       logic: "AND",
     },
@@ -33,26 +33,26 @@ const NxAdvanceSearch = ({
   const getColumnKey = (col, index) =>
     col?.key || col?.dataIndex || `${col?.title || "column"}-${index}`;
 
-  // Available operators
+  // Available operators (mapped to backend selectors: LIKE, EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN, IS_NULL, IS_NOT_NULL)
   const operators = [
+    "Contains",
     "Equal to",
     "Not equal to",
-    "Contains",
-    "Does not contain",
     "Greater than",
     "Less than",
-    "Greater than or equal",
-    "Less than or equal",
     "Is empty",
     "Is not empty",
   ];
+
+  // Only show columns that have a dataIndex (filterable entity fields)
+  const filterableColumns = columns.filter((col) => col.dataIndex);
 
   // Add new filter to main group
   const addFilter = () => {
     const newFilter = {
       id: Date.now(),
       column: "",
-      operator: "Equal to",
+      operator: "Contains",
       value: "",
       logic: "AND",
     };
@@ -83,7 +83,7 @@ const NxAdvanceSearch = ({
           {
             id: Date.now() + 1,
             column: "",
-            operator: "Equal to",
+            operator: "Contains",
             value: "",
             logic: "AND",
           },
@@ -105,7 +105,7 @@ const NxAdvanceSearch = ({
                 {
                   id: Date.now(),
                   column: "",
-                  operator: "Equal to",
+                  operator: "Contains",
                   value: "",
                   logic: "AND",
                 },
@@ -162,7 +162,7 @@ const NxAdvanceSearch = ({
       {
         id: Date.now(),
         column: "",
-        operator: "Equal to",
+        operator: "Contains",
         value: "",
         logic: "AND",
       },
@@ -170,6 +170,7 @@ const NxAdvanceSearch = ({
     setFilterRules([]);
     setLimitData("");
     onClear?.();
+    onClose?.();
   };
 
   // Logic dropdown menu
@@ -214,7 +215,7 @@ const NxAdvanceSearch = ({
                     borderRadius: 8,
                   }}
                 >
-                  {columns.map((col, index) => {
+                  {filterableColumns.map((col, index) => {
                     const columnKey = getColumnKey(col, index);
                     return (
                     <Option key={columnKey} value={columnKey}>
@@ -242,17 +243,19 @@ const NxAdvanceSearch = ({
             </div>
 
             {/* First Filter Value Input */}
-            <div className="mb-4">
-              <TextArea
-                placeholder="Input Value or Formula"
-                value={filters[0]?.value}
-                onChange={(e) =>
-                  updateFilter(filters[0].id, "value", e.target.value)
-                }
-                size="large"
-                style={{ borderRadius: 8 }}
-              />
-            </div>
+            {filters[0]?.operator !== "Is empty" && filters[0]?.operator !== "Is not empty" && (
+              <div className="mb-4">
+                <TextArea
+                  placeholder="Input Value or Formula"
+                  value={filters[0]?.value}
+                  onChange={(e) =>
+                    updateFilter(filters[0].id, "value", e.target.value)
+                  }
+                  size="large"
+                  style={{ borderRadius: 8 }}
+                />
+              </div>
+            )}
             {/* Additional Filters in Main Group */}
             {filters.slice(1).map((filter, index) => (
               <div key={filter.id} className="mb-4">
@@ -286,7 +289,7 @@ const NxAdvanceSearch = ({
                     showSearch
                     size="large"
                   >
-                    {columns.map((col, index) => {
+                    {filterableColumns.map((col, index) => {
                       const columnKey = getColumnKey(col, index);
                       return (
                       <Option key={columnKey} value={columnKey}>
@@ -312,15 +315,17 @@ const NxAdvanceSearch = ({
                   </Select>
                 </div>
 
-                <TextArea
-                  placeholder="Input Value or Formula"
-                  value={filter.value}
-                  onChange={(e) =>
-                    updateFilter(filter.id, "value", e.target.value)
-                  }
-                  size="large"
-                  style={{ borderRadius: 8 }}
-                />
+                {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
+                  <TextArea
+                    placeholder="Input Value or Formula"
+                    value={filter.value}
+                    onChange={(e) =>
+                      updateFilter(filter.id, "value", e.target.value)
+                    }
+                    size="large"
+                    style={{ borderRadius: 8 }}
+                  />
+                )}
               </div>
             ))}
 
@@ -402,7 +407,7 @@ const NxAdvanceSearch = ({
                         showSearch
                         size="large"
                       >
-                        {columns.map((col, index) => {
+                        {filterableColumns.map((col, index) => {
                           const columnKey = getColumnKey(col, index);
                           return (
                           <Option key={columnKey} value={columnKey}>
@@ -433,20 +438,22 @@ const NxAdvanceSearch = ({
                       </Select>
                     </div>
 
-                    <TextArea
-                      placeholder="Input Value or Formula"
-                      value={filter.value}
-                      onChange={(e) =>
-                        updateRuleFilter(
-                          rule.id,
-                          filter.id,
-                          "value",
-                          e.target.value
-                        )
-                      }
-                      size="large"
-                      style={{ borderRadius: 8 }}
-                    />
+                    {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
+                      <TextArea
+                        placeholder="Input Value or Formula"
+                        value={filter.value}
+                        onChange={(e) =>
+                          updateRuleFilter(
+                            rule.id,
+                            filter.id,
+                            "value",
+                            e.target.value
+                          )
+                        }
+                        size="large"
+                        style={{ borderRadius: 8 }}
+                      />
+                    )}
                   </div>
                 ))}
                 <Button
