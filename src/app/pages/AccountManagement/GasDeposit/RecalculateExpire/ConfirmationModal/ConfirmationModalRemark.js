@@ -2,6 +2,12 @@ import { Form } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
 import { requiredMessage } from "../../../../../../utils";
 
+/**
+ * Required remark textarea rendered on the Remark tab of the confirmation
+ * modal. Only shown for "submit" type actions.
+ *
+ * @param {{ disabled?: boolean }} props
+ */
 const ConfirmationModalRemark = ({ disabled = false }) => {
   return (
     <Form.Item
