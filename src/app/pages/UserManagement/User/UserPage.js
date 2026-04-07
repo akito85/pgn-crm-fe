@@ -1,10 +1,9 @@
 import {
   DownloadOutlined,
   ExclamationCircleOutlined,
-  LinkOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Alert, Checkbox, Form, Tooltip } from "antd";
+import { Alert, Form, Tooltip } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -23,6 +22,8 @@ import PendingTaskLayout from "./PendingTaskLayout";
 import SVGIcon from "../../../../assets/Icon/index";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconGenerateLink from "../../../../assets/Icon/Nx/IconGenerateLink";
+import IconPower from "../../../../assets/Icon/Nx/IconPower";
 import InputComponent from "../../../../components/InputComponent";
 import { formMessageRequired, hasValue } from "../../../../utils";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
@@ -157,7 +158,7 @@ const UserPage = () => {
     form.resetFields();
   };
 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     dispatch(
       donwloadedExcel({
         search: encodeURIComponent(JSON.stringify(search)),
@@ -166,7 +167,7 @@ const UserPage = () => {
         sort,
       })
     );
-  };
+  }, [dispatch, search, pageSize, sort]);
 
   const onFinish = async (formValue) => {
     try {
@@ -215,7 +216,7 @@ const UserPage = () => {
     { path: USER_ROUTES.VIEW_USER, breadcrumbName: "User" },
   ];
 
-  const itemActions = [
+  const itemActions = useMemo(() => [
     // Toolbar actions
     {
       action: "Change",
@@ -326,14 +327,12 @@ const UserPage = () => {
           >
             <ButtonComponent
               icon={
-                <LinkOutlined
-                  style={{
-                    color:
-                      record?.status === "ACTIVE" && record.authType !== "LDAP"
-                        ? "#1976D2"
-                        : "#C0BEC6",
-                    fontSize: 24,
-                  }}
+                <IconGenerateLink
+                  color={
+                    record?.status === "ACTIVE" && record.authType !== "LDAP"
+                      ? "#1976D2"
+                      : "#C0BEC6"
+                  }
                 />
               }
               border={false}
@@ -350,14 +349,8 @@ const UserPage = () => {
         <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
           <ButtonComponent
             icon={
-              <Checkbox
-                checked={record?.status !== "ACTIVE"}
-                onClick={() => {
-                  setOpenModal(true);
-                  setSelectedUserId(record?.userId);
-                  setActivate(record?.status);
-                  setRecord(record);
-                }}
+              <IconPower
+                color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
               />
             }
             border={false}
@@ -371,7 +364,7 @@ const UserPage = () => {
         </Tooltip>
       ),
     },
-  ];
+  ], [handleDownload]);
 
   return (
     <>
