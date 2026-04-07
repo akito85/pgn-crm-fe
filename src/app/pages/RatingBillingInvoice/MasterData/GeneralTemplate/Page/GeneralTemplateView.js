@@ -52,13 +52,12 @@ const GeneralTemplateView = () => {
   const hasMore = allData.length < (data_list?.page?.totalElements || 0);
 
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("generalTemplateFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["no"],
-          right: ["statusApproval", "action"],
-        };
+    try {
+      const saved = localStorage.getItem("generalTemplateFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["statusApproval", "action"] };
+    }
   });
 
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
@@ -73,11 +72,13 @@ const GeneralTemplateView = () => {
   const [modalError, setModalError] = useState(false);
 
   //useEffect
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem(
-      "generalTemplateFixedColumns",
-      JSON.stringify(fixedColumns)
-    );
+    try {
+      localStorage.setItem("generalTemplateFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   useEffect(() => {

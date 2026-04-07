@@ -54,20 +54,21 @@ const BillingCycleView = ({ type }) => {
     billing_cycle_list.length < (billing_cycle_pagination?.totalElements || 0);
 
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("billingCycleFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["no"],
-          right: ["action"],
-        };
+    try {
+      const saved = localStorage.getItem("billingCycleFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
   });
 
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem(
-      "billingCycleFixedColumns",
-      JSON.stringify(fixedColumns),
-    );
+    try {
+      localStorage.setItem("billingCycleFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   const routes = [

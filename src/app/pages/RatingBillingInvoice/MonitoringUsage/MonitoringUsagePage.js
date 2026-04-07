@@ -72,10 +72,23 @@ const MonitoringUsagePage = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["action", "status"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("monitoringUsageFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action", "status"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action", "status"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("monitoringUsageFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   useEffect(() => {
     if (

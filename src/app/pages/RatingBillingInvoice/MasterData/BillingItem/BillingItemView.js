@@ -48,10 +48,14 @@ const BillingItemView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["status", "statusApproval", "action"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("billingItemFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["status", "statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["status", "statusApproval", "action"] };
+    }
+  });
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -59,6 +63,15 @@ const BillingItemView = () => {
   const [chooseId, setChooseId] = useState();
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("billingItemFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   useEffect(() => {
     dispatch(
