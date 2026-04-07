@@ -1,5 +1,4 @@
 import { useSelector } from "react-redux";
-import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxAttachmentInput from "../../../../../../components/Nx/NxAttachmentInput";
@@ -7,6 +6,7 @@ import NxApprovalInput from "../../../../../../components/Nx/NxApprovalInput";
 import InfoGasDeposit from "../StepContents/InformationForm/InfoGasDeposit";
 import GasDepositDetailTable from "../../GasDepositDetailTable";
 import GasDepositBulkTable from "../StepContents/InformationForm/GasDepositBulkTable";
+import NxRemarkInput from "../../../../../../components/Nx/NxRemarkIInput";
 
 /**
  * Tabbed content area inside the confirmation modal.
@@ -132,7 +132,7 @@ const ConfirmationModalTabs = ({
       label: "Remark",
       cards: [
         {
-          content: <ConfirmationModalRemark disabled={disabled} />,
+          content: <NxRemarkInput disabled={disabled} />,
           header: "Remark",
           required: true,
         },
