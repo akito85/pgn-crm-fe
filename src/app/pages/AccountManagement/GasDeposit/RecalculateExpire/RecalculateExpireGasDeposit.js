@@ -182,6 +182,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
       searchedColumn,
       searchText,
       handleSearch,
+      includeStatus: false,
       isUnderAccount: !!accountId,
     }),
     [search, searchInput, searchedColumn, searchText]
