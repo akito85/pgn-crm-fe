@@ -3,10 +3,10 @@ import { useState } from "react";
 import RelationshipTable from "./RelationshipTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getApprovalHistory,
+  getRelationshipApprovalHistory,
   inactivateRelationship,
-  getApprovalHierarchies,
-  getApprovalHierarchyDetail,
+  getRelationshipApprovalHierarchies,
+  getRelationshipApprovalHierarchy,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
@@ -32,7 +32,7 @@ const Relationship = ({
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
-  const { data_approvalHistory } = useSelector((state) => state.relationship);
+  const { detail_relationshipApprovalHistory } = useSelector((state) => state.relationship);
 
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -97,7 +97,7 @@ const Relationship = ({
    */
   const handleApprovalHistoryModal = (show, relationshipId = 0) => {
     if (show) {
-      dispatch(getApprovalHistory({ accountId, relationshipId }));
+      dispatch(getRelationshipApprovalHistory({ accountId, relationshipId }));
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
@@ -119,15 +119,15 @@ const Relationship = ({
 
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_approvalHistory && data_approvalHistory?.dataApprover) {
+    if (detail_relationshipApprovalHistory && detail_relationshipApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_approvalHistory?.dataApprover?.ACCOUNT_RELATIONSHIP || [],
-          inactive: data_approvalHistory?.dataApprover?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
+          create: detail_relationshipApprovalHistory?.dataApprover?.ACCOUNT_RELATIONSHIP || [],
+          inactive: detail_relationshipApprovalHistory?.dataApprover?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
         dataHistory: {
-          create: data_approvalHistory?.dataHistory?.ACCOUNT_RELATIONSHIP || [],
-          inactive: data_approvalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
+          create: detail_relationshipApprovalHistory?.dataHistory?.ACCOUNT_RELATIONSHIP || [],
+          inactive: detail_relationshipApprovalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
       };
 
@@ -135,7 +135,7 @@ const Relationship = ({
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_approvalHistory]);
+  }, [detail_relationshipApprovalHistory]);
 
   return (
     <NxCardContainer header={"RELATIONSHIP LIST"}>
@@ -166,13 +166,13 @@ const Relationship = ({
           named={inactivateName}
           menu="relationship"
           sliceName="relationship"
-          approvalOptionsName="data_approvalHierarchies"
-          approvalHierarchtDetailsName="data_approvalHierarchyDetail"
+          approvalOptionsName="list_relationshipApprovalHierarchy"
+          approvalHierarchtDetailsName="detail_relationshipApprovalHierarchy"
           loadingInactivateName="loading_inactivateRelationship"
-          loadingListApprovalOptionsName="loading_listRelationshipApprovalOption"
-          loadingListHierarchyDetailName="loading_listRelationshipApprovalHierarchyDetail"
-          getApprovalOptions={getApprovalHierarchies}
-          getApprovalHierarchyDetails={getApprovalHierarchyDetail}
+          loadingListApprovalOptionsName="loading_listRelationshipApprovalHierarchy"
+          loadingListHierarchyDetailName="loading_detailRelationshipApprovalHierarchy"
+          getApprovalOptions={getRelationshipApprovalHierarchies}
+          getApprovalHierarchyDetails={getRelationshipApprovalHierarchy}
         />
 
         {/* Approval History Modal */}

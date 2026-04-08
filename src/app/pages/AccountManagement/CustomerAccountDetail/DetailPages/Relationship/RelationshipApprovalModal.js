@@ -5,7 +5,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import DetailText from "../../../../../../components/DetailText";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import {
-  getRelationshipApprovalList,
+  getRelationshipApprovals,
   approveOrRejectRelationship,
   approveOrRejectInactiveRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
@@ -89,7 +89,7 @@ const RelationshipApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_relationship, pagination_relationship, loading_listRelationshipApproval, loading_approveRejectRelationship } = useSelector(
+  const { list_relationship, pagination_listRelationship, loading_listRelationshipApproval, loading_approveRejectRelationship } = useSelector(
     (state) => state.relationship
   );
 
@@ -132,7 +132,7 @@ const RelationshipApprovalModal = ({
       };
 
       dispatch(
-        getRelationshipApprovalList({
+        getRelationshipApprovals({
           accountId,
           page,
           pageSize: loadMoreSize,
@@ -171,7 +171,7 @@ const RelationshipApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_relationship?.totalPages || 0;
+    const totalPages = pagination_listRelationship?.totalPages || 0;
 
     if (nextPage <= totalPages) {
       const body = {
@@ -183,7 +183,7 @@ const RelationshipApprovalModal = ({
       };
 
       dispatch(
-        getRelationshipApprovalList({
+        getRelationshipApprovals({
           accountId,
           page: nextPage,
           pageSize: loadMoreSize,
@@ -196,7 +196,7 @@ const RelationshipApprovalModal = ({
     }
   };
 
-  const hasMore = approvalData.length < (pagination_relationship?.totalElements || 0);
+  const hasMore = approvalData.length < (pagination_listRelationship?.totalElements || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -496,7 +496,7 @@ const RelationshipApprovalModal = ({
                     className={"[&_.ant-checkbox]:scale-90"}
                     dataSource={dataSourceWithKeys}
                     columns={processedColumns}
-                    totalData={pagination_relationship?.totalElements || 0}
+                    totalData={pagination_listRelationship?.totalElements || 0}
                     tableScrolled={{
                       x: dataSourceWithKeys.length ? "max-content" : 2000,
                     }}

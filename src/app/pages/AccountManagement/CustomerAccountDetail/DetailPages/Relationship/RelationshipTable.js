@@ -10,7 +10,7 @@ import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColu
 import TablePagination from "../../../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getRelationshipList,
+  getRelationships,
   downloadRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 
@@ -114,7 +114,7 @@ const RelationshipTable = ({
   const dispatch = useDispatch();
   const {
     list_relationship: dataSource,
-    pagination_relationship: pagination,
+    pagination_listRelationship: pagination,
     loading_listRelationship: loading,
   } = useSelector((state) => state.relationship);
 
@@ -152,7 +152,7 @@ const RelationshipTable = ({
     };
 
     dispatch(
-      getRelationshipList({
+      getRelationships({
         accountId,
         page: 0,
         pageSize: loadMoreSize,
@@ -214,7 +214,7 @@ const RelationshipTable = ({
       };
 
       await dispatch(
-        getRelationshipList({
+        getRelationships({
           accountId,
           page: nextPage,
           pageSize: loadMoreSize,
@@ -255,7 +255,7 @@ const RelationshipTable = ({
 
     setPage(0);
     dispatch(
-      getRelationshipList({
+      getRelationships({
         accountId,
         page: 0,
         pageSize: loadMoreSize,

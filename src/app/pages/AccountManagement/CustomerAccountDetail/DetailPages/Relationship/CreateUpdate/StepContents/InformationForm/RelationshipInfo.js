@@ -6,8 +6,8 @@ import DateComponent from "../../../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
 import {
-  getRelationshipCategory,
-  getRelationshipType,
+  getRelationshipCategories,
+  getRelationshipTypes,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { requiredMessage } from "../../../../../../../../../utils";
 import ModalChooseRelated from "./ModalChooseRelated";
@@ -44,14 +44,14 @@ const RelationshipInfo = ({
   const description = Form.useWatch("description", { form });
 
   // Get data from Redux store
-  const { data_relationshipType, data_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
+  const { list_relationshipType, list_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
     useSelector((state) => state.relationship);
 
   // Fetch relationship type and category on component mount
   useEffect(() => {
     if (accountId && formView) {
-      dispatch(getRelationshipType({ accountId }));
-      dispatch(getRelationshipCategory({ accountId }));
+      dispatch(getRelationshipTypes({ accountId }));
+      dispatch(getRelationshipCategories({ accountId }));
     }
   }, [dispatch, accountId]);
 
@@ -78,7 +78,7 @@ const RelationshipInfo = ({
                 form.resetFields(["relatedName", "relatedNumber"]);
               }}
             >
-              {data_relationshipType?.map((item) => (
+              {list_relationshipType?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.text}
                 </Select.Option>
@@ -103,7 +103,7 @@ const RelationshipInfo = ({
               onChange={(_, option) => form.setFieldValue("relationshipCategoryName", option.children)}
               loading={loading_listRelationshipCategory}
             >
-              {data_relationshipCategory?.map((item) => (
+              {list_relationshipCategory?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.text}
                 </Select.Option>

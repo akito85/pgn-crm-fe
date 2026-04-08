@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getRelatedObjectData } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { getRelatedObjects } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -27,7 +27,7 @@ const ModalChooseRelated = ({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
 
-  const { list_relatedObject, pagination_relatedObject, loading_listRelatedObject } =
+  const { list_relatedObject, pagination_listRelatedObject, loading_listRelatedObject } =
     useSelector((state) => state.relationship);
 
   // Normalize relationshipTypeName for comparison (convert "Child Of" to "CHILD_OF")
@@ -65,7 +65,7 @@ const ModalChooseRelated = ({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_relatedObject?.totalPages || 0;
+    const totalPages = pagination_listRelatedObject?.totalPages || 0;
 
     const body = {
       page: nextPage,
@@ -76,7 +76,7 @@ const ModalChooseRelated = ({
     
     if (nextPage <= totalPages) {
       await dispatch(
-        getRelatedObjectData({
+        getRelatedObjects({
           accountId,
           relationshipType,
           relationshipCategory,
@@ -99,7 +99,7 @@ const ModalChooseRelated = ({
       
       setPage(0);
       dispatch(
-        getRelatedObjectData({
+        getRelatedObjects({
           accountId,
           relationshipType,
           relationshipCategory,
@@ -140,7 +140,7 @@ const ModalChooseRelated = ({
   const currentData = useMemo(() => list_relatedObject, [list_relatedObject]);
 
   const hasMore =
-    currentData.length < (pagination_relatedObject?.totalElements || 0);
+    currentData.length < (pagination_listRelatedObject?.totalElements || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
@@ -175,7 +175,7 @@ const ModalChooseRelated = ({
             idTable="modal-choose-related"
             loading={loading_listRelatedObject}
             dataSource={dataSourceWithKeys}
-            totalData={pagination_relatedObject?.totalElements || 0}
+            totalData={pagination_listRelatedObject?.totalElements || 0}
             current={page}
             tableScrolled={{ x: tableScrolledX }}
             onSort={onSort}

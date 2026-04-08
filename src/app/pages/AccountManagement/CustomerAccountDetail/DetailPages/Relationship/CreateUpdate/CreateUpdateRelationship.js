@@ -10,11 +10,11 @@ import RelationshipInfo from "./StepContents/InformationForm/RelationshipInfo";
 import RelatedDetailCard from "./StepContents/InformationForm/RelatedDetailCard";
 import {
   createRelationship,
-  getApprovalHierarchies,
-  getApprovalHierarchyDetail,
-  getAttachmentCategory,
-  getDetailDraftRelationship,
-  getRelationshipDetail,
+  getRelationshipApprovalHierarchies,
+  getRelationshipApprovalHierarchy,
+  getRelationshipAttachmentCategories,
+  getRelationshipDraft,
+  getRelationship,
   updateRelationship
 } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -46,16 +46,14 @@ const CreateUpdateRelationship = ({
 
   const {
     data_attachmentList,
-    data_attachmentCategory,
-    data_approvalHierarchies,
-    data_approvalHierarchyDetail,
-    data_relationshipDetail,
-    detailDraft_relationshipDetail,
-    data_relationshipType,
-    data_relationshipCategory,
+    list_relationshipAttachmentCategory,
+    list_relationshipApprovalHierarchy,
+    detail_relationshipApprovalHierarchy,
+    detail_relationship,
+    detailDraft_relationship,
     loading_detailRelationship,
-    loading_listRelationshipApprovalHierarchyDetail,
-    loading_listRelationshipApprovalOption,
+    loading_detailRelationshipApprovalHierarchy,
+    loading_listRelationshipApprovalHierarchy,
     loading_detailDraftRelationship,
     loading_detailRelationshipAttachment,
   } = useSelector(
@@ -70,13 +68,13 @@ const CreateUpdateRelationship = ({
 
   const loading =
     loading_detailRelationship ||
-    loading_listRelationshipApprovalOption ||
-    loading_listRelationshipApprovalHierarchyDetail ||
+    loading_listRelationshipApprovalHierarchy ||
+    loading_detailRelationshipApprovalHierarchy ||
     loading_detailDraftRelationship ||
     loading_detailRelationshipAttachment;
 
-  const status = data_relationshipDetail.status || "DRAFT";
-  const statusApproval = data_relationshipDetail.statusApproval || "DRAFT";
+  const status = detail_relationship.status || "DRAFT";
+  const statusApproval = detail_relationship.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
@@ -87,8 +85,8 @@ const CreateUpdateRelationship = ({
   const attachmentIsRequired = true;
 
   const detail = (isActive && (isDraftApproval || isRejectApproval))
-    ? detailDraft_relationshipDetail
-    : data_relationshipDetail;
+    ? detailDraft_relationship
+    : detail_relationship;
 
   //state
   const [current, setCurrent] = useState(0);
@@ -101,15 +99,15 @@ const CreateUpdateRelationship = ({
 
   useEffect(() => {
     if (accountId) {
-      dispatch(getAttachmentCategory({ accountId }));
-      dispatch(getApprovalHierarchies({ accountId }));
+      dispatch(getRelationshipAttachmentCategories({ accountId }));
+      dispatch(getRelationshipApprovalHierarchies({ accountId }));
     }
   }, [accountId]);
 
   useEffect(() => {
     if (formType === "update" && id) {
-      dispatch(getRelationshipDetail({ accountId, idRelationship: id }));
-      dispatch(getDetailDraftRelationship({ accountId, idRelationship: id }));
+      dispatch(getRelationship({ accountId, idRelationship: id }));
+      dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
     }
   }, [formType, id]);
 
@@ -117,7 +115,7 @@ const CreateUpdateRelationship = ({
     if (
       isUpdate &&
       detail.appHierId &&
-      data_approvalHierarchies?.length
+      list_relationshipApprovalHierarchy?.length
     ) {
       form.setFieldsValue({
         relationshipType: detail.relationshipType,
@@ -131,7 +129,7 @@ const CreateUpdateRelationship = ({
       if (detail.relatedDetail && detail.relatedDetail.length > 0)
         setRelatedDetails(detail.relatedDetail);
     }
-  }, [data_relationshipDetail, data_approvalHierarchies, formType]);
+  }, [detail_relationship, list_relationshipApprovalHierarchy, formType]);
 
   useEffect(() => {
     if (data_attachmentList && data_attachmentList.length > 0 && formType === "update") {
@@ -155,7 +153,7 @@ const CreateUpdateRelationship = ({
 
   const handleSelectHierarchy = (appHierId, approvalName) => {
     if (accountId && appHierId)
-      dispatch(getApprovalHierarchyDetail({ accountId, appHierId }));
+      dispatch(getRelationshipApprovalHierarchy({ accountId, appHierId }));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -458,7 +456,7 @@ const CreateUpdateRelationship = ({
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      if (data_relationshipDetail && data_relationshipDetail.id) {
+      if (detail_relationship && detail_relationship.id) {
         form.setFieldsValue({
           relationshipType: detail.relationshipType,
           relationshipCategory: detail.relationshipCategory,
@@ -471,7 +469,7 @@ const CreateUpdateRelationship = ({
           appHierName: detail.appHierName,
         });
 
-        const appHierOption = data_approvalHierarchies.find(
+        const appHierOption = list_relationshipApprovalHierarchy.find(
           (option) => option.appHierId === detail.appHierId
         );
         if (appHierOption)
@@ -551,10 +549,10 @@ const CreateUpdateRelationship = ({
           content: (
             <NxApprovalInput
               form={form}
-              options={data_approvalHierarchies}
-              hierarchyDetails={data_approvalHierarchyDetail || []}
+              options={list_relationshipApprovalHierarchy}
+              hierarchyDetails={detail_relationshipApprovalHierarchy || []}
               handleSelectHiararchy={handleSelectHierarchy}
-              loading={loading_listRelationshipApprovalHierarchyDetail}
+              loading={loading_detailRelationshipApprovalHierarchy}
               key={`relationship-tab-1`}
             />
           )
@@ -571,8 +569,8 @@ const CreateUpdateRelationship = ({
               data={attachmentDataSource}
               updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
-              getAPICategory={() => getAttachmentCategory({ accountId })}
-              categoryData={data_attachmentCategory}
+              getAPICategory={() => getRelationshipAttachmentCategories({ accountId })}
+              categoryData={list_relationshipAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               mandatory={attachmentIsRequired}
@@ -677,7 +675,7 @@ const CreateUpdateRelationship = ({
                 formId={"relationshipForm"}
                 isOpen={showConfirmationModal}
                 handleCancel={() => handleSetShowConfirmationModal(false)}
-                approvalData={data_approvalHierarchyDetail || []}
+                approvalData={detail_relationshipApprovalHierarchy || []}
                 type={confirmationType}
                 attachmentDataSource={attachmentDataSource}
                 configApplication={configApp.ACCOUNT_SERVICE}
