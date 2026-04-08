@@ -598,11 +598,11 @@ const FunctionalCriteriaInvoiceTemplate = ({
   // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
+        (hasValue(item?.endDate) &&
+          moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days"))
       ) {
         dataOverlap?.push(item);
       }
@@ -613,9 +613,8 @@ const FunctionalCriteriaInvoiceTemplate = ({
     } else {
       return false;
     }
-    // }
   }, []);
-  
+
 
   // Function Add Row Data
   const addRow = () => {

@@ -47,7 +47,7 @@ export const columnsApprovalGLAccount = (
       ),
     },
     {
-      title: "Reference",
+      title: "Description",
       dataIndex: "reference",
       key: "reference",
       width: 200,

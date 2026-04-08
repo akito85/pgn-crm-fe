@@ -126,6 +126,11 @@ const BillingItemForm = (props) => {
   const [modalError, setModalError] = useState(false);
   const [modalRequired, setModalRequired] = useState(false);
   const [modalValidationTable, setModalValidationTable] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [bodyError, setBodyError] = useState({});
 
   // Form Data States
@@ -516,31 +521,50 @@ const BillingItemForm = (props) => {
 
     const proceedNext = () => {
       if (current === 0) {
-        if (selectedCriteria && dataCriteriaTable.length === 0) {
+        // Criteria Detail wajib diisi jika criteria dipilih
+        if (
+          selectedCriteria !== null &&
+          selectedCriteria !== undefined &&
+          dataCriteriaTable.length === 0
+        ) {
           dispatch(
             showModalError({
               title: "Failed",
-              description: "Criteria Table is mandatory and cannot be empty.",
+              description: "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
             })
           );
           return;
         }
 
-        if (dataTable.length > 0) {
-          const missingCategories = dataTable.filter(
-            (item) => !allDataDetailTable[item.category] || allDataDetailTable[item.category].length === 0
+        // Mapping Detail wajib ada minimal satu kategori
+        if (dataTable.length === 0) {
+          dispatch(
+            showModalError({
+              title: "Failed",
+              description: "Mapping Detail is mandatory. Please add at least one mapping category.",
+            })
           );
+          return;
+        }
 
-          if (missingCategories.length > 0) {
-            const categoryNames = missingCategories.map((c) => c.categoryName || c.category).join(", ");
-            dispatch(
-              showModalError({
-                title: "Failed",
-                description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
-              })
-            );
-            return;
-          }
+        // Setiap kategori mapping wajib punya minimal satu detail
+        const missingCategories = dataTable.filter(
+          (item) =>
+            !allDataDetailTable[item.category] ||
+            allDataDetailTable[item.category].length === 0
+        );
+
+        if (missingCategories.length > 0) {
+          const categoryNames = missingCategories
+            .map((c) => c.categoryName || c.category)
+            .join(", ");
+          dispatch(
+            showModalError({
+              title: "Failed",
+              description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
+            })
+          );
+          return;
         }
       }
 
@@ -887,7 +911,59 @@ const BillingItemForm = (props) => {
   const onFinish = async (e) => {
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
-      setCurrent(2);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
+      return;
+    }
+
+    // Criteria Detail wajib diisi jika criteria dipilih
+    if (
+      selectedCriteria !== null &&
+      selectedCriteria !== undefined &&
+      dataCriteriaTable.length === 0
+    ) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
+        })
+      );
+      setCurrent(0);
+      return;
+    }
+
+    // Mapping Detail wajib ada minimal satu kategori
+    if (dataTable.length === 0) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Mapping Detail is mandatory. Please add at least one mapping category.",
+        })
+      );
+      setCurrent(0);
+      return;
+    }
+
+    // Setiap kategori mapping wajib punya minimal satu detail
+    const missingCategories = dataTable.filter(
+      (item) =>
+        !allDataDetailTable[item.category] ||
+        allDataDetailTable[item.category].length === 0
+    );
+    if (missingCategories.length > 0) {
+      const categoryNames = missingCategories
+        .map((c) => c.categoryName || c.category)
+        .join(", ");
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
+        })
+      );
+      setCurrent(0);
       return;
     }
 
@@ -916,16 +992,19 @@ const BillingItemForm = (props) => {
         (item) => item.paramValue && item.paramValue.includes(fieldName0)
       );
 
-      if (stepIndex !== -1 && stepIndex !== current) {
-        setCurrent(stepIndex);
-        setTimeout(() => {
-          form.scrollToField(errorFields[0].name, { behavior: "smooth", block: "center" });
-        }, 100);
-      } else {
-        form.scrollToField(errorFields[0].name, { behavior: "smooth", block: "center" });
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
       }
     } else if (listDataAttachment.length === 0) {
-      setCurrent(2);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     }
   };
 
@@ -1362,6 +1441,25 @@ const BillingItemForm = (props) => {
             </div>
           </ModalError>
         )}
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
     </>
   );
