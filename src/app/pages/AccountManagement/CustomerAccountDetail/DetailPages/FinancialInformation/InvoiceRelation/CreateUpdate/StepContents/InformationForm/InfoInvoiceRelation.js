@@ -49,8 +49,9 @@ export default function InfoInvoiceRelation({
   const [isOpen, setIsOpen] = useState(false);
 
   const {
-    list_irAccountStandard: irAccountStandards,
-    pagination_irAccountStandard: pagination
+    list_irAccount: accounts,
+    pagination_irAccount: pagination,
+    loading_listIrAccount: loading
   } = useSelector((state) => state.invoiceRelation);
 
   const handleCancel = () => {
@@ -136,7 +137,7 @@ export default function InfoInvoiceRelation({
   const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
 
   const totalElement = pagination.totalElement;
-  const hasMore = irAccountStandards.length < totalElement;
+  const hasMore = accounts.length < totalElement;
 
   if (!formView) {
     return (
@@ -278,7 +279,7 @@ export default function InfoInvoiceRelation({
           <NxBaseContainer border>
             <NxTable
               idTable="invoice-relation-account-standard"
-              dataSource={irAccountStandards}
+              dataSource={accounts}
               totalData={totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
@@ -290,6 +291,7 @@ export default function InfoInvoiceRelation({
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
               columnDefinitions={columnDefinitions}
+              loading={loading}
             />
           </NxBaseContainer>
         </div>

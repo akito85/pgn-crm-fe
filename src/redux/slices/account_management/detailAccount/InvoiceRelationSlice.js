@@ -51,9 +51,9 @@ const initialState = {
   detail_irApprovalHierarchy: [],
   loading_listIrAttachmentCategory: false,
   list_irAttachmentCategory: [],
-  loading_listIrAccountStandard: false,
-  list_irAccountStandard: [],
-  pagination_irAccountStandard: {
+  loading_listIrAccount: false,
+  list_irAccount: [],
+  pagination_irAccount: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -708,11 +708,11 @@ const invoiceRelationSlice = createSlice({
     /** Get Invoice Relation Account Standard */
     [getIrAccounts.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listIrAccountStandard = true;
+        state.loading_listIrAccount = true;
       }
     },
     [getIrAccounts.fulfilled]: (state, action) => {
-      state.loading_listIrAccountStandard = false;
+      state.loading_listIrAccount = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -723,20 +723,20 @@ const invoiceRelationSlice = createSlice({
 
         if (isLoadMore) {
           const currentIds = new Set(
-            state.list_irAccountStandard.map((item) => item.accountId)
+            state.list_irAccount.map((item) => item.accountId)
           );
           const filteredResult = resultWithIds.filter(
             (resultItem) => !currentIds.has(resultItem.accountId)
           );
 
-          state.list_irAccountStandard = [
-            ...state.list_irAccountStandard,
+          state.list_irAccount = [
+            ...state.list_irAccount,
             ...filteredResult
           ];
-        } else state.list_irAccountStandard = resultWithIds;
+        } else state.list_irAccount = resultWithIds;
       }
 
-      state.pagination_irAccountStandard = {
+      state.pagination_irAccount = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
@@ -744,11 +744,11 @@ const invoiceRelationSlice = createSlice({
       };
     },
     [getIrAccounts.rejected]: (state, action) => {
-      state.loading_listIrAccountStandard = false;
+      state.loading_listIrAccount = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_irAccountStandard = [];
-        state.pagination_irAccountStandard = {
+        state.list_irAccount = [];
+        state.pagination_irAccount = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
