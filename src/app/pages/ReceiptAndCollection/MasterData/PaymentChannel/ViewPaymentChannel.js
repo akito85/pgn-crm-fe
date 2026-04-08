@@ -8,9 +8,6 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
-  EyeOutlined,
-} from "@ant-design/icons";
-import {
   renderColumn,
   renderDateColumn,
   hasValue,
@@ -125,9 +122,12 @@ const ViewPaymentChannel = () => {
 
   const handleOptions = () => {
     const d = dataApprovalHistoryFix?.dataApprover || {};
-    return Object.keys(d).map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
+    const tabOrder = ["create", "inactive", "active"];
+    return tabOrder
+      .filter((key) => Object.prototype.hasOwnProperty.call(d, key))
+      .map((item) => ({
+        value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      }));
   };
 
   // Function Search Column
@@ -148,19 +148,36 @@ const ViewPaymentChannel = () => {
     setSearchText("");
   }, []);
 
+  const normalizeApprovalTypeKey = (key) => {
+    const upperKey = (key || "").toUpperCase();
+    if (upperKey.includes("INACTIVE")) return "inactive";
+    if (upperKey.includes("ACTIVE")) return "active";
+    if (upperKey.includes("CREATE") || upperKey === "PAYMENT_CHANNEL") return "create";
+    return (key || "").toLowerCase();
+  };
+
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+      const dataApprover = Object.keys(dataApprovalHistory?.dataApprover || {}).reduce((acc, key) => {
+        const normalizedKey = normalizeApprovalTypeKey(key);
+        acc[normalizedKey] = [
+          ...(acc[normalizedKey] || []),
+          ...(dataApprovalHistory?.dataApprover?.[key] || []),
+        ];
+        return acc;
+      }, {});
+      const dataHistory = Object.keys(dataApprovalHistory?.dataHistory || {}).reduce((acc, key) => {
+        const normalizedKey = normalizeApprovalTypeKey(key);
+        acc[normalizedKey] = [
+          ...(acc[normalizedKey] || []),
+          ...(dataApprovalHistory?.dataHistory?.[key] || []),
+        ];
+        return acc;
+      }, {});
+
       const temp = {
-        dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.PAYMENT_CHANNEL || [],
-          inactive:
-            dataApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_CHANNEL || [],
-        },
-        dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.PAYMENT_CHANNEL || [],
-          inactive:
-            dataApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_CHANNEL || [],
-        },
+        dataApprover,
+        dataHistory,
       };
       setDataApprovalHistoryFix(temp);
     } else {
@@ -189,10 +206,11 @@ const ViewPaymentChannel = () => {
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
+    const targetStatus = (status || "").toLowerCase() === "inactive" ? "Active" : "Inactive";
     const body = {
       id: id,
       appHierId: res.approvalHierarchy,
-      status: status === "Inactive" ? "Active" : "Inactive",
+      status: targetStatus,
       remark: res.remark,
     };
     setBody({ body });
@@ -370,7 +388,7 @@ const ViewPaymentChannel = () => {
           style={{ lineHeight: 0 }}
         >
           <Tooltip title="Detail">
-            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+            <SVGIcon name="IconDetail" width={20} />
           </Tooltip>
         </Link>
       ),
@@ -407,6 +425,7 @@ const ViewPaymentChannel = () => {
       type: "table",
       render: (record) => {
         const statusLowerCase = record?.status?.toLowerCase();
+        const isActive = statusLowerCase === "active";
         return (
           <Tooltip
             title={
@@ -418,7 +437,7 @@ const ViewPaymentChannel = () => {
             <div>
               <Checkbox
                 onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
+                checked={!isActive}
                 disabled={disabledActionByStatus(
                   "activate",
                   record?.status,
@@ -615,7 +634,7 @@ const ViewPaymentChannel = () => {
         getAPIOption={getAllApprovalList}
         getAPIDetail={getListApprovalById}
         selector={"paymentChannel"}
-        alertMessage={`Are you sure you want to inactivate this Delivery Channel with Delivery Channel Code ${nameModalActiveOrInactivate}?`}
+        alertMessage={`Are you sure you want to ${(status || "").toLowerCase() === "inactive" ? "activate" : "inactivate"} this Delivery Channel with Delivery Channel Code ${nameModalActiveOrInactivate}?`}
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}

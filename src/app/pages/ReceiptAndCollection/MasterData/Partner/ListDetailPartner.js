@@ -103,7 +103,10 @@ const ListDetailPartner = () => {
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
     setLoadingConfirm(true);
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_PARTNER") {
+    if (
+      data_detail?.tApprovalDto?.approvalType === "INACTIVE_PARTNER" ||
+      data_detail?.tApprovalDto?.approvalType === "ACTIVE_PARTNER"
+    ) {
       const data = {
         id: id,
         remark: res.remark,

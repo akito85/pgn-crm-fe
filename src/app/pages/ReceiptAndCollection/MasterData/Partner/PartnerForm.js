@@ -90,8 +90,6 @@ const PartnerForm = (props) => {
               }}
             />
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Start Date"}
             name={"effStartDate"}
@@ -108,6 +106,8 @@ const PartnerForm = (props) => {
               onChange={handleStartDate}
             />
           </Form.Item>
+        </div>
+        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"End Date"}
             name={"effEndDate"}
