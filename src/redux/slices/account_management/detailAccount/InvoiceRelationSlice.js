@@ -26,8 +26,6 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
-
-  // --- Detail ---
   loading_detailIr: false,
   detail_invoiceRelation: {},
   loading_detailDraftIr: false,
@@ -40,8 +38,6 @@ const initialState = {
   loading_approveRejectIr: false,
   loading_approveIr: false,
   loading_rejectIr: false,
-
-  // --- Inactivate ---
   loading_inactivateIr: false,
 
   // --- Form Options (approval hierarchy, attachment categories, account standard) ---

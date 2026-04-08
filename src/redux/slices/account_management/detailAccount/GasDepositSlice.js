@@ -1300,7 +1300,12 @@ const gasDepositSlice = createSlice({
 
     /** Approve or Reject All Inactive Gas Deposit */
     [approveOrRejectAllGasDeposit.pending]: (state, action) => {
+<<<<<<< HEAD
       if (action.meta.arg?.action === "APPROVE") state.loading_approveGd = true;
+=======
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveGd = true;
+>>>>>>> release/milestone-1
       else if (action.meta.arg?.action === "REJECT")
         state.loading_rejectGd = true;
     },
