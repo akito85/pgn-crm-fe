@@ -117,16 +117,46 @@ const TaxCodeForm = ({ type }) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
-          if (current < steps.length - 1) setCurrent(current + 1);
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (listDataCriteria.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+            if (listDataDetail.length === 0) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Condition Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+          }
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+            window.scrollTo(0, 0);
+          }
         })
         .catch(() => {});
     } else {
-      if (current < steps.length - 1) setCurrent(current + 1);
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+        window.scrollTo(0, 0);
+      }
     }
   };
 
   const prev = () => {
-    if (current > 0) setCurrent(current - 1);
+    if (current > 0) {
+      setCurrent(current - 1);
+      window.scrollTo(0, 0);
+    }
   };
 
   const isLoading = loading || loadingForm;
@@ -762,12 +792,21 @@ const TaxCodeForm = ({ type }) => {
     } else {
       handleMandatory(setTabPages, listDataAttachment);
       if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
+      } else if (listDataDetail.length === 0) {
+        setCurrent(0);
+        errorBody = {
+          title: "Failed",
+          description: "Condition Mandatory. Please insert data.",
+        };
+        dispatch(showModalError(errorBody));
       } else if (storedDataInline) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: `Please save data table inline before submit. Please try again.`,
@@ -782,18 +821,21 @@ const TaxCodeForm = ({ type }) => {
           0
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlapping) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlappingCondition) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Condition. Start date and end date can't be overlap`,
