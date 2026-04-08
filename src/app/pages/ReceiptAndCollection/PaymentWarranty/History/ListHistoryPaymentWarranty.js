@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -75,17 +75,18 @@ const ListHistoryPaymentWarranty = () => {
         confirm();
         setSearchText(selectedKeys[0]);
         setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+        const shouldResetPage = search[dataIndex] !== selectedKeys[0];
         setSearch((prevState) => {
             const nextState = { ...prevState };
-            if (nextState[dataIndex] !== selectedKeys[0]) {
-                setPage(1);
-            }
             nextState[dataIndex] = selectedKeys[0];
             return nextState;
         });
+        if (shouldResetPage) {
+            setPage(1);
+        }
     };
 
-    const handleGlobalSearch = useMemo(() => 
+    const handleGlobalSearch = useCallback(
         debounce((value) => {
             setSearchText(value);
             setSearchedColumn(value ? "all" : "");
@@ -96,11 +97,18 @@ const ListHistoryPaymentWarranty = () => {
                 } else {
                     delete nextState.all;
                 }
-                setPage(1);
                 return nextState;
             });
-        }, 500), [setSearch, setSearchText, setSearchedColumn, setPage]
+            setPage(1);
+        }, 500),
+        []
     );
+
+    useEffect(() => {
+        return () => {
+            handleGlobalSearch.cancel();
+        };
+    }, [handleGlobalSearch]);
 
     const handleAdvanceSearch = (searchData) => {
         setSearch((prevState) => {

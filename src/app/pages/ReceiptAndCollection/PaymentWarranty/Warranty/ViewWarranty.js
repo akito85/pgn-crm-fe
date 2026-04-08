@@ -139,6 +139,9 @@ const ViewWarranty = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
+
     setSearch((prevState) => {
       const nextState = { ...prevState };
       if (selectedKeys[0]) {
@@ -146,12 +149,15 @@ const ViewWarranty = () => {
       } else {
         delete nextState[dataIndex];
       }
-      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
       return nextState;
     });
-  }, []);
 
-  const handleGlobalSearch = useMemo(() => 
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  }, [search]);
+
+  const handleGlobalSearch = useCallback(
     debounce((value) => {
       setSearchText(value);
       setSearchedColumn(value ? "all" : "");
@@ -162,12 +168,18 @@ const ViewWarranty = () => {
         } else {
           delete nextState.all;
         }
-        setPage(1);
         return nextState;
       });
+      setPage(1);
     }, 500),
     []
   );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
 
   const handleAdvanceSearch = (searchData) => {
     setSearch((prevState) => ({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -66,6 +66,7 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
     };
 
     const handleCancel = () => {
+        handleGlobalSearch.cancel();
         onClose();
         setSelectedRowKeys([]);
         setSelectedRows([]);
@@ -80,7 +81,7 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
         }
     };
 
-    const handleGlobalSearch = useMemo(() => 
+    const handleGlobalSearch = useCallback(
         debounce((value) => {
             setSearchText(value);
             setSearchedColumn(value ? "all" : "");
@@ -91,11 +92,18 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
                 } else {
                     delete nextState.all;
                 }
-                setPage(1);
                 return nextState;
             });
-        }, 500), [setSearch, setSearchText, setSearchedColumn, setPage]
+            setPage(1);
+        }, 500),
+        []
     );
+
+    useEffect(() => {
+        return () => {
+            handleGlobalSearch.cancel();
+        };
+    }, [handleGlobalSearch]);
 
     const handleAdvanceSearch = (searchData) => {
         setSearch((prevState) => {

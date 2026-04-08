@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip } from "antd";
 import { NavLink, Link } from "react-router-dom";
@@ -72,17 +72,18 @@ const ViewTransferToReceipt = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
     setSearch((prevState) => {
       const nextState = { ...prevState };
-      if (nextState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       nextState[dataIndex] = selectedKeys[0];
       return nextState;
     });
+    if (shouldResetPage) {
+      setPage(1);
+    }
   };
 
-  const handleGlobalSearch = useMemo(() => 
+  const handleGlobalSearch = useCallback(
     debounce((value) => {
       setSearchText(value);
       setSearchedColumn(value ? "all" : "");
@@ -93,11 +94,18 @@ const ViewTransferToReceipt = () => {
         } else {
           delete nextState.all;
         }
-        setPage(1);
         return nextState;
       });
-    }, 500), [setSearch, setSearchText, setSearchedColumn, setPage]
+      setPage(1);
+    }, 500),
+    []
   );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
 
   const handleAdvanceSearch = (searchData) => {
     setSearch((prevState) => {
