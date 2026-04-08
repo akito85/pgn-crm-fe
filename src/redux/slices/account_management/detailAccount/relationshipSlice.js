@@ -53,8 +53,6 @@ const initialState = {
   detail_relationshipApprovalHierarchy: [],
   loading_listRelationshipAttachmentCategory: false,
   list_relationshipAttachmentCategory: [],
-  data_attachmentList: [],
-  loading_detailRelationshipAttachment: false,
 
   // --- Related Object ---
   loading_listRelatedObject: false,

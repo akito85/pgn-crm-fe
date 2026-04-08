@@ -41,7 +41,6 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
     loading_detailRelationship,
     loading_detailDraftRelationship,
     loading_approveRejectRelationship,
-    data_attachmentList,
   } = useSelector((state) => state.relationship);
 
   const { loading: loadingCustomer, loadingAccount } = useSelector(

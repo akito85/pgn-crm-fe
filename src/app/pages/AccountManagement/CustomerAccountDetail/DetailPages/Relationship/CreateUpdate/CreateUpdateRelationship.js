@@ -45,7 +45,6 @@ const CreateUpdateRelationship = ({
   const customerId = location?.state?.idCustomer;
 
   const {
-    data_attachmentList,
     list_relationshipAttachmentCategory,
     list_relationshipApprovalHierarchy,
     detail_relationshipApprovalHierarchy,
@@ -55,7 +54,6 @@ const CreateUpdateRelationship = ({
     loading_detailRelationshipApprovalHierarchy,
     loading_listRelationshipApprovalHierarchy,
     loading_detailDraftRelationship,
-    loading_detailRelationshipAttachment,
   } = useSelector(
     (state) => state.relationship
   );
@@ -70,8 +68,7 @@ const CreateUpdateRelationship = ({
     loading_detailRelationship ||
     loading_listRelationshipApprovalHierarchy ||
     loading_detailRelationshipApprovalHierarchy ||
-    loading_detailDraftRelationship ||
-    loading_detailRelationshipAttachment;
+    loading_detailDraftRelationship;
 
   const status = detail_relationship.status || "DRAFT";
   const statusApproval = detail_relationship.statusApproval || "DRAFT";
@@ -130,26 +127,6 @@ const CreateUpdateRelationship = ({
         setRelatedDetails(detail.relatedDetail);
     }
   }, [detail_relationship, list_relationshipApprovalHierarchy, formType]);
-
-  useEffect(() => {
-    if (data_attachmentList && data_attachmentList.length > 0 && formType === "update") {
-      const mapped = data_attachmentList.map((item) => ({
-        key: item.id,
-        fileId: item.fileId || item.id,
-        fileCategoryId: item.fileCategoryId,
-        fileCategoryName: item.fileCategoryName,
-        type: item.fileCategoryName,
-        fileName: item.fileName,
-        fileSize: item.fileSize,
-        fileType: item.fileType,
-        urlFile1: item.urlFile1,
-        createdBy: item.createdBy,
-        createdDate: item.createdDate,
-        dataType: "exist",
-      }));
-      setAttachmentDataSource(mapped);
-    }
-  }, [data_attachmentList, formType]);
 
   const handleSelectHierarchy = (appHierId, approvalName) => {
     if (accountId && appHierId)
@@ -482,26 +459,7 @@ const CreateUpdateRelationship = ({
         }
       }
 
-      if (data_attachmentList && data_attachmentList.length > 0) {
-        const mapped = data_attachmentList.map((item) => ({
-          key: item.id,
-          fileId: item.fileId || item.id,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          type: item.fileCategoryName,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          urlFile1: item.urlFile1,
-          createdBy: item.createdBy,
-          createdDate: item.createdDate,
-          dataType: "exist",
-        }));
-        setAttachmentDataSource(mapped);
-      } else {
-        setAttachmentDataSource([]);
-      }
-
+      setAttachmentDataSource([]);
       setDeletedAttachments([]);
 
       setCurrent(0);
