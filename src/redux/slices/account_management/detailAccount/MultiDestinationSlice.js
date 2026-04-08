@@ -3,9 +3,6 @@ import accountManagementService from "../../../services/account_management/accou
 import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
 
 const initialState = {
-  // --- Shared ---
-  loading: false,
-
   // --- List ---
   loading_listMd: false,
   list_multiDestination: [],
@@ -61,12 +58,7 @@ const initialState = {
 
   // --- History ---
   loading_mdApprovalHistory: false,
-  data_mdApprovalHistory: {},
-
-  // --- Dynamic Search ---
-  data_globalTypeCondition: [],
-  data_globalTypeOperator: [],
-  data_globalTypeColumn: [],
+  detail_mdApprovalHistory: {},
 };
 
 /**
@@ -869,7 +861,7 @@ const multiDestinationSlice = createSlice({
     },
     [getMdApprovalHistory.fulfilled]: (state, action) => {
       state.loading_mdApprovalHistory = false;
-      state.data_mdApprovalHistory = action.payload;
+      state.detail_mdApprovalHistory = action.payload;
     },
     [getMdApprovalHistory.rejected]: (state) => {
       state.loading_mdApprovalHistory = false;
