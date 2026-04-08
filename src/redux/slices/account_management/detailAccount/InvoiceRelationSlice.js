@@ -471,10 +471,61 @@ export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
 );
 
 /**
- * Submits an inactivation request for an invoice relation record.
+ * Batch-approves or batch-rejects a mixed set of active and inactive invoice relations.
+ * Calls the active-approve and inactive-approve endpoints independently based on which arrays are populated.
  * Dispatches a success or error modal on completion.
  *
- * @param {object} arg
+ * @param {object}   arg
+ * @param {object[]} arg.body          - Active invoice relation records to process.
+ * @param {object[]} arg.inactiveBody  - Inactive invoice relation records to process.
+ * @param {string}   arg.action        - `"approved"` or `"rejected"` — drives the loading state and modal message.
+ */
+export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_ALL_INVOICE_RELATION",
+  async ({ body, inactiveBody, action }, thunkAPI) => {
+    try {
+      const approveUrl = "/v1/dbs/api/invoice-relation/approve";
+      const approveInactiveUrl = "/v1/dbs/api/invoice-relation/approve-inactive";
+
+      await Promise.all([
+        body && body.length > 0
+          ? accountManagementService.activationWithRemark(approveUrl, body)
+          : null,
+        inactiveBody && inactiveBody.length > 0
+          ? accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody)
+          : null,
+      ].filter(Boolean));
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}.`,
+        return: false
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+
+      return { body, inactiveBody, action };
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}. ${message}.`
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+/**
+ * Submits an inactivation request for an invoice relation record.
+ * Dispatches a success or error modal on completion.
+*
+* @param {object} arg
  * @param {object} arg.body - Request body (ID, remark, hierarchy).
  */
 export const inactivateInvoiceRelation = createAsyncThunk(
@@ -534,57 +585,6 @@ export const downloadInvoiceRelation = createAsyncThunk(
       const response = await accountManagementService.downloadFile(url, body);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-/**
- * Batch-approves or batch-rejects a mixed set of active and inactive invoice relations.
- * Calls the active-approve and inactive-approve endpoints independently based on which arrays are populated.
- * Dispatches a success or error modal on completion.
- *
- * @param {object}   arg
- * @param {object[]} arg.body          - Active invoice relation records to process.
- * @param {object[]} arg.inactiveBody  - Inactive invoice relation records to process.
- * @param {string}   arg.action        - `"approved"` or `"rejected"` — drives the loading state and modal message.
- */
-export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
-  "APPROVE_OR_REJECT_ALL_INVOICE_RELATION",
-  async ({ body, inactiveBody, action }, thunkAPI) => {
-    try {
-      const approveUrl = "/v1/dbs/api/invoice-relation/approve";
-      const approveInactiveUrl = "/v1/dbs/api/invoice-relation/approve-inactive";
-
-      await Promise.all([
-        body && body.length > 0
-          ? accountManagementService.activationWithRemark(approveUrl, body)
-          : null,
-        inactiveBody && inactiveBody.length > 0
-          ? accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody)
-          : null,
-      ].filter(Boolean));
-
-      const successBody = {
-        title: `Successful`,
-        description: `Your data has been ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}.`,
-        return: false
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-
-      return { body, inactiveBody, action };
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Your data was not ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}. ${message}.`
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
