@@ -56,6 +56,16 @@ const initialState = {
   loading_recalculateExpireGd: false,
 };
 
+/**
+ * Fetches a paginated list of gas deposits, optionally scoped to an account.
+ * Always injects `listType: "all"` into the request body.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  [arg.accountId]  - Account ID to scope the list. Omit to fetch all.
+ * @param {object}  arg.body         - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore   - If true, appends results; otherwise replaces the list.
+ */
 export const getGasDeposits = createAsyncThunk(
   "GET_GAS_DEPOSITS",
   async ({ accountId, body, isLoadMore }, thunkAPI) => {
@@ -77,6 +87,16 @@ export const getGasDeposits = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated approval list for a given account's gas deposits.
+ * Always injects `listType: "approval"` into the request body.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getGasDepositApprovals = createAsyncThunk(
   "GET_GAS_DEPOSIT_APPROVALS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
@@ -100,6 +120,19 @@ export const getGasDepositApprovals = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated detail list nested under a gas deposit record.
+ * Results are stored at `state[listKey][index]` or `state[parentKey]` when `parentKey` is provided.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id                              - Gas deposit ID.
+ * @param {number}  [arg.index]                         - Position of the parent record in `listKey`.
+ * @param {object}  arg.body                            - Pagination body.
+ * @param {boolean} arg.isLoadMore                      - If true, appends results; otherwise replaces.
+ * @param {string}  [arg.listKey="list_gasDeposit"]     - Redux state key of the parent list.
+ * @param {string}  [arg.parentKey]                     - Redux state key if parent is a top-level record (e.g. `"detail_gasDeposit"`).
+ */
 export const getGasDepositDetails = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAILS",
   async ({ id, index, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
@@ -119,6 +152,20 @@ export const getGasDepositDetails = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated mutation list nested under a gas deposit detail record.
+ * Results are stored at `state[listKey][index].list_gasDepositDetail[detailIndex]`.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.detailId                        - Gas deposit detail ID.
+ * @param {number}  [arg.index]                         - Position of the parent gas deposit in `listKey`.
+ * @param {number}  arg.detailIndex                     - Position of the detail record in `list_gasDepositDetail`.
+ * @param {object}  arg.body                            - Pagination body.
+ * @param {boolean} arg.isLoadMore                      - If true, appends results; otherwise replaces.
+ * @param {string}  [arg.listKey="list_gasDeposit"]     - Redux state key of the parent list.
+ * @param {string}  [arg.parentKey]                     - Redux state key if parent is a top-level record.
+ */
 export const getGasDepositDetailMutations = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATIONS",
   async ({ detailId, index, detailIndex, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
@@ -139,6 +186,15 @@ export const getGasDepositDetailMutations = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches a paginated list of gas deposit recalculate / expire request history.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  [arg.accountId]  - Account ID to scope the list. Omit to fetch all.
+ * @param {object}  arg.body         - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore   - If true, appends results; otherwise replaces the list.
+ */
 export const getGasDepositHistories = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORIES",
   async ({ accountId, body, isLoadMore }, thunkAPI) => {
@@ -155,6 +211,12 @@ export const getGasDepositHistories = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the current (non-draft) detail of a gas deposit record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id - Gas deposit ID.
+ */
 export const getGasDeposit = createAsyncThunk(
   "GET_GAS_DEPOSIT",
   async ({ id }, thunkAPI) => {
@@ -169,6 +231,12 @@ export const getGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the draft detail of a gas deposit record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id - Gas deposit ID.
+ */
 export const getGasDepositDraft = createAsyncThunk(
   "GET_GAS_DEPOSIT_DRAFT",
   async ({ id }, thunkAPI) => {
@@ -183,6 +251,12 @@ export const getGasDepositDraft = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the detail of a single gas deposit history record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id - Gas deposit history ID.
+ */
 export const getGasDepositHistory = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORY",
   async ({ id }, thunkAPI) => {
@@ -198,8 +272,13 @@ export const getGasDepositHistory = createAsyncThunk(
 );
 
 /**
- * Recalculate a gas deposit and uploads any provided attachments.
- * @param {{ body: object, attachments: Array, action: string }} args
+ * Submits a recalculate request for a gas deposit, then uploads any new attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object}   arg.body                - Request body for the recalculate API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after submission.
+ * @param {string}   arg.action              - `"draft"` or `"submit"` — used in the upload payload.
  */
 export const recalculateGasDeposit = createAsyncThunk(
   "RECALCULATE_GAS_DEPOSIT",
@@ -257,8 +336,13 @@ export const recalculateGasDeposit = createAsyncThunk(
 );
 
 /**
- * Expire a gas deposit and uploads any provided attachments.
- * @param {{ body: object, attachments: Array, action: string }} args
+ * Submits an expire request for a gas deposit, then uploads any new attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object}   arg.body                - Request body for the expire API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after submission.
+ * @param {string}   arg.action              - `"draft"` or `"submit"` — used in the upload payload.
  */
 export const expireGasDeposit = createAsyncThunk(
   "EXPIRE_GAS_DEPOSIT",
@@ -315,6 +399,9 @@ export const expireGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the list of approval hierarchy options for gas deposits.
+ */
 export const getGdApprovalHierarchies = createAsyncThunk(
   "GET_GD_APPROVAL_HIERARCHIES",
   async (_, thunkAPI) => {
@@ -328,6 +415,11 @@ export const getGdApprovalHierarchies = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches the employee list for a specific approval hierarchy.
+ *
+ * @param {number} id - Approval hierarchy ID.
+ */
 export const getGdApprovalHierarchy = createAsyncThunk(
   "GET_GD_APPROVAL_HIERARCHY",
   async (id, thunkAPI) => {
@@ -341,6 +433,9 @@ export const getGdApprovalHierarchy = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches the list of attachment categories for gas deposits.
+ */
 export const getGdAttachmentCategories = createAsyncThunk(
   "GET_GD_ATTACHMENT_CATEGORY",
   async (_, thunkAPI) => {
@@ -354,6 +449,15 @@ export const getGdAttachmentCategories = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches a paginated list of accounts eligible for gas deposit.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID used to scope the list.
+ * @param {object}  arg.body        - Pagination / search body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getGdAccounts = createAsyncThunk(
   "GET_GD_ACCOUNTS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
@@ -371,6 +475,14 @@ export const getGdAccounts = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an active gas deposit record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_GAS_DEPOSIT",
   async ({ body, action }, thunkAPI) => {
@@ -410,6 +522,14 @@ export const approveOrRejectGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an inactive gas deposit record (inactivation request).
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_GAS_DEPOSIT",
   async ({ body, action }, thunkAPI) => {
@@ -449,6 +569,16 @@ export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Batch-approves or batch-rejects a mixed set of recalculate and expire gas deposits.
+ * Calls the recalculate-approve and expire-approve endpoints in parallel based on which bodies are provided.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object[]} [arg.recalculateBody]  - Recalculate gas deposit records to process.
+ * @param {object[]} [arg.expireBody]       - Expire gas deposit records to process.
+ * @param {string}   arg.action             - `"APPROVE"` or `"REJECT"` — drives the loading state and modal message.
+ */
 export const approveOrRejectAllGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_GAS_DEPOSIT",
   async ({ recalculateBody, expireBody, action }, thunkAPI) => {
@@ -499,6 +629,13 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Submits an inactivation request for a gas deposit record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body - Request body (ID, remark, hierarchy).
+ */
 export const inactivateGasDeposit = createAsyncThunk(
   "INACTIVATE_GAS_DEPOSIT",
   async ({ body }, thunkAPI) => {
@@ -538,6 +675,13 @@ export const inactivateGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Downloads the gas deposit list as an Excel file for a given record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id   - Gas deposit ID.
+ * @param {object} arg.body - Search / sort / filter body.
+ */
 export const downloadGasDeposit = createAsyncThunk(
   "DOWNLOAD_GAS_DEPOSIT",
   async ({ body, id, }, thunkAPI) => {
@@ -552,6 +696,13 @@ export const downloadGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the approval history for a given gas deposit record.
+ * Returns `null` if the API response is an array (no history available).
+ * Handles HTTP 419 by dispatching `setBodyError`.
+ *
+ * @param {number} id - Gas deposit ID.
+ */
 export const getGdApprovalHistory = createAsyncThunk(
   "GET_GD_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
