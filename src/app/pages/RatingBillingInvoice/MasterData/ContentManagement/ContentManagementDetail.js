@@ -926,7 +926,7 @@ const ContentManagementDetail = () => {
           header={approveOrReject}
           approveOrReject={approveOrReject}
           menu={"Content Management"}
-          named={dataDetail?.contentTemplate?.templateName}
+          named={dataDetail?.templateName || dataDetail?.contentTemplate?.templateName}
         />
 
         {/* Modal Retry */}

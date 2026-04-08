@@ -137,9 +137,17 @@ const ListCreateForm = ({ type }) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (list.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(showModalError({ title: "Failed", description: "Criteria Mandatory. Please insert data." }));
+              return;
+            }
+          }
           if (current < STEPS.length - 1) {
             setCurrent(current + 1);
             setValuePage(STEPS[current + 1].value);
+            window.scrollTo(0, 0);
           }
         })
         .catch((error) => {
@@ -148,6 +156,7 @@ const ListCreateForm = ({ type }) => {
     } else if (current < STEPS.length - 1) {
       setCurrent(current + 1);
       setValuePage(STEPS[current + 1].value);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -155,6 +164,7 @@ const ListCreateForm = ({ type }) => {
     if (current > 0) {
       setCurrent(current - 1);
       setValuePage(STEPS[current - 1].value);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -610,12 +620,14 @@ const ListCreateForm = ({ type }) => {
       // It seems like handleMandatory is called regardless of the condition
       handleMandatory(setTabData, listDataAttachment);
       if (list.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
       } else if (storedData) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description:
@@ -631,12 +643,14 @@ const ListCreateForm = ({ type }) => {
           0,
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
       } else if (isOverlapping) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
