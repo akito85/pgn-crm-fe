@@ -3,7 +3,7 @@ import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
 import moment from "moment";
-import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { getPrAccounts } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
@@ -87,7 +87,7 @@ export default function InfoPaymentRelation({
       };
 
       await dispatch(
-        getPrAccountStandard({
+        getPrAccounts({
           id: accountId,
           body,
           isLoadMore: true,
@@ -108,7 +108,7 @@ export default function InfoPaymentRelation({
       };
 
       dispatch(
-        getPrAccountStandard({
+        getPrAccounts({
           id: accountId,
           body,
           isLoadMore: false,

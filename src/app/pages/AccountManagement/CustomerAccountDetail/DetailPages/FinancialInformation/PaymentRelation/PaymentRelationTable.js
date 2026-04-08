@@ -9,7 +9,7 @@ import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAcc
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getPaymentRelation,
+  getPaymentRelations,
   downloadPaymentRelation,
 } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 
@@ -41,7 +41,7 @@ const PaymentRelationTable = ({
 
   const {
     list_paymentRelation: dataSource,
-    pagination_paymentRelation: pagination,
+    pagination_listPr: pagination,
     loading_listPr: loading,
   } = useSelector((state) => state.paymentRelation);
 
@@ -82,7 +82,7 @@ const PaymentRelationTable = ({
       filterRules,
     };
 
-    dispatch(getPaymentRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getPaymentRelations({ id: idAccount, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -136,7 +136,7 @@ const PaymentRelationTable = ({
       };
 
       await dispatch(
-        getPaymentRelation({ id: idAccount, body, isLoadMore: true })
+        getPaymentRelations({ id: idAccount, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -169,7 +169,7 @@ const PaymentRelationTable = ({
     };
 
     setPage(0);
-    dispatch(getPaymentRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getPaymentRelations({ id: idAccount, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).

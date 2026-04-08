@@ -4,7 +4,7 @@ import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { approveOrRejectAllPaymentRelation, getPaymentRelationApprovals } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
@@ -20,7 +20,7 @@ const PaymentRelationApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approvePr, loading_rejectPr } = useSelector(
+  const { list_paymentRelationApproval, pagination_listPrApproval, loading_listPrApproval, loading_approvePr, loading_rejectPr } = useSelector(
     (state) => state.paymentRelation
   );
 
@@ -65,7 +65,7 @@ const PaymentRelationApprovalModal = ({
       }
 
       dispatch(
-        getPaymentRelationApproval({
+        getPaymentRelationApprovals({
           id,
           body,
           isLoadMore: false,
@@ -94,7 +94,7 @@ const PaymentRelationApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_paymentRelationApproval?.totalPage || 0;
+    const totalPages = pagination_listPrApproval?.totalPage || 0;
 
     // Check if there's more data to load
     if (nextPage <= totalPages) {
@@ -108,7 +108,7 @@ const PaymentRelationApprovalModal = ({
       }
 
       dispatch(
-        getPaymentRelationApproval({
+        getPaymentRelationApprovals({
           id,
           body,
           isLoadMore: true,
@@ -119,7 +119,7 @@ const PaymentRelationApprovalModal = ({
   };
 
   const hasMore =
-    dataSource.length < (pagination_paymentRelationApproval?.totalElement || 0);
+    dataSource.length < (pagination_listPrApproval?.totalElement || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -236,7 +236,7 @@ const PaymentRelationApprovalModal = ({
         approveOrRejectAllPaymentRelation({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected",
+          action,
         })
       )
       .unwrap()
@@ -357,7 +357,7 @@ const PaymentRelationApprovalModal = ({
                     className={"[&_.ant-checkbox]:scale-90"}
                     dataSource={dataSource}
                     columns={columns}
-                    totalData={pagination_paymentRelationApproval?.totalElement || 0}
+                    totalData={pagination_listPrApproval?.totalElement || 0}
                     tableScrolled={{ x: dataSource.length ? "max-content" : 1200 }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
