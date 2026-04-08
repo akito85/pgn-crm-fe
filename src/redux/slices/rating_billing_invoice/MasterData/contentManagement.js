@@ -98,6 +98,29 @@ export const getAllContentManagementPaginate = createAsyncThunk(
   },
 );
 
+export const downloadContentManagementList = createAsyncThunk(
+  "DOWNLOAD_CONTENT_MANAGEMENT_LIST",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/content/download-list?page=${page}&size=${pageSize}&search=${searchParams}&sort=${sortParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_CONTENT_MANAGEMENT_LIST",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response.response?.data || response);
+    }
+  },
+);
+
 // Get List Format
 export const getListFormat = createAsyncThunk(
   "GET_LIST_FORMAT",
@@ -1027,6 +1050,17 @@ const contentManagementSlice = createSlice({
       state.content_pagination = action.payload?.page || null;
     },
     [getAllContentManagementPaginate.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // downloadContentManagementList
+    [downloadContentManagementList.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadContentManagementList.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadContentManagementList.rejected]: (state) => {
       state.loading = false;
     },
 
