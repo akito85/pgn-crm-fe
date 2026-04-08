@@ -8,6 +8,7 @@ import {
 } from "../../general_slice";
 
 const initialState = {
+  // --- List ---
   loading_listGd: false,
   list_gasDeposit: [],
   pagination_listGd: {
@@ -16,6 +17,8 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Approval List ---
   loading_listGdApproval: false,
   list_gasDepositApproval: [],
   pagination_listGdApproval: {
@@ -24,6 +27,8 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Request History List ---
   loading_listGdHistory: false,
   list_gasDepositHistory: [],
   pagination_listGdHistory: {
@@ -32,6 +37,8 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
   loading_listGdApprovalHierarchy: false,
   list_gdApprovalHierarchy: [],
   loading_detailGdApprovalHierarchy: false,
@@ -46,17 +53,27 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Detail ---
   loading_detailGd: false,
   detail_gasDeposit: {},
   loading_detailDraftGd: false,
   detailDraft_gasDeposit: {},
+
+  // --- History Detail ---
   loading_detailGdHistory: false,
   detail_gasDepositHistory: {},
+  
+  // --- History ---
   loading_gdApprovalHistory: false,
   detail_gdApprovalHistory: {},
+
+  // --- Approve / Reject ---
   loading_approveRejectGd: false,
   loading_approveGd: false,
   loading_rejectGd: false,
+
+  // --- Recalculate / Expire ---
   loading_recalculateExpireGd: false
 };
 
