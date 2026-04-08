@@ -101,6 +101,11 @@ const BillingBucketForm = ({ type }) => {
   const [priority, setPriority] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
 
   // Steps configuration
   const steps = [
@@ -122,8 +127,30 @@ const BillingBucketForm = ({ type }) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (listDataCriteria.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+            if (listDataBI.length === 0) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Billing Item Detail Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+          }
           if (current < steps.length - 1) {
             setCurrent(current + 1);
+            window.scrollTo(0, 0);
           }
         })
         .catch((error) => {
@@ -132,6 +159,7 @@ const BillingBucketForm = ({ type }) => {
     } else {
       if (current < steps.length - 1) {
         setCurrent(current + 1);
+        window.scrollTo(0, 0);
       }
     }
   };
@@ -139,6 +167,7 @@ const BillingBucketForm = ({ type }) => {
   const prev = () => {
     if (current > 0) {
       setCurrent(current - 1);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -793,15 +822,29 @@ const BillingBucketForm = ({ type }) => {
     );
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: "ATTACHMENT",
+        stepIndex: 2,
+      });
     } else {
-      handleMandatory(setListSectionInfo, setListSectionInfo);
+      handleMandatory(setListSectionInfo, listDataAttachment);
       if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
+      } else if (listDataBI.length === 0) {
+        setCurrent(0);
+        errorBody = {
+          title: "Failed",
+          description: "Billing Item Detail Mandatory. Please insert data.",
+        };
+        dispatch(showModalError(errorBody));
       } else if (storedDataInline) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: `Please save data table inline before submit. Please try again.`,
@@ -816,18 +859,21 @@ const BillingBucketForm = ({ type }) => {
           0,
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlappingCriteria) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlappingBI) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Billing Item Detail. Start date and end date can't be overlap`,
@@ -985,6 +1031,21 @@ const BillingBucketForm = ({ type }) => {
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClear = () => {
@@ -1257,6 +1318,25 @@ const BillingBucketForm = ({ type }) => {
               flag === 1 ? "created" : "submitted"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>
