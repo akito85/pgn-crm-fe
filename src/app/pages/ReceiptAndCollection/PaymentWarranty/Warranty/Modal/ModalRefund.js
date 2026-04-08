@@ -1,9 +1,10 @@
 // VERIFICATION_TAG: 2026-02-17-001
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 // Utils
@@ -111,13 +112,47 @@ const ModalRefund = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
+      const nextState = { ...prevState };
+      nextState[dataIndex] = selectedKeys[0];
+      return nextState;
+    });
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  };
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        advanceSearch: searchData
       };
     });
   };
@@ -197,6 +232,7 @@ const ModalRefund = ({
   };
 
   const clearAllState = (preSelectedRow) => {
+    handleGlobalSearch.cancel();
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
     
@@ -333,12 +369,7 @@ const ModalRefund = ({
   // Customer Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
-      const finalSearch = Object.keys(search).length > 0 
-        ? Object.entries(search)
-            .filter(([_, value]) => value !== undefined && value !== "")
-            .map(([key, value]) => `${key}~${value}`)
-            .join("|") 
-        : "";
+      const finalSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
         getAllCustomerInfoPaginate({
           search: finalSearch,
@@ -353,17 +384,7 @@ const ModalRefund = ({
   // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 1) {
-      // NOTE: For Refund, we currently don't filter warranties by the selected customer Number.
-      // Customer selection is done in Step 1, but Guarantee selection in Step 2 fetches all available warranties.
-      // This is as per current requirement, but might change in the future (e.g., adding back customerNumber filter).
-      
-      let finalSearch = "";
-      if (Object.keys(search).length > 0) {
-        finalSearch = Object.entries(search)
-          .filter(([_, value]) => value !== undefined && value !== "")
-          .map(([key, value]) => `${key}~${value}`)
-          .join("|");
-      }
+      const finalSearch = encodeURIComponent(JSON.stringify(search));
 
       dispatch(
         getRefundListPaginate({
@@ -742,6 +763,10 @@ const ModalRefund = ({
                 setFixedColumns={setFixedColumns}
                 loading={loading}
                 showExport={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 rowSelection={rowSelectionCustomerInfo}
               />
             </div>
@@ -769,6 +794,10 @@ const ModalRefund = ({
                 setFixedColumns={setFixedColumns}
                 loading={loading}
                 showExport={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 rowSelection={rowSelectionWarrantyInfo}
               />
             </div>

@@ -17,6 +17,13 @@ export const columnsInvoice = (
 ) => {
   return [
     {
+      key: "no",
+      title: "NO",
+      isClassification: true,
+      width: 50,
+      render: (text, object, index) => index + 1,
+    },
+    {
       key: "invoiceNumber",
       title: "INVOICE NUMBER",
       dataIndex: "invoiceNumber",

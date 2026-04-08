@@ -5,8 +5,8 @@ import { dateFormatting } from "../../../../../utils";
 
 const MutationDetailTable = ({ details = [] }) => {
   const columns = [
-    { title: "NO", key: "no", width: 60, render: (_, __, i) => i + 1 },
-    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150 },
+    { title: "NO", key: "no", width: 60, align: "left", render: (_, __, i) => i + 1 },
+    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150, align: "center" },
     {
       title: "TRANSACTION DATE",
       dataIndex: "transactionDate",
@@ -47,8 +47,8 @@ const SummaryWarrantyTable = ({ data = [], loading = false }) => {
   const [expandedMutations, setExpandedMutations] = useState([]);
 
   const mutationColumns = [
-    { title: "NO", key: "no", width: 60, render: (_, __, i) => i + 1 },
-    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150 },
+    { title: "NO", key: "no", width: 60, align: "left", render: (_, __, i) => i + 1 },
+    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150, align: "center" },
     {
       title: "DOC DATE",
       dataIndex: "docDate",
@@ -56,7 +56,7 @@ const SummaryWarrantyTable = ({ data = [], loading = false }) => {
       width: 130,
       render: (v) => (v ? moment(v).format(dateFormatting.dateCapital) : "-"),
     },
-    { title: "TYPE", dataIndex: "type", key: "type", width: 120 },
+    { title: "TYPE", dataIndex: "type", key: "type", width: 120, align: "center" },
     { title: "CURRENCY", dataIndex: "currency", key: "currency", width: 100 },
     { title: "ACCOUNT GROUP DATE", dataIndex: "accountGroupDate", key: "accountGroupDate", width: 160 },
     {
@@ -70,10 +70,10 @@ const SummaryWarrantyTable = ({ data = [], loading = false }) => {
   ];
 
   const accountColumns = [
-    { title: "NO", key: "no", width: 60, render: (_, __, i) => i + 1 },
-    { title: "ACCOUNT NUMBER", dataIndex: "accountNumber", key: "accountNumber", width: 160 },
+    { title: "NO", key: "no", width: 60, align: "left", render: (_, __, i) => i + 1 },
+    { title: "ACCOUNT NUMBER", dataIndex: "accountNumber", key: "accountNumber", width: 160, align: "center" },
     { title: "ACCOUNT NAME", dataIndex: "accountName", key: "accountName", width: 200 },
-    { title: "ACCOUNT SEGMENT", dataIndex: "accountSegment", key: "accountSegment", width: 160 },
+    { title: "ACCOUNT SEGMENT", dataIndex: "accountSegment", key: "accountSegment", width: 160, align: "center" },
     { title: "ACCOUNT GROUP DATE", dataIndex: "accountGroupDate", key: "accountGroupDate", width: 180 },
     { title: "CURRENCY", dataIndex: "currency", key: "currency", width: 100 },
   ];
