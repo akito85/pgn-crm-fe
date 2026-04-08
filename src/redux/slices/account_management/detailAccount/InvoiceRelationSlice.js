@@ -16,16 +16,7 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
-
-  // --- Detail ---
-  loading_detailIr: false,
-  detail_invoiceRelation: {},
-  loading_detailDraftIr: false,
-  detailDraft_invoiceRelation: {},
-
-  // --- Create / Update ---
-  loading_createUpdateIr: false,
-
+  
   // --- Approval List ---
   loading_listIrApproval: false,
   list_invoiceRelationApproval: [],
@@ -35,6 +26,15 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Detail ---
+  loading_detailIr: false,
+  detail_invoiceRelation: {},
+  loading_detailDraftIr: false,
+  detailDraft_invoiceRelation: {},
+
+  // --- Create / Update ---
+  loading_createUpdateIr: false,
 
   // --- Approve / Reject ---
   loading_approveRejectIr: false,
