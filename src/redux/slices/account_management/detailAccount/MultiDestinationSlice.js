@@ -740,12 +740,10 @@ const multiDestinationSlice = createSlice({
     },
     [getMdApprovalHierarchy.fulfilled]: (state, action) => {
       state.detail_mdApprovalHierarchy = action.payload;
-  loading_listIrAttachmentCategoryMdfalse,
       state.loading_detailMdApprovalHierarchy = false;
     },
     [getMdApprovalHierarchy.rejected]: (state) => {
       state.detail_mdApprovalHierarchy = [];
-  loading_listIrAttachmentCategoryMdfalse,
       state.loading_detailMdApprovalHierarchy = false;
     },
 
@@ -755,11 +753,11 @@ const multiDestinationSlice = createSlice({
     },
     [getMdAttachmentCategories.fulfilled]: (state, action) => {
       state.list_mdAttachmentCategory = action.payload;
-      state.loading_listIrAttachmentCategoryMdfalse = false;
+      state.loading_listMdAttachmentCategory = false;
     },
     [getMdAttachmentCategories.rejected]: (state) => {
       state.list_mdAttachmentCategory = [];
-      state.loading_listIrAttachmentCategoryMdfalse = false;
+      state.loading_listMdAttachmentCategory = false;
     },
 
     /** Get Multi Destination Account Standard */
