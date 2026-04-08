@@ -119,9 +119,12 @@ const ViewCollectingAgent = () => {
 
     const handleOptions = () => {
         const d = dataApprovalHistoryFix?.dataApprover || {};
-        return Object.keys(d).map((item) => ({
-            value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-        }));
+        const tabOrder = ["create", "inactive", "active"];
+        return tabOrder
+            .filter((key) => Object.prototype.hasOwnProperty.call(d, key))
+            .map((item) => ({
+                value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+            }));
     };
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -134,19 +137,36 @@ const ViewCollectingAgent = () => {
         }));
     };
 
+    const normalizeApprovalTypeKey = (key) => {
+        const upperKey = (key || "").toUpperCase();
+        if (upperKey.includes("INACTIVE")) return "inactive";
+        if (upperKey.includes("ACTIVE")) return "active";
+        if (upperKey.includes("CREATE") || upperKey === "COLLECTING_AGENT") return "create";
+        return (key || "").toLowerCase();
+    };
+
     useEffect(() => {
         if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+            const dataApprover = Object.keys(dataApprovalHistory?.dataApprover || {}).reduce((acc, key) => {
+                const normalizedKey = normalizeApprovalTypeKey(key);
+                acc[normalizedKey] = [
+                    ...(acc[normalizedKey] || []),
+                    ...(dataApprovalHistory?.dataApprover?.[key] || []),
+                ];
+                return acc;
+            }, {});
+            const dataHistory = Object.keys(dataApprovalHistory?.dataHistory || {}).reduce((acc, key) => {
+                const normalizedKey = normalizeApprovalTypeKey(key);
+                acc[normalizedKey] = [
+                    ...(acc[normalizedKey] || []),
+                    ...(dataApprovalHistory?.dataHistory?.[key] || []),
+                ];
+                return acc;
+            }, {});
+
             const temp = {
-                dataApprover: {
-                    create: dataApprovalHistory?.dataApprover?.COLLECTING_AGENT || [],
-                    inactive: dataApprovalHistory?.dataApprover?.INACTIVE_COLLECTING_AGENT || [],
-                    active: dataApprovalHistory?.dataApprover?.ACTIVE_COLLECTING_AGENT || [],
-                },
-                dataHistory: {
-                    create: dataApprovalHistory?.dataHistory?.COLLECTING_AGENT || [],
-                    inactive: dataApprovalHistory?.dataHistory?.INACTIVE_COLLECTING_AGENT || [],
-                    active: dataApprovalHistory?.dataHistory?.ACTIVE_COLLECTING_AGENT || [],
-                },
+                dataApprover,
+                dataHistory,
             };
             setDataApprovalHistoryFix(temp);
         } else {
@@ -176,11 +196,11 @@ const ViewCollectingAgent = () => {
     };
 
     const handleSubmitModalInactivate = (res, handleClear) => {
-        const isCurrentlyInactive = (status || "").toLowerCase() === "inactive";
+        const targetStatus = (status || "").toLowerCase() === "inactive" ? "Active" : "Inactive";
         const reqBody = {
             id,
             appHierId: res.approvalHierarchy,
-            status: isCurrentlyInactive ? "Active" : "Inactive",
+            status: targetStatus,
             remark: res.remark,
         };
         setBody({ body: reqBody });
@@ -458,6 +478,7 @@ const ViewCollectingAgent = () => {
             type: "table",
             render: (record, data_length) => {
                 const statusLowerCase = record?.status?.toLowerCase();
+                    const isActive = statusLowerCase === "active";
                 return data_length > 3 ? (
                     <div className="w-full">
                         <ButtonComponent
@@ -469,7 +490,7 @@ const ViewCollectingAgent = () => {
                         >
                             <Checkbox
                                 onClick={() => handleInactive(record)}
-                                checked={record?.status !== "Active"}
+                                checked={!isActive}
                                 disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
                             />
                             <span className="text-black ml-6 gap-2 text-center">
@@ -482,7 +503,7 @@ const ViewCollectingAgent = () => {
                         <div>
                             <Checkbox
                                 onClick={() => handleInactive(record)}
-                                checked={record?.status !== "Active"}
+                                checked={!isActive}
                                 disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
                             />
                         </div>

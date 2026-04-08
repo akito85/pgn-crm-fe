@@ -129,8 +129,8 @@ const ViewPartner = () => {
 
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
+    const tabOrder = ["create", "inactive", "active"];
+    return tabOrder.filter((key) => Object.prototype.hasOwnProperty.call(data, key)).map((item) => ({
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
@@ -153,23 +153,36 @@ const ViewPartner = () => {
     setSearchText("");
   }, []);
 
+  const normalizeApprovalTypeKey = (key) => {
+    const upperKey = (key || "").toUpperCase();
+    if (upperKey.includes("INACTIVE")) return "inactive";
+    if (upperKey.includes("ACTIVE")) return "active";
+    if (upperKey.includes("CREATE") || upperKey === "PARTNER") return "create";
+    return (key || "").toLowerCase();
+  };
+
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+      const dataApprover = Object.keys(dataApprovalHistory?.dataApprover || {}).reduce((acc, key) => {
+        const normalizedKey = normalizeApprovalTypeKey(key);
+        acc[normalizedKey] = [
+          ...(acc[normalizedKey] || []),
+          ...(dataApprovalHistory?.dataApprover?.[key] || []),
+        ];
+        return acc;
+      }, {});
+      const dataHistory = Object.keys(dataApprovalHistory?.dataHistory || {}).reduce((acc, key) => {
+        const normalizedKey = normalizeApprovalTypeKey(key);
+        acc[normalizedKey] = [
+          ...(acc[normalizedKey] || []),
+          ...(dataApprovalHistory?.dataHistory?.[key] || []),
+        ];
+        return acc;
+      }, {});
+
       const temp = {
-        dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.PARTNER || [],
-          inactive:
-            dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER || [],
-          active:
-            dataApprovalHistory?.dataApprover?.ACTIVE_PARTNER || [],
-        },
-        dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.PARTNER || [],
-          inactive:
-            dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER || [],
-          active:
-            dataApprovalHistory?.dataHistory?.ACTIVE_PARTNER || [],
-        },
+        dataApprover,
+        dataHistory,
       };
       setDataApprovalHistoryFix(temp);
     } else {
@@ -467,6 +480,7 @@ const ViewPartner = () => {
       type: "table",
       render: (record, data_length) => {
         const statusLowerCase = record?.status?.toLowerCase();
+        const isActive = statusLowerCase === "active";
         return data_length > 3 ? (
           <div className="w-full">
             <ButtonComponent
@@ -478,7 +492,7 @@ const ViewPartner = () => {
             >
               <Checkbox
                 onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
+                checked={!isActive}
                 disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
               />
               <span className="text-black ml-6 gap-2 text-center">
@@ -491,7 +505,7 @@ const ViewPartner = () => {
             <div>
               <Checkbox
                 onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
+                checked={!isActive}
                 disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
               />
             </div>
