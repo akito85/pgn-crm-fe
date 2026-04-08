@@ -1,4 +1,4 @@
-import { Popover, Skeleton, Space } from "antd";
+import { Popover, Skeleton } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
 import IconThreeDots from "../assets/Icon/Nx/IconThreeDots";
@@ -134,9 +134,8 @@ export const useColumnActionPermission = (
           fixed: "right",
           width: 150,
           render: () => (
-            <div className="w-full flex justify-center items-center gap-2.5">
-              <Skeleton.Avatar active size="small" shape="circle" />
-              <Skeleton.Avatar active size="small" shape="circle" />
+            <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+              <Skeleton.Button active size="small" shape="round" block />
             </div>
           ),
         },

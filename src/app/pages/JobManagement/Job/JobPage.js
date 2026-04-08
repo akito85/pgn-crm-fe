@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { Dropdown } from "antd";
+import { Dropdown, Skeleton } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -45,8 +45,16 @@ const JobPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch { return null; }
+  }, [rawToken]);
+
   // Permission check
-  const { actions } = useGrantAccessHooks();
+  const { actions, loading: permissionsLoading } = useGrantAccessHooks();
   const permissions = useMemo(
     () => (actions ?? []).map((a) => a.toLowerCase()),
     [actions]
@@ -175,80 +183,90 @@ const JobPage = () => {
     }
   }, [createJobMutation]);
 
-  // Action column (permission-gated)
-  const actionColumn = useMemo(() => {
-    const hasAnyAction = canCreate || canUpdate || canDelete || canView;
-    if (!hasAnyAction) return null;
-
-    return {
-      title: "ACTIONS",
-      key: "actions",
-      width: 120,
-      align: "center",
-      fixed: "right",
-      render: (_, record) => {
-        const menuItems = [
-          canCreate && {
-            key: "copy",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
-                <IconCopy width="18" height="18" /> Copy
-              </span>
-            ),
-            onClick: () => handleCopy(record),
-            disabled: copyingId === record.id,
-          },
-          canUpdate && {
-            key: "update",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <EditMenuIcon /> Update
-              </span>
-            ),
-            onClick: () => toUpdate(record.id),
-          },
-          canDelete && {
-            key: "delete",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <DeleteMenuIcon /> Delete
-              </span>
-            ),
-            onClick: () => {
-              setJobToDelete({ id: record.id, name: record.name, code: record.code });
-              setDeleteModalOpen(true);
-            },
-          },
-        ].filter(Boolean);
-
+  // Action column — always present in baseColumns so the fixed-right column
+  // never appears/disappears (no layout shift). Skeleton and permission checks
+  // live inside render so only cell content changes during loading.
+  const actionColumn = useMemo(() => ({
+    title: "ACTIONS",
+    key: "actions",
+    width: 120,
+    align: "center",
+    fixed: "right",
+    render: (_, record) => {
+      if (permissionsLoading) {
         return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {menuItems.length > 0 && (
-              <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-                <button
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <IconThreeDots />
-                </button>
-              </Dropdown>
-            )}
-            {canView && (
-              <button
-                style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-                onClick={() => toView(record.id)}
-              >
-                <ViewListIcon />
-              </button>
-            )}
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
           </div>
         );
-      },
-    };
-  }, [toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
+      }
+
+      const hasAnyAction = canCreate || canUpdate || canDelete || canView;
+      if (!hasAnyAction) return null;
+
+      const menuItems = [
+        canCreate && {
+          key: "copy",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
+              <IconCopy width="18" height="18" /> Copy
+            </span>
+          ),
+          onClick: () => handleCopy(record),
+          disabled: copyingId === record.id,
+        },
+        canUpdate && {
+          key: "update",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EditMenuIcon /> Update
+            </span>
+          ),
+          onClick: () => toUpdate(record.id),
+        },
+        canDelete && {
+          key: "delete",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <DeleteMenuIcon /> Delete
+            </span>
+          ),
+          onClick: () => {
+            setJobToDelete({ id: record.id, name: record.name, code: record.code });
+            setDeleteModalOpen(true);
+          },
+        },
+      ].filter(Boolean);
+
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          {menuItems.length > 0 && (
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
+              <button
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+                onClick={(e) => e.stopPropagation()}
+                type="button"
+              >
+                <IconThreeDots />
+              </button>
+            </Dropdown>
+          )}
+          {canView && (
+            <button
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+              onClick={() => toView(record.id)}
+              type="button"
+            >
+              <ViewListIcon />
+            </button>
+          )}
+        </div>
+      );
+    },
+  }), [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
+    () => [...getJobManagementColumns(accessGroupsMap), actionColumn],
     [actionColumn, accessGroupsMap]
   );
 
@@ -301,6 +319,7 @@ const JobPage = () => {
       >
         <NxTable
           idTable="job-list-table"
+          userId={userId}
           dataSource={accumulatedData}
           totalData={data?.totalElements}
           current={page + 1}
