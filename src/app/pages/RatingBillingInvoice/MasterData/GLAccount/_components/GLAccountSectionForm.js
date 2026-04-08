@@ -34,6 +34,7 @@ const GLAccountSectionForm = ({ type, form }) => {
                   onKeyPress={(e) => {
                     if (!/[0-9]/.test(e.key)) e.preventDefault();
                   }}
+                  autoComplete="off"
                 />
               </Form.Item>
             </div>
