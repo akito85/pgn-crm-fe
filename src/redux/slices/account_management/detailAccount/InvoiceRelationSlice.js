@@ -7,6 +7,7 @@ import {
 } from "../../general_slice";
 
 const initialState = {
+  // --- List ---
   loading_listIr: false,
   list_invoiceRelation: [],
   pagination_listIr: {
@@ -15,11 +16,17 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Detail ---
   loading_detailIr: false,
   detail_invoiceRelation: {},
   loading_detailDraftIr: false,
   detailDraft_invoiceRelation: {},
+
+  // --- Create / Update ---
   loading_createUpdateIr: false,
+
+  // --- Approval List ---
   loading_listIrApproval: false,
   list_invoiceRelationApproval: [],
   pagination_listIrApproval: {
@@ -28,10 +35,16 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Approve / Reject ---
   loading_approveRejectIr: false,
   loading_approveIr: false,
   loading_rejectIr: false,
+
+  // --- Inactivate ---
   loading_inactivateIr: false,
+
+  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
   loading_listIrApprovalHierarchy: false,
   list_irApprovalHierarchy: [],
   loading_detailIrApprovalHierarchy: false,
@@ -46,6 +59,8 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- History ---
   loading_irApprovalHistory: false,
   detail_irApprovalHistory: {}
 };
