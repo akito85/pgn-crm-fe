@@ -21,7 +21,7 @@ const InvoiceRelation = ({ accountId, customerId }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
 
-  const { data_irApprovalHistory } = useSelector(
+  const { detail_irApprovalHistory } = useSelector(
     (state) => state.invoiceRelation
   );
 
@@ -96,18 +96,18 @@ const InvoiceRelation = ({ accountId, customerId }) => {
   // --- Effects ---
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
+    if (detail_irApprovalHistory && detail_irApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_irApprovalHistory?.dataApprover?.INVOICE_RELATION || [],
+          create: detail_irApprovalHistory?.dataApprover?.INVOICE_RELATION || [],
           inactive:
-            data_irApprovalHistory?.dataApprover?.INACTIVE_INVOICE_RELATION ||
+            detail_irApprovalHistory?.dataApprover?.INACTIVE_INVOICE_RELATION ||
             []
         },
         dataHistory: {
-          create: data_irApprovalHistory?.dataHistory?.INVOICE_RELATION || [],
+          create: detail_irApprovalHistory?.dataHistory?.INVOICE_RELATION || [],
           inactive:
-            data_irApprovalHistory?.dataHistory?.INACTIVE_INVOICE_RELATION || []
+            detail_irApprovalHistory?.dataHistory?.INACTIVE_INVOICE_RELATION || []
         }
       };
 
@@ -115,7 +115,7 @@ const InvoiceRelation = ({ accountId, customerId }) => {
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_irApprovalHistory]);
+  }, [detail_irApprovalHistory]);
 
   return (
     <>
