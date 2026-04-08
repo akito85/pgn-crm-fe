@@ -7,10 +7,6 @@ import {
 } from "../../general_slice";
 
 const initialState = {
-  // --- Shared ---
-  loading: false,
-
-  // --- List ---
   loading_listIr: false,
   list_invoiceRelation: [],
   pagination_invoiceRelation: {
@@ -19,16 +15,11 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
-
-  // --- Detail ---
   loading_detailIr: false,
   detail_invoiceRelation: {},
   loading_detailDraftIr: false,
   detailDraft_invoiceRelation: {},
-  // --- Create / Update ---
   loading_createUpdateIr: false,
-
-  // --- Approval List ---
   loading_listIrApproval: false,
   list_invoiceRelationApproval: [],
   pagination_invoiceRelationApproval: {
@@ -37,22 +28,17 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
-
-  // --- Approve / Reject ---
   loading_approveRejectIr: false,
   loading_approveIr: false,
   loading_rejectIr: false,
-
-  // --- Inactivate ---
   loading_inactivateIr: false,
-
-  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
   loading_listIrApprovalOption: false,
   list_irApprovalHierarchy: [],
   loading_listIrApprovalHierarchyEmployee: false,
   loading_detailIrApprovalHierarchyDetails: false,
   detail_irApprovalHierarchy: [],
   list_irAttachmentCategory: [],
+  loading_listIrAttachmentCategory: false,
   loading_listIrAccountStandard: false,
   list_irAccountStandard: [],
   pagination_irAccountStandard: {
@@ -61,9 +47,8 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
-
-  // --- History ---
-  data_irApprovalHistory: {}
+  loading_irApprovalHistory: false,
+  detail_irApprovalHistory: {}
 };
 
 /**
@@ -554,17 +539,17 @@ export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_INVOICE_RELATION",
   async ({ body, inactiveBody, action }, thunkAPI) => {
     try {
-      // Process active invoice relations
-      if (body && body.length > 0) {
-        const approveUrl = "/v1/dbs/api/invoice-relation/approve";
-        await accountManagementService.activationWithRemark(approveUrl, body);
-      }
+      const approveUrl = "/v1/dbs/api/invoice-relation/approve";
+      const approveInactiveUrl = "/v1/dbs/api/invoice-relation/approve-inactive";
 
-      // Process inactive invoice relations
-      if (inactiveBody && inactiveBody.length > 0) {
-        const approveInactiveUrl = "/v1/dbs/api/invoice-relation/approve-inactive";
-        await accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody);
-      }
+      await Promise.all([
+        body && body.length > 0
+          ? accountManagementService.activationWithRemark(approveUrl, body)
+          : null,
+        inactiveBody && inactiveBody.length > 0
+          ? accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody)
+          : null,
+      ].filter(Boolean));
 
       const successBody = {
         title: `Successful`,
@@ -617,6 +602,7 @@ const invoiceRelationSlice = createSlice({
   extraReducers: {
     /** Get Detail Invoice Relation */
     [getDetailInvoiceRelation.pending]: (state) => {
+      state.detail_invoiceRelation = {};
       state.loading_detailIr = true;
     },
     [getDetailInvoiceRelation.fulfilled]: (state, action) => {
@@ -630,6 +616,7 @@ const invoiceRelationSlice = createSlice({
 
     /** Get Detail Draft Invoice Relation */
     [getDetailDraftInvoiceRelation.pending]: (state) => {
+      state.detailDraft_invoiceRelation = {};
       state.loading_detailDraftIr = true;
     },
     [getDetailDraftInvoiceRelation.fulfilled]: (state, action) => {
@@ -665,6 +652,7 @@ const invoiceRelationSlice = createSlice({
 
     /** Get Invoice Relation Approval Hierarchy */
     [getIrApprovalHierarchy.pending]: (state) => {
+      state.list_irApprovalHierarchy = [];
       state.loading_listIrApprovalOption = true;
     },
     [getIrApprovalHierarchy.fulfilled]: (state, action) => {
@@ -678,6 +666,7 @@ const invoiceRelationSlice = createSlice({
 
     /** Get Invoice Relation Detail Approval Hierarchy */
     [getDetailIrApprovalHierarchy.pending]: (state) => {
+      state.detail_irApprovalHierarchy = [];
       state.loading_listIrApprovalHierarchyEmployee = true;
     },
     [getDetailIrApprovalHierarchy.fulfilled]: (state, action) => {
@@ -691,15 +680,15 @@ const invoiceRelationSlice = createSlice({
 
     /** Get Invoice Relation Attachment Category */
     [getIrAttachmentCategory.pending]: (state) => {
-      state.loading = true;
+      state.loading_listIrAttachmentCategory = true;
     },
     [getIrAttachmentCategory.fulfilled]: (state, action) => {
       state.list_irAttachmentCategory = action.payload;
-      state.loading = false;
+      state.loading_listIrAttachmentCategory = false;
     },
     [getIrAttachmentCategory.rejected]: (state) => {
       state.list_irAttachmentCategory = [];
-      state.loading = false;
+      state.loading_listIrAttachmentCategory = false;
     },
 
     /** Get Invoice Relation Account Standard */
@@ -875,17 +864,6 @@ const invoiceRelationSlice = createSlice({
       }
     },
 
-    /** Download Invoice Relation */
-    [downloadInvoiceRelation.pending]: (state) => {
-      state.loading = true;
-    },
-    [downloadInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [downloadInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
-    },
-
     /** Approve or Reject All Invoice Relation */
     [approveOrRejectAllInvoiceRelation.pending]: (state, action) => {
       if (action.meta.arg?.action === "APPROVE")
@@ -908,15 +886,15 @@ const invoiceRelationSlice = createSlice({
 
     /** Get Invoice Relation Approval History */
     [getIrApprovalHistory.pending]: (state) => {
-      state.loading = true;
+      state.loading_irApprovalHistory = true;
     },
     [getIrApprovalHistory.fulfilled]: (state, action) => {
-      state.data_irApprovalHistory = action.payload;
-      state.loading = false;
+      state.detail_irApprovalHistory = action.payload;
+      state.loading_irApprovalHistory = false;
     },
     [getIrApprovalHistory.rejected]: (state) => {
-      state.data_irApprovalHistory = {};
-      state.loading = false;
+      state.detail_irApprovalHistory = {};
+      state.loading_irApprovalHistory = false;
     }
   }
 });
