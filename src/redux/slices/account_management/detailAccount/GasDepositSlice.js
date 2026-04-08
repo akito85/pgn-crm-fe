@@ -597,7 +597,7 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
             "Accept": "application/json"
           }
         }) : null,
-      ]);
+      ].filter(Boolean));
 
       const successBody = {
         title: `Successful`,
@@ -606,7 +606,7 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
       };
 
       thunkAPI.dispatch(showModalSuccess(successBody))
-      return { recalculateBody, expireBody, action };
+      return null;
     } catch (error) {
       let message =
         (error.response &&
