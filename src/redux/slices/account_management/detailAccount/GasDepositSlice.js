@@ -50,6 +50,8 @@ const initialState = {
   loading_gdApprovalHistory: false,
   detail_gdApprovalHistory: {},
   loading_approveRejectGd: false,
+  loading_approveGd: false,
+  loading_rejectGd: false,
   loading_inactivateGd: false,
   loading_recalculateExpireGd: false,
 };
@@ -200,7 +202,7 @@ export const getGasDepositHistory = createAsyncThunk(
  * @param {{ body: object, attachments: Array, action: string }} args
  */
 export const recalculateGasDeposit = createAsyncThunk(
-  "RECALCULATE_GAS_DEEPOSIT",
+  "RECALCULATE_GAS_DEPOSIT",
   async ({ body: recalculateBody, attachments = [], action }, thunkAPI) => {
     try {
       const recalculateUrl = "/v1/dbs/api/gas-deposit/recalculate";
@@ -239,7 +241,7 @@ export const recalculateGasDeposit = createAsyncThunk(
         error.message ||
         error.toString();
 
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured";
 
       const errorBody = {
@@ -259,7 +261,7 @@ export const recalculateGasDeposit = createAsyncThunk(
  * @param {{ body: object, attachments: Array, action: string }} args
  */
 export const expireGasDeposit = createAsyncThunk(
-  "EXPIRE_GAS_DEEPOSIT",
+  "EXPIRE_GAS_DEPOSIT",
   async ({ body: expireBody, attachments = [], action }, thunkAPI) => {
     try {
       const expireUrl = "/v1/dbs/api/gas-deposit/expire";
@@ -298,7 +300,7 @@ export const expireGasDeposit = createAsyncThunk(
         error.message ||
         error.toString();
 
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured";
 
       const errorBody = {
@@ -390,7 +392,7 @@ export const approveOrRejectGasDeposit = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -429,7 +431,7 @@ export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -474,7 +476,7 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
       };
 
       thunkAPI.dispatch(showModalSuccess(successBody))
-      return null;
+      return { recalculateBody, expireBody, action };
     } catch (error) {
       let message =
         (error.response &&
@@ -482,7 +484,7 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured"
 
       const errorBody = {
@@ -518,7 +520,7 @@ export const inactivateGasDeposit = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not submitted. ${message}.`,
@@ -558,7 +560,7 @@ export const getGdApprovalHistory = createAsyncThunk(
       const response = await accountManagementService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
-      if (error.response.data.code === 419) {
+      if (error.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
@@ -1043,14 +1045,23 @@ const gasDepositSlice = createSlice({
     },
 
     /** Approve or Reject All Inactive Gas Deposit */
-    [approveOrRejectAllGasDeposit.pending]: (state) => {
-      state.loading_approveRejectGd = true;
+    [approveOrRejectAllGasDeposit.pending]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveGd = true;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectGd = true;
     },
-    [approveOrRejectAllGasDeposit.fulfilled]: (state) => {
-      state.loading_approveRejectGd = false;
+    [approveOrRejectAllGasDeposit.fulfilled]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveGd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectGd = false;
     },
-    [approveOrRejectAllGasDeposit.rejected]: (state) => {
-      state.loading_approveRejectGd = false;
+    [approveOrRejectAllGasDeposit.rejected]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveGd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectGd = false;
     },
 
     /** Inactivate Gas Deposit Attachment */
