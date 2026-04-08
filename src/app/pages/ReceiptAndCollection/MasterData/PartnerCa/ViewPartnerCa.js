@@ -181,10 +181,12 @@ const ViewPartnerCa = () => {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PARTNER_CA || [],
           inactive: dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER_CA || [],
+          active: dataApprovalHistory?.dataApprover?.ACTIVE_PARTNER_CA || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PARTNER_CA || [],
           inactive: dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER_CA || [],
+          active: dataApprovalHistory?.dataHistory?.ACTIVE_PARTNER_CA || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -351,10 +353,11 @@ const ViewPartnerCa = () => {
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
+    const isCurrentlyInactive = (statusRef.current || "").toLowerCase() === "inactive";
     const body = {
       id,
       appHierId: res.approvalHierarchy,
-      status: statusRef.current === "Inactive" ? "Active" : "Inactive",
+      status: isCurrentlyInactive ? "Active" : "Inactive",
       remark: res.remark,
     };
     dispatch(inactivePartnerCa({ body }))
@@ -673,7 +676,8 @@ const ViewPartnerCa = () => {
         getAPIOption={getAllApprovalList}
         getAPIDetail={getListApprovalById}
         selector="partnerCa"
-        alertMessage={`Are you sure you want to inactivate this Partner CA Mapping: ${nameModalActiveOrInactivate}?`}
+        header={(statusRef.current || "").toLowerCase() === "inactive" ? "Activate Information" : "Inactive Information"}
+        alertMessage={`Are you sure you want to ${(statusRef.current || "").toLowerCase() === "inactive" ? "activate" : "inactivate"} this Partner CA Mapping: ${nameModalActiveOrInactivate}?`}
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
