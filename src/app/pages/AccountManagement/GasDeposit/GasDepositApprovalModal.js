@@ -35,10 +35,11 @@ const GasDepositApprovalModal = ({
     list_gasDepositApproval: gasDepositApprovals,
     pagination_listGdApproval: pagination,
     loading_listGdApproval,
-    loading_approveRejectGd
+    loading_approveGd,
+    loading_rejectGd
   } = useSelector((state) => state.gasDeposit);
 
-  const loadingApproval = loading_approveRejectGd;
+  const loadingApproval = loading_approveGd || loading_rejectGd;
 
   const searchInput = useRef(null);
   const [form] = Form.useForm();
@@ -394,8 +395,8 @@ const GasDepositApprovalModal = ({
                     onClick={() => handleSave("REJECT")}
                     icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
                     className="flex-row-reverse"
-                    disabled={loadingApproval}
-                    loading={loadingApproval}
+                    disabled={!loading_rejectGd && loadingApproval}
+                    loading={loading_rejectGd}
                   >
                     Reject
                   </Button>
@@ -404,8 +405,8 @@ const GasDepositApprovalModal = ({
                     onClick={() => handleSave("APPROVE")}
                     icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
                     className="flex-row-reverse"
-                    disabled={loadingApproval}
-                    loading={loadingApproval}
+                    disabled={!loading_approveGd && loadingApproval}
+                    loading={loading_approveGd}
                   >
                     Approve
                   </Button>
