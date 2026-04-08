@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import MultiDestinationDetailTabs from "./MultiDestinationDetailTabs";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import { getGrantedAccessAccount } from "../../../../../../../redux/slices/account_management/accountManagement";
-import { getDetailMultiDestination, getDetailDraftMultiDestination, approveOrRejectMultiDestination, approveOrRejectInactiveMultiDestination } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { getMultiDestination, getMultiDestinationDraft, approveOrRejectMultiDestination, approveOrRejectInactiveMultiDestination } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
@@ -168,12 +168,12 @@ const MultiDestinationDetail = ({
 
   useEffect(() => {
     if (idMd)
-      dispatch(getDetailMultiDestination(idMd));
+      dispatch(getMultiDestination(idMd));
   }, [idMd]);
 
   useEffect(() => {
     if (idMd && draftExist)
-      dispatch(getDetailDraftMultiDestination(idMd));
+      dispatch(getMultiDestinationDraft(idMd));
   }, [idMd, draftExist]);
 
   return (

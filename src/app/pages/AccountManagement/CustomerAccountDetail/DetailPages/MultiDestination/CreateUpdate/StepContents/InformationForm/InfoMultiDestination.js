@@ -12,7 +12,7 @@ import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseCont
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
-import { getMdAccountStandard } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { getMdAccounts } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 
 export default function InfoMultiDestination({
@@ -62,7 +62,7 @@ export default function InfoMultiDestination({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { list_mdAccountStandard, pagination_mdAccountStandard, loading_listMdAccountStandard } = useSelector(
+  const { list_mdAccount, pagination_mdAccountStandard, loading_listMdAccount } = useSelector(
     (state) => state.multiDestination
   );
 
@@ -104,7 +104,7 @@ export default function InfoMultiDestination({
       }
 
       await dispatch(
-        getMdAccountStandard({
+        getMdAccounts({
           body,
           isLoadMore: true,
           id: accountId
@@ -126,7 +126,7 @@ export default function InfoMultiDestination({
       }
 
       dispatch(
-        getMdAccountStandard({
+        getMdAccounts({
           body,
           id: accountId,
           isLoadMore: false
@@ -165,8 +165,8 @@ export default function InfoMultiDestination({
   }, [allColumns]);
 
   const currentData = useMemo(
-    () => list_mdAccountStandard,
-    [list_mdAccountStandard]
+    () => list_mdAccount,
+    [list_mdAccount]
   );
 
   const hasMore =
@@ -463,7 +463,7 @@ export default function InfoMultiDestination({
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
               columnDefinitions={columnDefinitions}
-              loading={loading_listMdAccountStandard}
+              loading={loading_listMdAccount}
             />
           </NxBaseContainer>
         </div>

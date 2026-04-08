@@ -5,7 +5,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import DetailText from "../../../../../../components/DetailText";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import {
-  getMultiDestinationApproval,
+  getMultiDestinationApprovals,
   approveOrRejectAllMultiDestination
 } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
@@ -31,7 +31,7 @@ const MultiDestinationApprovalModal = ({
   // --- Hooks ---
   const {
     list_multiDestinationApproval,
-    pagination_multiDestinationApproval,
+    pagination_listMdApproval,
     loading_listMdApproval,
     loading_approveMd,
     loading_rejectMd
@@ -77,7 +77,7 @@ const MultiDestinationApprovalModal = ({
       };
 
       dispatch(
-        getMultiDestinationApproval({
+        getMultiDestinationApprovals({
           id: accountId,
           body,
           isLoadMore: false
@@ -117,7 +117,7 @@ const MultiDestinationApprovalModal = ({
    */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPage = pagination_multiDestinationApproval?.totalPage || 0;
+    const totalPage = pagination_listMdApproval?.totalPage || 0;
 
     if (nextPage <= totalPage) {
       const body = {
@@ -130,7 +130,7 @@ const MultiDestinationApprovalModal = ({
       };
 
       dispatch(
-        getMultiDestinationApproval({
+        getMultiDestinationApprovals({
           id: accountId,
           body,
           isLoadMore: true
@@ -143,7 +143,7 @@ const MultiDestinationApprovalModal = ({
   // --- Derived values ---
   const hasMore =
     list_multiDestinationApproval.length <
-    (pagination_multiDestinationApproval?.totalElement || 0);
+    (pagination_listMdApproval?.totalElement || 0);
 
   /**
    * Handles table sort changes and updates the sort query string.
@@ -416,7 +416,7 @@ const MultiDestinationApprovalModal = ({
                     dataSource={dataSourceWithKeys}
                     columns={columns}
                     totalData={
-                      pagination_multiDestinationApproval?.totalElement || 0
+                      pagination_listMdApproval?.totalElement || 0
                     }
                     tableScrolled={{
                       x: dataSourceWithKeys.length ? "max-content" : 5000
@@ -462,7 +462,7 @@ const MultiDestinationApprovalModal = ({
                   dataSource={selectedRows}
                   columns={columns}
                   totalData={
-                    pagination_multiDestinationApproval?.totalElement || 0
+                    pagination_listMdApproval?.totalElement || 0
                   }
                   tableScrolled={{
                     x: selectedRows.length ? "max-content" : 5000

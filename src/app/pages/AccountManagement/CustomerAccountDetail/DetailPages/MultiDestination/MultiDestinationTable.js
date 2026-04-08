@@ -9,7 +9,7 @@ import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccoun
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getMultiDestination,
+  getMultiDestinations,
   downloadMultiDestination
 } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 
@@ -78,7 +78,7 @@ const MultiDestinationTable = ({
       filterRules,
     };
 
-    dispatch(getMultiDestination({ id: accountId, body, isLoadMore: false }));
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -132,7 +132,7 @@ const MultiDestinationTable = ({
       };
 
       await dispatch(
-        getMultiDestination({ id: accountId, body, isLoadMore: true })
+        getMultiDestinations({ id: accountId, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -165,7 +165,7 @@ const MultiDestinationTable = ({
     };
 
     setPage(0);
-    dispatch(getMultiDestination({ id: accountId, body, isLoadMore: false }));
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).

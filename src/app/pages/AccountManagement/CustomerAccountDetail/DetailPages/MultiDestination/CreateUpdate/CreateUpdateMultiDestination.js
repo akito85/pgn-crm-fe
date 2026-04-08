@@ -10,11 +10,11 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_m
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createMultiDestination,
-  getDetailMultiDestination,
-  getDetailDraftMultiDestination,
-  getDetailMdApprovalHierarchy,
+  getMultiDestination,
+  getMultiDestinationDraft,
   getMdApprovalHierarchy,
-  getMdAttachmentCategory,
+  getMdApprovalHierarchies,
+  getMdAttachmentCategories,
   updateMultiDestination,
 } from "../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { showModalError, validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
@@ -38,10 +38,10 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   const isUpdate = formType === "update";
 
   const {
-    loading_listMdApprovalOption,
-    list_mdApprovalOptions,
-    loading_listMdApprovalHierarchyDetail,
-    list_mdApprovalHierarchyDetail,
+    loading_listMdApprovalHierarchy,
+    list_mdApprovalHierarchy,
+    loading_detailMdApprovalHierarchy,
+    detail_mdApprovalHierarchy,
     loading_detailMd,
     detail_multiDestination,
     loading_detailDraftMd,
@@ -51,8 +51,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   } = useSelector((state) => state.multiDestination);
 
   const loading =
-    loading_listMdApprovalOption ||
-    loading_listMdApprovalHierarchyDetail ||
+    loading_listMdApprovalHierarchy ||
+    loading_detailMdApprovalHierarchy ||
     loading_detailMd ||
     loading_detailDraftMd;
 
@@ -115,8 +115,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
 
   useEffect(() => {
     if (isUpdate && idMd) {
-      dispatch(getDetailMultiDestination(idMd));
-      dispatch(getDetailDraftMultiDestination(idMd));
+      dispatch(getMultiDestination(idMd));
+      dispatch(getMultiDestinationDraft(idMd));
     }
   }, [formType, idMd]);
 
@@ -124,7 +124,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     if (
       isUpdate &&
       detail &&
-      list_mdApprovalOptions?.length
+      list_mdApprovalHierarchy?.length
     ) {
       const {
         accountId,
@@ -171,12 +171,12 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         appHierId,
       });
 
-      const appHierOption = list_mdApprovalOptions.find((option) => option.appHierId === appHierId);
+      const appHierOption = list_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
 
       if (appHierOption)
         handleSelectHiararchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, list_mdApprovalOptions]);
+  }, [detail, list_mdApprovalHierarchy]);
 
   useEffect(() => {
     if (isUpdate && detail?.attachments)
@@ -187,7 +187,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   }, [detail]);
 
   useEffect(() => {
-    dispatch(getMdApprovalHierarchy());
+    dispatch(getMdApprovalHierarchies());
   }, []);
 
   const routes = [
@@ -369,7 +369,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailMdApprovalHierarchy(appHierId));
+    dispatch(getMdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -398,8 +398,8 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         content: (
           <NxApprovalInput
             form={form}
-            hierarchyDetails={list_mdApprovalHierarchyDetail || []}
-            options={list_mdApprovalOptions}
+            hierarchyDetails={detail_mdApprovalHierarchy || []}
+            options={list_mdApprovalHierarchy}
             handleSelectHiararchy={handleSelectHiararchy}
             key={`multi-destination-tab-1`}
           />
@@ -417,7 +417,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             updateData={setAttachmentDataSource}
             setDeleted={setDeletedAttachments}
             key={`multi-destination-tab-2`}
-            getAPICategory={getMdAttachmentCategory}
+            getAPICategory={getMdAttachmentCategories}
             categoryData={list_mdAttachmentCategory}
             service={accountManagementService}
             configApplication={configApp.ACCOUNT_SERVICE}
@@ -638,7 +638,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     } else if (isUpdate) {
       if (
         detail &&
-        list_mdApprovalOptions?.length
+        list_mdApprovalHierarchy?.length
       ) {
         const {
           accountId: relatedAccountId,
@@ -686,7 +686,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           appHierId,
         });
 
-        const appHierOption = list_mdApprovalOptions.find((option) => option.appHierId === appHierId);
+        const appHierOption = list_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
 
         if (appHierOption)
           handleSelectHiararchy(appHierId, appHierOption.approvalName);
@@ -797,7 +797,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
               formId={"multiDestinationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={list_mdApprovalHierarchyDetail || []}
+              approvalData={detail_mdApprovalHierarchy || []}
               type={confirmationType}
               attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
