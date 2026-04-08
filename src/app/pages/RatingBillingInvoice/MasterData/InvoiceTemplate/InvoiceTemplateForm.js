@@ -101,6 +101,11 @@ const InvoiceTemplateForm = ({ type }) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [bodyData, setBodyData] = useState({});
   const [bodyError, setBodyError] = useState({});
   const [startDate, setStartDate] = useState();
@@ -446,10 +451,10 @@ const InvoiceTemplateForm = ({ type }) => {
         id: item?.id || null,
         invoiceTemplateId: item?.invoiceTemplateId || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.date)
+          ? moment(item.startDate).format(dateFormatting.dateFormal)
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.date)
+          ? moment(item.endDate).format(dateFormatting.dateFormal)
           : null,
         customer: item.customer?.value || null,
         budget: item.budget?.value || null,
@@ -683,7 +688,7 @@ const InvoiceTemplateForm = ({ type }) => {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
+        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
       ) {
         dataOverlap?.push(item);
       }
@@ -706,6 +711,11 @@ const InvoiceTemplateForm = ({ type }) => {
 
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabPages, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
       handleMandatory(setTabPages, listDataAttachment);
       if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
@@ -926,6 +936,21 @@ const InvoiceTemplateForm = ({ type }) => {
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setTabPages, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabPages.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleCloseModalError = () => {
@@ -1105,6 +1130,25 @@ const InvoiceTemplateForm = ({ type }) => {
               flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>

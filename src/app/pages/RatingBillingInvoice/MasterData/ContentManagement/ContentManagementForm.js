@@ -166,6 +166,11 @@ const ContentManagementForm = ({ type }) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
   const [subjectValue, setSubjectValue] = useState("");
@@ -602,7 +607,11 @@ const ContentManagementForm = ({ type }) => {
       setListSectionInfo((prev) =>
         prev.map((item) => item.value === "Attachment" ? { ...item, errorBadge: 1 } : { ...item, errorBadge: 0 })
       );
-      dispatch(showModalError({ title: "Failed", description: "Attachment is required. Please upload at least one file." }));
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
       return;
     }
 
@@ -748,6 +757,20 @@ const ContentManagementForm = ({ type }) => {
 
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClear = () => {
@@ -771,6 +794,7 @@ const ContentManagementForm = ({ type }) => {
       dispatch(getDetailContentManagement(id));
       dispatch(getDetailDraftContentManagement(id));
     }
+    setCurrent(0);
   };
 
   const handleCloseModalError = () => {
@@ -952,6 +976,25 @@ const ContentManagementForm = ({ type }) => {
             </div>
             <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "saved as draft"}. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>
