@@ -9,7 +9,7 @@ import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAcc
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getInvoiceRelation,
+  getInvoiceRelations,
   downloadInvoiceRelation
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 
@@ -40,7 +40,7 @@ const InvoiceRelationTable = ({
   const dispatch = useDispatch();
   const {
     list_invoiceRelation: dataSource,
-    pagination_invoiceRelation: pagination,
+    pagination_listIr: pagination,
     loading_listIr: loading
   } = useSelector((state) => state.invoiceRelation);
 
@@ -81,7 +81,7 @@ const InvoiceRelationTable = ({
       filterRules
     };
 
-    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
+    dispatch(getInvoiceRelations({ id: accountId, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -135,7 +135,7 @@ const InvoiceRelationTable = ({
       };
 
       await dispatch(
-        getInvoiceRelation({ id: accountId, body, isLoadMore: true })
+        getInvoiceRelations({ id: accountId, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -168,7 +168,7 @@ const InvoiceRelationTable = ({
     };
 
     setPage(0);
-    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
+    dispatch(getInvoiceRelations({ id: accountId, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).

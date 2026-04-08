@@ -5,7 +5,7 @@ import {
   dateFormatting,
   requiredMessage
 } from "../../../../../../../../../../utils";
-import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
+import { getIrAccounts } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
@@ -89,7 +89,7 @@ export default function InfoInvoiceRelation({
       };
 
       await dispatch(
-        getIrAccountStandard({
+        getIrAccounts({
           body,
           isLoadMore: true,
           id: accountId
@@ -110,7 +110,7 @@ export default function InfoInvoiceRelation({
       };
 
       dispatch(
-        getIrAccountStandard({
+        getIrAccounts({
           body,
           id: accountId,
           isLoadMore: false

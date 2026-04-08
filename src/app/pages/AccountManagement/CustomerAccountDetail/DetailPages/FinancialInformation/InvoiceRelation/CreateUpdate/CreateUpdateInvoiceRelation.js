@@ -10,11 +10,11 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/accoun
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createInvoiceRelation,
-  getDetailDraftInvoiceRelation,
-  getDetailInvoiceRelation,
-  getDetailIrApprovalHierarchy,
+  getInvoiceRelationDraft,
+  getInvoiceRelation,
   getIrApprovalHierarchy,
-  getIrAttachmentCategory,
+  getIrApprovalHierarchies,
+  getIrAttachmentCategories,
   updateInvoiceRelation
 } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import {
@@ -43,8 +43,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const isUpdate = formType === "update";
   
   const {
-    loading_listIrApprovalOption,
-    loading_listIrApprovalHierarchyEmployee,
+    loading_listIrApprovalHierarchy,
+    loading_detailIrApprovalHierarchy,
     loading_detailIr,
     loading_detailDraftIr,
     loading_createUpdateIr,
@@ -56,8 +56,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   } = useSelector((state) => state.invoiceRelation);
   
   const loading =
-  loading_listIrApprovalOption ||
-    loading_listIrApprovalHierarchyEmployee ||
+  loading_listIrApprovalHierarchy ||
+    loading_detailIrApprovalHierarchy ||
     loading_detailIr ||
     loading_detailDraftIr;
     
@@ -97,8 +97,8 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   useEffect(() => {
     if (isUpdate && idIr) {
-      dispatch(getDetailInvoiceRelation(idIr));
-      dispatch(getDetailDraftInvoiceRelation(idIr));
+      dispatch(getInvoiceRelation(idIr));
+      dispatch(getInvoiceRelationDraft(idIr));
     }
   }, [formType, idIr]);
 
@@ -142,7 +142,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   }, [detail]);
 
   useEffect(() => {
-    dispatch(getIrApprovalHierarchy());
+    dispatch(getIrApprovalHierarchies());
   }, []);
 
   const routes = [
@@ -278,7 +278,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   };
 
   const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailIrApprovalHierarchy(appHierId));
+    dispatch(getIrApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -331,7 +331,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
               updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
               key={`invoice-relation-tab-2`}
-              getAPICategory={getIrAttachmentCategory}
+              getAPICategory={getIrAttachmentCategories}
               categoryData={list_irAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}

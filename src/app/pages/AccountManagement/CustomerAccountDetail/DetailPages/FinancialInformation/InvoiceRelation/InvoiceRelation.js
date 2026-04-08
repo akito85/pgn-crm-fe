@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
 import {
+  getIrApprovalHierarchies,
   getIrApprovalHierarchy,
-  getDetailIrApprovalHierarchy,
   getIrApprovalHistory,
   inactivateInvoiceRelation
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
@@ -148,10 +148,10 @@ const InvoiceRelation = ({ accountId, customerId }) => {
         approvalOptionsName="list_irApprovalHierarchy"
         approvalHierarchtDetailsName="detail_irApprovalHierarchy"
         loadingInactivateName="loading_inactivateIr"
-        loadingListApprovalOptionsName="loading_listIrApprovalOption"
-        loadingListHierarchyDetailName="loading_listIrApprovalHierarchyEmployee"
-        getApprovalOptions={getIrApprovalHierarchy}
-        getApprovalHierarchyDetails={getDetailIrApprovalHierarchy}
+        loadingListApprovalOptionsName="loading_listIrApprovalHierarchy"
+        loadingListHierarchyDetailName="loading_detailIrApprovalHierarchy"
+        getApprovalOptions={getIrApprovalHierarchies}
+        getApprovalHierarchyDetails={getIrApprovalHierarchy}
       />
       {/* Approval History Modal */}
       <NxHistoryModal

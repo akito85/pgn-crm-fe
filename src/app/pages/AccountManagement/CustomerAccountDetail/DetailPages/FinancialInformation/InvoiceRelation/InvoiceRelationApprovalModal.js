@@ -6,7 +6,7 @@ import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import {
   approveOrRejectAllInvoiceRelation,
-  getInvoiceRelationApproval
+  getInvoiceRelationApprovals
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
@@ -31,7 +31,7 @@ const InvoiceRelationApprovalModal = ({
   // --- Hooks ---
   const {
     list_invoiceRelationApproval: invoiceRelationApprovals,
-    pagination_invoiceRelationApproval: pagination,
+    pagination_listIrApproval: pagination,
     loading_listIrApproval,
     loading_approveIr,
     loading_rejectIr
@@ -77,7 +77,7 @@ const InvoiceRelationApprovalModal = ({
       };
 
       dispatch(
-        getInvoiceRelationApproval({
+        getInvoiceRelationApprovals({
           id: accountId,
           body,
           isLoadMore: false
@@ -130,7 +130,7 @@ const InvoiceRelationApprovalModal = ({
       };
 
       dispatch(
-        getInvoiceRelationApproval({
+        getInvoiceRelationApprovals({
           id: accountId,
           body,
           isLoadMore: true
