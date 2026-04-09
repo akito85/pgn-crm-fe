@@ -278,6 +278,11 @@ const InvoiceTemplateForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.startDate));
+      setEndDate(
+        data_detail_draft?.endDate
+          ? moment(data_detail_draft?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail_draft?.apphierId);
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
@@ -365,6 +370,11 @@ const InvoiceTemplateForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.startDate));
+      setEndDate(
+        data_detail?.endDate
+          ? moment(data_detail?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail?.apphierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
