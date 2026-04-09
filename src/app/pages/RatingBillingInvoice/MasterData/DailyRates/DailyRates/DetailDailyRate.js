@@ -1,8 +1,7 @@
 import moment from "moment";
-import React from "react";
-import BaseContainer from "../../../../../../components/BaseContainer";
 import DetailText from "../../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../../utils";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DetailDailyRate = ({ data_detail }) => {
   const labelStatus = (index) => {
@@ -24,12 +23,12 @@ const DetailDailyRate = ({ data_detail }) => {
       {data_detail?.isApprover &&
       data_detail?.approvalType &&
       data_detail?.approvalType === "INACTIVE_DAILY_RATES" ? (
-        <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
+        <CardContainer header={"INACTIVE REQUEST INFORMATION"}>
           <div className="grid grid-cols-4 w-full">
             <DetailText label={"Requested Date"}>
               {data_detail?.approvalDetail?.requestedDate
                 ? moment(data_detail?.approvalDetail?.requestedDate).format(
-                    "DD MMM YYYY HH:mm:ss"
+                    "DD MMM YYYY HH:mm:ss",
                   )
                 : ""}
             </DetailText>
@@ -40,9 +39,9 @@ const DetailDailyRate = ({ data_detail }) => {
               {data_detail?.approvalDetail?.remarks}
             </DetailText>
           </div>
-        </BaseContainer>
+        </CardContainer>
       ) : null}
-      <BaseContainer header={"DAILY RATE INFORMATION"}>
+      <CardContainer header={"DAILY RATE INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-5">
           <DetailText label={"Rate Type"}>{data_detail?.rateType}</DetailText>
           <DetailText label={"From Currency"}>
@@ -71,9 +70,9 @@ const DetailDailyRate = ({ data_detail }) => {
             {data_detail?.description}
           </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"HISTORY LOG INFORMATION"}>
+      <CardContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-5">
           <DetailText label={"Record ID"}>{data_detail?.ratesId}</DetailText>
           <DetailText label={"Created Date"}>
@@ -89,7 +88,7 @@ const DetailDailyRate = ({ data_detail }) => {
           </DetailText>
           <DetailText label={"Updated By"}>{data_detail?.updatedBy}</DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };
