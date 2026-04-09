@@ -90,6 +90,40 @@ export const columnsTaxCodeList = (
     ),
     render: (text) => renderColumn('glAccount', hasValue(search['glAccount']), searchText, text, false, 'input', search)
   },
+    {
+    title: "START DATE",
+    sorter: true,
+    align: "center",
+    dataIndex: "startDate",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "startDate",
+      searchInput,
+      hasValue(search['startDate']),
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
+  },
+  {
+    title: "END DATE",
+    sorter: true,
+    align: "center",
+    dataIndex: "endDate",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "endDate",
+      searchInput,
+      hasValue(search['endDate']),
+      searchText,
+      handleSearch,
+      true,
+      "date"
+    ),
+    render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
+  },
   {
     title: "CRITERIA",
     dataIndex: "criterias",
@@ -124,40 +158,6 @@ export const columnsTaxCodeList = (
       // ) : (
       //   ""
       // ),
-  },
-  {
-    title: "START DATE",
-    sorter: true,
-    align: "center",
-    dataIndex: "startDate",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "startDate",
-      searchInput,
-      hasValue(search['startDate']),
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
-  },
-  {
-    title: "END DATE",
-    sorter: true,
-    align: "center",
-    dataIndex: "endDate",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "endDate",
-      searchInput,
-      hasValue(search['endDate']),
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
   },
   {
     title: "DESCRIPTION",
