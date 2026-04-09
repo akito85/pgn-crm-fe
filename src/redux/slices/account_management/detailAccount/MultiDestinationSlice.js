@@ -49,7 +49,7 @@ const initialState = {
   list_mdAttachmentCategory: [],
   loading_listMdAccount: false,
   list_mdAccount: [],
-  pagination_mdAccount: {
+  pagination_listMdAccount: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -781,7 +781,7 @@ const multiDestinationSlice = createSlice({
           state.list_mdAccount = resultWithIds;
       }
 
-      state.pagination_mdAccount = {
+      state.pagination_listMdAccount = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
@@ -793,7 +793,7 @@ const multiDestinationSlice = createSlice({
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_mdAccount = [];
-        state.pagination_mdAccount = {
+        state.pagination_listMdAccount = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,

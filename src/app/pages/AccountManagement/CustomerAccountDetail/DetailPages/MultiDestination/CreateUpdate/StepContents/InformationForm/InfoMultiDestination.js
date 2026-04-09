@@ -62,7 +62,7 @@ export default function InfoMultiDestination({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { list_mdAccount, pagination_mdAccountStandard, loading_listMdAccount } = useSelector(
+  const { list_mdAccount, pagination_listMdAccount, loading_listMdAccount } = useSelector(
     (state) => state.multiDestination
   );
 
@@ -91,7 +91,7 @@ export default function InfoMultiDestination({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPage = pagination_mdAccountStandard?.totalPage || 0;
+    const totalPage = pagination_listMdAccount?.totalPage || 0;
 
     if (nextPage <= totalPage) {
       const body = {
@@ -170,7 +170,7 @@ export default function InfoMultiDestination({
   );
 
   const hasMore =
-    currentData.length < (pagination_mdAccountStandard?.totalElement || 0);
+    currentData.length < (pagination_listMdAccount?.totalElement || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
@@ -452,7 +452,7 @@ export default function InfoMultiDestination({
             <NxTable
               idTable="multi-destination-account-standard"
               dataSource={dataSourceWithKeys}
-              totalData={pagination_mdAccountStandard.totalElement || 0}
+              totalData={pagination_listMdAccount.totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
               onSort={onSort}
