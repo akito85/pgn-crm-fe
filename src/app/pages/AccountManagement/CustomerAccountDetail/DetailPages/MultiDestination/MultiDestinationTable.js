@@ -40,7 +40,7 @@ const MultiDestinationTable = ({
   const dispatch = useDispatch();
   const {
     list_multiDestination: dataSource,
-    pagination_multiDestination: pagination,
+    pagination_listMd: pagination,
     loading_listMd: loading,
   } = useSelector((state) => state.multiDestination);
 
