@@ -60,7 +60,7 @@ const ViewPartnerCa = () => {
   const [sort, setSort] = useState("");
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const statusRef = useRef("");
+  const [currentStatus, setCurrentStatus] = useState("");
   const [id, setId] = useState("");
   const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
@@ -345,7 +345,7 @@ const ViewPartnerCa = () => {
     setOpenModalInactivate(true);
     setId(r?.id);
     setNameModalActiveOrInactivate(r?.partner?.partnerName || r?.id);
-    statusRef.current = r?.status ?? "";
+    setCurrentStatus(r?.status ?? "");
   };
 
   const handleCancelModalInactivate = () => {
@@ -353,7 +353,7 @@ const ViewPartnerCa = () => {
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
-    const isCurrentlyInactive = (statusRef.current || "").toLowerCase() === "inactive";
+    const isCurrentlyInactive = (currentStatus || "").toLowerCase() === "inactive";
     const body = {
       id,
       appHierId: res.approvalHierarchy,
@@ -676,8 +676,8 @@ const ViewPartnerCa = () => {
         getAPIOption={getAllApprovalList}
         getAPIDetail={getListApprovalById}
         selector="partnerCa"
-        header={(statusRef.current || "").toLowerCase() === "inactive" ? "Activate Information" : "Inactive Information"}
-        alertMessage={`Are you sure you want to ${(statusRef.current || "").toLowerCase() === "inactive" ? "activate" : "inactivate"} this Partner CA Mapping: ${nameModalActiveOrInactivate}?`}
+        header={(currentStatus || "").toLowerCase() === "inactive" ? "Activate Information" : "Inactive Information"}
+        alertMessage={`Are you sure you want to ${(currentStatus || "").toLowerCase() === "inactive" ? "activate" : "inactivate"} this Partner CA Mapping: ${nameModalActiveOrInactivate}?`}
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
