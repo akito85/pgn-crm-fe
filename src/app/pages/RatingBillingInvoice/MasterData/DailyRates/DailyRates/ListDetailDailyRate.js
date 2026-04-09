@@ -20,10 +20,11 @@ import {
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/dailyrate";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import DetailDailyRate from "./DetailDailyRate";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const ListDetailDailyRate = () => {
   const { data_detail, data_detail_draft } = useSelector(
-    (state) => state.daily_rate
+    (state) => state.daily_rate,
   );
   const dispatch = useDispatch();
   const location = useLocation();
@@ -179,7 +180,7 @@ const ListDetailDailyRate = () => {
         );
       case "Attachment":
         return (
-          <BaseContainer header={"ATTACHMENT INFORMATION"}>
+          <CardContainer header={"ATTACHMENT INFORMATION"}>
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
@@ -192,7 +193,7 @@ const ListDetailDailyRate = () => {
               getAPIGuard={getConfigFileRBIData}
               typeRBI={"data"}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       case "Draft":
         return (
@@ -217,20 +218,8 @@ const ListDetailDailyRate = () => {
         {renderSection(segmentedPage)}
       </div>
 
-      <div className="flex mt-[30px] justify-between py-5">
-        <ButtonComponent
-          type={"submit"}
-          onClick={() => navigate(-1)}
-          icon={
-            <LeftOutlined
-              style={{
-                color: "#fff",
-                fontSize: 24,
-                justifyItems: "center",
-              }}
-            />
-          }
-        >
+      <div className="flex mt-[10px] justify-between">
+        <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
           Back
         </ButtonComponent>
 

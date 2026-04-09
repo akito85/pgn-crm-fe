@@ -522,7 +522,9 @@ const DailyRateView = ({ dispatch }) => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           type="submit"
           onClick={handleDownload}
         >
@@ -535,7 +537,9 @@ const DailyRateView = ({ dispatch }) => {
       render: (
         <NavLink to={RBI_ROUTES.DAILY_RATE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={20} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Daily Rates

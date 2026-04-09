@@ -232,8 +232,9 @@ const TaxCodeForm = ({ type }) => {
 
       // Data Attachment Draft Information
       const dataAttachmentDraft = (data_detail?.taxCodeAttDtos || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -346,8 +347,9 @@ const TaxCodeForm = ({ type }) => {
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
       // Data Attachment Information
-      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item) => {
+      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
