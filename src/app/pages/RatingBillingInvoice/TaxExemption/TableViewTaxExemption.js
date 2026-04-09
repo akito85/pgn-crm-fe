@@ -599,32 +599,6 @@ export const columnsTaxExemption = (
         ),
     },
     {
-      key: "proformaInvoice",
-      title: "PROFORMA INVOICE",
-      dataIndex: "pathFile",
-      isClassification: true,
-      width: 200,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "proformaInvoice",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-      ),
-      render: (text) =>
-        renderColumn(
-          "proformaInvoice",
-          hasValue(search["proformaInvoice"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search,
-        ),
-    },
-    {
       key: "statusBilling",
       title: "STATUS BILLING",
       dataIndex: "status",
