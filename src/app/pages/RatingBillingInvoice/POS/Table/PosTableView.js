@@ -91,11 +91,11 @@ export const PosTableView = (
   },
   {
     title: "PROFORMA INVOICE NUMBER",
-    dataIndex: "proformaInvoice",
+    dataIndex: "proformaInvoiceNumber",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "proformaInvoice",
+      "proformaInvoiceNumber",
       searchInput,
       searchedColumn,
       searchText,
@@ -104,7 +104,7 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "proformaInvoice",
+        "proformaInvoiceNumber",
         hasValue(search["proformaInvoice"]),
         searchText,
         text,

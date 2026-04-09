@@ -252,8 +252,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Draft Attachment Information
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -315,6 +316,11 @@ const BillingBucketForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.information?.startDate));
+      setEndDate(
+        data_detail_draft?.information?.endDate
+          ? moment(data_detail_draft?.information?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail_draft?.information?.apphierId);
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
@@ -358,8 +364,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Attachment Information
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -422,6 +429,11 @@ const BillingBucketForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.information?.startDate));
+      setEndDate(
+        data_detail?.information?.endDate
+          ? moment(data_detail?.information?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail?.information?.apphierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
