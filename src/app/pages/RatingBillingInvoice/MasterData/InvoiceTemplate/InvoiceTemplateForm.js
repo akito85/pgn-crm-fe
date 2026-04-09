@@ -463,10 +463,10 @@ const InvoiceTemplateForm = ({ type }) => {
         id: item?.id || null,
         invoiceTemplateId: item?.invoiceTemplateId || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
+          ? moment(item.startDate).format(dateFormatting.date)
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
+          ? moment(item.endDate).format(dateFormatting.date)
           : null,
         customer: item.customer?.value || null,
         budget: item.budget?.value || null,
