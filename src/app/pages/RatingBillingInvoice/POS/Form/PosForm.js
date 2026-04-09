@@ -1386,7 +1386,7 @@ const PosForm = ({ type }) => {
             email: data_detailPos?.email,
             address: data_detailPos?.address,
             billingCycle: data_globalBillingCycle?.find(
-              (item) => item.name === data_detailPos?.billingCycle,
+              (item) => item.id === data_detailPos?.billingCycle,
             )?.id,
             billingPeriod: data_detailPos?.billingPeriod,
             remark: data_detailPos?.remark,
