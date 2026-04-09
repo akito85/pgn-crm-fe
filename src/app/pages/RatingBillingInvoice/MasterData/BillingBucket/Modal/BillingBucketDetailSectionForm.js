@@ -96,17 +96,16 @@ const BillingBucketDetailSectionForm = ({
 
   const handleDisableDateBefore = (current) => {
     if (hasValue(startDate) && hasValue(validEndDate)) { 
-      return moment(startDate) > current ||current > moment(validEndDate).add(1, "days")
+      return current.isBefore(moment(startDate).startOf("day")) || current.isAfter(moment(validEndDate).endOf("day"));
     } else if (hasValue(validStartDate) && hasValue(validEndDate) === false) {
-      return moment(validStartDate) > current;
+      return current.isBefore(moment(validStartDate).startOf("day"));
     } else if (hasValue(validStartDate) && hasValue(validEndDate)) {
-      const startDate = moment(validStartDate).startOf("day");
-      const endDate = moment(validEndDate).endOf("day");
-      return current.isBefore(startDate) || current.isAfter(endDate);
+      const startDateInit = moment(validStartDate).startOf("day");
+      const endDateInit = moment(validEndDate).endOf("day");
+      return current.isBefore(startDateInit) || current.isAfter(endDateInit);
     } else {
       return true;
     }
-
   };
 
 

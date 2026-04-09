@@ -118,6 +118,7 @@ const CreateTOP = ({
             <InputComponent
               disabled={status === "Active" ? true : false}
               maxLength={100}
+              placeholder={"Input Name"}
             />
           </Form.Item>
 
@@ -159,7 +160,7 @@ const CreateTOP = ({
             name={"type"}
             rules={formMessageRequired("Type")}
           >
-            <SelectComponent>
+            <SelectComponent placeholder={"Choose Type"}>
               {dataType?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -177,6 +178,7 @@ const CreateTOP = ({
               onInput={(e) =>
                 (e.target.value = e.target.value.replace(/\D/g, ""))
               }
+              placeholder={"Input Terms"}
               maxLength={2}
             />
           </Form.Item>
@@ -218,6 +220,7 @@ const CreateTOP = ({
               rules={[{ message: requiredMessage("Criteria"), required: true }]}
             >
               <SelectComponent
+                placeholder={"Input Criteria"}
                 disabled={storedData}
                 mode="multiple"
                 onSelect={handleSelectCriteria}
@@ -236,7 +239,11 @@ const CreateTOP = ({
         </div>
         <div className="w-full grid grid-cols-1 gap-2">
           <Form.Item label={"Description"} name={"description"}>
-            <InputComponent type="textarea" cols={4} />
+            <InputComponent
+              placeholder={"Input Description"}
+              type="textarea"
+              cols={4}
+            />
           </Form.Item>
         </div>
       </CardContainer>
