@@ -140,7 +140,12 @@ const ListCreateForm = ({ type }) => {
           if (current === 0) {
             const formData = form.getFieldsValue();
             if (list.length === 0 && !formData?.criteria?.includes(24)) {
-              dispatch(showModalError({ title: "Failed", description: "Criteria Mandatory. Please insert data." }));
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                }),
+              );
               return;
             }
           }
@@ -1001,7 +1006,7 @@ const ListCreateForm = ({ type }) => {
         width={1000}
         type={"confirmation"}
         footer={
-          <div className="w-full flex justify-end gap-5 p-4">
+          <div className="w-full flex justify-end gap-2 p-4">
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>

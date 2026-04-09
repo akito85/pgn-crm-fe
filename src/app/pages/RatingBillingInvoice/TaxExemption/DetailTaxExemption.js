@@ -10,8 +10,10 @@ import StatusComponent from "../../../../components/StatusComponent";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
+import axios from "axios";
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import {
   getTaxExemptionDetail,
@@ -45,6 +47,25 @@ const DetailTaxExemption = () => {
 
   const [modalConfirm, setModalConfirm] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
+
+  const handlePreviewProformaInvoice = async () => {
+    if (!taxExemption.proformaInvoiceNumber) return;
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/rbi/proforma-invoice/download/latest/${taxExemption.proformaInvoiceNumber}`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        },
+      );
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Error previewing proforma invoice:", error);
+    }
+  };
 
   const approvalInfo = dataDetail?.approvalInfo || {};
 
@@ -250,18 +271,21 @@ const DetailTaxExemption = () => {
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Proforma Invoice</p>
-                      {taxExemption.pathFile ? (
-                        <a
-                          href={taxExemption.pathFile}
+                      {taxExemption.proformaInvoice ? (
+                        <span
                           className="text-xs"
-                          style={{ color: "#0075BF" }}
-                          target="_blank"
-                          rel="noreferrer"
+                          style={{
+                            color: "#0075BF",
+                            cursor: "pointer",
+                            wordBreak: "break-all",
+                            display: "block",
+                          }}
+                          onClick={handlePreviewProformaInvoice}
                         >
-                          {taxExemption.proformaInvoiceNumber}.pdf
-                        </a>
+                          {taxExemption.proformaInvoice}
+                        </span>
                       ) : (
-                        <p className="text-sm font-medium"></p>
+                        <p className="text-sm font-medium">-</p>
                       )}
                     </div>
                   </div>
