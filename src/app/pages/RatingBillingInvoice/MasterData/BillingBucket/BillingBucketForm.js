@@ -252,8 +252,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Draft Attachment Information
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -358,8 +359,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Attachment Information
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,

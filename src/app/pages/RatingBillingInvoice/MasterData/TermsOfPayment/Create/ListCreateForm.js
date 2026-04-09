@@ -277,8 +277,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail?.information?.apphierId);
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -349,8 +350,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail_draft?.information?.apphierId);
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,

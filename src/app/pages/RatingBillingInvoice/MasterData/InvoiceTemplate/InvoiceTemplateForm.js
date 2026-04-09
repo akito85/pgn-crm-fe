@@ -208,8 +208,9 @@ const InvoiceTemplateForm = ({ type }) => {
 
       // Data Attachment Draft Information
       const dataDraftAttachment = (data_detail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -296,8 +297,9 @@ const InvoiceTemplateForm = ({ type }) => {
 
       // Data Attachment Information
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,

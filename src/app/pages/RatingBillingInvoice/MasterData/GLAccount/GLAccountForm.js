@@ -132,6 +132,7 @@ const GLAccountForm = ({ type }) => {
       const attachments = data_detail?.attachments || [];
 
       const mappedAttachment = attachments.map((item, index) => ({
+        key: index + 1,
         id: item.id || index,
         size: item.size || 0,
         fileName: item.fileName || "-",
