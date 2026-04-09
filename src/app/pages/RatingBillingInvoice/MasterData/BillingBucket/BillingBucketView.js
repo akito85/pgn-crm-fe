@@ -200,7 +200,14 @@ const BillingBucketView = () => {
         sort,
       }),
     );
-  }, [allData.length, data?.page?.totalElements, search, sort, dispatch, loadMoreSize]);
+  }, [
+    allData.length,
+    data?.page?.totalElements,
+    search,
+    sort,
+    dispatch,
+    loadMoreSize,
+  ]);
 
   // Handle Refresh
   const handleRefresh = useCallback(() => {
@@ -311,7 +318,9 @@ const BillingBucketView = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           onClick={() => handleDownload()}
         >
           Download List
@@ -323,7 +332,9 @@ const BillingBucketView = () => {
       render: (
         <NavLink to={RBI_ROUTES.BILLING_BUCKET_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Billing Bucket
