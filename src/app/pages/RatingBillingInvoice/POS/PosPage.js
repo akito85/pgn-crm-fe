@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Spin, Tooltip, Dropdown } from "antd";
+import { Tooltip, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import { MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -69,6 +69,9 @@ const PosPage = () => {
   const [modalDelete, setModalDelete] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
+
+  // State loading lokal untuk list POS
+  const [tableLoading, setTableLoading] = useState(false);
 
   const handlePreviewInvoice = async (record) => {
     try {
@@ -166,6 +169,7 @@ const PosPage = () => {
     try {
       await dispatch(generateProformaInvoice(record.posNumber)).unwrap();
       // Refresh data setelah generate
+      setTableLoading(true);
       dispatch(
         getListPointOfSales({
           page: 0,
@@ -174,7 +178,9 @@ const PosPage = () => {
           search: encodeURIComponent(JSON.stringify(search)),
           isLoadMore: false,
         }),
-      );
+      ).finally(() => {
+        setTableLoading(false);
+      });
       setPage(0);
     } catch (error) {
       console.error("Error generating proforma invoice:", error);
@@ -205,6 +211,7 @@ const PosPage = () => {
 
   // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
+    setTableLoading(true);
     dispatch(
       getListPointOfSales({
         page: 0,
@@ -213,7 +220,9 @@ const PosPage = () => {
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false, // Flag untuk initial load
       }),
-    );
+    ).finally(() => {
+      setTableLoading(false);
+    });
     setPage(0);
   }, [dispatch, sort, search]);
 
@@ -291,6 +300,7 @@ const PosPage = () => {
       .then(() => {
         setModalDelete(false);
         setDataDelete(undefined);
+        setTableLoading(true);
         dispatch(
           getListPointOfSales({
             page: 0,
@@ -299,7 +309,9 @@ const PosPage = () => {
             search: encodeURIComponent(JSON.stringify(search)),
             isLoadMore: false,
           }),
-        );
+        ).finally(() => {
+          setTableLoading(false);
+        });
         setPage(0);
       })
       .catch((error) => {
@@ -367,6 +379,7 @@ const PosPage = () => {
   ];
 
   const handleApproveReject = () => {
+    setTableLoading(true);
     dispatch(
       getListPointOfSales({
         page: 0,
@@ -375,7 +388,9 @@ const PosPage = () => {
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false,
       }),
-    );
+    ).finally(() => {
+      setTableLoading(false);
+    });
     setPage(0);
   };
 
@@ -588,8 +603,7 @@ const PosPage = () => {
 
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
@@ -606,6 +620,7 @@ const PosPage = () => {
               idTable="pos-table"
               dataSource={dataSource}
               showExport={false}
+              loading={loading || tableLoading}
               columns={[
                 ...PosTableView(
                   searchInput,
@@ -696,7 +711,6 @@ const PosPage = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-      </Spin>
     </>
   );
 };
