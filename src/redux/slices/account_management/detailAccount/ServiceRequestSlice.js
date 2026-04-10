@@ -7,6 +7,12 @@ const initialState = {
   list_serviceRequest: [],
   pagination_listSr: null,
   loading_listSr: false,
+  // Approval modal state
+  list_srApprovals: [],
+  pagination_listSrApprovals: { totalElements: 0, totalPages: 0 },
+  loading_listSrApprovals: false,
+  loading_approveSr: false,
+  loading_rejectSr: false,
   // Detail / Create state
   data: [],
   detail_serviceRequest: null,
@@ -79,6 +85,58 @@ export const getServiceRequests = createAsyncThunk(
       const response = await accountManagementService.getAll(url);
       return { data: response, isLoadMore };
     } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Service Request Approval List (pending approvals)
+export const getServiceRequestApprovals = createAsyncThunk(
+  "GET_SERVICE_REQUEST_APPROVALS",
+  async ({ idAccount, body = {}, isLoadMore = false }, thunkAPI) => {
+    try {
+      const { page = 1, size = 10, sort, searchs } = body;
+      let url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list?page=${page}&size=${size}&listType=approval`;
+      if (sort) url += `&sort=${sort}`;
+      if (searchs && typeof searchs === "object") {
+        Object.keys(searchs).forEach((key) => {
+          if (searchs[key] !== undefined && searchs[key] !== null && searchs[key] !== "") {
+            url += `&${key}=${encodeURIComponent(searchs[key])}`;
+          }
+        });
+      }
+      const response = await accountManagementService.getAll(url);
+      return { data: response, isLoadMore };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Approve or Reject Service Requests
+export const approveOrRejectAllServiceRequest = createAsyncThunk(
+  "APPROVE_OR_REJECT_ALL_SERVICE_REQUEST",
+  async ({ body, action }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/service-request/approve";
+      await accountManagementService.activationWithRemark(url, body);
+      const successBody = {
+        title: "Successful",
+        description: `Your data has been ${action === "APPROVE" ? "approved" : "rejected"}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return { body, action };
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -1256,6 +1314,56 @@ const serviceRequestSlice = createSlice({
 
     [getSrInstallmentSchedule.fulfilled]: (state, action) => {
       state.list_srSchedules = action.payload;
+    },
+
+    // =====================================================
+    // SERVICE REQUEST APPROVALS
+    // =====================================================
+    [getServiceRequestApprovals.pending]: (state) => {
+      state.loading_listSrApprovals = true;
+    },
+    [getServiceRequestApprovals.fulfilled]: (state, action) => {
+      state.loading_listSrApprovals = false;
+      const { data: response, isLoadMore } = action.payload;
+      const responseData = response?.data ?? response;
+      const rawItems = responseData?.result ?? responseData?.content ?? [];
+      const pageInfo = responseData?.page;
+      const totalElements = pageInfo?.totalElements ?? responseData?.totalElements ?? responseData?.totalElement ?? 0;
+      const totalPages = pageInfo?.totalPages ?? Math.ceil(totalElements / (pageInfo?.size ?? 10));
+      state.pagination_listSrApprovals = { totalElements, totalPages };
+      const items = rawItems.map((item) => ({
+        ...item,
+        serviceRequestNumber: item.requestNumber,
+        serviceRequestReference: item.reference,
+        type: item.requestType,
+        category: item.requestCategory,
+        subCategory: item.requestSubCategory,
+        requestSource: item.source,
+      }));
+      if (isLoadMore) {
+        state.list_srApprovals = [...(state.list_srApprovals || []), ...items];
+      } else {
+        state.list_srApprovals = items;
+      }
+    },
+    [getServiceRequestApprovals.rejected]: (state) => {
+      state.loading_listSrApprovals = false;
+    },
+
+    [approveOrRejectAllServiceRequest.pending]: (state, action) => {
+      if (action.meta.arg.action === "APPROVE") {
+        state.loading_approveSr = true;
+      } else {
+        state.loading_rejectSr = true;
+      }
+    },
+    [approveOrRejectAllServiceRequest.fulfilled]: (state) => {
+      state.loading_approveSr = false;
+      state.loading_rejectSr = false;
+    },
+    [approveOrRejectAllServiceRequest.rejected]: (state) => {
+      state.loading_approveSr = false;
+      state.loading_rejectSr = false;
     },
   },
 });

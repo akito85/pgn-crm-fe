@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { Spin } from "antd";
 
 import ServiceRequestTable from "./ServiceRequestTable";
+import ServiceRequestApprovalModal from "./ServiceRequestApprovalModal";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NotFound from "../../../../../NotFound";
@@ -48,16 +49,24 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   }
 
   return (
-    <NxCardContainer header={"SERVICE REQUEST"}>
-      <NxBaseContainer border>
-        <ServiceRequestTable
-          idAccount={idAccount}
-          idCustomer={idCustomer}
-          handleApproval={setShowApprovalModal}
-          refreshSignal={refreshSignal}
-        />
-      </NxBaseContainer>
-    </NxCardContainer>
+    <>
+      <NxCardContainer header={"SERVICE REQUEST"}>
+        <NxBaseContainer border>
+          <ServiceRequestTable
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            handleApproval={setShowApprovalModal}
+            refreshSignal={refreshSignal}
+          />
+        </NxBaseContainer>
+      </NxCardContainer>
+      <ServiceRequestApprovalModal
+        accountId={idAccount}
+        isOpen={showApprovalModal}
+        handleCancel={() => setShowApprovalModal(false)}
+        afterFinish={triggerRefresh}
+      />
+    </>
   );
 };
 
