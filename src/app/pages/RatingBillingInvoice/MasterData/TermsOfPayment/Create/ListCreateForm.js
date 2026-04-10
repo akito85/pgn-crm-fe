@@ -321,6 +321,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail?.information?.startDate));
+      setEndDate(
+        data_detail?.information?.endDate
+          ? moment(data_detail?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)
@@ -394,6 +399,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail_draft?.information?.startDate));
+      setEndDate(
+        data_detail_draft?.information?.endDate
+          ? moment(data_detail_draft?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail_draft?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)

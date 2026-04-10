@@ -762,7 +762,7 @@ const TaxCodeForm = ({ type }) => {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
+        (hasValue(formHeader?.endDate) && moment(item?.endDate) > moment(formHeader?.endDate))
       ) {
         dataOverlap?.push(item);
       }
@@ -1210,7 +1210,7 @@ const TaxCodeForm = ({ type }) => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+              <p className="text-[18px]">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
               flagRef.current ? "submitted" : "created"
@@ -1232,7 +1232,7 @@ const TaxCodeForm = ({ type }) => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+              <p className="text-[18px]">{"Incomplete Data"}</p>
             </div>
             <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
