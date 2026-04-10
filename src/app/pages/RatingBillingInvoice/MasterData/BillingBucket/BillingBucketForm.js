@@ -229,9 +229,9 @@ const BillingBucketForm = ({ type }) => {
           billingItem: item.billingItem?.value,
           currency: item.currency?.value,
           sequence: item.sequence,
-          startDate: moment(item.startDate).format(dateFormatting.dateFormal),
+          startDate: moment(item.startDate).format(dateFormatting.date),
           endDate: item.endDate
-            ? moment(item.endDate).format(dateFormatting.dateFormal)
+            ? moment(item.endDate).format(dateFormatting.date)
             : null,
           priority: item.priority,
           description: item.description,
@@ -340,9 +340,9 @@ const BillingBucketForm = ({ type }) => {
             billingItem: item.billingItem?.value,
             currency: item.currency?.value,
             sequence: item.sequence,
-            startDate: moment(item.startDate).format(dateFormatting.dateFormal),
+            startDate: moment(item.startDate).format(dateFormatting.date),
             endDate: item.endDate
-              ? moment(item.endDate).format(dateFormatting.dateFormal)
+              ? moment(item.endDate).format(dateFormatting.date)
               : null,
             priority: item.priority,
             description: item.description,
@@ -515,10 +515,10 @@ const BillingBucketForm = ({ type }) => {
       return listDataCriteria?.map((item) => ({
         id: item?.id || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
+          ? moment(item.startDate).format(dateFormatting.date)
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
+          ? moment(item.endDate).format(dateFormatting.date)
           : null,
         customer: item.customer?.value || null,
         budget: item.budget?.value || null,
@@ -543,10 +543,10 @@ const BillingBucketForm = ({ type }) => {
         ...item,
         priority: item.priority === undefined ? false : item.priority,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
+          ? moment(item.startDate).format(dateFormatting.date)
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
+          ? moment(item.endDate).format(dateFormatting.date)
           : null,
       }));
     };
@@ -633,10 +633,10 @@ const BillingBucketForm = ({ type }) => {
       name: bodyData.name,
       priorityPeriod: bodyData.priorityPeriod,
       startDate: bodyData.startDate
-        ? moment(bodyData?.startDate).format(dateFormatting.dateFormal)
+        ? moment(bodyData?.startDate).format(dateFormatting.date)
         : null,
       endDate: bodyData.endDate
-        ? moment(bodyData?.endDate).format(dateFormatting.dateFormal)
+        ? moment(bodyData?.endDate).format(dateFormatting.date)
         : null,
       description: bodyData.description ? bodyData.description : null,
       apphierId: bodyData.apphierId,

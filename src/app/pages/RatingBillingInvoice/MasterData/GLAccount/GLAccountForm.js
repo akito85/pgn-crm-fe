@@ -384,6 +384,7 @@ const GLAccountForm = ({ type }) => {
       ]);
     } else {
       dispatch(getDetailGLAccount(id));
+      setCurrent(0);
     }
   };
 

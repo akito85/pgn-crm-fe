@@ -572,7 +572,7 @@ const GeneralTemplateView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">GENERAL TEMPLATE LIST</p>
+              <p className="mt-[15px]">GENERAL TEMPLATE LIST</p>
               <div className="flex gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>

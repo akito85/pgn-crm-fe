@@ -78,23 +78,31 @@ const EditableCell = ({
   };
 
   const handleDisableDateBetween = (current) => {
-    if (dataIndex === 'endDate' && hasValue(formTableCriteria.getFieldValue('startDate')) && hasValue(validateEndDate)) {
-      return current.isBefore(moment(formTableCriteria.getFieldValue('startDate')).startOf("day")) || current.isAfter(moment(validateEndDate).endOf("day"));
-    } else if (validateStartDate && validateEndDate) {
-      const startDate = moment(validateStartDate).startOf("day");
-      const endDate = moment(validateEndDate).endOf("day");
-      return current.isBefore(startDate) || current.isAfter(endDate);
-    } else {
-      return true; // Disable all dates if start or end date is not defined
+    if (!current) return false;
+
+    const headerStart = validateStartDate ? moment(validateStartDate).startOf("day") : null;
+    const headerEnd = validateEndDate ? moment(validateEndDate).endOf("day") : null;
+    const rowStart = formTableCriteria.getFieldValue("startDate") 
+      ? moment(formTableCriteria.getFieldValue("startDate")).startOf("day") 
+      : null;
+
+    if (headerStart && current.isBefore(headerStart, "day")) return true;
+    if (headerEnd && current.isAfter(headerEnd, "day")) return true;
+
+    if (dataIndex === "endDate" && rowStart && current.isBefore(rowStart, "day")) {
+      return true;
     }
+
+    return false;
   };
 
   // Validation Handle Start Date from Header Data
   const handleDisableDateBefore = (current) => {
-    if (validateStartDate !== null) {
-      return current.isBefore(moment(validateStartDate).startOf("day"));
+    if (!current) return false;
+    if (validateStartDate) {
+      return current.isBefore(moment(validateStartDate).startOf("day"), "day");
     }
-    return current.isBefore(moment().startOf("day"));
+    return current.isBefore(moment().startOf("day"), "day");
   };
 
   const getInputNode = (inputType) => {
