@@ -428,7 +428,6 @@ export default function InfoMultiDestination({
           <InputComponent
             type={"textarea"}
             rows={4}
-            placeholder="Asset meter baru PGN"
             maxLength={255}
             disabled={!isDraft && isUpdate}
           />
