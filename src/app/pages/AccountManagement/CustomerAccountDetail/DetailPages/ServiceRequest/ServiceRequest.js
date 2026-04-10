@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { Spin } from "antd";
 import ServiceRequestTable from "./ServiceRequestTable";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
-import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NotFound from "../../../../../NotFound";
@@ -14,7 +14,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const location = useLocation();
   const searchInput = useRef(null);
 
-  const { serviceRequests, pagination, loadingList } = useSelector(
+  const { list_serviceRequest, pagination_listSr, loading_listSr } = useSelector(
     (state) => state.serviceRequest
   );
   const { access_account } = useSelector((state) => state.accountManagement);
@@ -32,14 +32,14 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const currentData = useMemo(() => {
-    if (!Array.isArray(serviceRequests)) return [];
-    return serviceRequests.map((item, index) => ({
+    if (!Array.isArray(list_serviceRequest)) return [];
+    return list_serviceRequest.map((item, index) => ({
       ...item,
       key: `${item.id ?? "sr"}-${index}`,
     }));
-  }, [serviceRequests]);
+  }, [list_serviceRequest]);
 
-  const hasMore = currentData.length < (pagination?.totalElements || 0);
+  const hasMore = currentData.length < (pagination_listSr?.totalElements || 0);
 
   const isAccessGranted = access_account?.isGranted === true;
 
@@ -60,7 +60,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   useEffect(() => {
     if (isAccessGranted) {
       dispatch(
-        getFilteredServiceRequests({
+        getServiceRequests({
           idAccount,
           body: { page: 1, size: loadMoreSize, sort, searchs: search },
           isLoadMore: false,
@@ -99,11 +99,11 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination?.totalPages || 0;
+    const totalPages = pagination_listSr?.totalPages || 0;
 
     if (nextPage <= totalPages) {
       await dispatch(
-        getFilteredServiceRequests({
+        getServiceRequests({
           idAccount,
           body: { page: nextPage, size: loadMoreSize, sort, searchs: search },
           isLoadMore: true,
@@ -128,7 +128,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
               data={currentData}
               idAccount={idAccount}
               idCustomer={idCustomer}
-              totalElement={pagination?.totalElements || 0}
+              totalElement={pagination_listSr?.totalElements || 0}
               page={page}
               onSort={onSort}
               handleApproval={setShowApprovalModal}
@@ -140,7 +140,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
               searchedColumn={searchedColumn}
               searchInput={searchInput}
               handleSearch={handleSearch}
-              loading={loadingList}
+              loading={loading_listSr}
             />
           </NxBaseContainer>
         </NxCardContainer>

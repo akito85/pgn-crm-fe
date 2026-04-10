@@ -53,21 +53,21 @@ import {
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 
 import {
-  getServiceRequestById,
-  getServiceRequestDetailByAccount,
-  getDetailDraftServiceRequest,
-  getServiceRequestApprovalHierarchies,
-  getServiceRequestApprovalHierarchyDetail,
-  getServiceRequestTypes,
-  getServiceRequestCategories,
-  getServiceRequestSubcategories,
-  getServiceRequestChannels,
-  getServiceRequestPriorities,
-  getServiceRequestSources,
-  getServiceRequestDataRequirements,
-  getServiceRequestPrerequisites,
-  createCompleteServiceRequest,
-  updateCompleteServiceRequest,
+  getSrById,
+  getServiceRequest,
+  getServiceRequestDraft,
+  getSrApprovalHierarchies,
+  getSrApprovalHierarchy,
+  getSrTypes,
+  getSrCategories,
+  getSrSubcategories,
+  getSrChannels,
+  getSrPriorities,
+  getSrSources,
+  getSrDataRequirementTypes,
+  getSrPrerequisiteTypes,
+  createServiceRequest,
+  updateServiceRequest,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
@@ -97,31 +97,31 @@ const CreateCustomerServiceRequest = (props) => {
   );
 
   const {
-    data_types,
-    data_categories,
-    data_subcategories,
-    data_priorities,
-    data_channels,
-    data_sources,
-    data_approval_hierarchy,
-    data_approval_hierarchy_detail,
-    data_prerequisite_types,
-    data_data_requirement_types,
-    data_detail: serviceRequestDetail,
-    data_detail_draft: serviceRequestDetailDraft,
-    loading_update,
+    list_srTypes,
+    list_srCategories,
+    list_srSubcategories,
+    list_srPriorities,
+    list_srChannels,
+    list_srSources,
+    list_srApprovalHierarchy,
+    detail_srApprovalHierarchy,
+    list_srPrerequisiteTypes,
+    list_srDataRequirementTypes,
+    detail_serviceRequest: serviceRequestDetail,
+    detailDraft_serviceRequest: serviceRequestDetailDraft,
+    loading_createUpdateSr,
   } = useSelector((state) => state.serviceRequest);
 
   // Map state keys to the dropdowns structure expected by child components
   const dropdowns = {
-    serviceRequestTypes: data_types,
-    serviceRequestCategories: data_categories,
-    serviceRequestSubcategories: data_subcategories,
-    serviceRequestPriorities: data_priorities,
-    serviceRequestChannels: data_channels,
-    serviceRequestSources: data_sources,
-    serviceRequestPrerequisites: data_prerequisite_types,
-    serviceRequestDataRequirements: data_data_requirement_types,
+    serviceRequestTypes: list_srTypes,
+    serviceRequestCategories: list_srCategories,
+    serviceRequestSubcategories: list_srSubcategories,
+    serviceRequestPriorities: list_srPriorities,
+    serviceRequestChannels: list_srChannels,
+    serviceRequestSources: list_srSources,
+    serviceRequestPrerequisites: list_srPrerequisiteTypes,
+    serviceRequestDataRequirements: list_srDataRequirementTypes,
   };
 
   const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
@@ -280,7 +280,7 @@ const CreateCustomerServiceRequest = (props) => {
         page: 1,
         pageSize: 999,
       }));
-    // dispatch(getServiceRequestById(idAccount));
+    // dispatch(getSrById(idAccount));
   }, [dispatch, idAccount]);
 
   useEffect(() => {
@@ -288,32 +288,32 @@ const CreateCustomerServiceRequest = (props) => {
     dispatch(getGlobalIdentificationType());
     dispatch(getGlobalSex());
     dispatch(getGlobalMartialStatus());
-    dispatch(getServiceRequestTypes());
-    dispatch(getServiceRequestSubcategories());
-    dispatch(getServiceRequestCategories());
-    dispatch(getServiceRequestPriorities());
-    dispatch(getServiceRequestChannels());
-    dispatch(getServiceRequestSources());
-    dispatch(getServiceRequestPrerequisites());
-    dispatch(getServiceRequestDataRequirements());
-    dispatch(getServiceRequestApprovalHierarchies());
+    dispatch(getSrTypes());
+    dispatch(getSrSubcategories());
+    dispatch(getSrCategories());
+    dispatch(getSrPriorities());
+    dispatch(getSrChannels());
+    dispatch(getSrSources());
+    dispatch(getSrPrerequisiteTypes());
+    dispatch(getSrDataRequirementTypes());
+    dispatch(getSrApprovalHierarchies());
   }, [dispatch]);
 
   useEffect(() => {
-    if (data_approval_hierarchy && data_approval_hierarchy.length > 0) {
-      setApprovalOptions(data_approval_hierarchy);
+    if (list_srApprovalHierarchy && list_srApprovalHierarchy.length > 0) {
+      setApprovalOptions(list_srApprovalHierarchy);
       return;
     }
 
     setApprovalOptions([]);
-  }, [data_approval_hierarchy]);
+  }, [list_srApprovalHierarchy]);
 
   useEffect(() => {
     if (
-      data_approval_hierarchy_detail &&
-      data_approval_hierarchy_detail.length > 0
+      detail_srApprovalHierarchy &&
+      detail_srApprovalHierarchy.length > 0
     ) {
-      const normalizedData = data_approval_hierarchy_detail.map((item, index) => ({
+      const normalizedData = detail_srApprovalHierarchy.map((item, index) => ({
         ...item,
         key: item.key || `approval-hierarchy-${index + 1}`,
         employeeDetail: (item.employeeDetail || []).map((employee, employeeIndex) => ({
@@ -329,13 +329,13 @@ const CreateCustomerServiceRequest = (props) => {
     }
 
     setApprovalTableData([]);
-  }, [data_approval_hierarchy_detail]);
+  }, [detail_srApprovalHierarchy]);
 
   // Load detail + detail-draft when in update mode
   useEffect(() => {
     if (isUpdate && id && idAccount) {
-      dispatch(getServiceRequestDetailByAccount({ accountId: idAccount, id }));
-      dispatch(getDetailDraftServiceRequest({ accountId: idAccount, id }));
+      dispatch(getServiceRequest({ accountId: idAccount, id }));
+      dispatch(getServiceRequestDraft({ accountId: idAccount, id }));
     }
   }, [dispatch, isUpdate, id, idAccount]);
 
@@ -370,7 +370,7 @@ const CreateCustomerServiceRequest = (props) => {
     });
 
     if (detail.apphierId) {
-      dispatch(getServiceRequestApprovalHierarchyDetail(detail.apphierId));
+      dispatch(getSrApprovalHierarchy(detail.apphierId));
     }
   }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -381,7 +381,7 @@ const CreateCustomerServiceRequest = (props) => {
     });
 
     if (value) {
-      dispatch(getServiceRequestApprovalHierarchyDetail(value));
+      dispatch(getSrApprovalHierarchy(value));
       return;
     }
 
@@ -774,7 +774,7 @@ const CreateCustomerServiceRequest = (props) => {
     try {
       if (isUpdate && id) {
         await dispatch(
-          updateCompleteServiceRequest({
+          updateServiceRequest({
             accountId: idAccount,
             id,
             body: { ...dataSend, serviceRequestId: id },
@@ -783,7 +783,7 @@ const CreateCustomerServiceRequest = (props) => {
         ).unwrap();
       } else {
         await dispatch(
-          createCompleteServiceRequest({
+          createServiceRequest({
             accountId: idAccount,
             body: dataSend,
             successBodyExtra: { return: false },

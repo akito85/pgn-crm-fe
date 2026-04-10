@@ -14,7 +14,7 @@ import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 
 import { requiredMessage } from "../../../../../../../../../utils";
-import { getDataRequirementValuesByType } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getSrDataRequirementValues } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 export default function InfoDataRequirement({
   dropdowns,
@@ -22,7 +22,7 @@ export default function InfoDataRequirement({
   accountId
 }) {
   const dispatch = useDispatch();
-  const { data_data_requirement_values, loading_data_requirement_values } = useSelector(
+  const { detail_srDataRequirementValues, loading_srDataRequirementValues } = useSelector(
     (state) => state.serviceRequest
   );
 
@@ -143,16 +143,16 @@ export default function InfoDataRequirement({
     setSelectedTypeId(typeId);
     setSelectedTypeValue(typeValue);
     modalForm.setFieldsValue({ srFormDataRequirementValue: undefined });
-    if (typeId && accountId && typeValue && !data_data_requirement_values[typeValue]) {
-      dispatch(getDataRequirementValuesByType({ typeValue, accountId }));
+    if (typeId && accountId && typeValue && !detail_srDataRequirementValues[typeValue]) {
+      dispatch(getSrDataRequirementValues({ typeValue, accountId }));
     }
   };
 
   const handleEdit = (record) => {
     setSelectedTypeId(record.typeId);
     setSelectedTypeValue(record.typeValue);
-    if (record.typeValue && accountId && !data_data_requirement_values[record.typeValue]) {
-      dispatch(getDataRequirementValuesByType({ typeValue: record.typeValue, accountId }));
+    if (record.typeValue && accountId && !detail_srDataRequirementValues[record.typeValue]) {
+      dispatch(getSrDataRequirementValues({ typeValue: record.typeValue, accountId }));
     }
     modalForm.setFieldsValue({
       srFormDataRequirementType: record.typeId,
@@ -351,8 +351,8 @@ export default function InfoDataRequirement({
               usePagination={false}
               tableScrolled={{ y: 400, x: "max-content" }}
               useSelect={false}
-              loading={loading_data_requirement_values}
-              dataMain={(data_data_requirement_values[selectedTypeValue] || []).map((item, idx) => ({
+              loading={loading_srDataRequirementValues}
+              dataMain={(detail_srDataRequirementValues[selectedTypeValue] || []).map((item, idx) => ({
                 ...item,
                 key: item.id,
                 no: idx + 1,
