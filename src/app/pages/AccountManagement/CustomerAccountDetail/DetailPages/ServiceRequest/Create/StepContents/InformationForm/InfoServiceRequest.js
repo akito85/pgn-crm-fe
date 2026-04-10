@@ -1,38 +1,139 @@
-import { useState, useEffect, useRef, useCallback, Fragment } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import { Form, Select, Button, Tooltip } from "antd"; // Added Input import
-import SVGIcon from "../../../../../../../../../assets/Icon/index";
+import { Form, Select, Button } from "antd";
 
 import InputComponent from "../../../../../../../../../components/InputComponent";
-import StatusComponent from "../../../../../../../../../components/StatusComponent";
 import DateComponent from "../../../../../../../../../components/DateComponent";
 
 import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
-
-import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
-import accountManagementService from "../../../../../../../../../redux/services/account_management/accountManagementService";
-
-import moment from "moment";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../utils/getColumnSearchProps";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
+
+import { requiredMessage } from "../../../../../../../../../utils";
+import { getServiceRequests } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getSrRefColumns } from "./getSrRefColumns";
 
 export default function InfoServiceRequest({
   account,
   dropdowns,
   form,
+  isUpdate,
+  isDraft,
+  formView = true
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
+  const {
+    list_serviceRequest: srRefs,
+    pagination_listSr: pagination,
+    loading_listSr: loading
+  } = useSelector((state) => state.serviceRequest);
 
-  // Infinite scroll state for service request reference modal
-  const PAGE_SIZE_REF = 10;
-  const [srRefData, setSrRefData] = useState([]);
-  const [srRefPage, setSrRefPage] = useState(1);
-  const [srRefHasMore, setSrRefHasMore] = useState(true);
-  const [srRefLoading, setSrRefLoading] = useState(false);
-  const srRefLoadingRef = useRef(false);
+  const accountId = account?.accountInformation?.accountId;
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [loadMoreSize] = useState(10);
+  const [search, setSearch] = useState({});
+  const [sort, setSort] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef(null);
+
+  const serviceRequestReference = Form.useWatch(
+    "serviceRequestReference",
+    form
+  );
+  const type = Form.useWatch("type", form);
+  const category = Form.useWatch("category", form);
+  const subCategory = Form.useWatch("subCategory", form);
+  const channel = Form.useWatch("channel", form);
+  const priority = Form.useWatch("priority", form);
+  const requestSource = Form.useWatch("requestSource", form);
+  const requestDate = Form.useWatch("requestDate", form);
+  const description = Form.useWatch("description", form);
+
+  const onSort = (_, __, sortInfo) => {
+    const dataSort = sortInfo.order
+      ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
+      return { ...prevState, [dataIndex]: selectedKeys[0] };
+    });
+  };
+
+  // Initial load when modal opens; reset state on close
+  useEffect(() => {
+    if (isOpen) {
+      setPage(1);
+      setSearch({});
+      setSort("");
+      const body = { page: 1, size: loadMoreSize, sort: "", searchs: {} };
+      dispatch(
+        getServiceRequests({ idAccount: accountId, body, isLoadMore: false })
+      );
+    }
+  }, [isOpen]);
+
+  // Re-fetch on search/sort change (only when modal is open)
+  useEffect(() => {
+    if (!isOpen) return;
+    const body = { page: 1, size: loadMoreSize, sort, searchs: search };
+    dispatch(
+      getServiceRequests({ idAccount: accountId, body, isLoadMore: false })
+    );
+    setPage(1);
+  }, [sort, search]);
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPage = pagination?.totalPages || 0;
+    if (nextPage <= totalPage) {
+      const body = {
+        searchs: search,
+        page: nextPage,
+        size: loadMoreSize,
+        sort
+      };
+      await dispatch(
+        getServiceRequests({ idAccount: accountId, body, isLoadMore: true })
+      ).unwrap();
+      setPage(nextPage);
+    }
+  };
+
+  const setServiceRequestRef = (requestNumber) => {
+    form.setFieldsValue({ serviceRequestReference: requestNumber });
+  };
+
+  const columnDefinitions = useMemo(
+    () =>
+      getSrRefColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        setServiceRequestRef,
+        setIsOpen
+      ),
+    [search, searchInput, searchedColumn, searchText]
+  );
+  const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
+
+  const totalElement = pagination?.totalElements || 0;
+  const hasMore = srRefs.length < totalElement;
 
   // Create safe accessor functions that handle both array and { data: [] } formats
   const getDropdownItems = (dropdownKey) => {
@@ -44,7 +145,7 @@ export default function InfoServiceRequest({
   };
 
   const getDropdownOptions = (dropdownKey) => {
-    return getDropdownItems(dropdownKey).map(item => ({
+    return getDropdownItems(dropdownKey).map((item) => ({
       value: item.glbTypeValId?.toString() || item.id?.toString(),
       label: item.name || item.glbTypeValName
     }));
@@ -56,314 +157,38 @@ export default function InfoServiceRequest({
 
   const handleCancel = () => {
     setIsOpen(false);
-  }
+  };
 
   const handleClose = () => {
     setIsOpen(false);
+  };
+
+  if (!formView) {
+    return (
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full grid grid-cols-3 gap-4">
+          <NxDetailText label="Service Request Reference">
+            {serviceRequestReference}
+          </NxDetailText>
+          <NxDetailText label="Type">{type}</NxDetailText>
+          <NxDetailText label="Category">{category}</NxDetailText>
+          <NxDetailText label="Sub Category">{subCategory}</NxDetailText>
+          <NxDetailText label="Channel">{channel}</NxDetailText>
+          <NxDetailText label="Priority">{priority}</NxDetailText>
+          <NxDetailText label="Request Source">{requestSource}</NxDetailText>
+          <NxDetailText label="Request Date">
+            {NxDate.formatDate(requestDate, "DD MMM YYYY")}
+          </NxDetailText>
+        </div>
+        <div className="w-full">
+          <NxDetailText label="Description">{description}</NxDetailText>
+        </div>
+      </div>
+    );
   }
 
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format("DD MMM YYYY HH:mm:ss");
-    }
-    return "";
-  };
-
-  const columnMain = [
-    {
-      title: "NO",
-      width: 80,
-      align: "center",
-      render: (text, object, index) => index + 1,
-    },
-    {
-      title: "SERVICE REQUEST NUMBER",
-      dataIndex: "requestNumber",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("requestNumber"),
-    },
-    {
-      title: "SERVICE REQUEST REFERENCE",
-      dataIndex: "reference",
-      width: 220,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("reference"),
-    },
-    {
-      title: "TYPE",
-      dataIndex: "type",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("type"),
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "category",
-      width: 160,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("category"),
-    },
-    {
-      title: "SUB CATEGORY",
-      dataIndex: "subCategory",
-      width: 160,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("subCategory"),
-    },
-    {
-      title: "CHANNEL",
-      dataIndex: "channel",
-      width: 140,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("channel"),
-    },
-    {
-      title: "REQUEST SOURCE",
-      dataIndex: "source",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("source"),
-    },
-    {
-      title: "REQUEST DATE",
-      dataIndex: "requestDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("requestDate"),
-      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
-    },
-    {
-      title: "OPEN DATE",
-      dataIndex: "openDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("openDate"),
-      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
-    },
-    {
-      title: "RESOLVED DATE",
-      dataIndex: "resolvedDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("resolvedDate"),
-      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
-    },
-    {
-      title: "CLOSED DATE",
-      dataIndex: "closedDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("closedDate"),
-      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
-    },
-    {
-      title: "AGE (HOUR)",
-      dataIndex: "age",
-      width: 120,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue("age"),
-      render: (age) => age || "0",
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue("description"),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      width: 160,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue("statusApproval"),
-      render: (status) => {
-        const colorMap = {
-          "approved": "green",
-          "waitingApproval": "orange",
-          "pending": "orange",
-          "rejected": "red"
-        };
-        const displayText = {
-          "approved": "Approved",
-          "waitingApproval": "Waiting Approval",
-          "pending": "Pending",
-          "rejected": "Rejected"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={colorMap[status] || "gray"}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      title: "STATUS PRE-REQUISITE",
-      dataIndex: "statusPrerequisite",
-      width: 180,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue("statusPrerequisite"),
-      render: (status) => {
-        const colorMap = {
-          "completed": "green",
-          "pending": "red",
-          "none": "blue"
-        };
-        const displayText = {
-          "completed": "Completed",
-          "pending": "Pending",
-          "none": "None"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={colorMap[status] || "gray"}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      width: 140,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsUseFilteredValue("status"),
-      render: (status) => {
-        const colorMap = {
-          "inProgress": "blue",
-          "onHold": "orange",
-          "closed": "red",
-          "canceled": "gray",
-          "open": "green",
-          "active": "green",
-          "pending": "orange"
-        };
-        const displayText = {
-          "inProgress": "In Progress",
-          "onHold": "On Hold",
-          "closed": "Closed",
-          "canceled": "Canceled",
-          "open": "Open"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={colorMap[status] || "gray"}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      key: "action",
-      title: "ACTION",
-      align: "center",
-      width: 120,
-      fixed: "right",
-      render: (_, record) => {
-        return (
-          <div className="flex w-full justify-center gap-4">
-            <Tooltip title="Select">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconActionCreate"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => {
-                    handleRowClick(record);
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ];
-
-  const accountId = account?.accountInformation?.accountId;
-
-  const fetchServiceRequestRefs = useCallback(async (page) => {
-    const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/list?page=${page}&size=${PAGE_SIZE_REF}`;
-    const response = await accountManagementService.getAll(url);
-    // Response structure: { success, code, message, data: { result: [...], page: { totalElements } } }
-    // Unwrap the nested data layer first, then handle both Spring Page and custom formats
-    const responseData = response?.data ?? response;
-    const items = (responseData?.content ?? responseData?.result ?? []).map((item, idx) => ({
-      ...item,
-      key: item.id ?? `${page}-${idx}`,
-    }));
-    const totalElements =
-      responseData?.page?.totalElements ??
-      responseData?.totalElements ??
-      responseData?.totalElement ??
-      0;
-    const hasMore = page * PAGE_SIZE_REF < totalElements;
-    return { items, hasMore };
-  }, [accountId]);
-
-  // Load first page when modal opens, reset on close
-  useEffect(() => {
-    if (isOpen) {
-      setSrRefData([]);
-      setSrRefPage(1);
-      setSrRefHasMore(true);
-      setSrRefLoading(true);
-      srRefLoadingRef.current = false;
-      fetchServiceRequestRefs(1).then(({ items, hasMore }) => {
-        setSrRefData(items);
-        setSrRefHasMore(hasMore);
-        setSrRefLoading(false);
-      });
-    }
-  }, [isOpen]);
-
-  const handleLoadMoreSrRef = useCallback(() => {
-    if (srRefLoadingRef.current || !srRefHasMore) return Promise.resolve();
-    srRefLoadingRef.current = true;
-    const nextPage = srRefPage + 1;
-    return fetchServiceRequestRefs(nextPage).then(({ items, hasMore }) => {
-      setSrRefData((prev) => [...prev, ...items]);
-      setSrRefPage(nextPage);
-      setSrRefHasMore(hasMore);
-      srRefLoadingRef.current = false;
-    });
-  }, [srRefPage, srRefHasMore, fetchServiceRequestRefs]);
-
-  // Handle row click — auto select & close modal (like PaymentRelation pattern)
-  const handleRowClick = (record) => {
-    form.setFieldsValue({ serviceRequestReference: record.requestNumber });
-    setIsOpen(false);
-  };
-
-  const handleTableRowClick = (record, rowIndex, event) => {
-    // Prevent click on action buttons
-    const target = event.target;
-    const shouldPrevent = ['button', 'a', 'svg', 'path', '.ant-btn', '.ant-btn-link', '.ant-btn-icon-only', '.action-button', '.ant-dropdown-trigger', '.anticon', '.ant-popconfirm', '.ant-popover', 'input', 'select', '.ant-select', '.ant-input', '.ant-checkbox', '.ant-radio', '.ant-switch']
-      .some((selector) => {
-        if (selector.startsWith('.')) {
-          return target.closest(selector) !== null;
-        } else {
-          return target.tagName.toLowerCase() === selector.toLowerCase() ||
-                 target.closest(selector) !== null;
-        }
-      });
-
-    if (!shouldPrevent) {
-      handleRowClick(record);
-    }
-  };
-
-  return(
-    <Fragment>
+  return (
+    <>
       <NxCardContainer header={"SERVICE REQUEST INFORMATION"}>
         <NxBaseContainer border>
           <div className="w-full grid grid-cols-3 gap-4">
@@ -389,13 +214,12 @@ export default function InfoServiceRequest({
                 <Button
                   type="submit"
                   className="min-w-[120px]"
-                  onClick={() => {
-                    setIsOpen(true);
-                  }}
+                  onClick={() => setIsOpen(true)}
+                  disabled={!isDraft && isUpdate}
                 >
                   Select
                 </Button>
-              </div> 
+              </div>
             </Form.Item>
             <Form.Item
               key="type"
@@ -404,15 +228,15 @@ export default function InfoServiceRequest({
               rules={[
                 {
                   message: requiredMessage("Type"),
-                  required: true,
-                },
+                  required: true
+                }
               ]}
               className="no-margin-form"
             >
               <Select
                 placeholder="Select Types"
-                loading={!isDropdownLoaded('serviceRequestTypes')}
-                options={getDropdownOptions('serviceRequestTypes')}
+                loading={!isDropdownLoaded("serviceRequestTypes")}
+                options={getDropdownOptions("serviceRequestTypes")}
               />
             </Form.Item>
             <Form.Item
@@ -422,15 +246,15 @@ export default function InfoServiceRequest({
               rules={[
                 {
                   message: requiredMessage("Category"),
-                  required: true,
-                },
+                  required: true
+                }
               ]}
               className="no-margin-form"
             >
               <Select
                 placeholder="Select Category"
-                loading={!isDropdownLoaded('serviceRequestCategories')}
-                options={getDropdownOptions('serviceRequestCategories')}
+                loading={!isDropdownLoaded("serviceRequestCategories")}
+                options={getDropdownOptions("serviceRequestCategories")}
               />
             </Form.Item>
             <Form.Item
@@ -440,15 +264,15 @@ export default function InfoServiceRequest({
               rules={[
                 {
                   message: requiredMessage("Sub Category"),
-                  required: true,
-                },
+                  required: true
+                }
               ]}
               className="no-margin-form"
             >
               <Select
                 placeholder="Select Sub Category"
-                loading={!isDropdownLoaded('serviceRequestSubcategories')}
-                options={getDropdownOptions('serviceRequestSubcategories')}
+                loading={!isDropdownLoaded("serviceRequestSubcategories")}
+                options={getDropdownOptions("serviceRequestSubcategories")}
               />
             </Form.Item>
             <Form.Item
@@ -458,15 +282,15 @@ export default function InfoServiceRequest({
               rules={[
                 {
                   message: requiredMessage("Channel"),
-                  required: true,
-                },
+                  required: true
+                }
               ]}
               className="no-margin-form"
             >
               <Select
                 placeholder="Select Channels"
-                loading={!isDropdownLoaded('serviceRequestChannels')}
-                options={getDropdownOptions('serviceRequestChannels')}
+                loading={!isDropdownLoaded("serviceRequestChannels")}
+                options={getDropdownOptions("serviceRequestChannels")}
               />
             </Form.Item>
             <Form.Item
@@ -476,15 +300,15 @@ export default function InfoServiceRequest({
               rules={[
                 {
                   message: requiredMessage("Priority"),
-                  required: true,
-                },
+                  required: true
+                }
               ]}
               className="no-margin-form"
             >
               <Select
                 placeholder="Select Priorities"
-                loading={!isDropdownLoaded('serviceRequestPriorities')}
-                options={getDropdownOptions('serviceRequestPriorities')}
+                loading={!isDropdownLoaded("serviceRequestPriorities")}
+                options={getDropdownOptions("serviceRequestPriorities")}
               />
             </Form.Item>
             <Form.Item
@@ -494,15 +318,15 @@ export default function InfoServiceRequest({
               rules={[
                 {
                   message: requiredMessage("Request Source"),
-                  required: true,
-                },
+                  required: true
+                }
               ]}
               className="no-margin-form"
             >
               <Select
                 placeholder="Select Sources"
-                loading={!isDropdownLoaded('serviceRequestSources')}
-                options={getDropdownOptions('serviceRequestSources')}
+                loading={!isDropdownLoaded("serviceRequestSources")}
+                options={getDropdownOptions("serviceRequestSources")}
               />
             </Form.Item>
             <Form.Item
@@ -512,8 +336,8 @@ export default function InfoServiceRequest({
               rules={[
                 {
                   message: requiredMessage("Request Date"),
-                  required: true,
-                },
+                  required: true
+                }
               ]}
               className="no-margin-form"
             >
@@ -545,7 +369,7 @@ export default function InfoServiceRequest({
           <div className="flex justify-end">
             <Button type="menu" key="close" onClick={handleClose}>
               Back
-            </Button>,
+            </Button>
           </div>
         ]}
       >
@@ -553,22 +377,21 @@ export default function InfoServiceRequest({
           <NxBaseContainer border>
             <NxTable
               idTable="sr-ref-table"
+              dataSource={srRefs}
+              columns={columns}
               usePagination={false}
               useInfiniteScroll={true}
-              onLoadMore={handleLoadMoreSrRef}
-              hasMore={srRefHasMore}
-              useSelect={true}
-              dataMain={srRefData}
-              columnMain={columnMain}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
               tablePadding="small"
               fontSize="small"
-              loading={srRefLoading}
+              loading={loading}
               tableScrolled={{ x: "max-content", y: 400 }}
-              onRowClicked={handleTableRowClick}
+              onSort={onSort}
             />
           </NxBaseContainer>
         </div>
       </NxModal>
-    </Fragment>
-  )
+    </>
+  );
 }
