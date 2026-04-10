@@ -79,7 +79,7 @@ export default function InfoServiceRequest({
       setPage(1);
       setSearch({});
       setSort("");
-      const body = { page: 1, size: loadMoreSize, sort: "", searchs: {} };
+      const body = { page: 1, size: loadMoreSize, sort: "", searchs: {}, filters: [], filterRules: [] };
       dispatch(
         getServiceRequests({ idAccount: accountId, body, isLoadMore: false })
       );
@@ -89,7 +89,7 @@ export default function InfoServiceRequest({
   // Re-fetch on search/sort change (only when modal is open)
   useEffect(() => {
     if (!isOpen) return;
-    const body = { page: 1, size: loadMoreSize, sort, searchs: search };
+    const body = { page: 1, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [] };
     dispatch(
       getServiceRequests({ idAccount: accountId, body, isLoadMore: false })
     );
@@ -98,13 +98,15 @@ export default function InfoServiceRequest({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPage = pagination?.totalPages || 0;
+    const totalPage = pagination?.totalPage || 0;
     if (nextPage <= totalPage) {
       const body = {
         searchs: search,
         page: nextPage,
         size: loadMoreSize,
-        sort
+        sort,
+        filters: [],
+        filterRules: [],
       };
       await dispatch(
         getServiceRequests({ idAccount: accountId, body, isLoadMore: true })
@@ -132,7 +134,7 @@ export default function InfoServiceRequest({
   );
   const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
 
-  const totalElement = pagination?.totalElements || 0;
+  const totalElement = pagination?.totalElement || 0;
   const hasMore = srRefs.length < totalElement;
 
   // Create safe accessor functions that handle both array and { data: [] } formats

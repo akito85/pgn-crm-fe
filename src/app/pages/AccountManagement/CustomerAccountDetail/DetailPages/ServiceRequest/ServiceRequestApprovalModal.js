@@ -62,7 +62,7 @@ const ServiceRequestApprovalModal = ({
   // Fetch page 1 whenever the modal opens or any filter/sort changes.
   useEffect(() => {
     if (isOpen) {
-      const body = { page: 1, size: loadMoreSize, sort, searchs: search };
+      const body = { page: 1, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [] };
       dispatch(getServiceRequestApprovals({ idAccount: accountId, body, isLoadMore: false }));
       setPage(1);
     }
@@ -80,15 +80,15 @@ const ServiceRequestApprovalModal = ({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPage = pagination.totalPages || 0;
+    const totalPage = pagination.totalPage || 0;
     if (nextPage <= totalPage) {
-      const body = { page: nextPage, size: loadMoreSize, sort, searchs: search };
+      const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [] };
       dispatch(getServiceRequestApprovals({ idAccount: accountId, body, isLoadMore: true }));
       setPage(nextPage);
     }
   };
 
-  const totalElement = pagination.totalElements;
+  const totalElement = pagination.totalElement;
   const hasMore = srApprovals.length < totalElement;
 
   const onSort = (_, __, sorter) => {

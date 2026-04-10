@@ -10,10 +10,11 @@ import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxApprovalInput from "../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import HeaderDetail from "../../../HeaderDetail";
-
-// you fucking nasty using bulky moment lazy as fuck
-import moment from "moment";
+import { configApp } from "../../../../../../../constants/configApp";
 
 import {
   ModalConfirm,
@@ -66,11 +67,13 @@ import {
   getSrSources,
   getSrDataRequirementTypes,
   getSrPrerequisiteTypes,
+  getSrAttachmentCategories,
   createServiceRequest,
   updateServiceRequest,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
+import moment from "moment";
 
 const CreateCustomerServiceRequest = (props) => {
   const location = useLocation();
@@ -107,6 +110,7 @@ const CreateCustomerServiceRequest = (props) => {
     detail_srApprovalHierarchy,
     list_srPrerequisiteTypes,
     list_srDataRequirementTypes,
+    list_srAttachmentCategories,
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
     loading_createUpdateSr,
@@ -195,32 +199,16 @@ const CreateCustomerServiceRequest = (props) => {
   const [srObj, setSrObj] = useState({}); // Service Request information
   const [contactsData, setContactsData] = useState([]); // Contacts table
   const [prerequisitesData, setPrerequisitesData] = useState([]); // Prerequisites table
-  const [attachmentsData, setAttachmentsData] = useState([]); // Attachments
-  const [approvalOptions, setApprovalOptions] = useState([]);
-  const [approvalTableData, setApprovalTableData] = useState([]);
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
 
   const isLoading = loading || loadingForm || loadingAccount;
 
   const {
     InformationForm,
-    AttachmentForm,
-    ApprovalForm,
     ContactForm,
     PreRequisiteForm,
   } = StepContents;
-  const [dropdownsLoaded, setDropdownsLoaded] = useState(false);
-
-  // Timeout fallback - if dropdowns don't load within 10 seconds, allow form to render anyway
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!dropdownsLoaded) {
-        console.warn("Dropdown loading timeout - proceeding without full dropdown data");
-        setDropdownsLoaded(true);
-      }
-    }, 10000); // 10 second timeout
-
-    return () => clearTimeout(timeout);
-  }, [dropdownsLoaded]);
 
   const routes = [
     {
@@ -299,37 +287,6 @@ const CreateCustomerServiceRequest = (props) => {
     dispatch(getSrApprovalHierarchies());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (list_srApprovalHierarchy && list_srApprovalHierarchy.length > 0) {
-      setApprovalOptions(list_srApprovalHierarchy);
-      return;
-    }
-
-    setApprovalOptions([]);
-  }, [list_srApprovalHierarchy]);
-
-  useEffect(() => {
-    if (
-      detail_srApprovalHierarchy &&
-      detail_srApprovalHierarchy.length > 0
-    ) {
-      const normalizedData = detail_srApprovalHierarchy.map((item, index) => ({
-        ...item,
-        key: item.key || `approval-hierarchy-${index + 1}`,
-        employeeDetail: (item.employeeDetail || []).map((employee, employeeIndex) => ({
-          ...employee,
-          key:
-            employee.key ||
-            `approval-hierarchy-${index + 1}-employee-${employeeIndex + 1}`,
-        })),
-      }));
-
-      setApprovalTableData(normalizedData);
-      return;
-    }
-
-    setApprovalTableData([]);
-  }, [detail_srApprovalHierarchy]);
 
   // Load detail + detail-draft when in update mode
   useEffect(() => {
@@ -375,46 +332,10 @@ const CreateCustomerServiceRequest = (props) => {
   }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectHiararchy = (value, label) => {
-    formCreate.setFieldsValue({
-      appHierId: value,
-      appHierName: label,
-    });
-
-    if (value) {
-      dispatch(getSrApprovalHierarchy(value));
-      return;
-    }
-
-    setApprovalTableData([]);
+    formCreate.setFieldsValue({ appHierId: value, appHierName: label });
+    if (value) dispatch(getSrApprovalHierarchy(value));
   };
 
-  useEffect(() => {
-    // Check if dropdowns are loaded - handle both response structures:
-    // 1. Direct array: dropdowns.serviceRequestTypes = [...]
-    // 2. Response object: dropdowns.serviceRequestTypes = { data: [...] }
-    const isLoaded = (dropdown) => {
-      if (!dropdown) return false;
-      // If it's an array with items, it's loaded
-      if (Array.isArray(dropdown) && dropdown.length > 0) return true;
-      // If it's a response object with data array, it's loaded
-      if (dropdown?.data && Array.isArray(dropdown.data)) return true;
-      return false;
-    };
-
-    if (
-      dropdowns &&
-      isLoaded(dropdowns.serviceRequestTypes) &&
-      isLoaded(dropdowns.serviceRequestCategories) &&
-      isLoaded(dropdowns.serviceRequestSubcategories) &&
-      isLoaded(dropdowns.serviceRequestChannels) &&
-      isLoaded(dropdowns.serviceRequestPriorities) &&
-      isLoaded(dropdowns.serviceRequestSources) &&
-      isLoaded(dropdowns.serviceRequestPrerequisites) &&
-      isLoaded(dropdowns.serviceRequestDataRequirements)
-    ) {
-      setDropdownsLoaded(true);
-    }
-  }, [dropdowns]);
 
   const handleSetData = (e) => {
     const temp = (e?.customerName || "").split(" ");
@@ -538,19 +459,15 @@ const CreateCustomerServiceRequest = (props) => {
   const steps = [
     {
       title: "Service Request",
-      content: dropdownsLoaded ? (
+      content: (
         <InformationForm
           form={formCreate}
           account={data_accountDetail}
           customer={data_customerDetail}
           dropdowns={dropdowns}
         />
-      ) : (
-        <div className="flex justify-center items-center h-64">
-          <Spin size="large" tip="Loading dropdown data..." />
-        </div>
       ),
-      disabled: !dropdownsLoaded,
+      disabled: false,
     },
     {
       title: "Contact",
@@ -580,10 +497,10 @@ const CreateCustomerServiceRequest = (props) => {
     {
       title: "Approval",
       content: (
-        <ApprovalForm
+        <NxApprovalInput
           form={formCreate}
-          dataOption={approvalOptions}
-          dataTable={approvalTableData}
+          options={list_srApprovalHierarchy}
+          hierarchyDetails={detail_srApprovalHierarchy}
           handleSelectHiararchy={handleSelectHiararchy}
         />
       ),
@@ -592,9 +509,14 @@ const CreateCustomerServiceRequest = (props) => {
     {
       title: "Attachment",
       content: (
-        <AttachmentForm
-          attachmentsData={attachmentsData}
-          setAttachmentsData={setAttachmentsData}
+        <NxAttachmentInput
+          data={attachmentDataSource}
+          updateData={setAttachmentDataSource}
+          setDeleted={setDeletedAttachments}
+          getAPICategory={getSrAttachmentCategories}
+          categoryData={list_srAttachmentCategories}
+          service={accountManagementService}
+          configApplication={configApp.ACCOUNT_SERVICE}
         />
       ),
       disabled: false,
@@ -645,11 +567,7 @@ const CreateCustomerServiceRequest = (props) => {
       requestSubCategory: values.subCategory ? parseInt(values.subCategory) : null,
       priority: values.priority ? parseInt(values.priority) : null,
       description: values.description || null,
-      requestedDate: values.requestDate
-        ? (values.requestDate.toDate
-          ? values.requestDate.toDate()
-          : new Date(values.requestDate))
-        : null,
+      requestedDate: NxDate.formatForAPI(values.requestDate),
       reference: values.serviceRequestReference || null,
       apphierId: values.appHierId ? parseInt(values.appHierId) : null,
       channel: values.channel ? parseInt(values.channel) : null,
@@ -673,17 +591,6 @@ const CreateCustomerServiceRequest = (props) => {
         ...(pr.prerequisiteValue && { prerequisiteValue: pr.prerequisiteValue }),
         ...(pr.prerequisiteDueDate && { prerequisiteDueDate: pr.prerequisiteDueDate }),
         ...(pr.prerequisiteAssignedTo && { prerequisiteAssignedTo: pr.prerequisiteAssignedTo }),
-      })),
-      attachments: attachmentsData.map((att) => ({
-        category: "SERVICE_REQUEST",
-        fileName: att.fileName || null,
-        type: att.type || null,
-        fileSize: att.size || 0,
-        fileCategoryId: att.fileCategoryId ? parseInt(att.fileCategoryId) : null,
-        description: att.description || null,
-        base64Content: att.base64 || null,
-        isDraft,
-        isDeleted: false,
       })),
     };
   };
@@ -766,6 +673,7 @@ const CreateCustomerServiceRequest = (props) => {
   const handleConfirmSubmit = async () => {
     setModalConfirm(false);
     setLoadingForm(true);
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
     try {
       if (isUpdate && id) {
         await dispatch(
@@ -773,6 +681,8 @@ const CreateCustomerServiceRequest = (props) => {
             accountId: idAccount,
             id,
             body: { ...dataSend, serviceRequestId: id },
+            attachments: newAttachments,
+            action: confirmationType.toUpperCase(),
             successBodyExtra: { return: false },
           })
         ).unwrap();
@@ -781,6 +691,8 @@ const CreateCustomerServiceRequest = (props) => {
           createServiceRequest({
             accountId: idAccount,
             body: dataSend,
+            attachments: newAttachments,
+            action: confirmationType.toUpperCase(),
             successBodyExtra: { return: false },
           })
         ).unwrap();
@@ -827,10 +739,12 @@ const CreateCustomerServiceRequest = (props) => {
   return (
     <>
       <BreadCrumb routes={routes} />
-      <Form
+      <Spin spinning={isLoading}>
+        <Form
         id="accountForm"
         form={formCreate}
         layout={"vertical"}
+        preserve={true}
         onFinish={() => {
           if (current === steps.length - 1) {
             handleOpenConfirmation("submit");
@@ -912,7 +826,8 @@ const CreateCustomerServiceRequest = (props) => {
             </div>
           </div>
         </NxBaseContainer>
-      </Form>
+        </Form>
+      </Spin>
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -921,8 +836,8 @@ const CreateCustomerServiceRequest = (props) => {
         handleConfirm={handleConfirmSubmit}
         form={formCreate}
         dropdowns={dropdowns}
-        approvalTableData={approvalTableData}
-        attachmentsData={attachmentsData}
+        approvalTableData={detail_srApprovalHierarchy}
+        attachmentsData={attachmentDataSource}
         type={confirmationType}
         loading={loadingForm}
       />

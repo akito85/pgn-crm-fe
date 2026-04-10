@@ -5,11 +5,11 @@ import accountManagementService from "../../../services/account_management/accou
 const initialState = {
   // List page state
   list_serviceRequest: [],
-  pagination_listSr: null,
+  pagination_listSr: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_listSr: false,
   // Approval modal state
   list_srApprovals: [],
-  pagination_listSrApprovals: { totalElements: 0, totalPages: 0 },
+  pagination_listSrApprovals: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_listSrApprovals: false,
   loading_approveSr: false,
   loading_rejectSr: false,
@@ -25,6 +25,8 @@ const initialState = {
   list_srActivities: [],
   list_srDataRequirements: [],
   list_srAttachments: [],
+  list_srAttachmentCategories: [],
+  loading_listSrAttachmentCategories: false,
   list_srContacts: [],
   loading_listSrContacts: false,
   loading_listSrAttachments: false,
@@ -70,20 +72,11 @@ const initialState = {
 // Get Filtered Service Requests by Account (list page — infinite scroll)
 export const getServiceRequests = createAsyncThunk(
   "GET_SERVICE_REQUESTS",
-  async ({ idAccount, body = {}, isLoadMore = false }, thunkAPI) => {
+  async ({ idAccount, body, isLoadMore }, thunkAPI) => {
     try {
-      const { page = 1, size = 10, sort, searchs } = body;
-      let url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list?page=${page}&size=${size}`;
-      if (sort) url += `&sort=${sort}`;
-      if (searchs && typeof searchs === "object") {
-        Object.keys(searchs).forEach((key) => {
-          if (searchs[key] !== undefined && searchs[key] !== null && searchs[key] !== "") {
-            url += `&${key}=${encodeURIComponent(searchs[key])}`;
-          }
-        });
-      }
-      const response = await accountManagementService.getAll(url);
-      return { data: response, isLoadMore };
+      const url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -93,20 +86,14 @@ export const getServiceRequests = createAsyncThunk(
 // Get Service Request Approval List (pending approvals)
 export const getServiceRequestApprovals = createAsyncThunk(
   "GET_SERVICE_REQUEST_APPROVALS",
-  async ({ idAccount, body = {}, isLoadMore = false }, thunkAPI) => {
+  async ({ idAccount, body, isLoadMore }, thunkAPI) => {
     try {
-      const { page = 1, size = 10, sort, searchs } = body;
-      let url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list?page=${page}&size=${size}&listType=approval`;
-      if (sort) url += `&sort=${sort}`;
-      if (searchs && typeof searchs === "object") {
-        Object.keys(searchs).forEach((key) => {
-          if (searchs[key] !== undefined && searchs[key] !== null && searchs[key] !== "") {
-            url += `&${key}=${encodeURIComponent(searchs[key])}`;
-          }
-        });
-      }
-      const response = await accountManagementService.getAll(url);
-      return { data: response, isLoadMore };
+      const url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, {
+        ...body,
+        listType: "approval",
+      });
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -217,10 +204,24 @@ export const createSrForAccount = createAsyncThunk(
 // Create Service Request with nested data
 export const createServiceRequest = createAsyncThunk(
   "CREATE_SERVICE_REQUEST",
-  async ({ accountId, body, successBodyExtra = {} }, thunkAPI) => {
+  async ({ accountId, body, attachments = [], action = "SUBMIT", successBodyExtra = {} }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/create`;
       const response = await accountManagementService.createData(url, body);
+      const { id } = response.data;
+
+      const uploadUrl = `/v1/dbs/api/service-request/upload-attachment`;
+      await Promise.all(
+        attachments.map((att) =>
+          accountManagementService.uploadAttachment(uploadUrl, {
+            files: att.file,
+            category: att.fileCategoryId,
+            refId: id,
+            action,
+          })
+        )
+      );
+
       const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
       const successBody = {
         title: "Successful",
@@ -280,10 +281,23 @@ export const updateSrForAccount = createAsyncThunk(
 // Update Service Request with composite data (supports draft/submit via triggerJson)
 export const updateServiceRequest = createAsyncThunk(
   "UPDATE_SERVICE_REQUEST",
-  async ({ accountId, id, body, successBodyExtra = {} }, thunkAPI) => {
+  async ({ accountId, id, body, attachments = [], action = "SUBMIT", successBodyExtra = {} }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
       const response = await accountManagementService.updateData(url, body);
+
+      const uploadUrl = `/v1/dbs/api/service-request/upload-attachment`;
+      await Promise.all(
+        attachments.map((att) =>
+          accountManagementService.uploadAttachment(uploadUrl, {
+            files: att.file,
+            category: att.fileCategoryId,
+            refId: id,
+            action,
+          })
+        )
+      );
+
       const isDraft = Boolean(body?.isDraft) || body?.action === "DRAFT";
       const successBody = {
         title: "Successful",
@@ -534,6 +548,20 @@ export const getSrApprovalHierarchy = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/service-request/approval-hierarchy/${id}`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Attachment Categories for Service Request
+export const getSrAttachmentCategories = createAsyncThunk(
+  "GET_SR_ATTACHMENT_CATEGORIES",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/attachment-category`;
       const response = await accountManagementService.getAll(url);
       return response.data;
     } catch (error) {
@@ -938,39 +966,45 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // SERVICE REQUEST LIST
     // =====================================================
-    [getServiceRequests.pending]: (state) => {
-      state.loading_listSr = true;
-      state.isFailed = false;
+    [getServiceRequests.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSr = true;
     },
     [getServiceRequests.fulfilled]: (state, action) => {
       state.loading_listSr = false;
-      const { data: response, isLoadMore } = action.payload;
-      // Unwrap outer envelope: { success, code, message, data: { result, page } }
-      const responseData = response?.data ?? response;
-      const rawItems = responseData?.result ?? responseData?.content ?? [];
-      const pageInfo = responseData?.page;
-      const totalElements = pageInfo?.totalElements ?? responseData?.totalElements ?? responseData?.totalElement ?? 0;
-      const totalPages = pageInfo?.totalPages ?? Math.ceil(totalElements / (pageInfo?.size ?? 10));
-      state.pagination_listSr = { totalElements, totalPages };
-      // Normalize field names to match column dataIndex
-      const items = rawItems.map((item) => ({
-        ...item,
-        serviceRequestNumber: item.requestNumber,
-        serviceRequestReference: item.reference,
-        type: item.requestType,
-        category: item.requestCategory,
-        subCategory: item.requestSubCategory,
-        requestSource: item.source,
-      }));
-      if (isLoadMore) {
-        state.list_serviceRequest = [...(state.list_serviceRequest || []), ...items];
-      } else {
-        state.list_serviceRequest = items;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        const normalized = result.map((item) => ({
+          ...item,
+          serviceRequestNumber: item.requestNumber,
+          serviceRequestReference: item.reference,
+          type: item.requestType,
+          category: item.requestCategory,
+          subCategory: item.requestSubCategory,
+          requestSource: item.source,
+        }));
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_serviceRequest.map((i) => i.id));
+          state.list_serviceRequest = [
+            ...state.list_serviceRequest,
+            ...normalized.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_serviceRequest = normalized;
+        }
       }
+      state.pagination_listSr = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getServiceRequests.rejected]: (state) => {
+    [getServiceRequests.rejected]: (state, action) => {
       state.loading_listSr = false;
-      state.isFailed = true;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_serviceRequest = [];
+        state.pagination_listSr = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     [getSrListByAccount.pending]: (state) => {
@@ -1168,6 +1202,18 @@ const serviceRequestSlice = createSlice({
       state.detail_srApprovalHierarchy = [];
     },
 
+    [getSrAttachmentCategories.pending]: (state) => {
+      state.loading_listSrAttachmentCategories = true;
+    },
+    [getSrAttachmentCategories.fulfilled]: (state, action) => {
+      state.list_srAttachmentCategories = action.payload;
+      state.loading_listSrAttachmentCategories = false;
+    },
+    [getSrAttachmentCategories.rejected]: (state) => {
+      state.list_srAttachmentCategories = [];
+      state.loading_listSrAttachmentCategories = false;
+    },
+
     [getSrWorkOrderTypes.fulfilled]: (state, action) => {
       state.list_srWorkOrderTypes = action.payload;
     },
@@ -1319,35 +1365,45 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // SERVICE REQUEST APPROVALS
     // =====================================================
-    [getServiceRequestApprovals.pending]: (state) => {
-      state.loading_listSrApprovals = true;
+    [getServiceRequestApprovals.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrApprovals = true;
     },
     [getServiceRequestApprovals.fulfilled]: (state, action) => {
       state.loading_listSrApprovals = false;
-      const { data: response, isLoadMore } = action.payload;
-      const responseData = response?.data ?? response;
-      const rawItems = responseData?.result ?? responseData?.content ?? [];
-      const pageInfo = responseData?.page;
-      const totalElements = pageInfo?.totalElements ?? responseData?.totalElements ?? responseData?.totalElement ?? 0;
-      const totalPages = pageInfo?.totalPages ?? Math.ceil(totalElements / (pageInfo?.size ?? 10));
-      state.pagination_listSrApprovals = { totalElements, totalPages };
-      const items = rawItems.map((item) => ({
-        ...item,
-        serviceRequestNumber: item.requestNumber,
-        serviceRequestReference: item.reference,
-        type: item.requestType,
-        category: item.requestCategory,
-        subCategory: item.requestSubCategory,
-        requestSource: item.source,
-      }));
-      if (isLoadMore) {
-        state.list_srApprovals = [...(state.list_srApprovals || []), ...items];
-      } else {
-        state.list_srApprovals = items;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        const normalized = result.map((item) => ({
+          ...item,
+          serviceRequestNumber: item.requestNumber,
+          serviceRequestReference: item.reference,
+          type: item.requestType,
+          category: item.requestCategory,
+          subCategory: item.requestSubCategory,
+          requestSource: item.source,
+        }));
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srApprovals.map((i) => i.id));
+          state.list_srApprovals = [
+            ...state.list_srApprovals,
+            ...normalized.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srApprovals = normalized;
+        }
       }
+      state.pagination_listSrApprovals = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getServiceRequestApprovals.rejected]: (state) => {
+    [getServiceRequestApprovals.rejected]: (state, action) => {
       state.loading_listSrApprovals = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srApprovals = [];
+        state.pagination_listSrApprovals = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     [approveOrRejectAllServiceRequest.pending]: (state, action) => {

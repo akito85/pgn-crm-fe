@@ -45,7 +45,7 @@ const ServiceRequestTable = ({
     }));
   }, [list_serviceRequest]);
 
-  const totalElement = pagination_listSr?.totalElements || 0;
+  const totalElement = pagination_listSr?.totalElement || 0;
   const hasMore = currentData.length < totalElement;
 
   // --- State ---
@@ -56,6 +56,8 @@ const ServiceRequestTable = ({
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["statusApproval", "statusPrerequisite", "status", "action"],
     left: [],
@@ -66,7 +68,7 @@ const ServiceRequestTable = ({
     dispatch(
       getServiceRequests({
         idAccount,
-        body: { page: 1, size: loadMoreSize, sort, searchs: search },
+        body: { page: 1, size: loadMoreSize, sort, searchs: search, filters, filterRules },
         isLoadMore: false,
       })
     );
@@ -92,12 +94,12 @@ const ServiceRequestTable = ({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_listSr?.totalPages || 0;
-    if (nextPage <= totalPages) {
+    const totalPage = pagination_listSr?.totalPage || 0;
+    if (nextPage <= totalPage) {
       await dispatch(
         getServiceRequests({
           idAccount,
-          body: { page: nextPage, size: loadMoreSize, sort, searchs: search },
+          body: { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules },
           isLoadMore: true,
         })
       );
@@ -116,12 +118,12 @@ const ServiceRequestTable = ({
     dispatch(
       getServiceRequests({
         idAccount,
-        body: { page: 1, size: loadMoreSize, sort, searchs: search },
+        body: { page: 1, size: loadMoreSize, sort, searchs: search, filters, filterRules },
         isLoadMore: false,
       })
     );
     setPage(1);
-  }, [sort, search]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sort, search, filters, filterRules]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Trigger a page-1 refresh when the parent signals it (e.g. after approval).
   useEffect(() => {
