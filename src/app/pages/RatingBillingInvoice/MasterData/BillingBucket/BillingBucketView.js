@@ -20,7 +20,9 @@ import {
   getAllBillingBucketPaginate,
   getListApprovalHierarchy,
   inactiveBillingBucket,
+  requestActivateBillingBucket,
   getListApprovalHierarchyDetail,
+  getSelectedApproval,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -67,10 +69,12 @@ const BillingBucketView = () => {
     return saved
       ? JSON.parse(saved)
       : {
-          left: ["no"],
-          right: ["action"],
-        };
+        left: ["no"],
+        right: ["action"],
+      };
   });
+
+  const normalizeStatus = (value) => (value || "").toString().toUpperCase();
 
   useEffect(() => {
     localStorage.setItem(
@@ -114,11 +118,15 @@ const BillingBucketView = () => {
           create: data_approval_history?.dataApprover?.BILLING_BUCKET || [],
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_BILLING_BUCKET || [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_BILLING_BUCKET || [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.BILLING_BUCKET || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_BILLING_BUCKET || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_BILLING_BUCKET || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -228,12 +236,20 @@ const BillingBucketView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" && selectedStatusApproval === "APPROVED";
     const dataValue = {
       billingBucketCode: chooseId.billingBucketCode,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveBillingBucket(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateBillingBucket : inactiveBillingBucket)(
+        dataValue
+      )
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -265,7 +281,12 @@ const BillingBucketView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -380,9 +401,8 @@ const BillingBucketView = () => {
               type={"action"}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -421,14 +441,16 @@ const BillingBucketView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval
+          );
+        const canActivate =
+          rowStatus === "INACTIVE";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -437,8 +459,8 @@ const BillingBucketView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               border={false}
@@ -452,14 +474,14 @@ const BillingBucketView = () => {
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -637,9 +659,10 @@ const BillingBucketView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Billing Bucket with name ${
-            chooseId?.billingBucketCode || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+            ? "activate"
+            : "inactivate"
+            } this Billing Bucket with name ${chooseId?.billingBucketCode || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -657,7 +680,8 @@ const BillingBucketView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
