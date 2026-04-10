@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 
-import { Form, Select, Button, Tooltip, Spin, Tag, Input } from "antd"; // Added Input import
+import { Form, Select, Button, Tooltip } from "antd"; // Added Input import
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
 import InputComponent from "../../../../../../../../../components/InputComponent";
@@ -16,26 +16,15 @@ import { requiredMessage, toTitleCase } from "../../../../../../../../../utils";
 import accountManagementService from "../../../../../../../../../redux/services/account_management/accountManagementService";
 
 import moment from "moment";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../utils/getColumnSearchProps";
+import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
 
 export default function InfoServiceRequest({
   account,
-  customer,
   dropdowns,
   form,
-  totalElement = 0,
-  page = 1,
-  pageSize = 10,
-  searchText = "",
-  searchedColumn = "",
-  onSort = () => {},
-  getColumnSearchProps = () => {},
-  searchInput,
-  handleSearch
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [selectedRowKey, setSelectedRowKey] = useState(null);
-  const [serviceRequestRef, setServiceRequestRef] = useState("");
 
   // Infinite scroll state for service request reference modal
   const PAGE_SIZE_REF = 10;
@@ -44,10 +33,6 @@ export default function InfoServiceRequest({
   const [srRefHasMore, setSrRefHasMore] = useState(true);
   const [srRefLoading, setSrRefLoading] = useState(false);
   const srRefLoadingRef = useRef(false);
-  // Debug: Log form values when they change
-  useEffect(() => {
-    const values = form?.getFieldsValue();
-  }, [form]);
 
   // Create safe accessor functions that handle both array and { data: [] } formats
   const getDropdownItems = (dropdownKey) => {
@@ -69,44 +54,12 @@ export default function InfoServiceRequest({
     return getDropdownItems(dropdownKey).length > 0;
   };
 
-  // Or use destructuring with defaults
-  const {
-    serviceRequestTypes = { data: [] },
-    serviceRequestCategories = { data: [] },
-    serviceRequestSubcategories = { data: [] },
-    serviceRequestChannels = { data: [] },
-    serviceRequestPriorities = { data: [] },
-    serviceRequestSources = { data: [] }
-  } = dropdowns || {};
-
-  // Update handleOk to use the selected row
-  const handleOk = () => {
-    form.setFieldsValue({
-      srr: selectedRow.requestNumber,
-    });
-
-    setIsOpen(false);
-    // Reset selection when modal closes
-    setSelectedRow(null);
-    setSelectedRowKey(null);
-  };
-
   const handleCancel = () => {
     setIsOpen(false);
-    // Reset selection when modal closes
-    setSelectedRow(null);
-    setSelectedRowKey(null);
   }
 
   const handleClose = () => {
     setIsOpen(false);
-    // Reset selection when modal closes
-    setSelectedRow(null);
-    setSelectedRowKey(null);
-  }
-
-  const handleDateChange = () => {
-
   }
 
   const renderDate = (date) => {
@@ -128,107 +81,81 @@ export default function InfoServiceRequest({
       dataIndex: "requestNumber",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("requestNumber"),
-      // render: (reference, record) => (
-      //   <div
-      //     className="flex items-center gap-2"
-      //   >
-      //     <span
-      //       className="underline cursor-pointer text-blue-600"
-      //       onClick={(e) => {
-      //         e.stopPropagation();
-      //         handleRowClick(record);
-      //       }}
-      //     >
-      //       {reference || "-"}
-      //     </span>
-      //   </div>
-      // ),
+      ...getColumnSearchPropsUseFilteredValue("requestNumber"),
     },
     {
       title: "SERVICE REQUEST REFERENCE",
       dataIndex: "reference",
       width: 220,
       sorter: true,
-      ...getColumnSearchProps("reference"),
-      // render: (reference, record) => (
-      //   <span
-      //     className="underline cursor-pointer text-blue-600"
-      //     onClick={(e) => {
-      //       e.stopPropagation();
-      //       handleRowClick(record);
-      //     }}
-      //   >
-      //     {reference || "-"}
-      //   </span>
-      // ),
+      ...getColumnSearchPropsUseFilteredValue("reference"),
     },
     {
       title: "TYPE",
       dataIndex: "type",
       width: 150,
       sorter: true,
-      ...getColumnSearchProps("type"),
+      ...getColumnSearchPropsUseFilteredValue("type"),
     },
     {
       title: "CATEGORY",
       dataIndex: "category",
       width: 160,
       sorter: true,
-      ...getColumnSearchProps("category"),
+      ...getColumnSearchPropsUseFilteredValue("category"),
     },
     {
       title: "SUB CATEGORY",
       dataIndex: "subCategory",
       width: 160,
       sorter: true,
-      ...getColumnSearchProps("subCategory"),
+      ...getColumnSearchPropsUseFilteredValue("subCategory"),
     },
     {
       title: "CHANNEL",
       dataIndex: "channel",
       width: 140,
       sorter: true,
-      ...getColumnSearchProps("channel"),
+      ...getColumnSearchPropsUseFilteredValue("channel"),
     },
     {
       title: "REQUEST SOURCE",
       dataIndex: "source",
       width: 150,
       sorter: true,
-      ...getColumnSearchProps("source"),
+      ...getColumnSearchPropsUseFilteredValue("source"),
     },
     {
       title: "REQUEST DATE",
       dataIndex: "requestDate",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("requestDate"),
-      render: (date) => renderDate(date) || "-",
+      ...getColumnSearchPropsUseFilteredValue("requestDate"),
+      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
     },
     {
       title: "OPEN DATE",
       dataIndex: "openDate",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("openDate"),
-      render: (date) => renderDate(date) || "-",
+      ...getColumnSearchPropsUseFilteredValue("openDate"),
+      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
     },
     {
       title: "RESOLVED DATE",
       dataIndex: "resolvedDate",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("resolvedDate"),
-      render: (date) => renderDate(date) || "-",
+      ...getColumnSearchPropsUseFilteredValue("resolvedDate"),
+      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
     },
     {
       title: "CLOSED DATE",
       dataIndex: "closedDate",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("closedDate"),
-      render: (date) => renderDate(date) || "-",
+      ...getColumnSearchPropsUseFilteredValue("closedDate"),
+      render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
     },
     {
       title: "AGE (HOUR)",
@@ -236,7 +163,7 @@ export default function InfoServiceRequest({
       width: 120,
       sorter: true,
       align: "center",
-      ...getColumnSearchProps("age"),
+      ...getColumnSearchPropsUseFilteredValue("age"),
       render: (age) => age || "0",
     },
     {
@@ -244,7 +171,7 @@ export default function InfoServiceRequest({
       dataIndex: "description",
       width: 250,
       sorter: true,
-      ...getColumnSearchProps("description"),
+      ...getColumnSearchPropsUseFilteredValue("description"),
     },
     {
       title: "STATUS APPROVAL",
@@ -252,7 +179,7 @@ export default function InfoServiceRequest({
       width: 160,
       sorter: true,
       align: "center",
-      ...getColumnSearchProps("statusApproval"),
+      ...getColumnSearchPropsUseFilteredValue("statusApproval"),
       render: (status) => {
         const colorMap = {
           "approved": "green",
@@ -281,7 +208,7 @@ export default function InfoServiceRequest({
       width: 180,
       sorter: true,
       align: "center",
-      ...getColumnSearchProps("statusPrerequisite"),
+      ...getColumnSearchPropsUseFilteredValue("statusPrerequisite"),
       render: (status) => {
         const colorMap = {
           "completed": "green",
@@ -308,7 +235,7 @@ export default function InfoServiceRequest({
       width: 140,
       sorter: true,
       align: "center",
-      ...getColumnSearchProps("status"),
+      ...getColumnSearchPropsUseFilteredValue("status"),
       render: (status) => {
         const colorMap = {
           "inProgress": "blue",
@@ -341,7 +268,7 @@ export default function InfoServiceRequest({
       align: "center",
       width: 120,
       fixed: "right",
-      render: (v, r, i) => {
+      render: (_, record) => {
         return (
           <div className="flex w-full justify-center gap-4">
             <Tooltip title="Select">
@@ -351,7 +278,7 @@ export default function InfoServiceRequest({
                   color={"#0075bf"}
                   width={20}
                   onClick={() => {
-                    handleRowClick(r);
+                    handleRowClick(record);
                   }}
                 />
               </div>
@@ -413,9 +340,7 @@ export default function InfoServiceRequest({
 
   // Handle row click — auto select & close modal (like PaymentRelation pattern)
   const handleRowClick = (record) => {
-    form.setFieldsValue({ srr: record.requestNumber });
-    setSelectedRow(record);
-    setSelectedRowKey(record.key);
+    form.setFieldsValue({ serviceRequestReference: record.requestNumber });
     setIsOpen(false);
   };
 
@@ -441,135 +366,37 @@ export default function InfoServiceRequest({
     <Fragment>
       <NxCardContainer header={"SERVICE REQUEST INFORMATION"}>
         <NxBaseContainer border>
-        {/* Remove the wrapper Form component since form is passed as prop */}
-        <div className="w-full grid grid-cols-3 gap-4">
-          {/* Left Column */}
-          <div className="space-y-4">
-            <div className="w-full gap-4 flex flex-row items-end">
-              <Form.Item
-                key="serviceRequestReference"
-                name="srr"
-                label="Service Request Reference"
-                className="no-margin-form w-full"
-              >
-                  <InputComponent 
-                    className="flex-1"
-                  />
-              </Form.Item>
-              <Button
-                type="primary"
-                className="h-9 px-4 justify-center items-center"
-                style={{
-                  backgroundColor: "#0075bf",
-                  borderColor: "#0075bf",
-                  borderRadius: "5px",
-                  minWidth: "112px",
-                }}
-                onClick={() => {
-                  setIsOpen(true);
-                }}
-              >
-                Select
-              </Button>
-            </div>
-
+          <div className="w-full grid grid-cols-3 gap-4">
             <Form.Item
-              key="category"
-              name="category"
-              label="Category"
-              rules={[
-                {
-                  message: requiredMessage("Category"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
+              label={"Service Request Reference"}
+              required
+              className="no-margin-form w-full"
             >
-              <Select
-                placeholder="Select Category"
-                loading={!isDropdownLoaded('serviceRequestCategories')}
-                options={getDropdownOptions('serviceRequestCategories')}
-              />
+              <div className="flex gap-x-1">
+                <Form.Item
+                  key="serviceRequestReference"
+                  name={"serviceRequestReference"}
+                  rules={[
+                    {
+                      message: requiredMessage("Service Request Reference"),
+                      required: true
+                    }
+                  ]}
+                  noStyle
+                >
+                  <InputComponent disabled />
+                </Form.Item>
+                <Button
+                  type="submit"
+                  className="min-w-[120px]"
+                  onClick={() => {
+                    setIsOpen(true);
+                  }}
+                >
+                  Select
+                </Button>
+              </div> 
             </Form.Item>
-
-            <Form.Item
-              key="priority"
-              name="priority"
-              label="Priority"
-              rules={[
-                {
-                  message: requiredMessage("Priority"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
-            >
-              <Select
-                placeholder="Select Priorities"
-                loading={!isDropdownLoaded('serviceRequestPriorities')}
-                options={getDropdownOptions('serviceRequestPriorities')}
-              />
-            </Form.Item>
-          </div>
-
-          {/* Middle Column */}
-          <div className="space-y-4">
-            <Form.Item
-              key="srFormAccountCostCenter"
-              name="srFormAccountCostCenter"
-              label="Cost Center"
-              rules={[
-                {
-                  message: requiredMessage("Cost Center"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
-            >
-              <InputComponent disabled={true} />
-            </Form.Item>
-
-            <Form.Item
-              key="subCategory"
-              name="subCategory"
-              label="Sub Category"
-              rules={[
-                {
-                  message: requiredMessage("Sub Category"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
-            >
-              <Select
-                placeholder="Select Sub Category"
-                loading={!isDropdownLoaded('serviceRequestSubcategories')}
-                options={getDropdownOptions('serviceRequestSubcategories')}
-              />
-            </Form.Item>
-
-            <Form.Item
-              key="requestSource"
-              name="requestSource"
-              label="Request Source"
-              rules={[
-                {
-                  message: requiredMessage("Request Source"),
-                  required: true,
-                },
-              ]}
-              className="no-margin-form"
-            >
-              <Select
-                placeholder="Select Sources"
-                loading={!isDropdownLoaded('serviceRequestSources')}
-                options={getDropdownOptions('serviceRequestSources')}
-              />
-            </Form.Item>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-4">
             <Form.Item
               key="type"
               name="type"
@@ -588,7 +415,42 @@ export default function InfoServiceRequest({
                 options={getDropdownOptions('serviceRequestTypes')}
               />
             </Form.Item>
-
+            <Form.Item
+              key="category"
+              name="category"
+              label="Category"
+              rules={[
+                {
+                  message: requiredMessage("Category"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Category"
+                loading={!isDropdownLoaded('serviceRequestCategories')}
+                options={getDropdownOptions('serviceRequestCategories')}
+              />
+            </Form.Item>
+            <Form.Item
+              key="subCategory"
+              name="subCategory"
+              label="Sub Category"
+              rules={[
+                {
+                  message: requiredMessage("Sub Category"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Sub Category"
+                loading={!isDropdownLoaded('serviceRequestSubcategories')}
+                options={getDropdownOptions('serviceRequestSubcategories')}
+              />
+            </Form.Item>
             <Form.Item
               key="channel"
               name="channel"
@@ -607,7 +469,42 @@ export default function InfoServiceRequest({
                 options={getDropdownOptions('serviceRequestChannels')}
               />
             </Form.Item>
-
+            <Form.Item
+              key="priority"
+              name="priority"
+              label="Priority"
+              rules={[
+                {
+                  message: requiredMessage("Priority"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Priorities"
+                loading={!isDropdownLoaded('serviceRequestPriorities')}
+                options={getDropdownOptions('serviceRequestPriorities')}
+              />
+            </Form.Item>
+            <Form.Item
+              key="requestSource"
+              name="requestSource"
+              label="Request Source"
+              rules={[
+                {
+                  message: requiredMessage("Request Source"),
+                  required: true,
+                },
+              ]}
+              className="no-margin-form"
+            >
+              <Select
+                placeholder="Select Sources"
+                loading={!isDropdownLoaded('serviceRequestSources')}
+                options={getDropdownOptions('serviceRequestSources')}
+              />
+            </Form.Item>
             <Form.Item
               key="requestDate"
               name="requestDate"
@@ -623,10 +520,6 @@ export default function InfoServiceRequest({
               <DateComponent />
             </Form.Item>
           </div>
-        </div>
-
-        {/* Description - Full Width */}
-        <div className="w-full my-5">
           <Form.Item
             key="description"
             name="description"
@@ -640,20 +533,20 @@ export default function InfoServiceRequest({
               maxLength={255}
             />
           </Form.Item>
-        </div>
         </NxBaseContainer>
       </NxCardContainer>
 
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        handleOk={handleOk}
         title={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
         footer={[
-          <Button key="close" onClick={handleClose}>
-            Close
-          </Button>,
+          <div className="flex justify-end">
+            <Button type="menu" key="close" onClick={handleClose}>
+              Back
+            </Button>,
+          </div>
         ]}
       >
         <div className="p-4">

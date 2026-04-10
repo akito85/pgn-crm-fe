@@ -363,7 +363,7 @@ const CreateCustomerServiceRequest = (props) => {
       priority: detail.priority,
       description: detail.description,
       requestDate: detail.requestedDate ? moment(detail.requestedDate) : null,
-      srr: detail.reference,
+      serviceRequestReference: detail.reference,
       appHierId: detail.apphierId,
       channel: detail.channel,
       requestSource: detail.source,
@@ -500,8 +500,6 @@ const CreateCustomerServiceRequest = (props) => {
         accountGroupType: accountInfo?.accountGroupType || "",
         srFormAccountId: accountInfo?.accountId || "",
         srFormAccountSor: accountInfo?.sor || "",
-        srFormAccountCostCenter: accountSums?.costCenter || "",
-        srFormAccountCostCenterId: accountInfo?.costCenterId || null,
         srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
         srFormAccountSegment: accountInfo?.segment || "",
         srFormAccountGroupType: accountInfo?.accountGroupType || "",
@@ -652,13 +650,10 @@ const CreateCustomerServiceRequest = (props) => {
           ? values.requestDate.toDate()
           : new Date(values.requestDate))
         : null,
-      reference: values.srr || null,
+      reference: values.serviceRequestReference || null,
       apphierId: values.appHierId ? parseInt(values.appHierId) : null,
       channel: values.channel ? parseInt(values.channel) : null,
       source: values.requestSource ? parseInt(values.requestSource) : null,
-      costCenter: values.srFormAccountCostCenterId
-        ? parseInt(values.srFormAccountCostCenterId)
-        : null,
       action,
       isDraft,
       validationType,
@@ -814,8 +809,6 @@ const CreateCustomerServiceRequest = (props) => {
         accountGroupType: accountInfo?.accountGroupType || "",
         srFormAccountId: accountInfo?.accountId || "",
         srFormAccountSor: accountInfo?.sor || "",
-        srFormAccountCostCenter: accountSums?.costCenter || "",
-        srFormAccountCostCenterId: accountInfo?.costCenterId || null,
         srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
         srFormAccountSegment: accountInfo?.segment || "",
         srFormAccountGroupType: accountInfo?.accountGroupType || "",
