@@ -1,69 +1,9 @@
-import { Form, Input, Select } from "antd";
-import { useRef, useState } from "react";
+import { Form, Select } from "antd";
+import { useMemo } from "react";
 import NxDetailText from "../../components/Nx/NxDetailText";
 import SelectComponent from "../../components/SelectComponent";
 import { requiredMessage } from "../../utils";
-import { getColumnSearchProps } from "../../utils/getColumnSearchProps";
-import NxTable from "./NxTable";
-
-const DataExpand = ({ list = [] }) => {
-  const searchInput = useRef(null);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-
-  const columns = [
-    {
-      key: "no",
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (_, __, index) => index + 1,
-    },
-    {
-      key: "employee",
-      title: "EMPLOYEE",
-      width: 300,
-      dataIndex: "employeeName",
-      sorter: (a, b) => a?.employeeName?.localeCompare(b?.employeeName),
-      ...getColumnSearchProps(
-        "employeeName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      onFilter: (value, record) =>
-        record["employeeName"]
-          ?.toString()
-          .toLowerCase()
-          .includes(value.toLowerCase()),
-    },
-  ];
-
-  return (
-    <div>
-      <NxTable
-        idTable={"employee-table"}
-        useSelect={false}
-        usePagination={false}
-        useInfiniteScroll={false}
-        dataSource={list}
-        columns={columns}
-      />
-    </div>
-  );
-};
-
-const expandedRowRender = (record) => {
-  const dataExpand = record.employeeDetail || [];
-  return <DataExpand list={dataExpand} />;
-};
+import NxTableNested from "./NxTableNested";
 
 const NxApprovalInput = ({
   form,
@@ -74,61 +14,59 @@ const NxApprovalInput = ({
   loading = false,
   tableLoading = false,
 }) => {
-  const searchInput = useRef(null);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-
   const appHierId = Form.useWatch("appHierId", { form });
   const appHierName = Form.useWatch("appHierName", { form, preserve: true });
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-
-  const columns = [
+  const parentColumns = [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "approvalLevel",
       title: "HIERARCHY",
       dataIndex: "approvalLevel",
       sorter: (a, b) => a?.approvalLevel?.localeCompare(b?.approvalLevel),
-      ...getColumnSearchProps(
-        "approvalLevel",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      onFilter: (value, record) =>
-        record["approvalLevel"]
-          ?.toString()
-          .toLowerCase()
-          .includes(value.toLowerCase()),
+      fill: true,
     },
     {
+      key: "position",
       title: "POSITION",
       dataIndex: "position",
       sorter: (a, b) => a?.position?.localeCompare(b?.position),
-      ...getColumnSearchProps(
-        "position",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      onFilter: (value, record) =>
-        record["position"]
-          ?.toString()
-          .toLowerCase()
-          .includes(value.toLowerCase()),
+      fill: true,
     },
   ];
+
+  const childColumns = [
+    {
+      key: "no",
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (_, __, index) => index + 1,
+    },
+    {
+      key: "employeeName",
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+      sorter: (a, b) => a?.employeeName?.localeCompare(b?.employeeName),
+      fill: true,
+    },
+  ];
+
+  const nestedData = useMemo(
+    () =>
+      hierarchyDetails.map((h, i) => ({
+        ...h,
+        id: h.id ?? i,
+        children: h.employeeDetail || [],
+      })),
+    [hierarchyDetails]
+  );
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -157,14 +95,15 @@ const NxApprovalInput = ({
       )}
 
       {(appHierId || (!formView && hierarchyDetails.length > 0)) && (
-        <NxTable
-          idTable={"hierarchy-table"}
+        <NxTableNested
+          idTable="hierarchy-table"
+          dataSource={nestedData}
+          parentColumns={parentColumns}
+          childColumns={childColumns}
           useSelect={false}
           usePagination={false}
           useInfiniteScroll={false}
-          dataSource={hierarchyDetails}
-          columns={columns}
-          expandable={{ expandedRowRender }}
+          showAdvanceSearch={false}
           loading={tableLoading}
         />
       )}
