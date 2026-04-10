@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
-import TableInlineAllocation from "./TableInlineAllocation";
+import TableRBI from "../../../../../components/TableRBI";
 import { updatePagination } from "../../../../../utils/updatePagination";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { Spin } from "antd";
 import TablePagination from "../../../../../components/TablePagination";
 import { columnRecommendation } from "./ColumnRecomendation";
-import { columnsAllocation } from "../DetailReceipt";
+import { columnsAllocation } from "./ColumnAllocation";
 import { getRecommendationDetailAllocation, getAllocation } from "../../../../../redux/slices/receipt_collection/receipt";
 import moment from "moment";
 import { dateFormatting, hasValue } from "../../../../../utils";
@@ -107,14 +107,23 @@ const CreateAllocation = ({
   }, [selectedRowKeys, openModalAllocation, dataRecomendation]);
 
   // selected row keys
+  const dataRecomendationKeys = useMemo(() => {
+    return dataRecomendation?.map((item) => item?.key) || [];
+  }, [dataRecomendation?.length]);
+
   useEffect(() => {
-    if (dataRecomendation) {
-      setSelectedRowKeys(
-        dataRecomendation
-          ?.map((item) => item?.key)
-      );
+    if (dataRecomendationKeys.length > 0) {
+      setSelectedRowKeys(dataRecomendationKeys);
     }
-  }, [dataRecomendation]);
+  }, [dataRecomendationKeys]);
+
+  // Handle cleanup
+  useEffect(() => {
+    return () => {
+      setSelectedRowKeys([]);
+      setSelectDataTable([]);
+    };
+  }, []);
 
   // handle search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -217,9 +226,75 @@ const CreateAllocation = ({
     );
   };
 
+  const [editingKey, setEditingKey] = useState("");
+  const [tempRow, setTempRow] = useState({});
+
+  useEffect(() => {
+    // Calculate total amount whenever dataTable changes
+    const total = dataTable.reduce((acc, curr) => acc + (Number(curr.allocationAmount) || 0), 0);
+    setTotalUnapliedAmount(total);
+  }, [dataTable, setTotalUnapliedAmount]);
+
+  const handleEdit = (record) => {
+    setEditingKey(record.key);
+    setTempRow({ ...record });
+    setIsInsert(true); // Disable create/submit while editing
+  };
+
+  const handleCancelEdit = () => {
+    setEditingKey("");
+    setTempRow({});
+    setIsInsert(false);
+  };
+
+  const handleInputChange = (key, field, value) => {
+    setTempRow((prev) => ({
+      ...prev,
+      [field]: Number(value),
+    }));
+  };
+
+  const handleSave = (key) => {
+    const newData = [...dataTable];
+    const index = newData.findIndex((item) => key === item.key);
+    if (index > -1) {
+      const item = newData[index];
+      const updatedRow = {
+        ...item,
+        ...tempRow,
+        billingItemBalance: item.billingItemAmount - tempRow.allocationAmount,
+        allocationStatus:
+          item.billingItemAmount - tempRow.allocationAmount === 0
+            ? "Paid"
+            : "Partially Paid",
+        equivalentAmount:
+          item.convertedCurrency === "USD"
+            ? tempRow.allocationAmount / (dataDetail?.rateAmount || 1)
+            : tempRow.allocationAmount * (dataDetail?.rateAmount || 1),
+      };
+
+      if (updatedRow.billingItemBalance < 0) {
+        // Show error? For now just clamp or let user see balance < 0
+      }
+
+      newData.splice(index, 1, updatedRow);
+      setDataTable(newData);
+      setEditingKey("");
+      setTempRow({});
+      setIsInsert(false);
+    }
+  };
+
+  const handleDelete = (key) => {
+    const newData = dataTable.filter((item) => item.key !== key);
+    setDataTable(newData);
+    // Also update selection if needed
+    setSelectedRowKeys(newData.map(item => item.key));
+  };
+
   return (
     <div className="w-full items-end flex flex-col gap-5">
-      {dataDetail?.approvalDto?.isApprover === false && (
+      {dataDetail?.approvalDto?.isApprover !== true && (
         <>
           <ButtonComponent
             type={"submit"}
@@ -235,7 +310,6 @@ const CreateAllocation = ({
           >
             Create
           </ButtonComponent>
-          {/* Info message when no allocation available */}
           {dataDetail?.statusApproval === "Approved" &&
             unApliedAmount > 0 &&
             (!dataRecomendation || dataRecomendation?.length === 0) && (
@@ -246,50 +320,59 @@ const CreateAllocation = ({
         </>
       )}
       <div className="w-full">
-        <TableInlineAllocation
-          cols={columnsAllocation(
+        <TableRBI
+          idTable="table-allocation-detail"
+          columns={columnsAllocation(
             page,
             pageSize,
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
+            null,
+            handleEdit,
+            handleDelete,
+            null,
+            editingKey,
+            handleSave,
+            handleCancelEdit,
+            handleOpenModalReverse,
+            handleInputChange
           )}
-          current={page}
-          pageSize={pageSize}
-          scrollTable={{
-            x: 4400,
-            y: 300,
-          }}
-          actionFix={true}
-          tableData={updatePagination(
+          dataSource={updatePagination(
             dataTable,
             "data",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
+            page,
+            pageSize,
             typeColumn
           )}
-          setInserted={setIsInsert}
-          onDataChange={setDataTable}
+          current={page}
+          pageSize={pageSize}
           totalData={updatePagination(
             dataTable,
             "length",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
+            page,
+            pageSize,
             typeColumn
           )}
-          setUpdateSelectDataTable={setSelectDataTable}
-          setUpdateSelectRowKeys={setSelectedRowKeys}
-          setUpdateTotalAmount={setTotalUnapliedAmount}
-          rateAmount={unApliedAmount}
-          onReverse={handleOpenModalReverse}
-          type="detail"
-        // onSort={onSort}
-        // dispatcher={dispatch}
+          onChange={(p, ps) => {
+            setPage(p);
+          }}
+          onSizeChanger={(p, ps) => {
+             setPage(1);
+          }}
+          loading={loading}
+          tableScrolled={{
+            x: 3000,
+            y: 300,
+          }}
+          useSelect={false}
+          showSearchBar={false}
+          showAdvanceSearch={false}
         />
         <div className="w-full flex flex-col">
           {totalUnapliedAmount > unApliedAmount && (
@@ -325,7 +408,7 @@ const CreateAllocation = ({
         header={"Choose Allocation"}
         width={1200}
         footer={[
-          <div className="flex gap-5 justify-end w-full">
+          <div key="footer" className="flex gap-5 justify-end w-full">
             <ButtonComponent
               // type={"reject"}
               htmlType={"submit"}

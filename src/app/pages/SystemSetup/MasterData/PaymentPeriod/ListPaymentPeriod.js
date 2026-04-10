@@ -9,11 +9,9 @@ import { Link } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { EyeOutlined } from "@ant-design/icons";
 import {
     getListPaymentPeriod,
     inactivePaymentPeriod,
@@ -29,10 +27,11 @@ import {
     disabledActionByStatus,
 } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
-import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 
 const ListPaymentPeriod = () => {
     const dispatch = useDispatch();
@@ -61,10 +60,11 @@ const ListPaymentPeriod = () => {
 
     // Modal States
     const [modalActiveInactive, setModalActiveInactive] = useState(false);
-    const [modalOpenClose, setModalOpenClose] = useState(false);
     const [status, setStatus] = useState("");
     const [statusOpen, setStatusOpen] = useState("");
     const [dataInactivate, setDataInactivate] = useState(null);
+    const [modalOpenClose, setModalOpenClose] = useState(false);
+    const [openOrClose, setOpenOrClose] = useState("");
     const [openModalHistory, setOpenModalHistory] = useState(false);
     const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
@@ -160,6 +160,7 @@ const ListPaymentPeriod = () => {
     const handleSubmitModalInactivate = (res, handleClear) => {
         const data = {
             idPaymentPeriod: dataInactivate,
+            appHierId: res.approvalHierarchy,
             remark: res.remark,
             status: status === "INACTIVE" ? "ACTIVE" : "INACTIVE",
         };
@@ -181,6 +182,7 @@ const ListPaymentPeriod = () => {
         const data = {
             id: dataInactivate,
             statusOpen: statusOpen === "OPEN" ? "CLOSE" : "OPEN",
+            remark: res.remark,
         };
         dispatch(openClosePaymentPeriod(data))
             .unwrap()
@@ -303,7 +305,7 @@ const ListPaymentPeriod = () => {
                             to="/system-setup/payment-period/view"
                             state={{ id: record.idPaymentPeriod, statusApproval: record.statusApproval }}
                         >
-                            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+                            <SVGIcon name="IconDetail" width={20} />
                         </Link>
                     </Tooltip>
                 );
@@ -384,11 +386,11 @@ const ListPaymentPeriod = () => {
                                         setModalActiveInactive(true);
                                         setStatus(record?.status);
                                     }}
-                                    checked={record?.status !== "ACTIVE"}
+                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
                                     disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
                                 />
                                 <span className={"text-black ml-6 gap-2 text-center"}>
-                                    {record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
+                                    {record?.status?.toUpperCase() === "ACTIVE" ? "Inactivate" : "Activate"}
                                 </span>
                             </ButtonComponent>
                         </div>
@@ -396,7 +398,7 @@ const ListPaymentPeriod = () => {
                         <Tooltip title={statusLowerCase === "active" ? "Inactivate" : "Activate"}>
                             <div>
                                 <Checkbox
-                                    checked={record?.status !== "ACTIVE"}
+                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
                                     onClick={() => {
                                         setDataInactivate(record?.idPaymentPeriod);
                                         setModalActiveInactive(true);
@@ -440,30 +442,60 @@ const ListPaymentPeriod = () => {
         },
 
         {
-            action: "Open/Close",
+            // action open-close
+            action: "update",
             type: "table",
-            render: (record) => {
-                const canOpenClose = record.statusApproval === "APPROVED" && record.status === "ACTIVE";
+            render: (record, data_length) => {
+                const canOpenClose = record?.statusApproval?.toUpperCase() === "APPROVED" && record?.status?.toUpperCase() === "ACTIVE";
                 const statusOpenLowerCase = record?.statusOpen?.toLowerCase();
                 const label = statusOpenLowerCase === "open" ? "Close Period" : "Open Period";
+                const iconName = statusOpenLowerCase === "open" ? "IconPaymentClose" : "IconPaymentOpen";
+                const iconColor = !canOpenClose ? "#8D91A0" : (statusOpenLowerCase === "open" ? "#D90000" : "#0075bf");
+                
                 return (
-                    <ButtonComponent
-                        className="gap-5 w-full"
-                        icon={<SVGIcon name={statusOpenLowerCase === "open" ? "IconLock" : "IconUnlock"} color={canOpenClose ? "#0075bf" : "#8D91A0"} width={24} />}
-                        border={false}
-                        disabled={!canOpenClose}
-                        onClick={() => {
-                            if (canOpenClose) {
-                                setDataInactivate(record?.idPaymentPeriod);
-                                setModalOpenClose(true);
-                                setStatusOpen(record?.statusOpen?.toUpperCase());
-                            }
-                        }}
-                    >
-                        <span className={"text-black gap-2 text-xl text-center w-full"}>
-                            {label}
-                        </span>
-                    </ButtonComponent>
+                    data_length > 3 ? (
+                        <ButtonComponent
+                            className="gap-5"
+                            icon={<SVGIcon name={iconName} color={iconColor} width={24} />}
+                            border={false}
+                            disabled={!canOpenClose}
+                            onClick={() => {
+                                if (canOpenClose) {
+                                    setDataInactivate(record?.idPaymentPeriod);
+                                    setModalOpenClose(true);
+                                    setStatusOpen(record?.statusOpen?.toUpperCase());
+                                    setOpenOrClose(statusOpenLowerCase === "open" ? "close" : "open");
+                                }
+                            }}
+                            type="action"
+                        >
+                            <span className="text-black gap-2 text-center">
+                                {label}
+                            </span>
+                        </ButtonComponent>
+                    ) : (
+                        <Tooltip title={label}>
+                            <div
+                                onClick={(e) => {
+                                    if (!canOpenClose) {
+                                        e.preventDefault();
+                                        return;
+                                    }
+                                    setDataInactivate(record?.idPaymentPeriod);
+                                    setModalOpenClose(true);
+                                    setStatusOpen(record?.statusOpen?.toUpperCase());
+                                    setOpenOrClose(statusOpenLowerCase === "open" ? "close" : "open");
+                                }}
+                                className={!canOpenClose ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                            >
+                                <SVGIcon
+                                    name={iconName}
+                                    color={iconColor}
+                                    width={24}
+                                />
+                            </div>
+                        </Tooltip>
+                    )
                 );
             },
         },
@@ -679,7 +711,7 @@ const ListPaymentPeriod = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer
@@ -718,7 +750,7 @@ const ListPaymentPeriod = () => {
                         onAdvanceSearch={handleAdvanceSearch}
                     />
                 </CardContainer>
-                <ModalInactivateWithHierarchy
+                <ModalActiveInactive
                     selector={"paymentPeriod"}
                     dispatch={dispatch}
                     getAPIOption={getAllApprovalListPeriod}
@@ -737,18 +769,19 @@ const ListPaymentPeriod = () => {
                     dataApprover={dataApprovalHistoryFix?.dataApprover}
                     dataHistory={dataApprovalHistoryFix?.dataHistory}
                 />
-                <ModalInactivateWithHierarchy
-                    selector={"paymentPeriod"}
-                    dispatch={dispatch}
-                    getAPIOption={getAllApprovalListPeriod}
-                    getAPIDetail={getListApprovalByIdPeriod}
-                    alertMessage={`Are you sure you want to ${statusOpen === "OPEN" ? "CLOSE" : "OPEN"} this Payment Period?`}
-                    openModalInactivate={modalOpenClose}
-                    handleCloseModalInactivate={handleCancelModalOpenClose}
+                <ModalApproveOrReject
+                    handleCloseModal={handleCancelModalOpenClose}
                     onFinish={handleSubmitModalOpenClose}
+                    header={openOrClose}
+                    approveOrReject={openOrClose}
+                    menu={"Payment Period"}
+                    named={""}
+                    isOpen={modalOpenClose}
+                    customMessage={`Are you sure you want to ${statusOpen === "OPEN" ? "close" : "open"} this Payment Period?`}
+                    width={850}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -155,31 +154,32 @@ const AccountOnetime = () => {
 
   ]
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+    <>
+     <Spin spinning={loading}>
+      <BreadCrumb routes={routes} />
 
-        <Toolbar items={itemActions}/>
+      <Toolbar items={itemActions}/>
 
-        {/* <div className="w-full flex justify-end gap-[20px]">
+      {/*
+      <div className="w-full flex justify-end gap-[20px]">
+        <ButtonComponent
+          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          type="submit"
+          onClick={handleDownload}
+        >
+          Download List
+        </ButtonComponent>
+
+        <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_ONETIME}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonDownload" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
-            onClick={handleDownload}
           >
-            Download List
+            Create Account One Time
           </ButtonComponent>
-
-          <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNT_ONETIME}>
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-            >
-              Create Account One Time
-            </ButtonComponent>
-          </NavLink>
-        </div> */}
-
+        </NavLink>
+      </div> 
+      */}
         <BaseContainer header={"ACCOUNT - ONE TIME LIST"}>
           <div className="w-full">
             <TablePagination
@@ -212,7 +212,7 @@ const AccountOnetime = () => {
           </div>
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

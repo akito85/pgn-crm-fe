@@ -63,9 +63,20 @@ import IconReGenerate from "./IconReGenerate";
 import IconRatingRecalculate from "./IconRatingRecalculate";
 import IconMonitoring from './IconMonitoring';
 import IconPlusCircle from "./IconPlusCircle";
+import IconJobList from "./IconJobList";
+import IconJobGroup from "./IconJobGroup";
+import IconJobExecution from "./IconJobExecution";
+import IconExpire from "./IconExpire";
+import IconSquareX from "./IconSquareX";
+import IconSquareCheck from "./IconSquareCheck";
+import IconTripleDot from "./IconTripleDot";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
+  const { color = "#000000" } = props;
+  // Pass color to all icons
+  const iconProps = { ...props, color };
+
   switch (props.name) {
     case "IconAccountManagement":
       return <IconAccountManagement {...props} />;
@@ -83,6 +94,7 @@ const Icon = (props) => {
       return <IconArrowNarrowLeft {...props} />;
     case "IconBilling":
       return <IconBilling {...props} />;
+    case "IconCalendar":       // alias — menu management uses "IconCalendar", component is IconCalendarEvent
     case "IconCalendarEvent":
       return <IconCalendarEvent {...props} />;
     case "IconClear":
@@ -197,6 +209,20 @@ const Icon = (props) => {
       return <IconPlusCircle {...props} />;
     case "IconReporting":
       return <FileOutlined {...props} style={{ color: "#4B465C" }} />;
+    case "IconJobList":
+      return <IconJobList {...props} />;
+    case "IconJobGroup":
+      return <IconJobGroup {...props} />;
+    case "IconJobExecution":
+      return <IconJobExecution {...props} />;
+    case "IconExpire":
+      return <IconExpire {...props} />
+    case "IconSquareX":
+      return <IconSquareX {...props} />
+    case "IconSquareCheck":
+      return <IconSquareCheck {...props} />
+    case "IconTripleDot":
+      return <IconTripleDot {...props} />;
     default:
       return;
   }

@@ -269,18 +269,20 @@ const getServiceRequestColumns = (
     ),
     render: (status) => {
       const displayText = {
+        draft: "Draft",
+        DRAFT: "Draft",
         approved: "Approved",
         APPROVED: "Approved",
         waitingApproval: "Waiting Approval",
         WAITING_APPROVAL: "Waiting Approval",
-        pending: "Pending",
-        PENDING: "Pending",
         rejected: "Rejected",
         REJECTED: "Rejected",
+        pending: "Pending",
+        PENDING: "Pending",
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <StatusComponent colour={status} size="small">
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
@@ -308,6 +310,10 @@ const getServiceRequestColumns = (
       const displayText = {
         completed: "Completed",
         COMPLETED: "Completed",
+        approve: "Approve",
+        APPROVE: "Approve",
+        approved: "Approve",
+        APPROVED: "Approve",
         pending: "Pending",
         PENDING: "Pending",
         none: "None",
@@ -315,7 +321,7 @@ const getServiceRequestColumns = (
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <StatusComponent colour={status} size="small">
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
@@ -356,7 +362,7 @@ const getServiceRequestColumns = (
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <StatusComponent colour={status} size="small">
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>

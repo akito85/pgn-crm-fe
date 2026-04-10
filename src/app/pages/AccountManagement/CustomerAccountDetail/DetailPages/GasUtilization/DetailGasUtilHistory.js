@@ -134,7 +134,7 @@ const DetailGasUtilHistory = ({isOpen, setIsOpen, dataDetail}) => {
   return (
     <>
       <NxModal
-        header={"DETAIL GAS UTILIZATION HISTORY"}
+        title={"DETAIL GAS UTILIZATION HISTORY"}
         isOpen={isOpen}
         handleCancel={() => {
           setIsOpen(false)

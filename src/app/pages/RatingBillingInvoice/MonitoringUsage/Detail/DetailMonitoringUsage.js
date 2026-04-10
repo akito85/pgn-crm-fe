@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +15,7 @@ import {
   getListApprovalById,
   updateSingleUsage,
   deleteSingleUsage,
+  clearDetailData,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../components/CardContainer";
@@ -106,6 +106,10 @@ const DetailMonitoringUsage = () => {
       dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
       setPage(1);
     }
+    
+    return () => {
+      dispatch(clearDetailData());
+    };
   }, [location, dispatch]);
 
   useEffect(() => {
@@ -477,7 +481,7 @@ const DetailMonitoringUsage = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSave}>
@@ -690,7 +694,7 @@ const DetailMonitoringUsage = () => {
           />
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

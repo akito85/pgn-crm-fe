@@ -2,12 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Spin } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LeftOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import moment from "moment";
-import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import InvoiceTemplateSectionForm from "./Form/InvoiceTemplateSectionForm";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
@@ -16,7 +14,10 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ModalBack from "../../../../../components/Modal/ModalBack";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../components/FormStepNavigation";
 import {
   showModalError,
   validateCreateUpdate,
@@ -39,7 +40,8 @@ import {
   getTemplate,
   updateInvoiceTemplate,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/invoiceTemplate";
-import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import { ModalError, ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
+import ModalBack from "../../../../../components/Modal/ModalBack";
 
 const InvoiceTemplateForm = ({ type }) => {
   // Selector
@@ -74,7 +76,8 @@ const InvoiceTemplateForm = ({ type }) => {
   const [criteriaOptions, setCriteriaOptions] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [dataApphierId, setDataApphierId] = useState("");
-  const [flag, setFlag] = useState(false);
+  const flagRef = React.useRef(false);
+  const [current, setCurrent] = useState(0);
   const [valuePage, setValuePage] = useState("Invoice Template");
   const [tabPages, setTabPages] = useState([
     {
@@ -98,12 +101,69 @@ const InvoiceTemplateForm = ({ type }) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [bodyData, setBodyData] = useState({});
   const [bodyError, setBodyError] = useState({});
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
   const isLoading = loading || loadingForm;
+
+  const steps = [
+    { title: "INVOICE TEMPLATE", value: "Invoice Template" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  const next = () => {
+    const fieldsToValidate = tabPages[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {});
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
+
+  const handleSubmit = () => {
+    flagRef.current = true;
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleSaveDraft = () => {
+    flagRef.current = false;
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleBack = () => {
+    setModalBack(true);
+  };
 
   // Use Effect
   useEffect(() => {
@@ -148,8 +208,9 @@ const InvoiceTemplateForm = ({ type }) => {
 
       // Data Attachment Draft Information
       const dataDraftAttachment = (data_detail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -217,6 +278,11 @@ const InvoiceTemplateForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.startDate));
+      setEndDate(
+        data_detail_draft?.endDate
+          ? moment(data_detail_draft?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail_draft?.apphierId);
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
@@ -236,8 +302,9 @@ const InvoiceTemplateForm = ({ type }) => {
 
       // Data Attachment Information
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -303,6 +370,11 @@ const InvoiceTemplateForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.startDate));
+      setEndDate(
+        data_detail?.endDate
+          ? moment(data_detail?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail?.apphierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
@@ -514,7 +586,7 @@ const InvoiceTemplateForm = ({ type }) => {
       id,
       type,
       dateFormatting,
-      flag,
+      flag: flagRef.current,
       data_detail,
       data_detail_draft,
       columnsTableCriteriaInvoiceTemplate,
@@ -628,7 +700,7 @@ const InvoiceTemplateForm = ({ type }) => {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
+        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
       ) {
         dataOverlap?.push(item);
       }
@@ -651,6 +723,11 @@ const InvoiceTemplateForm = ({ type }) => {
 
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabPages, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
       handleMandatory(setTabPages, listDataAttachment);
       if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
@@ -682,7 +759,7 @@ const InvoiceTemplateForm = ({ type }) => {
       } else if (hasOverlapping) {
         const errorBody = {
           title: "Failed",
-          description: `You can't add Criteria. Start date and enda date can't be overlap`,
+          description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
       } else {
@@ -727,6 +804,7 @@ const InvoiceTemplateForm = ({ type }) => {
       setListDataCriteria([]);
       setCriteriaValues([]);
       setStoredDataInline(false);
+      setCurrent(0);
       setTabPages([
         {
           value: "Invoice Template",
@@ -758,7 +836,7 @@ const InvoiceTemplateForm = ({ type }) => {
       id,
       type,
       dateFormatting,
-      flag,
+      flag: flagRef.current,
       data_detail,
       data_detail_draft,
       columnsTableCriteriaInvoiceTemplate,
@@ -870,6 +948,21 @@ const InvoiceTemplateForm = ({ type }) => {
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setTabPages, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabPages.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleCloseModalError = () => {
@@ -911,13 +1004,14 @@ const InvoiceTemplateForm = ({ type }) => {
   }, [form, listDataCriteria]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={tabPages}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
 
         <Form
@@ -927,7 +1021,10 @@ const InvoiceTemplateForm = ({ type }) => {
           onFinishFailed={handleError}
         >
           <div
-            className={`${valuePage !== "Invoice Template" ? "hidden" : ""}`}
+            style={{
+              display:
+                valuePage !== tabPages[0].value ? "none" : undefined,
+            }}
           >
             <InvoiceTemplateSectionForm
               type={type}
@@ -948,8 +1045,13 @@ const InvoiceTemplateForm = ({ type }) => {
             />
           </div>
 
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"Approval Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== tabPages[1].value ? "none" : undefined,
+            }}
+          >
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -957,11 +1059,16 @@ const InvoiceTemplateForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
-            <BaseContainer header={"Attachment Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== tabPages[2].value ? "none" : undefined,
+            }}
+          >
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -975,71 +1082,20 @@ const InvoiceTemplateForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              disabled={storedDataInline}
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline}
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(false)}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedDataInline}
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(true)}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+          />
         </Form>
 
         {/* Modal Confirmation */}
@@ -1083,13 +1139,32 @@ const InvoiceTemplateForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

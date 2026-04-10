@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TableRBI from "../../../../../components/TableRBI";
@@ -8,23 +9,34 @@ import { getCustomerListColumns } from "./CustomerColumns";
 
 const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
     const dispatch = useDispatch();
-    const { customerData, loading } = useSelector((state) => state.deduction);
+    const { customerData, loadingSearchCustomer: loading } = useSelector((state) => state.deduction);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [dataSource, setDataSource] = useState([]);
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [searchedColumn, setSearchedColumn] = useState("");
+    const [searchText, setSearchText] = useState("");
+    const [search, setSearch] = useState({});
 
     useEffect(() => {
         if (isOpen) {
-            dispatch(searchCustomerDeduction({ page, pageSize }));
+            dispatch(searchCustomerDeduction({ 
+                page, 
+                pageSize,
+                search: encodeURIComponent(JSON.stringify(search))
+            }));
         }
-    }, [dispatch, isOpen, page, pageSize]);
+    }, [dispatch, isOpen, page, pageSize, search]);
 
     useEffect(() => {
         if (customerData && customerData.result) {
-            setDataSource(customerData.result);
+            const withKeys = customerData.result.map((item, index) => ({
+                ...item,
+                key: item.id || item.receiptId || index,
+            }));
+            setDataSource(withKeys);
         } else {
             setDataSource([]);
         }
@@ -54,6 +66,7 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
     };
 
     const handleCancel = () => {
+        handleGlobalSearch.cancel();
         onClose();
         setSelectedRowKeys([]);
         setSelectedRows([]);
@@ -66,6 +79,40 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
             setPageSize(newPageSize);
             setPage(1);
         }
+    };
+
+    const handleGlobalSearch = useCallback(
+        debounce((value) => {
+            setSearchText(value);
+            setSearchedColumn(value ? "all" : "");
+            setSearch((prevState) => {
+                const nextState = { ...prevState };
+                if (value) {
+                    nextState.all = value;
+                } else {
+                    delete nextState.all;
+                }
+                return nextState;
+            });
+            setPage(1);
+        }, 500),
+        []
+    );
+
+    useEffect(() => {
+        return () => {
+            handleGlobalSearch.cancel();
+        };
+    }, [handleGlobalSearch]);
+
+    const handleAdvanceSearch = (searchData) => {
+        setSearch((prevState) => {
+            setPage(1);
+            return {
+                ...prevState,
+                advanceSearch: searchData
+            };
+        });
     };
 
     return (
@@ -93,12 +140,17 @@ const ModalSearchCustomer = ({ isOpen, onClose, onConfirm }) => {
                     rowSelection={rowSelection}
                     loading={loading}
                     usePagination={true}
+                    showSearchBar={true}
+                    showAdvanceSearch={true}
+                    onSearch={(e) => handleGlobalSearch(e.target.value)}
+                    onAdvanceSearch={handleAdvanceSearch}
                     current={page}
                     pageSize={pageSize}
                     totalData={customerData?.page?.totalElements || 0}
                     onChange={onPageChange}
                     tableScrolled={{ x: 1800, y: 400 }}
-                    rowKey="id"
+                    rowKey="key"
+                    size="small"
                 />
             </div>
         </ModalCustom>

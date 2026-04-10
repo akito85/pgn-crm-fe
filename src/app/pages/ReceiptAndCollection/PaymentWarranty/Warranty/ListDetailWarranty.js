@@ -18,7 +18,6 @@ import DetailWarranty from "./DetailWarranty";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import FooterDetail from "../../../../../components/FooterDetail";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -81,7 +80,6 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
           
           // Fetch secondary details in parallel once primary is fetched
           await Promise.all([
-            dispatch(getDetailWarrantyMutation({ id, page: 1, pageSize: 999 })),
             isHold ? dispatch(getHoldDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
             isRelease ? dispatch(getReleaseDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
             isRefund ? dispatch(getRefundDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
@@ -456,9 +454,9 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   }
 
   return (
-    <LayoutMenu>
+    <>
       {content}
-    </LayoutMenu>
+    </>
   );
 };
 

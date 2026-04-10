@@ -189,7 +189,7 @@ const EquipmentForm = ({
     <>
       {/* Modal Form */}
       <NxModal
-        header={`${type === "create" ? "CREATE" : "UPDATE"} EQUIPMENT`}
+        title={`${type === "create" ? "CREATE" : "UPDATE"} EQUIPMENT`}
         isOpen={isOpen}
         type={"confirmation"}
         handleCancel={() => {
@@ -509,7 +509,7 @@ const EquipmentForm = ({
 
       {/* Modal Confirmation */}
       <NxModal
-        header={`CONFIRMATION`}
+        title={`CONFIRMATION`}
         isOpen={openConfirmation}
         type={"confirmation"}
         handleCancel={() => {

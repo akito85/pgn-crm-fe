@@ -10,7 +10,6 @@ import {
   FormStepper,
   FormFooter,
 } from "../../../../../../components/FormStepNavigation";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import DailyRateCreate from "./DailyRateCreate";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -42,6 +41,7 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../../../components/Modal/ModalPopUp";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DailyRateForm = ({ type }) => {
   const {
@@ -198,8 +198,9 @@ const DailyRateForm = ({ type }) => {
   const asserDataDetail = useCallback(
     (data_detail) => {
       const appHier = data_detail?.appHierId || [];
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
+      const dataAttachment = (data_detail?.mattachments || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
@@ -240,8 +241,9 @@ const DailyRateForm = ({ type }) => {
     (data_detail_draft, data_detail) => {
       const appHier = data_detail_draft?.appHierId || [];
       setSelectedHierarchy(appHier);
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
+      const dataAttachment = (data_detail?.mattachments || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
@@ -421,6 +423,7 @@ const DailyRateForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
@@ -455,11 +458,12 @@ const DailyRateForm = ({ type }) => {
   };
 
   const handleSubmitForm = async (formValue) => {
+    const allFormValues = { ...formValue, ...form.getFieldsValue(true) };
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabData, listDataAttachment);
     } else {
       handleMandatory(setTabData, listDataAttachment);
-      if (formValue?.tCurrency === formValue?.fCurrency) {
+      if (allFormValues?.tCurrency === allFormValues?.fCurrency) {
         const errorBody = {
           title: "Failed",
           description: "From currency cannot be the same as to currency!",
@@ -467,15 +471,15 @@ const DailyRateForm = ({ type }) => {
         dispatch(showModalError(errorBody));
       } else {
         const dataValue = {
-          rateType: formValue?.rateType,
-          fromCurrency: formValue?.fCurrency,
-          toCurrency: formValue?.tCurrency,
-          rateDate: moment(formValue?.rateDate).format(
+          rateType: allFormValues?.rateType,
+          fromCurrency: allFormValues?.fCurrency,
+          toCurrency: allFormValues?.tCurrency,
+          rateDate: moment(allFormValues?.rateDate).format(
             dateFormatting.dateCapital,
           ),
-          convertedRate: formValue?.convertedRate,
-          description: formValue?.description,
-          appHierId: formValue?.apphierId,
+          convertedRate: allFormValues?.convertedRate,
+          description: allFormValues?.description,
+          appHierId: allFormValues?.apphierId,
           submit: typeSubmit,
         };
         const isDataValid = await checkDataValidity(dataValue);
@@ -626,7 +630,7 @@ const DailyRateForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -657,19 +661,19 @@ const DailyRateForm = ({ type }) => {
 
           {/* Step 2: Approval - Conditional Rendering */}
           {valuePage === tabData[1].value && (
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+            <CardContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* Step 3: Attachment - Conditional Rendering */}
           {valuePage === tabData[2].value && (
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+            <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -683,7 +687,7 @@ const DailyRateForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* FormFooter menggantikan tombol manual */}
@@ -771,7 +775,7 @@ const DailyRateForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -3,65 +3,83 @@ import accountManagementService from "../../../services/account_management/accou
 import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
 
 const initialState = {
+  // --- Shared ---
   loading: false,
+
+  // --- List ---
   loading_listMd: false,
   list_multiDestination: [],
   pagination_multiDestination: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
+
+  // --- Approval List ---
   loading_listMdApproval: false,
   list_multiDestinationApproval: [],
   pagination_multiDestinationApproval: {
-    totalPages: 0,
-    totalElements: 0,
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
-  loading_listMdApprovalOption: false,
-  list_mdApprovalOptions: [],
-  loading_listMdApprovalHierarchyDetail: false,
-  list_mdApprovalHierarchyDetail: [],
-  data_mdAttachmentCategory: [],
-  loading_listMdAccountStandard: false,
-  list_mdAccountStandard: [],
-  pagination_mdAccountStandard: {
-    totalPages: 0,
-    totalElements: 0,
-    currentPage: 0,
-    pageSize: 10,
-  },
+
+  // --- Detail ---
   loading_detailMd: false,
   detail_multiDestination: {},
   loading_detailDraftMd: false,
   detailDraft_multiDestination: {},
-  loading_detailMdDetailAttachment: false,
-  list_mdDetailAttachment: [],
-  pagination_mdDetailAttachment: {
-    totalPages: 0,
-    totalElements: 0,
+
+  // --- Create / Update ---
+  loading_createUpdateMd: false,
+
+  // --- Approve / Reject ---
+  loading_approveRejectMd: false,
+  loading_approveMd: false,
+  loading_rejectMd: false,
+
+  // --- Inactivate ---
+  loading_inactivateMd: false,
+
+  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
+  loading_listMdApprovalOption: false,
+  list_mdApprovalOptions: [],
+  loading_listMdApprovalHierarchyDetail: false,
+  list_mdApprovalHierarchyDetail: [],
+  list_mdAttachmentCategory: [],
+  loading_listMdAccountStandard: false,
+  list_mdAccountStandard: [],
+  pagination_mdAccountStandard: {
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
+
+  // --- History ---
   data_mdApprovalHistory: {},
-  loading_approveRejectMd: false,
-  loading_createUpdateMd: false,
+
+  // --- Dynamic Search ---
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
   data_globalTypeColumn: [],
 };
 
+/**
+ * Fetches the paginated multi destination list for a given account.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getMultiDestination = createAsyncThunk(
   "GET_MULTI_DESTINATION",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      body = {
-        ...body,
-        listType: "all"
-      }
-
       const url = `/v1/dbs/api/multi-destination/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
@@ -76,6 +94,16 @@ export const getMultiDestination = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated approval list for a given account's multi destinations.
+ * Always injects `listType: "approval"` into the request body.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getMultiDestinationApproval = createAsyncThunk(
   "GET_MULTI_DESTINATION_APPROVAL",
   async ({ id, body, isLoadMore }, thunkAPI) => {
@@ -99,22 +127,18 @@ export const getMultiDestinationApproval = createAsyncThunk(
   }
 );
 
-export const getMultiDestinationAttachment = createAsyncThunk(
-  "GET_MULTI_DESTINATION_ATTACHMENT",
-  async ({ id }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/multi-destination/list-attachment/${id}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
-
+/**
+ * Creates a new multi destination record, then uploads any attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object}   arg.body                - Request body for the create API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after creation.
+ * @param {string}   arg.action              - `"DRAFT"` or `"SUBMIT"` — used in the upload payload.
+ */
 export const createMultiDestination = createAsyncThunk(
   "CREATE_MULTI_DESTINATION",
-  async ({ body: createBody, attachments = [] }, thunkAPI) => {
+  async ({ body: createBody, attachments = [], action }, thunkAPI) => {
     try {
       const createUrl = "/v1/dbs/api/multi-destination/create";
       const response = await accountManagementService.createData(createUrl, createBody);
@@ -127,6 +151,7 @@ export const createMultiDestination = createAsyncThunk(
         files:  attachment.file,
         category: attachment.fileCategoryId,
         refId: id,
+        action,
       }));
 
       await Promise.all(uploadPromises);
@@ -139,33 +164,39 @@ export const createMultiDestination = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
+/**
+ * Updates an existing multi destination record, then uploads any attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {number}   arg.id                  - ID of the multi destination to update.
+ * @param {object}   arg.body                - Request body for the update API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after update.
+ * @param {string}   arg.action              - `"DRAFT"` or `"SUBMIT"` — used in the upload payload.
+ */
 export const updateMultiDestination = createAsyncThunk(
   "UPDATE_MULTI_DESTINATION",
-  async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
+  async ({ id, body: updateBody, attachments = [], action }, thunkAPI) => {
     try {
       const updateUrl = `/v1/dbs/api/multi-destination/${id}`;
       const response = await accountManagementService.updateData(updateUrl, updateBody);
@@ -175,9 +206,11 @@ export const updateMultiDestination = createAsyncThunk(
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
+          id: attachment.id,
           files:  attachment.file,
           category: attachment.fileCategoryId,
           refId: id,
+          action,
         }
       ));
 
@@ -191,46 +224,36 @@ export const updateMultiDestination = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
+/**
+ * Fetches the current (non-draft) detail of a multi destination record.
+ *
+ * @param {number} id - Multi destination ID.
+ */
 export const getDetailMultiDestination = createAsyncThunk(
   "GET_DETAIL_MULTI_DESTINATION",
-  async ({ id, subjectId, objectId }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
-
-      if (subjectId)
-        queryParams.append("subjectId", subjectId);
-      if (objectId)
-        queryParams.append("objectId", objectId);
-
-      let url = `/v1/dbs/api/multi-destination/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
-
+      const url = `/v1/dbs/api/multi-destination/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -239,22 +262,16 @@ export const getDetailMultiDestination = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the draft detail of a multi destination record.
+ *
+ * @param {number} id - Multi destination ID.
+ */
 export const getDetailDraftMultiDestination = createAsyncThunk(
   "GET_DETAIL_DRAFT_MULTI_DESTINATION",
-  async ({ id, subjectId, objectId }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
-
-      if (subjectId)
-        queryParams.append("subjectId", subjectId);
-      if (objectId)
-        queryParams.append("objectId", objectId);
-
-      let url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
-
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
-
+      const url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -263,9 +280,12 @@ export const getDetailDraftMultiDestination = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the list of approval hierarchy options for multi destinations.
+ */
 export const getMdApprovalHierarchy = createAsyncThunk(
   "GET_MD_APPROVAL_HIERARCHY",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
@@ -276,6 +296,11 @@ export const getMdApprovalHierarchy = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches the employee list for a specific approval hierarchy.
+ *
+ * @param {number} id - Approval hierarchy ID.
+ */
 export const getDetailMdApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_MD_APPROVAL_HIERARCHY",
   async (id, thunkAPI) => {
@@ -289,9 +314,12 @@ export const getDetailMdApprovalHierarchy = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches the list of attachment categories for multi destinations.
+ */
 export const getMdAttachmentCategory = createAsyncThunk(
   "GET_MD_ATTACHMENT_CATEGORY",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/attachment-category`;
       const response = await accountManagementService.getAll(url);
@@ -302,12 +330,21 @@ export const getMdAttachmentCategory = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches a paginated list of account standards eligible for multi destination.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID used to scope the list.
+ * @param {object}  arg.body        - Pagination / search body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getMdAccountStandard = createAsyncThunk(
   "GET_MD_ACCOUNT_STANDARD",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/list-account/${id}`;
-      
+
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
@@ -319,6 +356,14 @@ export const getMdAccountStandard = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an active multi destination record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_MULTI_DESTINATION",
   async ({ body, action }, thunkAPI) => {
@@ -340,7 +385,7 @@ export const approveOrRejectMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -358,6 +403,14 @@ export const approveOrRejectMultiDestination = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an inactive multi destination record (inactivation request).
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_MULTI_DESTINATION",
   async ({ body, action }, thunkAPI) => {
@@ -379,7 +432,7 @@ export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -403,7 +456,7 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/multi-destination/approve";
       const inactiveUrl = "/v1/dbs/api/multi-destination/approve-inactive";
-      
+
       await Promise.all([
         body.length ? accountManagementService.activationWithRemark(url, body, {
           headers: {
@@ -432,7 +485,7 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured"
 
       const errorBody = {
@@ -447,6 +500,13 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
   }
 );
 
+/**
+ * Submits an inactivation request for a multi destination record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body - Request body (ID, remark, hierarchy).
+ */
 export const inactivateMultiDestination = createAsyncThunk(
   "INACTIVATE_MULTI_DESTINATION",
   async ({ body }, thunkAPI) => {
@@ -468,7 +528,7 @@ export const inactivateMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not submitted. ${message}.`,
@@ -516,9 +576,12 @@ export const getMdApprovalHistory = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the list of searchable columns for the multi destination dynamic search.
+ */
 export const getMdColumnApi = createAsyncThunk(
   "GET_MD_COLUMN_API",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/multi-destination/list-search-column";
       const response = await accountManagementService.getAll(url);
@@ -529,9 +592,12 @@ export const getMdColumnApi = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches the list of search condition types for the multi destination dynamic search.
+ */
 export const getMdConditionApi = createAsyncThunk(
   "GET_MD_CONDITION_API",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/multi-destination/list-search-condition";
       const response = await accountManagementService.getAll(url);
@@ -542,9 +608,12 @@ export const getMdConditionApi = createAsyncThunk(
   }
 )
 
+/**
+ * Fetches the list of search operator types for the multi destination dynamic search.
+ */
 export const getMdOperatorApi = createAsyncThunk(
   "GET_MD_OPERATOR_API",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/multi-destination/list-search-operator";
       const response = await accountManagementService.getAll(url);
@@ -584,8 +653,8 @@ const multiDestinationSlice = createSlice({
       }
 
       state.pagination_multiDestination = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -596,8 +665,8 @@ const multiDestinationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestination = [];
         state.pagination_multiDestination = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -629,8 +698,8 @@ const multiDestinationSlice = createSlice({
       }
 
       state.pagination_multiDestinationApproval = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -641,8 +710,8 @@ const multiDestinationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestinationApproval = [];
         state.pagination_multiDestinationApproval = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -651,11 +720,10 @@ const multiDestinationSlice = createSlice({
 
     /** Get Detail Multi Destination */
     [getDetailMultiDestination.pending]: (state) => {
-      state.detail_multiDestination = {};
       state.loading_detailMd = true;
     },
     [getDetailMultiDestination.fulfilled]: (state, action) => {
-      state.detail_multiDestination = action.payload || {};
+      state.detail_multiDestination = action.payload?.result || {};
       state.loading_detailMd = false;
     },
     [getDetailMultiDestination.rejected]: (state) => {
@@ -665,11 +733,10 @@ const multiDestinationSlice = createSlice({
 
     /** Get Detail Draft Multi Destination */
     [getDetailDraftMultiDestination.pending]: (state) => {
-      state.detailDraft_multiDestination = {};
       state.loading_detailDraftMd = true;
     },
     [getDetailDraftMultiDestination.fulfilled]: (state, action) => {
-      state.detailDraft_multiDestination = action.payload || {};
+      state.detailDraft_multiDestination = action.payload?.result || {};
       state.loading_detailDraftMd = false;
     },
     [getDetailDraftMultiDestination.rejected]: (state) => {
@@ -701,7 +768,6 @@ const multiDestinationSlice = createSlice({
 
     /** Get Multi Destination Approval Hierarchy */
     [getMdApprovalHierarchy.pending]: (state) => {
-      state.list_mdApprovalOptions = [];
       state.loading_listMdApprovalOption = true;
     },
     [getMdApprovalHierarchy.fulfilled]: (state, action) => {
@@ -715,7 +781,6 @@ const multiDestinationSlice = createSlice({
 
     /** Get Multi Destination Detail Approval Hierarchy */
     [getDetailMdApprovalHierarchy.pending]: (state) => {
-      state.list_mdApprovalHierarchyDetail = [];
       state.loading_listMdApprovalHierarchyDetail = true;
     },
     [getDetailMdApprovalHierarchy.fulfilled]: (state, action) => {
@@ -732,11 +797,11 @@ const multiDestinationSlice = createSlice({
       state.loading = true;
     },
     [getMdAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_mdAttachmentCategory = action.payload;
+      state.list_mdAttachmentCategory = action.payload;
       state.loading = false;
     },
     [getMdAttachmentCategory.rejected]: (state) => {
-      state.data_mdAttachmentCategory = [];
+      state.list_mdAttachmentCategory = [];
       state.loading = false;
     },
 
@@ -751,9 +816,14 @@ const multiDestinationSlice = createSlice({
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
+        const resultWithIds = result.map((record) => ({
+          ...record,
+          id: record.id || record.accountId
+        }));
+
         if (isLoadMore) {
           const currentIds = new Set(state.list_mdAccountStandard.map((item) => item.accountId));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
+          const filteredResult = resultWithIds.filter((resultItem) => !currentIds.has(resultItem.accountId));
 
           state.list_mdAccountStandard = [
             ...state.list_mdAccountStandard,
@@ -761,12 +831,12 @@ const multiDestinationSlice = createSlice({
           ];
         }
         else
-          state.list_mdAccountStandard = result;
+          state.list_mdAccountStandard = resultWithIds;
       }
 
       state.pagination_mdAccountStandard = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
@@ -777,53 +847,8 @@ const multiDestinationSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_mdAccountStandard = [];
         state.pagination_mdAccountStandard = {
-          totalPages: 0,
-          totalElements: 0,
-          currentPage: 0,
-          pageSize: 10,
-        }
-      }
-    },
-
-    /** Get Multi Destination Attachment */
-    [getMultiDestinationAttachment.pending]: (state, action) => {
-      if (!action.meta.arg?.isLoadMore) {
-        state.loading_detailMdDetailAttachment = true;
-      }
-    },
-    [getMultiDestinationAttachment.fulfilled]: (state, action) => {
-      state.loading_detailMdDetailAttachment = false;
-      const { result, page, isLoadMore } = action.payload;
-
-      if (Array.isArray(result)) {
-        if (isLoadMore) {
-          const currentIds = new Set(state.list_mdDetailAttachment.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
-
-          state.list_mdDetailAttachment = [
-            ...state.list_mdDetailAttachment,
-            ...filteredResult,
-          ];
-        }
-        else
-          state.list_mdDetailAttachment = result;
-      }
-
-      state.pagination_mdDetailAttachment = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
-        currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
-    },
-    [getMultiDestinationAttachment.rejected]: (state, action) => {
-      state.loading_detailMdDetailAttachment = false;
-
-      if (!action.meta.arg?.isLoadMore) {
-        state.list_mdDetailAttachment = [];
-        state.pagination_mdDetailAttachment = {
-          totalPages: 0,
-          totalElements: 0,
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -852,26 +877,35 @@ const multiDestinationSlice = createSlice({
       state.loading_approveRejectMd = false;
     },
 
-    /** Approve or Reject All Inactive Multi Destination */
-    [approveOrRejectAllMultiDestination.pending]: (state) => {
-      state.loading_approveRejectMd = true;
+    /** Approve or Reject All Multi Destination */
+    [approveOrRejectAllMultiDestination.pending]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveMd = true;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectMd = true;
     },
-    [approveOrRejectAllMultiDestination.fulfilled]: (state) => {
-      state.loading_approveRejectMd = false;
+    [approveOrRejectAllMultiDestination.fulfilled]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveMd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectMd = false;
     },
-    [approveOrRejectAllMultiDestination.rejected]: (state) => {
-      state.loading_approveRejectMd = false;
+    [approveOrRejectAllMultiDestination.rejected]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveMd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectMd = false;
     },
 
-    /** Inactivate Multi Destination Attachment */
+    /** Inactivate Multi Destination */
     [inactivateMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_inactivateMd = true;
     },
     [inactivateMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_inactivateMd = false;
     },
     [inactivateMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_inactivateMd = false;
     },
 
     /** Get Multi Destination Approval History */

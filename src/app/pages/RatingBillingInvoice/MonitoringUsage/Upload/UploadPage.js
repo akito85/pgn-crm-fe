@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -72,7 +71,7 @@ const UploadPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <div className={"w-full flex flex-col"}>
@@ -182,7 +181,7 @@ const UploadPage = () => {
           </div>
         </Form>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -14,7 +14,6 @@ import {
 } from "../../../../../redux/slices/system_setup/master_data/master_cost_center";
 import { Spin, Checkbox, Form, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { NavLink, Link } from "react-router-dom";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -560,63 +559,61 @@ const CostCenter = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">COST CENTER LIST</p>
-              <div className="mt-[15px] flex gap-[20px]">
-                <Toolbar items={itemActions} />
-              </div>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">COST CENTER LIST</p>
+            <div className="mt-[15px] flex gap-[20px]">
+              <Toolbar items={itemActions} />
             </div>
-          }
-        >
-          <div className="my-0">
-            <TableRBI
-              dataSource={dataSource}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: 1700, y: 525 }}
-              onSort={onSort}
-              columnDefinitions={columnDefinitions}
-              handleDownload={handleDownload}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-            />
           </div>
-        </CardContainer>
+        }
+      >
+        <div className="my-0">
+          <TableRBI
+            dataSource={dataSource}
+            columns={processedColumns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={data?.page?.totalElements || 0}
+            tableScrolled={{ x: 1700, y: 525 }}
+            onSort={onSort}
+            columnDefinitions={columnDefinitions}
+            handleDownload={handleDownload}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+          />
+        </div>
+      </CardContainer>
 
-        {/* Modal Detail */}
-        <DetailCostCenter
-          data={data_detail?.data}
-          openModal={modalDetail}
-          closeModal={handleCancelModal}
-        />
+      {/* Modal Detail */}
+      <DetailCostCenter
+        data={data_detail?.data}
+        openModal={modalDetail}
+        closeModal={handleCancelModal}
+      />
 
-        {/* Modal Active/Inactive */}
-        <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCancelModal}
-          onFinish={handleConfirm}
-          header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
-          approveOrReject={
-            activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
-          }
-          menu={"Cost Center"}
-          named={record?.name}
-          width={800}
-        />
+      {/* Modal Active/Inactive */}
+      <ModalApproveOrReject
+        isOpen={modalConfirm}
+        handleCloseModal={handleCancelModal}
+        onFinish={handleConfirm}
+        header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
+        approveOrReject={
+          activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
+        }
+        menu={"Cost Center"}
+        named={record?.name}
+        width={800}
+      />
 
-        {/* modal try again */}
-        {renderModal()}
-      </LayoutMenu>
+      {/* modal try again */}
+      {renderModal()}
     </Spin>
   );
 };

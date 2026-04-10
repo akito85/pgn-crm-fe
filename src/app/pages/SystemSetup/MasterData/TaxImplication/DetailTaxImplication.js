@@ -6,7 +6,6 @@ import { LeftOutlined } from '@ant-design/icons';
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_management/customer_account_routes';
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import DetailText from '../../../../../components/DetailText';
 import BaseContainer from '../../../../../components/BaseContainer';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -120,7 +119,7 @@ const DetailTaxImplication = () => {
   }, [id, data_detail]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -217,7 +216,7 @@ const DetailTaxImplication = () => {
         </div>
 
       </Spin>
-    </LayoutMenu>
+    </>
   )
 }
 

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import userHttpService from "../../services/userHttpService";
 import { setBodyError, showModalError } from "../general_slice";
+import { configApp } from "../../../constants/configApp";
 
 const DUMMY = {
   result: [
@@ -26,13 +27,12 @@ const DUMMY = {
   page: { totalElements: 1 },
 };
 
-// TODO: replace URL with real endpoint once API is ready
 export const getAllJobPaginate = createAsyncThunk(
   "jobManagement/getAllJobPaginate",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
-      const url = `/job-management/dbs/api/v1/job?search=${search}&page=${page}&size=${pageSize}&sort=${sort}`;
-      const response = await userHttpService.getAll(url);
+      const url = `/v1/api/job/definitions?search=${search}&page=${page}&size=${pageSize}&sort=${sort}`;
+      const response = await userHttpService.getAll(url, configApp.JOB_SERVICE);
       return response?.data ?? DUMMY;
     } catch (error) {
       if (
@@ -59,8 +59,8 @@ export const createJob = createAsyncThunk(
   "jobManagement/createJob",
   async (jobData, thunkAPI) => {
     try {
-      const url = `/job-management/dbs/api/v1/job`;
-      const response = await userHttpService.createData(url, jobData);
+      const url = `/v1/api/job/definitions`;
+      const response = await userHttpService.createData(url, jobData, configApp.JOB_SERVICE);
       return response?.data;
     } catch (error) {
       if (

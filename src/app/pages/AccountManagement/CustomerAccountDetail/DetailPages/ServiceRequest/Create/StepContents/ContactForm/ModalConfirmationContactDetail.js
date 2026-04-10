@@ -67,7 +67,6 @@ export default function ModalConfirmationContactDetail({
       isOpen={isOpen}
       handleCancel={handleClear}
       handleOk={handleConfirm}
-      header={"CONFIRMATION CONTACT INFORMATION"}
       width={1200}
       title={"CONFIRMATION CONTACT INFORMATION"}
       footer={

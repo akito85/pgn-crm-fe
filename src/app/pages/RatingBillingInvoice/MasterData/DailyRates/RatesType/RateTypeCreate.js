@@ -5,7 +5,6 @@ import BaseContainer from "../../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import { formMessageRequired } from "../../../../../../utils";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -158,7 +157,7 @@ const RateTypeCreate = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSubmitForm}>
@@ -280,7 +279,7 @@ const RateTypeCreate = ({ type }) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

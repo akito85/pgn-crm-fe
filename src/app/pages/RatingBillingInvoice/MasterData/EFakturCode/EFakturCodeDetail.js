@@ -6,7 +6,6 @@ import { Spin } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -31,7 +30,7 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 const EFakturCodeDetail = () => {
   // Selector
   const { loading, data_detail } = useSelector(
-    (state) => state.masterEfakturCode
+    (state) => state.masterEfakturCode,
   );
 
   // Declaration
@@ -83,15 +82,15 @@ const EFakturCodeDetail = () => {
       // Data Additional Code
       const mappedAdditionalCode = additionalCodes.map((item, index) => ({
         id: item.additionalId || index,
-        code: item.code || "-",
-        description: item.description || "-",
+        code: item.code || "",
+        description: item.description || "",
         startDate: item.startDate || null,
         endDate: item.endDate || null,
-        status: item.status || "Inactive",
+        status: item.status,
         createdDate: item.createdDate || null,
-        createdBy: item.createdBy || "-",
+        createdBy: item.createdBy || "",
         updatedDate: item.updatedDate || null,
-        updatedBy: item.updatedBy || "-",
+        updatedBy: item.updatedBy || "",
       }));
 
       // Data Attachment Information
@@ -127,6 +126,8 @@ const EFakturCodeDetail = () => {
       setDataDetail({
         code: fakturCode?.einvoiceCode || "-",
         description: fakturCode?.description || "-",
+        status: fakturCode?.status || null,
+        statusApproval: fakturCode?.statusApproval || null,
       });
 
       setAdditionalCodeList(mappedAdditionalCode);
@@ -215,7 +216,7 @@ const EFakturCodeDetail = () => {
     setModalConfirm(false);
     const data = {
       remark: res.remark,
-      action: approveOrReject.toUpperCase(),
+      action: approveOrReject.startsWith("Approve") ? "APPROVE" : approveOrReject.toUpperCase(),
       approvalId: bodyApproval.tAppId,
     };
     dispatch(
@@ -227,7 +228,7 @@ const EFakturCodeDetail = () => {
         : approveRejectEfakturCode({
             id: id,
             body: data,
-          })
+          }),
     )
       .unwrap()
       .then(() => {
@@ -249,7 +250,7 @@ const EFakturCodeDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <RadioTabs
@@ -266,7 +267,7 @@ const EFakturCodeDetail = () => {
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail?.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
+                          bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormatting.date)
                       : "-"}
                   </DetailText>
@@ -283,20 +284,8 @@ const EFakturCodeDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 
@@ -315,10 +304,16 @@ const EFakturCodeDetail = () => {
                 type="approve"
                 onClick={() => {
                   setModalConfirm(true);
-                  setApproveOrReject("Approve");
+                  setApproveOrReject(
+                    bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
+                      ? "Approve Inactive"
+                      : "Approve",
+                  );
                 }}
               >
-                Approve
+                {bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
+                  ? "Approve Inactive"
+                  : "Approve"}
               </ButtonComponent>
             </div>
           ) : null}
@@ -354,7 +349,7 @@ const EFakturCodeDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

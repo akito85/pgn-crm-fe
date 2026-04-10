@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip } from "antd";
 import { NavLink, Link } from "react-router-dom";
 import { EyeOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 
 // Global Custom Components
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
 import Toolbar from "../../../../../components/Toolbar";
@@ -71,13 +71,47 @@ const ViewTransferToCustomer = () => {
         confirm();
         setSearchText(selectedKeys[0]);
         setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+        const shouldResetPage = search[dataIndex] !== selectedKeys[0];
         setSearch((prevState) => {
-            if (prevState[dataIndex] !== selectedKeys[0]) {
-                setPage(1);
-            }
+            const nextState = { ...prevState };
+            nextState[dataIndex] = selectedKeys[0];
+            return nextState;
+        });
+        if (shouldResetPage) {
+            setPage(1);
+        }
+    };
+
+    const handleGlobalSearch = useCallback(
+        debounce((value) => {
+            setSearchText(value);
+            setSearchedColumn(value ? "all" : "");
+            setSearch((prevState) => {
+                const nextState = { ...prevState };
+                if (value) {
+                    nextState.all = value;
+                } else {
+                    delete nextState.all;
+                }
+                return nextState;
+            });
+            setPage(1);
+        }, 500),
+        []
+    );
+
+    useEffect(() => {
+        return () => {
+            handleGlobalSearch.cancel();
+        };
+    }, [handleGlobalSearch]);
+
+    const handleAdvanceSearch = (searchData) => {
+        setSearch((prevState) => {
+            setPage(1);
             return {
                 ...prevState,
-                [dataIndex]: selectedKeys[0],
+                advanceSearch: searchData
             };
         });
     };
@@ -174,7 +208,7 @@ const ViewTransferToCustomer = () => {
     );
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
@@ -195,6 +229,10 @@ const ViewTransferToCustomer = () => {
                         totalData={data?.page?.totalElements || 0}
                         onSort={onSort}
                         showExport={true}
+                        showSearchBar={true}
+                        showAdvanceSearch={true}
+                        onSearch={(e) => handleGlobalSearch(e.target.value)}
+                        onAdvanceSearch={handleAdvanceSearch}
                         handleDownload={handleDownload}
                         tableScrolled={{
                             x: 2500,
@@ -203,7 +241,7 @@ const ViewTransferToCustomer = () => {
                     />
                 </CardContainer>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

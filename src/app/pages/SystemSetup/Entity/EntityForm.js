@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
@@ -561,7 +560,7 @@ const EntityForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading} >
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
@@ -896,7 +895,7 @@ const EntityForm = (props) => {
       </ModalConfirm>
       {/** Modal Retry */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

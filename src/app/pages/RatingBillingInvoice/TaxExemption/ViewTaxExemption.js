@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Tooltip } from "antd";
+import axios from "axios";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsTaxExemption } from "./TableViewTaxExemption";
@@ -174,6 +176,25 @@ const ViewTaxExemption = () => {
     setSort(dataSort);
   };
 
+  // Preview proforma invoice handler
+  const handlePreview = async (record) => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/rbi/proforma-invoice/download/latest/${record?.proformaInvoiceNumber}`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        },
+      );
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Error previewing proforma invoice:", error);
+    }
+  };
+
   // Refresh handler
   const handleRefresh = () => {
     const searchParam = Object.keys(search).some((k) => search[k])
@@ -331,6 +352,7 @@ const ViewTaxExemption = () => {
       searchedColumn,
       searchText,
       handleSearch,
+      handlePreview,
     );
 
     const allCols = [...taxExemptionCols, ...actionCols];
@@ -387,7 +409,7 @@ const ViewTaxExemption = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <>
         <BreadCrumb routes={routes} />
 
@@ -454,7 +476,7 @@ const ViewTaxExemption = () => {
           dataHistory={dataApprovalHistory?.dataHistory}
         />
       </>
-    </LayoutMenu>
+    </>
   );
 };
 

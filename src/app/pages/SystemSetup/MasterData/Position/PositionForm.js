@@ -4,7 +4,6 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -151,7 +150,7 @@ const PositionForm = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <div className={"my-5"}>
         <Form
@@ -281,7 +280,7 @@ const PositionForm = (props) => {
 
       {/* render modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

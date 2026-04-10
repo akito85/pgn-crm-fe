@@ -91,9 +91,9 @@ export default function InfoMultiDestination({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_mdAccountStandard?.totalPages || 0;
+    const totalPage = pagination_mdAccountStandard?.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
         searchs: search,
         page: nextPage,
@@ -170,7 +170,7 @@ export default function InfoMultiDestination({
   );
 
   const hasMore =
-    currentData.length < (pagination_mdAccountStandard?.totalElements || 0);
+    currentData.length < (pagination_mdAccountStandard?.totalElement || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
@@ -388,10 +388,16 @@ export default function InfoMultiDestination({
           ]}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateForm)
+            value: value && moment(value, dateFormatting.dateFormal)
           })}
         >
-          <NxDate disabled={!isDraft && isUpdate} />
+          <NxDate
+            disabled={!isDraft && isUpdate}
+            onChange={date => {
+              if (date && endDate && date.isAfter(endDate, "day"))
+                form.resetFields(["endDate"])
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -400,10 +406,15 @@ export default function InfoMultiDestination({
           label={"End Date"}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateForm)
+            value: value && moment(value, dateFormatting.dateFormal)
           })}
         >
-          <NxDate disabled={!isDraft && isUpdate} />
+          <NxDate
+            dateDisable={(current) => {
+              if (!moment.isMoment(current)) return false;
+              return current.isBefore(startDate, "day");
+            }}
+          />
         </Form.Item>
       </div>
 
@@ -427,7 +438,7 @@ export default function InfoMultiDestination({
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        header={"CHOOSE ACCOUNT"}
+        title={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}
         footer={[
@@ -441,7 +452,7 @@ export default function InfoMultiDestination({
             <NxTable
               idTable="multi-destination-account-standard"
               dataSource={dataSourceWithKeys}
-              totalData={pagination_mdAccountStandard.totalElements || 0}
+              totalData={pagination_mdAccountStandard.totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
               onSort={onSort}

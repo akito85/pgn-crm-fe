@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 import { dateFormatting } from "../../../../../utils";
 import DetailText from "../../../../../components/DetailText";
 import TableRBI from "../../../../../components/TableRBI";
 import { columnMutation } from "./ColumnConfig/MutationColumns";
 import { configApp } from "../../../../../constants/configApp";
 import { getCurrencyDDL } from "../../../../../redux/slices/receipt_collection/receipt";
+import SearchBar from "../../../../../components/SearchBar";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
@@ -19,12 +21,11 @@ import { WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 import { 
     getDetailWarrantyMutation,
     deleteMutation,
-    getDetailMutation,
     getMutationApprovalHistory,
     getPaymentWarrantyPartnerBranchList,
-    submitApproval
+    submitApproval,
+    getServiceAgreementByAccountId
 } from "../../../../../redux/slices/receipt_collection/warranty";
-import { getListServiceAgreement } from "../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import ModalMutation from "./Modal/ModalMutation";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -34,9 +35,8 @@ const DetailWarranty = ({ data_detail }) => {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { dataMutation, loadingMutation, dataApprovalHistory, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
+  const { dataMutation, loadingMutation, dataApprovalHistory, dataPaymentWarrantyPartnerBranch, dataServiceAgreement } = useSelector((state) => state.warranty);
   const { currencyDDL } = useSelector((state) => state.receipt);
-  const { data: dataServiceAgreement } = useSelector((state) => state.accountServiceAgreement);
   const [selectedSA, setSelectedSA] = useState({});
   const [selectedBranchName, setSelectedBranchName] = useState(null);
   const [isModalMutationOpen, setIsModalMutationOpen] = useState(false);
@@ -49,10 +49,67 @@ const DetailWarranty = ({ data_detail }) => {
   const [isModalApprovalOpen, setIsModalApprovalOpen] = useState(false);
   const [approvalAction, setApprovalAction] = useState("");
   const [selectedMutationRecord, setSelectedMutationRecord] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [search, setSearch] = useState({});
+
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
+
+    setSearch((prevState) => {
+      const nextState = { ...prevState };
+      if (selectedKeys[0]) {
+        nextState[dataIndex] = selectedKeys[0];
+      } else {
+        delete nextState[dataIndex];
+      }
+      return nextState;
+    });
+
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  }, [search]);
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => ({
+        ...prevState,
+        advanceSearch: searchData,
+    }));
+    setPage(1);
+  };
 
   useEffect(() => {
     if (data_detail?.accountId) {
-      dispatch(getListServiceAgreement({ id: data_detail.accountId, page: 1, pageSize: 999 }));
+      dispatch(getServiceAgreementByAccountId({ id: data_detail.accountId }));
     }
     dispatch(getCurrencyDDL());
   }, [dispatch, data_detail?.accountId]);
@@ -91,13 +148,23 @@ const DetailWarranty = ({ data_detail }) => {
 
   useEffect(() => {
     if (data_detail?.id) {
-      dispatch(getDetailWarrantyMutation({ id: data_detail.id, page, pageSize }));
+      dispatch(getDetailWarrantyMutation({ 
+        id: data_detail.id, 
+        page, 
+        pageSize,
+        search: encodeURIComponent(JSON.stringify(search))
+      }));
     }
-  }, [dispatch, data_detail?.id, page, pageSize]);
+  }, [dispatch, data_detail?.id, page, pageSize, search]);
 
   const fetchMutation = () => {
     if (data_detail?.id) {
-      dispatch(getDetailWarrantyMutation({ id: data_detail.id, page, pageSize }));
+      dispatch(getDetailWarrantyMutation({ 
+        id: data_detail.id, 
+        page, 
+        pageSize,
+        search: encodeURIComponent(JSON.stringify(search))
+      }));
     }
   };
 
@@ -238,9 +305,7 @@ const DetailWarranty = ({ data_detail }) => {
             <DetailText label="Status">
                 {data_detail?.saStatus || selectedSA?.status ? <StatusComponent status={data_detail?.saStatus || selectedSA?.status} /> : "-"}
             </DetailText>
-            <div className="col-span-4">
-              <DetailText label="Description">{data_detail?.saDescription || selectedSA?.description || "-"}</DetailText>
-            </div>
+            <DetailText label="Description">{data_detail?.saDescription || selectedSA?.description || "-"}</DetailText>
         </div>
       </SectionCard>
 
@@ -280,14 +345,14 @@ const DetailWarranty = ({ data_detail }) => {
           <TableRBI
               dataSource={dataMutation?.content || []}
               columns={columnMutation(
-                page, pageSize, null, null, "", () => {}, {}, 
+                page, pageSize, null, searchedColumn, searchText, handleSearch, search, 
                 handleEdit, handleDelete, handleHistory, 
                 handleApproveMutation, handleRejectMutation,
                 false, false, data_detail?.isApprover,
                 dataMutation?.content || [],
                 data_detail?.id
               )}
-fixedColumns={{ left: ["no"], right: ["action"] }}
+              fixedColumns={{ left: ["no"], right: ["action"] }}
               current={page}
               pageSize={pageSize}
               totalData={dataMutation?.page?.totalElements || 0}
@@ -295,6 +360,8 @@ fixedColumns={{ left: ["no"], right: ["action"] }}
               showExport={false}
               showAdvanceSearch={true}
               showSearchBar={true}
+              onAdvanceSearch={handleAdvanceSearch}
+              onSearch={(e) => handleGlobalSearch(e.target.value)}
               tableScrolled={{ x: 1200, y: 525 }}
           />
         </Spin>

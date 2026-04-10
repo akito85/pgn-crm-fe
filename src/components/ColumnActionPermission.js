@@ -1,7 +1,7 @@
-import { MoreOutlined } from "@ant-design/icons";
-import { Popover, Space } from "antd";
+import { Popover, Skeleton } from "antd";
 import { useMemo } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
+import IconThreeDots from "../assets/Icon/Nx/IconThreeDots";
 
 // render content column
 export const RenderContentActions = (
@@ -14,14 +14,19 @@ export const RenderContentActions = (
   sliceColumn = "View",
   stopClickPropagation = false,
 ) => {
+
+
   if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center py-1 gap-4">
+      <div className="w-full flex justify-center items-center gap-2.5">
         <Popover
           trigger={"click"}
           placement="bottomRight"
+          showArrow={false}
+          overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
+          className="text-black hover:text-[#1976D2] transition-colors duration-300"
           content={
-            <Space direction="vertical">
+            <div className="flex flex-col">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.map((item, index) => {
@@ -31,16 +36,16 @@ export const RenderContentActions = (
                     return null;
                   }
                 })}
-            </Space>
+            </div>
           }
         >
           <div
-            className="group"
+            className="flex items-center"
             onClick={(e) => {
               if (stopClickPropagation) e.stopPropagation();
             }}
           >
-            <MoreOutlined className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out" />
+            <IconThreeDots />
           </div>
         </Popover>
         <div>
@@ -61,7 +66,7 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 py-1 items-center">
+      <div className="w-full flex justify-center gap-2.5 items-center">
         {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength, index);
@@ -83,6 +88,7 @@ export const useColumnActionPermission = (
   stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
+  const isLoading = access?.loading;
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
@@ -119,9 +125,7 @@ export const useColumnActionPermission = (
   }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
 
   const columns = useMemo(() => {
-    if (arrayActions?.length === 0) {
-      return [];
-    } else {
+    if (isLoading) {
       return [
         {
           key: "action",
@@ -129,21 +133,38 @@ export const useColumnActionPermission = (
           dataIndex: "action",
           fixed: "right",
           width: 150,
-          render: (text, record, index) =>
-            RenderContentActions(
-              text,
-              record,
-              index,
-              lowerCaseItemsRender,
-              arrayActions?.length,
-              arrayActions,
-              sliceColumn,
-              stopClickPropagation,
-            ),
+          render: () => (
+            <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+              <Skeleton.Button active size="small" shape="round" block />
+            </div>
+          ),
         },
       ];
     }
-  }, [arrayActions, lowerCaseItemsRender, sliceColumn]);
+    if (!arrayActions || arrayActions.length === 0) {
+      return [];
+    }
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        dataIndex: "action",
+        fixed: "right",
+        width: 150,
+        render: (text, record, index) =>
+          RenderContentActions(
+            text,
+            record,
+            index,
+            lowerCaseItemsRender,
+            arrayActions.length,
+            arrayActions,
+            sliceColumn,
+            stopClickPropagation,
+          ),
+      },
+    ];
+  }, [isLoading, arrayActions, lowerCaseItemsRender, sliceColumn, stopClickPropagation]);
 
   return columns;
 };

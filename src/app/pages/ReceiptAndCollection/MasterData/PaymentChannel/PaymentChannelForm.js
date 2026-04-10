@@ -65,7 +65,7 @@ const PaymentChannelForm = (props) => {
           </div>
         }
       >
-        <div className="w-full grid grid-cols-6 gap-5">
+        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Delivery Channel Code"}
             name={"ciCode"}

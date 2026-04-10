@@ -170,6 +170,14 @@ const TaxCodeSectionForm = ({
                 required: true,
                 message: "Please input your Tax Rate!",
               },
+              {
+                validator: (_, value) => {
+                  if (value !== undefined && value !== null && value > 100) {
+                    return Promise.reject("Tax Rate must not exceed 100%.");
+                  }
+                  return Promise.resolve();
+                },
+              },
             ]}
             getValueFromEvent={(e) => {
               return e.floatValue;
@@ -182,6 +190,14 @@ const TaxCodeSectionForm = ({
               numericFormatType={"text"}
               thousandSeparator={false}
               decimalSeparator={"."}
+              maxLength={3}
+              isAllowed={(values) => {
+                const { value } = values;
+                if (!value) return true;
+                // Allow max 3 digits (integer part only)
+                const integerPart = value.split(".")[0];
+                return integerPart.length <= 3;
+              }}
             />
           </Form.Item>
 

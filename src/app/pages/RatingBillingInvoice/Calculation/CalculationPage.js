@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip, Tabs } from "antd";
 import { Link, NavLink } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -57,10 +56,23 @@ const CalculationPage = () => {
     filters[currentTabKey]?.searchText || ""
   );
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["status", "action"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("calculationFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["status", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["status", "action"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("calculationFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   useEffect(() => {
     dispatch(
@@ -1537,7 +1549,7 @@ const CalculationPage = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -1609,7 +1621,7 @@ const CalculationPage = () => {
           </Tabs.TabPane>
         </Tabs>
       </CardContainer>
-    </LayoutMenu>
+    </>
   );
 };
 

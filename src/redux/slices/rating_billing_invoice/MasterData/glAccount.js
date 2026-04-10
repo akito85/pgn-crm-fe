@@ -9,6 +9,8 @@ import ratingBillingHttpService from "../../../services/ratingBillingHttpService
 
 const initialState = {
   data: [],
+  gl_account_list: [],
+  gl_account_pagination: null,
   data_detail: {},
   data_approval_hierarchy: [],
   data_approval_hierarchy_detail: [],
@@ -26,14 +28,14 @@ const initialState = {
 
 export const getAllGLAccountPaginate = createAsyncThunk(
   "GET_ALL_GL_ACCOUNT_PAGINATE",
-  async ({ page, pageSize, sort, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, isLoadMore = false }, thunkAPI) => {
     const searchParams = search === undefined ? "" : search;
     const sortParams =
       sort === undefined || sort === "" ? "createdDate~desc" : sort;
     try {
       const url = `/v1/dbs/api/gl-account?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -51,7 +53,7 @@ export const getAllGLAccountPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailGLAccount = createAsyncThunk(
@@ -78,7 +80,7 @@ export const getDetailGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchyList = createAsyncThunk(
@@ -105,12 +107,12 @@ export const getApprovalHierarchyList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchyDetail = createAsyncThunk(
   "GET_APPROVAL_HIERARCHY_DETAIL_GL_ACCOUNT",
-  async (id, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gl-account/apphier-detail/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
@@ -132,7 +134,7 @@ export const getApprovalHierarchyDetail = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -159,7 +161,7 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getSpecialGLList = createAsyncThunk(
@@ -186,7 +188,7 @@ export const getSpecialGLList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const uploadAttachment = createAsyncThunk(
@@ -224,7 +226,7 @@ export const uploadAttachment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getCategoryList = createAsyncThunk(
@@ -254,7 +256,7 @@ export const getCategoryList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createGLAccount = createAsyncThunk(
@@ -288,7 +290,7 @@ export const createGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateGLAccount = createAsyncThunk(
@@ -322,7 +324,7 @@ export const updateGLAccount = createAsyncThunk(
       }
       return thunkApi.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 export const inactiveGLAccount = createAsyncThunk(
@@ -359,7 +361,7 @@ export const inactiveGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveRejectGLAccount = createAsyncThunk(
@@ -400,7 +402,7 @@ export const approveRejectGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveRejectInactiveGLAccount = createAsyncThunk(
@@ -441,7 +443,7 @@ export const approveRejectInactiveGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const downloadGLAccountAttachment = createAsyncThunk(
@@ -454,7 +456,7 @@ export const downloadGLAccountAttachment = createAsyncThunk(
     } catch (err) {
       rejectWithValue(err);
     }
-  }
+  },
 );
 
 export const downloadGLAccount = createAsyncThunk(
@@ -473,11 +475,11 @@ export const downloadGLAccount = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_GL_ACCOUNT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getAllGLAccountApprovalList = createAsyncThunk(
@@ -504,7 +506,7 @@ export const getAllGLAccountApprovalList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const bulkApproveGLAccount = createAsyncThunk(
@@ -541,7 +543,7 @@ export const bulkApproveGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const glAccountSlice = createSlice({
@@ -559,12 +561,22 @@ const glAccountSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // get all
-      .addCase(getAllGLAccountPaginate.pending, (state) => {
-        state.loading = true;
+      .addCase(getAllGLAccountPaginate.pending, (state, action) => {
+        if (!action.meta.arg?.isLoadMore) {
+          state.loading = true;
+        }
       })
       .addCase(getAllGLAccountPaginate.fulfilled, (state, action) => {
         state.data = action.payload;
         state.loading = false;
+        const newResult = action.payload?.result || [];
+        const isLoadMore = action.payload?.isLoadMore;
+        if (isLoadMore) {
+          state.gl_account_list = [...state.gl_account_list, ...newResult];
+        } else {
+          state.gl_account_list = newResult;
+        }
+        state.gl_account_pagination = action.payload?.page || null;
       })
       .addCase(getAllGLAccountPaginate.rejected, (state) => {
         state.loading = false;

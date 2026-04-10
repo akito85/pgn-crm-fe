@@ -1,9 +1,14 @@
 import { Checkbox, Spin, Tooltip } from "antd";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
@@ -32,7 +37,7 @@ export const columnTOP = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -55,7 +60,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -65,7 +70,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -81,7 +86,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -91,7 +96,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -107,7 +112,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -117,7 +122,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -133,7 +138,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -143,7 +148,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -159,7 +164,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -169,7 +174,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -185,7 +190,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -195,7 +200,7 @@ export const columnTOP = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -214,7 +219,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -224,7 +229,7 @@ export const columnTOP = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -242,7 +247,7 @@ export const columnTOP = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -251,7 +256,7 @@ export const columnTOP = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -269,7 +274,7 @@ export const columnTOP = (
       searchText,
       handleSearch,
       true,
-      "dateCapital"
+      "dateCapital",
     ),
     render: (text) =>
       renderDateColumn(
@@ -278,7 +283,7 @@ export const columnTOP = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -293,7 +298,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -303,7 +308,7 @@ export const columnTOP = (
         text,
         true,
         "input",
-        search
+        search,
       ),
     ellipsis: {
       showTitle: false,
@@ -322,7 +327,7 @@ export const columnTOP = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
+      true,
     ),
     render: (index) => {
       let text;
@@ -343,7 +348,7 @@ export const columnTOP = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -360,7 +365,7 @@ export const columnTOP = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (index) => {
       let text;
@@ -381,7 +386,7 @@ export const columnTOP = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -389,9 +394,8 @@ export const columnTOP = (
 
 const TopView = () => {
   const dispatch = useDispatch();
-  const { data_list, dataApprovalHistory, loading } = useSelector(
-    (state) => state.top
-  );
+  const { data_list, data_list_items, dataApprovalHistory, loading } =
+    useSelector((state) => state.top);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const searchInput = useRef(null);
@@ -399,6 +403,11 @@ const TopView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const loadMoreSize = 20;
+  const hasMore =
+    data_list_items.length < (data_list?.page?.totalElements || 0);
 
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
@@ -443,27 +452,23 @@ const TopView = () => {
     dispatch(
       getTopPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [search, page, pageSize, sort, dispatch]);
+  }, [search, sort, dispatch, refreshKey]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   const handleChange = (pageChange, pageSizeChange) => {
@@ -479,6 +484,25 @@ const TopView = () => {
         : "";
     setSort(dataSort);
   };
+
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    const nextPage = Math.floor(data_list_items.length / loadMoreSize) + 1;
+    await dispatch(
+      getTopPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, search, sort, data_list_items.length]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
@@ -557,7 +581,7 @@ const TopView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -567,7 +591,7 @@ const TopView = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={handleDownload}
         >
@@ -580,7 +604,7 @@ const TopView = () => {
       render: (
         <NavLink to={RBI_ROUTES.TERMS_OF_PAYMENT_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Terms of Payment
@@ -601,7 +625,7 @@ const TopView = () => {
           >
             <Tooltip title="Detail">
               <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -614,8 +638,7 @@ const TopView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "Draft" ||
-          record.statusApproval === "Rejected" ||
-          (record.status === "ACTIVE" && record.statusApproval === "Approved");
+          record.statusApproval === "Rejected";
 
         const linkContent =
           data > 3 ? (
@@ -627,11 +650,12 @@ const TopView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -693,10 +717,11 @@ const TopView = () => {
                 />
               }
               border={false}
+              type={"action"}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -729,9 +754,10 @@ const TopView = () => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
+              type={"action"}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -754,7 +780,7 @@ const TopView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -769,7 +795,7 @@ const TopView = () => {
         searchText,
         handleSearch,
         handleInactive,
-        handleApprovalHistory
+        handleApprovalHistory,
       ),
       ...actionColumns,
     ];
@@ -826,28 +852,28 @@ const TopView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">
-                TERMS OF PAYMENT LIST
-              </p>
+              <p className="mt-[15px] w-full">TERMS OF PAYMENT LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
           <TableRBI
-            dataSource={data_list?.result}
+            idTable="topTable"
+            dataSource={data_list_items}
             columns={columns}
             current={page}
             pageSize={pageSize}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data_list?.page?.totalElements || 0}
+            loading={loading}
             onSort={onSort}
             tableScrolled={{
               x: 2500,
@@ -857,6 +883,13 @@ const TopView = () => {
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            usePagination={false}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            refreshLabel="Refresh"
           />
         </CardContainer>
 
@@ -883,7 +916,7 @@ const TopView = () => {
           dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

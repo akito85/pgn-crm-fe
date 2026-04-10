@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -119,7 +118,7 @@ const ViewTransactionLog = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <Spin
                 spinning={loading || false}
                 className={"w-full top-20"}
@@ -161,7 +160,7 @@ const ViewTransactionLog = () => {
                     </CardContainer>
                 </div>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

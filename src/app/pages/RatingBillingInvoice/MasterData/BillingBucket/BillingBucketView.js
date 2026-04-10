@@ -1,10 +1,15 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -28,7 +33,7 @@ import CardContainer from "../../../../../components/CardContainer";
 const BillingBucketView = () => {
   // Selector
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -38,11 +43,17 @@ const BillingBucketView = () => {
 
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
+
+  const hasMore = allData.length < (data?.page?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -64,7 +75,7 @@ const BillingBucketView = () => {
   useEffect(() => {
     localStorage.setItem(
       "billingBucketFixedColumns",
-      JSON.stringify(fixedColumns)
+      JSON.stringify(fixedColumns),
     );
   }, [fixedColumns]);
 
@@ -73,12 +84,28 @@ const BillingBucketView = () => {
     dispatch(
       getAllBillingBucketPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
-      })
+      }),
     );
-  }, [search, sort, page, pageSize, dispatch]);
+  }, [search, sort, dispatch, refreshKey]);
+
+  // Accumulate data for infinite scroll
+  useEffect(() => {
+    if (data?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.id));
+          const newItems = data.result.filter((item) => !ids.has(item.id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data, page]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -121,6 +148,7 @@ const BillingBucketView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    shouldResetRef.current = true;
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -133,10 +161,8 @@ const BillingBucketView = () => {
   };
 
   // Handle Change Page Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
   };
 
   const handleRetry = () => {
@@ -156,8 +182,42 @@ const BillingBucketView = () => {
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
+
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getAllBillingBucketPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      }),
+    );
+  }, [
+    allData.length,
+    data?.page?.totalElements,
+    search,
+    sort,
+    dispatch,
+    loadMoreSize,
+  ]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
 
   const handleOptions = () => {
     const data = dataApprovalHistory?.dataApprover || {};
@@ -191,10 +251,10 @@ const BillingBucketView = () => {
         dispatch(
           getAllBillingBucketPaginate({
             search: tempSearch,
-            page,
-            pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             sort,
-          })
+          }),
         );
       })
       .catch((error) => {
@@ -244,10 +304,10 @@ const BillingBucketView = () => {
     dispatch(
       downloadBillingBucket({
         page,
-        pageSize,
+        pageSize: initialPageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   };
 
@@ -258,7 +318,9 @@ const BillingBucketView = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           onClick={() => handleDownload()}
         >
           Download List
@@ -270,7 +332,9 @@ const BillingBucketView = () => {
       render: (
         <NavLink to={RBI_ROUTES.BILLING_BUCKET_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Billing Bucket
@@ -299,8 +363,7 @@ const BillingBucketView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -309,14 +372,15 @@ const BillingBucketView = () => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               border={false}
               disabled={!isEditable}
+              type={"action"}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -329,7 +393,7 @@ const BillingBucketView = () => {
               <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -380,8 +444,9 @@ const BillingBucketView = () => {
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
+              type={"action"}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -411,12 +476,13 @@ const BillingBucketView = () => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.billingBucketCode)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -424,7 +490,7 @@ const BillingBucketView = () => {
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() =>
                     handleApprovalHistory(record.billingBucketCode)
                   }
@@ -441,7 +507,7 @@ const BillingBucketView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -450,11 +516,11 @@ const BillingBucketView = () => {
       ...columnsBillingBucket(
         search,
         page,
-        pageSize,
+        initialPageSize,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];
@@ -466,7 +532,7 @@ const BillingBucketView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, page, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -511,14 +577,14 @@ const BillingBucketView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
+              <p className="w-full mt-[15px] text-primary">
                 BILLING BUCKET LIST
               </p>
 
@@ -528,19 +594,28 @@ const BillingBucketView = () => {
         >
           <div className={"w-full"}>
             <TableRBI
-              dataSource={dataSource}
+              idTable="billingBucketTable"
+              dataSource={allData}
               columns={columns}
               current={page}
-              pageSize={pageSize}
+              pageSize={initialPageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
+              loading={loading}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 1000 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              useInfiniteScroll={true}
+              usePagination={false}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
@@ -587,7 +662,7 @@ const BillingBucketView = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

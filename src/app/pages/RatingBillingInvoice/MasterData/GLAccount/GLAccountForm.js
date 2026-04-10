@@ -9,9 +9,8 @@ import {
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../../constants/configApp";
@@ -54,6 +53,11 @@ const GLAccountForm = ({ type }) => {
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const [flag, setFlag] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [current, setCurrent] = useState(0);
   const [listSectionInfo, setListSectionInfo] = useState([
     {
@@ -128,6 +132,7 @@ const GLAccountForm = ({ type }) => {
       const attachments = data_detail?.attachments || [];
 
       const mappedAttachment = attachments.map((item, index) => ({
+        key: index + 1,
         id: item.id || index,
         size: item.size || 0,
         fileName: item.fileName || "-",
@@ -136,28 +141,36 @@ const GLAccountForm = ({ type }) => {
         fileCategoryId: item.fileCategoryId || null,
         fileCategoryName: item.fileCategoryName || "-",
         pathFile: item.pathFile || "",
-        urlFile1: item.urlFile1 || "",
+        urlFile1: `/v1/dbs/api/gl-account/download-attachment/${item.id}` || "",
         urlFile2: item.urlFile2 || "",
         uploadBy: item.createdBy || "-",
         uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
         dataType: "exist",
       }));
 
+      const hierarchyId =
+        glAccount?.apphierId ||
+        glAccount?.appHierId ||
+        glAccount?.approvalHierarchy ||
+        approvalInfo?.apphierId ||
+        approvalInfo?.appHierId ||
+        null;
+
       form.setFieldsValue({
         glAccount: glAccount?.glAccount || "",
         glAccountDesc: glAccount?.glAccountDesc || "",
         remark: glAccount?.remark || "",
-        apphierId: approvalInfo?.tAppId || null,
+        apphierId: hierarchyId,
       });
 
-      setSelectedHierarchy(approvalInfo?.tAppId);
+      setSelectedHierarchy(hierarchyId);
       setListDataAttachment(mappedAttachment);
     }
   }, [id, type, form, data_detail]);
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getApprovalHierarchyDetail(selectedHierarchy));
+      dispatch(getApprovalHierarchyDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
@@ -211,47 +224,58 @@ const GLAccountForm = ({ type }) => {
     }
   };
 
-  const handleMandatory = (setListSectionInfo = () => {}, listDataAttachment, errorFields) => {
+  const handleMandatory = (
+    setListSectionInfo = () => {},
+    listDataAttachment,
+    errorFields
+  ) => {
     setListSectionInfo((prevState) => {
-      return prevState.map((item) => {
+      const res = prevState.map((item) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
                 (current, next) =>
-                  item.paramValue.includes(next.name[0]) ? current + 1 : current,
-                0,
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0
               )
             : listDataAttachment.length < 1
-              ? 1
-              : 0;
-        return { value: item.value, paramValue: item.paramValue, errorBadge };
+            ? 1
+            : 0;
+        return {
+          value: item.value,
+          paramValue: item.paramValue,
+          errorBadge,
+        };
       });
+      return res;
     });
   };
 
   const handleSave = async (formValue) => {
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
-      dispatch(showModalError({
-        title: "Failed",
-        description: "Attachment is mandatory. Please upload at least one file.",
-      }));
-      return;
-    }
-
-    handleMandatory(setListSectionInfo, listDataAttachment);
-    const isDataValid = await checkDataValidity(formValue);
-
-    if (isDataValid) {
-      setBodyData({ ...formValue });
-      setModalConfirm(true);
-      setListSectionInfo([
-        { value: "GL Account", paramValue: ["glAccount", "glAccountDesc", "remark"] },
-        { value: "Approval", paramValue: ["apphierId"] },
-        { value: "Attachment" },
-      ]);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
-      setModalConfirm(false);
+      handleMandatory(setListSectionInfo, listDataAttachment);
+      const isDataValid = await checkDataValidity(formValue);
+
+      if (isDataValid) {
+        setBodyData({ ...formValue });
+        setModalConfirm(true);
+        setListSectionInfo([
+          { value: "GL Account", paramValue: ["glAccount", "glAccountDesc", "remark"] },
+          { value: "Approval", paramValue: ["apphierId"] },
+          { value: "Attachment" },
+        ]);
+      } else {
+        setModalConfirm(false);
+      }
     }
   };
 
@@ -325,8 +349,24 @@ const GLAccountForm = ({ type }) => {
     }
   };
 
-  const handleError = ({ errorFields }) => {
+  // Handle Error Tab Form
+  const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClear = () => {
@@ -369,7 +409,7 @@ const GLAccountForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -394,19 +434,19 @@ const GLAccountForm = ({ type }) => {
 
           {/* Approval Section */}
           <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
-            <BaseContainer header={"Approval Information"}>
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           {/* Attachment Section */}
           <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
-            <BaseContainer header={"Attachment Information"}>
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -420,7 +460,7 @@ const GLAccountForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           <FormFooter
@@ -462,8 +502,27 @@ const GLAccountForm = ({ type }) => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

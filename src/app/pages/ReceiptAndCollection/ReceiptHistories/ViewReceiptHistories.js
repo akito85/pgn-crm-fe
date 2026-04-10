@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import TablePagination from "../../../../components/TablePagination";
 import {
@@ -1791,7 +1790,7 @@ const ViewReceiptHistories = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar actionList={access?.actions} items={itemActions} />
@@ -1819,7 +1818,7 @@ const ViewReceiptHistories = () => {
         </BaseContainer>
       </Spin>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

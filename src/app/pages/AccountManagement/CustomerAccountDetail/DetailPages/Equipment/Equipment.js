@@ -163,7 +163,7 @@ const columns = (
     },
     {
       key: "noh",
-      title: "OPERATIOIN HOURS/DAY",
+      title: "OPERATION HOURS/DAY",
       dataIndex: "noh",
       align: "right",
       sorter: true,
@@ -180,7 +180,7 @@ const columns = (
     },
     {
       key: "nod",
-      title: "OPERATIOIN DAYS/WEEK",
+      title: "OPERATION DAYS/WEEK",
       dataIndex: "nod",
       align: "right",
       sorter: true,
@@ -437,17 +437,17 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
       setModalCreateUpdate(true);
       setType("create");
     },
-    handleView: (record) => {
-      handleDetail(record);
+    handleView: ({ id }) => {
+      handleDetail(id);
     },
-    handleUpdate: (record) => {
+    handleUpdate: ({ id }) => {
       setModalCreateUpdate(true);
       setType("update");
-      setIdEquipment(record);
-      dispatch(getDetailEquipment({ id: record }));
+      setIdEquipment(id);
+      dispatch(getDetailEquipment({ id }));
     },
-    handleDelete: (record) => {
-      handleDelete(record);
+    handleDelete: ({ id }) => {
+      handleDelete(id);
     },
   })
   // const itemActions = [

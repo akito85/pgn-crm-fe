@@ -10,7 +10,6 @@ import { dateFormatting } from "../../../../utils";
 import moment from "moment";
 import BaseContainer from "../../../../components/BaseContainer";
 import DetailText from "../../../../components/DetailText";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
@@ -106,7 +105,7 @@ const AnnouncementDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"ANNOUNCEMENT INFORMATION"}>
@@ -216,7 +215,7 @@ const AnnouncementDetail = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

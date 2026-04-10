@@ -91,6 +91,22 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   VIEW_GAS_SOURCE: "/system-setup/gas-sources",
   UPLOAD_GAS_SOURCE: "/system-setup/gas-sources/upload",
 
+  // Gas Deposit Stand Alone
+  VIEW_GAS_DEPOSIT_SA: "/account-management/gas-deposit",
+  VIEW_DETAIL_GAS_DEPOSIT_SA: "/account-management/gas-deposit/view",
+  RECALCULATE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/recalculate",
+  EXPIRE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/expire",
+  
+  // Gas Deposit Account Standard
+  VIEW_DETAIL_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/view",
+  RECALCULATE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/recalculate",
+  EXPIRE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/expire",
+
+  // Gas Deposit Account One Time
+  VIEW_DETAIL_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/view",
+  RECALCULATE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/recalculate",
+  EXPIRE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/expire",
+
   // Multi Destination
   VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/view",
   CREATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/create",
@@ -149,6 +165,14 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
     "/account-management/account-standard/service-agreement/tos/update",
   DETAIL_TOS_SUBMISSION:
     "/account-management/account-standard/service-agreement/tos/view",
+
+  // WARRANTY TERM
+  CREATE_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/create",
+  UPDATE_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/update",
+  DETAIL_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/view",
 
   // Raw Material Source
   CREATE_RAW_MATERIAL_SOURCE:

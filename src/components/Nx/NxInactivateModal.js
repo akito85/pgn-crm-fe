@@ -1,7 +1,6 @@
-import { Alert, Form } from "antd";
+import { Alert, Button, Form } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { requiredMessage } from "../../utils";
-import ButtonComponent from "../ButtonComponent";
 import InputComponent from "../InputComponent";
 import NxModal from "./NxModal";
 import NxApprovalInput from "./NxApprovalInput";
@@ -17,8 +16,11 @@ const NxInactivateModal = ({
   named,
   customMessage,
   sliceName,
-  approvalOptionsStateName,
-  approvalHierarchtDetailsStateName,
+  approvalOptionsName,
+  approvalHierarchtDetailsName,
+  loadingListApprovalOptionsName,
+  loadingListHierarchyDetailName,
+  loadingInactivateName,
   getApprovalOptions = () => {},
   getApprovalHierarchyDetails = () => {},
   width = 1000,
@@ -28,8 +30,11 @@ const NxInactivateModal = ({
   const [form] = Form.useForm();
 
   const {
-    [approvalOptionsStateName]: approvalOptions,
-    [approvalHierarchtDetailsStateName]: approvalHierarchyDetails,
+    [approvalOptionsName]: approvalOptions,
+    [approvalHierarchtDetailsName]: approvalHierarchyDetails,
+    [loadingListApprovalOptionsName]: loadingApprovalOptions,
+    [loadingListHierarchyDetailName]: loadingHierarchyDetails,
+    [loadingInactivateName]: inactivateLoading,
   } = useSelector(
     (state) => state[sliceName]
   );
@@ -60,23 +65,25 @@ const NxInactivateModal = ({
     <NxModal
       isOpen={isOpen}
       handleCancel={handleCancelModalFinal}
-      header={`${header} information`}
+      title={`${header} INFORMATION`}
       width={width}
       type={"confirmation"}
       footer={
-        <div className="w-full flex justify-end gap-x-4">
-          <ButtonComponent onClick={handleCancelModalFinal} type="default">
+        <div className="flex justify-end">
+          <Button onClick={handleCancelModalFinal} type="menu" disabled={inactivateLoading}>
             Cancel
-          </ButtonComponent>
-          <ButtonComponent
+          </Button>
+          <Button
             form="formApproveReject"
             type="submit"
             htmlType="submit"
+            loading={inactivateLoading}
           >
             Confirm
-          </ButtonComponent>
+          </Button>
         </div>
       }
+      loading={inactivateLoading}
     >
       <div className="p-4">
         <Form
@@ -107,6 +114,8 @@ const NxInactivateModal = ({
             hierarchyDetails={approvalHierarchyDetails}
             options={approvalOptions}
             handleSelectHiararchy={handleSelectHiararchy}
+            loading={inactivateLoading || loadingApprovalOptions || loadingHierarchyDetails}
+            tableLoading={loadingHierarchyDetails}
           />
           <Form.Item
             name={"remark"}
@@ -119,6 +128,7 @@ const NxInactivateModal = ({
               rows={1}
               type="textarea"
               placeholder={"Type your remark"}
+              disabled={inactivateLoading}
             />
           </Form.Item>
         </Form>

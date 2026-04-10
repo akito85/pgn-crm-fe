@@ -4,21 +4,25 @@ import { useState } from "react";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 
+/**
+ * Tabbed detail view for a multi destination record.
+ * Renders "Multi Destination Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Multi destination detail record
+ */
 const MultiDestinationDetailTabs = ({
-  subjectAccountNumber,
-  idMd = 0,
-  dataDetail = {},
-  dispatch = () => {},
+  detail = {},
 }) => {
-  // Use provided options or fall back to default tabs
+  const attachments = detail.attachments;
+
   const tabOptions = [
     {
       key: "mdi",
       label: "Multi Destination Information",
       children: (
         <MultiDestinationDetailInfo
-          subjectAccountNumber={subjectAccountNumber}
-          dataDetail={dataDetail}
+          detail={detail}
         />
       )
     },
@@ -27,8 +31,7 @@ const MultiDestinationDetailTabs = ({
       label: "Attachment",
       children: (
         <MultiDestinationDetailAttch
-          idMd={idMd}
-          dispatch={dispatch}
+          attachments={attachments}
         />
       )
     },

@@ -6,7 +6,6 @@ import BaseContainer from '../../../../components/BaseContainer';
 import REPORT_ROUTES from '../../../../routes/report/report_routes';
 import useCustomerWarrantyReportHooks from './hooks/useCustomerWarrantyReportHooks';
 import TablePagination from '../../../../components/TablePagination';
-const LayoutMenu = lazy(() => import('../../../../components/SidebarMenu/LayoutMenu'));
 
 const CustomerWarrantyReport = () => {
     const {
@@ -32,7 +31,7 @@ const CustomerWarrantyReport = () => {
     }, []);
     return (
         <Suspense fallback={<Spin />}>
-            <LayoutMenu>
+            <>
                 <Spin spinning={false}>
                     <BreadCrumb routes={routes} />
                     <Toolbar items={itemActions} />
@@ -55,7 +54,7 @@ const CustomerWarrantyReport = () => {
                         />
                     </BaseContainer>
                 </Spin>
-            </LayoutMenu>
+            </>
         </Suspense>
     );
 }

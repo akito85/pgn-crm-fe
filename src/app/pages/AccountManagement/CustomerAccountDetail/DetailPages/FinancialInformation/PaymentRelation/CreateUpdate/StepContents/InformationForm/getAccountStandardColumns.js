@@ -398,7 +398,7 @@ const getAccountStandardColumns = (
     align: "center",
     width: 120,
     fixed: "right",
-    render: (v, r, i) => {
+    render: (_, record) => {
       return (
         <div className="flex w-full justify-center gap-4">
           <Tooltip title="Select">
@@ -408,7 +408,7 @@ const getAccountStandardColumns = (
                 color={"#0075bf"}
                 width={20}
                 onClick={() => {
-                  setAccount(r?.accountId, r?.accountNumber, r?.accountName)
+                  setAccount(record)
                   setIsOpen(false);
                 }}
               />

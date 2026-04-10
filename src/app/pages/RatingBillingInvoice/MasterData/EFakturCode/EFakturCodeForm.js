@@ -11,9 +11,11 @@ import {
   validateCreateUpdate,
 } from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../components/FormStepNavigation";
 import EFakturCodeSectionForm from "./EFakturCodeSectionForm";
 import BaseContainer from "../../../../../components/BaseContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -21,9 +23,11 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import { configApp } from "../../../../../constants/configApp";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ConfirmationEFakturCode from "./ConfirmationEfakturCode";
-import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
-import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import {
   getDetailEfakturCode,
   getApprovalHierarchyList,
@@ -35,6 +39,7 @@ import {
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
 import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
+import CardContainer from "../../../../../components/CardContainer";
 
 const EFakturCodeForm = ({ type }) => {
   // Selector
@@ -169,6 +174,7 @@ const EFakturCodeForm = ({ type }) => {
 
       // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
+        key: index + 1,
         id: item.id || index,
         size: item.size || 0,
         fileName: item.fileName || "-",
@@ -200,7 +206,7 @@ const EFakturCodeForm = ({ type }) => {
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getApprovalHierarchyDetail(selectedHierarchy));
+      dispatch(getApprovalHierarchyDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
@@ -264,6 +270,7 @@ const EFakturCodeForm = ({ type }) => {
     type,
     dateFormatting,
     flag,
+    selectedHierarchy,
   }) => {
     const additionalCodes = listAdditionalCode?.map((item) => ({
       code: item.code,
@@ -281,7 +288,7 @@ const EFakturCodeForm = ({ type }) => {
       code: bodyData.efakturCode,
       description: bodyData.description || null,
       additionalCodes: additionalCodes,
-      apphierId: bodyData.apphierId,
+      apphierId: selectedHierarchy ?? bodyData.apphierId,
       isSubmit: flag,
     };
 
@@ -301,6 +308,7 @@ const EFakturCodeForm = ({ type }) => {
       type,
       dateFormatting,
       flag,
+      selectedHierarchy,
     });
 
     try {
@@ -310,7 +318,7 @@ const EFakturCodeForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -373,12 +381,11 @@ const EFakturCodeForm = ({ type }) => {
         };
         dispatch(showModalError(errorBody));
       } else {
-        const isDataValid = await checkDataValidity(formValue);
+        const allFormValues = { ...formValue, ...form.getFieldsValue(true) };
+        const isDataValid = await checkDataValidity(allFormValues);
 
         if (isDataValid) {
-          setBodyData({
-            ...formValue,
-          });
+          setBodyData(allFormValues);
           setModalConfirm(true);
           setListSectionInfo([
             {
@@ -406,6 +413,7 @@ const EFakturCodeForm = ({ type }) => {
       type,
       dateFormatting,
       flag,
+      selectedHierarchy,
     });
 
     if (type === "create") {
@@ -446,7 +454,7 @@ const EFakturCodeForm = ({ type }) => {
         .then(async (dataForm) => {
           const efakturCode = dataForm?.einvoiceCodeId;
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
           for (let i = 0; i < filterDataAttach.length; i++) {
@@ -481,7 +489,7 @@ const EFakturCodeForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -492,11 +500,11 @@ const EFakturCodeForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -512,6 +520,7 @@ const EFakturCodeForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
@@ -551,24 +560,29 @@ const EFakturCodeForm = ({ type }) => {
   const handleSubmit = () => {
     setFlag(true);
     setTimeout(() => {
-        form.submit();
+      form.submit();
     }, 0);
-};
+  };
 
   const handleSaveDraft = () => {
     setFlag(false);
     setTimeout(() => {
-        form.submit();
+      form.submit();
     }, 0);
-};
+  };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        
+
         {/* FormStepper menggantikan RadioTabs */}
-        <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
+        />
 
         <Form
           layout="vertical"
@@ -592,7 +606,7 @@ const EFakturCodeForm = ({ type }) => {
 
           {/* Step 2: Approval - Conditional Rendering */}
           {valuePage === listSectionInfo[1].value && (
-            <BaseContainer header={"Approval Information"}>
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -600,12 +614,12 @@ const EFakturCodeForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* Step 3: Attachment - Conditional Rendering */}
           {valuePage === listSectionInfo[2].value && (
-            <BaseContainer header={"Attachment Information"}>
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -619,7 +633,7 @@ const EFakturCodeForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* FormFooter menggantikan tombol manual */}
@@ -638,37 +652,17 @@ const EFakturCodeForm = ({ type }) => {
         </Form>
 
         {/* Modal Confirmation */}
-        <ModalCustom
+        <ConfirmationEFakturCode
           isOpen={modalConfirm}
           handleCancel={() => setModalConfirm(false)}
-          header={"CONFIRMATION"}
-          width={1200}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
-                isPrimary
-                onClick={handleConfirm}
-                loading={loadingSave}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <ConfirmationEFakturCode
-            data={bodyData}
-            selectedHierarchy={selectedHierarchy}
-            listDataAppHierDetail={appHierDataDetail}
-            listDataAttachment={listDataAttachment}
-            listAdditionalCode={listAdditionalCode}
-            dataOption={appHierOptions}
-          />
-        </ModalCustom>
+          handleConfirm={handleConfirm}
+          data={bodyData}
+          selectedHierarchy={selectedHierarchy}
+          listDataAppHierDetail={appHierDataDetail}
+          listDataAttachment={listDataAttachment}
+          listAdditionalCode={listAdditionalCode}
+          dataOption={appHierOptions}
+        />
 
         {/* Modal Back */}
         <ModalConfirm
@@ -704,7 +698,7 @@ const EFakturCodeForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

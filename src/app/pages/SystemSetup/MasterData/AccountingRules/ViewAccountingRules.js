@@ -1,5 +1,10 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import { Alert, Checkbox, Form, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -40,15 +45,14 @@ import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../../components/CardContainer";
 
 const ViewAccountingRules = () => {
-  const { data, data_detail, loading } = useSelector(
-    (state) => state.accounting_rules
+  const { data_detail, loading, data_list, data_pagination } = useSelector(
+    (state) => state.accounting_rules,
   );
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
 
   // Use State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const loadMoreSize = 20;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -59,6 +63,7 @@ const ViewAccountingRules = () => {
   const [accountingRuleId, setAccountingRuleId] = useState(null);
   const [accountingName, setAccountingName] = useState("");
   const [modalError, setModalError] = useState(false);
+  const hasMore = data_list.length < (data_pagination?.totalElements || 0);
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["status", "action"],
@@ -71,9 +76,15 @@ const ViewAccountingRules = () => {
   useEffect(() => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getAccountingRulesPaginate({ search: reqSearch, sort, page, pageSize })
+      getAccountingRulesPaginate({
+        search: reqSearch,
+        sort,
+        page: 1,
+        pageSize: loadMoreSize,
+        isLoadMore: false,
+      }),
     );
-  }, [dispatch, page, pageSize, search, sort]);
+  }, [dispatch, search, sort]);
 
   // trigger modal try again
   useEffect(() => {
@@ -86,15 +97,10 @@ const ViewAccountingRules = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   // handle activation
@@ -128,7 +134,13 @@ const ViewAccountingRules = () => {
     setOpenModalActivation(false);
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     await dispatch(
-      getAccountingRulesPaginate({ page, pageSize, sort, search: reqSearch })
+      getAccountingRulesPaginate({
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+        search: reqSearch,
+        isLoadMore: false,
+      }),
     ).unwrap();
     form.resetFields();
   };
@@ -141,7 +153,7 @@ const ViewAccountingRules = () => {
         title: "NO",
         width: 60,
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         key: "classificationTypeName",
@@ -157,7 +169,7 @@ const ViewAccountingRules = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -167,7 +179,7 @@ const ViewAccountingRules = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -184,7 +196,7 @@ const ViewAccountingRules = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -194,7 +206,7 @@ const ViewAccountingRules = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -211,7 +223,7 @@ const ViewAccountingRules = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -221,7 +233,7 @@ const ViewAccountingRules = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -238,7 +250,7 @@ const ViewAccountingRules = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -248,7 +260,7 @@ const ViewAccountingRules = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -268,7 +280,7 @@ const ViewAccountingRules = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -278,7 +290,7 @@ const ViewAccountingRules = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -295,7 +307,7 @@ const ViewAccountingRules = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -305,11 +317,11 @@ const ViewAccountingRules = () => {
             text,
             false,
             "status",
-            search
+            search,
           ),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   // Breadcrumbs
@@ -328,12 +340,6 @@ const ViewAccountingRules = () => {
     },
   ];
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   // onsort
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -343,11 +349,46 @@ const ViewAccountingRules = () => {
     setSort(dataSort);
   };
 
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    if (data_list.length >= (data_pagination?.totalElements || 0)) return;
+    const nextPage = Math.floor(data_list.length / loadMoreSize) + 1;
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    await dispatch(
+      getAccountingRulesPaginate({
+        page: nextPage,
+        pageSize: loadMoreSize,
+        search: reqSearch,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, data_list.length, data_pagination, search, sort]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(
+      getAccountingRulesPaginate({
+        search: reqSearch,
+        sort,
+        page: 1,
+        pageSize: loadMoreSize,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, search, sort]);
+
   // handle download
   const handleDownload = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      downloadAccountingRules({ search: reqSearch, sort, page, pageSize })
+      downloadAccountingRules({
+        search: reqSearch,
+        sort,
+        page: 1,
+        pageSize: loadMoreSize,
+      }),
     );
   };
 
@@ -356,7 +397,13 @@ const ViewAccountingRules = () => {
     if (bodyError?.action === "GET_ACCOUNTING_RULES_PAGINATE") {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        downloadAccountingRules({ search: reqSearch, sort, page, pageSize })
+        getAccountingRulesPaginate({
+          search: reqSearch,
+          sort,
+          page: 1,
+          pageSize: loadMoreSize,
+          isLoadMore: false,
+        }),
       );
     } else if (bodyError?.action === "DOWNLOAD_ACCOUNTING_RULES") {
       handleDownload();
@@ -391,7 +438,7 @@ const ViewAccountingRules = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -418,7 +465,7 @@ const ViewAccountingRules = () => {
       render: (
         <NavLink to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_ACCOUNTING_RULES}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
             Create Accounting Rules
@@ -498,7 +545,7 @@ const ViewAccountingRules = () => {
 
   const actionCols = useColumnActionPermission(
     ["Activate", "View", "Update"],
-    itemActions
+    itemActions,
   );
 
   const allColumns = useMemo(() => {
@@ -522,14 +569,14 @@ const ViewAccountingRules = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
+      <>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">ACCOUNTING RULES LIST</p>
-              <div className="mt-[15px] flex gap-[20px]">
+              <p className="mt-[15px]">ACCOUNTING RULES LIST</p>
+              <div className="flex gap-[20px]">
                 <Toolbar items={itemActions} />
               </div>
             </div>
@@ -537,13 +584,10 @@ const ViewAccountingRules = () => {
         >
           <div className="my-0">
             <TableRBI
-              dataSource={data?.result}
+              idTable="accountingRulesTable"
+              dataSource={data_list}
               columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
+              totalData={data_pagination?.totalElements || 0}
               tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
               columnDefinitions={columnDefinitions}
@@ -551,6 +595,13 @@ const ViewAccountingRules = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              useInfiniteScroll={true}
+              usePagination={false}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
@@ -594,7 +645,7 @@ const ViewAccountingRules = () => {
             <DetailText label={"Created Date"}>
               {hasValue(data_detail?.createdDate) &&
                 moment(data_detail?.createdDate)?.format(
-                  dateFormatting?.dateTime
+                  dateFormatting?.dateTime,
                 )}
             </DetailText>
             <DetailText label={"Created By"}>
@@ -603,7 +654,7 @@ const ViewAccountingRules = () => {
             <DetailText label={"Updated Date"}>
               {hasValue(data_detail?.updatedDate) &&
                 moment(data_detail?.updatedDate).format(
-                  dateFormatting?.dateTime
+                  dateFormatting?.dateTime,
                 )}
             </DetailText>
             <DetailText label={"Updated By"}>
@@ -685,7 +736,7 @@ const ViewAccountingRules = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-      </LayoutMenu>
+      </>
     </Spin>
   );
 };

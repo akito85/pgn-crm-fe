@@ -1,5 +1,4 @@
 import React, { useCallback, useRef } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { useState } from "react";
@@ -1387,7 +1386,9 @@ const PosForm = ({ type }) => {
             email: data_detailPos?.email,
             address: data_detailPos?.address,
             billingCycle: data_globalBillingCycle?.find(
-              (item) => item.name === data_detailPos?.billingCycle,
+              (item) =>
+                String(item.id) === String(data_detailPos?.billingCycle) ||
+                item.name === data_detailPos?.billingCycle,
             )?.id,
             billingPeriod: data_detailPos?.billingPeriod,
             remark: data_detailPos?.remark,
@@ -1432,7 +1433,9 @@ const PosForm = ({ type }) => {
         setInvoiceDate(moment(data_detailPos?.invoiceDate));
         setDataBillingCycle(
           data_globalBillingCycle?.find(
-            (item) => item.name === data_detailPos?.billingCycle,
+            (item) =>
+              String(item.id) === String(data_detailPos?.billingCycle) ||
+              item.name === data_detailPos?.billingCycle,
           )?.id,
         );
         setDataAttachment(
@@ -1469,7 +1472,7 @@ const PosForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingForm || loadingAccount}>
         <BreadCrumb routes={routes} />
 
@@ -1674,7 +1677,7 @@ const PosForm = ({ type }) => {
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

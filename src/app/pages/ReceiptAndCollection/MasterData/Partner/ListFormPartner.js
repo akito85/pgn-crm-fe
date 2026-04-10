@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import RadioTabs from "../../../../../components/RadioTabs";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
   createPartner,
@@ -461,7 +461,7 @@ const ListFormPartner = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading || loadingForm}>
         <FormStepper
@@ -577,7 +577,7 @@ const ListFormPartner = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

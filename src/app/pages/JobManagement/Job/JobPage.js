@@ -2,56 +2,101 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { Dropdown, Skeleton } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
+import NxModal from "../../../../components/Nx/NxModal";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { getAllJobPaginate } from "../../../../redux/slices/job_management/jobSlice";
 import { getJobManagementColumns } from "../jobManagementColumns";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
+import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery, useCreateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
+import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
+import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
+import IconCopy from "../../../../assets/Icon/Nx/IconCopy";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 
-const actionColumn = {
-  title: "ACTIONS",
-  key: "actions",
-  width: 100,
-  align: "center",
-  fixed: "right",
-  render: () => <span>—</span>,
-};
+const ViewListIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5.625 5.625H18.125M5.625 10H18.125M5.625 14.375H18.125" stroke="#1976D2" strokeWidth="1.875" strokeLinejoin="round"/>
+    <path d="M2.5 5H3.75V6.25H2.5V5ZM2.5 9.375H3.75V10.625H2.5V9.375ZM2.5 13.75H3.75V15H2.5V13.75Z" stroke="#1976D2" strokeWidth="1.25" strokeLinecap="square" strokeLinejoin="round"/>
+  </svg>
+);
+
+const EditMenuIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 7H6C4.89543 7 4 7.89543 4 9V18C4 19.1046 4.89543 20 6 20H15C16.1046 20 17 19.1046 17 18V15" stroke="black" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 15H12L20.5 6.49998C21.3284 5.67156 21.3284 4.32841 20.5 3.49998C19.6716 2.67156 18.3284 2.67156 17.5 3.49998L9 12V15" stroke="black" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 5L19 8" stroke="black" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const DeleteMenuIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 11V17M14 11V17M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6M3 6H21M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6" stroke="#D32F2F" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const JobPage = () => {
   const dispatch = useDispatch();
-  const { data, loading } = useSelector((state) => state.jobManagement);
+  const navigate = useNavigate();
 
-  const [page, setPage] = useState(1);
-  const [sort, setSort] = useState("");
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch { return null; }
+  }, [rawToken]);
+
+  // Permission check
+  const { actions, loading: permissionsLoading } = useGrantAccessHooks();
+  const permissions = useMemo(
+    () => (actions ?? []).map((a) => a.toLowerCase()),
+    [actions]
+  );
+  const canCreate = permissions.includes("create");
+  const canUpdate = permissions.includes("update");
+  const canDelete = permissions.includes("delete");
+  const canView   = permissions.includes("view");
+
+  const [page, setPage]                   = useState(0); // 0-indexed for backend
+  const [sort, setSort]                   = useState({ sortBy: "createdAt", sortDir: "DESC" });
   const [accumulatedData, setAccumulatedData] = useState([]);
+  const [fixedColumns, setFixedColumns]   = useState({ left: [], right: ["actions"] });
 
-  const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [jobToDelete, setJobToDelete]         = useState(null); // { id, name, code }
 
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getAllJobPaginate({
-        search: encodeURIComponent(JSON.stringify({})),
-        page,
-        pageSize: PAGE_SIZE,
-        sort,
-      })
-    );
-  }, [dispatch, page, sort]);
+  // Copy state
+  const [copyingId, setCopyingId] = useState(null);
 
-  useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+  // RTK Query hooks
+  const { data, isFetching } = useSearchJobsQuery({
+    page,
+    size: PAGE_SIZE,
+    sortBy: sort.sortBy,
+    sortDir: sort.sortDir,
+  });
 
-  // Append new data when page increments, replace on reset (page 1)
+  const { data: accessGroupsRaw } = useGetAccessGroupsQuery();
+  const accessGroupsMap = useMemo(() => {
+    if (!accessGroupsRaw) return {};
+    return Object.fromEntries(accessGroupsRaw.map((g) => [g.groupId, g.groupName]));
+  }, [accessGroupsRaw]);
+
+  const [deleteJobMutation, { isLoading: deleteLoading }] = useDeleteJobMutation();
+  const [createJobMutation] = useCreateJobMutation();
+
+  // Accumulate pages for infinite scroll
   useEffect(() => {
     if (!data?.result) return;
-    if (page === 1) {
+    if (page === 0) {
       setAccumulatedData(data.result);
     } else {
       setAccumulatedData((prev) => {
@@ -60,43 +105,173 @@ const JobPage = () => {
         return [...prev, ...newItems];
       });
     }
-  }, [data?.result]);
+  }, [data?.result, page]);
 
-  const handleRefresh = () => {
-    setPage(1);
+  const handleRefresh = useCallback(() => {
+    setPage(0);
     setAccumulatedData([]);
-  };
+  }, []);
 
-  const handleLoadMore = async () => {
-    const totalPages = data?.page?.totalPages || 0;
-    if (page < totalPages) {
+  const handleLoadMore = () => {
+    const totalPages = data?.totalPages || 0;
+    if (page + 1 < totalPages) {
       setPage((prev) => prev + 1);
     }
   };
 
-  const hasMore = accumulatedData.length < (data?.page?.totalElements || 0);
+  const hasMore = accumulatedData.length < (data?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
-    setSort(
-      sorter.order
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-        : ""
-    );
-    setPage(1);
+    if (sorter.order) {
+      setSort({
+        sortBy:  sorter.field,
+        sortDir: sorter.order === "ascend" ? "ASC" : "DESC",
+      });
+    } else {
+      setSort({ sortBy: "createdAt", sortDir: "DESC" });
+    }
+    setPage(0);
     setAccumulatedData([]);
   };
 
+  // Navigation helpers (state-based — ID passed via location.state, not URL param)
+  const toView   = useCallback((id) => navigate(JOB_MGMT_ROUTES.VIEW_JOB_DETAIL, { state: { id } }), [navigate]);
+  const toUpdate = useCallback((id) => navigate(JOB_MGMT_ROUTES.UPDATE_JOB,      { state: { id } }), [navigate]);
+
+  // Delete handlers
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteJobMutation(jobToDelete.id).unwrap();
+      setDeleteModalOpen(false);
+      setJobToDelete(null);
+      handleRefresh(); // reset to page 0 — RTK Query cache invalidation re-fetches automatically
+    } catch {
+      // intentionally empty: deleteJob queryFn dispatches showModalError on failure
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setJobToDelete(null);
+  };
+
+  const handleCopy = useCallback(async (record) => {
+    setCopyingId(record.id);
+    try {
+      await createJobMutation({
+        name:                 `${record.name} (Copy)`,
+        code:                 `${record.code}_COPY`,
+        description:          record.description,
+        type:                 record.type,
+        executeType:          record.executeType,
+        handler:              record.handler,
+        taskQueueId:          record.taskQueueId    ?? null,
+        timeout:              record.timeout        ?? null,
+        maxRetry:             record.maxRetry       ?? 0,
+        retryPolicy:          record.retryPolicy    ?? null,
+        module:               record.module         ?? null,
+        defaultInput:         record.defaultInput   ?? null,
+        parameters:           record.parameters     ?? [],
+        accessGroupId:        record.accessGroupId  ?? null,
+        notificationSettings: record.notificationSettings ?? null,
+      }).unwrap();
+      handleRefresh();
+    } catch {
+      // intentionally empty: createJob queryFn dispatches showModalError on failure
+    } finally {
+      setCopyingId(null);
+    }
+  }, [createJobMutation]);
+
+  // Action column — always present in baseColumns so the fixed-right column
+  // never appears/disappears (no layout shift). Skeleton and permission checks
+  // live inside render so only cell content changes during loading.
+  const actionColumn = useMemo(() => ({
+    title: "ACTIONS",
+    key: "actions",
+    width: 120,
+    align: "center",
+    fixed: "right",
+    render: (_, record) => {
+      if (permissionsLoading) {
+        return (
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
+          </div>
+        );
+      }
+
+      const hasAnyAction = canCreate || canUpdate || canDelete || canView;
+      if (!hasAnyAction) return null;
+
+      const menuItems = [
+        canCreate && {
+          key: "copy",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
+              <IconCopy width="18" height="18" /> Copy
+            </span>
+          ),
+          onClick: () => handleCopy(record),
+          disabled: copyingId === record.id,
+        },
+        canUpdate && {
+          key: "update",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EditMenuIcon /> Update
+            </span>
+          ),
+          onClick: () => toUpdate(record.id),
+        },
+        canDelete && {
+          key: "delete",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <DeleteMenuIcon /> Delete
+            </span>
+          ),
+          onClick: () => {
+            setJobToDelete({ id: record.id, name: record.name, code: record.code });
+            setDeleteModalOpen(true);
+          },
+        },
+      ].filter(Boolean);
+
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          {menuItems.length > 0 && (
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
+              <button
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+                onClick={(e) => e.stopPropagation()}
+                type="button"
+              >
+                <IconThreeDots />
+              </button>
+            </Dropdown>
+          )}
+          {canView && (
+            <button
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+              onClick={() => toView(record.id)}
+              type="button"
+            >
+              <ViewListIcon />
+            </button>
+          )}
+        </div>
+      );
+    },
+  }), [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
+
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(1, PAGE_SIZE), actionColumn],
-    []
+    () => [...getJobManagementColumns(accessGroupsMap), actionColumn],
+    [actionColumn, accessGroupsMap]
   );
 
   const allColumns = useMemo(
-    () =>
-      baseColumns.map((col) => ({
-        ...col,
-        key: col.key || col.dataIndex || col.title,
-      })),
+    () => baseColumns.map((col) => ({ ...col, key: col.key || col.dataIndex || col.title })),
     [baseColumns]
   );
 
@@ -106,48 +281,25 @@ const JobPage = () => {
   );
 
   const columnDefinitions = useMemo(
-    () =>
-      allColumns.map((col) => ({
-        key: col.key || col.dataIndex || col.title,
-        title: col.title,
-      })),
+    () => allColumns.map((col) => ({ key: col.key || col.dataIndex || col.title, title: col.title })),
     [allColumns]
   );
 
-  // Toolbar buttons
-  const downloadListHandler = () => {
-    // Add download functionality here
-    console.log('Download List clicked');
-  };
-
-  const navigate = useNavigate();
-
-  const createHandler = () => {
-    navigate(JOB_MGMT_ROUTES.CREATE_JOB);
-  };
-
   const routes = [
-    {
-      path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT,
-      breadcrumbName: "Job Scheduler Management",
-    },
-    {
-      path: "",
-      breadcrumbName: "Job List",
-    },
+    { path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT, breadcrumbName: "Job Scheduler Management" },
+    { path: "", breadcrumbName: "Job List" },
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
-      <NxCardContainer 
+      <NxCardContainer
         header="JOB LIST"
         actionElement={
           <div className="flex gap-2">
             <ButtonComponent
               type="primary"
               icon={<DownloadOutlined />}
-              onClick={downloadListHandler}
               isPrimary={true}
               className="px-2 py-2 rounded-lg min-h-[32px]"
             >
@@ -156,7 +308,7 @@ const JobPage = () => {
             <ButtonComponent
               type="primary"
               icon={<PlusOutlined />}
-              onClick={createHandler}
+              onClick={() => navigate(JOB_MGMT_ROUTES.CREATE_JOB)}
               isPrimary={true}
               className="px-2 py-2 rounded-lg min-h-[32px]"
             >
@@ -167,10 +319,11 @@ const JobPage = () => {
       >
         <NxTable
           idTable="job-list-table"
+          userId={userId}
           dataSource={accumulatedData}
-          totalData={data?.page?.totalElements}
-          current={page}
-          loading={loading}
+          totalData={data?.totalElements}
+          current={page + 1}
+          loading={isFetching}
           columns={processedColumns}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
@@ -182,11 +335,49 @@ const JobPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
-          onRefresh={handleRefresh}
-          showRefresh={true}
+          // onRefresh={handleRefresh}
+          // showRefresh={true}
         />
       </NxCardContainer>
-    </LayoutMenu>
+
+      {/* Delete Confirmation Modal */}
+      <NxModal
+        isOpen={deleteModalOpen}
+        title="Delete Job"
+        loading={deleteLoading}
+        handleCancel={handleDeleteCancel}
+        width={480}
+        footer={[
+          <div className="flex flex-row justify-between items-center">
+            <ButtonComponent size={"small"} key="cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              size={"small"}
+              key="delete"
+              border={false}
+              className="!bg-[#d32f2f] !text-white !border-transparent"
+              onClick={handleDeleteConfirm}
+              loading={deleteLoading}
+            >
+              Delete
+            </ButtonComponent>
+          </div>
+        ]}
+      >
+        <div style={{ padding: "20px 24px" }}>
+          <p style={{ margin: 0, marginBottom: 16, color: "#333" }}>
+            Are you sure you want to delete this job? This action cannot be undone.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: "8px 0", fontSize: 13 }}>
+            <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Name</span>
+            <span style={{ fontWeight: 500, color: "#222" }}>{jobToDelete?.name ?? "—"}</span>
+            <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Code</span>
+            <span style={{ fontWeight: 500, color: "#222" }}>{jobToDelete?.code ?? "—"}</span>
+          </div>
+        </div>
+      </NxModal>
+    </>
   );
 };
 

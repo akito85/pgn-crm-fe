@@ -1,94 +1,132 @@
-import {
-  Spin,
-  Checkbox,
-  Tooltip,
-} from "antd";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Checkbox, Tooltip } from "antd";
+import { debounce } from "lodash";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import {
-  EyeOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
-import {
   renderColumn,
   renderDateColumn,
+  hasValue,
+  disabledActionByStatus,
 } from "../../../../../utils";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
+  getAllApprovalList,
+  getListApprovalById,
   getApprovalHistory,
   getDownloadPartner,
   getPaginatePartner,
   inactivePartnerCa,
-  getAllApprovalList,
-  getListApprovalById,
 } from "../../../../../redux/slices/receipt_collection/partnerCa";
-import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import Toolbar from "../../../../../components/Toolbar";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
+
+const COLUMN_WIDTH = {
+  NO: 60,
+  PARTNER: 200,
+  CA: 200,
+  BANK: 200,
+  DATE: 150,
+  STATUS: 110,
+  STATUS_APPROVAL: 160,
+  ACTION: 60,
+};
 
 const ViewPartnerCa = () => {
-  // Selector
   const { loading, data, dataApprovalHistory } = useSelector(
     (state) => state.partnerCa
   );
   const { bodyError } = useSelector((state) => state?.general);
 
-  // Declaration
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
-  // const dataSource = data?.result;
 
-  // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [body, setBody] = useState({});
-  const [status, setStatus] = useState("");
+  const statusRef = useRef("");
   const [id, setId] = useState("");
   const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "statusApproval", "action"],
+  }));
 
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getPaginatePartner({
-        page,
-        pageSize,
-        sort,
-        search: encodeURIComponent(JSON.stringify(search)),
-      })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
+  const initialPageSize = 100;
 
   useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        dispatch(
+          getPaginatePartner({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+            isLoadMore: false,
+          })
+        );
+        if (isMounted) setPage(1);
+      } catch {
+        if (isMounted) setPage(1);
+      }
+    };
+    fetchData();
+    return () => { isMounted = false; };
+  }, [dispatch, search, sort]);
 
+  const hasMore = (data?.result?.length || 0) < (data?.page?.totalElements || 0);
 
-  // Breadcrumbs
+  const handleLoadMore = async () => {
+    if (!hasMore) return;
+    const currentDataLength = data?.result?.length || 0;
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+    dispatch(
+      getPaginatePartner({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      })
+    );
+    setPage(nextPage);
+  };
+
+  const handleRefresh = () => {
+    dispatch(
+      getPaginatePartner({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  };
+
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER_CA,
       breadcrumbName: "Partner Collecting Agent Mapping",
@@ -98,41 +136,55 @@ const ViewPartnerCa = () => {
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
     const keyData = Object.keys(data);
+    const escapeUnsafe = (s) =>
+      String(s ?? "").replaceAll(/[<>"'&]/g, (char) => {
+        const escapeMap = { "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "&": "&amp;" };
+        return escapeMap[char] ?? char;
+      });
     return keyData.map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+      value: escapeUnsafe(
+        item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
+      ),
     }));
   };
 
-  // Function Search Column
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
+  const handleSearch = useMemo(
+    () =>
+      debounce((selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+        setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
+      }, 500),
+    []
+  );
 
   useEffect(() => {
-    if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+    return () => {
+      handleSearch.cancel?.();
+    };
+  }, [handleSearch]);
+
+  const handleReset = useCallback((clearFilters, dataIndex) => {
+    clearFilters();
+    setSearch((prev) => {
+      const next = { ...prev };
+      delete next[dataIndex];
+      return next;
+    });
+    setSearchText("");
+  }, []);
+
+  useEffect(() => {
+    if (dataApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PARTNER_CA || [],
-          inactive:
-            dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER_CA || [],
+          inactive: dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER_CA || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PARTNER_CA || [],
-          inactive:
-            dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER_CA || [],
+          inactive: dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER_CA || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -143,23 +195,155 @@ const ViewPartnerCa = () => {
 
   const handleApprovalHistory = async (data) => {
     try {
-      setBody(data);
       await dispatch(getApprovalHistory(data))?.unwrap();
       setOpenModalHistory(true);
-
-    } catch (error) {
+    } catch {
       setOpenModalHistory(false);
-
     }
+  };
+
+  const baseColumns = useMemo(
+    () => [
+      {
+        key: "partnerName",
+        title: "PARTNER NAME",
+        dataIndex: "partnerName",
+        width: COLUMN_WIDTH.PARTNER,
+        sorter: true,
+        isClassification: true,
+        filteredValue: search?.partnerName == null ? null : [search.partnerName],
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "partnerName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
+        ),
+        render: (text, record) =>
+          renderColumn("partnerName", hasValue(search["partnerName"]), searchText,
+            record?.partner?.partnerName
+              ? `${record.partner.partnerCode} - ${record.partner.partnerName}`
+              : text, true, "input", search),
+      },
+      {
+        key: "collectingAgentName",
+        title: "COLLECTING AGENT",
+        dataIndex: "collectingAgentName",
+        width: COLUMN_WIDTH.CA,
+        sorter: true,
+        isClassification: true,
+        filteredValue: search?.collectingAgentName == null ? null : [search.collectingAgentName],
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "collectingAgentName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
+        ),
+        render: (text, record) =>
+          renderColumn("collectingAgentName", hasValue(search["collectingAgentName"]), searchText,
+            record?.collectingAgent?.name
+              ? `${record.collectingAgent.code} - ${record.collectingAgent.name}`
+              : text, true, "input", search),
+      },
+      {
+        key: "settlementBankName",
+        title: "SETTLEMENT BANK",
+        dataIndex: "settlementBankName",
+        width: COLUMN_WIDTH.BANK,
+        sorter: true,
+        isClassification: true,
+        filteredValue: search?.settlementBankName == null ? null : [search.settlementBankName],
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "settlementBankName", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
+        ),
+        render: (text, record) =>
+          renderColumn("settlementBankName", hasValue(search["settlementBankName"]), searchText,
+            record?.settlementBank?.bankName
+              ? `${record.settlementBank.bankCode} - ${record.settlementBank.bankName}`
+              : text, true, "input", search),
+      },
+      {
+        key: "startDate",
+        title: "START DATE",
+        dataIndex: "startDate",
+        width: COLUMN_WIDTH.DATE,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        filteredValue: search?.startDate == null ? null : [search.startDate],
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "startDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
+        ),
+        render: (text) =>
+          renderDateColumn("startDate", hasValue(search["startDate"]), searchText, text, "date", search),
+      },
+      {
+        key: "endDate",
+        title: "END DATE",
+        dataIndex: "endDate",
+        width: COLUMN_WIDTH.DATE,
+        sorter: true,
+        isClassification: true,
+        align: "center",
+        filteredValue: search?.endDate == null ? null : [search.endDate],
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "endDate", searchInput, searchedColumn, searchText, handleSearch, false, "date", [], handleReset
+        ),
+        render: (text) =>
+          renderDateColumn("endDate", hasValue(search["endDate"]), searchText, text, "date", search),
+      },
+      {
+        key: "status",
+        title: "STATUS",
+        dataIndex: "status",
+        width: COLUMN_WIDTH.STATUS,
+        sorter: true,
+        isClassification: true,
+        fixed: "right",
+        filteredValue: search?.status == null ? null : [search.status],
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "status", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
+        ),
+        render: (text) =>
+          renderColumn("status", hasValue(search["status"]), searchText, text, false, "status", search),
+      },
+      {
+        key: "statusApproval",
+        title: "STATUS APPROVAL",
+        dataIndex: "statusApproval",
+        width: COLUMN_WIDTH.STATUS_APPROVAL,
+        sorter: true,
+        isClassification: true,
+        fixed: "right",
+        filteredValue: search?.statusApproval == null ? null : [search.statusApproval],
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
+        ),
+        render: (text) =>
+          renderColumn("status", hasValue(search["statusApproval"]), searchText, text, false, "status", search),
+      },
+    ],
+    [search, searchText, searchedColumn, handleSearch, handleReset]
+  );
+
+  const onSort = (_, __, sorter) => {
+    let dataSort = "";
+    if (sorter.order != null) {
+      const direction = sorter.order === "ascend" ? "asc" : "desc";
+      dataSort = `${sorter.field}~${direction}`;
+    }
+    setSort(dataSort);
+  };
+
+  const handleDownload = () => {
+    dispatch(
+      getDownloadPartner({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize: loadMoreSize,
+        sort,
+      })
+    );
   };
 
   const handleInactive = (r) => {
     setOpenModalInactivate(true);
     setId(r?.id);
-    setNameModalActiveOrInactivate(
-      r?.partnerCode
-    );
-    setStatus(r?.status);
+    setNameModalActiveOrInactivate(r?.partner?.partnerName || r?.id);
+    statusRef.current = r?.status ?? "";
   };
 
   const handleCancelModalInactivate = () => {
@@ -168,311 +352,37 @@ const ViewPartnerCa = () => {
 
   const handleSubmitModalInactivate = (res, handleClear) => {
     const body = {
-      id: id,
+      id,
       appHierId: res.approvalHierarchy,
-      status: status === "Inactive" ? "Active" : "Inactive",
+      status: statusRef.current === "Inactive" ? "Active" : "Inactive",
       remark: res.remark,
     };
-    setBody({ body });
     dispatch(inactivePartnerCa({ body }))
       .unwrap()
       .then(() => {
         handleClear();
         handleCancelModalInactivate();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(getPaginatePartner({ search: tempSearch, page, pageSize, sort }));
+        dispatch(
+          getPaginatePartner({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+            isLoadMore: false,
+          })
+        );
       });
   };
 
-  const columns = [
-    {
-      title: "NO",
-      width: 60,
-      key: "no",
-      align: "center",
-      isClassification: true,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "PARTNER CODE",
-      dataIndex: "partnerCode",
-      sorter: true,
-      key: "partnerCode",
-      ...getColumnSearchPropsPaging(
-        "partnerCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "partnerCode",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "PARTNER Name",
-      dataIndex: ["partner", "partnerName"],
-      sorter: true,
-      key: "partnerName",
-      ...getColumnSearchPropsPaging(
-        "partner.partnerName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "partner.partnerName",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "Ca Code",
-      dataIndex: "caCode",
-      key: "caCode",
-      align: "",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "caCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "caCode",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "Ca Name",
-      dataIndex: ["ca", "name"],
-      key: "caName",
-      align: "",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "ca.name",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "ca.name",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "SETTLEMENT BANK",
-      dataIndex: "settlementBank",
-      key: "settlementBank",
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "settlementBank",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn(
-          "settlementBank",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "START DATE",
-      sorter: true,
-      align: "center",
-      key: "effStartDate",
-      dataIndex: "effStartDate",
-      ...getColumnSearchPropsPaging(
-        "effStartDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false,
-        "date"
-      ),
-      render: (v) =>
-        renderDateColumn(
-          "effStartDate",
-          searchedColumn,
-          searchText,
-          v,
-          "date",
-          search
-        ),
-    },
-    {
-      title: "END DATE",
-      sorter: true,
-      align: "center",
-      key: "effEndDate",
-      dataIndex: "effEndDate",
-      ...getColumnSearchPropsPaging(
-        "effEndDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false,
-        "date"
-      ),
-      render: (v) =>
-        renderDateColumn(
-          "effEndDate",
-          searchedColumn,
-          searchText,
-          v,
-          "date",
-          search
-        ),
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      sorter: true,
-      width: 100,
-      fixed: "right",
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn(
-          "status",
-          searchedColumn,
-          searchText,
-          text,
-          false,
-          "status"
-        ),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      key: "statusApproval",
-      sorter: true,
-      width: 200,
-      fixed: "right",
-      ...getColumnSearchPropsPaging(
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn(
-          "status",
-          searchedColumn,
-          searchText,
-          text,
-          false,
-          "status"
-        ),
-    },
-  ];
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["status", "statusApproval", "action"],
-  }));
-
-  const onSort = (_, __, sort) => {
-    const field = Array.isArray(sort.field)
-      ? sort.field.join(".")
-      : sort.field;
-
-    const dataSort =
-      sort.order !== undefined
-        ? `${field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-
-
-
-
-
-  // handle download
-  const handleDownload = () => {
-    dispatch(
-      getDownloadPartner({
-        search: encodeURIComponent(JSON.stringify(search)),
-        // search: tempSearch,
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  };
-
   const itemActions = [
-    // toolbar items
     {
       action: "Download",
       render: (
         <ButtonComponent
           onClick={handleDownload}
-          type={"submit"}
+          type="submit"
           border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
         >
           Download List
         </ButtonComponent>
@@ -483,250 +393,293 @@ const ViewPartnerCa = () => {
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_PARTNER_CA}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
+            border={false}
           >
             Create
           </ButtonComponent>
         </NavLink>
       ),
     },
-
-    // column action
     {
       action: "View",
       type: "table",
-      render: (record, data_length) => {
-        return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER_CA}
-              state={{ id: record?.id }}
-            >
-              {/* <ButtonComponent
-                  className="gap-5"
-                  icon={<EyeOutlined />}
-                  border={false}
-                /> */}
-              <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
-            </Link>
-          </Tooltip>
-        );
-      },
+      render: (record) => (
+        <Tooltip title="Detail">
+          <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_PARTNER_CA} state={{ id: record?.id }}>
+            <SVGIcon name="IconDetail" width={20} />
+          </Link>
+        </Tooltip>
+      ),
     },
     {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
-        const isEditable = record.statusApproval === "Rejected"
-        // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
-        // (record.status !== "Active" && record.statusApproval !== "Approved") 
-
-        return (
-          data_length > 3 ? (
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER_CA}
-              state={{ id: record?.id }}
+        const isEditable =
+          record.statusApproval === "Draft" || record.statusApproval === "Rejected";
+        return data_length > 3 ? (
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER_CA}
+            state={{ id: record?.id }}
+            className={isEditable ? "" : "pointer-events-none"}
+          >
+            <ButtonComponent
+              className="gap-5"
+              icon={<SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />}
+              border={false}
+              disabled={!isEditable}
+              type="action"
             >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
+              <span className="text-black gap-2 text-center">Update</span>
+            </ButtonComponent>
+          </Link>
+        ) : (
+          <Tooltip title="Update">
+            <button
+              type="button"
+              onClick={() => {
+                if (isEditable) {
+                  navigate(RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER_CA, {
+                    state: { id: record?.id },
+                  });
                 }
-                border={false}
-                disabled={!isEditable}
-
-              >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
-            </Link>
-          ) : (
-            <Tooltip title="Update" >
-              <div
-                onClick={(e) => {
-                  if (!isEditable) e.preventDefault();
-                }}
-                className={!isEditable ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
-              >
-                {isEditable ? (
-                  <Link
-                    to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER_CA}
-                    state={{ id: record?.id }}
-                  >
-                    <SVGIcon name="IconEdit" color="#ACC424" width={24} />
-                  </Link>
-                ) : (
-                  <SVGIcon name="IconEdit" color="#8D91A0" width={24} className={"cursor-not-allowed"} />
-                )}
-              </div>
-            </Tooltip>
-          )
+              }}
+              disabled={!isEditable}
+              className={isEditable ? "cursor-pointer" : "cursor-not-allowed opacity-50"}
+              style={{ background: "transparent", border: "none", padding: 0 }}
+            >
+              <SVGIcon name="IconEdit" color={isEditable ? "#ACC424" : "#8D91A0"} width={20} />
+            </button>
+          </Tooltip>
         );
       },
     },
     {
       action: "Activate",
       type: "table",
-      render: (record, data_length) => {
-        // const statusLowerCase = record?.status?.toLowerCase()
-
-        return (
-          data_length > 3 ?
-            <div className="w-full">
-              <ButtonComponent
-                border={false}
-                className={'gap-5 w-full'}
+      render: (record, data_length) =>
+        data_length > 3 ? (
+          <div className="w-full">
+            <ButtonComponent
+              border={false}
+              className="gap-5"
+              onClick={() => handleInactive(record)}
+              disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+              type="action"
+            >
+              <Checkbox
                 onClick={() => handleInactive(record)}
-              // disabled={
-              //   disabledActionByStatus('activate', record?.status, record?.statusApproval)
-              // }
-              >
-                <Checkbox
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-                <span
-                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
-                >
-                  {record?.status === "Active" ? "Inactivate" : "Activate"}
-                </span>
-              </ButtonComponent>
+                checked={record?.status !== "Active"}
+                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+              />
+              <span className="text-black ml-6 gap-2 text-center">
+                {record?.status === "Active" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          </div>
+        ) : (
+          <Tooltip title={record?.status === "Active" ? "Inactivate" : "Activate"}>
+            <div>
+              <Checkbox
+                checked={record?.status !== "Active"}
+                onClick={() => handleInactive(record)}
+                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+              />
             </div>
-            :
-            <Tooltip title={record?.status === "Active" ? "Inactivate" : "Activate"}>
-              <div >
-                <Checkbox
-                  border={false}
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-              </div>
-            </Tooltip>
-        );
-      }
+          </Tooltip>
+        ),
     },
     {
       action: "history",
       type: "table",
-      render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
+      render: (record, data_length) =>
+        data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
+            border={false}
+            onClick={() => handleApprovalHistory(record?.id)}
+            type="action"
+          >
+            <span className="text-black gap-2 text-center">Approval History</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title="Approval History">
+            <button
+              type="button"
               onClick={() => handleApprovalHistory(record?.id)}
+              className="cursor-pointer"
+              style={{ background: "transparent", border: "none", padding: 0 }}
             >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
-                onClick={() => handleApprovalHistory(record?.id)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
-        );
-      },
+              <SVGIcon name="IconLogHistory" color="#0075bf" width={24} />
+            </button>
+          </Tooltip>
+        ),
     },
   ];
 
-  // handle retry modal error
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
-      if (bodyError?.action === "GET_APPROVAL_PARTNER_CA") {
-        dispatch(getApprovalHistory(body));
-      } else if (bodyError?.action === "DOWNLOAD_PARTNER_CA") {
+      if (bodyError?.action === "DOWNLOAD_PARTNER_CA") {
         handleDownload();
-      } else if (bodyError?.action === "INACTIVE_PARTNER_CA") {
-        dispatch(inactivePartnerCa(body));
       }
-      handleFetch();
-    } catch (error) {
-      handleFetch();
+      handleRefresh();
+    } catch {
+      handleRefresh();
     }
   };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
+  const actionColsRaw = useColumnActionPermission(
+    ["view", "update", "activate", "history"],
+    itemActions
+  );
+
+  const actionCols = useMemo(
+    () =>
+      actionColsRaw.map((col) => ({
+        ...col,
+        key: col.action,
+        width: COLUMN_WIDTH.ACTION,
+        align: "center",
+      })),
+    [actionColsRaw]
+  );
+
+  const allColumns = useMemo(() => {
+    const cols = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return cols;
+  }, [baseColumns, actionCols]);
+
+  const columnDefinitions = useMemo(
+    () =>
+      allColumns.map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+      })),
+    [allColumns]
+  );
+
+  const handleAdvanceSearch = (searchData) => {
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    if (searchData?.filterRules && Array.isArray(searchData.filterRules)) {
+      searchData.filterRules.forEach((ruleGroup) => {
+        if (Array.isArray(ruleGroup)) {
+          ruleGroup.forEach((rule) => {
+            if (rule?.column && rule?.value !== undefined && rule?.value !== null && rule?.value !== "" && rule?.condition) {
+              const conditionKey = rule.condition === "Equal to" ? "" : rule.condition;
+              simpleSearch[`${rule.column}${conditionKey}`] = rule.value;
+            }
+          });
+        }
+      });
+    }
+    setSearch(simpleSearch);
+    setSearchedColumn(Object.keys(simpleSearch)[0]);
+    setSearchText(Object.values(simpleSearch)[0]);
+    setPage(1);
+    dispatch(
+      getPaginatePartner({
+        search: encodeURIComponent(JSON.stringify(simpleSearch)),
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+        isLoadMore: false,
+      })
+    );
+  };
+
+  const columns = useMemo(() => {
+    const base = [
+      {
+        key: "no",
+        title: "NO",
+        width: COLUMN_WIDTH.NO,
+        align: "center",
+        isClassification: true,
+        render: (text, object, index) => index + 1,
+      },
+      ...allColumns,
+    ];
+    return applyFixedColumns(base, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        {/* <Toolbar items={itemActions} /> */}
-        <CardContainer header={
+    <>
+      <BreadCrumb routes={routes} />
+      <CardContainer
+        header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">PARTNER COLLECTING AGENT MAPPING List</p>
+            <p className="mt-[15px] font-bold">PARTNER COLLECTING AGENT MAPPING LIST</p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
             </div>
           </div>
-        }>
-          <TableRBI
-            dataSource={data?.result}
-            pageSize={pageSize}
-            // columns={columns}
-            columns={[
-              ...columns,
-              ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
-                itemActions
-              ),
-            ]}
-            current={page}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-            totalData={data?.page?.totalElements}
-            onSort={onSort}
-            tableScrolled={{
-              x: "max-content",
-              y: 525,
-            }}
-            showExport={true}
-            handleDownload={handleDownload}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-          />
-        </CardContainer>
-
-
-
-        <ModalHistory
-          isOpen={openModalHistory && dataApprovalHistoryFix}
-          handleClose={() => setOpenModalHistory(false)}
-          header={"Approval History"}
-          width={850}
-          tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistoryFix?.dataApprover}
-          dataHistory={dataApprovalHistoryFix?.dataHistory}
+        }
+      >
+        <TableRBI
+          key="partner-ca-mapping-table"
+          idTable="partner-ca-mapping-table"
+          size="small"
+          dataSource={data?.result}
+          loading={loading}
+          columns={columns}
+          onSort={onSort}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          totalData={data?.page?.totalElements}
+          tableScrolled={{ x: "max-content", y: 525 }}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          columnDefinitions={columnDefinitions}
+          handleDownload={handleDownload}
+          showExport={false}
+          showPaginationInfo={true}
+          paginationInfoRenderer={(total, loaded) => `Showing ${loaded} of ${total} records`}
+          usePagination={false}
+          showRefresh={true}
+          onRefresh={handleRefresh}
+          loadMoreThreshold={20}
+          onAdvanceSearch={handleAdvanceSearch}
         />
+      </CardContainer>
 
-        <ModalActiveInactive
-          dispatch={dispatch}
-          getAPIOption={getAllApprovalList}
-          getAPIDetail={getListApprovalById}
-          selector={"partnerCa"}
-          alertMessage={`Are you sure you want to inactivate this Partner CA with Partner Code ${nameModalActiveOrInactivate}?`}
-          openModalInactivate={openModalInactivate}
-          handleCloseModalInactivate={handleCancelModalInactivate}
-          onFinish={handleSubmitModalInactivate}
-        />
-      </Spin>
-      {/* modal try again */}
+      <ModalHistory
+        isOpen={openModalHistory && dataApprovalHistoryFix}
+        handleClose={() => setOpenModalHistory(false)}
+        header="Approval History"
+        width={850}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
+      <ModalActiveInactive
+        dispatch={dispatch}
+        getAPIOption={getAllApprovalList}
+        getAPIDetail={getListApprovalById}
+        selector="partnerCa"
+        alertMessage={`Are you sure you want to inactivate this Partner CA Mapping: ${nameModalActiveOrInactivate}?`}
+        openModalInactivate={openModalInactivate}
+        handleCloseModalInactivate={handleCancelModalInactivate}
+        onFinish={handleSubmitModalInactivate}
+      />
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

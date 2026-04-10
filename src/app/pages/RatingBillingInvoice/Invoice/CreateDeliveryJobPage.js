@@ -7,7 +7,6 @@ import {
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import InputComponent from "../../../../components/InputComponent";
 import SelectComponent from "../../../../components/SelectComponent";
@@ -31,7 +30,7 @@ const CreateDeliveryJobPage = () => {
   const fetchJobNames = async () => {
     try {
       const response = await ratingBillingHttpService.getAll(
-        "/v1/dbs/api/rbi/delivery/jobname"
+        "/v1/dbs/api/rbi/delivery/jobname",
       );
       if (response?.data) {
         setJobNames(response.data);
@@ -46,7 +45,7 @@ const CreateDeliveryJobPage = () => {
   const fetchCustomerSegments = async () => {
     try {
       const response = await ratingBillingHttpService.getAll(
-        "/v1/dbs/api/rbi/delivery/customer-segment"
+        "/v1/dbs/api/rbi/delivery/customer-segment",
       );
       if (response?.data) {
         setCustomerSegments(response.data);
@@ -61,7 +60,7 @@ const CreateDeliveryJobPage = () => {
   const fetchEmailTemplates = async () => {
     try {
       const response = await ratingBillingHttpService.getAll(
-        "/v1/dbs/api/rbi/delivery/template/email"
+        "/v1/dbs/api/rbi/delivery/template/email",
       );
       if (response?.data) {
         setEmailTemplates(response.data);
@@ -76,7 +75,7 @@ const CreateDeliveryJobPage = () => {
   const fetchWhatsappTemplates = async () => {
     try {
       const response = await ratingBillingHttpService.getAll(
-        "/v1/dbs/api/rbi/delivery/template/whatsapp"
+        "/v1/dbs/api/rbi/delivery/template/whatsapp",
       );
       if (response?.data) {
         setWhatsappTemplates(response.data);
@@ -91,7 +90,7 @@ const CreateDeliveryJobPage = () => {
   const fetchSmsTemplates = async () => {
     try {
       const response = await ratingBillingHttpService.getAll(
-        "/v1/dbs/api/rbi/delivery/template/sms"
+        "/v1/dbs/api/rbi/delivery/template/sms",
       );
       if (response?.data) {
         setSmsTemplates(response.data);
@@ -161,11 +160,11 @@ const CreateDeliveryJobPage = () => {
       if (values.activeDateRange && values.activeDateRange.length === 2) {
         formData.append(
           "startDate",
-          values.activeDateRange[0].format("YYYY-MM-DD")
+          values.activeDateRange[0].format("YYYY-MM-DD"),
         );
         formData.append(
           "endDate",
-          values.activeDateRange[1].format("YYYY-MM-DD")
+          values.activeDateRange[1].format("YYYY-MM-DD"),
         );
       }
 
@@ -179,7 +178,7 @@ const CreateDeliveryJobPage = () => {
       if (values.template_whatsapp || values.template_wa) {
         formData.append(
           "whatsappTemplateId",
-          values.template_whatsapp || values.template_wa
+          values.template_whatsapp || values.template_wa,
         );
       }
       if (values.template_sms) {
@@ -199,7 +198,7 @@ const CreateDeliveryJobPage = () => {
         formData,
         (percent) => {
           console.log(`Upload progress: ${percent}%`);
-        }
+        },
       );
 
       message.success("Job delivery berhasil dibuat!");
@@ -209,7 +208,7 @@ const CreateDeliveryJobPage = () => {
       console.error("Validation or submission failed:", error);
       if (error.response) {
         message.error(
-          error.response?.data?.message || "Gagal membuat job delivery"
+          error.response?.data?.message || "Gagal membuat job delivery",
         );
       } else if (error.errorFields) {
         message.error("Mohon lengkapi semua field yang wajib diisi");
@@ -260,7 +259,7 @@ const CreateDeliveryJobPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
@@ -269,6 +268,7 @@ const CreateDeliveryJobPage = () => {
             </p>
           </div>
         }
+        type={"tabs"}
       >
         <Spin spinning={loading}>
           <Form
@@ -293,7 +293,7 @@ const CreateDeliveryJobPage = () => {
                             return Promise.resolve();
                           }
                           return Promise.reject(
-                            new Error("Minimal pilih satu job name")
+                            new Error("Minimal pilih satu job name"),
                           );
                         },
                       },
@@ -316,7 +316,8 @@ const CreateDeliveryJobPage = () => {
                 {/* Description */}
                 <Form.Item noStyle shouldUpdate>
                   {({ getFieldError }) => {
-                    const hasJobNameError = getFieldError("jobNames").length > 0;
+                    const hasJobNameError =
+                      getFieldError("jobNames").length > 0;
                     return (
                       <div
                         style={{
@@ -327,7 +328,10 @@ const CreateDeliveryJobPage = () => {
                         <Form.Item
                           name="description"
                           rules={[
-                            { required: true, message: "Deskripsi wajib diisi!" },
+                            {
+                              required: true,
+                              message: "Deskripsi wajib diisi!",
+                            },
                           ]}
                         >
                           <InputComponent
@@ -352,13 +356,17 @@ const CreateDeliveryJobPage = () => {
                   return (
                     <div
                       className="flex w-full gap-3"
-                      style={{ marginTop: hasDescriptionError ? "0px" : "-15px" }}
+                      style={{
+                        marginTop: hasDescriptionError ? "0px" : "-15px",
+                      }}
                     >
                       {/* Active Date Range */}
                       <div style={{ flex: 1 }}>
                         <Form.Item
                           label={
-                            <span style={{ fontWeight: "400", fontSize: "14px" }}>
+                            <span
+                              style={{ fontWeight: "400", fontSize: "14px" }}
+                            >
                               Active Date Range
                             </span>
                           }
@@ -377,7 +385,9 @@ const CreateDeliveryJobPage = () => {
                             size="medium"
                             disabledDate={(current) => {
                               // Disable dates before today
-                              return current && current < dayjs().startOf("day");
+                              return (
+                                current && current < dayjs().startOf("day")
+                              );
                             }}
                           />
                         </Form.Item>
@@ -387,7 +397,9 @@ const CreateDeliveryJobPage = () => {
                       <div style={{ flex: 1 }}>
                         <Form.Item
                           label={
-                            <span style={{ fontWeight: "400", fontSize: "14px" }}>
+                            <span
+                              style={{ fontWeight: "400", fontSize: "14px" }}
+                            >
                               Customer Criteria
                             </span>
                           }
@@ -425,7 +437,7 @@ const CreateDeliveryJobPage = () => {
 
                       selectedJobNames.forEach((jobCode) => {
                         const jobName = jobNames.find(
-                          (job) => job.code === jobCode
+                          (job) => job.code === jobCode,
                         );
                         if (!jobName) return;
 
@@ -495,7 +507,7 @@ const CreateDeliveryJobPage = () => {
                                   }))}
                                 />
                               </Form.Item>
-                            )
+                            ),
                           )}
 
                           {/* Show message for unavailable templates */}
@@ -547,7 +559,7 @@ const CreateDeliveryJobPage = () => {
                             size="large"
                             onClick={() =>
                               navigate(
-                                "/system-setup/content-management/create"
+                                "/system-setup/content-management/create",
                               )
                             }
                           >
@@ -611,32 +623,24 @@ const CreateDeliveryJobPage = () => {
                 </Upload.Dragger>
               </Form.Item>
             </BaseContainer>
-
-            {/* Action Buttons */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "12px",
-                marginTop: "32px",
-              }}
-            >
-              <Button size="large" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button
-                type="primary"
-                size="large"
-                onClick={handleSubmit}
-                loading={loading}
-              >
-                Save Configuration
-              </Button>
-            </div>
           </Form>
         </Spin>
       </CardContainer>
-    </LayoutMenu>
+      {/* Action Buttons */}
+      <div className="flex w-full bg-white rounded-md p-3 mt-3 justify-between">
+        <Button size="large" onClick={handleCancel}>
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          size="large"
+          onClick={handleSubmit}
+          loading={loading}
+        >
+          Save Configuration
+        </Button>
+      </div>
+    </>
   );
 };
 

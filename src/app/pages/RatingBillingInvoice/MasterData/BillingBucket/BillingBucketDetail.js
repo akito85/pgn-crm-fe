@@ -6,11 +6,9 @@ import { Spin } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailSection from "./Utils/DetailSection";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -25,11 +23,12 @@ import {
   approveRejectInactiveBillingBucket,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+import CardContainer from "../../../../../components/CardContainer";
 
 const BillingBucketDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -108,7 +107,7 @@ const BillingBucketDetail = () => {
             updatedDate: item.updatedDate,
             updatedBy: item.updatedBy,
           };
-        }
+        },
       );
 
       // Data Attachment Information
@@ -131,7 +130,7 @@ const BillingBucketDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -336,7 +335,7 @@ const BillingBucketDetail = () => {
         );
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <CardContainer header={"Attachment Information"}>
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
@@ -345,7 +344,7 @@ const BillingBucketDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return <></>;
@@ -383,7 +382,7 @@ const BillingBucketDetail = () => {
           })
         : approveRejectBillingBucket({
             body: data,
-          })
+          }),
     )
       .unwrap()
       .then(() => {
@@ -406,7 +405,7 @@ const BillingBucketDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -414,12 +413,12 @@ const BillingBucketDetail = () => {
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_BILLING_BUCKET" && (
-              <BaseContainer header={"inactive request information"}>
+              <CardContainer header={"inactive request information"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
+                          bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormatting.date)
                       : ""}
                   </DetailText>
@@ -430,7 +429,7 @@ const BillingBucketDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
+              </CardContainer>
             )}
           <RadioTabs
             data={listSectionInfo}
@@ -440,20 +439,8 @@ const BillingBucketDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex mt-[10px]">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 
@@ -511,7 +498,7 @@ const BillingBucketDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

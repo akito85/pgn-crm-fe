@@ -555,9 +555,10 @@ const TableProduct = ({
       {/* Start Pagination */}
       <div className="py-4">
       <Form form={formTable} component={false}>
-        <NxTable
-          idTable="product-detail-table"
-          dataSource={displayData}
+				<NxTable
+					idTable="product-detail-table"
+					rowKey="key"
+					dataSource={displayData}
           columns={filterColumn(
             columnsConfig.map((col) => ({
               ...col,

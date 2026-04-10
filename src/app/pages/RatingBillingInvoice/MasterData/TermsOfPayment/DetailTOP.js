@@ -1,9 +1,9 @@
 import moment from "moment";
 import React from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 import FunctionalTableCriteriaTOP from "./TableCriteria/FunctionalTableCriteriaTOP";
+import CardContainer from "../../../../../components/CardContainer";
 
 const DetailTOP = ({
   dataDetail,
@@ -19,27 +19,27 @@ const DetailTOP = ({
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(", ");
 
-    const labelStatus = (index) => {
-      let text;
-      switch (index) {
-        case "WAITING_APPROVAL":
-          text = "Waiting Approval";
-          break;
-        default:
-          text = index
-            ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-            : index;
-          break;
-      }
-      return text;
-    };
+  const labelStatus = (index) => {
+    let text;
+    switch (index) {
+      case "WAITING_APPROVAL":
+        text = "Waiting Approval";
+        break;
+      default:
+        text = index
+          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+          : index;
+        break;
+    }
+    return text;
+  };
 
   return (
     <div>
       {data_req?.isApprover &&
       data_req?.approvalType &&
       data_req?.approvalType === "INACTIVE_TERMS_OF_PAYMENT" ? (
-        <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
+        <CardContainer header={"INACTIVE REQUEST INFORMATION"}>
           <div className="grid grid-cols-4 w-full">
             <DetailText label={"Requested Date"}>
               {data_req?.requestedDate
@@ -51,10 +51,10 @@ const DetailTOP = ({
             </DetailText>
             <DetailText label={"Remark"}>{data_req?.remarks}</DetailText>
           </div>
-        </BaseContainer>
+        </CardContainer>
       ) : null}
 
-      <BaseContainer header={"TERMS OF PAYMENT INFORMATION"}>
+      <CardContainer header={"TERMS OF PAYMENT INFORMATION"}>
         <div className="w-full grid grid-cols-3 gap-5">
           <DetailText label={"Name"}>{dataDetail?.name}</DetailText>
           <DetailText label={"Start Date"}>
@@ -91,9 +91,9 @@ const DetailTOP = ({
             {dataDetail?.description}
           </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"CRITERIA INFORMATION"}>
+      <CardContainer header={"CRITERIA INFORMATION"}>
         <FunctionalTableCriteriaTOP
           type={"show"}
           showAction={"show"}
@@ -101,13 +101,11 @@ const DetailTOP = ({
           dataCriteria={dataCriteria}
           updateData={updateData}
         />
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"HISTORY LOG INFORMATION"}>
+      <CardContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5">
-          <DetailText label={"Record ID"}>
-            {dataLog.recordId}
-          </DetailText>
+          <DetailText label={"Record ID"}>{dataLog.recordId}</DetailText>
           <DetailText label={"Created Date"}>
             {dataLog.createdDate !== null
               ? moment(dataLog.createdDate).format(dateFormatting.dateTime)
@@ -121,7 +119,7 @@ const DetailTOP = ({
           </DetailText>
           <DetailText label={"Updated By"}>{dataLog.updatedBy}</DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

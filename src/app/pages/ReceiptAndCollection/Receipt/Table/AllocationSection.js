@@ -11,12 +11,12 @@ import {
 } from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
-import { Spin, Form, Button } from "antd";
+import { Spin, Form, Button, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import { getAllocationRecomendationList } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getAllocationRecomendationList, createAllocation } from "../../../../../redux/slices/receipt_collection/receipt";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import { columnRecommendation } from "./ColumnRecomendation";
 import { updatePagination } from "../../../../../utils/updatePagination";
@@ -31,15 +31,16 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import { configApp } from "../../../../../constants/configApp";
 import InputComponent from "../../../../../components/InputComponent";
 import { FormStepper } from "../../../../../components/FormStepNavigation";
+import TableRBI from "../../../../../components/TableRBI";
 
 const AllocationSection = ({
   dataTable,
-  setDataTable = () => {},
-  setIsInsert = () => {},
+  setDataTable = () => { },
+  setIsInsert = () => { },
   isInsert,
   amount,
   totalAllocationAmount,
-  setTotalAllocationAmount = () => {},
+  setTotalAllocationAmount = () => { },
   accountNumberSelected,
   rateAmountValue,
   formValues,
@@ -313,6 +314,38 @@ const AllocationSection = ({
     });
   };
 
+  // Fungsi untuk update amount tiap baris
+  const handleEditAmount = (rowKey, newValue) => {
+    // 1. Update data di tabel modal
+    setDataRecomendation((prev) =>
+      prev.map((item) =>
+        item.key === rowKey ? { ...item, allocationAmount: Number(newValue) || 0 } : item
+      )
+    );
+
+    // 2. Update data di tabel utama (HANYA kalau barisnya ada)
+    setDataTable((prev) => {
+      // Cek dulu, apakah row ini ada di tabel utama?
+      const isExist = prev.some((item) => item.key === rowKey);
+
+      // Kalau nggak ada (artinya kita lagi ngedit di dalam modal),
+      // STOP di sini. Jangan return array baru biar useEffect nggak ke-trigger & nge-reset datanya!
+      if (!isExist) return prev;
+
+      // Kalau ada, baru update angkanya
+      return prev.map((item) =>
+        item.key === rowKey ? { ...item, allocationAmount: Number(newValue) || 0 } : item
+      );
+    });
+  };
+
+  useEffect(() => {
+    if (openModalAllocation && selectDataTable?.length > 0) {
+      const newTotal = selectDataTable.reduce((total, row) => total + (row.allocationAmount || 0), 0);
+      setTotalAllocationAmount(newTotal);
+    }
+  }, [selectDataTable, openModalAllocation]);
+
   // filtered column
   const filteredColumns = columnAllocation(
     pageChoose,
@@ -329,7 +362,7 @@ const AllocationSection = ({
   );
 
   // handle open modal allocation
-  const handleOpen = () => {};
+  const handleOpen = () => { };
 
   // handle close modal allocation
   const handleCancel = () => {
@@ -394,65 +427,129 @@ const AllocationSection = ({
   // handle save data table
   const handleSaveDataTable = () => {
     if (totalAllocationAmount > parsedAmount) {
+      const errorBody = {
+        title: "Alert",
+        description: `Total allocation amount cannot be greater than receipt amount!`,
+      };
+      dispatch(showModalError(errorBody));
     } else {
-      // dispatch(setDataAllocation(selectDataTable));
-      // Merge new data (Approval, Remark, Attachment) into the selected rows
-      // Note: Since these are technically "header" info for the allocation SET,
-      // we might need to attach them to EACH row, or the backend expects them differently.
-      // Based on typical table-inline patterns, we'll attach them to the objects.
+      // Check if we're in update mode and have a receipt ID
+      const receiptId = formValues?.id; // Assuming receipt ID is available in formValues
+      
+      if (receiptId) {
+        // Call API to create allocation in database
+        const allocationRequest = {
+          receiptId: receiptId,
+          allocationDtoList: selectDataTable.map((row) => ({
+            id: row.id,
+            allocationAmount: row.allocationAmount,
+            remark: forceObj.remark,
+            approvalHierarchyId: forceObj.approvalHierarchy,
+            createdBy: userData?.userName,
+          })),
+          remark: forceObj.remark,
+          approvalHierarchyId: forceObj.approvalHierarchy,
+          attachmentIds: listDataAttachment?.map(att => att.id) || [],
+        };
 
-      const enrichedData = selectDataTable.map((row) => ({
-        ...row,
-        remark: forceObj.remark,
-        approvalHierarchyId: forceObj.approvalHierarchy,
-        attachments: listDataAttachment,
-        createdBy: userData?.userName,
-      }));
+        dispatch(createAllocation(allocationRequest))
+          .unwrap()
+          .then(() => {
+            // Success - update local state
+            const enrichedData = selectDataTable.map((row) => ({
+              ...row,
+              remark: forceObj.remark,
+              approvalHierarchyId: forceObj.approvalHierarchy,
+              attachments: listDataAttachment,
+              createdBy: userData?.userName,
+            }));
 
-      setDataTable((prev) => [...prev, ...enrichedData]);
+            setDataTable((prev) => [...prev, ...enrichedData]);
+            handleResetModal();
+          })
+          .catch((error) => {
+            console.error("Create allocation failed:", error);
+            const errorBody = {
+              title: "Error",
+              description: error?.message || "Failed to create allocation. Please try again.",
+            };
+            dispatch(showModalError(errorBody));
+          });
+      } else {
+        // For create mode, just update local state (will be saved with receipt)
+        const enrichedData = selectDataTable.map((row) => ({
+          ...row,
+          remark: forceObj.remark,
+          approvalHierarchyId: forceObj.approvalHierarchy,
+          attachments: listDataAttachment,
+          createdBy: userData?.userName,
+        }));
 
-      // handleCancel();
-      setOpenModalAllocation(false);
-      setPageChoose(1);
-      setPageSizeChoose(10);
-      setCurrentStep(0);
-      setForceObj({});
-      setListDataAttachment([]);
-      modalForm.resetFields();
+        setDataTable((prev) => [...prev, ...enrichedData]);
+        handleResetModal();
+      }
     }
+  };
+
+  const handleResetModal = () => {
+    setSelectedRowKeys([]);
+    setSelectDataTable([]);
+    setTotalAllocationAmount(0);
+    setOpenModalAllocation(false);
+    setPageChoose(1);
+    setPageSizeChoose(10);
+    setCurrentStep(0);
+    setForceObj({});
+    setListDataAttachment([]);
+    modalForm.resetFields();
   };
 
   const handleOpenModalAllocation = async () => {
     try {
-      const { apphierId, receiptCode, refrence, isMisc, ...keys } =
-        form?.getFieldsValue();
+      try {
+        // Validate specific fields from the Receipt form (tab 1)
+        await form.validateFields([
+          "miscellaneous", "accNumber", "cusNumber", "cusName", "accountName",
+          "segment", "accountGroupType", "accountType", "sor", "costCenterCode",
+          "costCenterName", "receiptCode", "receiptChannel", "paymentType",
+          "paymentGateway", "collectingAgent", "deliveryChannel", "method",
+          "bank", "receiptDate", "currency", "amount", "rateType", "rateDate",
+          "rateAmount", "convertedCurrency", "eqAmount", "description",
+          "registrationNumber", "customerType", "partner"
+        ]);
+      } catch (err) {
+        // If validation fails, show the exact fields
+        if (err?.errorFields?.length > 0) {
+          const failingFields = err.errorFields.map(f => f.name.join('.')).join(', ');
+          console.log("Validation Error Fields:", err.errorFields);
+          const errorBody = {
+            title: "Alert",
+            description: `Please input all mandatory form values! Missing: ${failingFields}`,
+          };
+          dispatch(showModalError(errorBody));
+          return;
+        }
+      }
 
-      const checkValues = Object.values(keys).every((value) => {
-        return value !== undefined && value !== null && value !== "";
-      });
-      // setSelectedRowKeys([]);
-      // setSelectDataTable([]);
-      console.log(checkValues);
-      if (checkValues === false) {
+      if (hasValue(amount) === false || parsedAmount === 0) {
         const errorBody = {
-          title: "Failed",
-          description: `Please input values!`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (hasValue(amount) === false || parsedAmount === 0) {
-        const errorBody = {
-          title: "Failed",
+          title: "Alert",
           description: `Please input amount!`,
         };
         dispatch(showModalError(errorBody));
       } else {
+        setSelectedRowKeys([]);
+        setSelectDataTable([]);
+        setTotalAllocationAmount(0);
         await dispatch(
           getAllocationRecomendationList({
             search: encodeURIComponent(JSON?.stringify(search)),
             pageChoose,
             pageSizeChoose,
             sort: sort,
-            accountNumberSelected,
+            accountNumberSelected: accountNumberSelected?.includes(" - ")
+              ? (!isNaN(accountNumberSelected?.split(" - ")[0]) ? accountNumberSelected?.split(" - ")[0] : accountNumberSelected?.split(" - ")[1])
+              : accountNumberSelected,
             balance: balance,
             currencyId: formValues?.currency,
             rateAmount: rateAmountValue,
@@ -467,10 +564,10 @@ const AllocationSection = ({
 
   // handle sort
   const steps = [
-    { title: "Allocation Information" },
-    { title: "Approval Information" },
-    { title: "Attachment Information" },
-    { title: "Confirmation" },
+    { title: "CHOOSE ALLOCATION" },
+    { title: "APPROVAL" },
+    { title: "ATTACHMENT" },
+    { title: "CONFIRMATION" },
   ];
 
   const handleNext = () => {
@@ -482,89 +579,98 @@ const AllocationSection = ({
   };
 
   return (
-    <div className="w-full items-end flex flex-col gap-5">
-      <ButtonComponent
-        type={"submit"}
-        icon={<SVGIcon name="IconButtonCreate" width={24} />}
-        onClick={handleOpenModalAllocation}
-        disabled={isInsert || rateAmountValue === 0}
-      >
-        Create
-      </ButtonComponent>
+    <div className="w-full flex flex-col gap-4">
+      <div className="flex justify-end">
+        <ButtonComponent
+          type={"submit"}
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          onClick={handleOpenModalAllocation}
+          disabled={isInsert || rateAmountValue === 0}
+        >
+          Create
+        </ButtonComponent>
+      </div>
+
       <div className="w-full">
-        <TableInlineAllocation
-          cols={columnAllocation(
+        <TableRBI
+          columns={columnAllocation(
             page,
             pageSize,
             searchInput,
             searchedColumn,
             searchText,
             handleSearch,
+            undefined,
+            () => setOpenModalAllocation(true), // This is "Update" in main view? Usually it should open edit modal.
+            (key) => {
+              const newData = dataTable.filter((item) => item.key !== key);
+              setDataTable(newData);
+            }
           )}
           current={page}
           pageSize={pageSize}
-          scrollTable={{ x: 3500, y: 500 }}
-          actionFix={true}
-          tableData={updatePagination(
+          dataSource={updatePagination(
             dataTable,
             "data",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
-            typeColumn,
+            page,
+            pageSize,
+            typeColumn
           )}
-          setInserted={setIsInsert}
-          onDataChange={setDataTable}
           totalData={updatePagination(
             dataTable,
             "length",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
-            typeColumn,
+            page,
+            pageSize,
+            typeColumn
           )}
-          setUpdateSelectDataTable={setSelectDataTable}
-          setUpdateSelectRowKeys={setSelectedRowKeys}
-          setUpdateTotalAmount={setTotalAllocationAmount}
-          rateAmount={rateAmountValue}
-          currency={currencyId}
-          // onSort={onSort}
-          // dispatcher={dispatch}
+          tableScrolled={{ x: 1500, y: 500 }}
+          onChange={(p, s) => {
+            setPage(p);
+            setPageSize(s);
+          }}
+          actionFix={true}
         />
       </div>
-      <div className="w-full flex flex-col">
+
+      <div className="w-full flex flex-col items-end text-sm text-[#4B465C] opacity-80">
         {totalAllocationAmount > parsedAmount && (
           <span className="text-red-800">
             Total amount of selected item has been exceeded Total available
             amount. Please select other item.
           </span>
         )}
-        <span>
-          {" "}
-          Total Amount :{" "}
-          {totalAllocationAmount?.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </span>
-        <span>
-          {" "}
-          Balance :{" "}
-          {balance === 0
-            ? 0
-            : balance?.toLocaleString("en-US", {
+        <div className="flex gap-4 mt-2">
+          <span>
+            Total Amount :{" "}
+            <strong>
+              {totalAllocationAmount?.toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
-              })}{" "}
-        </span>
+              })}
+            </strong>
+          </span>
+          <span>
+            Balance :{" "}
+            <strong>
+              {balance === 0
+                ? 0
+                : balance?.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+            </strong>
+          </span>
+        </div>
       </div>
       <ModalCustom
         isOpen={openModalAllocation}
         handleCancel={handleCancel}
         type={"confirmation"}
-        header={"Choose Allocation"}
+        header={"CREATE ALLOCATION"}
         width={1200}
         footer={null}
       >
@@ -581,10 +687,10 @@ const AllocationSection = ({
               {/* Step 1: Allocation Information */}
               <div style={{ display: currentStep === 0 ? "block" : "none" }}>
                 <p className="text-primary text-xl font-semibold uppercase py-[20px] gap-5">
-                  RECEIPT ON BANK STATEMENT
+                  ALLOCATION LIST
                 </p>
                 <div className="my-5">
-                  <TablePagination
+                  <TableRBI
                     columns={columnRecommendation(
                       pageChoose,
                       pageSizeChoose,
@@ -592,6 +698,8 @@ const AllocationSection = ({
                       searchedColumnChoose,
                       searchTextChoose,
                       handleSearchModal,
+                      undefined,
+                      handleEditAmount
                     )}
                     current={pageChoose}
                     pageSize={pageSizeChoose}
@@ -613,10 +721,11 @@ const AllocationSection = ({
                       pageSizeChoose,
                       typeColumn,
                     )}
-                    tableScrolled={{ x: 3500, y: 500 }}
+                    tableScrolled={{ x: 1800, y: 500 }}
                     onChange={handleChange}
                     rowSelection={rowSelection}
                     onSizeChanger={handleChange}
+                    actionFix={true}
                   />
                 </div>
                 {totalAllocationAmount > parsedAmount && (
@@ -675,24 +784,22 @@ const AllocationSection = ({
               {/* Step 4: Confirmation */}
               <div style={{ display: currentStep === 3 ? "block" : "none" }}>
                 <div className="flex flex-col gap-4">
-                  <RadioTabs
-                    data={[
-                      { value: "Allocation" },
-                      { value: "Approval" },
-                      { value: "Attachment" },
+                  <Tabs
+                    activeKey={confirmationTab || "Allocation"}
+                    onChange={(key) => setConfirmationTab(key)}
+                    items={[
+                      { label: "Allocation", key: "Allocation" },
+                      { label: "Approval", key: "Approval" },
+                      { label: "Attachment", key: "Attachment" },
                     ]}
-                    onChange={(e) => setConfirmationTab(e.target.value)}
-                    currentPosition={confirmationTab || "Allocation"}
                   />
                   <div className="flex flex-col gap-4">
-                    <div className="text-primary text-sm font-bold uppercase">
-                      {`${confirmationTab || "Allocation"} INFORMATION`}
-                    </div>
+
 
                     {/* Allocation Info Tab */}
                     {(confirmationTab === "Allocation" || !confirmationTab) && (
                       <>
-                        <TablePagination
+                        <TableRBI
                           columns={columnRecommendation(
                             pageChoose,
                             pageSizeChoose,
@@ -700,12 +807,15 @@ const AllocationSection = ({
                             searchedColumnChoose,
                             searchTextChoose,
                             handleSearchModal,
+                            undefined,
+                            handleEditAmount,
+                            true
                           )}
                           dataSource={selectDataTable}
                           usePagination={false}
-                          tableScrolled={{ x: 3500, y: 300 }}
+                          tableScrolled={{ x: 1800, y: 300 }}
                         />
-                        <DetailText label={"Remark"}>
+                        {/* <DetailText label={"Remark"}>
                           {forceObj?.remark}
                         </DetailText>
                         <div className="mt-2">
@@ -713,7 +823,7 @@ const AllocationSection = ({
                           {totalAllocationAmount?.toLocaleString("en-US", {
                             minimumFractionDigits: 2,
                           })}
-                        </div>
+                        </div> */}
                       </>
                     )}
 
@@ -795,20 +905,20 @@ const AllocationSection = ({
                 </Button>
               ) : (
                 <Button
-                  key="btn-submit"
+                  key="btn-confirm"
                   htmlType="button"
                   onClick={handleSaveDataTable}
                   type="primary"
                   style={{
-                    backgroundColor: "#388E3C",
-                    borderColor: "#388E3C",
+                    backgroundColor: "#28a745",
+                    borderColor: "#28a745",
                     color: "#fff",
                     borderRadius: "6px",
                     height: "32px",
                     fontSize: "12px",
                   }}
                 >
-                  Submit
+                  Confirm
                 </Button>
               )}
             </div>

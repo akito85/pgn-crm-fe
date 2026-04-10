@@ -9,7 +9,6 @@ import moment from "moment";
 
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
@@ -29,6 +28,7 @@ import {
   getPaymentWarrantyPartnerList,
   getPaymentWarrantyPartnerBranchList,
   getWarrantyTypeOptions,
+  getServiceAgreementByAccountId,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 
 
@@ -43,9 +43,6 @@ import {
   getListCategoryReceipt,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 
-import {
-  getListServiceAgreement
-} from "../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { configApp } from "../../../../../constants/configApp";
@@ -69,7 +66,17 @@ const ListFormWarranty = (props) => {
   const location = useLocation();
   const { id } = location?.state || {};
 
-  const { dataListAppHierId, dataListAppHierDetail, loadingDetail, loadingApproval, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, data_detail, dataMutation } = useSelector((state) => state.warranty);
+  const { 
+    dataListAppHierId, 
+    dataListAppHierDetail, 
+    loadingDetail, 
+    loadingApproval, 
+    dataPaymentWarrantyPartner, 
+    dataPaymentWarrantyPartnerBranch, 
+    data_detail, 
+    dataMutation,
+    dataServiceAgreement
+  } = useSelector((state) => state.warranty);
   
   const {
     dataAccountNumber,
@@ -79,7 +86,6 @@ const ListFormWarranty = (props) => {
     data_converted_currency
   } = useSelector((state) => state.receipt);
 
-  const { data: dataServiceAgreement } = useSelector((state) => state.accountServiceAgreement);
 
   const [current, setCurrent] = useState(0);
   const [modalBack, setModalBack] = useState(false);
@@ -207,7 +213,7 @@ const ListFormWarranty = (props) => {
       
       if (data_detail.accountId) {
         dispatch(getAccountNumberDDL(data_detail.accountId));
-        dispatch(getListServiceAgreement({ id: data_detail.accountId, page: 1, pageSize: 999 }));
+        dispatch(getServiceAgreementByAccountId({ id: data_detail.accountId }));
       }
       if (data_detail.issuerBankId || data_detail.issuerBank) {
         dispatch(getPaymentWarrantyPartnerBranchList(data_detail.issuerBankId));
@@ -248,7 +254,12 @@ const ListFormWarranty = (props) => {
   const handleAccountChange = (value) => {
     if (hasValue(value)) {
         dispatch(getAccountNumberDDL(value));
-        dispatch(getListServiceAgreement({ id: value, page: 1, pageSize: 999 }));
+        dispatch(getServiceAgreementByAccountId({ id: value }));
+        form.setFieldsValue({
+            saNumber: null, saReference: null, saType: null, saTypeChild: null, pbgType: null,
+            saDate: null, saStartDate: null, saEndDate: null, commitmentDate: null,
+            saStatusApproval: null, saStatus: null, saDescription: null
+        });
     } else {
         dispatch(getAllAccountNumberDDL());
         dispatch(resetDataAccountNumber());
@@ -467,7 +478,7 @@ const ListFormWarranty = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routesBread} />
       <Spin spinning={loadingDetail || loadingApproval || loadingSave}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -607,7 +618,7 @@ const ListFormWarranty = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

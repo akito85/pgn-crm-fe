@@ -1,35 +1,36 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Collapse, Spin } from "antd";
-import { UpOutlined } from "@ant-design/icons";
-import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import CardContainer from "../../../../components/CardContainer";
-import DetailText from "../../../../components/DetailText";
-import TablePagination from "../../../../components/TablePagination";
-import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
-import { columnJournal } from "./Table/ColumnJournal";
+import { Spin } from "antd";
 import moment from "moment";
-import { dateFormatting } from "../../../../utils";
-import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
-import { configApp } from "../../../../constants/configApp";
-import { getListCategoryReceipt } from "../../../../redux/slices/receipt_collection/receipt";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import CardContainerNoBorder from "../../../../components/CardContainerNoBorder";
+import SectionCard from "../../../../components/SectionCard";
+import DetailText from "../../../../components/DetailText";
+import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
+import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
+import TableRBI from "../../../../components/TableRBI";
+import { hasValue } from "../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import {
     getAccountingAllocation,
     submitAccountingAllocation
 } from "../../../../redux/slices/receipt_collection/accounting";
-import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
-
-const { Panel } = Collapse;
+import { getListCategoryReceipt } from "../../../../redux/slices/receipt_collection/receipt";
+import { clearBodyMessage } from "../../../../redux/slices/general_slice";
+import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
+import { configApp } from "../../../../constants/configApp";
 
 /**
  * Create Accounting Page for Receipt
- * Displays journal information from Oracle procedure: pack_accounting.f_get_accounting_aloc
- * 
+ * Displays journal information from Oracle: pack_accounting.f_get_accounting_aloc
+ *
  * Flow: Step 1 (CREATE) → Step 2 (ATTACHMENT) → Submit
+ *
+ * Table uses ROWSPAN:
+ *   - Group (transaction) level columns span multiple rows per zno_pembayaran group
+ *   - Line (item) level columns show per-row values (BUZEI, INV NUMBER, BILLING ITEM, etc.)
  */
 const CreateAccounting = () => {
     const dispatch = useDispatch();
@@ -37,390 +38,467 @@ const CreateAccounting = () => {
     const navigate = useNavigate();
     const searchInput = useRef(null);
 
-    // Get receipt data from navigation state
     const receiptData = location?.state || {};
+    const { loading: accountingLoading } = useSelector((state) => state.accounting);
 
-    // Local state
-    const [currentStep, setCurrentStep] = useState(0); // 0: CREATE, 1: ATTACHMENT
-    const [activeKeys, setActiveKeys] = useState(['customer', 'account', 'journal']);
-    const [journal1Page, setJournal1Page] = useState(1);
-    const [journal1PageSize, setJournal1PageSize] = useState(10);
-    const [journal2Page, setJournal2Page] = useState(1);
-    const [journal2PageSize, setJournal2PageSize] = useState(10);
-    const [searchText, setSearchText] = useState("");
-    const [searchedColumn, setSearchedColumn] = useState("");
+    const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [attachments, setAttachments] = useState([]);
     const [loading, setLoading] = useState(false);
-
-    // Steps definition for stepper
-    const steps = [
-        { title: "CREATE", value: "create" },
-        { title: "ATTACHMENT", value: "attachment" },
-    ];
-
-    // Mock data - replace with actual data from Redux/API
     const [accountingData, setAccountingData] = useState({
         customerInfo: {
             customerNumber: receiptData?.customerNumber || "",
-            customerName: receiptData?.customerName || "",
+            customerName: receiptData?.customerName || receiptData?.customer || "",
             billPeriod: receiptData?.receiptDate
                 ? moment(receiptData.receiptDate).format("MMM YYYY").toUpperCase()
                 : "",
         },
         accountInfo: {
             accountNumber: receiptData?.accountNumber || "",
-            accountName: receiptData?.accountName || "",
+            accountName: receiptData?.accountName || receiptData?.account || "",
             accountReferenceId: receiptData?.accountReferenceId || "",
         },
         journal1: [],
         journal2: [],
     });
 
-    // Breadcrumbs
+    // Table state
+    const [searchText, setSearchText] = useState("");
+    const [searchedColumn, setSearchedColumn] = useState("");
+    const [searchFilter1, setSearchFilter1] = useState({});
+    const [searchFilter2, setSearchFilter2] = useState({});
+    const [pagination1, setPagination1] = useState({ current: 1, pageSize: 10 });
+    const [pagination2, setPagination2] = useState({ current: 1, pageSize: 10 });
+
+    const steps = [{ title: "CREATE" }, { title: "ATTACHMENT" }];
+
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT,
-            breadcrumbName: "Receipt",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNTING,
-            breadcrumbName: "Create Accounting",
-        },
+        { path: "", breadcrumbName: "Receipt & Collection" },
+        { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT, breadcrumbName: "Receipt" },
+        { path: "", breadcrumbName: "Receipt List" },
+        { path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNTING, breadcrumbName: "Create Accounting" },
     ];
 
     useEffect(() => {
-        // Fetch accounting allocation data when component mounts
-        if (receiptData?.id) {
-            fetchAccountingAllocation();
-        }
+        if (receiptData?.id) fetchAccountingAllocation();
+        return () => { dispatch(clearBodyMessage()); };
     }, [receiptData?.id]);
 
     const fetchAccountingAllocation = async () => {
         try {
             setLoading(true);
-
-            // Extract pay period from receipt date (format: YYYYMM)
             const payPeriod = receiptData?.receiptDate
                 ? moment(receiptData.receiptDate).format("YYYYMM")
                 : moment().format("YYYYMM");
 
-            // Call backend API via Redux
             const response = await dispatch(getAccountingAllocation({
                 receiptId: receiptData.id,
                 payPeriod: payPeriod,
             })).unwrap();
 
-            // Set data from API response
-            // response is already the 'data' object from backend ResponseObject
-            console.log("API Response:", response);
-            if (response) {
-                setAccountingData(response);
-            }
-
-            setLoading(false);
+            if (response) setAccountingData(response);
         } catch (error) {
             console.error("Error fetching accounting allocation:", error);
+        } finally {
             setLoading(false);
-            // You might want to show error notification here
         }
     };
 
+    // =============================================
+    // ROWSPAN PROCESSING
+    // Group by: zno_pembayaran (Payment Number)
+    // Each payment can have multiple line items (buzei)
+    // =============================================
+    const processDataWithRowspan = (data) => {
+        if (!data || data.length === 0) return [];
+
+        const groups = [];
+        const groupMap = new Map();
+
+        data.forEach(row => {
+            // Use payment number as group key; fallback to batch number
+            const key = row.zno_pembayaran || row.zbatch || `row-${JSON.stringify(row)}`;
+            if (!groupMap.has(key)) {
+                groupMap.set(key, []);
+                groups.push(key);
+            }
+            groupMap.get(key).push(row);
+        });
+
+        const result = [];
+        let groupIndex = 1;
+
+        groups.forEach(key => {
+            const rows = groupMap.get(key);
+            rows.forEach((row, i) => {
+                result.push({
+                    ...row,
+                    _rowSpan: i === 0 ? rows.length : 0, // rowSpan=0 hides the cell
+                    _groupIndex: groupIndex,
+                    _isFirstRow: i === 0,
+                });
+            });
+            groupIndex++;
+        });
+
+        return result;
+    };
+
+    // =============================================
+    // FILTERING & PAGINATION
+    // Filter on raw data FIRST, then apply rowspan
+    // =============================================
+    const getFilteredData = (data, filter) => {
+        let result = [...(data || [])];
+        Object.keys(filter).forEach(key => {
+            const fv = filter[key];
+            if (hasValue(fv)) {
+                const val = fv.toString().toLowerCase();
+                result = result.filter(item =>
+                    item[key]?.toString().toLowerCase().includes(val)
+                );
+            }
+        });
+        return result;
+    };
+
+    // Journal 1
+    const processedJournal1 = useMemo(() => {
+        const filtered = getFilteredData(accountingData?.journal1, searchFilter1);
+        return processDataWithRowspan(filtered);
+    }, [accountingData?.journal1, searchFilter1]);
+
+    const paginatedJournal1 = useMemo(() => {
+        const { current, pageSize } = pagination1;
+        return processedJournal1.slice((current - 1) * pageSize, current * pageSize);
+    }, [processedJournal1, pagination1]);
+
+    // Journal 2
+    const processedJournal2 = useMemo(() => {
+        const filtered = getFilteredData(accountingData?.journal2, searchFilter2);
+        return processDataWithRowspan(filtered);
+    }, [accountingData?.journal2, searchFilter2]);
+
+    const paginatedJournal2 = useMemo(() => {
+        const { current, pageSize } = pagination2;
+        return processedJournal2.slice((current - 1) * pageSize, current * pageSize);
+    }, [processedJournal2, pagination2]);
+
+    // =============================================
+    // COLUMN HELPERS
+    // =============================================
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
         setSearchedColumn(dataIndex);
     };
 
-    const handleJournal1Change = (page, pageSize) => {
-        setJournal1Page(pageSize !== journal1PageSize ? 1 : page);
-        setJournal1PageSize(pageSize);
-    };
+    const getColSearch = (dataIndex, setFilter) =>
+        getColumnSearchPropsUseFilteredValueFE(
+            setFilter,
+            dataIndex,
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            false,
+            "input"
+        );
 
-    const handleJournal2Change = (page, pageSize) => {
-        setJournal2Page(pageSize !== journal2PageSize ? 1 : page);
-        setJournal2PageSize(pageSize);
-    };
+    // Group-level column (rowspan across line items)
+    const grpCol = (title, dataIndex, width, setFilter, extra = {}) => ({
+        title,
+        dataIndex,
+        width,
+        onCell: (record) => ({ rowSpan: record._rowSpan ?? 1 }),
+        sorter: null, // disable sorter on rowspan cols to avoid confusion
+        ...getColSearch(dataIndex, setFilter),
+        ...extra,
+    });
 
-    const handleClearData = () => {
-        setAccountingData({
-            ...accountingData,
-            journal1: [],
-            journal2: [],
-        });
-    };
+    // Line-level column (per line item, no rowspan)
+    const lineCol = (title, dataIndex, width, setFilter, extra = {}) => ({
+        title,
+        dataIndex,
+        width,
+        ...getColSearch(dataIndex, setFilter),
+        sorter: (a, b) => (a[dataIndex] ?? "").toString().localeCompare((b[dataIndex] ?? "").toString()),
+        ...extra,
+    });
 
+    // =============================================
+    // COLUMN DEFINITIONS (41 columns)
+    // Group cols: rowspan per transaction (zno_pembayaran group)
+    // Line cols:  each row shows its own value
+    // =============================================
+    const buildColumns = (setFilter) => [
+        // === NO: shows group index (rowspan) ===
+        {
+            title: "NO",
+            width: 60,
+            align: "center",
+            fixed: "left",
+            onCell: (record) => ({ rowSpan: record._rowSpan ?? 1 }),
+            render: (_, record) => record._groupIndex,
+        },
+
+        // === GROUP-LEVEL columns ===
+        grpCol("PGN ORGANIZATION CODE IN SAP", "bukrs", 200, setFilter),
+        grpCol("YEAR", "ryear", 100, setFilter, { align: "center" }),
+        grpCol("MONTH", "monat", 100, setFilter, { align: "center" }),
+        grpCol("POST BATCH NUMBER", "zbatch", 180, setFilter),
+        grpCol("TRANSACTION NUMBER", "zno_pembayaran", 180, setFilter),
+
+        // === LINE-LEVEL columns ===
+        lineCol("LINE NUMBER", "buzei", 130, setFilter, { align: "center" }),
+        lineCol("INV NUMBER", "zno_tag", 160, setFilter),
+        lineCol("TRANSACTION TYPE", "ztipe_tran", 160, setFilter),
+
+        // === GROUP-LEVEL columns (continue) ===
+        grpCol("ACCOUNT NUMBER", "zkode_cust", 160, setFilter),
+        grpCol("ACC. SOR", "zsor", 120, setFilter),
+        grpCol("ACC. COST CENTER/AREA", "zarea", 200, setFilter),
+        grpCol("ACCOUNT SEGMENT", "zsegmen_pel", 180, setFilter),
+        grpCol("ACCOUNT GROUP TYPE", "zkel_pel", 180, setFilter),
+        grpCol("ACCOUNT TYPE", "zjenis_rek", 150, setFilter),
+
+        // === LINE-LEVEL: billing item columns ===
+        lineCol("BILLING ITEM CODE", "zkomp_bil", 180, setFilter),
+        lineCol("BILL PERIOD", "zbilling_per", 150, setFilter),
+
+        // === GROUP-LEVEL columns (continue) ===
+        grpCol("RATE TYPE", "zkurs", 130, setFilter),
+        grpCol("DUE DATE", "wwert", 160, setFilter, {
+            render: (text) => text ? moment(text).format("DD MMM YYYY") : "-",
+        }),
+        grpCol("CUST ID SAP", "kunnr", 160, setFilter),
+        grpCol("CATEGORY SAP", "blart", 150, setFilter),
+        grpCol("DOCUMENT DATE", "bldat", 160, setFilter, {
+            render: (text) => text ? moment(text).format("DD MMM YYYY") : "-",
+        }),
+        grpCol("POSTING DATE", "budat", 160, setFilter, {
+            render: (text) => text ? moment(text).format("DD MMM YYYY") : "-",
+        }),
+        grpCol("CURRENCY", "waers", 110, setFilter, { align: "center" }),
+        grpCol("EXCHANGE RATE", "kursf", 150, setFilter, {
+            align: "right",
+            render: (val) => val != null ? Number(val).toLocaleString("id-ID") : "-",
+        }),
+        grpCol("TRANSACTION GROUPS", "koart", 180, setFilter),
+        grpCol("GL ACCOUNT", "hkont", 150, setFilter),
+        grpCol("AMOUNT", "wrbtr", 170, setFilter, {
+            align: "right",
+            render: (val) => val != null ? Number(val).toLocaleString("id-ID") : "-",
+        }),
+        grpCol("EQV AMOUNT IDR", "dmbtr", 170, setFilter, {
+            align: "right",
+            render: (val) => val != null ? Number(val).toLocaleString("id-ID") : "-",
+        }),
+        grpCol("EQV AMOUNT USD", "dmbe2", 170, setFilter, {
+            align: "right",
+            render: (val) => val != null ? Number(val).toLocaleString("id-ID") : "-",
+        }),
+        grpCol("SPECIAL GL", "umskz", 120, setFilter, { align: "center" }),
+        grpCol("PROFIT CENTER", "prctr", 160, setFilter),
+        grpCol("WITHOLDING TAX TYPE", "witht", 190, setFilter),
+        grpCol("WITHOLDING TAX CODE", "qsskz", 190, setFilter),
+        grpCol("COST CENTER", "kostl", 150, setFilter),
+        grpCol("TRANSACTION REFERENCE", "zuonr", 200, setFilter),
+        grpCol("TEXT", "sgtxt", 200, setFilter, { ellipsis: true }),
+
+        // === LINE-LEVEL: reference columns ===
+        lineCol("REFERENCE 1", "xref1", 150, setFilter),
+        lineCol("REFERENCE 2", "xref2", 150, setFilter),
+        lineCol("REFERENCE 3", "xref3", 150, setFilter),
+        lineCol("METER READING CODE", "meterReadingCode", 190, setFilter),
+        lineCol("F", "f", 90, setFilter, { align: "center" }),
+    ];
+
+    const journalColumns1 = useMemo(() => buildColumns(setSearchFilter1), [searchedColumn, searchText]);
+    const journalColumns2 = useMemo(() => buildColumns(setSearchFilter2), [searchedColumn, searchText]);
+
+    // =============================================
+    // NAVIGATION
+    // =============================================
     const handleNext = () => {
-        if (currentStep === 0) {
-            setCurrentStep(1); // Move to ATTACHMENT step
-        } else {
-            // Submit the form
-            handleSubmit();
-        }
+        if (currentStepIndex < steps.length - 1) setCurrentStepIndex(prev => prev + 1);
     };
-
-    const handlePrevious = () => {
-        if (currentStep === 1) {
-            setCurrentStep(0); // Back to CREATE step
-        }
+    const handlePrev = () => {
+        if (currentStepIndex > 0) setCurrentStepIndex(prev => prev - 1);
     };
-
     const handleCancel = () => {
+        dispatch(clearBodyMessage());
         navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT);
     };
-
+    const handleClear = () => {
+        setAccountingData(prev => ({ ...prev, journal1: [], journal2: [] }));
+    };
     const handleSubmit = async () => {
         try {
             setLoading(true);
-
             const payPeriod = receiptData?.receiptDate
                 ? moment(receiptData.receiptDate).format("YYYYMM")
                 : moment().format("YYYYMM");
-
-            // Call backend API via Redux to submit accounting
-            const response = await dispatch(submitAccountingAllocation({
+            await dispatch(submitAccountingAllocation({
                 receiptId: receiptData.id,
                 payPeriod: payPeriod,
             })).unwrap();
-
-            console.log("Accounting submitted successfully:", response);
-            setLoading(false);
-
-            // Navigate back to receipt list after success
             navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT);
         } catch (error) {
             console.error("Error submitting accounting:", error);
+        } finally {
             setLoading(false);
-            // You might want to show error notification here
         }
     };
 
-    const renderCreateStep = () => (
-        <div className="w-full space-y-4">
-            {/* Accounting Information Section */}
-            <div className="text-primary text-sm font-bold uppercase py-2">
-                ACCOUNTING INFORMATION
+    // =============================================
+    // RENDER TABLE SECTION
+    // =============================================
+    const renderJournalTable = (label, dataSource, columns, pagination, setPagination, totalData, setFilter) => (
+        <SectionCard title={label} collapsible>
+            <TableRBI
+                idTable={`journal-${label.toLowerCase().replace(" ", "-")}-table`}
+                dataSource={dataSource}
+                columns={columns}
+                loading={loading || accountingLoading}
+                tableScrolled={{ x: 5500 }}
+                useSelect={true}
+                usePagination={true}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                current={pagination.current}
+                pageSize={pagination.pageSize}
+                totalData={totalData}
+                onSizeChanger={(_, size) => {
+                    setPagination({ current: 1, pageSize: size });
+                }}
+                onChange={(page) => setPagination(prev => ({ ...prev, current: page }))}
+                onAdvanceSearch={(data) => {
+                    setFilter(prev => data ? { ...prev, ...data } : {});
+                    setPagination(prev => ({ ...prev, current: 1 }));
+                }}
+            />
+            <div className="mt-3 flex items-center gap-2">
+                <input type="checkbox" disabled checked={false} />
+                <label className="text-xs text-gray-500">Posting to SAP</label>
             </div>
-
-            <Collapse
-                activeKey={activeKeys}
-                onChange={setActiveKeys}
-                expandIconPosition="right"
-                expandIcon={({ isActive }) => <UpOutlined rotate={isActive ? 0 : 180} />}
-                className="bg-white"
-            >
-                {/* Customer Information */}
-                <Panel
-                    header={
-                        <span className="text-primary text-xs font-semibold uppercase">
-                            Customer Information
-                        </span>
-                    }
-                    key="customer"
-                    className="border-b"
-                >
-                    <div className="grid grid-cols-3 gap-5 p-4">
-                        <DetailText label="Customer Number">
-                            {accountingData?.customerInfo?.customerNumber}
-                        </DetailText>
-                        <DetailText label="Customer Name">
-                            {accountingData?.customerInfo?.customerName}
-                        </DetailText>
-                        <DetailText label="Bill Period">
-                            {accountingData?.customerInfo?.billPeriod}
-                        </DetailText>
-                    </div>
-                </Panel>
-
-                {/* Account Information */}
-                <Panel
-                    header={
-                        <span className="text-primary text-xs font-semibold uppercase">
-                            Account Information
-                        </span>
-                    }
-                    key="account"
-                    className="border-b"
-                >
-                    <div className="grid grid-cols-3 gap-5 p-4">
-                        <DetailText label="Account Number">
-                            {accountingData?.accountInfo?.accountNumber}
-                        </DetailText>
-                        <DetailText label="Account Name">
-                            {accountingData?.accountInfo?.accountName}
-                        </DetailText>
-                        <DetailText label="Account Reference ID">
-                            {accountingData?.accountInfo?.accountReferenceId}
-                        </DetailText>
-                    </div>
-                </Panel>
-            </Collapse>
-
-            {/* Journal Information Section */}
-            <div className="text-primary text-sm font-bold uppercase py-2 mt-6">
-                JOURNAL INFORMATION
-            </div>
-
-            <Collapse
-                activeKey={activeKeys}
-                onChange={setActiveKeys}
-                expandIconPosition="right"
-                expandIcon={({ isActive }) => <UpOutlined rotate={isActive ? 0 : 180} />}
-                className="bg-white"
-            >
-                {/* Journal 1 */}
-                <Panel
-                    header={
-                        <span className="text-primary text-xs font-semibold uppercase">
-                            Journal 1
-                        </span>
-                    }
-                    key="journal1"
-                    className="border-b"
-                >
-                    <div className="p-4">
-                        <TablePagination
-                            dataSource={accountingData?.journal1 || []}
-                            columns={columnJournal(
-                                journal1Page,
-                                journal1PageSize,
-                                searchInput,
-                                searchedColumn,
-                                searchText,
-                                handleSearch
-                            )}
-                            tableScrolled={{ x: 1200, y: 300 }}
-                            totalData={accountingData?.journal1?.length || 0}
-                            pageSize={journal1PageSize}
-                            current={journal1Page}
-                            onChange={handleJournal1Change}
-                            onSizeChanger={handleJournal1Change}
-                        />
-                        <div className="mt-2 text-xs text-gray-500">
-                            Posting to SAP
-                        </div>
-                    </div>
-                </Panel>
-
-                {/* Journal 2 */}
-                <Panel
-                    header={
-                        <span className="text-primary text-xs font-semibold uppercase">
-                            Journal 2
-                        </span>
-                    }
-                    key="journal2"
-                    className="border-b"
-                >
-                    <div className="p-4">
-                        <TablePagination
-                            dataSource={accountingData?.journal2 || []}
-                            columns={columnJournal(
-                                journal2Page,
-                                journal2PageSize,
-                                searchInput,
-                                searchedColumn,
-                                searchText,
-                                handleSearch
-                            )}
-                            tableScrolled={{ x: 1200, y: 300 }}
-                            totalData={accountingData?.journal2?.length || 0}
-                            pageSize={journal2PageSize}
-                            current={journal2Page}
-                            onChange={handleJournal2Change}
-                            onSizeChanger={handleJournal2Change}
-                        />
-                        <div className="mt-2 text-xs text-gray-500">
-                            Posting to SAP
-                        </div>
-                    </div>
-                </Panel>
-            </Collapse>
-        </div>
+        </SectionCard>
     );
 
+    // =============================================
+    // STEP 1: CREATE
+    // =============================================
+    const renderCreateStep = () => (
+        <>
+            <CardContainerNoBorder header="ACCOUNTING INFORMATION" noPadding>
+                <div className="flex flex-col gap-1 p-5">
+                    <SectionCard title="CUSTOMER INFORMATION" collapsible>
+                        <div className="grid grid-cols-5 w-full gap-y-4 gap-x-4">
+                            <DetailText label="Customer Number">
+                                {accountingData?.customerInfo?.customerNumber || "-"}
+                            </DetailText>
+                            <DetailText label="Customer Name">
+                                {accountingData?.customerInfo?.customerName || "-"}
+                            </DetailText>
+                            <DetailText label="Bill Period">
+                                {accountingData?.customerInfo?.billPeriod || "-"}
+                            </DetailText>
+                        </div>
+                    </SectionCard>
+
+                    <SectionCard title="ACCOUNT INFORMATION" collapsible>
+                        <div className="grid grid-cols-5 w-full gap-y-4 gap-x-4">
+                            <DetailText label="Account Number">
+                                {accountingData?.accountInfo?.accountNumber || "-"}
+                            </DetailText>
+                            <DetailText label="Account Name">
+                                {accountingData?.accountInfo?.accountName || "-"}
+                            </DetailText>
+                            <DetailText label="Account Reference ID">
+                                {accountingData?.accountInfo?.accountReferenceId || "-"}
+                            </DetailText>
+                        </div>
+                    </SectionCard>
+                </div>
+            </CardContainerNoBorder>
+
+            <CardContainerNoBorder header="JOURNAL INFORMATION" className="mt-4" noPadding>
+                <div className="flex flex-col gap-3 p-5">
+                    {renderJournalTable(
+                        "JOURNAL 1",
+                        paginatedJournal1,
+                        journalColumns1,
+                        pagination1,
+                        setPagination1,
+                        processedJournal1.length,
+                        setSearchFilter1
+                    )}
+                    {renderJournalTable(
+                        "JOURNAL 2",
+                        paginatedJournal2,
+                        journalColumns2,
+                        pagination2,
+                        setPagination2,
+                        processedJournal2.length,
+                        setSearchFilter2
+                    )}
+                </div>
+            </CardContainerNoBorder>
+        </>
+    );
+
+    // =============================================
+    // STEP 2: ATTACHMENT
+    // =============================================
     const renderAttachmentStep = () => (
-        <div className="w-full">
-            <p className="text-primary text-xl font-bold uppercase py-4">
-                ATTACHMENT INFORMATION
-            </p>
-            <AttachmentComponent
-                data={attachments}
-                updateData={setAttachments}
-                dispatch={dispatch}
-                getAPICategory={getListCategoryReceipt}
-                typeSelector="accounting"
-                service={receiptCollectionHttpService}
-                configApplication={configApp.PAYMENT_SERVICE}
-                typeRBI={"data"}
-            />
-        </div>
+        <CardContainerNoBorder header="ATTACHMENT INFORMATION" noPadding>
+            <div className="p-5">
+                <AttachmentComponent
+                    data={attachments}
+                    updateData={setAttachments}
+                    dispatch={dispatch}
+                    getAPICategory={getListCategoryReceipt}
+                    typeSelector="accounting"
+                    service={receiptCollectionHttpService}
+                    configApplication={configApp.PAYMENT_SERVICE}
+                    typeRBI={"data"}
+                />
+            </div>
+        </CardContainerNoBorder>
     );
 
     return (
-        <LayoutMenu>
-            <Spin spinning={loading}>
-                <BreadCrumb routes={routes} />
-                <CardContainer
-                    header={
-                        <div className="flex justify-between items-center -my-4">
-                            <p className="mt-[15px] font-bold uppercase text-[#0075BF]">
-                                CREATE ACCOUNTING
-                            </p>
-                        </div>
-                    }
-                >
-                    {/* Steps Navigation */}
-                    <FormStepper
-                        steps={steps}
-                        current={currentStep}
-                        onPrev={handlePrevious}
-                        onNext={handleNext}
-                    />
+        <>
+            <BreadCrumb routes={routes} />
 
-                    {/* Content */}
-                    <div className="mt-4">
-                        {currentStep === 0 && renderCreateStep()}
-                        {currentStep === 1 && renderAttachmentStep()}
-                    </div>
+            <div className="mb-3">
+                <FormStepper
+                    steps={steps}
+                    current={currentStepIndex}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                />
+            </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-between items-center p-4 border-t mt-4">
-                        <div className="flex gap-2">
-                            <ButtonComponent type="default" onClick={handleCancel}>
-                                Cancel
-                            </ButtonComponent>
-                            {currentStep === 0 && (
-                                <ButtonComponent type="default" onClick={handleClearData}>
-                                    Clear Data
-                                </ButtonComponent>
-                            )}
-                        </div>
-                        <div className="flex gap-2">
-                            {currentStep > 0 && (
-                                <ButtonComponent
-                                    type="submit"
-                                    onClick={handlePrevious}
-                                >
-                                    Previous
-                                </ButtonComponent>
-                            )}
-                            {currentStep === 0 && (
-                                <ButtonComponent type="default" onClick={() => { }}>
-                                    Save as Draft
-                                </ButtonComponent>
-                            )}
-                            <ButtonComponent type="submit" onClick={handleNext}>
-                                {currentStep === 0 ? "Next" : "Submit"}
-                            </ButtonComponent>
-                        </div>
-                    </div>
-                </CardContainer>
+            <Spin spinning={loading || accountingLoading}>
+                <div className={currentStepIndex !== 0 ? "hidden" : ""}>
+                    {renderCreateStep()}
+                </div>
+                <div className={currentStepIndex !== 1 ? "hidden" : ""}>
+                    {renderAttachmentStep()}
+                </div>
+
+                <FormFooter
+                    current={currentStepIndex}
+                    totalSteps={steps.length}
+                    onPrev={handlePrev}
+                    onNext={handleNext}
+                    onCancel={handleCancel}
+                    onClear={handleClear}
+                    onSubmit={handleSubmit}
+                    type="create"
+                />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

@@ -1,13 +1,13 @@
 // EMeteraiManagement.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { message, Dropdown } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { DownOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
+import ModalHistory from "../../../../components/Modal/ModalHistory";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import StampingRequestModal from "./_components/StampingRequestModal";
 import ProcessSigningModal from "./_components/ProcessingSigningModal";
@@ -20,6 +20,7 @@ import {
   createStampingRequest,
   uploadManualStamping,
   uploadManualSigning,
+  getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/emeterai";
 
 const EMeteraiManagement = () => {
@@ -27,15 +28,15 @@ const EMeteraiManagement = () => {
 
   // Redux state
   const {
-    data: DATA_INVOICE,
+    invoice_list,
+    invoice_pagination,
     loading,
     stampingLoading,
-    pageInfo,
+    data_approval_history,
   } = useSelector((state) => state.emeterai);
 
   // Local state
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const loadMoreSize = 20;
   const [sort, setSort] = useState("billPeriod~desc");
 
   // Modal states
@@ -44,13 +45,36 @@ const EMeteraiManagement = () => {
   const [signingModalVisible, setSigningModalVisible] = useState(false);
   const [modalApproval, setModalApproval] = useState(false);
   const [modalRequest, setModalRequest] = useState(false);
+  const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
+  const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
   // Selected invoice
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
+  // Format approval history data when it changes
+  useEffect(() => {
+    if (
+      data_approval_history?.dataApprover ||
+      data_approval_history?.dataHistory
+    ) {
+      const rawApprover = data_approval_history.dataApprover || {};
+      const rawHistory = data_approval_history.dataHistory || {};
+      // Lowercase keys to match ModalHistory tab lookup behaviour
+      const dataApprover = Object.fromEntries(
+        Object.entries(rawApprover).map(([k, v]) => [k.toLowerCase(), v]),
+      );
+      const dataHistory = Object.fromEntries(
+        Object.entries(rawHistory).map(([k, v]) => [k.toLowerCase(), v]),
+      );
+      setDataApprovalHistory({ dataApprover, dataHistory });
+    } else {
+      setDataApprovalHistory({});
+    }
+  }, [data_approval_history]);
+
   // Fixed column settings
   const [fixedColumns, setFixedColumns] = useState({
-    left: ["invoiceNumber"],
+    left: ["no"],
     right: ["actions"],
   });
 
@@ -68,18 +92,51 @@ const EMeteraiManagement = () => {
 
   // Fetch data on mount and when dependencies change
   useEffect(() => {
-    fetchInvoices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, sort]);
+    dispatch(
+      getAllEMeteraiInvoices({
+        page: 1,
+        pageSize: loadMoreSize,
+        search: "",
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, sort]);
+
+  const handleLoadMore = useCallback(() => {
+    const nextPage = Math.floor(invoice_list.length / loadMoreSize) + 1;
+    dispatch(
+      getAllEMeteraiInvoices({
+        page: nextPage,
+        pageSize: loadMoreSize,
+        search: "",
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, sort, invoice_list.length]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getAllEMeteraiInvoices({
+        page: 1,
+        pageSize: loadMoreSize,
+        search: "",
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, sort]);
 
   const fetchInvoices = () => {
     dispatch(
       getAllEMeteraiInvoices({
-        page: page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         search: "",
-        sort: sort,
-      })
+        sort,
+        isLoadMore: false,
+      }),
     );
   };
 
@@ -106,6 +163,15 @@ const EMeteraiManagement = () => {
     if (record) {
       setSelectedInvoice(record);
       setStampingModalVisible(true);
+    } else {
+      message.error("Invoice data not available");
+    }
+  };
+
+  const handleApprovalHistory = (record) => {
+    if (record?.invoiceNumber) {
+      dispatch(getApprovalHistory({ invoiceNumber: record.invoiceNumber }));
+      setModalApprovalHistory(true);
     } else {
       message.error("Invoice data not available");
     }
@@ -159,7 +225,7 @@ const EMeteraiManagement = () => {
       message.success(
         submissionData.stampingMethod === "e-stamping"
           ? "E-Stamping request submitted successfully!"
-          : "Manual stamping uploaded successfully!"
+          : "Manual stamping uploaded successfully!",
       );
     } catch (error) {
       console.error("❌ Stamping Submission Error:", error);
@@ -177,7 +243,7 @@ const EMeteraiManagement = () => {
           createStampingRequest({
             invoiceNumber,
             signingMethod,
-          })
+          }),
         ).unwrap();
       } else if (signingMethod === "manual") {
         await dispatch(
@@ -186,7 +252,7 @@ const EMeteraiManagement = () => {
             file,
             remark: remark || "Manual signing upload",
             apphierId,
-          })
+          }),
         ).unwrap();
       }
 
@@ -196,16 +262,6 @@ const EMeteraiManagement = () => {
     } catch (error) {
       console.error("❌ Signing Submission Error:", error);
     }
-  };
-
-  // Handle pagination change
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
-
-  const handleSizeChange = (current, size) => {
-    setPage(1);
-    setPageSize(size);
   };
 
   // Sort Handler
@@ -234,7 +290,7 @@ const EMeteraiManagement = () => {
     setModalRequest(false);
   };
 
-  const handleRefresh = () => {
+  const handleRefreshBtn = () => {
     fetchInvoices();
   };
 
@@ -246,16 +302,17 @@ const EMeteraiManagement = () => {
     onProcessStamping: handleProcessStamping,
     onProcessSigning: handleProcessSigning,
     onRetry: handleRetry,
+    onApprovalHistory: handleApprovalHistory,
   });
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
         header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">E-Meterai Management</p>
+            <p className="mt-[15px]">E-Meterai Management</p>
             <div className="flex gap-2">
               <Dropdown
                 menu={{
@@ -279,8 +336,11 @@ const EMeteraiManagement = () => {
                 }}
                 trigger={["click"]}
               >
-                <ButtonComponent type="default">
-                  Approval Configuration <DownOutlined />
+                <ButtonComponent
+                  type="primary"
+                  icon={<DownOutlined width={20} />}
+                >
+                  Approval Configuration
                 </ButtonComponent>
               </Dropdown>
             </div>
@@ -290,18 +350,22 @@ const EMeteraiManagement = () => {
         {/* Table with TableRBI */}
         <TableRBI
           idTable="emeterai-management-table"
-          dataSource={DATA_INVOICE || []}
+          dataSource={invoice_list}
           columns={columnDefinitions}
           loading={loading}
-          pageSize={pageSize}
-          current={page}
-          onChange={handlePageChange}
-          onSizeChanger={handleSizeChange}
           onSort={onSort}
-          totalData={pageInfo.totalElements || 0}
+          totalData={invoice_pagination?.totalElements || 0}
           tableScrolled={{ x: 1500, y: 500 }}
           useSelect={true}
-          usePagination={true}
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={
+            invoice_list.length < (invoice_pagination?.totalElements || 0)
+          }
+          showRefresh={true}
+          onRefresh={handleRefresh}
+          refreshLabel="Refresh"
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
@@ -346,7 +410,7 @@ const EMeteraiManagement = () => {
         handleClose={closeModalApproval}
         onSuccess={() => {
           closeModalApproval();
-          handleRefresh();
+          handleRefreshBtn();
         }}
       />
 
@@ -356,10 +420,30 @@ const EMeteraiManagement = () => {
         handleClose={closeModalRequest}
         onSuccess={() => {
           closeModalRequest();
-          handleRefresh();
+          handleRefreshBtn();
         }}
       />
-    </LayoutMenu>
+
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        tabOptions={Object.keys(dataApprovalHistory?.dataApprover || {}).map(
+          (key) => ({
+            value: key,
+            label: key
+              .toLowerCase()
+              .split("_")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" "),
+          }),
+        )}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
+    </>
   );
 };
 

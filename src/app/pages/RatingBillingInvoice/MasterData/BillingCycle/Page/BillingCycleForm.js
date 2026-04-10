@@ -3,12 +3,11 @@ import { Form, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import SVGIcon from "../../../../../../assets/Icon";
 import BillingCycleSectionForm from "../Form/BillingCycleSectionForm";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
@@ -60,7 +59,12 @@ const BillingCycleForm = ({ type }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
-  const [flag, setFlag] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
+  const flagRef = React.useRef(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
   const [startDate, setStartDate] = useState();
@@ -136,8 +140,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const datadraftAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -178,8 +183,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const dataAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -298,6 +304,21 @@ const BillingCycleForm = ({ type }) => {
       });
       return res;
     });
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabData.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const processData = ({ bodyData, id, type, dateFormatting, flag }) => {
@@ -319,19 +340,23 @@ const BillingCycleForm = ({ type }) => {
     return body;
   };
 
+  // Helper to build processData with the current flag ref value
+  const buildProcessData = (bodyDataArg) =>
+    processData({
+      bodyData: bodyDataArg,
+      id,
+      type,
+      dateFormatting,
+      flag: flagRef.current,
+    });
+
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
         ? "/v1/dbs/api/billingcycle/validate-create"
         : "/v1/dbs/api/billingcycle/validate-update";
 
-    const body = processData({
-      bodyData: formValue,
-      id,
-      type,
-      dateFormatting,
-      flag,
-    });
+    const body = buildProcessData(formValue);
 
     try {
       await dispatch(
@@ -357,6 +382,11 @@ const BillingCycleForm = ({ type }) => {
           }
           return item;
         });
+      });
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
       });
     } else {
       const isDataValid = await checkDataValidity(formValue);
@@ -399,10 +429,10 @@ const BillingCycleForm = ({ type }) => {
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
-      setAppHierOptions([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
       setBodyData({});
+      setCurrent(0);
       setTabData([
         {
           value: "Billing Cycle",
@@ -427,13 +457,7 @@ const BillingCycleForm = ({ type }) => {
     setLoadingSave(true);
     setModalConfirm(false);
 
-    const payload = processData({
-      bodyData: bodyData,
-      dateFormatting,
-      flag,
-      id,
-      type,
-    });
+    const payload = buildProcessData(bodyData);
 
     if (type === "create") {
       dispatch(createBillingCycle(payload))
@@ -534,18 +558,18 @@ const BillingCycleForm = ({ type }) => {
   };
 
   const handleSubmit = () => {
-    setFlag(true);
+    flagRef.current = true;
     setTimeout(() => {
-        form.submit();
+      form.submit();
     }, 0);
-};
+  };
 
   const handleSaveDraft = () => {
-    setFlag(false);
+    flagRef.current = false;
     setTimeout(() => {
-        form.submit();
+      form.submit();
     }, 0);
-};
+  };
 
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
@@ -554,7 +578,7 @@ const BillingCycleForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
         <FormStepper
@@ -569,8 +593,12 @@ const BillingCycleForm = ({ type }) => {
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
         >
-         {valuePage === tabData[0].value && (
-            <div>
+          <div
+            style={{
+              display:
+                valuePage !== tabData[0].value ? "none" : undefined,
+            }}
+          >
               <BillingCycleSectionForm
                 type={type}
                 dataTimeUnit={list_time_unit}
@@ -578,12 +606,15 @@ const BillingCycleForm = ({ type }) => {
                 status={status}
                 handleStartDate={handleStartDate}
               />
-            </div>
-          )}
+          </div>
 
-          {valuePage === tabData[1].value && (
-            <div>
-              <BaseContainer header={"Approval Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== tabData[1].value ? "none" : undefined,
+            }}
+          >
+              <CardContainer header={"Approval Information"}>
                 <ApprovalComponentGeneral
                   type={type}
                   dataTable={appHierDataDetail}
@@ -591,13 +622,16 @@ const BillingCycleForm = ({ type }) => {
                   selectedHierarchy={selectedHierarchy}
                   updateSelectedHierarchy={setSelectedHierarchy}
                 />
-              </BaseContainer>
-            </div>
-          )}
+                </CardContainer>
+          </div>
 
-          {valuePage === tabData[2].value && (
-            <div>
-              <BaseContainer header={"Attachment Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== tabData[2].value ? "none" : undefined,
+            }}
+          >
+              <CardContainer header={"Attachment Information"}>
                 <AttachmentComponent
                   type={type}
                   data={listDataAttachment}
@@ -611,9 +645,8 @@ const BillingCycleForm = ({ type }) => {
                   typeRBI={"data"}
                   mandatory={true}
                 />
-              </BaseContainer>
-            </div>
-          )}
+                </CardContainer>
+          </div>
 
           <FormFooter
             current={current}
@@ -628,29 +661,10 @@ const BillingCycleForm = ({ type }) => {
           />
         </Form>
 
-        <ModalCustom
-          isOpen={modalConfirm}
-          handleCancel={() => setModalConfirm(false)}
-          header={"Confirmation"}
-          width={1000}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-between gap-5 p-4">
-              <ButtonComponent onClick={() => setModalConfirm(false)} type="default">
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
-                isPrimary
-                onClick={handleSave}
-                loading={loadingSave}
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <ModalConfirmationBillingCycle
+        <ModalConfirmationBillingCycle
+            isOpen={modalConfirm}
+            handleCancel={() => setModalConfirm(false)}
+            handleConfirm={handleSave}
             data={bodyData}
             listDataAppHierDetail={appHierDataDetail}
             apiApproval={dataListAppHierId}
@@ -659,7 +673,6 @@ const BillingCycleForm = ({ type }) => {
             selectedHierarchy={selectedHierarchy}
             apiTimeUnit={list_time_unit}
           />
-        </ModalCustom>
 
         <ModalConfirm
           isOpen={modalBack}
@@ -687,13 +700,32 @@ const BillingCycleForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

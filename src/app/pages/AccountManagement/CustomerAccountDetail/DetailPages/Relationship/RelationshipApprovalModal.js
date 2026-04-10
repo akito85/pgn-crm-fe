@@ -83,7 +83,7 @@ const expandedRowRender = (record) => {
 };
 
 const RelationshipApprovalModal = ({
-  idAccount = 0,
+  accountId = 0,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {},
@@ -133,7 +133,7 @@ const RelationshipApprovalModal = ({
 
       dispatch(
         getRelationshipApprovalList({
-          idAccount,
+          accountId,
           page,
           pageSize: loadMoreSize,
           sort,
@@ -184,7 +184,7 @@ const RelationshipApprovalModal = ({
 
       dispatch(
         getRelationshipApprovalList({
-          idAccount,
+          accountId,
           page: nextPage,
           pageSize: loadMoreSize,
           sort,
@@ -331,7 +331,7 @@ const RelationshipApprovalModal = ({
         promises.push(
           dispatch(
             approveOrRejectRelationship({
-              idAccount,
+              accountId,
               body: regularBody,
               action,
             })
@@ -343,7 +343,7 @@ const RelationshipApprovalModal = ({
         promises.push(
           dispatch(
             approveOrRejectInactiveRelationship({
-              idAccount,
+              accountId,
               body: inactiveBody,
               action,
             })
@@ -413,7 +413,7 @@ const RelationshipApprovalModal = ({
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Relationship Information"
+        title="APPROVAL RELATIONSHIP INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
@@ -423,7 +423,7 @@ const RelationshipApprovalModal = ({
               Cancel
             </Button>
 
-            <div className="flex gap-x-4">
+            <div className="flex">
               <Button
                 onClick={() => {
                   prev();

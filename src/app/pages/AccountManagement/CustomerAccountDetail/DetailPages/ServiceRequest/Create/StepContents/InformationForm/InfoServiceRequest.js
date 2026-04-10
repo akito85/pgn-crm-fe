@@ -82,7 +82,7 @@ export default function InfoServiceRequest({
   // Update handleOk to use the selected row
   const handleOk = () => {
     form.setFieldsValue({
-      srr: selectedRow.serviceRequestReference,
+      srr: selectedRow.requestNumber,
     });
 
     setIsOpen(false);
@@ -125,48 +125,43 @@ export default function InfoServiceRequest({
     },
     {
       title: "SERVICE REQUEST NUMBER",
-      dataIndex: "serviceRequestNumber",
+      dataIndex: "requestNumber",
       width: 200,
       sorter: true,
-      ...getColumnSearchProps("serviceRequestNumber"),
-      render: (reference, record) => (
-        <div 
-          className="flex items-center gap-2"
-        >
-          <span 
-            className="underline cursor-pointer text-blue-600"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRowClick(record);
-            }}
-          >
-            {reference || "-"}
-          </span>
-          {/*
-          {selectedRowKey === record.key && (
-            <Tag color="blue">Selected</Tag>
-          )}
-          */}
-        </div>
-      ),
+      ...getColumnSearchProps("requestNumber"),
+      // render: (reference, record) => (
+      //   <div
+      //     className="flex items-center gap-2"
+      //   >
+      //     <span
+      //       className="underline cursor-pointer text-blue-600"
+      //       onClick={(e) => {
+      //         e.stopPropagation();
+      //         handleRowClick(record);
+      //       }}
+      //     >
+      //       {reference || "-"}
+      //     </span>
+      //   </div>
+      // ),
     },
     {
       title: "SERVICE REQUEST REFERENCE",
-      dataIndex: "serviceRequestReference",
+      dataIndex: "reference",
       width: 220,
       sorter: true,
-      ...getColumnSearchProps("serviceRequestReference"),
-      render: (reference, record) => (
-        <span 
-          className="underline cursor-pointer text-blue-600"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRowClick(record);
-          }}
-        >
-          {reference || "-"}
-        </span>
-      ),
+      ...getColumnSearchProps("reference"),
+      // render: (reference, record) => (
+      //   <span
+      //     className="underline cursor-pointer text-blue-600"
+      //     onClick={(e) => {
+      //       e.stopPropagation();
+      //       handleRowClick(record);
+      //     }}
+      //   >
+      //     {reference || "-"}
+      //   </span>
+      // ),
     },
     {
       title: "TYPE",
@@ -198,10 +193,10 @@ export default function InfoServiceRequest({
     },
     {
       title: "REQUEST SOURCE",
-      dataIndex: "requestSource",
+      dataIndex: "source",
       width: 150,
       sorter: true,
-      ...getColumnSearchProps("requestSource"),
+      ...getColumnSearchProps("source"),
     },
     {
       title: "REQUEST DATE",
@@ -372,12 +367,18 @@ export default function InfoServiceRequest({
   const fetchServiceRequestRefs = useCallback(async (page) => {
     const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/list?page=${page}&size=${PAGE_SIZE_REF}`;
     const response = await accountManagementService.getAll(url);
-    // API may return { content, totalElements } or { result, totalElement } — handle both
-    const items = (response?.content ?? response?.result ?? []).map((item, idx) => ({
+    // Response structure: { success, code, message, data: { result: [...], page: { totalElements } } }
+    // Unwrap the nested data layer first, then handle both Spring Page and custom formats
+    const responseData = response?.data ?? response;
+    const items = (responseData?.content ?? responseData?.result ?? []).map((item, idx) => ({
       ...item,
       key: item.id ?? `${page}-${idx}`,
     }));
-    const totalElements = response?.totalElements ?? response?.totalElement ?? 0;
+    const totalElements =
+      responseData?.page?.totalElements ??
+      responseData?.totalElements ??
+      responseData?.totalElement ??
+      0;
     const hasMore = page * PAGE_SIZE_REF < totalElements;
     return { items, hasMore };
   }, [accountId]);
@@ -412,7 +413,7 @@ export default function InfoServiceRequest({
 
   // Handle row click — auto select & close modal (like PaymentRelation pattern)
   const handleRowClick = (record) => {
-    form.setFieldsValue({ srr: record.serviceRequestReference });
+    form.setFieldsValue({ srr: record.requestNumber });
     setSelectedRow(record);
     setSelectedRowKey(record.key);
     setIsOpen(false);
@@ -630,7 +631,6 @@ export default function InfoServiceRequest({
             key="description"
             name="description"
             label="Description"
-            rules={[{ message: requiredMessage("Description"), required: true }]}
             className="no-margin-form"
           >
             <InputComponent
@@ -648,7 +648,7 @@ export default function InfoServiceRequest({
         isOpen={isOpen}
         handleCancel={handleCancel}
         handleOk={handleOk}
-        header={"CHOOSE SERVICE REQUEST REFERENCE"}
+        title={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
         footer={[
           <Button key="close" onClick={handleClose}>

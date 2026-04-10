@@ -7,13 +7,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import ButtonComponent from "../../../../../components/ButtonComponent";
 import CardContainer from "../../../../../components/CardContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import {
     getDetailPaymentPeriod,
     approveOrRejectPaymentPeriod,
+    approveOrRejectInactivePaymentPeriod,
 } from "../../../../../redux/slices/receipt_collection/paymentPeriod";
 import { dateFormatting } from "../../../../../utils";
 import { configApp } from "../../../../../constants/configApp";
@@ -110,7 +111,10 @@ const ViewPaymentPeriod = () => {
             approvalId: detail.approvalId
         };
 
-        dispatch(approveOrRejectPaymentPeriod(body))
+        const isInactive = detail.status?.toUpperCase() === "ACTIVE";
+        const thunk = isInactive ? approveOrRejectInactivePaymentPeriod : approveOrRejectPaymentPeriod;
+
+        dispatch(thunk(body))
             .unwrap()
             .then(() => {
                 handleClear();
@@ -212,7 +216,7 @@ const ViewPaymentPeriod = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <Tabs
@@ -243,7 +247,7 @@ const ViewPaymentPeriod = () => {
                     loading={loadingConfirm}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

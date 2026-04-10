@@ -1,5 +1,5 @@
 import { Form, Select } from "antd";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import DateComponent from "../../../../../../components/DateComponent";
@@ -28,8 +28,8 @@ const BillingCycleSectionForm = ({
   };
 
   return (
-    <BaseContainer header={"Billing Cycle Information"}>
-      <div className="w-full grid grid-cols-3 gap-3">
+    <CardContainer header={"Billing Cycle Information"}>
+      <div className="w-full grid grid-cols-5 gap-x-3 gap-y-0">
         <Form.Item
           label={"Begin Cycle"}
           name={"beginCycle"}
@@ -38,10 +38,19 @@ const BillingCycleSectionForm = ({
               required: true,
               message: "Please input your Begin Cycle!",
             },
+            {
+              validator: (_, value) => {
+                if (value && (Number(value) > 31 || Number(value) < 1)) {
+                  return Promise.reject("Begin Cycle must be between 1 and 31");
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <InputComponent
             type={"number"}
+            maxLength={2}
             disabled={type !== "create" && status !== "DRAFT" ? true : false}
           />
         </Form.Item>
@@ -53,10 +62,19 @@ const BillingCycleSectionForm = ({
               required: true,
               message: "Please input your End Cycle!",
             },
+            {
+              validator: (_, value) => {
+                if (value && (Number(value) > 31 || Number(value) < 1)) {
+                  return Promise.reject("End Cycle must be between 1 and 31");
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <InputComponent
             type={"number"}
+            maxLength={2}
             disabled={type !== "create" && status !== "DRAFT" ? true : false}
           />
         </Form.Item>
@@ -89,9 +107,17 @@ const BillingCycleSectionForm = ({
               required: true,
               message: "Please input your Invoice Date!",
             },
+            {
+              validator: (_, value) => {
+                if (value && (Number(value) > 31 || Number(value) < 1)) {
+                  return Promise.reject("Invoice Date must be between 1 and 31");
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
-          <InputComponent type="number" />
+          <InputComponent type="number" maxLength={2} />
         </Form.Item>
         <Form.Item
           label={"Start Date"}
@@ -144,7 +170,7 @@ const BillingCycleSectionForm = ({
           />
         </Form.Item>
       </div>
-    </BaseContainer>
+    </CardContainer>
   );
 };
 

@@ -9,6 +9,8 @@ import ReactDOM from "react-dom";
 
 const initialState = {
   data: [],
+  invoice_list: [],
+  invoice_pagination: null,
   loading: false,
   isFailed: false,
   isSuccess: false,
@@ -34,6 +36,8 @@ const initialState = {
     number: 0,
   },
   // Approval states
+  data_approval_history: null,
+  loading_approval_history: false,
   data_ready_request: [],
   loading_ready_request: false,
   data_approval_hierarchy: [],
@@ -47,7 +51,10 @@ const initialState = {
 
 export const getAllEMeteraiInvoices = createAsyncThunk(
   "GET_ALL_EMETERAI_INVOICES",
-  async ({ page, pageSize, search, sort, filters }, thunkAPI) => {
+  async (
+    { page, pageSize, search, sort, filters, isLoadMore = false },
+    thunkAPI,
+  ) => {
     try {
       const sortParams = sort || "billPeriod~asc";
       const searchParams = search || "";
@@ -61,7 +68,7 @@ export const getAllEMeteraiInvoices = createAsyncThunk(
         if (filters.dateRange && filters.dateRange.length === 2) {
           const [startDate, endDate] = filters.dateRange;
           url += `&startDate=${startDate.format(
-            "YYYY-MM-DD"
+            "YYYY-MM-DD",
           )}&endDate=${endDate.format("YYYY-MM-DD")}`;
         }
         if (filters.stampStatus && filters.stampStatus !== "all") {
@@ -74,18 +81,18 @@ export const getAllEMeteraiInvoices = createAsyncThunk(
 
       const response = await ratingBillingHttpService.getPagination(url);
 
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       console.error("❌ GET E-Meterai Invoices Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getInvoiceDetail = createAsyncThunk(
@@ -101,13 +108,13 @@ export const getInvoiceDetail = createAsyncThunk(
       console.error("❌ GET Invoice Detail Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getInvoiceActivityLogs = createAsyncThunk(
@@ -123,13 +130,13 @@ export const getInvoiceActivityLogs = createAsyncThunk(
       console.error("❌ GET Invoice Activity Logs Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const previewOriginalInvoice = createAsyncThunk(
@@ -144,7 +151,7 @@ export const previewOriginalInvoice = createAsyncThunk(
             "ngrok-skip-browser-warning": "true",
           },
           responseType: "arraybuffer",
-        }
+        },
       );
       const responseBlob = await response.data;
       const blobText =
@@ -162,7 +169,7 @@ export const previewOriginalInvoice = createAsyncThunk(
         newTab.document.body.appendChild(viewerContainer);
         ReactDOM.render(
           <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer
+          viewerContainer,
         );
       }
     } catch (error) {
@@ -170,7 +177,7 @@ export const previewOriginalInvoice = createAsyncThunk(
       console.error("=".repeat(80));
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const previewStampedInvoice = createAsyncThunk(
@@ -185,7 +192,7 @@ export const previewStampedInvoice = createAsyncThunk(
             "ngrok-skip-browser-warning": "true",
           },
           responseType: "arraybuffer",
-        }
+        },
       );
       const responseBlob = await response.data;
       const blobText =
@@ -203,7 +210,7 @@ export const previewStampedInvoice = createAsyncThunk(
         newTab.document.body.appendChild(viewerContainer);
         ReactDOM.render(
           <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer
+          viewerContainer,
         );
       }
     } catch (error) {
@@ -211,7 +218,7 @@ export const previewStampedInvoice = createAsyncThunk(
       console.error("=".repeat(80));
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const downloadOriginalInvoice = createAsyncThunk(
@@ -227,7 +234,7 @@ export const downloadOriginalInvoice = createAsyncThunk(
       console.error("❌ Download Original Invoice Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -243,7 +250,7 @@ export const downloadOriginalInvoice = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadStampedInvoice = createAsyncThunk(
@@ -259,7 +266,7 @@ export const downloadStampedInvoice = createAsyncThunk(
       console.error("❌ Download Stamped Invoice Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -275,7 +282,7 @@ export const downloadStampedInvoice = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const downloadSignedInvoice = createAsyncThunk(
@@ -291,7 +298,7 @@ export const downloadSignedInvoice = createAsyncThunk(
       console.error("❌ Download Signed Invoice Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -307,7 +314,27 @@ export const downloadSignedInvoice = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
+);
+
+export const getApprovalHistory = createAsyncThunk(
+  "GET_EMETERAI_APPROVAL_HISTORY",
+  async ({ invoiceNumber }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/approval-history/${invoiceNumber}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      console.error("\u274C GET E-Meterai Approval History Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message,
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
 );
 
 // Approval-related actions
@@ -322,13 +349,13 @@ export const getReadyForRequestList = createAsyncThunk(
       console.error("❌ GET Ready for Request List Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchyList = createAsyncThunk(
@@ -342,13 +369,13 @@ export const getApprovalHierarchyList = createAsyncThunk(
       console.error("❌ GET Approval Hierarchy List Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApphierDetail = createAsyncThunk(
@@ -362,13 +389,13 @@ export const getApphierDetail = createAsyncThunk(
       console.error("❌ GET Apphier Detail Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalListByType = createAsyncThunk(
@@ -382,13 +409,13 @@ export const getApprovalListByType = createAsyncThunk(
       console.error("❌ GET Approval List Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveStampSign = createAsyncThunk(
@@ -414,7 +441,7 @@ export const approveStampSign = createAsyncThunk(
       console.error("❌ POST Approval Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -430,7 +457,7 @@ export const approveStampSign = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const requestApprovalStampSign = createAsyncThunk(
@@ -456,7 +483,7 @@ export const requestApprovalStampSign = createAsyncThunk(
       console.error("❌ POST Request Approval Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -472,7 +499,7 @@ export const requestApprovalStampSign = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const createStampingRequest = createAsyncThunk(
@@ -492,7 +519,7 @@ export const createStampingRequest = createAsyncThunk(
       kopur = "1",
       remark,
     },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const body = {
@@ -527,7 +554,7 @@ export const createStampingRequest = createAsyncThunk(
       console.error("❌ POST E-Meterai Stamping Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -543,7 +570,7 @@ export const createStampingRequest = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const uploadManualStamping = createAsyncThunk(
@@ -560,7 +587,7 @@ export const uploadManualStamping = createAsyncThunk(
 
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
-        formData
+        formData,
       );
 
       const successMessage = {
@@ -577,7 +604,7 @@ export const uploadManualStamping = createAsyncThunk(
       console.error("❌ POST Manual Stamping Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -593,7 +620,7 @@ export const uploadManualStamping = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const uploadManualSigning = createAsyncThunk(
@@ -610,7 +637,7 @@ export const uploadManualSigning = createAsyncThunk(
 
       const response = await ratingBillingHttpService.uploadAttachment(
         url,
-        formData
+        formData,
       );
 
       const successMessage = {
@@ -626,7 +653,7 @@ export const uploadManualSigning = createAsyncThunk(
       console.error("❌ POST Manual Signing Error:");
       console.error(
         "Error Message:",
-        error?.response?.data?.message || error.message
+        error?.response?.data?.message || error.message,
       );
       console.error("Error Code:", error?.response?.data?.code);
       console.error("=".repeat(80));
@@ -642,7 +669,7 @@ export const uploadManualSigning = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 const emeteraiSlice = createSlice({
@@ -666,13 +693,22 @@ const emeteraiSlice = createSlice({
     },
   },
   extraReducers: {
-    [getAllEMeteraiInvoices.pending]: (state) => {
-      state.loading = true;
+    [getAllEMeteraiInvoices.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
       state.isFailed = false;
     },
     [getAllEMeteraiInvoices.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload?.result || [];
+      const newResult = action.payload?.result || [];
+      if (action.payload?.isLoadMore) {
+        state.invoice_list = [...state.invoice_list, ...newResult];
+      } else {
+        state.invoice_list = newResult;
+      }
+      state.invoice_pagination = action.payload?.page || null;
       state.pageInfo = action.payload?.page || initialState.pageInfo;
       state.isSuccess = true;
     },
@@ -953,6 +989,23 @@ const emeteraiSlice = createSlice({
       state.isFailed = true;
       state.message =
         action.payload?.data?.message || "Failed to request approval";
+    },
+
+    [getApprovalHistory.pending]: (state) => {
+      state.loading_approval_history = true;
+      state.isFailed = false;
+    },
+    [getApprovalHistory.fulfilled]: (state, action) => {
+      state.loading_approval_history = false;
+      state.data_approval_history = action.payload;
+      state.isSuccess = true;
+    },
+    [getApprovalHistory.rejected]: (state, action) => {
+      state.loading_approval_history = false;
+      state.isFailed = true;
+      state.data_approval_history = null;
+      state.message =
+        action.payload?.data?.message || "Failed to fetch approval history";
     },
   },
 });

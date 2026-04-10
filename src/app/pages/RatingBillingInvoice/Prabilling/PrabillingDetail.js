@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tabs, Tooltip } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import DetailText from "../../../../components/DetailText";
@@ -57,10 +56,12 @@ const PrabillingDetail = () => {
 
   // Fetch init detail
   useEffect(() => {
-    if (initId) {
-      dispatch(getDetailPrabillingInit(initId));
+    if (!initId) {
+      navigate(RBI_ROUTES.PRABILLING_VIEW, { replace: true });
+      return;
     }
-  }, [dispatch, initId]);
+    dispatch(getDetailPrabillingInit(initId));
+  }, [dispatch, initId, navigate]);
 
   // Fetch prabilling result whenever initCode tersedia
   useEffect(() => {
@@ -322,20 +323,20 @@ const PrabillingDetail = () => {
         key: "action",
         title: "ACTION",
         width: 60,
-        fixed: "right",
+        align: "center",
         render: (text, record) => (
           <Tooltip title="View Account Detail">
             <div
               onClick={() => handleViewDetail(record)}
-              style={{ cursor: "pointer", display: "inline-block" }}
+              style={{ cursor: "pointer", display: "flex", justifyContent: "center" }}
             >
-              <SVGIcon name="IconDetail" width={20} />
+              <SVGIcon name="IconDetail" color="#0075BF" width={20} />
             </div>
           </Tooltip>
         ),
       },
     ],
-    [search, searchText, searchedColumn, prabillData]
+    [search, searchText, searchedColumn, prabillData, handleViewDetail]
   );
 
   const allColumns = useMemo(() => {
@@ -400,7 +401,7 @@ const PrabillingDetail = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading_detail_prabilling}>
 
@@ -510,7 +511,7 @@ const PrabillingDetail = () => {
         </div>
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -299,20 +299,38 @@ button.ant-btn.ant-btn-reject:disabled {
 }
 
 button.ant-btn.ant-btn-action {
+  display: flex;
+  column-gap: 8px;
   width: fit-content;
   background: transparent;
-  color: #000000;
+  color: black;
   align-items: center;
   border: none;
   padding: 8px;
-}
 
-button.ant-btn.ant-btn-action:hover {
-  background: #F5F5F5;
-}
+  svg {
+    color: black;
+    transition: color 0.3s ease-in-out;
+  }
 
-button.ant-btn.ant-btn-action:disabled:hover {
-  background: transparent;
+  &:hover {
+    background-color: #F5F5F5;
+
+    svg {
+      color: #0075BF;
+    }
+  }
+
+  &:disabled {
+    svg {
+      color: #BDBDBD;
+    }
+
+    &:hover {
+      color: black;
+      background: transparent;
+    }
+  }
 }
 
 button.ant-btn.ant-btn-table-action {
@@ -550,6 +568,10 @@ td.ant-table-column-sort {
   border-radius: 4px !important;
 }
 
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #FFFFFF !important;
+}
+
 .action-checkbox .ant-checkbox-checked .ant-checkbox-inner {
   background-color: #0075bf !important;
   border-color: transparent !important;
@@ -564,6 +586,10 @@ td.ant-table-column-sort {
   background-color: #0075bf !important;
   border-color: transparent !important;
   border-radius: 4px !important;
+}
+
+.checkbox-table .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #FFFFFF !important;
 }
 
 /* .ant-menu .ant-menu-item-selected {
@@ -937,9 +963,15 @@ span.ant-tree-title {
 .ant-menu-title-content a {
   color: rgba(0, 0, 0, 0.85);
 }
-.ant-menu-submenu-selected svg {
+.ant-menu-item-selected svg,
+.ant-menu-submenu:has(> .ant-menu-sub > .ant-menu-item-selected) > .ant-menu-submenu-title svg {
   filter: invert(44%) sepia(41%) saturate(3760%) hue-rotate(191deg)
     brightness(101%) contrast(102%);
+}
+/* Nested submenu/item icons smaller than top-level for visual hierarchy */
+.ant-menu-sub.ant-menu-inline .sidebar-icon {
+  width: 16px !important;
+  height: 16px;
 }
 .ant-menu-submenu-selected .ant-menu-title-content .active {
   color: var(--primary);
@@ -1059,6 +1091,36 @@ span.ant-tree-title {
 .ant-menu {
   font-size: 12px !important;
 }
+/* Suppress submenu arrow rotation transition in the sidebar so submenus open/close
+   instantly with no animation -- eliminates the expand/collapse glitch on navigation.
+   Scoped to .ant-layout-sider so other antd menus (e.g. dropdowns) are unaffected. */
+.ant-layout-sider .ant-menu-submenu-arrow,
+.ant-layout-sider .ant-menu-submenu-arrow::before,
+.ant-layout-sider .ant-menu-submenu-arrow::after {
+  transition: none !important;
+}
+.ant-layout-sider .ant-menu-submenu,
+.ant-layout-sider .ant-menu-submenu-inline {
+  transition: none !important;
+}
+/* Collapsed sidebar: popup flyout for submenus on hover */
+.custom-menu-popup {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px -4px rgba(0,0,0,.12),
+              0 6px 16px 0 rgba(0,0,0,.08),
+              0 9px 28px 8px rgba(0,0,0,.05);
+  min-width: 160px;
+  padding: 4px 0;
+}
+.custom-menu-popup .ant-menu-item {
+  padding: 5px 12px;
+  line-height: 22px;
+  height: auto;
+}
+.custom-menu-popup .ant-menu-item:hover {
+  background: #f5f5f5;
+}
 
 .width-collapsed {
   min-width: 80px !important;
@@ -1066,6 +1128,104 @@ span.ant-tree-title {
 .width-not-collapsed {
   min-width: max-content !important;
   max-width: 280px !important;
+}
+
+/* Center icons in collapsed sidebar */
+.ant-menu-inline-collapsed .ant-menu-item-icon,
+.ant-menu-submenu-inline.ant-menu-submenu-popup .ant-menu-item-icon {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-right: 0 !important;
+}
+
+/* When collapsed, all menu items should have minimal padding to center icons */
+.ant-menu-inline-collapsed .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-submenu > .ant-menu-submenu-title {
+  padding: 0 !important;  /* Remove padding to allow full centering */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Override any conflicting submenu title padding when collapsed */
+.ant-menu-inline-collapsed .ant-menu-submenu > .ant-menu-submenu-title {
+  left: 0 !important;
+  padding: 0 !important;
+  text-overflow: clip !important;
+}
+
+/* Align logo with menu items */
+.logo {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 46px !important;  /* Match menu item height */
+  padding: 0 12px !important;  /* Consistent padding */
+}
+
+/* Adjust logo container when sidebar is collapsed */
+.width-collapsed .logo {
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Smooth transition for logo when expanding/collapsing */
+.logo {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  padding-right: 24px !important;  /* Make room for the toggle button */
+}
+
+/* Align the toggle button with submenu arrows */
+.logo .trigger {
+  position: absolute !important;
+  right: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  top: 0 !important;
+}
+
+/* Submenu items in collapsed state should also be centered */
+.ant-menu-inline-collapsed .ant-menu-sub .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-sub .ant-menu-submenu-title {
+  padding: 0 !important;  /* Remove padding to allow full centering */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Expanded state - maintain proper indentation hierarchy */
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-item {
+  padding: 0 24px !important;
+}
+
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-submenu-title {
+  padding: 0 24px !important;
+}
+
+/* Submenu items in expanded state should have proper indentation */
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-sub .ant-menu-item {
+  padding: 0 24px 0 48px !important;  /* Left padding for indentation, right for balance */
+}
+
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-sub .ant-menu-submenu-title {
+  padding: 0 24px 0 48px !important;  /* Left padding for indentation, right for balance */
+}
+
+/* Hide text content when sidebar is collapsed */
+.sidebar-collapsed-content {
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  display: inline-block !important;
+  line-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .ant-picker {

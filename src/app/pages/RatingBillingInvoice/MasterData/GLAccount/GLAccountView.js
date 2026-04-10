@@ -1,10 +1,15 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -27,22 +32,26 @@ import CardContainer from "../../../../../components/CardContainer";
 import ModalApprovalGLAccount from "./ModalApprovalGLAccount";
 
 const GLAccountView = () => {
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.glAccount,
-  );
+  const {
+    loading,
+    data_approval_history,
+    gl_account_list,
+    gl_account_pagination,
+  } = useSelector((state) => state.glAccount);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+
+  const hasMore =
+    gl_account_list.length < (gl_account_pagination?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -52,20 +61,22 @@ const GLAccountView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("glAccountFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["no"],
-          right: ["action"],
-        };
+    try {
+      const saved = localStorage.getItem("glAccountFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
   });
 
-  // Save to localStorage when fixedColumns change
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem("glAccountFixedColumns", JSON.stringify(fixedColumns));
+    try {
+      localStorage.setItem("glAccountFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   // Use Effect - Fetch data
@@ -73,12 +84,13 @@ const GLAccountView = () => {
     dispatch(
       getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
+        isLoadMore: false,
       }),
     );
-  }, [search, sort, page, pageSize, dispatch]);
+  }, [search, sort, dispatch]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -121,23 +133,47 @@ const GLAccountView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  // Handle Change Page Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // Handle Sort Table
+  const onSort = (_, __, sort) => {
+    const dataSort =
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (gl_account_list.length >= (gl_account_pagination?.totalElements || 0))
+      return;
+    const nextPage = Math.floor(gl_account_list.length / loadMoreSize) + 1;
+    await dispatch(
+      getAllGLAccountPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, gl_account_list.length, gl_account_pagination, search, sort]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getAllGLAccountPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, search, sort]);
 
   const handleRetry = () => {
     handleOk();
@@ -148,15 +184,6 @@ const GLAccountView = () => {
   const handleCloseModalError = () => {
     setModalError(false);
     setBodyError({});
-  };
-
-  // Handle Sort Table
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
   };
 
   const handleOptions = () => {
@@ -178,22 +205,13 @@ const GLAccountView = () => {
       .then(() => {
         handleClear();
         handleCancel();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
         dispatch(
           getAllGLAccountPaginate({
-            search: tempSearch,
-            page,
-            pageSize,
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           }),
         );
       })
@@ -245,20 +263,8 @@ const GLAccountView = () => {
     dispatch(
       downloadGLAccount({
         search: tempSearch,
-        page,
-        pageSize,
-        sort,
-      }),
-    );
-  };
-
-  // Handle Refresh after approval
-  const handleRefresh = () => {
-    dispatch(
-      getAllGLAccountPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
       }),
     );
@@ -271,7 +277,7 @@ const GLAccountView = () => {
       render: (
         <ButtonComponent
           icon={
-            <SVGIcon name="IconRequestApproval" width={24} color="#ffffff" />
+            <SVGIcon name="IconRequestApproval" width={20} color="#ffffff" />
           }
           type="submit"
           className="bg-red-500"
@@ -287,7 +293,7 @@ const GLAccountView = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -301,7 +307,7 @@ const GLAccountView = () => {
       render: (
         <NavLink to={RBI_ROUTES.GLACCOUNT_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
             Create GL Account
@@ -335,8 +341,7 @@ const GLAccountView = () => {
       render: (record, data) => {
         const isEditable =
           record.approvalStatus === "DRAFT" ||
-          record.approvalStatus === "REJECTED" ||
-          (record.status === "ACTIVE" && record.approvalStatus === "APPROVED");
+          record.approvalStatus === "REJECTED";
         const linkContent =
           data > 3 ? (
             <ButtonComponent
@@ -347,11 +352,12 @@ const GLAccountView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -412,11 +418,12 @@ const GLAccountView = () => {
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -448,10 +455,11 @@ const GLAccountView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.glAccountId)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -482,8 +490,8 @@ const GLAccountView = () => {
     const glAccountCols = [
       ...columnsGLAccount(
         search,
-        page,
-        pageSize,
+        1,
+        loadMoreSize,
         searchInput,
         searchedColumn,
         searchText,
@@ -499,7 +507,7 @@ const GLAccountView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -544,16 +552,14 @@ const GLAccountView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
-                GL ACCOUNT LIST
-              </p>
+              <p className="w-full mt-[15px] text-primary">GL ACCOUNT LIST</p>
 
               <Toolbar items={itemGrantAccess} />
             </div>
@@ -561,19 +567,24 @@ const GLAccountView = () => {
         >
           <div className={"w-full"}>
             <TableRBI
-              dataSource={dataSource}
+              idTable="glAccountTable"
+              dataSource={gl_account_list}
               columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
+              totalData={gl_account_pagination?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 1000 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
@@ -628,7 +639,7 @@ const GLAccountView = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

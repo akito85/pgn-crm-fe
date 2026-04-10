@@ -20,7 +20,6 @@ import {
   clearUpdatedBatchIds,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -73,10 +72,23 @@ const MonitoringUsagePage = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["action", "status"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("monitoringUsageFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action", "status"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action", "status"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("monitoringUsageFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   useEffect(() => {
     if (
@@ -408,7 +420,7 @@ const MonitoringUsagePage = () => {
 
   return (
     <>
-      <LayoutMenu>
+      <div>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -475,7 +487,7 @@ const MonitoringUsagePage = () => {
             </Tabs.TabPane>
           </Tabs>
         </CardContainer>
-      </LayoutMenu>
+      </div>
 
       {modalApproval ? (
         <ModalApprovalUsage

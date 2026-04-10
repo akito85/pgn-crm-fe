@@ -140,9 +140,12 @@ const TableRBI = ({
   showSearchBar = true,
   showRefresh = false,
   onRefresh,
+  refreshLabel,
+  refreshIcon,
   enableRowClick = false,
   selectedRowKey = null,
   onRowClick = () => {},
+  onSearch = () => {},
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -758,7 +761,7 @@ const TableRBI = ({
             <div className="flex justify-end gap-2 items-center">
               {showRefresh && (
                 <Button
-                  icon={<ReloadOutlined style={{ fontSize: "14px" }} />}
+                  icon={refreshIcon || <ReloadOutlined style={{ fontSize: "14px" }} />}
                   onClick={handleRefresh}
                   loading={loading}
                   style={{
@@ -769,7 +772,7 @@ const TableRBI = ({
                     fontSize: "12px",
                   }}
                 >
-                  Refresh
+                  {refreshLabel || "Refresh"}
                 </Button>
               )}
 
@@ -792,7 +795,10 @@ const TableRBI = ({
 
               {showSearchBar && (
                 <div style={{ width: "250px" }}>
-                  <SearchBar placeholder="Search Content" />
+                  <SearchBar 
+                    placeholder="Search Content" 
+                    onChange={onSearch}
+                  />
                 </div>
               )}
             </div>

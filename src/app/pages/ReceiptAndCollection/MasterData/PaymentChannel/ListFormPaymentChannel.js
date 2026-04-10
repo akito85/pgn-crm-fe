@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
   createPaymentChannel,
@@ -394,7 +393,12 @@ const ListFormPaymentChannel = (props) => {
 
   const handleSaveDraft = () => {
     const currentFormValue = form.getFieldsValue();
+    const existingId =
+      currentFormValue.id ||
+      data_detail?.peOpCi?.id ||
+      id;
     const dataValue = {
+      id: existingId,
       ciCode: currentFormValue.ciCode,
       name: currentFormValue.name,
       effStartDate: currentFormValue.effStartDate ? moment(currentFormValue.effStartDate).format(dateFormatting.date) : null,
@@ -407,13 +411,12 @@ const ListFormPaymentChannel = (props) => {
     dispatch(saveDraftPaymentChannel(dataValue))
       .unwrap()
       .then(() => {
-        handleClear();
-        handleBack();
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL);
       });
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <FormStepper
@@ -481,6 +484,7 @@ const ListFormPaymentChannel = (props) => {
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
+                mandatory={true}
               />
             </CardContainer>
           </div>
@@ -544,7 +548,7 @@ const ListFormPaymentChannel = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

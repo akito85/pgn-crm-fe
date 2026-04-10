@@ -13,7 +13,6 @@ import DetailSection from "../../../../../components/DetailSection";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
 import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectPartner,
   approveOrRejectInactivePartner,
@@ -104,7 +103,10 @@ const ListDetailPartner = () => {
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
     setLoadingConfirm(true);
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_PARTNER") {
+    if (
+      data_detail?.tApprovalDto?.approvalType === "INACTIVE_PARTNER" ||
+      data_detail?.tApprovalDto?.approvalType === "ACTIVE_PARTNER"
+    ) {
       const data = {
         id: id,
         remark: res.remark,
@@ -147,7 +149,7 @@ const ListDetailPartner = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <div>
@@ -208,7 +210,7 @@ const ListDetailPartner = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

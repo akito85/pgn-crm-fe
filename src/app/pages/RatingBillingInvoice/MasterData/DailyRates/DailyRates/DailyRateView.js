@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 import moment from "moment";
 import { Link, NavLink } from "react-router-dom";
@@ -35,7 +41,7 @@ export const columnDailyRate = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => {},
 ) => [
   {
     title: "NO",
@@ -51,13 +57,14 @@ export const columnDailyRate = (
     key: "rateType",
     sorter: true,
     align: "left",
+    width: 120,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateType",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -67,7 +74,7 @@ export const columnDailyRate = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -76,13 +83,14 @@ export const columnDailyRate = (
     key: "fromCurrencyName",
     sorter: true,
     align: "center",
+    width: 160,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fromCurrencyName",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -92,7 +100,7 @@ export const columnDailyRate = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -101,13 +109,14 @@ export const columnDailyRate = (
     key: "toCurrencyName",
     sorter: true,
     align: "center",
+    width: 150,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "toCurrencyName",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (text) =>
       renderColumn(
@@ -117,7 +126,7 @@ export const columnDailyRate = (
         text,
         false,
         "input",
-        search
+        search,
       ),
   },
   {
@@ -126,6 +135,7 @@ export const columnDailyRate = (
     key: "rateDate",
     sorter: true,
     align: "center",
+    width: 140,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateDate",
@@ -134,7 +144,7 @@ export const columnDailyRate = (
       searchText,
       handleSearch,
       true,
-      "date"
+      "date",
     ),
     render: (text) =>
       renderDateColumn(
@@ -143,7 +153,7 @@ export const columnDailyRate = (
         searchText,
         text,
         "date",
-        search
+        search,
       ),
   },
   {
@@ -152,13 +162,14 @@ export const columnDailyRate = (
     key: "convertedRate",
     sorter: true,
     align: "right",
+    width: 170,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convertedRate",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
@@ -183,7 +194,7 @@ export const columnDailyRate = (
         value,
         true,
         "input",
-        search
+        search,
       );
     },
   },
@@ -192,13 +203,14 @@ export const columnDailyRate = (
     dataIndex: "description",
     key: "description",
     sorter: true,
+    width: 250,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "description",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
@@ -211,14 +223,14 @@ export const columnDailyRate = (
         text,
         true,
         "input",
-        search
+        search,
       ),
   },
   {
     title: "STATUS",
     dataIndex: "status",
     key: "status",
-    width: 150,
+    width: 130,
     sorter: true,
     align: "left",
     ...getColumnSearchPropsUseFilteredValue(
@@ -227,7 +239,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (a) => {
       let text;
@@ -252,7 +264,7 @@ export const columnDailyRate = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
@@ -260,7 +272,7 @@ export const columnDailyRate = (
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     key: "statusApproval",
-    width: 200,
+    width: 180,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -269,7 +281,7 @@ export const columnDailyRate = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (a) => {
       let text;
@@ -294,24 +306,29 @@ export const columnDailyRate = (
         text,
         false,
         "status",
-        search
+        search,
       );
     },
   },
 ];
 
 const DailyRateView = ({ dispatch }) => {
-  const { data_list, dataApprovalHistory, loading } = useSelector(
-    (state) => state.daily_rate
-  );
+  const {
+    daily_rate_list,
+    daily_rate_pagination,
+    dataApprovalHistory,
+    loading,
+  } = useSelector((state) => state.daily_rate);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const loadMoreSize = 20;
   const searchInput = useRef(null);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+
+  const hasMore =
+    daily_rate_list.length < (daily_rate_pagination?.totalElements || 0);
 
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -354,27 +371,23 @@ const DailyRateView = ({ dispatch }) => {
     dispatch(
       getDailyRatePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [search, page, pageSize, sort, dispatch]);
+  }, [search, sort, dispatch]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   //handleApproval history
@@ -406,10 +419,13 @@ const DailyRateView = ({ dispatch }) => {
     }));
   };
 
-  const handleApprovalHistory = (data) => {
-    dispatch(getApprovalHistory(data.ratesId));
-    setOpenModalHistory(true);
-  };
+  const handleApprovalHistory = useCallback(
+    (data) => {
+      dispatch(getApprovalHistory(data.ratesId));
+      setOpenModalHistory(true);
+    },
+    [dispatch],
+  );
 
   //handle inactive
   const handleInactive = (r) => {
@@ -421,12 +437,6 @@ const DailyRateView = ({ dispatch }) => {
     setOpenModalInactivate(false);
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
@@ -434,6 +444,33 @@ const DailyRateView = ({ dispatch }) => {
         : "";
     setSort(dataSort);
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (daily_rate_list.length >= (daily_rate_pagination?.totalElements || 0))
+      return;
+    const nextPage = Math.floor(daily_rate_list.length / loadMoreSize) + 1;
+    await dispatch(
+      getDailyRatePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, daily_rate_list.length, daily_rate_pagination, search, sort]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getDailyRatePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, search, sort]);
 
   const handleSubmitModalInactivate = (res, handleClear) => {
     const body = {
@@ -449,10 +486,11 @@ const DailyRateView = ({ dispatch }) => {
         dispatch(
           getDailyRatePaginate({
             search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
-          })
+            isLoadMore: false,
+          }),
         );
       });
   };
@@ -471,10 +509,10 @@ const DailyRateView = ({ dispatch }) => {
     dispatch(
       getDowloadDailyRate({
         search: tempSearch,
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -484,7 +522,9 @@ const DailyRateView = ({ dispatch }) => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           type="submit"
           onClick={handleDownload}
         >
@@ -497,7 +537,9 @@ const DailyRateView = ({ dispatch }) => {
       render: (
         <NavLink to={RBI_ROUTES.DAILY_RATE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Daily Rates
@@ -518,7 +560,7 @@ const DailyRateView = ({ dispatch }) => {
           >
             <Tooltip title="Detail">
               <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -545,11 +587,12 @@ const DailyRateView = ({ dispatch }) => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
+                className={`ml-0 ${
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
@@ -611,11 +654,12 @@ const DailyRateView = ({ dispatch }) => {
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -648,9 +692,10 @@ const DailyRateView = ({ dispatch }) => {
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
               border={false}
+              type={"action"}
               onClick={() => handleApprovalHistory(record)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -673,16 +718,20 @@ const DailyRateView = ({ dispatch }) => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
-  );
+    itemGrantAccess,
+  ).map((col) => ({
+    ...col,
+    width: 60,
+    align: "center",
+  }));
 
   // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
     const dailyRateCols = [
       ...columnDailyRate(
         search,
-        page,
-        pageSize,
+        1,
+        loadMoreSize,
         searchInput,
         searchedColumn,
         searchText,
@@ -690,7 +739,7 @@ const DailyRateView = ({ dispatch }) => {
         handleInactive,
         handleApprovalHistory,
         formatRupiah,
-        disabledDate
+        disabledDate,
       ),
       ...actionColumns,
     ];
@@ -702,7 +751,13 @@ const DailyRateView = ({ dispatch }) => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [
+    search,
+    searchedColumn,
+    searchText,
+    actionColumns,
+    handleApprovalHistory,
+  ]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -752,31 +807,34 @@ const DailyRateView = ({ dispatch }) => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
-                DAILY RATES LIST
-              </p>
+              <p className="w-full mt-[15px] text-primary">DAILY RATES LIST</p>
 
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
           <TableRBI
-            dataSource={data_list?.result}
+            idTable="dailyRateTable"
+            dataSource={daily_rate_list}
             columns={columns}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-            totalData={data_list?.page?.totalElements || 0}
+            totalData={daily_rate_pagination?.totalElements || 0}
             onSort={onSort}
             tableScrolled={{
-              x: 2500,
+              x: "max-content",
               y: 525,
             }}
             handleDownload={handleDownload}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            refreshLabel="Refresh"
           />
         </CardContainer>
 
