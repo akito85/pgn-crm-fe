@@ -484,6 +484,8 @@ const ListCreateForm = ({ type }) => {
     } else {
       dispatch(getDetailTOP(id));
       dispatch(getDetailDraftTOP(id));
+      setCurrent(0);
+      setValuePage(STEPS[0].value);
     }
   };
 

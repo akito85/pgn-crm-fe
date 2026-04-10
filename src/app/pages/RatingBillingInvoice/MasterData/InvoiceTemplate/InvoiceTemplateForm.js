@@ -824,6 +824,7 @@ const InvoiceTemplateForm = ({ type }) => {
     } else {
       dispatch(getDetailInvoiceTemplate(id));
       dispatch(getDetailDraftInvoiceTemplate(id));
+      setCurrent(0);
     }
   };
 

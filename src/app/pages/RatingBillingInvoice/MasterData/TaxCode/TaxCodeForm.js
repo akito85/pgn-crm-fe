@@ -1051,6 +1051,7 @@ const TaxCodeForm = ({ type }) => {
     } else {
       dispatch(getDetailTaxCode(id));
       dispatch(getDetailDraftTaxCode(id));
+      setCurrent(0);
     }
   };
 
