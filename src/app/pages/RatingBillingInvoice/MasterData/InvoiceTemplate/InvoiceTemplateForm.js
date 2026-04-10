@@ -700,7 +700,7 @@ const InvoiceTemplateForm = ({ type }) => {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
+        moment(item?.endDate) > moment(formHeader?.endDate)
       ) {
         dataOverlap?.push(item);
       }
@@ -824,6 +824,7 @@ const InvoiceTemplateForm = ({ type }) => {
     } else {
       dispatch(getDetailInvoiceTemplate(id));
       dispatch(getDetailDraftInvoiceTemplate(id));
+      setCurrent(0);
     }
   };
 

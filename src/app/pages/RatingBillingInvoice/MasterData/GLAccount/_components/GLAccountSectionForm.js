@@ -30,7 +30,7 @@ const GLAccountSectionForm = ({ type, form }) => {
               >
                 <InputComponent
                   placeholder="GL Account Number.."
-                  maxLength={255}
+                  maxLength={50}
                   onKeyPress={(e) => {
                     if (!/[0-9]/.test(e.key)) e.preventDefault();
                   }}
