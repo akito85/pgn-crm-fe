@@ -450,6 +450,7 @@ const BillingCycleForm = ({ type }) => {
     } else {
       dispatch(getInfoDetail(id));
       dispatch(getInfoDetailDraft(id));
+      setCurrent(0);
     }
   };
 
