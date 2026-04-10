@@ -311,7 +311,7 @@ const PosForm = ({ type }) => {
   );
 
   const handleSetFormUpdate = useCallback(
-    (data_detailPos, data_globalCurrency) => {
+    (data_detailPos, data_globalCurrency, data_globalBillingCycle) => {
       const costCenterValue =
         data_detailPos?.costcenter || data_detailPos?.costCenter || "";
       form.setFieldsValue({
@@ -323,6 +323,11 @@ const PosForm = ({ type }) => {
         transactionDate: moment(data_detailPos?.transactionDate),
         invoiceDate: moment(data_detailPos?.invoiceDate),
         costcenter: costCenterValue,
+        billingCycle: data_globalBillingCycle?.find(
+          (item) =>
+            String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+            item.name === data_detailPos?.billingCycle,
+        )?.id,
       });
     },
     [form],
@@ -569,9 +574,11 @@ const PosForm = ({ type }) => {
           email: data_detailPos?.email,
           address: data_detailPos?.address,
           billingCycle: data_globalBillingCycle?.find(
-            (item) => item.name === data_detailPos?.billingCycle,
+            (item) =>
+              String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+              item.name === data_detailPos?.billingCycle,
           )?.id,
-          billingPeriod: data_detailPos?.billingPeriod,
+          billingPeriod: data_detailPos?.billingPeriodId || data_detailPos?.billingPeriod,
           remark: data_detailPos?.remark,
           sor: sorId,
           costcenter: ccId,
@@ -595,7 +602,7 @@ const PosForm = ({ type }) => {
           dispatch(getAccountGroupTypeList([accountSegmentId]));
         }
       } else {
-        handleSetFormUpdate(data_detailPos, data_globalCurrency);
+        handleSetFormUpdate(data_detailPos, data_globalCurrency, data_globalBillingCycle);
         setAccountNumber(data_detailPos?.accountNumber);
       }
 
@@ -607,7 +614,9 @@ const PosForm = ({ type }) => {
       setInvoiceDate(moment(data_detailPos?.invoiceDate));
       setDataBillingCycle(
         data_globalBillingCycle?.find(
-          (item) => item.name === data_detailPos?.billingCycle,
+          (item) =>
+            String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+            item.name === data_detailPos?.billingCycle,
         )?.id,
       );
       setDataDynamic({
@@ -932,83 +941,141 @@ const PosForm = ({ type }) => {
 
   const onFinish = (e) => {
     let errorBody = {};
-    if (dataAttachment.length === 0) {
-      handleMandatory(setDataTabs, dataAttachment);
-    } else {
-      handleMandatory(setDataTabs, dataAttachment);
-      if (data.length === 0 && dataAttachment.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: `Your data was not created. Point of Sales Item and Attachment are Mandatory. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (data.length === 0) {
+
+    // Untuk Save as Draft (typeSubmit = false), skip validasi attachment dan approval
+    // Tapi tetap validasi POS items dan field form lainnya
+    if (!typeSubmit) {
+      // Validasi POS items tetap dilakukan untuk save as draft
+      if (data.length === 0) {
         errorBody = {
           title: "Failed",
           description:
             "Your data was not created. Point of Sales Item is Mandatory. Please try again.",
         };
         dispatch(showModalError(errorBody));
-      } else if (dataAttachment.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: "Attachment Mandatory. Please insert data.",
-        };
-        dispatch(showModalError(errorBody));
-      } else {
-        const findBillingCycle = data_globalBillingCycle?.find(
-          (item) => item.id === e?.billingCycle,
-        )?.name;
-        const findBillingPeriod = data_globalBillingPeriod?.find(
-          (item) => item.id === e?.billingPeriod,
-        )?.name;
-        setDataSend({
-          ...e,
-          billingCycle:
-            findBillingCycle === undefined
-              ? e?.billingCycle
-              : findBillingCycle,
-          billingPeriod:
-            findBillingPeriod === undefined
-              ? e?.billingPeriod
-              : findBillingPeriod,
-          currency: data_globalCurrency?.find(
-            (item) => item.Id === e?.currency,
-          )?.text,
-          transactionDate: moment(e?.transactionDate).format(
-            dateFormatting.date,
-          ),
-          invoiceDate: moment(e?.invoiceDate).format(dateFormatting.date),
-          termsOfPayment: moment.isMoment(e?.termType?.termValue)
+        return;
+      }
+
+      const findBillingCycle = data_globalBillingCycle?.find(
+        (item) => item.id === e?.billingCycle,
+      )?.name;
+      const findBillingPeriod = data_globalBillingPeriod?.find(
+        (item) => item.id === e?.billingPeriod,
+      )?.name;
+      setDataSend({
+        ...e,
+        billingCycle:
+          findBillingCycle === undefined
+            ? e?.billingCycle
+            : findBillingCycle,
+        billingPeriod:
+          findBillingPeriod === undefined
+            ? e?.billingPeriod
+            : findBillingPeriod,
+        currency: data_globalCurrency?.find(
+          (item) => item.Id === e?.currency,
+        )?.text,
+        transactionDate: e?.transactionDate
+          ? moment(e?.transactionDate).format(dateFormatting.date)
+          : null,
+        invoiceDate: e?.invoiceDate
+          ? moment(e?.invoiceDate).format(dateFormatting.date)
+          : null,
+        termsOfPayment: e?.termType?.termValue
+          ? moment.isMoment(e?.termType?.termValue)
             ? moment(e?.termType?.termValue).format(dateFormatting.date)
             : data_globalTermsOfPaymentValue?.find(
                 (item) => item.Id === e?.termType?.termValue,
-              )?.text,
-          remark: e?.remark,
-          genProInv: e?.genProInv ? "Y" : "N",
-          submit: typeSubmit,
-          topId: e.termType.termValueDdl,
-        });
-        setModalConfirm(true);
-        setDataTabs([
-          {
-            value: "Point of Sales",
-            paramValue: [
-              "accountNumber",
-              "billingCycle",
-              "period",
-              "currency",
-              "transactionDate",
-              "invoiceDate",
-              "termType",
-              "termValue",
-              "remark",
-            ],
-          },
-          { value: "Approval", paramValue: ["apphierId"] },
-          { value: "Attachment" },
-        ]);
-      }
+              )?.text
+          : null,
+        remark: e?.remark,
+        genProInv: e?.genProInv ? "Y" : "N",
+        submit: typeSubmit,
+        topId: e?.termType?.termValueDdl,
+      });
+      setModalConfirm(true);
+      return;
+    }
+
+    // Untuk Submit (typeSubmit = true), lakukan validasi lengkap termasuk attachment
+    if (dataAttachment.length === 0) {
+      handleMandatory(setDataTabs, dataAttachment);
+    } else {
+      handleMandatory(setDataTabs, dataAttachment);
+    }
+
+    if (data.length === 0 && dataAttachment.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: `Your data was not created. Point of Sales Item and Attachment are Mandatory. Please try again.`,
+      };
+      dispatch(showModalError(errorBody));
+    } else if (data.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description:
+          "Your data was not created. Point of Sales Item is Mandatory. Please try again.",
+      };
+      dispatch(showModalError(errorBody));
+    } else if (dataAttachment.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: "Attachment Mandatory. Please insert data.",
+      };
+      dispatch(showModalError(errorBody));
+    } else {
+      const findBillingCycle = data_globalBillingCycle?.find(
+        (item) => item.id === e?.billingCycle,
+      )?.name;
+      const findBillingPeriod = data_globalBillingPeriod?.find(
+        (item) => item.id === e?.billingPeriod,
+      )?.name;
+      setDataSend({
+        ...e,
+        billingCycle:
+          findBillingCycle === undefined
+            ? e?.billingCycle
+            : findBillingCycle,
+        billingPeriod:
+          findBillingPeriod === undefined
+            ? e?.billingPeriod
+            : findBillingPeriod,
+        currency: data_globalCurrency?.find(
+          (item) => item.Id === e?.currency,
+        )?.text,
+        transactionDate: moment(e?.transactionDate).format(
+          dateFormatting.date,
+        ),
+        invoiceDate: moment(e?.invoiceDate).format(dateFormatting.date),
+        termsOfPayment: moment.isMoment(e?.termType?.termValue)
+          ? moment(e?.termType?.termValue).format(dateFormatting.date)
+          : data_globalTermsOfPaymentValue?.find(
+              (item) => item.Id === e?.termType?.termValue,
+            )?.text,
+        remark: e?.remark,
+        genProInv: e?.genProInv ? "Y" : "N",
+        submit: typeSubmit,
+        topId: e.termType.termValueDdl,
+      });
+      setModalConfirm(true);
+      setDataTabs([
+        {
+          value: "Point of Sales",
+          paramValue: [
+            "accountNumber",
+            "billingCycle",
+            "period",
+            "currency",
+            "transactionDate",
+            "invoiceDate",
+            "termType",
+            "termValue",
+            "remark",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
     }
   };
 
@@ -1387,10 +1454,10 @@ const PosForm = ({ type }) => {
             address: data_detailPos?.address,
             billingCycle: data_globalBillingCycle?.find(
               (item) =>
-                String(item.id) === String(data_detailPos?.billingCycle) ||
+                String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
                 item.name === data_detailPos?.billingCycle,
             )?.id,
-            billingPeriod: data_detailPos?.billingPeriod,
+            billingPeriod: data_detailPos?.billingPeriodId || data_detailPos?.billingPeriod,
             remark: data_detailPos?.remark,
             sor: sorId,
             costcenter:
@@ -1400,7 +1467,7 @@ const PosForm = ({ type }) => {
           });
           setAccountNumber(data_detailPos?.registrationNumber);
         } else {
-          handleSetFormUpdate(data_detailPos, data_globalCurrency);
+          handleSetFormUpdate(data_detailPos, data_globalCurrency, data_globalBillingCycle);
           setAccountNumber(data_detailPos?.accountNumber);
         }
 
@@ -1434,7 +1501,7 @@ const PosForm = ({ type }) => {
         setDataBillingCycle(
           data_globalBillingCycle?.find(
             (item) =>
-              String(item.id) === String(data_detailPos?.billingCycle) ||
+              String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
               item.name === data_detailPos?.billingCycle,
           )?.id,
         );
