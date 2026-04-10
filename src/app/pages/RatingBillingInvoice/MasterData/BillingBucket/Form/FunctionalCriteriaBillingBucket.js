@@ -45,7 +45,7 @@ const EditableCell = ({
   disableDate,
   validateStartDate,
   validateEndDate,
-  handleEditDataRecord = () => { },
+  handleEditDataRecord = () => {},
   ...restProps
 }) => {
   const dispatch = useDispatch();
@@ -78,11 +78,18 @@ const EditableCell = ({
   };
 
   const handleDisableDateBetween = (current) => {
-    if (dataIndex === 'endDate' && hasValue(formTableCriteria.getFieldValue('startDate')) && hasValue(validateEndDate)) {
-      return moment(formTableCriteria.getFieldValue('startDate')) > current || current > moment(validateEndDate).add(1, 'days')
+    if (
+      dataIndex === "endDate" &&
+      hasValue(formTableCriteria.getFieldValue("startDate")) &&
+      hasValue(validateEndDate)
+    ) {
+      return (
+        moment(formTableCriteria.getFieldValue("startDate")) > current ||
+        current > moment(validateEndDate).startOf("day")
+      );
     } else if (validateStartDate && validateEndDate) {
       const startDate = moment(validateStartDate).startOf("day");
-      const endDate = moment(validateEndDate).endOf("day");
+      const endDate = moment(validateEndDate).startOf("day");
       return current.isBefore(startDate) || current.isAfter(endDate);
     } else {
       return true; // Disable all dates if start or end date is not defined
@@ -182,13 +189,13 @@ const EditableCell = ({
             inputType !== "endDate"
               ? rules()
               : [
-                {
-                  validator: (_, value) =>
-                    endDateValidator(
-                      formTableCriteria.getFieldValue().startDate
-                    )(_, value),
-                },
-              ]
+                  {
+                    validator: (_, value) =>
+                      endDateValidator(
+                        formTableCriteria.getFieldValue().startDate,
+                      )(_, value),
+                  },
+                ]
           }
         >
           {inputNode}
@@ -204,9 +211,9 @@ const FunctionalCriteriaBillingBucket = ({
   type,
   data = [],
   dataCriteria = [],
-  updateData = () => { },
+  updateData = () => {},
   storedData = false,
-  setStoredData = () => { },
+  setStoredData = () => {},
   required,
   disableDate,
   status,
@@ -253,8 +260,6 @@ const FunctionalCriteriaBillingBucket = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [modalValidationTable, setModalValidationTable] = useState(false);
 
-
-
   // Use Effect
   useEffect(() => {
     setTotalData(data.length);
@@ -274,7 +279,6 @@ const FunctionalCriteriaBillingBucket = ({
       dispatch(getCustomer());
     }
   }, [type]);
-
 
   // Data Select Criteria
   const budget = (data_budget || []).map((item) => {
@@ -517,11 +521,15 @@ const FunctionalCriteriaBillingBucket = ({
   };
 
   const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-    if (moment(rowValue?.startDate).startOf("day") < moment(formHeaderValue?.startDate).startOf("day")) {
+    if (
+      moment(rowValue?.startDate).startOf("day") <
+      moment(formHeaderValue?.startDate).startOf("day")
+    ) {
       return true;
     } else if (
       hasValue(rowValue?.endDate) &&
-      moment(rowValue?.endDate).startOf("day") > moment(formHeaderValue?.endDate).startOf("day").add(1, "days") &&
+      moment(rowValue?.endDate).startOf("day") >
+        moment(formHeaderValue?.endDate).startOf("day").add(1, "days") &&
       hasValue(formHeaderValue?.endDate)
     ) {
       return true;
@@ -530,22 +538,24 @@ const FunctionalCriteriaBillingBucket = ({
     }
   }, []);
 
-
   // Function Save Data
   const save = async (key) => {
     try {
       const row = await formTableCriteria.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
-      const isOverlappingDate = checkOverlappingDate({ startDate: validStartDate, endDate: validEndDate }, row);
+      const isOverlappingDate = checkOverlappingDate(
+        { startDate: validStartDate, endDate: validEndDate },
+        row,
+      );
       if (isOverlappingDate) {
         formTableCriteria.setFields([
           {
-            name: 'startDate',
+            name: "startDate",
             errors: [`Overlapping date found`],
           },
           {
-            name: 'endDate',
+            name: "endDate",
             errors: [`Overlapping date found`],
           },
         ]);
@@ -560,7 +570,6 @@ const FunctionalCriteriaBillingBucket = ({
         setStoredData(false);
         setStatusAction("");
         formTableCriteria.resetFields();
-
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
@@ -570,26 +579,31 @@ const FunctionalCriteriaBillingBucket = ({
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, 'days')) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate) < moment(formHeader?.startDate) ||
+        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
+      ) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
     // }
-
   }, []);
 
   // Function Add Row Data
   const addRow = () => {
-    const hasOverlapping = checkOverlappingData({ startDate: validStartDate, endDate: validEndDate }, data);
+    const hasOverlapping = checkOverlappingData(
+      { startDate: validStartDate, endDate: validEndDate },
+      data,
+    );
     if (hasOverlapping) {
-      setModalValidationTable(true)
+      setModalValidationTable(true);
     } else {
       formTableCriteria.resetFields();
       setStoredData(true);
@@ -612,7 +626,7 @@ const FunctionalCriteriaBillingBucket = ({
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -632,7 +646,7 @@ const FunctionalCriteriaBillingBucket = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -682,8 +696,9 @@ const FunctionalCriteriaBillingBucket = ({
                           <SVGIcon
                             name="IconEdit"
                             color={editingKey ? "#8D91A0" : "#ACC424"}
-                            className={`${editingKey ? "cursor-not-allowed" : ""
-                              }`}
+                            className={`${
+                              editingKey ? "cursor-not-allowed" : ""
+                            }`}
                             width={24}
                             onClick={
                               !editingKey ? () => edit(record) : undefined
@@ -727,11 +742,11 @@ const FunctionalCriteriaBillingBucket = ({
         : temp.filter((col) => col.title !== "ACTION");
     return filterCol.filter((col) =>
       col.title !== "NO" &&
-        col.title !== "ACTION" &&
-        col.title !== "START DATE" &&
-        col.title !== "END DATE"
+      col.title !== "ACTION" &&
+      col.title !== "START DATE" &&
+      col.title !== "END DATE"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
 
@@ -787,8 +802,9 @@ const FunctionalCriteriaBillingBucket = ({
       ) : null}
       <div className="relative flex flex-col w-full">
         <div
-          className={`${totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-            } w-1/4 flex`}
+          className={`${
+            totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
+          } w-1/4 flex`}
         >
           <Select
             mode="multiple"
@@ -841,7 +857,7 @@ const FunctionalCriteriaBillingBucket = ({
                   validateStartDate: validStartDate,
                   validateEndDate: validEndDate,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

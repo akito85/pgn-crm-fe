@@ -286,6 +286,11 @@ const BillingBucketForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.information?.startDate));
+      setEndDate(
+        data_detail_draft?.information?.endDate
+          ? moment(data_detail_draft?.information?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail_draft?.information?.apphierId);
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
@@ -393,6 +398,11 @@ const BillingBucketForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.information?.startDate));
+      setEndDate(
+        data_detail?.information?.endDate
+          ? moment(data_detail?.information?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail?.information?.apphierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
@@ -741,14 +751,18 @@ const BillingBucketForm = ({ type }) => {
     dataTable?.forEach((item) => {
       let isOverlap = false;
 
-      if (moment(item?.startDate).startOf("day") < moment(formHeader?.startDate).startOf("day")) {
+      if (
+        moment(item?.startDate).startOf("day") <
+        moment(formHeader?.startDate).startOf("day")
+      ) {
         isOverlap = true;
       }
 
       if (formHeader?.endDate) {
         if (
           !item?.endDate ||
-          moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day")
+          moment(item?.endDate).startOf("day") >
+            moment(formHeader?.endDate).startOf("day")
         ) {
           isOverlap = true;
         }

@@ -188,11 +188,6 @@ const BillingBucketSectionForm = ({
             <DateComponent
               onChange={(e) => handleStartDate(e)}
               dateDisable={disabledStartDate}
-              disabled={
-                (status !== "DRAFT" && type === "update") || disabledDate
-                  ? true
-                  : false
-              }
             />
           </Form.Item>
 
@@ -213,7 +208,6 @@ const BillingBucketSectionForm = ({
             <DateComponent
               onChange={(e) => handleEndDate(e)}
               dateDisable={handleDisableEndDate}
-              disabled={disabledDate}
             />
           </Form.Item>
 
