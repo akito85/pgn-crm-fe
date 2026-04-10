@@ -760,10 +760,14 @@ const TaxCodeForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        (hasValue(formHeader?.endDate) && moment(item?.endDate) > moment(formHeader?.endDate))
-      ) {
+      const itemStart = moment(item?.startDate).startOf("day");
+      const headerStart = moment(formHeader?.startDate).startOf("day");
+      const startOutOfRange = itemStart < headerStart;
+      const endOutOfRange =
+        hasValue(formHeader?.endDate) &&
+        hasValue(item?.endDate) &&
+        moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day");
+      if (startOutOfRange || endOutOfRange) {
         dataOverlap?.push(item);
       }
     });
