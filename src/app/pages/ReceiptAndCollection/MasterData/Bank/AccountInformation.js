@@ -1,13 +1,12 @@
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
-import { Form, Spin } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
+import { Form, Spin, message } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumbAdvanced from "../../../../../components/BreadCrumbAdvanced";
-import ButtonComponent from "../../../../../components/ButtonComponent";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import RadioTabs from "../../../../../components/RadioTabs";
 import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   createAccountInformation,
@@ -32,13 +31,14 @@ import {
   updateBankAccountNomenklatur,
   updateBankAccountGLAccounts,
   updateBankAccountCriteria,
+  getParentAccountOptions,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import AccountForm from "./AccountForm";
-import SVGIcon from "../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ConfirmModalBankAccount from "./ConfirmModalBankAccount";
+import ButtonComponent from "../../../../../components/ButtonComponent";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -47,6 +47,7 @@ import {
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+
 const AccountInformation = ({ type, bankId }) => {
   const {
     dataEntity,
@@ -57,12 +58,12 @@ const AccountInformation = ({ type, bankId }) => {
     dataListAppHierDetail,
     loading,
     data_modal,
-    message,
     data_list_gl,
     dataGLAccount,
     dataGLType,
     data_va_category,
     data_billing_item,
+    data_parent_options,
   } = useSelector((state) => state.bank);
 
   const dispatch = useDispatch();
@@ -70,22 +71,35 @@ const AccountInformation = ({ type, bankId }) => {
   const navigate = useNavigate();
   const id = location?.state?.id;
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
 
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [modalBack, setModalBack] = useState(false);
   const [criteriaValues, setCriteriaValues] = useState([]);
-  const [isVA, setIsVA] = useState(false);
-  console.log("🚀 ~ AccountInformation ~ isVA:", isVA);
   const [kirimBody, setKirimBody] = useState();
   const [loadingForm, setLoadingForm] = useState(loading);
-  const [Id, setId] = useState();
   const [storedData, setStoredData] = useState(false);
-console.log(data_list_gl, ' data list gl');
 
-  //use effect
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const steps = [
+    { title: 'ACCOUNT' },
+    { title: 'APPROVAL' },
+    { title: 'ATTACHMENT' },
+  ];
+
+  // Watch form fields for conditional logic
+  const typeValue = Form.useWatch('type', form);
+  const headerCategory = Form.useWatch('category', form);
+  const typeLabel = data_type_detail?.find(t => t.id === typeValue)?.name || '';
+  const parentRequired = typeLabel.toLowerCase() === 'pooling';
+
+  useEffect(() => {
+    if (!parentRequired) {
+      form.setFieldValue('parent', undefined);
+    }
+  }, [parentRequired, form]);
+
   useEffect(() => {
     dispatch(getListEntity());
     dispatch(getAllApprovalList());
@@ -101,7 +115,19 @@ console.log(data_list_gl, ' data list gl');
     dispatch(getDisplayOptions());
     dispatch(getBillingItemOptions());
   }, [dispatch]);
-  // approval
+
+  useEffect(() => {
+    if (type === "create" && id) {
+      dispatch(getParentAccountOptions(id));
+    }
+  }, [dispatch, type, id]);
+
+  useEffect(() => {
+    const bankIdFromModal = data_modal?.accountBankDto?.bankId;
+    if (type === "update" && bankIdFromModal) {
+      dispatch(getParentAccountOptions(bankIdFromModal));
+    }
+  }, [dispatch, type, data_modal]);
 
   useEffect(() => {
     if (dataListAppHierId && dataListAppHierId.length > 0) {
@@ -135,25 +161,41 @@ console.log(data_list_gl, ' data list gl');
     }
   }, [dataListAppHierDetail]);
 
-  // Define tabData before using it in useState
-  const [tabData, setTabData] = useState([
-    {
-      value: "Account",
-      paramValue: [
-        "accountNumber",
-        "accountName",
-        "paymentCriteria",
-        "bankCode",
-        " phoneNumber",
-        "email",
-        "address",
-      ],
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
-
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
+
+  const handleUpdateAttachment = (updater) => {
+    setListDataAttachment((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+
+      // Undo: existing item's pendingDelete changed from true → false
+      const undone = next.filter(
+        (n) => n.dataType === "exist" && !n.pendingDelete &&
+          prev.find((p) => p.id === n.id && p.pendingDelete)
+      );
+      if (undone.length > 0) {
+        setDeletedAttachmentIds((ids) =>
+          ids.filter((id) => !undone.map((u) => u.id).includes(id))
+        );
+        return next;
+      }
+
+      // Delete: existing item removed from array — keep it but mark as pending
+      const removed = prev.filter(
+        (item) => item.dataType === "exist" && !item.pendingDelete &&
+          !next.find((n) => n.id === item.id)
+      );
+      if (removed.length > 0) {
+        setDeletedAttachmentIds((ids) => [
+          ...ids,
+          ...removed.map((r) => r.id).filter(Boolean),
+        ]);
+        return [...next, ...removed.map((r) => ({ ...r, pendingDelete: true }))];
+      }
+
+      return next;
+    });
+  };
   const [modalConfirm, setModalConfirm] = useState(false);
   const [data, setData] = useState([]);
   const [valueOrUnlimited, setValueOrUnlimited] = useState(false);
@@ -161,15 +203,13 @@ console.log(data_list_gl, ' data list gl');
   const [listDataGLAccountInfo, setListDataGLAccountInfo] = useState([]);
   const [listDataCategoryInfo, setListDataCategoryInfo] = useState([]);
 
-  // dirty flags — track which groups have been modified by the user
+  // dirty flags
   const [bankInfoDirty, setBankInfoDirty] = useState(false);
   const [glDirty, setGlDirty] = useState(false);
   const [categoryDirty, setCategoryDirty] = useState(false);
   const [criteriaDirty, setCriteriaDirty] = useState(false);
-  // payload cache used between confirm-modal open and actual submission
   const [updatePayloads, setUpdatePayloads] = useState({});
 
-  // wrappers that mark a group dirty when the user makes changes
   const handleUpdateGL = (newData) => {
     setListDataGLAccountInfo(newData);
     if (type === "update") setGlDirty(true);
@@ -183,45 +223,19 @@ console.log(data_list_gl, ' data list gl');
     if (type === "update") setCriteriaDirty(true);
   };
 
-  const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
-  // const [disabled, setdisabled] = useState((disabled = true));
-
-  useEffect(() => {
-    if (type === "update" && data_modal && data_modal?.id) {
-      setIsVA(data_modal?.accountBankDto?.isVa);
-    }
-  }, [type, data_modal]);
-
   useEffect(() => {
     if (id && type === "update") {
       dispatch(getDetailAccountInformation(id));
     }
   }, [dispatch, id, type]);
 
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-
-  useEffect(() => {
-    if (
-      formValue.approvalHierarchy &&
-      !appHierOptions
-        .map((item) => item.value)
-        .includes(formValue.approvalHierarchy)
-    ) {
-      form.setFieldsValue({ approvalHierarchy: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
-
   useEffect(() => {
     if (id && type === "update") {
-      // Data Criteria Select
       const criteriaSelect = data_modal?.accountBankDto?.criteriaDtoList?.map(
-        (item) => {
-          return {
-            id: item?.criteria,
-            transactionCalendarId: item?.transactionCalendarId,
-          };
-        }
+        (item) => ({
+          id: item?.criteria,
+          transactionCalendarId: item?.transactionCalendarId,
+        })
       );
       const mappingCriteria = (criteriaSelect ?? [])
         .map((a) => Number(a.id))
@@ -230,66 +244,60 @@ console.log(data_list_gl, ' data list gl');
         data_modal?.accountBankDto?.criteriaDataDtoList || []
       )
         .filter((crit) => crit.allCriteria !== true)
-        .map((item, index) => {
-          return {
-            id: item.id,
-            startDate:
-              item?.startDate === null
-                ? ""
-                : moment(item?.startDate).format(dateFormatting.dateCapital),
-            endDate:
-              item?.endDate === undefined || item?.endDate === null
-                ? ""
-                : moment(item?.endDate).format(dateFormatting.dateCapital),
-            referenceId: item.referenceId,
-            budget: item.budget,
-            subDistrict: item.subDistrict,
-            district: item.district,
-            city: item.city,
-            province: item.province,
-            area: item.area,
-            sor: item.sor,
-            industrialSector: item.industrialSector,
-            product: item.product,
-            gsizes: item.gsizes,
-            customerSegment: item.customerSegment,
-            accountGroup: item.accountGroup,
-            accountClass: item.accountClass,
-            accountCategory: item.accountCategory,
-            customer: item.customer,
-            key: index + 1,
-            type: "exist",
-          };
-        });
+        .map((item, index) => ({
+          id: item.id,
+          startDate:
+            item?.startDate === null
+              ? ""
+              : moment(item?.startDate).format(dateFormatting.dateCapital),
+          endDate:
+            item?.endDate === undefined || item?.endDate === null
+              ? ""
+              : moment(item?.endDate).format(dateFormatting.dateCapital),
+          referenceId: item.referenceId,
+          budget: item.budget,
+          subDistrict: item.subDistrict,
+          district: item.district,
+          city: item.city,
+          province: item.province,
+          area: item.area,
+          sor: item.sor,
+          industrialSector: item.industrialSector,
+          product: item.product,
+          gsizes: item.gsizes,
+          customerSegment: item.customerSegment,
+          accountGroup: item.accountGroup,
+          accountClass: item.accountClass,
+          accountCategory: item.accountCategory,
+          customer: item.customer,
+          key: index + 1,
+          type: "exist",
+        }));
 
-      // Data Attachment Information
       const dataAttachment = (data_modal?.attachmentDtoList || []).map(
-        (item) => {
-          return {
-            id: item.id,
-            size: item.size,
-            fileName: item.fileName,
-            fileSize: item.fileSize,
-            fileType: item.fileType,
-            fileCategoryId: item.fileCategoryId,
-            fileCategoryName: item.fileCategoryName,
-            pathFile: item.pathFile,
-            urlFile1: item.urlFile1,
-            urlFile2: item.urlFile2,
-            uploadBy: item.createdBy,
-            uploadDate: item.createdDate
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        }
+        (item) => ({
+          id: item.id,
+          size: item.size,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          fileCategoryId: item.fileCategoryId,
+          fileCategoryName: item.fileCategoryName,
+          pathFile: item.pathFile,
+          urlFile1: item.urlFile1,
+          urlFile2: item.urlFile2,
+          uploadBy: item.createdBy,
+          uploadDate: item.createdDate
+            ? moment(item.createdDate).format("DD MMM YYYY")
+            : "",
+          dataType: "exist",
+        })
       );
 
       setSelectedHierarchy(data_modal?.accountBankDto?.appHierId);
       form.setFieldsValue({
         accountNumber: data_modal?.accountBankDto?.accountNumber,
         accountName: data_modal?.accountBankDto?.accountName,
-        branch: data_modal?.accountBankDto?.branchName,
         startDate: data_modal?.accountBankDto?.startDate
           ? moment(data_modal?.accountBankDto?.startDate).clone()
           : "",
@@ -300,14 +308,12 @@ console.log(data_list_gl, ' data list gl');
         description: data_modal?.accountBankDto?.description,
         entity: data_modal?.accountBankDto?.entity?.id,
         type: data_modal?.accountBankDto?.type?.id,
-        isVA: data_modal?.accountBankDto?.isVa,
-        totalDigit: data_modal?.accountBankDto?.totalDigit,
-        fsCode: data_modal?.accountBankDto?.staticCode,
+        category: data_modal?.accountBankDto?.category,
+        parent: data_modal?.accountBankDto?.parentId || null,
         transCriteria: mappingCriteria,
         apphierId: data_modal?.accountBankDto?.appHierId,
         criteria: mappingCriteria,
       });
-      setIsVA(data_modal?.accountBankDto?.isVa);
       setListDataAttachment(dataAttachment);
       setListDataCriteria(dataCriteriaList);
       setCriteriaValues(mappingCriteria);
@@ -317,7 +323,7 @@ console.log(data_list_gl, ' data list gl');
       const glAccountOpts = (dataGLAccount || []).map((a) => ({
         value: a.id,
         label: a.accountNumber ?? a.name ?? "",
-        description: a.description ?? a.accountDescription ?? "",
+        description: a.description ?? a.accountDescription ?? a.desc ?? "",
       }));
       const dataGLList = (
         data_modal?.accountBankDto?.glAccountDataDtoList || []
@@ -352,117 +358,137 @@ console.log(data_list_gl, ' data list gl');
           nomenklatur1: item.nomenklatur1 ? { value: item.nomenklatur1, label: item.nomenklatur1 } : null,
           nomenklatur2: item.nomenklatur2 ? { value: item.nomenklatur2, label: item.nomenklatur2 } : null,
           display: item.display ? { value: item.display, label: item.display } : null,
-          billingItem: (item.billingItemIds || []).map((bid) => {
+          details: (item.billingItemIds || []).map((bid, bidIndex) => {
             const billingLabel = billingOpts.find((o) => String(o.value) === String(bid))?.label ?? String(bid);
-            return { value: bid, label: billingLabel };
+            return { key: bidIndex + 1, billingItem: { value: bid, label: billingLabel } };
           }),
           flag: 2,
         };
       });
       setListDataCategoryInfo(dataCategoryList);
     }
-  }, [id, data_modal, form, isVA, type, dataGLAccount, dataGLType, data_va_category, data_billing_item]);
+  }, [id, data_modal, form, type, dataGLAccount, dataGLType, data_va_category, data_billing_item]);
 
-  // Breadcrumbs
-  const routes = (id) => {
-    return [
-      {
-        path: "",
-        breadcrumbName: "System Setup",
-      },
-      {
-        path: "",
-        breadcrumbName: "Master Data",
-      },
-      {
-        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK,
-        breadcrumbName: "Bank",
-      },
-      {
-        path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK,
-        breadcrumbName: `Detail Bank`,
-        state: {
-          id: id,
-        },
-      },
-      {
-        path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNT_INFORMATION,
-        breadcrumbName: ` ${type === "update" ? "Update" : "Create"}
-        Bank Account`,
-      },
-    ];
+  const routes = (id) => [
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK, breadcrumbName: "Bank" },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK,
+      breadcrumbName: "Detail Bank",
+      state: { id },
+    },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNT_INFORMATION,
+      breadcrumbName: `${type === "update" ? "Update" : "Create"} Bank Account`,
+    },
+  ];
+
+  const handleNext = async () => {
+    if (currentStepIndex === 0) {
+      try {
+        await form.validateFields([
+          'accountNumber', 'accountName', 'currency', 'entity',
+          'type', 'category', 'criteria', 'startDate',
+        ]);
+        if (parentRequired) {
+          await form.validateFields(['parent']);
+        }
+        setCurrentStepIndex(currentStepIndex + 1);
+      } catch {
+        message.error("Mohon lengkapi data mandatori di Step 1");
+      }
+    } else if (currentStepIndex === 1) {
+      if (!selectedHierarchy) {
+        message.error("Approval Information wajib diisi sebelum lanjut!");
+        return;
+      }
+      setCurrentStepIndex(currentStepIndex + 1);
+    } else if (currentStepIndex < steps.length - 1) {
+      setCurrentStepIndex(currentStepIndex + 1);
+    }
   };
 
-  // const onChange = (e) => {
-  //   if (storedData) {
-  //     const errorBody = {
-  //       title: "Failed",
-  //       description: `Please save data table inline before submit. Please try again.`,
-  //     };
-  //     dispatch(showModalError(errorBody));
-  //   } else {
-  //   }
-  // };
+  const handlePrev = () => {
+    if (currentStepIndex > 0) setCurrentStepIndex(currentStepIndex - 1);
+  };
 
   const handleClear = () => {
-    form.resetFields();
-    setSelectedHierarchy("");
-    setListDataAttachment([]);
-    setAppHierDataDetail([]);
-    setListDataCriteria([]);
-    setCriteriaValues([]);
-    setIsVA(false);
+    if (type === "update") {
+      // Reset: re-fetch original data from API; useEffect will re-hydrate all fields and tables
+      dispatch(getDetailAccountInformation(id));
+      setBankInfoDirty(false);
+      setGlDirty(false);
+      setCategoryDirty(false);
+      setCriteriaDirty(false);
+      setDeletedAttachmentIds([]);
+    } else {
+      // Clear: wipe only the table rows; keep Bank Account Info header, Approval, and Attachment
+      setListDataGLAccountInfo([]);
+      setListDataCategoryInfo([]);
+      setListDataCriteria([]);
+    }
+    setCurrentStepIndex(0);
   };
+
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
 
   const handleSubmitForm = (formValue) => {
     let errorBody = {};
-    if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+    if (listDataCategoryInfo.length === 0) {
       errorBody = {
         title: "Failed",
-        description: "Criteria Mandatory. Please insert data.",
+        description: "Category Information wajib diisi. Silahkan menambahkan minimal 1 data.",
+      };
+      dispatch(showModalError(errorBody));
+    } else if (listDataGLAccountInfo.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: "GL Account Information wajib diisi. Silahkan menambahkan minimal 1 data.",
+      };
+      dispatch(showModalError(errorBody));
+    } else if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+      errorBody = {
+        title: "Failed",
+        description: "Criteria Information wajib diisi. Silahkan menambahkan minimal 1 data.",
       };
       dispatch(showModalError(errorBody));
     } else if (storedData) {
       errorBody = {
         title: "Failed",
-        description:
-          "Please save data table inline before submit. Please try again.",
+        description: "Please save data table inline before submit. Please try again.",
       };
       dispatch(showModalError(errorBody));
     } else {
-      let dataCriteriaObject = listDataCriteria.map((item) => {
-        return {
-          startDate: moment(item.startDate).format(dateFormatting.date),
-          endDate: item?.endDate
-            ? moment(item.endDate).format(dateFormatting.date)
-            : null,
-          id: null,
-          referenceId: null,
-          customer: item.customer?.value || null,
-          budget: item.budget?.value || null,
-          subDistrict: item.subDistrict?.value || null,
-          district: item.district?.value || null,
-          city: item.city?.value || null,
-          province: item.province?.value || null,
-          area: item.area?.value || null,
-          sor: item.sor?.value || null,
-          industrialSector: item.industrialSector?.value || null,
-          gsizes: item.gsizes?.value || null,
-          customerSegment: item.customerSegment?.value || null,
-          accountGroup: item.accountGroup?.value || null,
-          serviceType: item.serviceType?.value || null,
-          accountCategory: item.accountCategory?.value || null,
-          allCriteria: item.all?.value || null,
-        };
-      });
+      let dataCriteriaObject = listDataCriteria.map((item) => ({
+        startDate: moment(item.startDate).format(dateFormatting.date),
+        endDate: item?.endDate ? moment(item.endDate).format(dateFormatting.date) : null,
+        id: null,
+        referenceId: null,
+        customer: item.customer?.value || null,
+        budget: item.budget?.value || null,
+        subDistrict: item.subDistrict?.value || null,
+        district: item.district?.value || null,
+        city: item.city?.value || null,
+        province: item.province?.value || null,
+        area: item.area?.value || null,
+        sor: item.sor?.value || null,
+        industrialSector: item.industrialSector?.value || null,
+        gsizes: item.gsizes?.value || null,
+        customerSegment: item.customerSegment?.value || null,
+        accountGroup: item.accountGroup?.value || null,
+        serviceType: item.serviceType?.value || null,
+        accountCategory: item.accountCategory?.value || null,
+        allCriteria: item.all?.value || null,
+      }));
 
       let dataGLObject = listDataGLAccountInfo.map((item) => ({
         id: item?.id || null,
         typeId: item.type?.value || null,
         glAccountId: item.glAccountNumber?.value || null,
+        glAccountDescription: item.glAccountDescription || null,
         description: item.description || null,
         flag: item.flag || null,
       }));
@@ -475,10 +501,8 @@ console.log(data_list_gl, ' data list gl');
         nomenklatur1: item.nomenklatur1?.label || null,
         nomenklatur2: item.nomenklatur2?.label || null,
         display: item.display?.label || null,
-        billingItemIds: Array.isArray(item.billingItem)
-          ? item.billingItem.map((b) => b?.value || b).filter(Boolean)
-          : item.billingItem?.value
-          ? [item.billingItem.value]
+        billingItemIds: Array.isArray(item.details)
+          ? item.details.map((d) => d?.billingItem?.value ?? d?.billingItem).filter(Boolean)
           : [],
         flag: item.flag || null,
       }));
@@ -487,21 +511,19 @@ console.log(data_list_gl, ' data list gl');
       const endDate = formValue?.endDate
         ? moment(formValue?.endDate).format("DD MMM YYYY")
         : null;
-      // const filterNameentity = dataEntity?.filter((a) => a?.name === formValue?.entity)?.find((b) => b?.id)?.id
+
       const dataValue = {
         accountNumber: formValue?.accountNumber,
         accountName: formValue?.accountName,
         bankId: id,
         currencyId: formValue?.currency,
         entityId: formValue?.entity,
-        branchName: formValue?.branch,
-        totalDigit: formValue?.totalDigit || null,
         typeId: formValue?.type,
-        startDate: startDate,
-        endDate: endDate,
+        category: formValue?.category,
+        parentId: formValue?.parent || null,
+        startDate,
+        endDate,
         description: formValue?.description,
-        isVa: isVA,
-        staticCode: formValue?.staticCode || null,
         appHierId: selectedHierarchy,
         glAccountDataDtoList: dataGLObject,
         categoryDataDtoList: dataCategoryObject,
@@ -509,23 +531,7 @@ console.log(data_list_gl, ' data list gl');
         criteriaDataDtoList: dataCriteriaObject,
       };
       setKirimBody(dataValue);
-      setTabData([
-        {
-          value: "Account",
-          paramValue: [
-            "accountNumber",
-            "accountName",
-            "paymentCriteria",
-            "branch",
-            "type",
-            "currency",
-            "startDate",
-            "entity",
-          ],
-        },
-        { value: "Approval", paramValue: ["apphierId"] },
-        { value: "Attachment" },
-      ]);
+
       if (type === "create") {
         dispatch(createValidasiBankAccount(dataValue))
           .unwrap()
@@ -537,17 +543,17 @@ console.log(data_list_gl, ' data list gl');
             setModalConfirm(true);
           });
       } else if (type === "update") {
-        // build per-group payloads and store them; show confirmation modal
         const bankInfoPayload = {
           id,
           accountNumber: formValue?.accountNumber,
           accountName: formValue?.accountName,
           currencyId: formValue?.currency,
           entityId: formValue?.entity,
-          branchName: formValue?.branch,
           typeId: formValue?.type,
-          startDate: startDate,
-          endDate: endDate,
+          category: formValue?.category,
+          parentId: formValue?.parent || null,
+          startDate,
+          endDate,
           description: formValue?.description,
           appHierId: selectedHierarchy,
         };
@@ -565,36 +571,19 @@ console.log(data_list_gl, ' data list gl');
       }
     }
   };
-  //handle Error
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    setTabData((prevState) => {
-      const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length < 0) {
-          return {
-            value: item.value,
-            paramValue: item.paramValue,
-          };
-        }
-        const errorBadge = errorFields.reduce(
-          (current, next) =>
-            item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
-        );
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
+
+  const handleError = ({ errorFields }) => {
+    if (errorFields?.length > 0) {
+      message.error("Mohon lengkapi data mandatori");
+    }
   };
 
   const handleProcessModalConfirm = async () => {
     setModalConfirm(false);
+    setLoadingForm(true);
     const successMessage = {
       title: "Successfull",
-      description: `Your data has been submitted`,
+      description: "Your data has been submitted",
       return: true,
     };
 
@@ -605,19 +594,43 @@ console.log(data_list_gl, ' data list gl');
         if (glDirty) calls.push(dispatch(updateBankAccountGLAccounts({ id, data: updatePayloads.glAccounts })).unwrap());
         if (categoryDirty) calls.push(dispatch(updateBankAccountNomenklatur({ id, data: updatePayloads.nomenklatur })).unwrap());
         if (criteriaDirty) calls.push(dispatch(updateBankAccountCriteria({ id, data: updatePayloads.criteria })).unwrap());
-        if (calls.length === 0) {
+        // Upload new attachments
+        const newAttachments = listDataAttachment.filter((item) => item.dataType !== "exist");
+        for (const element of newAttachments) {
+          calls.push(
+            receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, {
+              files: element.file,
+              fileCategoryId: element.fileCategoryId,
+              referensiId: id,
+              category: "BANK ACCOUNT",
+            })
+          );
+        }
+        if (calls.length === 0 && deletedAttachmentIds.length === 0) {
           dispatch(showModalError({ title: "No Changes", description: "No changes detected to save." }));
           return;
         }
         await Promise.all(calls);
+        // Delete removed existing attachments — silently skip if endpoint not yet available
+        for (const attachId of deletedAttachmentIds) {
+          try {
+            await receiptCollectionHttpService.deleteData(`/v1/dbs/api/attachment/delete/${attachId}`);
+          } catch {
+            // endpoint not yet implemented; skip
+          }
+        }
+        // Remove pending-delete rows from the displayed list
+        setListDataAttachment((prev) => prev.filter((item) => !item.pendingDelete));
         dispatch(showModalSuccess(successMessage));
-        // reset dirty flags
         setBankInfoDirty(false);
         setGlDirty(false);
         setCategoryDirty(false);
         setCriteriaDirty(false);
+        setDeletedAttachmentIds([]);
       } catch (error) {
-        // errors are already shown by individual thunks
+        // errors already shown by individual thunks
+      } finally {
+        setLoadingForm(false);
       }
       return;
     }
@@ -625,45 +638,40 @@ console.log(data_list_gl, ' data list gl');
     // create flow
     let temp = { ...kirimBody };
     if ((temp.criteriaIdList || []).includes(24)) {
-      temp = {
-        ...temp,
-        criteriaDataDtoList: [{ allCriteria: true }],
-      };
+      temp = { ...temp, criteriaDataDtoList: [{ allCriteria: true }] };
     }
     dispatch(createAccountInformation(temp))
       .unwrap()
       .then(async (data) => {
-        let id = data.id;
-        setLoadingForm(loadingForm);
+        let createdId = data.id;
         for (let icon = 0; icon < listDataAttachment.length; icon++) {
           const element = listDataAttachment[icon];
           const body = {
             files: element.file,
             fileCategoryId: element.fileCategoryId,
-            referensiId: id,
+            referensiId: createdId,
             category: "BANK ACCOUNT",
           };
-          const response = await receiptCollectionHttpService.uploadImage(
+          await receiptCollectionHttpService.uploadImage(
             `/v1/dbs/api/attachment/upload/v1`,
             body
           );
         }
-        setLoadingForm(loadingForm);
-        setId(id);
         handleCancelModalConfirm();
         handleClear();
         dispatch(showModalSuccess(successMessage));
       })
       .catch((error) => {
-        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-          const message =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
+        if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
+          const msg =
+            (error.response?.data?.message) ||
             error.message ||
             error.toString();
-          dispatch(showModalError(message));
+          dispatch(showModalError(msg));
         }
+      })
+      .finally(() => {
+        setLoadingForm(false);
       });
   };
 
@@ -680,7 +688,7 @@ console.log(data_list_gl, ' data list gl');
       form.setFieldsValue({ criteria: outputArray });
       if (type === "update") setCriteriaDirty(true);
     },
-    [criteriaValues, form, setCriteriaValues, type]
+    [criteriaValues, form, type]
   );
 
   const handleDeselectCriteria = useCallback(
@@ -696,22 +704,27 @@ console.log(data_list_gl, ' data list gl');
       form.setFieldsValue({ criteria: outputArray });
       if (type === "update") setCriteriaDirty(true);
     },
-    [criteriaValues, form, setCriteriaValues, type]
+    [criteriaValues, form, type]
   );
 
   const handleClearCriteria = () => {
     setCriteriaValues([]);
   };
 
+  const formValue = form.getFieldsValue();
+
   return (
     <LayoutMenu>
       <BreadCrumbAdvanced routes={routes(id)} />
-      <Spin spinning={loading}>
-        <RadioTabs
-          data={tabData}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
-        />
+      <Spin spinning={loading || loadingForm}>
+        <div className="mb-5">
+          <FormStepper
+            steps={steps}
+            current={currentStepIndex}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
+        </div>
         <Form
           layout="vertical"
           form={form}
@@ -719,11 +732,9 @@ console.log(data_list_gl, ' data list gl');
           onFinishFailed={handleError}
           onValuesChange={() => { if (type === "update") setBankInfoDirty(true); }}
         >
-          <div className={`${valuePage !== "Account" ? "hidden" : ""}`}>
+          <div className={`${currentStepIndex !== 0 ? "hidden" : ""}`}>
             <AccountForm
               data_select_criteria={data_select_criteria}
-              setIsVA={setIsVA}
-              isVA={isVA}
               dataEntity={dataEntity}
               typeData={data_type_detail}
               dataCurrency={dataCurrency}
@@ -747,11 +758,12 @@ console.log(data_list_gl, ' data list gl');
               setListDataGLAccountInfo={type === "update" ? handleUpdateGL : setListDataGLAccountInfo}
               listDataCategoryInfo={listDataCategoryInfo}
               setListDataCategoryInfo={type === "update" ? handleUpdateCategory : setListDataCategoryInfo}
+              parentRequired={parentRequired}
+              headerCategory={headerCategory}
+              parentOptions={data_parent_options}
             />
-            {/* <ContactListCreate
-            /> */}
           </div>
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
+          <div className={`${currentStepIndex !== 1 ? "hidden" : ""}`}>
             <BaseContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
@@ -761,62 +773,30 @@ console.log(data_list_gl, ' data list gl');
               />
             </BaseContainer>
           </div>
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
+          <div className={`${currentStepIndex !== 2 ? "hidden" : ""}`}>
             <BaseContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentSectionForm
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={type === "update" ? handleUpdateAttachment : setListDataAttachment}
                 typeSelector="bank"
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
+                canDeleteExisting={type === "update"}
               />
             </BaseContainer>
           </div>
-          <div className="flex w-full justify-between align-middle my-3 gap-5">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedData === true ? true : false}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-                disabled={storedData === true ? true : false}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                // onClick={() => setModalConfirm(true)}
-                // disabled={disableSubmit}
-                disabled={storedData === true ? true : false}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+
+          <FormFooter
+            current={currentStepIndex}
+            totalSteps={steps.length}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onCancel={() => setModalBack(true)}
+            onClear={handleClear}
+            onSubmit={() => form.submit()}
+            type={type}
+          />
         </Form>
 
         <ModalCustom
@@ -827,16 +807,10 @@ console.log(data_list_gl, ' data list gl');
           type={"confirmation"}
           footer={
             <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent
-                onClick={handleCancelModalConfirm}
-                type="default"
-              >
+              <ButtonComponent onClick={handleCancelModalConfirm} type="default">
                 Cancel
               </ButtonComponent>
-              <ButtonComponent
-                type="submit"
-                onClick={handleProcessModalConfirm}
-              >
+              <ButtonComponent type="submit" onClick={handleProcessModalConfirm}>
                 Confirm
               </ButtonComponent>
             </div>
@@ -844,11 +818,7 @@ console.log(data_list_gl, ' data list gl');
         >
           <ConfirmModalBankAccount
             data={formValue}
-            tabData={tabData}
-            // dataTable={filterDataByPage()}
-            // handleChange={setDataSource}
             listDataCriteria={listDataCriteria}
-            isVA={isVA}
             criteriaValues={criteriaValues}
             apiCriteria={data_select_criteria}
             listDataAttachment={listDataAttachment}
@@ -860,10 +830,10 @@ console.log(data_list_gl, ' data list gl');
             listDataAppHierDetail={appHierDataDetail}
             listDataGLAccountInfo={listDataGLAccountInfo}
             listDataCategoryInfo={listDataCategoryInfo}
+            parentOptions={data_parent_options}
           />
         </ModalCustom>
 
-        {/* Modal Back*/}
         <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}

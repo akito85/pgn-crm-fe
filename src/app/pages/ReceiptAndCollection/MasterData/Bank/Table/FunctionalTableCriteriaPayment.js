@@ -774,7 +774,7 @@ const FunctionalTableCriteriaPayment = ({
             record.type !== "exist";
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="gap-2">
               {editable ? (
                 <>
                   <ButtonComponent
@@ -1014,6 +1014,7 @@ const FunctionalTableCriteriaPayment = ({
         <div className="w-full">
           <Table
             bordered
+            size="small"
             dataSource={filterDataByPage()}
             columns={filterColumn(
               columns().map((col) => ({

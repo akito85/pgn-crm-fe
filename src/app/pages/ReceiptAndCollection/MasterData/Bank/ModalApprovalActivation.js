@@ -31,11 +31,11 @@ const buildVAAccountColumns = (
   {
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
-    dataIndex: "accountNumber",
+    dataIndex: "bankAccountNumber",
     sorter: true,
     align: "left",
     ...getColumnSearchProps(
-      "accountNumber",
+      "bankAccountNumber",
       searchInput,
       searchedColumn,
       searchText,
@@ -46,11 +46,11 @@ const buildVAAccountColumns = (
   {
     key: "accountName",
     title: "ACCOUNT NAME",
-    dataIndex: "accountName",
+    dataIndex: "bankAccountName",
     sorter: true,
     align: "left",
     ...getColumnSearchProps(
-      "accountName",
+      "bankAccountName",
       searchInput,
       searchedColumn,
       searchText,
@@ -61,11 +61,11 @@ const buildVAAccountColumns = (
   {
     key: "costCenter",
     title: "COST CENTER",
-    dataIndex: "costCenter",
+    dataIndex: "customerCenter",
     sorter: true,
     align: "left",
     ...getColumnSearchProps(
-      "costCenter",
+      "customerCenter",
       searchInput,
       searchedColumn,
       searchText,

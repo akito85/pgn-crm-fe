@@ -7,7 +7,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import { columnsTableCategoryInformation } from "./TableCategoryInformation";
 import FunctionalTableDetailBillingItem from "./FunctionalTableDetailBillingItem";
 import {
-  getBillingItemOptions,
+  getBillingItemOptionsByCategory,
   getDisplayOptions,
   getNomenklatur1Options,
   getNomenklatur2Options,
@@ -94,6 +94,7 @@ const FunctionalTableCategoryInformation = ({
   setStoredData = () => {},
   status,
   statusApproval,
+  headerCategory = "",
 }) => {
   const searchInput = useRef(null);
   const [formTableCat] = Form.useForm();
@@ -121,7 +122,6 @@ const FunctionalTableCategoryInformation = ({
       dispatch(getNomenklatur1Options());
       dispatch(getNomenklatur2Options());
       dispatch(getDisplayOptions());
-      dispatch(getBillingItemOptions());
     }
   }, [type, dispatch]);
 
@@ -129,6 +129,28 @@ const FunctionalTableCategoryInformation = ({
     value: item?.id ?? item?.Id,
     label: item?.name ?? item?.text ?? "",
   }));
+
+  // Filter category options based on header category selection
+  const filteredCategoryOptions = vaCategoryOptions.filter((opt) => {
+    if (headerCategory === "Virtual Account") return opt.label.toUpperCase().startsWith("VA");
+    if (headerCategory === "Online Payment") return opt.label.toUpperCase().startsWith("OP");
+    return true;
+  });
+
+  // Collect category values already used across all existing rows
+  const usedCategoryValues = data.map((row) => {
+    const cat = row.category;
+    return cat?.value ?? cat;
+  }).filter(Boolean);
+
+  // For new rows: exclude ALL already-used category types
+  const categoryOptionsForNewRow = filteredCategoryOptions.filter(
+    (opt) => !usedCategoryValues.includes(opt.value)
+  );
+
+  // Disable Create button when every category type already has a row
+  const allCategoriesUsed = filteredCategoryOptions.length > 0 && categoryOptionsForNewRow.length === 0;
+
   const nomenklatur1Options = (data_nomenklatur1 || []).map((item) => ({
     value: item?.id ?? item?.Id,
     label: item?.name ?? item?.text ?? "",
@@ -143,7 +165,7 @@ const FunctionalTableCategoryInformation = ({
   }));
 
   const listOption = {
-    vaCategory: vaCategoryOptions,
+    vaCategory: filteredCategoryOptions,
     nomenklatur1: nomenklatur1Options,
     nomenklatur2: nomenklatur2Options,
     display: displayOptions,
@@ -300,7 +322,7 @@ const FunctionalTableCategoryInformation = ({
             (status === "DRAFT" && statusApproval === "DRAFT") ||
             record.type !== "exist";
           return (
-            <Space className="my-3 gap-2">
+            <Space className="gap-2">
               {editable ? (
                 <>
                   <ButtonComponent onClick={() => cancel(record)} type="default">
@@ -362,8 +384,8 @@ const FunctionalTableCategoryInformation = ({
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
-            onClick={!storedData ? addRow : undefined}
-            disabled={editingKey !== ""}
+            onClick={!storedData && !allCategoriesUsed ? addRow : undefined}
+            disabled={editingKey !== "" || allCategoriesUsed}
           >
             Create
           </ButtonComponent>
@@ -390,6 +412,7 @@ const FunctionalTableCategoryInformation = ({
         <Form form={formTableCat} component={false}>
           <Table
             bordered
+            size="small"
             className="w-full"
             components={{ body: { cell: EditableCell } }}
             dataSource={filterDataByPage()}
@@ -399,6 +422,7 @@ const FunctionalTableCategoryInformation = ({
               onExpandedRowsChange: setExpandedRowKeys,
               expandIcon: ({ expanded, onExpand, record }) => (
                 <button
+                  type="button"
                   onClick={(e) => onExpand(record, e)}
                   className="flex items-center justify-center w-6 h-6 border border-gray-300 rounded text-gray-600 hover:text-blue-500 hover:border-blue-400 bg-white"
                   style={{ fontSize: "14px", fontWeight: "bold" }}
@@ -425,16 +449,37 @@ const FunctionalTableCategoryInformation = ({
             columns={filterColumn(
               columns().map((col) => ({
                 ...col,
-                onCell: (record) => ({
-                  record,
-                  inputType: col.inputType,
-                  dataIndex: col.dataIndex,
-                  title: col.title,
-                  editing: isEditing(record),
-                  options: col.option,
-                  required: col.required,
-                  handleEditDataRecord,
-                }),
+                onCell: (record) => {
+                  let options = col.option;
+                  if (col.dataIndex === "category" && record.key === editingKey) {
+                    if (statusAction === "add") {
+                      // New row: hide all already-used category types
+                      options = categoryOptionsForNewRow;
+                    } else if (statusAction === "edit") {
+                      // Editing row: hide categories used by OTHER rows only
+                      const otherUsedValues = data
+                        .filter((row) => row.key !== record.key)
+                        .map((row) => {
+                          const cat = row.category;
+                          return cat?.value ?? cat;
+                        })
+                        .filter(Boolean);
+                      options = filteredCategoryOptions.filter(
+                        (opt) => !otherUsedValues.includes(opt.value)
+                      );
+                    }
+                  }
+                  return {
+                    record,
+                    inputType: col.inputType,
+                    dataIndex: col.dataIndex,
+                    title: col.title,
+                    editing: isEditing(record),
+                    options,
+                    required: col.required,
+                    handleEditDataRecord,
+                  };
+                },
               }))
             )}
             pagination={{

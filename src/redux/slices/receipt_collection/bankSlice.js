@@ -70,8 +70,13 @@ const initialState = {
   // VA Account / VA Transaction sub-tabs
   dataVAAccount: [],
   dataVATransaction: [],
+  // OP Account / OP Transaction / OP Custom sub-tabs
+  dataOPAccount: [],
+  dataOPTransaction: [],
+  dataOPCustom: [],
   // ------------------------------------------
   dataCriteriaView: [],
+  data_parent_options: [],
 };
 
 export const createAccountInformation = createAsyncThunk(
@@ -282,6 +287,96 @@ export const getVATransactionList = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "activationDate~desc" : sort;
       const url = `/v1/dbs/api/bank/va-transaction/get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getOPAccountList = createAsyncThunk(
+  "GET_OP_ACCOUNT_LIST",
+  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "activationDate~desc" : sort;
+      const url = `/v1/dbs/api/bank/op-account/get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getOPTransactionList = createAsyncThunk(
+  "GET_OP_TRANSACTION_LIST",
+  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "activationDate~desc" : sort;
+      const url = `/v1/dbs/api/bank/op-transaction/get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getOPCustomList = createAsyncThunk(
+  "GET_OP_CUSTOM_LIST",
+  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "activationDate~desc" : sort;
+      const url = `/v1/dbs/api/bank/op-custom/get-list/${id}?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -1761,6 +1856,22 @@ export const getBillingItemOptions = createAsyncThunk(
     }
   }
 );
+
+export const getBillingItemOptionsByCategory = createAsyncThunk(
+  "GET_BILLING_ITEM_OPTIONS_BY_CATEGORY",
+  async (categoryId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank/billing-item/get-by-category?categoryId=${categoryId}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: error, actions: "GET_BILLING_ITEM_OPTIONS_BY_CATEGORY", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
 // ------------------------------------
 
 export const getAccountCriteriaView = createAsyncThunk(
@@ -1774,6 +1885,19 @@ export const getAccountCriteriaView = createAsyncThunk(
       thunkAPI.dispatch(
         validateError({ error: error, actions: "GET_ACCOUNT_CRITERIA_VIEW", back: false })
       );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getParentAccountOptions = createAsyncThunk(
+  "GET_PARENT_ACCOUNT_OPTIONS",
+  async (bankId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/bank/account-information/parent-options/${bankId}`;
+      const data = await receiptCollectionHttpService.getDetail(url);
+      return data.data;
+    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -2557,10 +2681,42 @@ const bankSlice = createSlice({
     },
     [getVATransactionList.rejected]: (state) => { state.loading = false; },
 
+    // OP Account sub-tab
+    [getOPAccountList.pending]: (state) => { state.loading = true; },
+    [getOPAccountList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataOPAccount = action.payload;
+    },
+    [getOPAccountList.rejected]: (state) => { state.loading = false; },
+
+    // OP Transaction sub-tab
+    [getOPTransactionList.pending]: (state) => { state.loading = true; },
+    [getOPTransactionList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataOPTransaction = action.payload;
+    },
+    [getOPTransactionList.rejected]: (state) => { state.loading = false; },
+
+    // OP Custom sub-tab
+    [getOPCustomList.pending]: (state) => { state.loading = true; },
+    [getOPCustomList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.dataOPCustom = action.payload;
+    },
+    [getOPCustomList.rejected]: (state) => { state.loading = false; },
+
     // Approve VA Activation
     [approveVaActivation.pending]: (state) => { state.loading = true; },
     [approveVaActivation.fulfilled]: (state) => { state.loading = false; },
     [approveVaActivation.rejected]: (state) => { state.loading = false; },
+
+    // Parent account options
+    [getParentAccountOptions.pending]: (state) => { state.loading = true; },
+    [getParentAccountOptions.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_parent_options = action.payload ?? [];
+    },
+    [getParentAccountOptions.rejected]: (state) => { state.loading = false; },
     // ----------------------------------------
   },
 });

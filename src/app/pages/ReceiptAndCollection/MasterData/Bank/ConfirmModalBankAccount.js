@@ -13,6 +13,12 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 
 const { Panel } = Collapse;
 
+const CONFIRM_TABS = [
+  { value: "Account" },
+  { value: "Approval" },
+  { value: "Attachment" },
+];
+
 const ConfirmModalBankAccount = ({
   data,
   listDataCriteria,
@@ -23,17 +29,17 @@ const ConfirmModalBankAccount = ({
   listDataDetail = [],
   listDataAppHierDetail = [],
   dataOption = [],
-  tabData = [],
   apiCriteria,
   dataTable = [],
-  isVA,
   dataType,
   data_entity,
   data_currency,
   selectedHierarchy,
   listDataGLAccountInfo = [],
   listDataCategoryInfo = [],
+  parentOptions = [],
 }) => {
+  const tabData = CONFIRM_TABS;
   const [valuePage, setValuePage] = useState(tabData[0].value);
   // find data criteria
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
@@ -44,6 +50,7 @@ const ConfirmModalBankAccount = ({
     ?.reduce((current, next) => current + `, ${next}`, "");
 
   const { dataEntity } = useSelector((state) => state.bank);
+  const parentLabel = (parentOptions || []).find((p) => String(p.id) === String(data?.parent))?.label || "";
   const type = dataType
     ?.filter((a) => a?.id === data?.type)
     ?.find((b) => b?.name)?.name;
@@ -61,47 +68,30 @@ const ConfirmModalBankAccount = ({
           (item) => item.id === data.entity
         )?.[0]?.name;
         return (
-          <div className="w-full">
-            <div className="grid grid-cols-3 w-full gap-5">
-              <DetailText label={"Bank Account Number"}>
-                {data?.accountNumber}
-              </DetailText>
-              <DetailText label={"Bank Account Name"}>
-                {data?.accountName}
-              </DetailText>
-              <DetailText label={"Branch Name"}>{data?.branch}</DetailText>
+          <div className="w-full flex flex-col gap-y-2.5">
+            {/* Row 1 */}
+            <div className="grid grid-cols-5 w-full gap-x-2">
+              <DetailText label={"Account Number"}>{data?.accountNumber}</DetailText>
+              <DetailText label={"Account Name"}>{data?.accountName}</DetailText>
               <DetailText label={"Currency"}>{currency}</DetailText>
               <DetailText label={"Entity"}>{entity}</DetailText>
               <DetailText label={"Type"}>{type}</DetailText>
-              <DetailText label="Criteria">
-                {matchedNamesCriteria?.slice(2)}
-              </DetailText>
+            </div>
+            {/* Row 2 */}
+            <div className="grid grid-cols-5 w-full gap-x-2">
+              <DetailText label={"Category"}>{data?.category}</DetailText>
               <DetailText label={"Start Date"}>
-                {moment(data?.startDate).format(dateFormatting.date)}
+                {data?.startDate ? moment(data?.startDate).format(dateFormatting.dateCapital) : ""}
               </DetailText>
               <DetailText label={"End Date"}>
-                {data?.endDate
-                  ? moment(data?.endDate).format(dateFormatting.date)
-                  : ""}
+                {data?.endDate ? moment(data?.endDate).format(dateFormatting.dateCapital) : ""}
               </DetailText>
-              <div className="col-span-3">
-                <DetailText label={"Description"}>
-                  {data?.description}
-                </DetailText>
-              </div>
-              {isVA === true ? (
-                <>
-                  <DetailText label={"IsVA"}>
-                    {data?.isVA === "on" ? "True" : "False"}
-                  </DetailText>
-                  <DetailText label={"Total Digit"}>
-                    {data?.totalDigit}
-                  </DetailText>
-                  <DetailText label={"First Static Code"}>
-                    {data?.fsCode}
-                  </DetailText>
-                </>
-              ) : null}
+              <DetailText label={"Parent"}>{parentLabel}</DetailText>
+              <DetailText label={"Criteria"}>{matchedNamesCriteria?.slice(2)}</DetailText>
+            </div>
+            {/* Description full width */}
+            <div className="w-full">
+              <DetailText label={"Description"}>{data?.description}</DetailText>
             </div>
           </div>
         );
@@ -113,7 +103,7 @@ const ConfirmModalBankAccount = ({
             approvalName={
               (dataOption || []).filter(
                 (data) => data.value === selectedHierarchy
-              )?.[0].name || ""
+              )?.[0]?.name || ""
             }
             dataTable={listDataAppHierDetail}
             selectedHierarchy

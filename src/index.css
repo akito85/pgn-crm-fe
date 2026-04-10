@@ -1220,3 +1220,18 @@ span.ant-tree-title {
 .ant-collapse > .ant-collapse-item:last-child {
   margin-bottom: 0 !important;
 }
+
+/* RC Bank — small font for table/form sections (matches text-xs / bank info header) */
+.rc-bank-small table {
+  font-size: 0.75rem;
+}
+.rc-bank-small td {
+  white-space: nowrap;
+}
+.rc-bank-small .ant-form-item-label label {
+  font-size: 0.75rem;
+}
+.rc-bank-small .ant-select-selection-item,
+.rc-bank-small .ant-input {
+  font-size: 0.75rem;
+}

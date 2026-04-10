@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { Spin, Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, UndoOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ModalAttachment from "./ModalAttachment";
 import { useSelector } from "react-redux";
@@ -79,7 +79,9 @@ const columnAttachmentData = (
   handleSearch = () => { },
   handleDelete = () => { },
   type,
-  handleShow
+  handleShow,
+  canDeleteExisting = false,
+  handleUndoDelete = () => { }
 ) => {
   const res = [
     {
@@ -177,22 +179,33 @@ const columnAttachmentData = (
               </span>
             </Tooltip>
             {type !== "detail" ? (
-              <Tooltip title="Delete">
-                <span
-                  className={`flex justify-center${r.dataType === "exist" ? " cursor-not-allowed" : ""
-                    }`}
-                >
-                  <SVGIcon
-                    name="IconDelete"
-                    color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
-                    width={24}
-                    className={r.dataType === "exist" ? "disabled" : undefined}
-                    onClick={
-                      r.dataType !== "exist" ? () => handleDelete(r) : undefined
-                    }
-                  />
-                </span>
-              </Tooltip>
+              r.pendingDelete ? (
+                <Tooltip title="Undo Delete">
+                  <span className="flex justify-center cursor-pointer">
+                    <UndoOutlined
+                      style={{ fontSize: "20px", color: "#0075BF" }}
+                      onClick={() => handleUndoDelete(r)}
+                    />
+                  </span>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Delete">
+                  {(() => {
+                    const canDel = r.dataType !== "exist" || canDeleteExisting;
+                    return (
+                      <span className={`flex justify-center${!canDel ? " cursor-not-allowed" : ""}`}>
+                        <SVGIcon
+                          name="IconDelete"
+                          color={canDel ? "#D90000" : "#8D91A0"}
+                          width={24}
+                          className={!canDel ? "disabled" : undefined}
+                          onClick={canDel ? () => handleDelete(r) : undefined}
+                        />
+                      </span>
+                    );
+                  })()}
+                </Tooltip>
+              )
             ) : null}
           </div>
         );
@@ -226,6 +239,7 @@ const AttachmentSectionForm = ({
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
+  canDeleteExisting = false,
 }) => {
 
 
@@ -273,6 +287,14 @@ const AttachmentSectionForm = ({
       const temp = prevState.filter((detail) => detail.key !== record.key);
       return temp;
     });
+  };
+
+  const handleUndoDelete = (record) => {
+    updateData((prevState) =>
+      prevState.map((item) =>
+        item.id === record.id ? { ...item, pendingDelete: false } : item
+      )
+    );
   };
 
   const handleOpenModal = () => {
@@ -348,7 +370,9 @@ const AttachmentSectionForm = ({
             handleSearch,
             handleDelete,
             type,
-            handleShow
+            handleShow,
+            canDeleteExisting,
+            handleUndoDelete
           )}
         />
         <ModalAttachment

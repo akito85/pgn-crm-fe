@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Select, Space, Table, Tooltip } from "antd";
-import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
+import { getBillingItemOptions } from "../../../../../../redux/slices/receipt_collection/bankSlice";
 
 const FunctionalTableDetailBillingItem = ({
   data = [],
@@ -16,12 +17,20 @@ const FunctionalTableDetailBillingItem = ({
   const [statusAction, setStatusAction] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [localBillingItems, setLocalBillingItems] = useState([]);
 
-  const { data_billing_item } = useSelector((state) => state.bank);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getBillingItemOptions())
+      .unwrap()
+      .then((result) => setLocalBillingItems(result ?? []))
+      .catch(() => setLocalBillingItems([]));
+  }, [dispatch]);
 
   const isEditing = (record) => record.key === editingKey;
 
-  const billingItemOptions = (data_billing_item || []).map((item) => ({
+  const billingItemOptions = localBillingItems.map((item) => ({
     value: item?.id ?? item?.Id,
     label: item?.name ?? item?.text ?? "",
   }));

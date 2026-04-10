@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, Select } from "antd";
+import { Form, Select } from "antd";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import moment from "moment";
 import React, { useState } from "react";
@@ -21,9 +21,7 @@ const AccountForm = ({
   dataCurrency,
   dataEntity,
   typeData,
-  isVA,
   data_select_criteria,
-  setIsVA,
   formValue,
   form,
   storedData,
@@ -35,14 +33,13 @@ const AccountForm = ({
   handleSelectCriteria = () => {},
   handleDeselectCriteria = () => {},
   handleClearCriteria = () => {},
+  parentRequired = false,
+  headerCategory,
+  parentOptions = [],
 }) => {
   const [categoryCollapsed, setCategoryCollapsed] = useState(false);
   const [glAccountCollapsed, setGLAccountCollapsed] = useState(false);
   const [criteriaCollapsed, setCriteriaCollapsed] = useState(false);
-
-  const handlePage = (e) => {
-    setIsVA(e.target.checked);
-  };
 
   const disabledDate = (current) => {
     if (
@@ -58,31 +55,23 @@ const AccountForm = ({
   return (
     <div className="w-full">
       <BaseContainer header={"BANK ACCOUNT INFORMATION"}>
-        <div>
-          <div className="w-full grid grid-cols-3 gap-3">
+        <div className="rc-bank-small">
+          {/* Row 1: Account Number, Account Name, Currency, Entity, Type */}
+          <div className="w-full grid grid-cols-5 gap-3">
             <Form.Item
-              label={"Bank Account Number"}
+              label={"Account Number"}
               name={"accountNumber"}
-              rules={formMessageRequired("Bank Account Number")}
+              rules={formMessageRequired("Account Number")}
             >
               <InputComponent />
             </Form.Item>
             <Form.Item
-              label={"Bank Account Name"}
+              label={"Account Name"}
               name={"accountName"}
-              rules={formMessageRequired("Bank Account Name")}
+              rules={formMessageRequired("Account Name")}
             >
               <InputComponent />
             </Form.Item>
-            <Form.Item
-              label={"Branch"}
-              name={"branch"}
-              rules={formMessageRequired("branch")}
-            >
-              <InputComponent />
-            </Form.Item>
-          </div>
-          <div className="w-full grid grid-cols-3 gap-3">
             <Form.Item
               label={"Currency"}
               name={"currency"}
@@ -123,7 +112,45 @@ const AccountForm = ({
               </SelectComponent>
             </Form.Item>
           </div>
-          <div className="w-full grid grid-cols-3 gap-3">
+          {/* Row 2: Category, Start Date, End Date, Parent (conditional), Criteria */}
+          <div className="w-full grid grid-cols-5 gap-3">
+            <Form.Item
+              label={"Category"}
+              name={"category"}
+              rules={formMessageRequired("Category")}
+            >
+              <SelectComponent>
+                <Select.Option value="Virtual Account">Virtual Account</Select.Option>
+                <Select.Option value="Online Payment">Online Payment</Select.Option>
+              </SelectComponent>
+            </Form.Item>
+            <Form.Item
+              label={"Start Date"}
+              name={"startDate"}
+              rules={formMessageRequired("Start Date")}
+              required
+            >
+              <DateComponent
+                disabledDate={(current) => {
+                  return current && current < moment().add(-1, "days");
+                }}
+              />
+            </Form.Item>
+            <Form.Item label={"End Date"} name={"endDate"}>
+              <DateComponent dateDisable={disabledDate} />
+            </Form.Item>
+            {parentRequired && (
+              <Form.Item
+                label={"Parent"}
+                name={"parent"}
+                rules={formMessageRequired("Parent")}
+              >
+                <SelectComponent
+                  allowClear
+                  options={parentOptions.map((p) => ({ value: p.id, label: p.label }))}
+                />
+              </Form.Item>
+            )}
             <Form.Item
               name={"criteria"}
               rules={[{ message: requiredMessage("Criteria"), required: true }]}
@@ -144,77 +171,15 @@ const AccountForm = ({
                   ))}
               </SelectComponent>
             </Form.Item>
-
-            <Form.Item
-              label={"Start Date"}
-              name={"startDate"}
-              rules={formMessageRequired("Start Date")}
-              required
-            >
-              <DateComponent
-                disabledDate={(current) => {
-                  return current && current < moment().add(-1, "days");
-                }}
-              />
-            </Form.Item>
-            <Form.Item label={"End Date"} name={"endDate"}>
-              <DateComponent dateDisable={disabledDate} />
-            </Form.Item>
           </div>
-          <div className="w-full grid grid-cols-1">
+          {/* Row 3: Description full width */}
+          <div className="w-full">
             <Form.Item label={"Description"} name={"description"}>
               <InputComponent rows={5} type="textarea" />
             </Form.Item>
           </div>
-          <div>
-            <div className="w-full flex justify-end gap-5">
-              <div className="w-full grid grid-cols-3 gap-5">
-                <Form.Item name={"isVA"}>
-                  <div className="flex flex-col pt-[12px]">
-                    <Checkbox onChange={handlePage} checked={isVA}>
-                      Is VA
-                    </Checkbox>
-                    <span className="text-[10px]">
-                      Click or tap this checkbox if data can be VA.
-                    </span>
-                  </div>
-                </Form.Item>
-                {isVA === true ? (
-                  <>
-                    <Form.Item
-                      label={"Total Digit"}
-                      name={"totalDigit"}
-                      rules={formMessageRequired("Total Digit")}
-                    >
-                      <Input
-                        allowClear
-                        maxLength={2}
-                        onInput={(e) =>
-                          (e.target.value = e.target.value.replace(/\D/g, ""))
-                        }
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label={"First Static Code"}
-                      name={"fsCode"}
-                      rules={formMessageRequired("Fist Static Code")}
-                    >
-                      <Input
-                        allowClear
-                        maxLength={8}
-                        onInput={(e) =>
-                          (e.target.value = e.target.value.replace(/\D/g, ""))
-                        }
-                      />
-                    </Form.Item>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </div>
         </div>
       </BaseContainer>
-      {/* GL Account section */}
 
       {/* Category Information */}
       <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
@@ -225,7 +190,7 @@ const AccountForm = ({
           </div>
         </div>
         {!categoryCollapsed && (
-          <div className="mt-4">
+          <div className="mt-4 rc-bank-small">
             <FunctionalTableCategoryInformation
               type={type}
               data={listDataCategoryInfo}
@@ -233,6 +198,7 @@ const AccountForm = ({
               storedData={storedData}
               setStoredData={setStoredData}
               status={status}
+              headerCategory={headerCategory}
             />
           </div>
         )}
@@ -247,7 +213,7 @@ const AccountForm = ({
           </div>
         </div>
         {!glAccountCollapsed && (
-          <div className="mt-4">
+          <div className="mt-4 rc-bank-small">
             <FunctionalTableGLAccountInformation
               type={type}
               data={listDataGLAccountInfo}
@@ -269,7 +235,7 @@ const AccountForm = ({
           </div>
         </div>
         {!criteriaCollapsed && (
-          <div className="mt-4">
+          <div className="mt-4 rc-bank-small">
             <FunctionalTableCriteriaPayment
               type={type}
               data={listDataCriteria}

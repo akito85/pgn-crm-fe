@@ -208,6 +208,7 @@ const FunctionalTableGLAccountInformation = ({
   const save = async (key) => {
     try {
       const row = await formTableGL.validateFields();
+      const glAccountDescription = formTableGL.getFieldValue('glAccountDescription');
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
       if (index > -1) {
@@ -215,7 +216,7 @@ const FunctionalTableGLAccountInformation = ({
         const flag =
           item?.type !== "exist" && type === "update" ? 1 :
           item?.type === "exist" && type === "update" ? 2 : undefined;
-        newData.splice(index, 1, { ...item, ...row, flag });
+        newData.splice(index, 1, { ...item, ...row, glAccountDescription, flag });
         updateData(newData);
         setEditingKey("");
       }
@@ -285,7 +286,7 @@ const FunctionalTableGLAccountInformation = ({
             (status === "DRAFT" && statusApproval === "DRAFT") ||
             record.type !== "exist";
           return (
-            <Space className="my-3 gap-2">
+            <Space className="gap-2">
               {editable ? (
                 <>
                   <ButtonComponent onClick={() => cancel(record)} type="default">
@@ -375,6 +376,7 @@ const FunctionalTableGLAccountInformation = ({
         <Form form={formTableGL} component={false}>
           <Table
             bordered
+            size="small"
             className="w-full"
             components={{ body: { cell: EditableCell } }}
             dataSource={filterDataByPage()}
