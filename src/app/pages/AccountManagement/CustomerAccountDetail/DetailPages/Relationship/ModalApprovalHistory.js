@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import ModalHistory from "../../../../../../components/Modal/ModalHistory";
 import { getApprovalHistory } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 
 const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId }) => {
   const dispatch = useDispatch();
-  const { data_approvalHistory, loadingApprovalHistory } = useSelector(
+  const { data_approvalHistory, loading_approvalHistoryRelationship } = useSelector(
     (state) => state.relationship
   );
 
@@ -36,21 +36,11 @@ const ModalApprovalHistory = ({ isOpen, handleCancel, idAccount, relationshipId 
     }
   }, [data_approvalHistory]);
 
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
-
   return (
-    <ModalHistory
+    <NxHistoryModal
       isOpen={isOpen}
       handleClose={handleCancel}
       header={"Approval History"}
-      width={850}
-      tabOptions={handleApprovalHistoryOptions()}
       dataApprover={dataApprovalHistoryFix?.dataApprover}
       dataHistory={dataApprovalHistoryFix?.dataHistory}
     />

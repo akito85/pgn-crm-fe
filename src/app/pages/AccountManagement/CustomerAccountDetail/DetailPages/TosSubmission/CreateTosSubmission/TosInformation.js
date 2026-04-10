@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Button, Form, Input } from "antd";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../../components/DateComponent";
 import { requiredMessage } from "../../../../../../../utils";
-import TableDetailTos from "./TableDetailTos";
+import TableDetailTos from "../../../../../ProductAndPromo/Product/ProductForm/TermOfService/TableDetailTos";
 import moment from "moment";
 import ModalSelectTos from "./ModalSelectTos";
 
@@ -46,137 +48,127 @@ const TosInformation = ({
     }
   };
 
-  const resetEndDate = () => {
+  const handleStartDateChange = (value) => {
     form.resetFields(["endDate"]);
-  }
+    form.setFieldsValue({ appliedDate: value });
+    updateTosSubmission(value, "appliedDate");
+    return updateTosSubmission(value, "startDate");
+  };
+
   return (
-    <div className="drop-shadow-lg bg-white rounded-lg w-full mt-[30px] p-[20px]">
-      {/* SECTION CHOOSE TERM OF SERVICE */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            CHOOSE TERM OF SERVICE
-          </h3>
-        </div>
-        <div className={"grid grid-cols-3 w-full gap-x-6"}>
-          <Form.Item
-            label={"Term of Service Name"}
-            name={"tosName"}
-            rules={[
-              {
-                message: requiredMessage("Term of Service Name"),
-                required: true,
-              },
-            ]}
-            valuePropName={tosSubmissionObj?.tosName}
-          >
-            <div className="flex flex-row">
-              <Input.Group compact>
-                <InputComponent
-                  disabled={true}
-                  value={tosSubmissionObj?.tosName}
-                  // value={addressTable?.map((a) => a.fullAddress)[0]}
-                />
-                <Button type="primary" onClick={() => setModalSelectTos(true)}>
-                  Choose
-                </Button>
-              </Input.Group>
+    <NxCardContainer
+      type="profile"
+      hideChildren
+      className="mt-[30px]"
+      element={(
+        <div className="flex flex-col gap-4">
+          <NxBaseContainer header="TERM OF SERVICE SUBMISSION INFORMATION" border>
+            <div className="flex flex-col gap-4 w-full">
+              <div className="grid grid-cols-3 w-full gap-4">
+                <Form.Item
+                  label={"Term of Service Name"}
+                  name={"tosName"}
+                  rules={[
+                    {
+                      message: requiredMessage("Term of Service Name"),
+                      required: true,
+                    },
+                  ]}
+                  valuePropName={tosSubmissionObj?.tosName}
+                >
+                  <Input.Group compact>
+                    <InputComponent disabled={true} value={tosSubmissionObj?.tosName} />
+                    <Button type="primary" onClick={() => setModalSelectTos(true)}>
+                      Choose
+                    </Button>
+                  </Input.Group>
+                </Form.Item>
+
+                <Form.Item
+                  name={"startDate"}
+                  rules={[{ message: requiredMessage("Start Date"), required: true }]}
+                  className="no-margin-form"
+                  getValueFromEvent={handleStartDateChange}
+                  label="Start Date"
+                  required
+                >
+                  <DateComponent dateDisable={disabledDate} />
+                </Form.Item>
+
+                <Form.Item
+                  name={"endDate"}
+                  className="no-margin-form"
+                  rules={[
+                    {
+                      validator: (_, value) =>
+                        (value &&
+                          ((type === "create" &&
+                            moment(tosSubmissionObj.startDate) < moment(value)) ||
+                            (type === "update" &&
+                              moment(tosSubmissionObj.startDate) <= moment(value)))) ||
+                        !value
+                          ? Promise.resolve()
+                          : Promise.reject(new Error("End date must before Start date")),
+                    },
+                    { message: requiredMessage("End Date"), required: true },
+                  ]}
+                  getValueFromEvent={(e) => updateTosSubmission(e, "endDate")}
+                  label="End Date"
+                  required
+                >
+                  <DateComponent
+                    dateDisable={handleDisableEndDate}
+                    disabled={!tosSubmissionObj.startDate}
+                  />
+                </Form.Item>
+              </div>
+
+              <div className="grid grid-cols-3 w-full gap-4">
+                <Form.Item name={"appliedDate"} className="no-margin-form" label="Applied Date">
+                  <DateComponent disabled={true} />
+                </Form.Item>
+              </div>
+
+              <div className={"grid grid-cols-1 w-full gap-x-6"}>
+                <Form.Item
+                  name={"remark"}
+                  className="w-full"
+                  getValueFromEvent={(e) => updateTosSubmission(e, "remark")}
+                  label={"Remark"}
+                >
+                  <InputComponent type="textarea" value={tosSubmissionObj.remark} />
+                </Form.Item>
+              </div>
             </div>
-          </Form.Item>
-        </div>
-      </div>
+          </NxBaseContainer>
 
-      {/* SECTION TERM OF SERVICE DETAIL - TABLE */}
-      <div>
-        <div className="pt-8 pb-4">
-          <h3 className="text-primary text-xs font-bold uppercase">
-            TERM OF SERVICE DETAIL
-          </h3>
-        </div>
-        <div className="w-ful">
-          <TableDetailTos
-            type={"form"}
-            editDetail={editDetail}
-            dataTable={
-              editDetail
-                ? dataDetail
-                : dataDetail.filter((item) => item?.attribute?.value !== 112)
-            }
-            updateTable={updateDataDetail}
-          />
-        </div>
-      </div>
-
-      {/* SECTION TERM OF SERVICE SUBMISSION INFORMATION */}
-      <div className="pt-8 pb-4">
-        <h3 className="text-primary text-xs font-bold uppercase">
-        TERM OF SERVICE SUBMISSION INFORMATION
-        </h3>
-      </div>
-      <div className="flex flex-col gap-4 w-full">
-        <div className={"grid grid-cols-3 w-full gap-4"}>
-          <Form.Item
-            name={"startDate"}
-            rules={[{ message: requiredMessage("Start Date"), required: true }]}
-            className="no-margin-form"
-            getValueFromEvent={(e) => updateTosSubmission(e, "startDate")}
-            label="Start Date"
-            required
-          >
-            <DateComponent dateDisable={disabledDate} onChange={resetEndDate}/>
-          </Form.Item>
-          <Form.Item
-            name={"endDate"}
-            className="no-margin-form"
-            rules={[
-              {
-                validator: (_, value) =>
-                  (value &&
-                    ((type === "create" &&
-                      moment(tosSubmissionObj.startDate) < moment(value)) ||
-                      (type === "update" &&
-                        moment(tosSubmissionObj.startDate) <=
-                          moment(value)))) ||
-                  !value
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error("End date must before Start date")
-                      ),
-              },
-              { message: requiredMessage("End Date"), required: true },
-            ]}
-            getValueFromEvent={(e) => updateTosSubmission(e, "endDate")}
-            label="End Date"
-            required
-          >
-            <DateComponent
-              dateDisable={handleDisableEndDate}
-              disabled={!tosSubmissionObj.startDate}
+          <NxBaseContainer header="TERM OF SERVICE DETAIL" border>
+            <TableDetailTos
+              type={"form"}
+              editDetail={editDetail}
+              dataTable={
+                editDetail
+                  ? dataDetail
+                  : dataDetail.filter((item) => item?.attribute?.value !== 112)
+              }
+              updateTable={updateDataDetail}
             />
-          </Form.Item>
+          </NxBaseContainer>
+
+          {modalSelectTos ? (
+            <ModalSelectTos
+              idSA={idSA}
+              dataObj={tosSubmissionObj}
+              handleCancel={() => setModalSelectTos(false)}
+              modalDetail={modalSelectTos}
+              updateObj={setTosSubmissionObj}
+              updateTable={updateDataDetail}
+            />
+          ) : null}
         </div>
-        <div className={"grid grid-cols-1 w-full gap-x-6"}>
-          <Form.Item
-            name={"remark"}
-            className="w-full"
-            getValueFromEvent={(e) => updateTosSubmission(e, "remark")}
-            label={"Remark"}
-          >
-            <InputComponent type="textarea" value={tosSubmissionObj.remark} />
-          </Form.Item>
-        </div>
-      </div>
-      {modalSelectTos ? (
-        <ModalSelectTos
-          idSA={idSA}
-          dataObj={tosSubmissionObj}
-          handleCancel={() => setModalSelectTos(false)}
-          modalDetail={modalSelectTos}
-          updateObj={setTosSubmissionObj}
-          updateTable={updateDataDetail}
-        />
-      ) : null}
-    </div>
+      )}
+    >
+    </NxCardContainer>
   );
 };
 

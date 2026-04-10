@@ -10,7 +10,6 @@ import {
   FormStepper,
   FormFooter,
 } from "../../../../../../components/FormStepNavigation";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import DailyRateCreate from "./DailyRateCreate";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -455,11 +454,12 @@ const DailyRateForm = ({ type }) => {
   };
 
   const handleSubmitForm = async (formValue) => {
+    const allFormValues = { ...formValue, ...form.getFieldsValue(true) };
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabData, listDataAttachment);
     } else {
       handleMandatory(setTabData, listDataAttachment);
-      if (formValue?.tCurrency === formValue?.fCurrency) {
+      if (allFormValues?.tCurrency === allFormValues?.fCurrency) {
         const errorBody = {
           title: "Failed",
           description: "From currency cannot be the same as to currency!",
@@ -467,15 +467,15 @@ const DailyRateForm = ({ type }) => {
         dispatch(showModalError(errorBody));
       } else {
         const dataValue = {
-          rateType: formValue?.rateType,
-          fromCurrency: formValue?.fCurrency,
-          toCurrency: formValue?.tCurrency,
-          rateDate: moment(formValue?.rateDate).format(
+          rateType: allFormValues?.rateType,
+          fromCurrency: allFormValues?.fCurrency,
+          toCurrency: allFormValues?.tCurrency,
+          rateDate: moment(allFormValues?.rateDate).format(
             dateFormatting.dateCapital,
           ),
-          convertedRate: formValue?.convertedRate,
-          description: formValue?.description,
-          appHierId: formValue?.apphierId,
+          convertedRate: allFormValues?.convertedRate,
+          description: allFormValues?.description,
+          appHierId: allFormValues?.apphierId,
           submit: typeSubmit,
         };
         const isDataValid = await checkDataValidity(dataValue);
@@ -626,7 +626,7 @@ const DailyRateForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -771,7 +771,7 @@ const DailyRateForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

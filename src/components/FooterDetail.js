@@ -10,7 +10,7 @@ const FooterDetail = ({ onCancel, onApprove, onReject, showApproval = false }) =
         <div className="bg-white border border-[#dbdade] rounded-lg p-5 mt-5 flex justify-between shadow-sm">
             <ButtonComponent
                 onClick={onCancel}
-                className="!border-[#dbdade] !text-[#4b465c] hover:!bg-[#f1f1f2]"
+                className="!border-[#0075BF] !text-[#0075BF]"
             >
                 Cancel
             </ButtonComponent>

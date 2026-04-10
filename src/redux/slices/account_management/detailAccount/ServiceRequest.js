@@ -71,12 +71,12 @@ export const createServiceRequestForAccount = createAsyncThunk(
   }
 );
 
-// 5. Create Complete Service Request (Composite)
+// 5. Create Service Request with nested data
 export const createCompleteServiceRequest = createAsyncThunk(
   "serviceRequest/createCompleteServiceRequest",
   async ({ accountId, requestBody }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/composite`;
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/create`;
       const response = await accountManagementService.createData(url, requestBody);
       return response;
     } catch (error) {

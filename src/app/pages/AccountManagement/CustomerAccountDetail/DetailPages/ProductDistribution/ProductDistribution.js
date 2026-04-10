@@ -1,43 +1,42 @@
-import React, { useState, Fragment } from "react";
-import BaseContainer from "../../../../../../components/BaseContainer";
-import RadioTabs from "../../../../../../components/RadioTabs";
+import React, { useState } from "react";
 import CurrentProductDistribution from "./CurrentProductDistribution/CurrentProductDistribution";
 import ProductDistributionHistory from "./ProductDistributionHistory/ProductDistributionHistory";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import { Tabs } from "antd";
 
 const ProductDistribution = ({ id, idCustomer }) => {
-  // State
-  const [valuePage, setValuePage] = useState("Current Raw Material Source");
-  const [listSectionInfo, setListSectionInfo] = useState([
-    { value: "Current Product Distribution" },
-    { value: "Product Distribution History" },
-  ]);
+  const tabOptions = [
+    {
+      key: "current",
+      label: "Current Product Distribution",
+      children: (
+        <CurrentProductDistribution id={id} idCustomer={idCustomer} />
+      )
+    },
+    {
+      key: "history",
+      label: "Product Distribution History",
+      children: (
+        <ProductDistributionHistory id={id} idCustomer={idCustomer} />
+      )
+    },
+  ];
 
-  const layout = (valuePage) => {
-    switch (valuePage) {
-      case "Current Product Distribution":
-        return <CurrentProductDistribution id={id} idCustomer={idCustomer} />;
-      case "Product Distribution History":
-        return <ProductDistributionHistory id={id} idCustomer={idCustomer} />;
-      default:
-        return <CurrentProductDistribution id={id} idCustomer={idCustomer} />;
-    }
-  };
+  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
+
   return (
-    <Fragment>
-      <BaseContainer
-        type={"tab"}
-        element={
-          <>
-            <RadioTabs
-              data={listSectionInfo}
-              onChange={(e) => setValuePage(e.target.value)}
-            />
-          </>
-        }
-      >
-        {layout(valuePage)}
-      </BaseContainer>
-    </Fragment>
+    <NxCardContainer
+      header={"PRODUCT DISTRIBUTION"}
+      type={"tabs"}
+      element={
+        <Tabs
+          items={tabOptions}
+          onChange={setActiveKey}
+          activeKey={activeKey}
+          className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-tab]:py-4 [&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+        />
+      }
+    ></NxCardContainer>
   );
 };
 

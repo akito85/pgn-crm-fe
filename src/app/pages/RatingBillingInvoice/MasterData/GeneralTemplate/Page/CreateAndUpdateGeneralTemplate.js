@@ -5,7 +5,6 @@ import {
 } from "../../../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -459,9 +458,20 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       .unwrap()
       .then(async (data) => {
         setLoadingForm(true);
-        await handleSendDataFile(data);
-        handleDescriptionSuccess(body, type);
-        handleClearOrReset();
+        try {
+          await handleSendDataFile(data);
+          handleDescriptionSuccess(body, type);
+          handleClearOrReset();
+        } catch (error) {
+          const message =
+            error?.response?.data?.data ||
+            error?.response?.data?.message ||
+            error?.message ||
+            "Failed to upload file";
+          setBodyError({ message, value: data });
+          setModalError(true);
+          setLoadingForm(false);
+        }
         setLoadingSave(false);
         setModalConfirm(false);
       })
@@ -576,7 +586,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingForm}>
         <BreadCrumb routes={routes} />
         
@@ -745,7 +755,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
           </ModalCustom>
         ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

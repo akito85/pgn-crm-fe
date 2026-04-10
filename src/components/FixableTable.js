@@ -215,7 +215,7 @@ const FixableTable = ({
 
   const buttonElement = showButton && (
     <Dropdown
-      overlay={fixColumnMenu}
+      menu={fixColumnMenu}
       trigger={['click']}
       visible={dropdownVisible}
       onVisibleChange={setDropdownVisible}

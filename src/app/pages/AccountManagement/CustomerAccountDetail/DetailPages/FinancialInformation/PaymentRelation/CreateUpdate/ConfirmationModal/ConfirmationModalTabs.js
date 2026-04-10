@@ -1,57 +1,62 @@
-import ConfirmationModalInfo from "./ConfirmationModalInfo";
-import ConfirmationModalApproval from "./ConfirmationModalApproval";
-import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
 import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxApprovalInput from "../../../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../../../components/Nx/NxAttachmentInput";
+import InfoPaymentRelation from "../StepContents/InformationForm/InfoPaymentRelation";
 
 const ConfirmationModalTabs = ({
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
-  dispatch,
-  dataAttachment,
-  data = {},
+  form,
+  approvalData,
+  attachmentDataSource,
   service,
   type = "",
   configApplication,
   activeTab = 0,
   setActiveTab = () => {},
+  disabled = false,
 }) => {
   const tabOptions = [
     {
       key: 0,
       label: "Payment Relation Information",
-      children: <ConfirmationModalInfo data={data} />
+      disabled,
+      children: <InfoPaymentRelation form={form} formView={false} />
     },
     {
       key: 1,
       label: "Approval",
+      disabled,
       children: (
-        <ConfirmationModalApproval
-          dataTable={hierarchyTableData}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-        />
+        <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />
       )
     },
     {
       key: 2,
       label: "Attachment",
+      disabled,
       children: (
-        <ConfirmationModalAttachment
-          data={dataAttachment}
-          dispatch={dispatch}
+        <NxAttachmentInput
+          data={attachmentDataSource}
           service={service}
           configApplication={configApplication}
+          type={"confirmation"}
         />
       )
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark />
+      disabled,
+      children: <ConfirmationModalRemark disabled={disabled} />
     },
-  ].filter(Boolean);
+  ].filter(Boolean).map((tabOption) => ({
+    ...tabOption,
+    children:
+      <NxBaseContainer border header={tabOption.label}>
+        {tabOption.children}
+      </NxBaseContainer>
+  }));
 
   return (
     <NxTabs

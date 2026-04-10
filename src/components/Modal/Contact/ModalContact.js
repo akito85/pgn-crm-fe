@@ -10,9 +10,11 @@ import { getColumnSearchProps } from "../../../utils/getColumnSearchProps";
 import InputComponent from "../../InputComponent";
 import { onInputUpperCase } from "../../../app/pages/AccountManagement/Utils";
 import SelectComponent from "../../SelectComponent";
+import NxCardContainer from "../../Nx/NxCardContainer";
 
 import { useDispatch } from "react-redux";
 import SVGIcon from "../../../assets/Icon/index";
+import { PlusOutlined } from "@ant-design/icons";
 
 const ModalContact = ({
   open = false,
@@ -34,6 +36,7 @@ const ModalContact = ({
   const dispatch = useDispatch();
   // const [dataTable, setDataTable] = useState([]);
   const searchInput = useRef(null);
+  const addRowTrigger = useRef(null);
   const [openModalChoose, setOpenModalChoose] = useState(false);
   const [selectedType, setSelectedType] = useState("");
   const [pageContact, setPageContact] = useState(1);
@@ -350,10 +353,10 @@ const ModalContact = ({
       <ModalCustom
         isOpen={open}
         type="confirmation"
-        header={"Contact Information"}
+        header={typeContact === "update" ? "Update Contact" : "Create Contact"}
         handleCancel={handleCancelContact}
         footer={[
-          <div className="w-full flex">
+          <div key="footer" className="w-full flex">
             <ButtonComponent onClick={handleCancelContact} type={"submit"}>
               Back
             </ButtonComponent>
@@ -377,148 +380,167 @@ const ModalContact = ({
         ]}
         width={1200}
       >
-        <div className="w-full">
-          <div className="text-primary text-xs font-bold uppercase pt-6">
-            Contact Information
-          </div>
-          {typeContact !== "update" && (
-            <div className="w-full justify-end flex mb-4">
-              <ButtonComponent
-                type={"submit"}
-                border={true}
-                onClick={handleOpenModalChoose}
-              >
-                Choose Contact
-              </ButtonComponent>
-            </div>
-          )}
-          <Form
-            form={formModal}
-            id={"modalContact"}
-            onFinish={(formValue) => {
-              handleSaveContact(formValue, dataTable);
-              setOpenModalChoose(false);
-              setOpen(false);
-              formModal?.resetFields();
-              formContact?.resetFields([["values", 0]]);
-              setDataTable([]);
-            }}
-            layout="vertical"
-          >
-            <div className="w-full grid grid-cols-3 gap-5">
-              <Form.Item
-                label={"First Name"}
-                name={"firstName"}
-                rules={formMessageRequired("First Name")}
-              >
-                <InputComponent
-                  onInput={onInputUpperCase}
-                  disabled={
-                    typeContact === "choosed" || typeContact === "update"
-                  }
-                />
-              </Form.Item>
-              <Form.Item label={"Middle Name"} name={"middleName"}>
-                <InputComponent
-                  onInput={onInputUpperCase}
-                  disabled={
-                    typeContact === "choosed" || typeContact === "update"
-                  }
-                />
-              </Form.Item>
-              <Form.Item label={"Last Name"} name={"lastName"}>
-                <InputComponent
-                  onInput={onInputUpperCase}
-                  disabled={
-                    typeContact === "choosed" || typeContact === "update"
-                  }
-                />
-              </Form.Item>
-            </div>
-            <div className="w-full grid grid-cols-3 gap-5">
-              <Form.Item label={"Job"} name={"jobId"}>
-                <SelectComponent
-                  options={datas_option?.data_job}
-                  disabled={
-                    typeContact === "choosed" || typeContact === "update"
-                  }
-                />
-              </Form.Item>
-              <Form.Item label={"Position"} name={"positionId"}>
-                <SelectComponent
-                  options={datas_option?.data_position}
-                  disabled={
-                    typeContact === "choosed" || typeContact === "update"
-                  }
-                />
-              </Form.Item>
-            </div>
-            <div className="text-primary text-xs font-bold uppercase pt-6">
-              Contact detail
-            </div>
-            <TableContact
-              cols={columns}
-              dataTable={dataTable}
-              setDataTable={setDataTable}
-              form={formContact}
-              editRecords={editRecord}
-              actionButtons={
-                typeContact === "default" ? ["update", "delete"] : []
-              }
-              changePrefix={changePrefix}
-              onChangePage={handleChange}
-              onSizeChanger={handleChange}
-              page={pageContact}
-              pageSize={pageContactSize}
-              showButtonCreate={typeContact === "default"}
-            />
-            <div className="text-primary text-xs font-bold uppercase pt-6">
-              Contact Purpose Information
-            </div>
-            <div className="w-full grid-cols-3 grid gap-5">
-              <div className="flex flex-col pt-[12px]">
-                <Form.Item name={"isPrimary"} valuePropName={"checked"}>
-                  <Checkbox
-                    disabled={
-                      typeContact === "update" &&
-                      formModal?.getFieldsValue()?.isPrimary === true
-                    }
+        <Form
+          form={formModal}
+          id={"modalContact"}
+          onFinish={(formValue) => {
+            handleSaveContact(formValue, dataTable);
+            setOpenModalChoose(false);
+            setOpen(false);
+            formModal?.resetFields();
+            formContact?.resetFields([["values", 0]]);
+            setDataTable([]);
+          }}
+          layout="vertical"
+        >
+          <div className="flex flex-col gap-4 pt-2">
+
+            {/* Contact Information */}
+            <NxCardContainer
+              header="Contact Information"
+              actionElement={
+                typeContact !== "update" ? (
+                  <ButtonComponent
+                    isPrimary={true}
+                    icon={<PlusOutlined />}
+                    onClick={handleOpenModalChoose}
                   >
-                    <p className="m-0">Primary Contact</p>
-                    <span className="text-[10px]">
-                      Click or tap this checkbox if data is branch.
-                    </span>
-                  </Checkbox>
+                    Choose
+                  </ButtonComponent>
+                ) : null
+              }
+            >
+              <div className="grid grid-cols-3 gap-5 mb-4">
+                <Form.Item
+                  label={"First Name"}
+                  name={"firstName"}
+                  rules={formMessageRequired("First Name")}
+                >
+                  <InputComponent
+                    onInput={onInputUpperCase}
+                    disabled={
+                      typeContact === "choosed" || typeContact === "update"
+                    }
+                  />
+                </Form.Item>
+                <Form.Item label={"Middle Name"} name={"middleName"}>
+                  <InputComponent
+                    onInput={onInputUpperCase}
+                    disabled={
+                      typeContact === "choosed" || typeContact === "update"
+                    }
+                  />
+                </Form.Item>
+                <Form.Item label={"Last Name"} name={"lastName"}>
+                  <InputComponent
+                    onInput={onInputUpperCase}
+                    disabled={
+                      typeContact === "choosed" || typeContact === "update"
+                    }
+                  />
                 </Form.Item>
               </div>
+              <div className="grid grid-cols-3 gap-5">
+                <Form.Item label={"Job"} name={"jobId"}>
+                  <SelectComponent
+                    options={datas_option?.data_job}
+                    disabled={
+                      typeContact === "choosed" || typeContact === "update"
+                    }
+                  />
+                </Form.Item>
+                <Form.Item label={"Position"} name={"positionId"}>
+                  <SelectComponent
+                    options={datas_option?.data_position}
+                    disabled={
+                      typeContact === "choosed" || typeContact === "update"
+                    }
+                  />
+                </Form.Item>
+              </div>
+            </NxCardContainer>
 
-              {module_name === "contact" && (
-                <>
-                  <Form.Item
-                    label={"Contact Address"}
-                    name={"contactAddressId"}
+            {/* Contact Detail */}
+            <NxCardContainer
+              header="Contact Detail"
+              withoutPadding
+              actionElement={
+                typeContact === "default" ? (
+                  <ButtonComponent
+                    isPrimary={true}
+                    icon={<PlusOutlined />}
+                    onClick={() => addRowTrigger.current?.()}
                   >
-                    <SelectComponent
-                      options={datas_option?.data_contact_address}
-                      disabled={typeContact === "update"}
-                    />
+                    Create
+                  </ButtonComponent>
+                ) : null
+              }
+            >
+              <TableContact
+                cols={columns}
+                dataTable={dataTable}
+                setDataTable={setDataTable}
+                form={formContact}
+                editRecords={editRecord}
+                actionButtons={
+                  typeContact === "default" ? ["update", "delete"] : []
+                }
+                changePrefix={changePrefix}
+                onChangePage={handleChange}
+                onSizeChanger={handleChange}
+                page={pageContact}
+                pageSize={pageContactSize}
+                showButtonCreate={false}
+                addRowTrigger={addRowTrigger}
+              />
+            </NxCardContainer>
+
+            {/* Contact Purpose Information */}
+            <NxCardContainer header="Contact Purpose Information">
+              <div className="grid grid-cols-3 gap-5 mb-4">
+                <div className="flex flex-col pt-[12px]">
+                  <Form.Item name={"isPrimary"} valuePropName={"checked"}>
+                    <Checkbox
+                      disabled={
+                        typeContact === "update" &&
+                        formModal?.getFieldsValue()?.isPrimary === true
+                      }
+                    >
+                      <p className="m-0">Primary Contact</p>
+                      <span className="text-[10px]">
+                        Click or tap this checkbox if data is branch.
+                      </span>
+                    </Checkbox>
                   </Form.Item>
-                  <Form.Item
-                    label={"Contact Address Additional Note"}
-                    name={"additionalNote"}
-                  >
-                    <InputComponent disabled={typeContact === "update"} />
-                  </Form.Item>
-                </>
-              )}
-            </div>
-            <div className="w-full">
+                </div>
+
+                {module_name === "contact" && (
+                  <>
+                    <Form.Item
+                      label={"Contact Address"}
+                      name={"contactAddressId"}
+                    >
+                      <SelectComponent
+                        options={datas_option?.data_contact_address}
+                        disabled={typeContact === "update"}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label={"Contact Address Additional Note"}
+                      name={"additionalNote"}
+                    >
+                      <InputComponent disabled={typeContact === "update"} />
+                    </Form.Item>
+                  </>
+                )}
+              </div>
               <Form.Item label={"Description"} name={"description"}>
                 <InputComponent rows={5} type="textarea" />
               </Form.Item>
-            </div>
-          </Form>
-        </div>
+            </NxCardContainer>
+
+          </div>
+        </Form>
       </ModalCustom>
 
       <ModalChooseContact

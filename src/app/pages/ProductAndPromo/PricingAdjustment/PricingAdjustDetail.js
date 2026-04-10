@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -391,7 +390,7 @@ const PricingAdjustDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin
         spinning={loadingPricingAdjust}
         className={"w-full top-20"}
@@ -522,7 +521,7 @@ const PricingAdjustDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

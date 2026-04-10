@@ -10,7 +10,7 @@ import DetailText from "../../../../../components/DetailText";
 const BillingDetail = ({
   billingCodeId,
   calculationCodeId,
-  ratingCodeId,
+  billHeaderId,
   selectedBillingData,
   onClose,
 }) => {
@@ -18,7 +18,7 @@ const BillingDetail = ({
   const detailRef = useRef(null);
 
   useEffect(() => {
-    if (billingCodeId && detailRef.current) {
+    if (billHeaderId  && detailRef.current) {
       setActiveTab("1");
 
       requestAnimationFrame(() => {
@@ -41,18 +41,19 @@ const BillingDetail = ({
         <BillingItemTab
           billingCodeId={billingCodeId}
           calculationCodeId={calculationCodeId}
+          billHeaderId={billHeaderId} 
         />
       ),
     },
     {
       key: "2",
       label: "Rating Summary",
-      children: <RatingSummaryTab ratingCodeId={ratingCodeId} />,
+      children: <RatingSummaryTab billHeaderId={billHeaderId} />,
     },
     {
       key: "3",
       label: "Adjustment",
-      children: <AdjustmentTab billingCodeId={billingCodeId} />,
+      children: <AdjustmentTab billHeaderId={billHeaderId} />,
     },
   ];
 
@@ -89,10 +90,10 @@ const BillingDetail = ({
               ? moment(selectedBillingData?.createdDate).format(
                   "DD MMM YYYY HH:mm:ss",
                 )
-              : "-"}
+              : " "}
           </DetailText>
           <DetailText label={"Created By"}>
-            {selectedBillingData?.createdBy || "-"}
+            {selectedBillingData?.createdBy || " "}
           </DetailText>
           <DetailText label={"Updated Date"}>
             {selectedBillingData?.updatedDate

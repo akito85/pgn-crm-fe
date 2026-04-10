@@ -1,15 +1,13 @@
 import {
-    LeftOutlined,
     WarningOutlined,
 } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
     createCollectingAgent,
@@ -25,9 +23,8 @@ import {
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
 import CollectingAgentForm from "./CollectingAgentForm";
-import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ContentModalConfirm from "./ContentModalConfirm";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -53,7 +50,7 @@ const ListFormCollectingAgent = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [form] = Form.useForm();
-    const formValue = form.getFieldsValue();
+    const formValue = Form.useWatch([], form) ?? {};
     const location = useLocation();
     const { id, status } = location?.state || {};
     const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -66,11 +63,11 @@ const ListFormCollectingAgent = (props) => {
     const [loadingSave, setLoadingSave] = useState(false);
     const [current, setCurrent] = useState(0);
 
-    const steps = [
+    const steps = useMemo(() => [
         { title: "CREATE", value: "Collecting Agent" },
         { title: "APPROVAL", value: "Approval" },
         { title: "ATTACHMENT", value: "Attachment" },
-    ];
+    ], []);
 
     useEffect(() => {
         if (id && type === "update") {
@@ -134,21 +131,20 @@ const ListFormCollectingAgent = (props) => {
         if (id && data_detail) {
             form.setFieldsValue({
                 id: data_detail?.collectingAgent?.id,
-                caCode: data_detail?.collectingAgent?.caCode,
+                caCode: data_detail?.collectingAgent?.caCode ?? data_detail?.collectingAgent?.code,
                 name: data_detail?.collectingAgent?.name,
-                type: data_detail?.collectingAgent?.type,
                 effStartDate:
-                    data_detail?.collectingAgent?.effStartDate === null
+                    (data_detail?.collectingAgent?.effStartDate ?? data_detail?.collectingAgent?.startDate) === null
                         ? moment()
-                        : moment(data_detail?.collectingAgent?.effStartDate).clone(),
+                        : moment(data_detail?.collectingAgent?.effStartDate ?? data_detail?.collectingAgent?.startDate).clone(),
                 effEndDate:
-                    data_detail?.collectingAgent?.effEndDate === null
+                    (data_detail?.collectingAgent?.effEndDate ?? data_detail?.collectingAgent?.endDate) === null
                         ? ""
-                        : moment(data_detail?.collectingAgent?.effEndDate).clone(),
-                apphierId: data_detail?.collectingAgent?.appHierId,
+                        : moment(data_detail?.collectingAgent?.effEndDate ?? data_detail?.collectingAgent?.endDate).clone(),
+                apphierId: data_detail?.collectingAgent?.apphierId ?? data_detail?.collectingAgent?.appHierId,
             });
 
-            setSelectedHierarchy(data_detail?.collectingAgent?.appHierId);
+            setSelectedHierarchy(data_detail?.collectingAgent?.apphierId ?? data_detail?.collectingAgent?.appHierId);
 
             setListDataAttachment(
                 (data_detail?.attachmentDtoList || []).map((attachData) => ({
@@ -158,7 +154,7 @@ const ListFormCollectingAgent = (props) => {
                 }))
             );
         }
-    }, [data_detail, id]);
+    }, [data_detail, id, form]);
 
     // Define tabData before using it in useState
     const [tabData, setTabData] = useState([
@@ -167,7 +163,6 @@ const ListFormCollectingAgent = (props) => {
             paramValue: [
                 "caCode",
                 "name",
-                "type",
                 "effStartDate",
                 "effEndDate",
             ],
@@ -181,11 +176,8 @@ const ListFormCollectingAgent = (props) => {
 
     useEffect(() => {
         setValuePage(steps[current].value);
-    }, [current]);
+    }, [current, steps]);
 
-    const onChange = (e) => {
-        // setValuePage(e.target.value);
-    };
 
     const next = () => {
         const fieldsToValidate = tabData[current]?.paramValue;
@@ -227,7 +219,6 @@ const ListFormCollectingAgent = (props) => {
         const dataValue = {
             caCode: formValue.caCode,
             name: formValue.name,
-            type: formValue.type,
             effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
             effEndDate: formValue.effEndDate
                 ? moment(formValue.effEndDate).format(dateFormatting.date)
@@ -247,6 +238,7 @@ const ListFormCollectingAgent = (props) => {
                     const sukses = data?.success;
                     if (sukses === false) {
                         setModalConfirm(false);
+                        return;
                     }
                     setModalConfirm(true);
                 });
@@ -257,6 +249,7 @@ const ListFormCollectingAgent = (props) => {
                     const sukses = data?.success;
                     if (sukses === false) {
                         setModalConfirm(false);
+                        return;
                     }
                     setModalConfirm(true);
                     setSendBody(bodyValidasiUpdate);
@@ -270,7 +263,6 @@ const ListFormCollectingAgent = (props) => {
             id: id,
             caCode: values.caCode,
             name: values.name,
-            type: values.type,
             effStartDate: values.effStartDate ? moment(values.effStartDate).format(dateFormatting.date) : null,
             effEndDate: values.effEndDate ? moment(values.effEndDate).format(dateFormatting.date) : null,
             apphierId: values.apphierId,
@@ -336,22 +328,22 @@ const ListFormCollectingAgent = (props) => {
 
     // Breadcrumbs
     const routes = [
-      {
-        path: "",
-        breadcrumbName: "System Setup",
-      },
-      {
-        path: "",
-        breadcrumbName: "Master Data",
-      },
-      {
-        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
-        breadcrumbName: "Collecting Agent",
-      },
-      {
-        path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_COLLECTING_AGENT,
-        breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
-      },
+        {
+            path: "",
+            breadcrumbName: "System Setup",
+        },
+        {
+            path: "",
+            breadcrumbName: "Master Data",
+        },
+        {
+            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
+            breadcrumbName: "Collecting Agent",
+        },
+        {
+            path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_COLLECTING_AGENT,
+            breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+        },
     ];
 
     //kirim body
@@ -373,7 +365,6 @@ const ListFormCollectingAgent = (props) => {
             dispatch(updateCollectingAgent(sendBody))
                 .unwrap()
                 .then(async () => {
-                    const id = data_detail?.collectingAgent?.id;
                     setLoadingForm(true);
                     const filterDataAttach = listDataAttachment.filter(
                         (item) => item.dataType !== "exist"
@@ -427,7 +418,6 @@ const ListFormCollectingAgent = (props) => {
                             fileCategoryId: element.fileCategoryId,
                             referensiId: id,
                             category: "COLLECTING_AGENT",
-                            fileCategoryId: element.fileCategoryId,
                         };
                         await receiptCollectionHttpService.uploadImage(
                             `/v1/dbs/api/attachment/upload/v1`,
@@ -457,7 +447,7 @@ const ListFormCollectingAgent = (props) => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading || loadingForm}>
                 <FormStepper
@@ -484,21 +474,33 @@ const ListFormCollectingAgent = (props) => {
                             display: valuePage !== tabData[1].value ? "none" : undefined,
                         }}
                     >
-                        <BaseContainer header={"APPROVAL INFORMATION"}>
+                        <CardContainer
+                            header={
+                                <div className="flex -my-4 justify-between items-center">
+                                    <p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>
+                                </div>
+                            }
+                        >
                             <ApprovalComponentGeneral
                                 dataTable={appHierDataDetail}
                                 dataOption={appHierOptions}
                                 selectedHierarchy={selectedHierarchy}
                                 updateSelectedHierarchy={setSelectedHierarchy}
                             />
-                        </BaseContainer>
+                        </CardContainer>
                     </div>
                     <div
                         style={{
                             display: valuePage !== tabData[2].value ? "none" : undefined,
                         }}
                     >
-                        <BaseContainer header={"ATTACHMENT INFORMATION"}>
+                        <CardContainer
+                            header={
+                                <div className="flex -my-4 justify-between items-center">
+                                    <p className="mt-[15px] text-primary">ATTACHMENT INFORMATION</p>
+                                </div>
+                            }
+                        >
                             <AttachmentComponent
                                 type={type}
                                 data={listDataAttachment}
@@ -510,7 +512,7 @@ const ListFormCollectingAgent = (props) => {
                                 configApplication={configApp.PAYMENT_SERVICE}
                                 typeRBI={"data"}
                             />
-                        </BaseContainer>
+                        </CardContainer>
                     </div>
                     <FormFooter
                         current={current}
@@ -571,7 +573,7 @@ const ListFormCollectingAgent = (props) => {
                     </p>
                 </div>
             </ModalConfirm>
-        </LayoutMenu>
+        </>
     );
 };
 

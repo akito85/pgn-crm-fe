@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../components/RadioTabs";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -231,7 +230,7 @@ const AdjustmentBillingDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -297,7 +296,7 @@ const AdjustmentBillingDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

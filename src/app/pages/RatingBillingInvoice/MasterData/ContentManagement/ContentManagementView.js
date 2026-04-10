@@ -4,7 +4,6 @@ import { Checkbox, Spin, Tooltip, Dropdown, Menu } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -390,22 +389,27 @@ const ContentManagementView = () => {
         searchText,
         handleSearch
       ),
-      // ✅ Definisikan manual action column dengan Dropdown Menu
+      // ✅ Definisikan manual action column dengan Detail icon + Dropdown Menu
       {
         title: "ACTION",
         key: "action",
         dataIndex: "action",
         fixed: "right",
-        width: 80,
+        width: 100,
         align: "center",
         render: (_, record) => {
-          // Filter hanya action dengan type "table"
-          const tableActions = itemGrantAccess.filter(
-            (item) => item.type === "table"
+          // Filter action table selain "View" untuk dropdown
+          const dropdownActions = itemGrantAccess.filter(
+            (item) => item.type === "table" && item.action !== "View"
+          );
+
+          // Ambil action "View" untuk icon detail
+          const viewAction = itemGrantAccess.find(
+            (item) => item.type === "table" && item.action === "View"
           );
 
           // Buat menu items untuk dropdown
-          const menuItems = tableActions.map((item, idx) => ({
+          const menuItems = dropdownActions.map((item, idx) => ({
             key: idx,
             label: item.render(record, 5),
           }));
@@ -413,19 +417,22 @@ const ContentManagementView = () => {
           const menu = <Menu items={menuItems} />;
 
           return (
-            <Dropdown
-              overlay={menu}
-              trigger={["click"]}
-              placement="bottomRight"
-            >
-              <MoreOutlined
-                style={{
-                  fontSize: "20px",
-                  cursor: "pointer",
-                  color: "#0075bf",
-                }}
-              />
-            </Dropdown>
+            <div className="flex items-center justify-center gap-2">
+              <Dropdown
+                overlay={menu}
+                trigger={["click"]}
+                placement="bottomRight"
+              >
+                <MoreOutlined
+                  style={{
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    color: "#0075bf",
+                  }}
+                />
+              </Dropdown>
+              {viewAction && viewAction.render(record)}
+            </div>
           );
         },
       },
@@ -483,7 +490,7 @@ const ContentManagementView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -559,7 +566,7 @@ const ContentManagementView = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

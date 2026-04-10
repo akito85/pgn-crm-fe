@@ -3,26 +3,25 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import moment from 'moment'
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import DetailText from "../../../../../../../components/DetailText";
-import RadioTabs from "../../../../../../../components/RadioTabs";
 import ServiceAgreementDetailCompoment from "./ServiceAgreementDetailCompoment";
 import Warranty from "./Warranty";
 import TosSubmission from "./TosSubmission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import HeaderDetail from "../../../HeaderDetail";
 import { approveOrRejectInactiveServiceAgreement, approveOrRejectServiceAgreement, getDetailServiceAgreement, getDetailServiceAgreementDraft } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import { Spin, Form } from "antd";
-// import ModalApproveOrRejectSa from "./Modal/ModalApproveOrRejectSa";
 import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
 import ModalErrorApproveOrRejectServiceAgreement from "./Modal/ModalErrorApproveOrRejectServiceAgreement";
-import BaseContainer from "../../../../../../../components/BaseContainer";
-import { dateFormatting, hasValue } from "../../../../../../../utils";
-import DraftComponent from "./ServiceAgreementDetailCompoment/DraftComponent";
+import { dateFormatting } from "../../../../../../../utils";
 import { usePrevLocContext } from "../../../../../../../utils/usePrevLoc";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import Attachment from "./Attachment";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import ServiceAgreementHistoryLogInformation from "../shared/HistoryLogInformation";
 
 const DetailServiceAgreement = () => {
   const { path } = usePrevLocContext();
@@ -38,29 +37,15 @@ const DetailServiceAgreement = () => {
   const idAccount = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
   const type = location?.state?.type;
-  const statusSa = data_detail?.saInfo?.status
+  const statusSa = data_detail?.saInfo?.status;
 
-  const optionTab = [
-    { value: "Service Agreement Detail" },
-    // { value: "Attachment" },
-    { value: "Warranty", disabled: true },
-    { value: "TOS Submission", disabled: statusSa !== "ACTIVE" ? true : false },
-  ];
-  const [typeServiceAgreementSec, setTypeServiceAgreementSec] = useState(
-    optionTab[0].value
-  );
-  // Tab Sa Origin/Draft
-  const [valuePage, setValuePage] = useState("Service Agreement Information");
-  const [tabPagesSaDetail, setTabPagesSaDetail] = useState([
-    { value: "Service Agreement Information" },
-    { value: "Draft" },
-  ]);
+  // Single active tab key for all 4 tabs
+  const [activeTab, setActiveTab] = useState("saInformation");
 
   // Modal Approve Or Reject SA
   const [modalError, setModalError] = useState(false);
   const [modalApproveOrReject, setModalApproveOrReject] = useState('')
   const [approveOrReject, setApproveOrReject] = useState('')
-  const [remark, setRemark] = useState('')
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
     tappId: null,
@@ -69,12 +54,6 @@ const DetailServiceAgreement = () => {
   });
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
-
-
-
-  const handleChangeOption = (e) => {
-    setTypeServiceAgreementSec(e.target.value);
-  };
 
   const routes = (item) => {
     return [
@@ -100,44 +79,6 @@ const DetailServiceAgreement = () => {
     ]
   }
 
-  const dataTabs = {
-    serviceAgreementDetail: "Service Agreement Detail",
-    // attachement: "Attachment",
-    // warranty: "Warranty",
-    tosSubmission: "TOS Submission",
-  };
-  const renderSection = () => {
-    switch (typeServiceAgreementSec) {
-      case dataTabs.serviceAgreementDetail:
-        return (
-          <ServiceAgreementDetailCompoment
-            data={data_detail}
-            dataDraft={data_detail_draft}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
-            type={type}
-            idSA={idSA}
-          />
-        );
-      case dataTabs.warranty:
-        return <Warranty />;
-      case dataTabs.tosSubmission:
-        return (
-          <TosSubmission
-            idSA={idSA}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
-            type={type}
-            dataDetailSA={data_detail}
-          />
-        );
-      // case dataTabs.attachement:
-      //   return <Attachment/>;
-      default:
-        return <></>;
-    }
-  };
-
   useEffect(() => {
     if (
       path && (
@@ -146,11 +87,19 @@ const DetailServiceAgreement = () => {
         path.pathname.includes("/account-management/account-standard/service-agreement/tos/update")
       )
     ) {
-      setTypeServiceAgreementSec(dataTabs.tosSubmission);
+      setActiveTab("tosSubmission");
+    } else if (
+      path && (
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/create") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/view") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/update")
+      )
+    ) {
+      setActiveTab("warranty");
     } else {
-      setTypeServiceAgreementSec(dataTabs.serviceAgreementDetail);
+      setActiveTab("saInformation");
     }
-  }, [dataTabs.serviceAgreementDetail, dataTabs.tosSubmission, path])
+  }, [path])
 
   useEffect(() => {
     dispatch(getDetailServiceAgreement(idSA))
@@ -179,18 +128,6 @@ const DetailServiceAgreement = () => {
   }, [dispatch, idSA]);
 
 
-  useEffect(() => {
-    if (hasValue(data_detail_draft) === false) {
-      setTabPagesSaDetail((prevState) => prevState?.filter(item => item?.value !== 'Draft'))
-    } else {
-      setTabPagesSaDetail([
-        { value: "Service Agreement Information" },
-        { value: "Draft" },
-      ])
-    }
-  }, [data_detail_draft]);
-
-
   // handle confirm
   const handleConfirm = (formValue, handleClear) => {
     setModalApproveOrReject(false);
@@ -203,7 +140,6 @@ const DetailServiceAgreement = () => {
       title: `Successful`,
       description: `Your data has been rejected.`,
       width: 700,
-      // alertDescription: `Warning! if you reject this data, you will need to request approval again.`,
     };
     const data = {
       saId: idSA,
@@ -252,178 +188,256 @@ const DetailServiceAgreement = () => {
   }
   const handleCancel = () => {
     setModalApproveOrReject(false);
-    // form.resetFields();
   };
 
 
-  function convertToNormalcase(inputText) {
-    return inputText.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  }
+  // SA Information content
+  const renderSaInformation = () => (
+    <div className="flex flex-col gap-y-4">
+      <NxBaseContainer border={true} header={"SERVICE AGREEMENT INFORMATION"}>
+        <div className="flex flex-col gap-y-4">
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Service Type"}>{data_detail?.saInfo?.saServiceType}</NxDetailText>
+            {
+              data_detail?.saInfo?.saReferenceNumber && (
+                <NxDetailText label={"Service Agreement Reference Number"}>{data_detail?.saInfo?.saReferenceNumber}</NxDetailText>
+              )
+            }
+          </div>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Service Agreement Number"} className={"break-all whitespace-normal"}>{data_detail?.saInfo?.saNumber}</NxDetailText>
+            <NxDetailText label={"Service Agreement Type"}>{data_detail?.saInfo?.saType}</NxDetailText>
+            <NxDetailText label={"PJBG Type"}>{data_detail?.saInfo?.pjbgType}</NxDetailText>
 
-
-
-  // Handle Change Radio Tabs
-  const onChangeTabInfo = (e) => {
-    setValuePage(e.target.value);
-  };
-  return (
-    <div>
-      <LayoutMenu>
-        <Spin spinning={loading}>
-          <BreadCrumbAdvanced routes={routes(location?.state)} />
-          <HeaderDetail
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
-            type={type}
-          />
-
-          {/* Card Requested Information */}
-          {data_detail?.approvalDetail !== null && data_detail?.isApprover === true && (
-            <BaseContainer
-              header={
-                data_detail?.approvalDetail.type == 'inactive' ?
-                  'INACTIVE REQUEST INFORMATION' :
-                  data_detail?.approvalDetail.type == 'create' ?
-                    'CREATE REQUEST INFORMATION' :
-                    'UPDATE REQUEST INFORMATION'
-              }>
-              <div className="w-full grid grid-cols-4 gap-3">
-                <DetailText label={"Requested Date"}>{data_detail?.approvalDetail?.requestedDate ? moment(data_detail?.approvalDetail?.requestedDate).format(dateFormatting.dateTime) : ''}</DetailText>
-                <DetailText label={"Requested By"}>{data_detail?.approvalDetail?.requestedBy}</DetailText>
-                {data_detail?.approvalDetail.type == 'inactive' && (
-                  <DetailText label={"Remarks"}>{data_detail?.approvalDetail?.remarks}</DetailText>
-                )}
-              </div>
-            </BaseContainer>
+          </div>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Service Agreement Date"}>{data_detail?.saInfo?.saDate ? moment(data_detail?.saInfo?.saDate).format(dateFormatting.date) : ''}</NxDetailText>
+            <NxDetailText label={"Start Date"}>{data_detail?.saInfo?.startDate ? moment(data_detail?.saInfo?.startDate).format(dateFormatting.date) : ''}</NxDetailText>
+            <NxDetailText label={"End Date"}>{data_detail?.saInfo?.endDate ? moment(data_detail?.saInfo?.endDate).format(dateFormatting.date) : ''}</NxDetailText>
+          </div>
+          {data_detail?.saInfo?.isMain === "Y" && (
+            <div className="w-full grid grid-cols-3 gap-4">
+              <NxDetailText label={"Already Gas In"}>{data_detail?.saInfo?.alreadyGasIn ? 'Yes' : 'No'}</NxDetailText>
+              <NxDetailText label={"Gas In Plan Date"}>{data_detail?.saInfo?.gasInPlanDate ? moment(data_detail?.saInfo?.gasInPlanDate).format(dateFormatting.date) : '-'}</NxDetailText>
+              <NxDetailText label={"Commitment Date"}>{data_detail?.saInfo?.comitmentDate ? moment(data_detail?.saInfo?.comitmentDate).format(dateFormatting.date) : '-'}</NxDetailText>
+            </div>
           )}
 
-          <BaseContainer type={"tabs"} element={<RadioTabs data={tabPagesSaDetail} onChange={onChangeTabInfo} />}>
-            {/* SA INFO ORIGIN */}
-            <div className={`${valuePage !== "Service Agreement Information" ? "hidden" : ""}`}>
-              {/* {data_detail?.saInfo?.saReferenceNumber !== null &&
-                <div>
-                  <div className="py-4 text-primary text-xs font-bold uppercase">
-                    SERVICE AGREEMENT REFERENCE NUMBER
-                  </div>
-                  <div className="w-full grid grid-cols-2 gap-4">
-                    <DetailText label={"Service Agreement Reference Number"} className={"break-all whitespace-normal"}>{data_detail?.saInfo?.saReferenceNumber}</DetailText>
-                  </div>
-                </div>
-              }  */}
-              <div>
-                <div className="py-4 text-primary text-xs font-bold uppercase">
-                  SERVICE AGREEMENT INFORMATION
-                </div>
-                <div className="w-full grid grid-cols-4 gap-4">
-                  <DetailText label={"Service Agreement Number"} className={"break-all whitespace-normal"}>{data_detail?.saInfo?.saNumber}</DetailText>
-                  <DetailText label={"Service Agreement Reference Number"}>{data_detail?.saInfo?.saReferenceNumber}</DetailText>
-                  <DetailText label={"Service Agreement Type"}>{data_detail?.saInfo?.saType}</DetailText>
-                  <DetailText label={"PJBG Type"}>{data_detail?.saInfo?.pjbgType}</DetailText>
-                  <DetailText label={"Service Agreement Date"}>{data_detail?.saInfo?.saDate ? moment(data_detail?.saInfo?.saDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Start Date"}>{data_detail?.saInfo?.startDate ? moment(data_detail?.saInfo?.startDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"End Date"}>{data_detail?.saInfo?.endDate ? moment(data_detail?.saInfo?.endDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Commitment Date"}>{data_detail?.saInfo?.comitmentDate ? moment(data_detail?.saInfo?.comitmentDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Status"}>{data_detail?.saInfo?.status && convertToNormalcase(data_detail?.saInfo?.status)}</DetailText>
-                  <DetailText label={"Status Approval"}>{data_detail?.saHistory?.approvalStatus && convertToNormalcase(data_detail?.saHistory?.approvalStatus)}</DetailText>
-                  <div className="col-span-4">
-                    <DetailText label={"Description"}>{data_detail?.saInfo?.description}</DetailText>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="py-4 text-primary text-xs font-bold uppercase">
-                  BILING & PAYMENT INFORMATION
-                </div>
-                <div className="w-full grid grid-cols-4 gap-4">
-                  <DetailText label={"Billing Cycle"}>{data_detail?.saInfo?.billingCycle}</DetailText>
-                  <DetailText label={"Term of Payment"}>{data_detail?.saInfo?.termsOfPaymentName}</DetailText>
-                  <DetailText label={"Invoce Template"}>{data_detail?.saInfo?.invoiceTemplate}</DetailText>
-                </div>
-              </div>
-              <div>
-                <div className="py-4 text-primary text-xs font-bold uppercase">
-                  GAS INFORMATION
-                </div>
-                <div className="w-full grid grid-cols-4 gap-4">
-                  <DetailText label={"Gas In Plan Date"}>{data_detail?.saInfo?.gasInPlanDate ? moment(data_detail?.saInfo?.gasInPlanDate).format(dateFormatting.date) : ''}</DetailText>
-                  <DetailText label={"Already Gas In"}>{data_detail?.saInfo?.alreadyGasIn ? 'Yes' : 'No'}</DetailText>
-                </div>
-              </div>
+          {/* <div className="w-full grid grid-cols-3 gap-4">
+            <DetailText label={"Status"}>{data_detail?.saInfo?.status && convertToNormalcase(data_detail?.saInfo?.status)}</DetailText>
+            <DetailText label={"Status Approval"}>{data_detail?.saHistory?.approvalStatus && convertToNormalcase(data_detail?.saHistory?.approvalStatus)}</DetailText>
+          </div> */}
+
+          <div className="w-full grid grid-cols-1 gap-4">
+            <NxDetailText label={"Description"}>{data_detail?.saInfo?.description}</NxDetailText>
             </div>
+        </div>
+      </NxBaseContainer>
+      <NxBaseContainer border={true} header={"BILING & PAYMENT INFORMATION"}>
+        <div className="w-full grid grid-cols-3 gap-4">
+          <NxDetailText label={"Billing Cycle"}>{data_detail?.saInfo?.billingCycle}</NxDetailText>
+          <NxDetailText label={"Term of Payment"}>{data_detail?.saInfo?.termsOfPaymentName}</NxDetailText>
+          <NxDetailText label={"Invoce Template"}>{data_detail?.saInfo?.invoiceTemplate}</NxDetailText>
+        </div>
+      </NxBaseContainer>
 
-            {/* SA INFO DRAFT */}
-            {data_detail_draft && (
-              <div className={`${valuePage !== "Draft" ? "hidden" : ""}`}>
-                <DraftComponent dataDetailDraft={data_detail_draft} />
-              </div>
-            )}
-          </BaseContainer>
+      {/* Draft Section — kept as-is, shown below SA info when draft data exists */}
+      {/* {data_detail_draft && (
+        <div>
+          <DraftComponent dataDetailDraft={data_detail_draft} />
+        </div>
+      )} */}
+    </div>
+  );
 
-          {/* Tabs  */}
-          <div className="pt-8 pb-1">
-            <RadioTabs
-              currentPosition={typeServiceAgreementSec}
-              data={optionTab}
-              onChange={handleChangeOption}
+  const dataAttachment = (data_detail?.attachment || []).map(
+    (item) => {
+      return {
+        id: item.id,
+        size: item.size,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        fileType: item.type,
+        category: item.fileCategoryName,
+        categoryName: item.categoryName,
+        pathFile: item.pathFile,
+        urlFile1: item.urlFile1,
+        urlFile2: item.urlFile2,
+        uploadBy: item.createdBy,
+        uploadDate: item.createdDate
+          ? moment(item.createdDate).format("DD MMM YYYY HH:mm:ss")
+          : "",
+        dataType: "exist",
+      };
+    }
+  );
+
+  const tabItems = [
+    {
+      key: "saInformation",
+      label: "Service Agreement Information",
+      children: renderSaInformation(),
+    },
+    {
+      key: "saDetail",
+      label: "Service Agreement Detail",
+      children: (
+        <ServiceAgreementDetailCompoment
+          data={data_detail}
+          dataDraft={data_detail_draft}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={type}
+          idSA={idSA}
+        />
+      ),
+    },
+    {
+      key: "warranty",
+      label: "Warranty",
+      disabled: statusSa !== "ACTIVE",
+      children: (
+        <Warranty
+          idSA={idSA}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={type}
+          dataDetailSA={data_detail}
+        />
+      ),
+    },
+    {
+      key: "tosSubmission",
+      label: "TOS Submission",
+      disabled: statusSa !== "ACTIVE",
+      children: (
+        <TosSubmission
+          idSA={idSA}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={type}
+          dataDetailSA={data_detail}
+        />
+      ),
+    },
+    {
+      key: "historyUpdate",
+      label: "History Update",
+      children: (
+        <>
+        </>
+      ),
+    },
+    {
+      key: "attachment",
+      label: "Attachment",
+      children: (
+        <>
+          <NxBaseContainer border={true}>
+            <Attachment
+              dataSource={dataAttachment}
             />
-          </div>
-          {renderSection()}
-          <div className="my-5 flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            {showButtonApproval ? (
-              <div className={"w-full flex justify-end gap-5"}>
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => {
-                    setModalApproveOrReject(true);
-                    setApproveOrReject("Reject");
-                  }}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => {
-                    setModalApproveOrReject(true);
-                    setApproveOrReject("Approve");
-                  }}
-                >
-                  Approve
-                </ButtonComponent>
-              </div>
-            ) : null}
+          </NxBaseContainer>
+        </>
+      ),
+    }
+  ];
 
+  return (
+    <>
+      <div>
+        <Spin spinning={loading}>
+          <div className="flex flex-col gap-y-4">
+            {/* <BreadCrumbAdvanced routes={routes(location?.state)} /> */}
+            <NxBreadCrumb routes={routes(location?.state)} />
+            <HeaderDetail
+              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+              dispatch={dispatch}
+              idAccount={idAccount}
+              idCustomer={idCustomer}
+              type={type}
+            />
+
+            {/* Card Requested Information */}
+            {data_detail?.approvalDetail !== null && data_detail?.isApprover === true && (
+              <NxCardContainer
+                header={
+                  data_detail?.approvalDetail.type === 'inactive' ?
+                    'INACTIVE REQUEST INFORMATION' :
+                    data_detail?.approvalDetail.type === 'create' ?
+                      'CREATE REQUEST INFORMATION' :
+                      'UPDATE REQUEST INFORMATION'
+                }
+              >
+                <div className="w-full grid grid-cols-4 gap-3">
+                  <NxDetailText label={"Requested Date"}>{data_detail?.approvalDetail?.requestedDate ? moment(data_detail?.approvalDetail?.requestedDate).format(dateFormatting.dateTime) : ''}</NxDetailText>
+                  <NxDetailText label={"Requested By"}>{data_detail?.approvalDetail?.requestedBy}</NxDetailText>
+                  {data_detail?.approvalDetail.type === 'inactive' && (
+                    <NxDetailText label={"Remarks"}>{data_detail?.approvalDetail?.remarks}</NxDetailText>
+                  )}
+                </div>
+              </NxCardContainer>
+            )}
+
+            {/* Single unified card with NxTabs */}
+            <NxCardContainer header={"DETAIL INFORMATION"} withoutPadding>
+              <NxTabs
+                activeKey={activeTab}
+                onChange={(key) => setActiveTab(key)}
+                items={tabItems}
+              />
+            </NxCardContainer>
+
+            <ServiceAgreementHistoryLogInformation
+              showRecordId
+              historyData={{
+                recordId: data_detail?.saHistory?.saId,
+                createdDate: data_detail?.saHistory?.createdDate
+                  ? moment(data_detail?.saHistory?.createdDate).format(dateFormatting.dateTime)
+                  : "",
+                createdBy: data_detail?.saHistory?.createdBy,
+                updatedDate: data_detail?.saHistory?.updateDate
+                  ? moment(data_detail?.saHistory?.updateDate).format(dateFormatting.dateTime)
+                  : "",
+                updatedBy: data_detail?.saHistory?.updatedBy,
+              }}
+            />
+
+            <NxBaseContainer border>
+              <ButtonComponent
+                type={"menu"}
+                className="!w-fit"
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </ButtonComponent>
+              {showButtonApproval ? (
+                <div className={"w-full flex justify-end gap-5"}>
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => {
+                      setModalApproveOrReject(true);
+                      setApproveOrReject("Reject");
+                    }}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => {
+                      setModalApproveOrReject(true);
+                      setApproveOrReject("Approve");
+                    }}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
+              ) : null}
+            </NxBaseContainer>
           </div>
         </Spin>
 
-        {/* ModalCOnfirmation Approve Or Reject SA */}
-        {/* <ModalApproveOrRejectSa
-          isOpen={modalApproveOrReject}
-          header={approveOrReject}
-          approveOrReject={approveOrReject}
-          handleCancel={() => handleCancel()}
-          handleCancelFooter={() => handleCancel()}
-          handleConfirmFooter={handleConfirm}
-          remark={remark}
-          onChange={(e) => setRemark(e.target.value)}
-          form={form}
-        /> */}
+        {/* ModalConfirmation Approve Or Reject SA */}
         <ModalApproveOrReject
           isOpen={modalApproveOrReject}
           handleCloseModal={handleCancel}
@@ -445,8 +459,8 @@ const DetailServiceAgreement = () => {
           approveOrReject={approveOrReject}
           message={message}
         />
-      </LayoutMenu>
-    </div>
+      </div>
+    </>
   );
 };
 

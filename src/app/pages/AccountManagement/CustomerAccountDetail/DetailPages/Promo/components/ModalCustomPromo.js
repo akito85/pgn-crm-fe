@@ -11,9 +11,16 @@ const ModalCustomPromo = ({
   title = "Modal Title",
   maxHeight = "80vh",
 }) => {
+  const renderHeader = () => {
+    if (typeof title === 'string') {
+      return title.toLocaleUpperCase();
+    }
+   return title;
+  };
+
   return (
     <ModalCustom
-      header={title.toLocaleUpperCase()}
+      header={renderHeader()} // Gunakan fungsi renderHeader
       isOpen={isOpen}
       handleCancel={onCancel}
       footer={footer}

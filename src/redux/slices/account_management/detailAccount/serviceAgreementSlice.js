@@ -9,6 +9,7 @@ const initialState = {
   data_detail_draft: {},
   data_service_type: [],
   data_sa_type: [],
+  data_sa_child_type: [],
   data_pjbg: [],
   data_product: [],
   data_product_detail: {},
@@ -40,14 +41,14 @@ const initialState = {
 // Get list pagination SA
 export const getListServiceAgreement = createAsyncThunk(
   "GET_LIST_SERVICE_AGREEMENT",
-  async ({ search, id, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, id, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/sa/view/${id}?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await accountManagementService.getDetail(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -352,6 +353,20 @@ export const getSaType = createAsyncThunk(
     }
   }
 );
+// Get Service Agreement Child Type
+export const getSaChildType = createAsyncThunk(
+  "GET_SERVICE_AGREEMENT_CHILD_TYPE",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/sa/ddl/saChildType`;
+      const response = await accountManagementService.getAll(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Get Service Agreement Type
 export const getPjbg = createAsyncThunk("GET_PJBG_TYPE", async (thunkAPI) => {
   try {
@@ -692,13 +707,22 @@ const accountServiceAgreementSlice = createSlice({
       state.isFailed = false;
       state.isSuccess = false;
       state.loading = true;
-      state.data = action.payload;
+      // Don't reset state.data here - it clears accumulated data for infinite scroll
     },
     [getListServiceAgreement.fulfilled]: (state, action) => {
       state.isFailed = false;
       state.isSuccess = false;
-      state.data = action.payload;
       state.loading = false;
+
+      // Handle infinite scroll - append data when isLoadMore is true
+      if (action.payload?.isLoadMore && state.data?.result) {
+        state.data = {
+          ...action.payload,
+          result: [...state.data.result, ...(action.payload.result || [])],
+        };
+      } else {
+        state.data = action.payload;
+      }
     },
     [getListServiceAgreement.rejected]: (state, action) => {
       state.data = action.payload;
@@ -866,6 +890,24 @@ const accountServiceAgreementSlice = createSlice({
     },
     [getSaType.rejected]: (state, action) => {
       state.data_sa_type = action.payload;
+      state.loading = false;
+    },
+
+    // Service Agreement Child Type
+    [getSaChildType.pending]: (state, action) => {
+      state.isFailed = false;
+      state.isSuccess = false;
+      state.loading = true;
+      state.data_sa_child_type = action.payload;
+    },
+    [getSaChildType.fulfilled]: (state, action) => {
+      state.isFailed = false;
+      state.isSuccess = false;
+      state.data_sa_child_type = action.payload;
+      state.loading = false;
+    },
+    [getSaChildType.rejected]: (state, action) => {
+      state.data_sa_child_type = action.payload;
       state.loading = false;
     },
 

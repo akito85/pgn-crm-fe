@@ -1,151 +1,150 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import BaseContainer from "../../../../../../components/BaseContainer";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { useNavigate } from "react-router-dom";
-import ServiceRequestTable from "./ServiceRequestTable";
+import { useLocation } from "react-router-dom";
 import { Spin } from "antd";
-import { FilterOutlined, DownloadOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons"
-import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequest"
+import ServiceRequestTable from "./ServiceRequestTable";
+import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
+import { getFilteredServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import NotFound from "../../../../../NotFound";
 
 const ServiceRequest = ({ idAccount, idCustomer, type }) => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { serviceRequests, loading, errors } = useSelector(state => state.serviceRequest);
+  const location = useLocation();
+  const searchInput = useRef(null);
 
-  console.log(idAccount, idCustomer, type)
+  const { serviceRequests, pagination, loadingList } = useSelector(
+    (state) => state.serviceRequest
+  );
+  const { access_account } = useSelector((state) => state.accountManagement);
 
-  useEffect(() => {
-    // Fetch service requests when component mounts
-    dispatch(getFilteredServiceRequests({
-      page: 1,
-      pageSize: 10,
-      // sort: "createdDate~desc",
-      search: '',
-      filters: { accountId: idCustomer, isDeleted: "N" }
+  // Access check state
+  const [isAccessChecked, setIsAccessChecked] = useState(false);
+
+  // Table states
+  const [page, setPage] = useState(1);
+  const [loadMoreSize] = useState(20);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+
+  const currentData = useMemo(() => {
+    if (!Array.isArray(serviceRequests)) return [];
+    return serviceRequests.map((item, index) => ({
+      ...item,
+      key: `${item.id ?? "sr"}-${index}`,
     }));
-  }, [dispatch]);
+  }, [serviceRequests]);
 
-  // if (loading.serviceRequests) {
-  //   return <div>Loading service requests...</div>;
-  // }
+  const hasMore = currentData.length < (pagination?.totalElements || 0);
+
+  const isAccessGranted = access_account?.isGranted === true;
+
+  // Check granted access when component mounts
+  useEffect(() => {
+    setIsAccessChecked(false);
+    const path = location?.pathname.includes("account-standard")
+      ? "/account-management/account-standard/service-request"
+      : "/account-management/account-onetime/service-request";
+
+    dispatch(getGrantedAccessAccount(path))
+      .unwrap()
+      .then(() => setIsAccessChecked(true))
+      .catch(() => setIsAccessChecked(true));
+  }, [dispatch, location?.pathname]);
+
+  // Fetch data when filters change
+  useEffect(() => {
+    if (isAccessGranted) {
+      dispatch(
+        getFilteredServiceRequests({
+          idAccount,
+          body: { page: 1, size: loadMoreSize, sort, searchs: search },
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
+  }, [sort, search, isAccessGranted]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
+  const handleDownload = () => {
+    // TODO: Implement download functionality
+    console.log("Download service requests");
+  };
+
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPages = pagination?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      await dispatch(
+        getFilteredServiceRequests({
+          idAccount,
+          body: { page: nextPage, size: loadMoreSize, sort, searchs: search },
+          isLoadMore: true,
+        })
+      );
+      setPage(nextPage);
+    }
+  };
 
   return (
     <Fragment>
-      {/*
-      <Spin spinning={loading.serviceRequests} className={"w-full top-20"} tip={"Loading..."}>
-      */}
-      <BaseContainer header={"SERVICE REQUEST LIST"}>
-        <div className="flex justify-between items-center gap-5 mb-5">
-          {/* Filter Button - Left side */}
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <FilterOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 20,
-                }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              width: "128px",
-              height: "48px",
-              borderRadius: "5px"
-            }}
-          >
-            Filters
-          </ButtonComponent>
-          
-          {/* Right side buttons container */}
-          <div className="flex justify-end items-center gap-2.5">
-            {/* Download List Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {}}
-              icon={
-                <DownloadOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Download List
-            </ButtonComponent>
-
-            {/* Approval Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {}}
-              icon={
-                <CheckOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Approval
-            </ButtonComponent>
-
-            {/* Create Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate("/account-management/account-standard/service-requests/create", {
-                state: { idAccount, idCustomer, type }
-              })}
-              icon={
-                <PlusOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Create
-            </ButtonComponent>
-          </div>
+      {!isAccessChecked ? (
+        <div className="w-full flex justify-center py-10">
+          <Spin tip="Checking access..." />
         </div>
-        <div className={"w-full"}>
-          <ServiceRequestTable />
-        </div>
-      </BaseContainer>
-      {/* 
-      </Spin>
-      */}
+      ) : !isAccessGranted ? (
+        <NotFound type={"unauthorized"} />
+      ) : (
+        <NxCardContainer header={"SERVICE REQUEST"}>
+          <NxBaseContainer border>
+            <ServiceRequestTable
+              data={currentData}
+              idAccount={idAccount}
+              idCustomer={idCustomer}
+              totalElement={pagination?.totalElements || 0}
+              page={page}
+              onSort={onSort}
+              handleApproval={setShowApprovalModal}
+              handleDownload={handleDownload}
+              handleLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              searchText={searchText}
+              search={search}
+              searchedColumn={searchedColumn}
+              searchInput={searchInput}
+              handleSearch={handleSearch}
+              loading={loadingList}
+            />
+          </NxBaseContainer>
+        </NxCardContainer>
+      )}
     </Fragment>
   );
 };

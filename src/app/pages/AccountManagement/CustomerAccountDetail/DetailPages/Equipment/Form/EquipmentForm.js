@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Checkbox, Form, Input } from "antd";
 
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SelectComponent from "../../../../../../../components/SelectComponent";
 import { hasValue, requiredMessage } from "../../../../../../../utils";
@@ -20,7 +19,9 @@ import InputComponent from "../../../../../../../components/InputComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
-import DetailText from "../../../../../../../components/DetailText";
+import NxModal from "../../../../../../../components/Nx/NxModal";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 
 const EquipmentForm = ({
   type,
@@ -187,8 +188,8 @@ const EquipmentForm = ({
   return (
     <>
       {/* Modal Form */}
-      <ModalCustom
-        header={`${type === "create" ? "CREATE" : "UPDATE"} EQUIPMENT`}
+      <NxModal
+        title={`${type === "create" ? "CREATE" : "UPDATE"} EQUIPMENT`}
         isOpen={isOpen}
         type={"confirmation"}
         handleCancel={() => {
@@ -224,291 +225,291 @@ const EquipmentForm = ({
           </div>
         }
       >
-        <Form
-          id={"formCreate"}
-          layout="vertical"
-          form={form}
-          onFinish={onFinishCreate}
-        >
-          <div className="text-primary text-xs font-semibold uppercase pb-[30px]">
-            EQUIPMENT INFORMATION
-          </div>
-
-          <div className={"grid grid-cols-3 w-full gap-x-6"}>
-            <Form.Item
-              name={"name"}
-              label={"Name"}
-              rules={[
-                {
-                  message: requiredMessage("Name"),
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent options={ddlNameEquipment} />
-            </Form.Item>
-            <Form.Item
-              name={"typeEquipment"}
-              label={"Type"}
-              rules={[
-                {
-                  message: requiredMessage("Type"),
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent options={ddlTypeEquipment} />
-            </Form.Item>
-            <Form.Item
-              name={"brand"}
-              label={"Brand"}
-              rules={[
-                {
-                  message: requiredMessage("Brand"),
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent options={ddlBrandEquipment} />
-            </Form.Item>
-
-            {/* Quantity Group */}
-            <Form.Item label="Quantity" required>
-              <Input.Group compact>
+        <div className="p-4">
+          <Form
+            id={"formCreate"}
+            layout="vertical"
+            form={form}
+            onFinish={onFinishCreate}
+          >
+            <NxBaseContainer border header={"EQUIPMENT INFORMATION"}>
+              <div className={"grid grid-cols-3 w-full gap-x-6"}>
                 <Form.Item
-                  name={["quantity", "value"]}
-                  noStyle
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
+                  name={"name"}
+                  label={"Name"}
                   rules={[
                     {
+                      message: requiredMessage("Name"),
                       required: true,
-                      message: requiredMessage("Quantity Value"),
                     },
                   ]}
                 >
-                  <InputComponent
-                    decimalScale={2}
-                    thousandSeparator={","}
-                    decimalSeparator={"."}
-                    type="numeric"
+                  <SelectComponent options={ddlNameEquipment} />
+                </Form.Item>
+                <Form.Item
+                  name={"typeEquipment"}
+                  label={"Type"}
+                  rules={[
+                    {
+                      message: requiredMessage("Type"),
+                      required: true,
+                    },
+                  ]}
+                >
+                  <SelectComponent options={ddlTypeEquipment} />
+                </Form.Item>
+                <Form.Item
+                  name={"brand"}
+                  label={"Brand"}
+                  rules={[
+                    {
+                      message: requiredMessage("Brand"),
+                      required: true,
+                    },
+                  ]}
+                >
+                  <SelectComponent options={ddlBrandEquipment} />
+                </Form.Item>
+
+                {/* Quantity Group */}
+                <Form.Item label="Quantity" required>
+                  <Input.Group compact>
+                    <Form.Item
+                      name={["quantity", "value"]}
+                      noStyle
+                      getValueFromEvent={(e) => {
+                        return e.floatValue;
+                      }}
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Quantity Value"),
+                        },
+                      ]}
+                    >
+                      <InputComponent
+                        decimalScale={2}
+                        thousandSeparator={","}
+                        decimalSeparator={"."}
+                        type="numeric"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name={["quantity", "id"]}
+                      noStyle
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Quantity Type"),
+                        },
+                      ]}
+                    >
+                      <SelectComponent width={80} options={ddlQtyEquipment} />
+                    </Form.Item>
+                  </Input.Group>
+                </Form.Item>
+
+                {/* Capacity Group */}
+                <Form.Item label="Capacity" required>
+                  <Input.Group compact>
+                    <Form.Item
+                      name={["capacity", "value"]}
+                      noStyle
+                      getValueFromEvent={(e) => {
+                        return e.floatValue;
+                      }}
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Capacity Value"),
+                        },
+                      ]}
+                    >
+                      <InputComponent
+                        decimalScale={2}
+                        thousandSeparator={","}
+                        decimalSeparator={"."}
+                        type="numeric"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name={["capacity", "id"]}
+                      noStyle
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Capacity Unit"),
+                        },
+                      ]}
+                    >
+                      <SelectComponent width={80} options={ddlCapacityEquipment} />
+                    </Form.Item>
+                  </Input.Group>
+                </Form.Item>
+
+                {/* Energy Group */}
+                <Form.Item label="Energy" required>
+                  <Input.Group compact>
+                    <Form.Item
+                      name={["energy", "value"]}
+                      noStyle
+                      getValueFromEvent={(e) => {
+                        return e.floatValue;
+                      }}
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Energy Value"),
+                        },
+                      ]}
+                    >
+                      <InputComponent
+                        decimalScale={2}
+                        thousandSeparator={","}
+                        decimalSeparator={"."}
+                        type="numeric"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name={["energy", "id"]}
+                      noStyle
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Energy Unit"),
+                        },
+                      ]}
+                    >
+                      <SelectComponent width={80} options={ddlEnergyEquipment} />
+                    </Form.Item>
+                  </Input.Group>
+                </Form.Item>
+
+                {/* Gas Conversion Group */}
+                <Form.Item label="Gas Conversion/Month" required>
+                  <Input.Group compact>
+                    <Form.Item
+                      name={["gasConversion", "value"]}
+                      noStyle
+                      getValueFromEvent={(e) => {
+                        return e.floatValue;
+                      }}
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Gas Conversion Value"),
+                        },
+                      ]}
+                    >
+                      <InputComponent
+                        decimalScale={2}
+                        thousandSeparator={","}
+                        decimalSeparator={"."}
+                        type="numeric"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name={["gasConversion", "id"]}
+                      noStyle
+                      rules={[
+                        {
+                          required: true,
+                          message: requiredMessage("Gas Conversion Unit"),
+                        },
+                      ]}
+                    >
+                      <SelectComponent width={80} options={ddlGasConversionEquipment} />
+                    </Form.Item>
+                  </Input.Group>
+                </Form.Item>
+
+                <Form.Item
+                  name={"noh"}
+                  label={"Operating Hours/Day"}
+                  rules={[
+                    {
+                      message: requiredMessage("Operating Hours/Day"),
+                      required: true,
+                    },
+                  ]}
+                >
+                  <InputComponent type={"number"} />
+                </Form.Item>
+                <Form.Item
+                  name={"nod"}
+                  label={"Operating Days/Week"}
+                  rules={[
+                    {
+                      message: requiredMessage("Operating Days/Week"),
+                      required: true,
+                    },
+                  ]}
+                >
+                  <InputComponent type={"number"} />
+                </Form.Item>
+
+                <Form.Item
+                  name="isDualFuel"
+                  label={"Dual Fuel"}
+                  // initialValue={isCheckPremise}
+                  valuePropName="checked"
+                  >
+                  <div className="flex flex-col">
+                    <Checkbox
+                      checked={isDualFuel}
+                      onChange={(e) => {
+                        setIsDualFuel(e.target.checked);
+                        form.resetFields(["fuelType2"]);
+                      }}
+                    >
+                      <span className="text-[12px]">
+                        Check if equipment have dual fuel
+                      </span>
+                    </Checkbox>
+                  </div>
+                </Form.Item>
+                <Form.Item
+                  name={"fuelType1"}
+                  label={"Fuel Type 1"}
+                  rules={[
+                    {
+                      message: requiredMessage("Fuel Type 1"),
+                      required: true,
+                    },
+                  ]}
+                >
+                  <SelectComponent options={ddlFuelTypeEquipment} />
+                </Form.Item>
+                <Form.Item
+                  name={"fuelType2"}
+                  label={"Fuel Type 2"}
+                  rules={[
+                    {
+                      message: requiredMessage("Fuel Type 2"),
+                      required: isDualFuel,
+                    },
+                  ]}
+                >
+                  <SelectComponent
+                    disabled={!isDualFuel}
+                    options={ddlFuelTypeEquipment}
                   />
                 </Form.Item>
-                <Form.Item
-                  name={["quantity", "id"]}
-                  noStyle
-                  rules={[
-                    {
-                      required: true,
-                      message: requiredMessage("Quantity Type"),
-                    },
-                  ]}
-                >
-                  <SelectComponent width={80} options={ddlQtyEquipment} />
-                </Form.Item>
-              </Input.Group>
-            </Form.Item>
-
-            {/* Capacity Group */}
-            <Form.Item label="Capacity" required>
-              <Input.Group compact>
-                <Form.Item
-                  name={["capacity", "value"]}
-                  noStyle
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
-                  rules={[
-                    {
-                      required: true,
-                      message: requiredMessage("Capacity Value"),
-                    },
-                  ]}
-                >
-                  <InputComponent
-                    decimalScale={2}
-                    thousandSeparator={","}
-                    decimalSeparator={"."}
-                    type="numeric"
-                  />
-                </Form.Item>
-                <Form.Item
-                  name={["capacity", "id"]}
-                  noStyle
-                  rules={[
-                    {
-                      required: true,
-                      message: requiredMessage("Capacity Unit"),
-                    },
-                  ]}
-                >
-                  <SelectComponent width={80} options={ddlCapacityEquipment} />
-                </Form.Item>
-              </Input.Group>
-            </Form.Item>
-
-            {/* Energy Group */}
-            <Form.Item label="Energy" required>
-              <Input.Group compact>
-                <Form.Item
-                  name={["energy", "value"]}
-                  noStyle
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
-                  rules={[
-                    {
-                      required: true,
-                      message: requiredMessage("Energy Value"),
-                    },
-                  ]}
-                >
-                  <InputComponent
-                    decimalScale={2}
-                    thousandSeparator={","}
-                    decimalSeparator={"."}
-                    type="numeric"
-                  />
-                </Form.Item>
-                <Form.Item
-                  name={["energy", "id"]}
-                  noStyle
-                  rules={[
-                    {
-                      required: true,
-                      message: requiredMessage("Energy Unit"),
-                    },
-                  ]}
-                >
-                  <SelectComponent width={80} options={ddlEnergyEquipment} />
-                </Form.Item>
-              </Input.Group>
-            </Form.Item>
-
-            {/* Gas Conversion Group */}
-            <Form.Item label="Gas Conversion/Month" required>
-              <Input.Group compact>
-                <Form.Item
-                  name={["gasConversion", "value"]}
-                  noStyle
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
-                  rules={[
-                    {
-                      required: true,
-                      message: requiredMessage("Gas Conversion Value"),
-                    },
-                  ]}
-                >
-                  <InputComponent
-                    decimalScale={2}
-                    thousandSeparator={","}
-                    decimalSeparator={"."}
-                    type="numeric"
-                  />
-                </Form.Item>
-                <Form.Item
-                  name={["gasConversion", "id"]}
-                  noStyle
-                  rules={[
-                    {
-                      required: true,
-                      message: requiredMessage("Gas Conversion Unit"),
-                    },
-                  ]}
-                >
-                  <SelectComponent width={80} options={ddlGasConversionEquipment} />
-                </Form.Item>
-              </Input.Group>
-            </Form.Item>
-
-            <Form.Item
-              name={"noh"}
-              label={"Operating Hours/Day"}
-              rules={[
-                {
-                  message: requiredMessage("Operating Hours/Day"),
-                  required: true,
-                },
-              ]}
-            >
-              <InputComponent type={"number"} />
-            </Form.Item>
-            <Form.Item
-              name={"nod"}
-              label={"Operating Days/Week"}
-              rules={[
-                {
-                  message: requiredMessage("Operating Days/Week"),
-                  required: true,
-                },
-              ]}
-            >
-              <InputComponent type={"number"} />
-            </Form.Item>
-
-            <Form.Item
-              name="isDualFuel"
-              label={"Dual Fuel"}
-              // initialValue={isCheckPremise}
-              valuePropName="checked"
-              >
-              <div className="flex flex-col">
-                <Checkbox
-                  checked={isDualFuel}
-                  onChange={(e) => {
-                    setIsDualFuel(e.target.checked);
-                    form.resetFields(["fuelType2"]);
-                  }}
-                >
-                  <span className="text-[12px]">
-                    Check if equipment have dual fuel
-                  </span>
-                </Checkbox>
               </div>
-            </Form.Item>
-            <Form.Item
-              name={"fuelType1"}
-              label={"Fuel Type 1"}
-              rules={[
-                {
-                  message: requiredMessage("Fuel Type 1"),
-                  required: true,
-                },
-              ]}
-            >
-              <SelectComponent options={ddlFuelTypeEquipment} />
-            </Form.Item>
-            <Form.Item
-              name={"fuelType2"}
-              label={"Fuel Type 2"}
-              rules={[
-                {
-                  message: requiredMessage("Fuel Type 2"),
-                  required: isDualFuel,
-                },
-              ]}
-            >
-              <SelectComponent
-                disabled={!isDualFuel}
-                options={ddlFuelTypeEquipment}
-              />
-            </Form.Item>
-          </div>
 
-          <div className={"grid grid-cols-1 w-full gap-x-6"}>
-            <Form.Item name={"description"} label={"Description"}>
-              <InputComponent type="textarea" />
-            </Form.Item>
-          </div>
-        </Form>
-      </ModalCustom>
+              <div className={"grid grid-cols-1 w-full gap-x-6"}>
+                <Form.Item name={"description"} label={"Description"}>
+                  <InputComponent type="textarea" />
+                </Form.Item>
+              </div>
+            </NxBaseContainer>
+          </Form>
+        </div>
+      </NxModal>
 
       {/* Modal Confirmation */}
-      <ModalCustom
-        header={`CONFIRMATION`}
+      <NxModal
+        title={`CONFIRMATION`}
         isOpen={openConfirmation}
         type={"confirmation"}
         handleCancel={() => {
@@ -536,43 +537,42 @@ const EquipmentForm = ({
           </div>
         }
       >
-         <div>
-            <div className="text-primary text-xs font-bold uppercase py-4">
-              Equipment Information
-            </div>
-            <div className='w-full grid grid-cols-3'>
-              <DetailText label={'Name'}>
+        <div className="p-4">
+          <NxBaseContainer border header={"EQUIPMENT INFORMATION"}>
+            <div className='w-full grid grid-cols-3 gap-4'>
+              <NxDetailText label={'Name'}>
                 {ddlNameEquipment?.filter(item => item?.value === body?.body?.name)[0]?.label}
-              </DetailText>
-              <DetailText label={'Type'}>
+              </NxDetailText>
+              <NxDetailText label={'Type'}>
                 {ddlTypeEquipment?.filter(item => item?.value === body?.body?.typeEquipment)[0]?.label}
-              </DetailText>
-              <DetailText label={'Brand'}>
+              </NxDetailText>
+              <NxDetailText label={'Brand'}>
                 {ddlBrandEquipment?.filter(item => item?.value === body?.body?.brand)[0]?.label}
-              </DetailText>
-              <DetailText label={'Quantity'}>
+              </NxDetailText>
+              <NxDetailText label={'Quantity'}>
                 {body?.body?.qty} {ddlQtyEquipment?.filter(item => item?.value === body?.body?.qtyUom)[0]?.label}
-              </DetailText>
-              <DetailText label={'Capacity'}>
+              </NxDetailText>
+              <NxDetailText label={'Capacity'}>
                 {body?.body?.cap} {ddlCapacityEquipment?.filter(item => item?.value === body?.body?.capUom)[0]?.label}
-              </DetailText>
-              <DetailText label={'Energy Consumption'}>
+              </NxDetailText>
+              <NxDetailText label={'Energy Consumption'}>
                 {body?.body?.con} {ddlEnergyEquipment?.filter(item => item?.value === body?.body?.conUom)[0]?.label}
-                </DetailText>
-              <DetailText label={'Gas Conversion/Month'}>
+                </NxDetailText>
+              <NxDetailText label={'Gas Conversion/Month'}>
                 {body?.body?.gasConv} {ddlGasConversionEquipment?.filter(item => item?.value === body?.body?.gasConvUom)[0]?.label}
-              </DetailText>
-              <DetailText label={'Operating Hours/Day'}>{body?.body?.noh}</DetailText>
-              <DetailText label={'Operating Days/Week'}>{body?.body?.nod}</DetailText>
-              <DetailText label={'Dual Fuel'}>{body?.body?.isDualFuel ? "Yes" : "No"}</DetailText>
-              <DetailText label={'Fuel Type 1'}>{ddlFuelTypeEquipment?.filter(item => item?.value === body?.body?.fuelType1)[0]?.label}</DetailText>
-              <DetailText label={'Fuel Type 2'}>{ddlFuelTypeEquipment?.filter(item => item?.value === body?.body?.fuelType2)[0]?.label}</DetailText>
+              </NxDetailText>
+              <NxDetailText label={'Operating Hours/Day'}>{body?.body?.noh}</NxDetailText>
+              <NxDetailText label={'Operating Days/Week'}>{body?.body?.nod}</NxDetailText>
+              <NxDetailText label={'Dual Fuel'}>{body?.body?.isDualFuel ? "Yes" : "No"}</NxDetailText>
+              <NxDetailText label={'Fuel Type 1'}>{ddlFuelTypeEquipment?.filter(item => item?.value === body?.body?.fuelType1)[0]?.label}</NxDetailText>
+              <NxDetailText label={'Fuel Type 2'}>{ddlFuelTypeEquipment?.filter(item => item?.value === body?.body?.fuelType2)[0]?.label}</NxDetailText>
             </div>
             <div className='w-full'>
-                <DetailText label={'Description'}>{body?.body?.description}</DetailText>
+                <NxDetailText label={'Description'}>{body?.body?.description}</NxDetailText>
             </div>
+          </NxBaseContainer>
         </div>
-      </ModalCustom>
+      </NxModal>
     </>
   );
 };

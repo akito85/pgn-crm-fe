@@ -5,7 +5,7 @@ import { getAllBillingItemPaginate } from "../../../../../redux/slices/rating_bi
 import { columnsBillingItem } from "./Table/TableBillingItem";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const BillingItemTab = ({ billingCodeId, calculationCodeId }) => {
+const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
   const { data_billingItem } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
@@ -27,14 +27,14 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId }) => {
   useEffect(() => {
     dispatch(
       getAllBillingItemPaginate({
-        billingCodeId,
+        billHeaderId,
         searchBI: encodeURIComponent(JSON.stringify(searchBI)),
         pageBI,
         pageSizeBI,
         sortBI,
-      })
+      }),
     );
-  }, [dispatch, billingCodeId, searchBI, pageBI, pageSizeBI, sortBI]);
+  }, [dispatch, billHeaderId, searchBI, pageBI, pageSizeBI, sortBI]);
 
   const handleSearchBI = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -73,7 +73,7 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId }) => {
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
-      searchBI
+      searchBI,
     );
   }, [pageBI, pageSizeBI, searchedColumnBI, searchTextBI, searchBI]);
 
@@ -95,6 +95,14 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId }) => {
     }));
   }, [allColumnsBI]);
 
+  // Tambahkan key unik per row menggunakan id dari response
+  const dataSourceWithKeys = useMemo(() => {
+    return dataSourceBI?.map((item) => ({
+      ...item,
+      key: item.id,
+    }));
+  }, [dataSourceBI]);
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
@@ -103,21 +111,21 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId }) => {
           <p className="text-[15px] text-primary">{calculationCodeId || "-"}</p>
         </div>
         <div>
-          <p className="text-[13px] text-gray-600 mb-1">Billing Code</p>
-          <p className="text-[15px] text-primary">{billingCodeId || "-"}</p>
+          <p className="text-[13px] text-gray-600 mb-1">Source Number</p>
+          <p className="text-[15px] text-primary">{billHeaderId || "-"}</p>
         </div>
       </div>
 
       <TableRBI
         size="small"
-        dataSource={dataSourceBI}
+        dataSource={dataSourceWithKeys}
         columns={processedColumnsBI}
         current={pageBI}
         pageSize={pageSizeBI}
         onChange={handleChangePageBI}
         onSizeChanger={handleChangePageBI}
         totalData={data_billingItem?.page?.totalElements || 0}
-        tableScrolled={{ x: 4500, y: 525 }}
+        tableScrolled={{ x: 2200, y: 525 }}
         onSort={onSortBI}
         columnDefinitions={columnDefinitionsBI}
         fixedColumns={fixedColumnsBI}

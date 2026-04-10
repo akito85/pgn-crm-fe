@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import { getColumnSearchProps } from "../../../../../../../utils/getColumnSearchProps";
-import TablePagination from "../../../../../../../components/TablePagination";
-import Highlighter from "react-highlight-words";
-import { Tooltip } from "antd";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import { Table, Tooltip } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,12 +36,11 @@ const expandedRowRender = (record) => {
   ];
   return (
     <div className="flex flex-col py-4 px-4 mx-[-16px]">
-      <p className="text-primary text-xs font-bold uppercase">{"TOS DETAIL"}</p>
-      <TablePagination
-        useSelect={false}
-        usePagination={false}
+      <Table
         dataSource={dataExpand}
         columns={columns}
+        pagination={false}
+        rowKey={(_, index) => index}
       />
     </div>
   );
@@ -51,111 +49,139 @@ const expandedRowRender = (record) => {
 const ModalSelectTos = ({
   idSA,
   modalDetail = false,
-  handleCancel = () => {},
+  handleCancel = () => { },
   dataObj = {},
-  updateObj = () => {},
-  updateTable = () => {},
+  updateObj = () => { },
+  updateTable = () => { },
 }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const [dataTable, setDataTable] = useState([]);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElement] = useState(0);
+
+  // NxTable FE state
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("");
+  const [fieldSort, setFieldSort] = useState("");
+  const [orderSort, setOrderSort] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+
   const { dataSelect } = useSelector((state) => state.tosSubmission);
 
+  // Fetch all data at once when modal opens
   useEffect(() => {
-    setDataTable(
-      (dataSelect?.result || []).map((item) => {
-        return {
-          ...item,
-          key: item?.saTosId,
-          saTosDetail: (item?.saTosDetail || []).map((itemDetail, index) => {
-            return {
-              ...itemDetail,
-              key: index + 1,
-            };
-          }),
-        };
-      })
-    );
-    setTotalElement(dataSelect?.page?.totalElements || 0);
+    if (modalDetail && idSA) {
+      setIsLoading(true);
+      dispatch(
+        getListSelectTosSubmissionPaging({
+          id: idSA,
+          page: 1,
+          pageSize: 9999,
+          search: "",
+          sort: "",
+        })
+      ).finally(() => setIsLoading(false));
+    }
+  }, [modalDetail, idSA, dispatch]);
+
+  // Normalise raw data from redux
+  const rawData = useMemo(() => {
+    return (dataSelect?.result || []).map((item) => ({
+      ...item,
+      key: item?.saTosId,
+      saTosDetail: (item?.saTosDetail || []).map((detail, index) => ({
+        ...detail,
+        key: index + 1,
+      })),
+    }));
   }, [dataSelect]);
 
+  // FE-side filter + sort
+  const processedData = useMemo(() => {
+    let result = [...rawData];
+
+    if (searchedColumn && searchText) {
+      const lower = searchText.toLowerCase();
+      result = result.filter((item) =>
+        item[searchedColumn]?.toString().toLowerCase().includes(lower)
+      );
+    }
+
+    if (fieldSort) {
+      result.sort((a, b) => {
+        const fa = a[fieldSort]?.toString().toLowerCase() || "";
+        const fb = b[fieldSort]?.toString().toLowerCase() || "";
+        if (fa < fb) return orderSort === "asc" ? -1 : 1;
+        if (fa > fb) return orderSort === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [rawData, searchedColumn, searchText, fieldSort, orderSort]);
+
+  // Infinite scroll slice
   useEffect(() => {
-    dispatch(
-      getListSelectTosSubmissionPaging({
-        id: idSA,
-        page,
-        pageSize,
-        search,
-        sort,
-      })
-    );
-  }, [dispatch, idSA, page, pageSize, search, sort]);
+    setDisplayData(processedData.slice(0, loadedCount));
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
 
-  const handleSelectRow = (record) => {
-    updateObj((prevState) => {
-      return {
-        ...prevState,
-        tosId: record?.saTosId,
-        tosName: record?.saTosName,
-      };
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
     });
-    updateTable(
-      (record?.saTosDetail || []).map((item, index) => {
-        return {
-          key: index + 1,
-          attribute:
-            item?.attributeName && item?.attributeId
-              ? {
-                  label: item?.attributeName,
-                  value: item?.attributeId,
-                }
-              : null,
-          // value: parseInt(item?.value || ""),
-          value: typeof item?.value  === "string" ? parseInt(item?.value) : item?.value,
-          unit:
-            item?.unitName && item?.unitId
-              ? {
-                  label: item?.unitName,
-                  value: item?.unitId,
-                }
-              : null,
-          fromItem:
-            item?.fromItemName && item?.fromItemId
-              ? {
-                  label: item?.fromItemName,
-                  value: item?.fromItemId,
-                }
-              : null,
-        };
-      })
-    );
-    handleCancel();
-  };
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
+  }, []);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
+    setSearchText(selectedKeys[0] || "");
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    setSearch(selectedKeys[0] ? `${dataIndex}~${selectedKeys[0]}` : "");
+    setLoadedCount(20);
   };
 
   const onSort = (_, __, sort) => {
-    const dataOrder = sort.order === "ascend" ? "asc" : "desc";
-    const dataSort = sort.order ? `${sort.field}~${dataOrder}` : "";
-    setSort(dataSort);
+    if (sort.order) {
+      setFieldSort(sort.field);
+      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
+    } else {
+      setFieldSort("");
+      setOrderSort("");
+    }
+    setLoadedCount(20);
+  };
+
+  const handleSelectRow = (record) => {
+    updateObj((prevState) => ({
+      ...prevState,
+      tosId: record?.saTosId,
+      tosName: record?.saTosName,
+    }));
+    updateTable(
+      (record?.saTosDetail || []).map((item, index) => ({
+        key: index + 1,
+        attribute:
+          item?.attributeName && item?.attributeId
+            ? { label: item?.attributeName, value: item?.attributeId }
+            : null,
+        value:
+          typeof item?.value === "string" ? parseInt(item?.value) : item?.value,
+        unit:
+          item?.unitName && item?.unitId
+            ? { label: item?.unitName, value: item?.unitId }
+            : null,
+        fromItem:
+          item?.fromItemName && item?.fromItemId
+            ? { label: item?.fromItemName, value: item?.fromItemId }
+            : null,
+      }))
+    );
+    handleCancel();
   };
 
   const columns = [
@@ -163,7 +189,7 @@ const ModalSelectTos = ({
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "TERM OF SERVICE",
@@ -183,6 +209,7 @@ const ModalSelectTos = ({
       dataIndex: "saTosDescription",
       width: 240,
       sorter: true,
+      ellipsis: { showTitle: false },
       ...getColumnSearchProps(
         "saTosDescription",
         searchInput,
@@ -191,56 +218,34 @@ const ModalSelectTos = ({
         handleSearch,
         true
       ),
-      ellipsis: {
-        showTitle: false,
-      },
       render: (text) => {
-        if (searchedColumn === "saTosDescription") {
+        if (text) {
           return (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
+            <Tooltip placement="topLeft" title={text}>
+              {text}
+            </Tooltip>
           );
-        } else {
-          if (text) {
-            return (
-              <Tooltip placement="topLeft" title={text}>
-                {text}
-              </Tooltip>
-            );
-          }
-          return "";
         }
+        return "";
       },
     },
     {
       title: "ACTION",
       align: "center",
-      width: 240,
+      width: 100,
       fixed: "right",
-      render: (v, r, i) => {
+      render: (v, r) => {
+        const isSelected = dataObj?.tosId === r?.saTosId;
         return (
           <div className="flex justify-center align-middle gap-2">
             <Tooltip title="Add">
               <span
-                className={`flex justify-center${
-                  dataObj?.tosId !== r?.saTosId ? "" : ` cursor-not-allowed`
-                }`}
-                onClick={
-                  dataObj?.tosId !== r?.saTosId
-                    ? () => handleSelectRow(r)
-                    : undefined
-                }
+                className={`flex justify-center${isSelected ? " cursor-not-allowed" : ""}`}
+                onClick={!isSelected ? () => handleSelectRow(r) : undefined}
               >
                 <SVGIcon
                   name="IconActionCreate"
-                  color={dataObj?.tosId !== r?.saTosId ? "#0075bf" : "#8D91A0"}
+                  color={!isSelected ? "#0075bf" : "#8D91A0"}
                   width={24}
                 />
               </span>
@@ -250,6 +255,12 @@ const ModalSelectTos = ({
       },
     },
   ];
+
+  const columnDefinitions = columns.map((col) => ({
+    key: col.key || col.dataIndex || col.title,
+    title: col.title,
+  }));
+
   return (
     <ModalCustom
       isOpen={modalDetail}
@@ -258,22 +269,35 @@ const ModalSelectTos = ({
       header="CHOOSE TERM OF SERVICE"
       width={1000}
       footer={
-        <ButtonComponent type={"default"} onClick={handleCancel}>
-          Back
-        </ButtonComponent>
+        <div className="w-full flex justify-start">
+          <ButtonComponent type={"default"} size="small" onClick={handleCancel}>
+            Back
+          </ButtonComponent>
+        </div>
       }
     >
-      <TablePagination
-        dataSource={dataTable}
-        totalData={totalElements}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChangeSize}
-        tableScrolled={{ y: 300, x: 1200 }}
+      <NxTable
+        idTable="modal-select-tos-table"
+        dataSource={displayData}
         columns={columns}
-        onSort={onSort}
+        totalData={processedData.length}
+        tableScrolled={{ y: 300, x: "max-content" }}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columnDefinitions}
+        onChange={onSort}
+        loading={isLoading}
+        showAdvanceSearch={false}
+        showSearchBar={false}
         expandable={{
           expandedRowRender,
+          rowExpandable: (record) =>
+            record?.saTosDetail && record.saTosDetail.length > 0,
         }}
       />
     </ModalCustom>

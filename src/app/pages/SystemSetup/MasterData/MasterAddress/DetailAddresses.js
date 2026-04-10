@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu'
 import BreadCrumb from '../../../../../components/BreadCrumb'
 import BaseContainer from '../../../../../components/BaseContainer'
 import DetailText from '../../../../../components/DetailText'
@@ -62,7 +61,7 @@ const DetailAddresses = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={'address information'}>
@@ -147,7 +146,7 @@ const DetailAddresses = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   )
 }
 

@@ -18,13 +18,58 @@ export const submitTransferToReceipt = createAsyncThunk(
       const response = await receiptCollectionHttpService.createData(url, body);
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         error?.response?.data?.message || error?.message || error?.toString();
+
+      if (message && (message.includes("could not execute statement") || message.includes("ConstraintViolationException") || message.includes("SQL"))) {
+        message = "Terjadi kesalahan pada sistem saat memproses data. Silakan coba beberapa saat lagi atau hubungi tim support.";
+      }
+
       const errorBody = {
         title: "Failed",
         description: `${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const getCashBalance = createAsyncThunk(
+  "GET_CASH_BALANCE_TRANSFER",
+  async (accountId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty/${accountId}/cash-balance`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const getWarrantyCashByAccountId = createAsyncThunk(
+  "GET_WARRANTY_CASH_BY_ACCOUNT_TRANSFER",
+  async (accountId, thunkAPI) => {
+    try {
+      // Fetch warranty for the selected account, then filter CASH and ACTIVE in frontend
+      const searchParam = encodeURIComponent(JSON.stringify({
+        accountId: accountId,
+        warrantyType: "CASH"
+      }));
+      const url = `/v1/dbs/api/payment-warranty/get-list?page=1&size=1000&searchs=${searchParam}`;
+      const response = await receiptCollectionHttpService.getPagination(url);
+
+      // Data sudah difilter oleh backend, ambil array hasilnya
+      const filtered = response?.data?.result || response?.data || [];
+
+
+      return filtered;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
@@ -146,6 +191,8 @@ const initialState = {
   data_detail: null,
   dataListAppHierDetail: [],
   dataListCategory: [],
+  cashBalance: 0,
+  listWarrantyCash: [],
   loading: false,
   isFailed: false,
   isSuccess: false,
@@ -160,6 +207,14 @@ export const getAllTransferToReceiptListPaginate = createAsyncThunk(
       const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/payment-warranty/transfer-receipt/get-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await receiptCollectionHttpService.getPagination(url);
+
+      if (response && response.data && response.data.result) {
+        response.data.result = response.data.result.map(item => ({
+          ...item,
+          equivalent: item.equivalentAmount,
+          remark: item.remarks
+        }));
+      }
       return response.data;
     } catch (error) {
       const message =
@@ -365,6 +420,27 @@ const transferToReceiptSlice = createSlice({
     },
     [getListCategory.rejected]: (state) => {
       // state.loading = false;
+    },
+
+    // Get Cash Balance
+    [getCashBalance.pending]: (state) => {
+      // loading state if needed
+    },
+    [getCashBalance.fulfilled]: (state, action) => {
+      state.cashBalance = action.payload?.cashBalance ?? action.payload?.data?.cashBalance ?? 0;
+    },
+    [getCashBalance.rejected]: (state) => {
+      state.cashBalance = 0;
+    },
+
+    // Get Warranty Cash By Account
+    [getWarrantyCashByAccountId.pending]: (state) => {
+    },
+    [getWarrantyCashByAccountId.fulfilled]: (state, action) => {
+      state.listWarrantyCash = action.payload?.result || action.payload || [];
+    },
+    [getWarrantyCashByAccountId.rejected]: (state) => {
+      state.listWarrantyCash = [];
     },
   },
 });

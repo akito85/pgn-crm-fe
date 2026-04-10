@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BaseContainer from "../../../../../components/BaseContainer";
 import Tree from "react-d3-tree";
@@ -151,7 +150,7 @@ const ViewHierarchy = () => {
     },
   ];
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading} className="w-full top-20" tip="Loading">
         <BreadCrumb routes={routes}/>
         <BaseContainer header={"VIEW HIERARCHY"}>
@@ -194,7 +193,7 @@ const ViewHierarchy = () => {
           </div>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

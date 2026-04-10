@@ -198,7 +198,7 @@ const ColumnFixDropdown = ({
 
   return (
     <Dropdown
-      overlay={columnFixMenu}
+      menu={columnFixMenu}
       trigger={["click"]}
       open={dropdownVisible} // ✅ ganti visible → open (versi AntD v5)
       onOpenChange={setDropdownVisible}

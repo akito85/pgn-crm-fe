@@ -1,211 +1,213 @@
-import { useState } from "react";
-import RadioTabs from "../../../../../../../../../components/RadioTabs";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
-import DetailText from "../../../../../../../../../components/DetailText";
-import moment from "moment";
+import { Form, Input, Select } from "antd";
+import { useRef, useState } from "react";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
+import SelectComponent from "../../../../../../../../../components/SelectComponent";
+import { requiredMessage } from "../../../../../../../../../utils";
+import { getColumnSearchProps } from "../../../../../../../../../utils/getColumnSearchProps";
 
-/**
- * Approval/Review step for Service Request
- */
-export default function ApprovalForm({
-  form,
-  account = {},
-  customer = {},
-  dropdowns = {},
-  contactsData = [],
-  prerequisitesData = [],
-  attachmentsData = [],
-}) {
-  const [valuePage, setValuePage] = useState("Service Request");
+const DataExpand = ({ list = [], tableId = "approval-employee-table" }) => {
+  const searchInput = useRef(null);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
 
-  // Get form data only when rendering (not on every parent render)
-  const formData = form?.getFieldsValue(true) || {};
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
 
-  const tabPages = [
-    { value: "Service Request" },
-    { value: "Contact" },
-    { value: "Pre-Requisite" },
+  const columns = [
+    {
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: "EMPLOYEE",
+      dataIndex: "employeeName",
+      sorter: (a, b) => a?.employeeName?.localeCompare(b?.employeeName),
+      ...getColumnSearchProps(
+        "employeeName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      onFilter: (value, record) =>
+        record.employeeName
+          ?.toString()
+          .toLowerCase()
+          .includes(value.toLowerCase()),
+    },
   ];
 
-  // Helper to get dropdown label from ID
-  const getDropdownLabel = (dropdownKey, id) => {
-    if (!dropdowns?.[dropdownKey]?.data || !id) return "-";
-    const item = dropdowns[dropdownKey].data.find(
-      (item) =>
-        item.glbTypeValId?.toString() === id?.toString() ||
-        item.id?.toString() === id?.toString(),
-    );
-    return item?.name || item?.glbTypeValName || id;
+  return (
+    <div>
+      <p className="text-primary text-xs font-bold uppercase pt-4">
+        EMPLOYEE INFORMATION
+      </p>
+      <NxTable
+        idTable={tableId}
+        useSelect={false}
+        usePagination={false}
+        useInfiniteScroll
+        hasMore={false}
+        dataSource={list}
+        totalData={list.length}
+        columns={columns}
+        tableScrolled={{ x: 400 }}
+        className="mb-4"
+      />
+    </div>
+  );
+};
+
+const expandedRowRender = (record) => {
+  const dataExpand = record.employeeDetail || [];
+  return (
+    <DataExpand
+      list={dataExpand}
+      tableId={`approval-employee-table-${record.key}`}
+    />
+  );
+};
+
+const normalizeApprovalTable = (dataTable = []) =>
+  dataTable.map((detail, index) => ({
+    ...detail,
+    key: detail.key || `service-request-approval-${index}`,
+    employeeDetail: (detail.employeeDetail || []).map((employee, employeeIndex) => ({
+      ...employee,
+      key:
+        employee.key ||
+        `service-request-approval-${index}-employee-${employeeIndex}`,
+    })),
+  }));
+
+export default function ApprovalForm({
+  form,
+  dataOption = [],
+  dataTable = [],
+  formView = true,
+  handleSelectHiararchy = () => {},
+}) {
+  const searchInput = useRef(null);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+
+  const appHierId = Form.useWatch("appHierId", { form });
+  const appHierName = Form.useWatch("appHierName", { form, preserve: true });
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
   };
 
-  const accountInfo = account?.accountInformation || {};
-  const accountSummary = account?.accountSummary || {};
+  const columns = [
+    {
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: "HIERARCHY",
+      dataIndex: "approvalLevel",
+      sorter: (a, b) => a?.approvalLevel?.localeCompare(b?.approvalLevel),
+      ...getColumnSearchProps(
+        "approvalLevel",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      onFilter: (value, record) =>
+        record.approvalLevel
+          ?.toString()
+          .toLowerCase()
+          .includes(value.toLowerCase()),
+    },
+    {
+      title: "POSITION",
+      dataIndex: "position",
+      sorter: (a, b) => a?.position?.localeCompare(b?.position),
+      ...getColumnSearchProps(
+        "position",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      onFilter: (value, record) =>
+        record.position
+          ?.toString()
+          .toLowerCase()
+          .includes(value.toLowerCase()),
+    },
+  ];
 
-  const renderServiceRequestSummary = () => (
-    <>
-      <NxPanel title="ACCOUNT INFORMATION">
-        <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Account ID">
-            {formData?.srFormAccountId || accountInfo?.accountId || "-"}
-          </DetailText>
-          <DetailText label="Account SOR">
-            {formData?.srFormAccountSor || accountInfo?.sor || "-"}
-          </DetailText>
-          <DetailText label="Cost Center">
-            {formData?.srFormAccountCostCenter ||
-              accountSummary?.costCenter ||
-              "-"}
-          </DetailText>
-          <DetailText label="Meter Reading Code">
-            {formData?.srFormMeterReadingCode ||
-              accountSummary?.meterReadingCodes ||
-              "-"}
-          </DetailText>
-          <DetailText label="Account Segment">
-            {formData?.srFormAccountSegment || accountInfo?.segment || "-"}
-          </DetailText>
-          <DetailText label="Account Group Type">
-            {formData?.srFormAccountGroupType ||
-              accountInfo?.accountGroupType ||
-              "-"}
-          </DetailText>
-          <DetailText label="Account Type">
-            {formData?.srFormAccountType || accountInfo?.accountType || "-"}
-          </DetailText>
-          <DetailText label="Premise Address">
-            {formData?.srFormPremiseAddress || "-"}
-          </DetailText>
-        </div>
-      </NxPanel>
-
-      <NxPanel title="SERVICE REQUEST INFORMATION" className="mt-4">
-        <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Service Request Reference">
-            {formData?.srr || "-"}
-          </DetailText>
-          <DetailText label="Type">
-            {getDropdownLabel("serviceRequestTypes", formData?.type)}
-          </DetailText>
-          <DetailText label="Category">
-            {getDropdownLabel("serviceRequestCategories", formData?.category)}
-          </DetailText>
-          <DetailText label="Sub Category">
-            {getDropdownLabel(
-              "serviceRequestSubcategories",
-              formData?.subCategory,
-            )}
-          </DetailText>
-          <DetailText label="Channel">
-            {getDropdownLabel("serviceRequestChannels", formData?.channel)}
-          </DetailText>
-          <DetailText label="Priority">
-            {getDropdownLabel("serviceRequestPriorities", formData?.priority)}
-          </DetailText>
-          <DetailText label="Request Source">
-            {getDropdownLabel("serviceRequestSources", formData?.requestSource)}
-          </DetailText>
-          <DetailText label="Request Date">
-            {formData?.requestDate
-              ? moment(formData.requestDate).format("DD MMM YYYY HH:mm:ss")
-              : "-"}
-          </DetailText>
-        </div>
-        <div className="w-full mt-3">
-          <DetailText label="Description">
-            {formData?.description || "-"}
-          </DetailText>
-        </div>
-      </NxPanel>
-
-      {formData?.srFormDataRequirements?.length > 0 && (
-        <NxPanel title="DATA REQUIREMENTS" className="mt-4">
-          <div className="w-full">
-            {formData.srFormDataRequirements.map((req, index) => (
-              <div key={index} className="grid grid-cols-2 gap-3 mb-2">
-                <DetailText label="Type">{req.type || "-"}</DetailText>
-                <DetailText label="Value">{req.value || "-"}</DetailText>
-              </div>
-            ))}
-          </div>
-        </NxPanel>
-      )}
-    </>
-  );
-
-  const renderContactSummary = () => (
-    <NxPanel title="CONTACTS">
-      {contactsData.length > 0 ? (
-        <div className="w-full">
-          {contactsData.map((contact, index) => (
-            <div key={index} className="border-b pb-3 mb-3">
-              <div className="grid grid-cols-3 gap-3">
-                <DetailText label="Name">{contact.name || "-"}</DetailText>
-                <DetailText label="Type">{contact.type || "-"}</DetailText>
-                <DetailText label="Phone">{contact.phone || "-"}</DetailText>
-                <DetailText label="Email">{contact.email || "-"}</DetailText>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500">No contacts added</p>
-      )}
-    </NxPanel>
-  );
-
-  const renderPrerequisiteSummary = () => (
-    <NxPanel title="PRE-REQUISITES">
-      {prerequisitesData.length > 0 ? (
-        <div className="w-full">
-          {prerequisitesData.map((prereq, index) => (
-            <div key={index} className="border-b pb-3 mb-3">
-              <div className="grid grid-cols-3 gap-3">
-                <DetailText label="Type">{prereq.type || "-"}</DetailText>
-                <DetailText label="Name">{prereq.name || "-"}</DetailText>
-                <DetailText label="Description">
-                  {prereq.description || "-"}
-                </DetailText>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500">No pre-requisites added</p>
-      )}
-    </NxPanel>
-  );
-
-  const renderContent = () => {
-    switch (valuePage) {
-      case "Service Request":
-        return renderServiceRequestSummary();
-      case "Contact":
-        return renderContactSummary();
-      case "Pre-Requisite":
-        return renderPrerequisiteSummary();
-      default:
-        return renderServiceRequestSummary();
-    }
-  };
+  const approvalTableData = normalizeApprovalTable(dataTable);
 
   return (
-    <div className="w-full">
-      <div className="mb-4">
-        <span className="text-primary uppercase font-bold text-lg">
-          REVIEW & APPROVAL
-        </span>
-        <p className="text-gray-600 mt-2">
-          Please review the Service Request information, Contacts, and
-          Pre-Requisites before proceeding to attachments.
-        </p>
-      </div>
+    <NxCardContainer header="APPROVAL INFORMATION">
+      <NxBaseContainer border>
+        <div className="flex flex-col gap-y-4 w-full">
+          {formView ? (
+            <>
+              <Form.Item name="appHierName" hidden>
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="appHierId"
+                label="Approval Hierarchy"
+                rules={[
+                  {
+                    message: requiredMessage("Approval Hierarchy"),
+                    required: true,
+                  },
+                ]}
+                className="no-margin-form w-1/3"
+              >
+                <SelectComponent
+                  onChange={(value, option) =>
+                    handleSelectHiararchy(value, option?.children)
+                  }
+                >
+                  {dataOption.map((data, index) => (
+                    <Select.Option key={index} value={data.appHierId}>
+                      {data.approvalName}
+                    </Select.Option>
+                  ))}
+                </SelectComponent>
+              </Form.Item>
+            </>
+          ) : (
+            <NxDetailText label="Approval Hierarchy">
+              {appHierName || "-"}
+            </NxDetailText>
+          )}
 
-      <RadioTabs
-        data={tabPages}
-        onChange={(e) => setValuePage(e.target.value)}
-      />
-
-      <div className="mt-6">{renderContent()}</div>
-    </div>
+          {(appHierId || (!formView && approvalTableData.length > 0)) && (
+            <NxTable
+              idTable="service-request-approval-table"
+              useSelect={false}
+              usePagination={false}
+              useInfiniteScroll
+              hasMore={false}
+              dataSource={approvalTableData}
+              totalData={approvalTableData.length}
+              columns={columns}
+              expandable={{ expandedRowRender }}
+              tableScrolled={{ x: 600 }}
+            />
+          )}
+        </div>
+      </NxBaseContainer>
+    </NxCardContainer>
   );
 }

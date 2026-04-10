@@ -1,14 +1,4 @@
 export const SYSTEM_SETUP_ROUTES = {
-  // job routes
-  LOGGING_VIEW_MENU: "/system-setup/logging",
-
-  // job routes
-  JOB_VIEW_MENU: "/system-setup/job-management",
-  JOB_CREATE_MENU: "/system-setup/job-management/create",
-  JOB_DETAIL_MENU: "/system-setup/job-management/view",
-
-  // job control
-  JOB_CONTROL_VIEW_MENU: "/system-setup/job-control",
 
   // menus routes
   VIEW_MENU: "/system-setup/menu",
@@ -88,6 +78,12 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_PAYMENT_CYCLE: "/system-setup/payment-cycle/view",
   CREATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/create",
   UPDATE_PAYMENT_CYCLE: "/system-setup/payment-cycle/update",
+
+  // Payment Period
+  VIEW_PAYMENT_PERIOD: "/system-setup/payment-period",
+  DETAIL_PAYMENT_PERIOD: "/system-setup/payment-period/view",
+  CREATE_PAYMENT_PERIOD: "/system-setup/payment-period/create",
+  UPDATE_PAYMENT_PERIOD: "/system-setup/payment-period/update",
 
   // Billing Item Category
   VIEW_BILLING_ITEM_CATEGORY: "/system-setup/transaction-mapping-category",

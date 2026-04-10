@@ -1,184 +1,191 @@
-import { Fragment, useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { Spin } from "antd";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import { memo, useEffect } from "react";
+import { useState } from "react";
 import RelationshipTable from "./RelationshipTable";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
-import SVGIcon from "../../../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
-import { Form } from "antd";
-import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import NxFilter from "../../../../../../components/Nx/NxFilter";
-import { getRelationshipColumnApi, getRelationshipConditionApi, getRelationshipOperatorApi, downloadRelationship } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import { CheckOutlined, DownloadOutlined, FilterOutlined } from "@ant-design/icons";
+import {
+  getApprovalHistory,
+  inactivateRelationship,
+  getApprovalHierarchies,
+  getApprovalHierarchyDetail,
+} from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
+import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
-import NotFound from "../../../../../NotFound";
+import { useLocation } from "react-router-dom";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import RelationshipApprovalModal from "./RelationshipApprovalModal";
 
-const Relationship = ({ id = 0, type = "standard", idCustomer = null }) => {
-  const dispatch = useDispatch();
-  const relationshipState = useSelector((state) => state.relationship);
-  const { loading } = relationshipState;
-  const { access_account } = useSelector((state) => state.accountManagement);
-  const [formQuery] = Form.useForm();
+/**
+ * Relationship list table module
+ * @param {{ accountId: number; customerId: number; type: string }} props
+ * @returns
+ */
+const Relationship = ({
+  accountId,
+  customerId,
+}) => {
+  // --- Hooks ---
   const location = useLocation();
-  const [isAccessChecked, setIsAccessChecked] = useState(false);
+  const dispatch = useDispatch();
 
-  // Check granted access when component mounts - must complete before data fetch
-  useEffect(() => {
-    setIsAccessChecked(false);
-    const path = location?.pathname.includes('account-standard')
-      ? '/account-management/account-standard/relationship'
-      : '/account-management/account-onetime/relationship';
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
-    dispatch(getGrantedAccessAccount(path))
-      .unwrap()
-      .then(() => setIsAccessChecked(true))
-      .catch(() => setIsAccessChecked(true));
-  }, [dispatch, location?.pathname]);
+  const { data_approvalHistory } = useSelector((state) => state.relationship);
 
-  const isAccessGranted = access_account?.isGranted === true;
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [inputFields, setInputFields] = useState([]);
-  const [tempInputFields, setTempInputFields] = useState([]);
-  const [modalQuery, setModalQuery] = useState(false);
-  const [approvalMode, setApprovalMode] = useState(false);
-  const [listType, setListType] = useState("all");
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [inactivateId, setInactivateId] = useState(0);
+  const [inactivateName, setInactivateName] = useState("");
 
-  const handleOpenFilter = () => {
-    setModalQuery(true);
-  };
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
+  const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
-  const handleCancelQuery = () => {
-    formQuery.resetFields();
-    setModalQuery(false);
-    setTempInputFields(inputFields);
-  };
+  // --- Functions / handlers ---
+  const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
-  const handleSaveQuery = () => {
-    const queryValues = formQuery.getFieldValue("query");
-    if (queryValues) {
-      const formattedQuery = queryValues.map((item) => ({
-        condition: item.condition,
-        column: item.column,
-        operator: item.operator,
-        value: item.value,
-      }));
-      setInputFields(formattedQuery);
-      setTempInputFields(formattedQuery);
+  /**
+   * Open or close inactivate modal
+   * @param {boolean} show
+   * @param {number} relationshipId
+   * @param {string} name
+   */
+  const handleInactivateModal = (show, relationshipId = 0, name = "") => {
+    if (show) {
+      setInactivateId(relationshipId);
+      setInactivateName(name);
+      setShowInactiveModal(true);
+    } else {
+      setInactivateId(0);
+      setInactivateName("");
+      setShowInactiveModal(false);
     }
-    setModalQuery(false);
-    setPage(1);
   };
 
   /**
-   * Handle entering or exiting approval mode
-   * When entering: set listType = "approval"
-   * When exiting: set listType = "all"
-   * @param {boolean} newApprovalMode
+   * @param {string} remark
+   * @param {() => {}} handleClear
    */
-  const handleIsApproval = (newApprovalMode) => {
-    if (newApprovalMode) {
-      // ENTERING APPROVAL MODE
-      setPage(1);
-      setListType("approval");
-      setApprovalMode(true);
+  const handleInactivate = ({ remark, appHierId }, handleClear) => {
+    const body = {
+      id: inactivateId,
+      appHierId,
+      remark,
+    };
+
+    dispatch(
+      inactivateRelationship({
+        accountId,
+        body,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setShowInactiveModal(false);
+        triggerRefresh();
+        handleClear();
+      })
+      .catch(() => {});
+  };
+
+  /**
+   * @param {boolean} show
+   * @param {number} relationshipId
+   */
+  const handleApprovalHistoryModal = (show, relationshipId = 0) => {
+    if (show) {
+      dispatch(getApprovalHistory({ accountId, relationshipId }));
+      setShowApprovalHistoryModal(true);
     } else {
-      // EXITING APPROVAL MODE
-      setSearchText("");
-      setSearchedColumn("");
-      setPage(1);
-      setListType("all");
-      setApprovalMode(false);
+      setShowApprovalHistoryModal(false);
     }
   };
 
-  const handleDownload = () => {
-    const body = {
-      page,
-      size: pageSize,
-      sort,
-      inputFields: tempInputFields,
-      searchs: search,
-      listType: listType,
-    };
+  // --- Effects ---
+  useEffect(() => {
+    if (isStandard) {
+      dispatch(
+        getGrantedAccessAccount(`/account-management/account-standard/relationship`)
+      );
+    } else if (isOneTime) {
+      dispatch(
+        getGrantedAccessAccount(`/account-management/account-onetime/relationship`)
+      );
+    }
+  }, []);
 
-    dispatch(downloadRelationship({ idAccount: id, body }));
-  };
+  // Reshape raw API approval history into { create, inactive } buckets.
+  useEffect(() => {
+    if (data_approvalHistory && data_approvalHistory?.dataApprover) {
+      const temp = {
+        dataApprover: {
+          create: data_approvalHistory?.dataApprover?.ACCOUNT_RELATIONSHIP || [],
+          inactive: data_approvalHistory?.dataApprover?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
+        },
+        dataHistory: {
+          create: data_approvalHistory?.dataHistory?.ACCOUNT_RELATIONSHIP || [],
+          inactive: data_approvalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
+        },
+      };
+
+      setDataApprovalHistoryFix(temp);
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [data_approvalHistory]);
 
   return (
-    // <Spin spinning={loading} className={"w-full top-20"} tip={"Loading..."}>
-    <Fragment>
-      {
-        !isAccessChecked ?
-          <div className="w-full flex justify-center py-10">
-            <Spin tip="Checking access..." />
-          </div>
-         : !isAccessGranted ?
-          <NotFound type={"unauthorized"} />
-         : 
-        <BaseContainer header={"RELATIONSHIP LIST"}>
-          <RelationshipTable
-            idAccount={id}
-            page={page}
-            setPage={setPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            searchedColumn={searchedColumn}
-            setSearchedColumn={setSearchedColumn}
-            searchText={searchText}
-            setSearchText={setSearchText}
-            sort={sort}
-            setSort={setSort}
-            search={search}
-            setSearch={setSearch}
-            approvalMode={approvalMode}
-            handleIsApproval={handleIsApproval}
-            type={type}
-            idCustomer={idCustomer}
-            inputFields={inputFields}
-            tempInputFields={tempInputFields}
-            listType={listType}
-            isAccessGranted={isAccessGranted}
-            handleDownload={handleDownload}
-            handleOpenFilter={handleOpenFilter}
-          />
-        </BaseContainer>
-      }
+    <NxCardContainer header={"RELATIONSHIP LIST"}>
+      <NxBaseContainer border>
+        <RelationshipTable
+          accountId={accountId}
+          customerId={customerId}
+          refreshSignal={refreshSignal}
+          handleInactivateModal={handleInactivateModal}
+          handleApprovalHistoryModal={handleApprovalHistoryModal}
+          handleApproval={setShowApprovalModal}
+        />
 
-      {/* Modal Filter */}
-      <ModalCustom
-        isOpen={modalQuery}
-        type={"confirmation"}
-        header={"QUERY"}
-        width={1200}
-        handleCancel={handleCancelQuery}
-      >
-        <Form form={formQuery} layout="vertical" onFinish={handleSaveQuery} id={"relationshipFilterForm"}>
-          <NxFilter
-            form={formQuery}
-            onCancel={handleCancelQuery}
-            dispatch={dispatch}
-            getColumnApi={getRelationshipColumnApi}
-            getConditionApi={getRelationshipConditionApi}
-            getOperatorApi={getRelationshipOperatorApi}
-            reduxState={relationshipState}
-            maxFilters={5}
-            loading={loading}
-            formId="relationshipFilterForm"
-            accountId={id}
-          />
-        </Form>
-      </ModalCustom>
-    </Fragment>
-    // </Spin>
+        <RelationshipApprovalModal
+          accountId={accountId}
+          isOpen={showApprovalModal}
+          handleCancel={() => setShowApprovalModal(false)}
+          afterFinish={triggerRefresh}
+        />
+
+        {/* Inactivate Modal */}
+        <NxInactivateModal
+          isOpen={showInactiveModal}
+          header={"INACTIVATE"}
+          handleCloseModal={() => handleInactivateModal(false)}
+          customMessage={`Are you sure you want to inactivate relationship - ${inactivateName}?`}
+          onFinish={({ remark, appHierId }, handleClear) => handleInactivate({ remark, appHierId }, handleClear)}
+          named={inactivateName}
+          menu="relationship"
+          sliceName="relationship"
+          approvalOptionsName="data_approvalHierarchies"
+          approvalHierarchtDetailsName="data_approvalHierarchyDetail"
+          loadingInactivateName="loading_inactivateRelationship"
+          loadingListApprovalOptionsName="loading_listRelationshipApprovalOption"
+          loadingListHierarchyDetailName="loading_listRelationshipApprovalHierarchyDetail"
+          getApprovalOptions={getApprovalHierarchies}
+          getApprovalHierarchyDetails={getApprovalHierarchyDetail}
+        />
+
+        {/* Approval History Modal */}
+        <NxHistoryModal
+          isOpen={showApprovalHistoryModal}
+          handleClose={() => handleApprovalHistoryModal(false)}
+          header={"Approval History"}
+          dataApprover={dataApprovalHistoryFix?.dataApprover}
+          dataHistory={dataApprovalHistoryFix?.dataHistory}
+        />
+      </NxBaseContainer>
+    </NxCardContainer>
   );
 };
 
-export default Relationship;
+export default memo(Relationship);

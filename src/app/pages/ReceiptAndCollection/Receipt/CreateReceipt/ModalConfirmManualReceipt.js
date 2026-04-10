@@ -2,11 +2,12 @@ import React, { Fragment, useRef, useState } from "react";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
+import { Tabs } from "antd";
 import moment from "moment";
 import { dateFormatting, roundToTwoDecimal } from "../../../../../utils";
 import { columnAllocation } from "../Table/ColumnAllocation";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
+import SectionCard from "../../../../../components/SectionCard";
 
 const ModalConfirmManualReceipt = ({
   tabData,
@@ -36,7 +37,7 @@ const ModalConfirmManualReceipt = ({
   dataAccNumber,
   rateString,
 }) => {
-  const [valuePage, setValuePage] = useState(tabData[0].value);
+  const [activeKey, setActiveKey] = useState(tabData[0].value);
   const resepChannel = dataReceiptChannelDDL?.data
     ?.filter((a) => a?.id === data?.receiptChannelId)
     ?.find((b) => b?.name)?.name;
@@ -86,90 +87,103 @@ const ModalConfirmManualReceipt = ({
 
   console.log(typeof data.amount);
   const showSection = () => {
-    switch (valuePage) {
+    switch (activeKey) {
       case tabData[0].value:
         return (
           <div className="w-full">
-            <div className="text-primary text-xs font-bold uppercase py-3">
-              {"CUSTOMER INFORMATION"}
-            </div>
-            <div className="grid grid-cols-3 w-full gap-5">
-              <DetailText label={"Account Type"}>{data?.accountType}</DetailText>
-              <DetailText label={"Account Number"}>{accNumb}</DetailText>
-              <DetailText label={"Account Name"}>{data?.accountName}</DetailText>
-              <DetailText label={"Customer Name"}>{data?.customerName}</DetailText>
-              <DetailText label={"Customer Number"}>{data?.customerNumber}</DetailText>
-              <DetailText label={"SOR"}>{data?.sor}</DetailText>
-              <DetailText label={"Cost Center"}>{data?.area}</DetailText>
-              <DetailText label={"Account Segment"}>{data?.segment}</DetailText>
-            </div>
-            <div className="text-primary text-xs font-bold uppercase py-3">
-              {"RECEIPT DETAIL INFORMATION"}
-            </div>
-            <div className="w-full grid grid-cols-3 gap-5">
-              <DetailText label={"Receipt Channel"}>{resepChannel}</DetailText>
-              <DetailText label={"Payment Gateway"}>
-                {paymentGateway}
-              </DetailText>
-              <DetailText label={"Collecting Agent"}>{colGen}</DetailText>
-              <DetailText label={"Delivery Channel"}>{devChen}</DetailText>
-              <DetailText label={"Method"}>{method}</DetailText>
-              <DetailText label={"Receipt Date"}>
-                {data?.receiptDate
-                  ? moment(data?.receiptDate).format(dateFormatting.dateTime)
-                  : ""}
-              </DetailText>
-              <DetailText label={"Payment Type"}>{payType}</DetailText>
-              <DetailText label={"Bank"}>{bank}</DetailText>
-              <DetailText label={"Reference"}>{data?.refrence}</DetailText>
-            </div>
-            <div className="text-primary text-xs font-bold uppercase py-3">
-              {"AMOUNT DETAIL INFORMATION"}
-            </div>
-            <div className="w-full grid grid-cols-3 gap-5">
-              <DetailText label={"Currency"}>{currency}</DetailText>
-              <DetailText label={"Amount"}>
-                {/* {data?.amount?.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} */}
-                {roundToTwoDecimal(data.amount)}
-                {/* {Math.round((data?.amount + Number.EPSILON) * 100) / 100} */}
-              </DetailText>
-              <DetailText label={"Rate"}>
-                {/* {data?.rateAmount?.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} */}
-                {rateString}
-              </DetailText>
-            </div>
-            <div className="w-full grid grid-cols-3 gap-5">
-              <DetailText label={"Rate Type"}>{rateType}</DetailText>
-              <DetailText label={"Rate Date"}>
-                {data?.rateDate
-                  ? moment(data?.rateDate).format(dateFormatting.dateCapital)
-                  : ""}
-              </DetailText>
-              <DetailText label={"Equivalent Amount"}>
-                {/* {NumbersEQ.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })} */}
-                {roundToTwoDecimal(data.equivalentAmount)}
-              </DetailText>
-            </div>
-            <div className="w-full grid grid-cols-3 gap-5">
-              <DetailText label={"Converted Currency"}>
-                {data?.convertedCurrency}
-              </DetailText>
-              {/* <DetailText label={"Equivalent Amount"}>
-                {data?.equivalentAmount}
-              </DetailText> */}
-            </div>
-            <div className="w-full grid grid-cols-1 gap-5">
-              <DetailText label={"Description"}>{data?.description}</DetailText>
-            </div>
+          <div className="w-full flex flex-col gap-4">
+            <SectionCard title="CUSTOMER INFORMATION">
+              <div className="grid grid-cols-5 w-full gap-5">
+                <DetailText label={"Miscellaneous"}>{data?.miscellaneous}</DetailText>
+                <DetailText label={"Customer Type"}>{data?.customerType}</DetailText>
+                <DetailText label={"Registration Number"}>{data?.registrationNumber}</DetailText>
+                <DetailText label={"Account Number"}>{accNumb}</DetailText>
+                <DetailText label={"Customer Number"}>{data?.customerNumber}</DetailText>
+
+                <DetailText label={"Customer Name"}>{data?.customerName}</DetailText>
+                <DetailText label={"Account Name"}>{data?.accountName}</DetailText>
+                <DetailText label={"Account Segment"}>{data?.segment}</DetailText>
+                <DetailText label={"Account Group Type"}>{data?.accountGroupType}</DetailText>
+                <DetailText label={"Account Type"}>{data?.accountType}</DetailText>
+
+                <DetailText label={"Classification Type"}>{data?.classificationType}</DetailText>
+                <DetailText label={"SOR"}>{data?.sor}</DetailText>
+                <DetailText label={"Cost Center"}>{data?.area}</DetailText>
+                <DetailText label={"Meter Reading Code"}>{data?.meterReadingCode}</DetailText>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="RECEIPT INFORMATION">
+              <div className="w-full grid grid-cols-5 gap-5">
+                <DetailText label={"Receipt Method"}>{method}</DetailText>
+                <DetailText label={"Receipt Code"}>{data?.receiptCode}</DetailText>
+                <DetailText label={"Receipt Number"}>{data?.receiptNumber || "-"}</DetailText>
+                <DetailText label={"Receipt Date"}>
+                  {data?.receiptDate
+                    ? moment(data?.receiptDate).format(dateFormatting.dateTime)
+                    : ""}
+                </DetailText>
+                <DetailText label={"Receipt Channel"}>{resepChannel}</DetailText>
+                <DetailText label={"Payment Type"}>{payType}</DetailText>
+
+                <DetailText label={"Partner"}>{paymentGateway}</DetailText>
+                <DetailText label={"Collecting Agent"}>{colGen}</DetailText>
+                <DetailText label={"Delivery Channel"}>{devChen}</DetailText>
+                <DetailText label={"Bank"}>{bank}</DetailText>
+                <div />
+
+                <div className="col-span-5">
+                  <DetailText label={"Remark"}>{data?.receiptRemark}</DetailText>
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="AMOUNT INFORMATION">
+              <div className="w-full grid grid-cols-5 gap-5">
+                <DetailText label={"Currency"}>{currency}</DetailText>
+                <DetailText label={"Amount"}>{roundToTwoDecimal(data.amount)}</DetailText>
+                <DetailText label={"Converted Currency"}>{data?.convertedCurrency || "-"}</DetailText>
+                <DetailText label={"Rate Type"}>{rateType}</DetailText>
+                <DetailText label={"Rate Date"}>
+                  {data?.rateDate
+                    ? moment(data?.rateDate).format(dateFormatting.dateCapital)
+                    : ""}
+                </DetailText>
+
+                <DetailText label={"Rate"}>{rateString}</DetailText>
+                <DetailText label={"Equivalent Amount"}>{roundToTwoDecimal(data.equivalentAmount)}</DetailText>
+                <DetailText label={"Unapplied Amount / Balance"}>{data?.unappliedAmount || 0}</DetailText>
+                <DetailText label={"Applied Amount"}>{data?.appliedAmount || 0}</DetailText>
+                <DetailText label={"Applied Eqv Amount"}>{data?.appliedEqvAmount || 0}</DetailText>
+
+                <DetailText label={"Unapplied Eqv Amount"}>{data?.unappliedEqvAmount || 0}</DetailText>
+                <DetailText label={"Unidentified Amount"}>{data?.unidentifiedAmount || 0}</DetailText>
+                <DetailText label={"Hold Amount"}>{data?.holdAmount || 0}</DetailText>
+                <DetailText label={"Refund Amount"}>{data?.refundAmount || 0}</DetailText>
+                <DetailText label={"Transfer Amount"}>{data?.transferAmount || 0}</DetailText>
+
+                <div className="col-span-5">
+                  <DetailText label={"Description"}>{data?.description}</DetailText>
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="ALLOCATION ITEM INFORMATION">
+              <div className="flex flex-col gap-4">
+                <TableRBI
+                  dataSource={dataTable}
+                  columns={columnAllocation(page, pageSize)}
+                  tableScrolled={{ x: 1500, y: 500 }}
+                  totalData={dataTable?.length}
+                  pageSize={pageSize}
+                  current={page}
+                  onChange={handleChange}
+                  onSizeChanger={handleChange}
+                  useSelect={false}
+                />
+              </div>
+            </SectionCard>
+          </div>
           </div >
         );
       case tabData[1].value:
@@ -199,40 +213,19 @@ const ModalConfirmManualReceipt = ({
     }
   };
 
-  const handleReceipt = (e) => {
-    setValuePage(e.target.value);
-  };
-
   return (
     <div className="flex flex-col gap-4">
-      <RadioTabs
-        data={tabData}
-        onChange={handleReceipt}
-        currentPosition={valuePage}
+      <Tabs
+        activeKey={activeKey}
+        onChange={(key) => setActiveKey(key)}
+        items={tabData.map((tab) => ({
+          label: tab.value,
+          key: tab.value,
+        }))}
       />
       <div className="flex flex-col gap-4">
-        {/* <div className="text-primary text-xs font-bold uppercase">
-          {`${valuePage} Information`}
-        </div> */}
         {showSection()}
       </div>
-      {valuePage === tabData[0].value ? (
-        <div className="flex flex-col gap-4">
-          <div className="text-primary text-xs font-bold uppercase py-1">
-            {"ALLOCATION INFORMATION"}
-          </div>
-          <TablePagination
-            dataSource={dataTable}
-            columns={columnAllocation(page, pageSize)}
-            tableScrolled={{ x: 3500, y: 500 }}
-            totalData={dataTable?.length}
-            pageSize={pageSize}
-            current={page}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-          />
-        </div>
-      ) : null}
     </div>
   );
 };

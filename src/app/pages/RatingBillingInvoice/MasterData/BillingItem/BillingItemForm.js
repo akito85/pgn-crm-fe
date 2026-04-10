@@ -11,7 +11,6 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalPopUp";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
@@ -43,6 +42,7 @@ import {
   getGLAccountList,
   getClassificationTypeList,
   getAccountTypeList,
+  resetApprovalState,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import {
   showModalError,
@@ -80,6 +80,10 @@ const BillingItemForm = (props) => {
     data_accountTypeList,
     loading,
   } = useSelector((state) => state.billing_item);
+
+  const currentPosition = useSelector(
+    (state) => state.auth?.currentPosition ?? state.user?.activePosition ?? null
+  );
 
   // Stepper States
   const [current, setCurrent] = useState(0);
@@ -154,12 +158,12 @@ const BillingItemForm = (props) => {
 
   const isLoading = loading || loadingForm;
 
+  // Initial data fetch
   useEffect(() => {
     dispatch(getBillingItemCategory());
     dispatch(getBillingItemCategoryDdl());
     dispatch(getBillType());
     dispatch(getAvailableApproval());
-    dispatch(getSelectedApproval());
     dispatch(getBillingItemTypeList());
     dispatch(getBillingItemCriteriaList());
     dispatch(getBillingItemCategoryList());
@@ -168,6 +172,16 @@ const BillingItemForm = (props) => {
     dispatch(getClassificationTypeList());
     dispatch(getAccountTypeList());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (currentPosition === null || currentPosition === undefined) return;
+    dispatch(resetApprovalState());
+    setAppHierDataDetail([]);
+    setAppHierOptions([]);
+    setSelectedHierarchy(undefined);
+    form.setFieldsValue({ apphierId: null });
+    dispatch(getAvailableApproval());
+  }, [currentPosition, dispatch, form]);
 
   useEffect(() => {
     if (type === "update" && id) {
@@ -209,6 +223,8 @@ const BillingItemForm = (props) => {
         value: appHier.appHierId,
       }));
       setAppHierOptions(tempAppHier);
+    } else {
+      setAppHierOptions([]);
     }
   }, [dataListAppHierId]);
 
@@ -710,7 +726,7 @@ const BillingItemForm = (props) => {
             `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}` === item.glAccountId ||
             g.id === item.glAccountId,
         );
-        return found ? (found.glAccountDesc ?? found.name) : item.glAccountId;
+        return found ? (found.glAccount ?? found.account) : item.glAccountId;
       })();
 
       const specialGlResolved = (() => {
@@ -763,24 +779,6 @@ const BillingItemForm = (props) => {
     }
 
     handleMandatory(setListSectionInfo, listDataAttachment);
-
-    if (dataTable.length === 0) {
-      const errorBody = {
-        title: "Failed",
-        description: `Mapping Information is Mandatory. Please insert data.`,
-      };
-      dispatch(showModalError(errorBody));
-      return;
-    }
-
-    if (handleCheckMissingDetailMap(allDataDetailTable, dataTable)) {
-      const errorBody = {
-        title: "Failed",
-        description: `${handleAllMissingDetailMap(allDataDetailTable, dataTable)}. Please insert data.`,
-      };
-      dispatch(showModalError(errorBody));
-      return;
-    }
 
     const criteriaPayload = buildCriteriaPayload();
     const allValues = form.getFieldsValue(true);
@@ -941,7 +939,7 @@ const BillingItemForm = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -1174,7 +1172,7 @@ const BillingItemForm = (props) => {
           </ModalError>
         )}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

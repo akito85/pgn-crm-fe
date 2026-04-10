@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import { Alert, Checkbox, Form, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -553,7 +552,7 @@ const ViewAddresses = () => {
     ]
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
 
@@ -657,7 +656,7 @@ const ViewAddresses = () => {
             {renderModal()}
 
 
-        </LayoutMenu>
+        </>
     );
 }
 

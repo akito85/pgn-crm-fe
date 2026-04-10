@@ -1,10 +1,8 @@
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
-import {  getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
 export const columnsInvoiceTemplate = (
   search,
-  page = 1,
-  pageSize = 10,
   searchInput,
   searchedColumn,
   searchText,
@@ -12,13 +10,15 @@ export const columnsInvoiceTemplate = (
 ) => [
   {
     title: "NO",
+    key: "no",
     align: "center",
     width: 60,
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    render: (text, object, index) => index + 1,
   },
   {
     title: "INVOICE NAME",
     dataIndex: "invoiceName",
+    key: "invoiceName",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -33,6 +33,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "INVOICE TYPE",
     dataIndex: "invoiceType",
+    key: "invoiceType",
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -48,6 +49,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "METERAI",
     dataIndex: "meterai",
+    key: "meterai",
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -63,6 +65,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "SIGNATURE",
     dataIndex: "signature",
+    key: "signature",
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -78,6 +81,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "TEMPLATE",
     dataIndex: "templateName",
+    key: "templateName",
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -93,6 +97,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "CRITERIA",
     dataIndex: "criterias",
+    key: "criterias",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -112,6 +117,7 @@ export const columnsInvoiceTemplate = (
     sorter: true,
     align: "center",
     dataIndex: "startDate",
+    key: "startDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -129,6 +135,7 @@ export const columnsInvoiceTemplate = (
     sorter: true,
     align: "center",
     dataIndex: "endDate",
+    key: "endDate",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -144,6 +151,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "DESCRIPTION",
     dataIndex: "description",
+    key: "description",
     align: "left",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -162,7 +170,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "STATUS",
     dataIndex: "status",
-    fixed: "right",
+    key: "status",
     width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -178,7 +186,7 @@ export const columnsInvoiceTemplate = (
   {
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    fixed: "right",
+    key: "statusApproval",
     width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(

@@ -7,7 +7,6 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumbAdvanced from "../../../../../components/BreadCrumbAdvanced";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   createAccountInformation,
   createValidasiBankAccount,
@@ -714,7 +713,7 @@ const AccountInformation = ({ type, bankId }) => {
   const formValue = form.getFieldsValue();
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumbAdvanced routes={routes(id)} />
       <Spin spinning={loading || loadingForm}>
         <div className="mb-5">
@@ -848,7 +847,7 @@ const AccountInformation = ({ type, bankId }) => {
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

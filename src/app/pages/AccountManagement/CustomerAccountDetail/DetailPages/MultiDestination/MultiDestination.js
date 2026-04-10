@@ -1,165 +1,92 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect } from "react";
 import { useState } from "react";
 import MultiDestinationTable from "./MultiDestinationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getMultiDestination, downloadMultiDestination, getMdApprovalHistory, inactivateMultiDestination } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import {
+  getMdApprovalHistory,
+  inactivateMultiDestination,
+  getMdApprovalHierarchy,
+  getDetailMdApprovalHierarchy
+} from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import MultiDestinationApprovalModal from "./MultiDestinationApprovalModal";
-import NxApproveOrRejectModal from "../../../../../../components/Nx/NxApproveOrRejectModal";
+import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
-const MultiDestination = ({
-  id = 0,
-  idCustomer = 0,
-}) => {
+/**
+ * Multi destination list table module
+ * @param {{ accountId: number; customerId: number }} props
+ * @returns
+ */
+const MultiDestination = ({ accountId, customerId }) => {
+  // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const {
-    list_multiDestination,
-    pagination_multiDestination,
-    data_mdApprovalHistory,
-    loading,
-  } = useSelector(
-    (state) => state.multiDestination
-  );
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
-  //declare
-  const searchInput = useRef(null);
+  const { data_mdApprovalHistory } = useSelector((state) => state.multiDestination);
 
-  //state
-  const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
+  const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateMdId, setInactivateMdId] = useState(0);
-  const [inactivateMdAppHierId, setInactivateMdAppHierId] = useState(0);
   const [inactivateMdAccountNumber, setInactivateMdAccountNumber] = useState(0);
-
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [tempFilters, setTempFilters] = useState([]);
 
-  const currentData = useMemo(() => list_multiDestination, [list_multiDestination]);
-
-  const currentPagination = pagination_multiDestination;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
-
-  const handleRefresh = () => {
-    const body = {
-      page: 1,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      inputFields: tempFilters,
-    }
-
-    dispatch(
-      getMultiDestination({
-        id,
-        body,
-        isLoadMore: false,
-      })
-    );
-    setPage(1);
-  };
+  // --- Functions / handlers ---
+  const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
    * Open or close inactivate modal
    * @param {boolean} show
    * @param {number} mdId
-   * @param {number} mdAppHierId
+   * @param {string} mdAccountNumber
    */
-  const handleInactivateModal = (show, newMdId = 0, newMdAppHierId = 0, newMdAccountNumber = "") => {
+  const handleInactivateModal = (
+    show,
+    newMdId = 0,
+    newMdAccountNumber = ""
+  ) => {
     if (show) {
       setInactivateMdId(newMdId);
-      setInactivateMdAppHierId(newMdAppHierId);
-      setInactivateMdAccountNumber(newMdAccountNumber)
+      setInactivateMdAccountNumber(newMdAccountNumber);
       setShowInactiveModal(true);
     } else {
       setInactivateMdId(0);
-      setInactivateMdAppHierId(0);
       setInactivateMdAccountNumber("");
       setShowInactiveModal(false);
     }
-  }
+  };
 
   /**
    * @param {string} remark
    * @param {() => {}} handleClear
    */
-  const handleInactivateMd = (remark, handleClear) => {
+  const handleInactivateMd = ({ remark, appHierId }, handleClear) => {
     const body = {
       id: inactivateMdId,
-      appHierId: inactivateMdAppHierId,
-      remark,
-    }
+      appHierId,
+      remark
+    };
 
-    dispatch(inactivateMultiDestination({
-      body,
-    }))
-    .unwrap()
-    .then(() => {
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        inputFields: tempFilters,
-      }
-
-      dispatch(getMultiDestination({ id, body, isLoadMore: false }));
-      setShowInactiveModal(false);
-      handleClear();
-    })
-    .catch(() => {})
-  }
-
-  /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
-   */
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
+    dispatch(
+      inactivateMultiDestination({
+        body
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setShowInactiveModal(false);
+        triggerRefresh();
+        handleClear();
+      })
+      .catch(() => {});
   };
 
   /**
@@ -173,87 +100,41 @@ const MultiDestination = ({
     } else {
       setShowApprovalHistoryModal(false);
     }
-  }
-
-  const handleDownload = () => {
-    const body = {
-      page,
-      size: loadMoreSize,
-      sort,
-      inputFields: tempFilters,
-      searchs: search
-    }
-
-    dispatch(downloadMultiDestination({ body, id, }));
   };
 
-  /**
-   * @param {*} _
-   * @param {*} __
-   * @param {import("antd/lib/table/interface").SorterResult} sort
-   */
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = pagination_multiDestination?.totalPages || 0;
-
-    if (nextPage <= totalPages) {
-      const body = {
-        page: nextPage,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        inputFields: tempFilters,
-      }
-
-      await dispatch(
-        getMultiDestination({
-          id,
-          body,
-          isLoadMore: true,
-        })
-      );
-    }
-    setPage(nextPage);
-  };
-
+  // --- Effects ---
   useEffect(() => {
-    if(location?.pathname.includes('account-standard')) {
-      dispatch(getGrantedAccessAccount(`/account-management/account-standard/multi-destination`))
-    }else{
-      dispatch(getGrantedAccessAccount(`/account-management/account-onetime/multi-destination`))
+    if (isStandard) {
+      dispatch(
+        getGrantedAccessAccount(
+          `/account-management/account-standard/multi-destination`
+        )
+      );
+    } else if (isOneTime) {
+      dispatch(
+        getGrantedAccessAccount(
+          `/account-management/account-onetime/multi-destination`
+        )
+      );
     }
   }, []);
 
-  useEffect(() => {
-    const body = {
-      page,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      inputFields: tempFilters,
-    }
-
-    dispatch(getMultiDestination({ id, body, isLoadMore: false }));
-  }, [sort, search, tempFilters]);
-
+  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
     if (data_mdApprovalHistory && data_mdApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
           create: data_mdApprovalHistory?.dataApprover?.MULTI_DESTINATION || [],
-          inactive: data_mdApprovalHistory?.dataApprover?.INACTIVE_MULTI_DESTINATION || [],
+          inactive:
+            data_mdApprovalHistory?.dataApprover?.INACTIVE_MULTI_DESTINATION ||
+            []
         },
         dataHistory: {
           create: data_mdApprovalHistory?.dataHistory?.MULTI_DESTINATION || [],
-          inactive: data_mdApprovalHistory?.dataHistory?.INACTIVE_MULTI_DESTINATION || [],
-        },
+          inactive:
+            data_mdApprovalHistory?.dataHistory?.INACTIVE_MULTI_DESTINATION ||
+            []
+        }
       };
 
       setDataApprovalHistoryFix(temp);
@@ -266,41 +147,40 @@ const MultiDestination = ({
     <NxCardContainer header={"MULTI DESTINATION"}>
       <NxBaseContainer border>
         <MultiDestinationTable
-          data={dataSourceWithKeys}
-          idAccount={id}
-          idCustomer={idCustomer}
-          totalElement={pagination_multiDestination.totalElements}
-          page={page}
-          onSort={onSort}
+          accountId={accountId}
+          customerId={customerId}
           handleInactivateModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleApproval={setShowApprovalModal}
-          handleDownload={handleDownload}
-          tempFilters={tempFilters}
-          handleLoadMore={handleLoadMore}
-          hasMore={hasMore}
-          searchText={searchText}
-          search={search}
-          searchedColumn={searchedColumn}
-          searchInput={searchInput}
-          handleSearch={handleSearch}
-          loading={loading}
+          refreshSignal={refreshSignal}
         />
 
         <MultiDestinationApprovalModal
-          id={id}
+          accountId={accountId}
           isOpen={showApprovalModal}
           handleCancel={() => setShowApprovalModal(false)}
-          afterFinish={handleRefresh}
+          afterFinish={triggerRefresh}
         />
 
         {/* Inactivate Modal */}
-        <NxApproveOrRejectModal
+        <NxInactivateModal
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
           customMessage={`Are you sure you want to inactivate multi destination - ${inactivateMdAccountNumber}?`}
-          onFinish={({ remark }, handleClear) => handleInactivateMd(remark, handleClear)}
+          onFinish={({ remark, appHierId }, handleClear) =>
+            handleInactivateMd({ remark, appHierId }, handleClear)
+          }
+          named={inactivateMdAccountNumber}
+          menu="multi destination"
+          sliceName="multiDestination"
+          approvalOptionsName="list_mdApprovalOptions"
+          approvalHierarchtDetailsName="list_mdApprovalHierarchyDetail"
+          loadingListApprovalOptionsName="loading_listMdApprovalOption"
+          loadingListHierarchyDetailName="loading_listMdApprovalHierarchyDetail"
+          loadingInactivateName="loading_inactivateMd"
+          getApprovalOptions={getMdApprovalHierarchy}
+          getApprovalHierarchyDetails={getDetailMdApprovalHierarchy}
         />
 
         {/* Approval History Modal */}
@@ -308,8 +188,6 @@ const MultiDestination = ({
           isOpen={showApprovalHistoryModal}
           handleClose={() => handleApprovalHistoryModal(false)}
           header={"Approval History"}
-          width={850}
-          tabOptions={handleApprovalHistoryOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
         />

@@ -9,7 +9,6 @@ import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Col
 
 // Global Custom Components
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../../components/CardContainer";
 import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -243,7 +242,7 @@ const ViewWarranty = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -290,7 +289,7 @@ const ViewWarranty = () => {
           handleOpenModal={() => setRefundModal(true)}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

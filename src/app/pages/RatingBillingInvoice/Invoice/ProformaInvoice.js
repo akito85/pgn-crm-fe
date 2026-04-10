@@ -7,7 +7,6 @@ import DocViewer from "react-doc-viewer";
 import SelectComponent from "../../../../components/SelectComponent";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsInvoice } from "./TableViewInvoice";
@@ -421,7 +420,7 @@ const ProformaInvoice = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -528,7 +527,7 @@ const ProformaInvoice = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

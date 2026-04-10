@@ -1,0 +1,250 @@
+
+import { Spin, Tag, Tabs } from "antd";
+import moment from "moment";
+import React, { useEffect, useState, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import DetailSection from "../../../../../components/DetailSection";
+import DetailText from "../../../../../components/DetailText";
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import CardContainer from "../../../../../components/CardContainer";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import FooterDetail from "../../../../../components/FooterDetail";
+import {
+    getDetailPaymentPeriod,
+    approveOrRejectPaymentPeriod,
+} from "../../../../../redux/slices/receipt_collection/paymentPeriod";
+import { dateFormatting } from "../../../../../utils";
+import { configApp } from "../../../../../constants/configApp";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
+import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
+
+const getStatusColor = (status) => {
+    switch (status?.toUpperCase()) {
+        case "ACTIVE": return "green";
+        case "INACTIVE": return "red";
+        default: return "default";
+    }
+};
+
+const getApprovalStatusColor = (status) => {
+    const s = status?.toUpperCase();
+    if (s === "APPROVED") return "green";
+    if (s === "REJECTED") return "red";
+    if (s?.includes("WAITING")) return "orange";
+    return "blue";
+};
+
+const ViewPaymentPeriod = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const id = location.state?.id;
+    const items = [
+        { label: "Payment Period", key: "Payment Period" },
+        { label: "Attachment", key: "Attachment" }
+    ];
+
+    const {
+        loading,
+        data_detail,
+    } = useSelector((state) => state.paymentPeriod);
+
+    const showButtonApproval = !!data_detail?.tApprovalDto?.isApprover;
+
+    const [activeTab, setActiveTab] = useState("Payment Period");
+    const [modalAction, setModalAction] = useState({ open: false, type: "" });
+    const [loadingConfirm, setLoadingConfirm] = useState(false);
+
+    // Initial Fetch
+    useEffect(() => {
+        if (id) {
+            dispatch(getDetailPaymentPeriod(id));
+        }
+    }, [dispatch, id]);
+
+    const detail = data_detail?.paymentPeriodDetail || {};
+    const attachments = data_detail?.attachmentList || [];
+
+
+    // Breadcrumbs
+    const routes = [
+        {
+            path: "/",
+            breadcrumbName: "System Setup",
+        },
+        {
+            path: "/system-setup",
+            breadcrumbName: "Master Data",
+        },
+        {
+            path: "/system-setup/payment-period",
+            breadcrumbName: "Payment Period",
+        },
+        {
+            path: "",
+            breadcrumbName: "Detail Payment Period",
+        },
+    ];
+
+    const handleBack = useCallback(() => {
+        navigate(-1);
+    }, [navigate]);
+
+    const handleTabChange = (key) => {
+        setActiveTab(key);
+    };
+
+    const handleApprove = () => setModalAction({ open: true, type: "Approve" });
+    const handleReject = () => setModalAction({ open: true, type: "Reject" });
+    const handleCloseModal = () => setModalAction({ ...modalAction, open: false });
+
+    const handleSubmitDecision = (values, handleClear) => {
+        setLoadingConfirm(true);
+        const body = {
+            id: id,
+            action: modalAction.type.toUpperCase(),
+            remark: values.remark,
+            approvalId: detail.approvalId
+        };
+
+        dispatch(approveOrRejectPaymentPeriod(body))
+            .unwrap()
+            .then(() => {
+                handleClear();
+                handleCloseModal();
+                setLoadingConfirm(false);
+                dispatch(showModalSuccess({
+                    title: "Success",
+                    description: `Payment Period ${modalAction.type}d successfully`
+                }));
+                navigate("/system-setup/payment-period");
+            })
+            .catch((err) => {
+                handleCloseModal();
+                setLoadingConfirm(false);
+                dispatch(showModalError({ title: "Failed", description: err.message || "An error occurred" }));
+            });
+    };
+
+    const renderPaymentPeriodInfo = () => (
+        <div>
+            <DetailSection header={"PAYMENT PERIOD INFORMATION"}>
+                <div className="w-full grid grid-cols-4 gap-4">
+                    <DetailText label="Period Name">{detail.periodName}</DetailText>
+                    <DetailText label="Start Date">
+                        {detail.startDate
+                            ? moment(detail.startDate).format(dateFormatting.dateCapital)
+                            : ""}
+                    </DetailText>
+                    <DetailText label="End Date">
+                        {detail.endDate
+                            ? moment(detail.endDate).format(dateFormatting.dateCapital)
+                            : ""}
+                    </DetailText>
+                    <DetailText label="Status">
+                        <Tag color={getStatusColor(detail.status)}>
+                            {detail.status}
+                        </Tag>
+                    </DetailText>
+                    <DetailText label="Status Approval">
+                        <Tag color={getApprovalStatusColor(detail.statusApproval)}>
+                            {detail.statusApproval}
+                        </Tag>
+                    </DetailText>
+                    <DetailText label="Status Open">
+                        <Tag color={detail.statusOpen?.toUpperCase() === "OPEN" ? "green" : "red"}>
+                            {detail.statusOpen}
+                        </Tag>
+                    </DetailText>
+                    <div className="col-span-4">
+                        <DetailText label="Description">
+                            {detail.description}
+                        </DetailText>
+                    </div>
+                </div>
+            </DetailSection>
+
+            <DetailSection header={"HISTORY LOG INFORMATION"}>
+                <div className="w-full grid grid-cols-4 gap-4">
+                    <DetailText label={"Record ID"}>{detail.id}</DetailText>
+                    <DetailText label={"Created Date"}>
+                        {detail.createdDate
+                            ? moment(detail.createdDate).format("DD MMM YYYY HH:mm:ss")
+                            : ""}
+                    </DetailText>
+                    <DetailText label={"Created By"}>{detail.createdBy}</DetailText>
+                    <DetailText label={"Updated Date"}>
+                        {detail.updatedDate
+                            ? moment(detail.updatedDate).format("DD MMM YYYY HH:mm:ss")
+                            : ""}
+                    </DetailText>
+                    <DetailText label={"Updated By"}>{detail.updatedBy}</DetailText>
+                </div>
+            </DetailSection>
+        </div>
+    );
+
+    const renderAttachmentInfo = () => (
+        <CardContainer header={"ATTACHMENT INFORMATION"}>
+            <AttachmentComponent
+                type={"detail"}
+                data={attachments}
+                updateData={() => { }}
+                typeSelector="paymentPeriod"
+                service={receiptCollectionHttpService}
+                configApplication={configApp.PAYMENT_SERVICE}
+            />
+        </CardContainer>
+    );
+
+    const renderSection = (key) => {
+        switch (key) {
+            case "Payment Period":
+                return renderPaymentPeriodInfo();
+            case "Attachment":
+                return renderAttachmentInfo();
+            default:
+                return <></>;
+        }
+    };
+
+    return (
+        <>
+            <BreadCrumb routes={routes} />
+            <Spin spinning={loading}>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={handleTabChange}
+                    items={items.map(item => ({
+                        label: item.label,
+                        key: item.key,
+                        children: renderSection(item.key)
+                    }))}
+                />
+
+                <FooterDetail
+                    onCancel={handleBack}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    showApproval={showButtonApproval}
+                />
+
+                <ModalApproveOrReject
+                    isOpen={modalAction.open}
+                    handleCloseModal={handleCloseModal}
+                    onFinish={handleSubmitDecision}
+                    approveOrReject={modalAction.type}
+                    header={modalAction.type}
+                    menu="Payment Period"
+                    named={detail.periodName}
+                    loading={loadingConfirm}
+                />
+            </Spin>
+        </>
+    );
+};
+
+export default ViewPaymentPeriod;

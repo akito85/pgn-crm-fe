@@ -9,7 +9,6 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import {
   getDetailActivityNamePaginate,
   createUpdateActivityName,
@@ -171,7 +170,7 @@ const FormActivityName = (props) => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form
@@ -345,7 +344,7 @@ const FormActivityName = (props) => {
 
       {/* render modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

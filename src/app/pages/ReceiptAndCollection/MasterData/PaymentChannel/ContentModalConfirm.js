@@ -41,7 +41,7 @@ const ContentModalConfirm = ({
                 </DetailText>
                 <DetailText label={"Name"}>{data?.name}</DetailText>
                 <DetailText label={"Category"}>{data?.category}</DetailText>
-                <DetailText label={"Type"}>{data?.type}</DetailText>
+
                 <DetailText label={"Eff Start Date"}>
                   {moment(data?.effStartDate).format(dateFormatting.date)}
                 </DetailText>
@@ -66,9 +66,9 @@ const ContentModalConfirm = ({
               showSelect={false}
               disableSelect={true}
               approvalName={
-                (dataOption || []).filter(
+                (dataOption || []).find(
                   (data) => data.value === selectedHierarchy
-                )?.[0].name || ""
+                )?.name || ""
               }
               dataTable={listDataAppHierDetail}
               selectedHierarchy

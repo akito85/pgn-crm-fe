@@ -1,38 +1,49 @@
-import { useRef, useState, useEffect, useMemo, Fragment } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
 import DetailText from "../../../../../../components/DetailText";
 import NxTable from "../../../../../../components/Nx/NxTable";
-import { getMultiDestinationApproval, approveOrRejectAllMultiDestination } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import {
+  getMultiDestinationApproval,
+  approveOrRejectAllMultiDestination
+} from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../../../assets/Icon/index";
 
+/**
+ * Modal for approving or rejecting pending multi-destination records.
+ * Displays a two-step wizard: select records + enter remark, then confirm.
+ * @param {{ accountId: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @returns
+ */
 const MultiDestinationApprovalModal = ({
-  id = 0,
+  accountId,
   isOpen,
   handleCancel = () => {},
-  afterFinish = () => {},
+  afterFinish = () => {}
 }) => {
-  // Selector
-  const { list_multiDestinationApproval, pagination_multiDestinationApproval, loading } = useSelector(
-    (state) => state.multiDestination
-  );
+  // --- Hooks ---
+  const {
+    list_multiDestinationApproval,
+    pagination_multiDestinationApproval,
+    loading_listMdApproval,
+    loading_approveMd,
+    loading_rejectMd
+  } = useSelector((state) => state.multiDestination);
 
-  // Declaration
-  const containerRef = useRef(null);
+  const loadingApproval = loading_approveMd || loading_rejectMd;
+
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = list_multiDestinationApproval;
 
-  // State
   const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -43,36 +54,47 @@ const MultiDestinationApprovalModal = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
     right: []
   });
 
-  // Initial fetch - Load data when modal opens
+  // --- Effects ---
+  // Fetches the first page of pending approvals whenever the modal opens or
+  // any filter/search/sort parameter changes. Resets the page counter to 1.
   useEffect(() => {
     if (isOpen) {
       const body = {
-        inputFields: tempFilters,
         page,
         size: loadMoreSize,
         sort,
         searchs: search,
-      }
+        filters,
+        filterRules
+      };
 
       dispatch(
         getMultiDestinationApproval({
-          id,
+          id: accountId,
           body,
-          isLoadMore: false,
+          isLoadMore: false
         })
       );
       setPage(1);
     }
-  }, [dispatch, isOpen, search, sort]);
+  }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
-  // Function Search API
+  // --- Functions / handlers ---
+  /**
+   * Handles column search: confirms the search, updates search text/column state,
+   * and resets the page if the filter value has changed.
+   * @param {string[]} selectedKeys - The selected filter values.
+   * @param {Function} confirm - Ant Design confirm callback to apply the filter.
+   * @param {string} dataIndex - The column key being searched.
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -83,41 +105,52 @@ const MultiDestinationApprovalModal = ({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
 
-  // Load more handler
+  /**
+   * Fetches the next page of multi-destination approvals and appends it to the
+   * existing list. Does nothing if all pages have already been loaded.
+   * @returns {Promise<void>}
+   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_multiDestinationApproval?.totalPages || 0;
+    const totalPage = pagination_multiDestinationApproval?.totalPage || 0;
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
       const body = {
-        inputFields: tempFilters,
         page: nextPage,
         size: loadMoreSize,
         sort,
         searchs: search,
-      }
+        filters,
+        filterRules
+      };
 
       dispatch(
         getMultiDestinationApproval({
-          id,
+          id: accountId,
           body,
-          isLoadMore: true,
+          isLoadMore: true
         })
       );
       setPage(nextPage);
     }
   };
 
+  // --- Derived values ---
   const hasMore =
-    dataSource.length < (pagination_multiDestinationApproval?.totalElements || 0);
+    list_multiDestinationApproval.length <
+    (pagination_multiDestinationApproval?.totalElement || 0);
 
-  // Sort Table
+  /**
+   * Handles table sort changes and updates the sort query string.
+   * @param {object} _ - Pagination (unused).
+   * @param {object} __ - Filters (unused).
+   * @param {{ field: string; order: "ascend" | "descend" | undefined }} sorter
+   */
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -131,90 +164,82 @@ const MultiDestinationApprovalModal = ({
     selectedRowKeys,
     onChange: (newSelectedRowKeys, newSelectedRows) => {
       setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
+      setSelectedRows(
+        newSelectedRows.map((newSelectedRow) => ({ ...newSelectedRow }))
+      );
     },
-    preserveSelectedRowKeys: true,
+    preserveSelectedRowKeys: true
   };
 
-  // Step
   const steps = [
-    {
-      title: "MULTI DESTINATION",
-    },
-    {
-      title: "CONFIRMATION",
-    },
+    { key: "md", title: "MULTI DESTINATION" },
+    { key: "mdc", title: "CONFIRMATION" }
   ];
 
-  const formFields = [
-    [
-      "remark",
-    ],
-  ];
+  const formFields = [["remark"]];
 
-  // Button Next
+  /**
+   * Advances the wizard to the next step after validating the current step.
+   * On step 0, requires at least one row to be selected before proceeding.
+   * @returns {Promise<void>}
+   */
   const next = async () => {
     try {
       if (current === 0) {
         if (!selectedRowKeys.length) {
           const errorBody = {
             title: "Failed",
-            description: `Please select at least one record`,
+            description: `Please select at least one record`
           };
           dispatch(showModalError(errorBody));
 
           throw new Error("No record was selected");
         } else {
           await form.validateFields([formFields[current]]);
-          setCurrent(prev => prev + 1);
+          setCurrent((prev) => prev + 1);
         }
       } else {
-        form.validateFields([formFields[current]])
+        form.validateFields([formFields[current]]);
       }
-    } catch {
-
-    }
+    } catch {}
   };
 
-  // Button Previous
+  /**
+   * Returns to the previous step.
+   */
   const prev = () => {
-    setCurrent(prev => prev - 1);
+    setCurrent((prev) => prev - 1);
   };
 
-  // Scroll Left Handler
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  // Scroll Right Handler
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Scroll Handler
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
-
-  // Handle Next
+  /**
+   * Delegates to `next()` to advance the wizard step.
+   */
   const handleButtonNext = () => {
     next();
-    scrollRightHandler();
   };
 
-  // Mapping Step
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
+  /**
+   * Resets the entire wizard to its initial state: clears selection, search,
+   * pagination, form fields, and closes the modal. Also triggers `afterFinish`.
+   */
+  const resetForm = () => {
+    afterFinish();
+    setCurrent(0);
+    form.resetFields();
+    handleCancel();
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+  };
 
-  // Handle Cancel Form
+  /**
+   * Cancels the modal without triggering `afterFinish`: closes the modal and
+   * resets all local state.
+   */
   const handleCancelForm = () => {
     handleCancel();
     setSelectedRowKeys([]);
@@ -228,52 +253,50 @@ const MultiDestinationApprovalModal = ({
     form.resetFields();
   };
 
+  /**
+   * Validates the form, dispatches the approve/reject action for the selected
+   * rows, and resets the modal on success.
+   * @param {"APPROVE" | "REJECT"} action - The action to perform on selected records.
+   * @returns {Promise<void>}
+   */
   const handleSave = async (action) => {
     try {
       const values = await form.validateFields();
 
-      const body = selectedRows.filter(row => row.approvalType === "MULTI_DESTINATION").map((row) => ({
-        id: row.id,
-        approvalId: row.tappId,
-        action,
-        description: values.remark,
-      }));
+      const body = selectedRows
+        .filter((row) => row.approvalType === "MULTI_DESTINATION")
+        .map((row) => ({
+          id: row.id,
+          approvalId: row.tappId,
+          action,
+          description: values.remark
+        }));
 
-      const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_MULTI_DESTINATION").map((row) => ({
-        id: row.id,
-        approvalId: row.tappId,
-        action,
-        description: values.remark,
-      }))
+      const inactiveBody = selectedRows
+        .filter((row) => row.approvalType === "INACTIVE_MULTI_DESTINATION")
+        .map((row) => ({
+          id: row.id,
+          approvalId: row.tappId,
+          action,
+          description: values.remark
+        }));
 
       dispatch(
         approveOrRejectAllMultiDestination({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected",
+          action
         })
       )
-      .unwrap()
-      .then(() => {
-        afterFinish();
-        setCurrent(0);
-        form.resetFields();
-        handleCancel();
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
-        setSearch({});
-        setPage(1);
-        setSort("");
-        setSearchText("");
-        setSearchedColumn("");
-      })
-      .catch((error) => {})
-    } catch {
-
-    }
+        .unwrap()
+        .then(() => {
+          resetForm();
+        })
+        .catch((error) => {});
+    } catch {}
   };
 
-  const baseColumns = useMemo(
+  const columnDefinitions = useMemo(
     () =>
       getMultiDestinationColumns(
         search,
@@ -281,124 +304,108 @@ const MultiDestinationApprovalModal = ({
         searchedColumn,
         searchText,
         handleSearch,
-        false,
+        false
       ),
-    [page, loadMoreSize, searchedColumn, searchText]
+    [search, searchInput, searchedColumn, searchText]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(
+    () => nxApplyFixedColumns(columnDefinitions, fixedColumns),
+    [columnDefinitions, fixedColumns]
+  );
 
   const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
+    return list_multiDestinationApproval?.map((item, index) => ({
       ...item,
-      key: index + 1,
+      key: index + 1
     }));
-  }, [dataSource]);
+  }, [list_multiDestinationApproval]);
 
   return (
-    <Fragment>
+    <>
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
-        header="Approval Multi Destination Information"
+        title="APPROVAL MULTI DESTINATION INFORMATION"
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
-            <ButtonComponent type={"default"} onClick={handleCancelForm}>
+            <Button
+              type={"menu"}
+              onClick={handleCancelForm}
+              disabled={loadingApproval}
+            >
               Cancel
-            </ButtonComponent>
-
-            <div className="flex gap-x-4">
-              <ButtonComponent
+            </Button>
+            <div className="flex">
+              <Button
                 onClick={() => {
                   prev();
-                  scrollLeftHandler();
                 }}
-                type={"default"}
-                disabled={current < 1}
+                type={"menu"}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
-              </ButtonComponent>
+              </Button>
 
-              { current < steps.length - 1 && (
-                <ButtonComponent
+              {current < steps.length - 1 && (
+                <Button
                   onClick={() => handleButtonNext()}
                   type={"submit"}
-                  disabled={current > steps.length - 1 || steps[current].disabled}
+                  disabled={
+                    current > steps.length - 1 ||
+                    steps[current].disabled ||
+                    loadingApproval
+                  }
                 >
                   Next
-                </ButtonComponent>
+                </Button>
               )}
               {current === steps.length - 1 && (
                 <>
-                  <ButtonComponent
+                  <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
+                    disabled={!loading_rejectMd && loadingApproval}
+                    loading={loading_rejectMd}
                   >
                     Reject
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading}
+                    icon={
+                      <SVGIcon width={14} height={14} name="IconSquareCheck" />
+                    }
+                    className="flex-row-reverse"
+                    disabled={!loading_approveMd && loadingApproval}
+                    loading={loading_approveMd}
                   >
                     Approve
-                  </ButtonComponent>
+                  </Button>
                 </>
               )}
             </div>
           </div>
         }
       >
-        <NxBaseContainer
-          border={{
-            top: false,
-            right: false,
-            left: false,
-          }}
-          rounded={false}
-        >
-          <div className="flex flex-row justify-center">
-            <div
-              onScroll={handleScroll}
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-            >
-              <Steps current={current} items={items} labelPlacement="vertical" />
-            </div>
-          </div>
-        </NxBaseContainer>
+        <NxFormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={handleButtonNext}
+          inModal
+        />
 
         <div className="p-4">
           {/* STEP 1: MULTI DESTINATION INFORMATION */}
-          <div
-            className={`steps-content ${current !== 0 ? "hidden" : ""}`}
-          >
-            <Form
-              layout="vertical"
-              form={form}
-              id={"formApprove"}
-            >
+          <div className={`steps-content ${current !== 0 ? "hidden" : ""}`}>
+            <Form layout="vertical" form={form} id={"formApprove"}>
               <div className="w-full grid grid-cols-1 gap-x-4">
                 <NxBaseContainer
                   border
@@ -407,14 +414,18 @@ const MultiDestinationApprovalModal = ({
                   <NxTable
                     className={"[&_.ant-checkbox]:scale-90"}
                     dataSource={dataSourceWithKeys}
-                    columns={processedColumns}
-                    totalData={pagination_multiDestinationApproval?.totalElements || 0}
-                    tableScrolled={{ y: 400, x: dataSourceWithKeys.length ? "max-content" : 5000 }}
+                    columns={columns}
+                    totalData={
+                      pagination_multiDestinationApproval?.totalElement || 0
+                    }
+                    tableScrolled={{
+                      x: dataSourceWithKeys.length ? "max-content" : 5000
+                    }}
                     onSort={onSort}
                     columnDefinitions={columnDefinitions}
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
-                    loading={loading}
+                    loading={loading_listMdApproval}
                     showExport={false}
                     rowSelection={rowSelection}
                     usePagination={false}
@@ -428,7 +439,7 @@ const MultiDestinationApprovalModal = ({
                     label={"Remark"}
                     name={"remark"}
                     rules={[
-                      { required: true, message: "Please input your Remark!" },
+                      { required: true, message: "Please input your Remark!" }
                     ]}
                     className="no-margin-form"
                   >
@@ -444,20 +455,18 @@ const MultiDestinationApprovalModal = ({
           </div>
 
           {/* STEP 2: CONFIRMATION */}
-          <div
-            className={`steps-content ${current !== 1 ? "hidden" : ""}`}
-          >
-            <NxBaseContainer
-              border
-              header={"Confirmation"}
-            >
+          <div className={`steps-content ${current !== 1 ? "hidden" : ""}`}>
+            <NxBaseContainer border header={"Confirmation"}>
               <div className="flex flex-col gap-y-4">
-
                 <NxTable
                   dataSource={selectedRows}
-                  columns={processedColumns}
-                  totalData={pagination_multiDestinationApproval?.totalElements || 0}
-                  tableScrolled={{ y: 400, x: selectedRows.length ? "max-content" : 5000 }}
+                  columns={columns}
+                  totalData={
+                    pagination_multiDestinationApproval?.totalElement || 0
+                  }
+                  tableScrolled={{
+                    x: selectedRows.length ? "max-content" : 5000
+                  }}
                   onSort={onSort}
                   columnDefinitions={columnDefinitions}
                   fixedColumns={fixedColumns}
@@ -474,7 +483,7 @@ const MultiDestinationApprovalModal = ({
           </div>
         </div>
       </NxModal>
-    </Fragment>
+    </>
   );
 };
 

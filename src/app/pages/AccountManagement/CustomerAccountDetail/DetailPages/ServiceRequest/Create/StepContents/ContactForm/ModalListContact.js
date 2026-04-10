@@ -226,7 +226,6 @@ export default function ModalListContact({
       isOpen={isOpen}
       handleCancel={handleBack}
       handleOk={handleBack}
-      header={"CHOOSE CONTACT"}
       width={1200}
       title={"CHOOSE CONTACT"}
       footer={

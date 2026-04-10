@@ -8,7 +8,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
     getAllApprovalList,
     getListApprovalById,
@@ -345,7 +344,7 @@ const ListFormOffset = (props) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <RadioTabs
@@ -467,7 +466,7 @@ const ListFormOffset = (props) => {
                     selectedHierarchy={selectedHierarchy}
                 />
             </ModalCustom>
-        </LayoutMenu>
+        </>
     );
 };
 

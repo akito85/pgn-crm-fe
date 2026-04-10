@@ -1,122 +1,145 @@
-import React, { useRef, useState } from "react";
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
-import CardComponent from "../../../../../../../components/Card/CardComponent";
-import DetailText from "../../../../../../../components/DetailText";
+import React, { useMemo, useRef, useState } from "react";
 import moment from "moment";
-import { dateFormatting } from "../../../../../../../utils";
-import { getColumnSearchPropsPaging } from "../../../../../../../utils/getColumnSearchProps";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import { dateFormatting, renderColumn } from "../../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxModal from "../../../../../../../components/Nx/NxModal";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import { sorterFunction } from "../../../../../../../utils/sorterFunction";
+import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const columns = (
-  page = 1,
-  pageSize = 10,
+  search,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  onFilter = () => {},
-  sorter = () => {}
+  handleSearch,
 ) => {
   return [
     {
+      key: "no",
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
+      key: "country",
       title: "COUNTRY",
       dataIndex: "country",
-      sorter: true,
       width: 150,
-      onFilter: (value, record) => onFilter("country", value, record),
-      sorter: (a, b) => sorter("country", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("country", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "country",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
+      render: (text) => {
+        return renderColumn("country", searchedColumn, searchText, text, false, "input", search)
+      }
     },
     {
+      key: "percentage",
       title: "PERCENTAGE (%)",
       dataIndex: "percentage",
       align: "right",
-      sorter: true,
       width: 150,
-      onFilter: (value, record) => onFilter("percentage", value, record),
-      sorter: (a, b) => sorter("percentage", a, b),
-      ...getColumnSearchPropsPaging(
+      sorter: (a, b) => sorterFunction("percentage", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "percentage",
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        true
       ),
+      render: (text) => {
+        return renderColumn("percentage", searchedColumn, searchText, text, false, "input", search)
+      }
     },
   ];
 };
 
 const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
+  const listDataDetail = data_detail?.srcDistDtl || [];
+
+  const dataSoueceWithKeys =  useMemo(() => {
+    if (!listDataDetail?.length) return [];
+
+    return listDataDetail.map((item, index) => ({
+      ...item,
+      key: `product-distribution-detail-${item.id || index}`,
+    }));
+  }, [listDataDetail])
+  
   // Declaration
   const searchInput = useRef(null);
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState({});
 
-    // Function Search Column
-    const handleSearch = (selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-      if (searchedColumn !== tempSearchColumn) {
-        setPage(1);
+  // Function Search Column
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    searchedColumn(dataIndex);
+    setSearch((prevState) => {
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
       }
-      setSearchedColumn(tempSearchColumn);
-    };
-
-      // Function Change Pagination
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+    });
   };
 
-  // Filter Column
-  const onFilter = (dataIndex, value, record) => {
-    const fixSearchText = value.toLowerCase();
-    const recordValue = record[dataIndex];
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
 
-    if (recordValue != null) {
-      return recordValue.toString().toLowerCase().includes(fixSearchText);
-    }
+  const baseColumns = useMemo(() =>
+    columns(
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ), [search, searchText, searchedColumn]
+  );
 
-    return false;
-  };
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = baseColumns.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
+ 
+  const processedColumns = useMemo(() => {
+    return nxApplyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
 
-  // Sorter Column
-  const sorter = (fieldSort, a, b) => {
-    const handleDataSort = (obj) => {
-      const value = obj[fieldSort];
-      return value != null ? value.toString().toLowerCase() : "";
-    };
-
-    let fa = handleDataSort(a);
-    let fb = handleDataSort(b);
-
-    return fa.localeCompare(fb);
-  };
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns, fixedColumns]);
 
   return (
-    <ModalCustom
-    isOpen={openModal}
-    handleCancel={closeModal}
+    <NxModal
+      isOpen={openModal}
+      handleCancel={closeModal}
       type="detail"
-      header="Detail Raw Material Source"
+      title="DETAIL PRODUCT DISTRIBUTION SOURCE"
       width={800}
       footer={
         <ButtonComponent type={"default"} onClick={closeModal}>
@@ -124,59 +147,57 @@ const ProductDistributionDetail = ({data_detail, openModal, closeModal}) => {
         </ButtonComponent>
       }
     >
-      <CardComponent header={"Raw Material Source Information"} cols={3}>
-        <DetailText label={"Effective Date"}>
-          {data_detail?.effectiveDate
-            ? moment(data_detail.effectiveDate).format(dateFormatting.date)
-            : ""}
-        </DetailText>
-        <DetailText label={"Local (%)"}>{data_detail?.value1}</DetailText>
-        <DetailText label={"Export (%)"}>{data_detail?.value2}</DetailText>
-        <DetailText label={"Description"}>
-          {data_detail?.description}
-        </DetailText>
-      </CardComponent>
+      <div className="flex flex-col p-4 gap-4">
 
-      <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-        <DetailText label="Record ID">{data_detail?.id}</DetailText>
-        <DetailText label="Created Date">
-          {data_detail?.createdDate
-            ? moment(data_detail.createdDate).format(dateFormatting.dateTime)
-            : ""}
-        </DetailText>
-        <DetailText label="Created By">{data_detail?.createdBy}</DetailText>
-        <DetailText label="Updated Date">
-          {data_detail?.updatedDate
-            ? moment(data_detail.updatedDate).format(dateFormatting.dateTime)
-            : ""}
-        </DetailText>
-        <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
-      </CardComponent>
+        <NxBaseContainer border header={"PRODUCT DISTRIBUTION INFORMATION"}>
+          <div className="w-full grid grid-cols-3 gap-4">
+            <NxDetailText label={"Effective Date"}>
+              {data_detail?.effectiveDate
+                ? moment(data_detail.effectiveDate).format(dateFormatting.date)
+                : ""}
+            </NxDetailText>
+            <NxDetailText label={"Local (%)"}>{data_detail?.value1}</NxDetailText>
+            <NxDetailText label={"Export (%)"}>{data_detail?.value2}</NxDetailText>
+            <NxDetailText label={"Description"}>
+              {data_detail?.description}
+            </NxDetailText>
+          </div>
+        </NxBaseContainer>
 
-      <div className="text-primary text-xs font-bold uppercase pt-4">
-        Product Distribution Export Detail
+        <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
+          <div className="w-full grid grid-cols-5 gap-4">
+            <NxDetailText label="Record ID">{data_detail?.id}</NxDetailText>
+            <NxDetailText label="Created Date">
+              {data_detail?.createdDate
+                ? moment(data_detail.createdDate).format(dateFormatting.dateTime)
+                : ""}
+            </NxDetailText>
+            <NxDetailText label="Created By">{data_detail?.createdBy}</NxDetailText>
+            <NxDetailText label="Updated Date">
+              {data_detail?.updatedDate
+                ? moment(data_detail.updatedDate).format(dateFormatting.dateTime)
+                : ""}
+            </NxDetailText>
+            <NxDetailText label="Updated By">{data_detail?.updatedBy}</NxDetailText>
+          </div>
+        </NxBaseContainer>
+
+        <NxBaseContainer border header={"PRODUCT DISTRIBUTION DETAIL"}>
+          <NxTable
+            idTable="detail-product-distribution"
+            dataSource={dataSoueceWithKeys}
+            tableScrolled={{ y: 525, x: dataSoueceWithKeys?.length ? "max-content" : "100%" }}
+            columns={processedColumns}
+            usePagination={false}
+            useInfiniteScroll={false}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            columnDefinitions={columnDefinitions}
+            showAdvanceSearch={false}
+          />
+        </NxBaseContainer>
       </div>
-
-      <TablePaginationNew
-        type="FE"
-        dataSource={data_detail?.srcDistDtl}
-        totalData={data_detail?.srcDistDtl?.length}
-        current={page}
-        pageSize={pageSize}
-        tableScrolled={{ y: 525, x: "auto" }}
-        onChange={handleChange}
-        columns={columns(
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          onFilter,
-          sorter
-        )}
-      />
-    </ModalCustom>
+    </NxModal>
   )
 }
 

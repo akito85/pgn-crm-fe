@@ -11,6 +11,7 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_mana
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
+import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
 
 const ServiceAgreementTable = ({
     data = [],
@@ -40,356 +41,168 @@ const ServiceAgreementTable = ({
         left: [],
     }));
 
-    // All Service Agreement table actions (custom implementation)
-    const itemActions = useMemo(
-        () => [
-            // Delete Draft Action
-            {
-                action: "Delete",
-                type: "table",
-                render: (record, actionLength, index) => {
-                    const canDelete =
-                        record?.status === "DRAFT" &&
-                        (record?.approvalStatus === "DRAFT" || record?.approvalStatus === "REJECTED");
-
-                    const content =
-                        actionLength > 2 ? (
-                            <ButtonComponent
-                                icon={<SVGIcon name="IconDelete" width={20} color={canDelete ? "#be3036" : "#c2cad2"} />}
-                                border={false}
-                                disabled={!canDelete}
-                                onClick={canDelete ? () => handleOpenDeleteDraft(record?.id) : undefined}
-                            >
-                                <span className="text-black ml-3">Delete</span>
-                            </ButtonComponent>
-                        ) : (
-                            <Tooltip title={canDelete ? "Delete" : ""}>
-                                <SVGIcon
-                                    name="IconDelete"
-                                    width={20}
-                                    color={canDelete ? "#be3036" : "#c2cad2"}
-                                    className={canDelete ? undefined : "disabled cursor-not-allowed"}
-                                    onClick={canDelete ? () => handleOpenDeleteDraft(record?.id) : undefined}
-                                />
-                            </Tooltip>
-                        );
-
-                    return <Fragment key={`table-action-delete-${index}`}>{content}</Fragment>;
-                },
+    // Map standard actions via nxGetAccountActions and add SA-specific actions
+    const itemActions = [
+        ...nxGetAccountActions({
+            handleDelete: handleOpenDeleteDraft,
+            handleView: ({ id: idSA }) => {
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_AGREEMENT, {
+                    state: { idSA, idAccount, idCustomer, type }
+                });
             },
-
-            // View/Detail Action
-            {
-                action: "View",
-                type: "table",
-                render: (record, actionLength, index) => {
-                    const content =
-                        actionLength > 2 ? (
-                            <Link
-                                to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_AGREEMENT}
-                                state={{
-                                    idSA: record?.id,
-                                    idAccount: idAccount,
-                                    idCustomer: idCustomer,
-                                    type: type,
-                                }}
-                            >
-                                <ButtonComponent
-                                    icon={<SVGIcon name="IconDetail" width={20} color="#0075BF" />}
-                                    border={false}
-                                >
-                                    <span className="text-black ml-3">Detail</span>
-                                </ButtonComponent>
-                            </Link>
-                        ) : (
-                            <Link
-                                to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_AGREEMENT}
-                                state={{
-                                    idSA: record?.id,
-                                    idAccount: idAccount,
-                                    idCustomer: idCustomer,
-                                    type: type,
-                                }}
-                            >
-                                <Tooltip title="Detail">
-                                    <SVGIcon name="IconDetail" width={20} />
-                                </Tooltip>
-                            </Link>
-                        );
-
-                    return <Fragment key={`table-action-view-${index}`}>{content}</Fragment>;
-                },
-            },
-
-            // Create Add-on Action
-            {
-                action: "CreateAddon",
-                type: "table",
-                render: (record, actionLength, index) => {
-                    const isCreate = record?.isMain === "Y" &&
-                        record?.status === "ACTIVE" &&
-                        (record?.approvalStatus === "APPROVED" || record?.approvalStatus === "REJECTED");
-
-                    const linkState = {
-                        saReferenceNumber: record?.saNumber,
-                        serviceType: record?.serviceType?.id,
-                        saType: record?.saType?.id,
-                        pjbgType: record?.pjbgType?.id,
-                        saDate: record?.saDate,
-                        billingCycle: record?.billingCycle?.id,
-                        startDate: record?.startDate,
-                        endDate: record?.endDate,
-                        termOfPayment: record?.termOfPayment?.id,
-                        invoiceTemplate: record?.invoiceTemplate?.id,
-                        typeSa: "addon",
-                        idAccount,
+            handleUpdate: (record) => {
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_AGREEMENT, {
+                    state: {
+                        idSa: record.id,
+                        idAccount: record.accountId,
+                        approvalStatus: record.approvalStatus,
+                        status: record.status,
+                        saType: record.saType?.value,
+                        isMain: record.isMain,
+                        saReferenceNumber: record.saReference,
                         idCustomer,
-                        type,
-                        isMain: false,
-                        productTypeId: 287,
-                        idSa: record?.id,
-                    };
-
-                    const content =
-                        actionLength > 2 ? (
-                            isCreate ? (
-                                <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_ADDON} state={linkState}>
-                                    <ButtonComponent
-                                        icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#0075BF" }} />}
-                                        border={false}
-                                    >
-                                        <span className="text-black ml-3">Create Add-on</span>
-                                    </ButtonComponent>
-                                </Link>
-                            ) : (
-                                <ButtonComponent
-                                    icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#8D91A0" }} />}
-                                    border={false}
-                                    disabled
-                                >
-                                    <span className="text-black ml-3">Create Add-on</span>
-                                </ButtonComponent>
-                            )
-                        ) : isCreate ? (
-                            <Tooltip title="Create Add-On">
-                                <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_ADDON} state={linkState}>
-                                    <PlusCircleOutlined style={{ fontSize: "20px", color: "#bbce4b" }} />
-                                </Link>
-                            </Tooltip>
-                        ) : (
-                            <Tooltip title="Create Add-On">
-                                <PlusCircleOutlined style={{ fontSize: "20px", color: "#c2cad2" }} className="cursor-not-allowed" />
-                            </Tooltip>
-                        );
-
-                    return <Fragment key={`table-action-addon-${index}`}>{content}</Fragment>;
-                },
+                        type
+                    }
+                });
             },
+            handleApprovalHistory: ({ id }) => handleApprovalHistory(id),
+        }).map(actionDef => {
+            // Apply custom disable logic for SA Update/Delete that differ slightly from default generic ones
+            if (actionDef.action === 'Update') {
+                return {
+                    ...actionDef,
+                    render: (record, actionLength, index) => {
+                        const isEditable = record?.approvalStatus !== "WAITING APPROVAL" && record?.status !== "INACTIVE";
 
-            // Create Amendment Action
-            {
-                action: "CreateAmendment",
-                type: "table",
-                render: (record, actionLength, index) => {
-                    const isCreate =
-                        record?.isMain === "Y" &&
-                        record?.status === "ACTIVE" &&
-                        (record?.approvalStatus === "APPROVED" || record?.approvalStatus === "REJECTED");
+                        const linkState = {
+                            idSa: record?.id,
+                            idAccount: record?.accountId,
+                            approvalStatus: record?.approvalStatus,
+                            status: record?.status,
+                            saType: record?.saType?.value,
+                            isMain: record?.isMain,
+                            saReferenceNumber: record?.saReference,
+                            idCustomer: idCustomer,
+                            type: type,
+                        };
 
-                    const linkState = {
-                        saReferenceNumber: record?.saNumber,
-                        serviceType: record?.serviceType?.id,
-                        saType: record?.saType?.id,
-                        pjbgType: record?.pjbgType?.id,
-                        saDate: record?.saDate,
-                        billingCycle: record?.billingCycle?.id,
-                        startDate: record?.startDate,
-                        endDate: record?.endDate,
-                        termOfPayment: record?.termOfPayment?.id,
-                        invoiceTemplate: record?.invoiceTemplate?.id,
-                        typeSa: "Amendment",
-                        idAccount,
-                        idCustomer,
-                        type,
-                        isMain: false,
-                        idSa: record?.id,
-                    };
-
-                    const content =
-                        actionLength > 2 ? (
-                            isCreate ? (
-                                <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_AMANDEMEN} state={linkState}>
-                                    <ButtonComponent
-                                        icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#0075BF" }} />}
-                                        border={false}
-                                    >
-                                        <span className="text-black ml-3">Create Amendment</span>
-                                    </ButtonComponent>
-                                </Link>
-                            ) : (
-                                <ButtonComponent
-                                    icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#8D91A0" }} />}
-                                    border={false}
-                                    disabled
-                                >
-                                    <span className="text-black ml-3">Create Amendment</span>
-                                </ButtonComponent>
-                            )
-                        ) : isCreate ? (
-                            <Tooltip title="Create Amendment">
-                                <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_AMANDEMEN} state={linkState}>
-                                    <PlusCircleOutlined style={{ fontSize: "20px", color: "#0075BF" }} />
-                                </Link>
-                            </Tooltip>
-                        ) : (
-                            <Tooltip title="Create Amendment">
-                                <PlusCircleOutlined style={{ fontSize: "20px", color: "#c2cad2" }} className="cursor-not-allowed" />
-                            </Tooltip>
-                        );
-
-                    return <Fragment key={`table-action-amendment-${index}`}>{content}</Fragment>;
-                },
-            },
-
-            // Update Action
-            {
-                action: "Update",
-                type: "table",
-                render: (record, actionLength, index) => {
-                    const isEditable =
-                        record?.approvalStatus !== "WAITING APPROVAL" && record?.status !== "INACTIVE";
-
-                    const linkState = {
-                        idSa: record?.id,
-                        idAccount: record?.accountId,
-                        approvalStatus: record?.approvalStatus,
-                        status: record?.status,
-                        saType: record?.saType?.value,
-                        isMain: record?.isMain,
-                        saReferenceNumber: record?.saReference,
-                        idCustomer: idCustomer,
-                        type: type,
-                    };
-
-                    const content =
-                        actionLength > 2 ? (
+                        const content = actionLength > 2 ? (
                             isEditable ? (
                                 <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_AGREEMENT} state={linkState}>
-                                    <ButtonComponent
-                                        icon={<SVGIcon name="IconEdit" color="#ACC424" width={20} />}
-                                        border={false}
-                                    >
+                                    <ButtonComponent icon={<SVGIcon name="IconEdit" color="#ACC424" width={20} />} border={false}>
                                         <span className="text-black ml-3">Update</span>
                                     </ButtonComponent>
                                 </Link>
                             ) : (
-                                <ButtonComponent
-                                    icon={<SVGIcon name="IconEdit" color="#8D91A0" width={20} />}
-                                    border={false}
-                                    disabled
-                                >
+                                <ButtonComponent icon={<SVGIcon name="IconEdit" color="#8D91A0" width={20} />} border={false} disabled>
                                     <span className="text-black ml-3">Update</span>
                                 </ButtonComponent>
                             )
                         ) : isEditable ? (
                             <Link to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_AGREEMENT} state={linkState}>
-                                <Tooltip title="Update">
-                                    <SVGIcon name="IconEdit" width={20} color="#ACC424" />
-                                </Tooltip>
+                                <Tooltip title="Update"><SVGIcon name="IconEdit" width={20} color="#ACC424" /></Tooltip>
                             </Link>
                         ) : (
-                            <Tooltip title="Update">
-                                <SVGIcon
-                                    name="IconEdit"
-                                    width={20}
-                                    color="#8D91A0"
-                                    className="cursor-not-allowed"
-                                />
-                            </Tooltip>
+                            <Tooltip title="Update"><SVGIcon name="IconEdit" width={20} color="#8D91A0" className="cursor-not-allowed" /></Tooltip>
                         );
-
-                    return <Fragment key={`table-action-update-${index}`}>{content}</Fragment>;
-                },
-            },
-
-            // Inactivate Action
-            {
-                action: "Activate",
-                type: "table",
-                render: (record, actionLength, index) => {
-                    const isActive = record?.status === "ACTIVE";
-                    const canInactivate =
-                        isActive &&
-                        (record?.approvalStatus === "APPROVED" ||
-                            record?.approvalStatus === "REJECTED" ||
-                            record?.approvalStatus === "DRAFT");
-
-                    const content =
-                        actionLength > 2 ? (
-                            <ButtonComponent
-                                icon={
-                                    <Checkbox
-                                        className="inactive-check"
-                                        disabled={!canInactivate}
-                                        checked={!isActive}
-                                        style={{ transform: "scale(0.9)" }}
-                                    />
-                                }
-                                border={false}
-                                disabled={!canInactivate}
-                                onClick={canInactivate ? () => handleOpenInactivate(record?.id, record?.saNumber) : undefined}
-                            >
-                                <span className="text-black ml-3">{isActive ? "Inactivate" : "Activate"}</span>
+                        return <Fragment key={`table-action-update-${index}`}>{content}</Fragment>;
+                    }
+                };
+            }
+            if (actionDef.action === 'Delete') {
+                return {
+                    ...actionDef,
+                    render: (record, actionLength, index) => {
+                        const canDelete = record?.status === "DRAFT" && (record?.approvalStatus === "DRAFT" || record?.approvalStatus === "REJECTED");
+                        const content = actionLength > 2 ? (
+                            <ButtonComponent icon={<SVGIcon name="IconDelete" width={20} color={canDelete ? "#be3036" : "#c2cad2"} />} border={false} disabled={!canDelete} onClick={canDelete ? () => handleOpenDeleteDraft(record?.id) : undefined}>
+                                <span className="text-black ml-3">Delete</span>
                             </ButtonComponent>
                         ) : (
-                            <Tooltip title={isActive ? "Inactivate" : "Activate"}>
-                                <Checkbox
-                                    className="inactive-check"
-                                    disabled={!canInactivate}
-                                    checked={!isActive}
-                                    onClick={canInactivate ? () => handleOpenInactivate(record?.id, record?.saNumber) : undefined}
-                                    style={{ transform: "scale(0.9)" }}
-                                />
+                            <Tooltip title={canDelete ? "Delete" : ""}>
+                                <SVGIcon name="IconDelete" width={20} color={canDelete ? "#be3036" : "#c2cad2"} className={canDelete ? undefined : "disabled cursor-not-allowed"} onClick={canDelete ? () => handleOpenDeleteDraft(record?.id) : undefined} />
                             </Tooltip>
                         );
+                        return <Fragment key={`table-action-delete-${index}`}>{content}</Fragment>;
+                    }
+                };
+            }
+            return actionDef;
+        }),
 
-                    return <Fragment key={`table-action-activate-${index}`}>{content}</Fragment>;
-                },
-            },
-
-            // Approval History Action
-            {
-                action: "History",
-                type: "table",
-                render: (record, actionLength, index) => {
-                    const content =
-                        actionLength > 2 ? (
-                            <ButtonComponent
-                                icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={20} />}
-                                border={false}
-                                onClick={() => handleApprovalHistory(record?.id)}
-                            >
-                                <span className="text-black ml-3">Approval History</span>
+        // --- Custom SA Actions ---
+        {
+            action: "CreateAddon",
+            type: "table",
+            render: (record, actionLength, index) => {
+                const isCreate = record?.isMain === "Y" && record?.status === "ACTIVE" && (record?.approvalStatus === "APPROVED" || record?.approvalStatus === "REJECTED");
+                const linkState = { saReferenceNumber: record?.saNumber, serviceType: record?.serviceType?.id, saType: record?.saType?.id, pjbgType: record?.pjbgType?.id, saDate: record?.saDate, billingCycle: record?.billingCycle?.id, startDate: record?.startDate, endDate: record?.endDate, termOfPayment: record?.termOfPayment?.id, invoiceTemplate: record?.invoiceTemplate?.id, typeSa: "addon", idAccount, idCustomer, type, isMain: false, productTypeId: 287, idSa: record?.id };
+                const content = actionLength > 2 ? (
+                    isCreate ? (
+                        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_ADDON} state={linkState}>
+                            <ButtonComponent icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#0075BF" }} />} border={false}>
+                                <span className="text-black ml-3">Create Child</span>
                             </ButtonComponent>
-                        ) : (
-                            <Tooltip title="Approval History">
-                                <SVGIcon
-                                    name="IconLogHistory"
-                                    color="#0075bf"
-                                    width={20}
-                                    onClick={() => handleApprovalHistory(record?.id)}
-                                />
-                            </Tooltip>
-                        );
-
-                    return <Fragment key={`table-action-history-${index}`}>{content}</Fragment>;
-                },
+                        </Link>
+                    ) : (
+                        <ButtonComponent icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#8D91A0" }} />} border={false} disabled>
+                            <span className="text-black ml-3">Create Child</span>
+                        </ButtonComponent>
+                    )
+                ) : isCreate ? (
+                    <Tooltip title="Create Child"><Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_ADDON} state={linkState}><PlusCircleOutlined style={{ fontSize: "20px", color: "#bbce4b" }} /></Link></Tooltip>
+                ) : (
+                    <Tooltip title="Create Child"><PlusCircleOutlined style={{ fontSize: "20px", color: "#c2cad2" }} className="cursor-not-allowed" /></Tooltip>
+                );
+                return <Fragment key={`table-action-addon-${index}`}>{content}</Fragment>;
             },
-        ],
-        [idAccount, idCustomer, type, handleOpenDeleteDraft, handleOpenInactivate, handleApprovalHistory]
-    );
+        },
+        {
+            action: "CreateAmendment",
+            type: "table",
+            render: (record, actionLength, index) => {
+                const isCreate = record?.isMain === "Y" && record?.status === "ACTIVE" && (record?.approvalStatus === "APPROVED" || record?.approvalStatus === "REJECTED");
+                const linkState = { saReferenceNumber: record?.saNumber, serviceType: record?.serviceType?.id, saType: record?.saType?.id, pjbgType: record?.pjbgType?.id, saDate: record?.saDate, billingCycle: record?.billingCycle?.id, startDate: record?.startDate, endDate: record?.endDate, termOfPayment: record?.termOfPayment?.id, invoiceTemplate: record?.invoiceTemplate?.id, typeSa: "Amendment", idAccount, idCustomer, type, isMain: false, idSa: record?.id };
+                const content = actionLength > 2 ? (
+                    isCreate ? (
+                        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_AMANDEMEN} state={linkState}>
+                            <ButtonComponent icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#0075BF" }} />} border={false}>
+                                <span className="text-black ml-3">Create Amendment</span>
+                            </ButtonComponent>
+                        </Link>
+                    ) : (
+                        <ButtonComponent icon={<PlusCircleOutlined style={{ fontSize: "20px", color: "#8D91A0" }} />} border={false} disabled>
+                            <span className="text-black ml-3">Create Amendment</span>
+                        </ButtonComponent>
+                    )
+                ) : isCreate ? (
+                    <Tooltip title="Create Amendment"><Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_AGREEMENT_AMANDEMEN} state={linkState}><PlusCircleOutlined style={{ fontSize: "20px", color: "#0075BF" }} /></Link></Tooltip>
+                ) : (
+                    <Tooltip title="Create Amendment"><PlusCircleOutlined style={{ fontSize: "20px", color: "#c2cad2" }} className="cursor-not-allowed" /></Tooltip>
+                );
+                return <Fragment key={`table-action-amendment-${index}`}>{content}</Fragment>;
+            },
+        },
+        {
+            action: "Activate",
+            type: "table",
+            render: (record, actionLength, index) => {
+                const isActive = record?.status === "ACTIVE";
+                const canInactivate = isActive && (record?.approvalStatus === "APPROVED" || record?.approvalStatus === "REJECTED" || record?.approvalStatus === "DRAFT");
+                const content = actionLength > 2 ? (
+                    <ButtonComponent icon={<Checkbox className="inactive-check" disabled={!canInactivate} checked={!isActive} style={{ transform: "scale(0.9)" }} />} border={false} disabled={!canInactivate} onClick={canInactivate ? () => handleOpenInactivate(record?.id, record?.saNumber) : undefined}>
+                        <span className="text-black ml-3">{isActive ? "Inactivate" : "Activate"}</span>
+                    </ButtonComponent>
+                ) : (
+                    <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+                        <Checkbox className="inactive-check" disabled={!canInactivate} checked={!isActive} onClick={canInactivate ? () => handleOpenInactivate(record?.id, record?.saNumber) : undefined} style={{ transform: "scale(0.9)" }} />
+                    </Tooltip>
+                );
+                return <Fragment key={`table-action-activate-${index}`}>{content}</Fragment>;
+            },
+        }
+    ];
 
-    console.log("FilteredArray = ", filteredArray)
     const actionCols = useColumnActionPermissionAccount(
         ["Delete", "View", "CreateAddon", "CreateAmendment", "Update", "Activate", "History"],
         itemActions,
@@ -446,7 +259,7 @@ const ServiceAgreementTable = ({
             useInfiniteScroll={true}
             hasMore={hasMore}
             onLoadMore={handleLoadMore}
-            loadMoreThreshold={20}
+            loadMoreThreshold={2}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             columnDefinitions={columnDefinitions}

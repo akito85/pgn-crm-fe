@@ -5,7 +5,6 @@ import { WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -439,7 +438,7 @@ const BankForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <div className="w-full mt-4">
@@ -570,7 +569,7 @@ const BankForm = ({ type }) => {
           </div>
         </ModalConfirm>
       </div>
-    </LayoutMenu>
+    </>
   );
 };
 

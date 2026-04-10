@@ -8,7 +8,6 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import BaseContainer from "../../../../components/BaseContainer";
 
@@ -148,7 +147,7 @@ const ManagementBillingInstallmentPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -226,7 +225,7 @@ const ManagementBillingInstallmentPage = () => {
           />
         </BaseContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BaseContainer from "../../../../../components/BaseContainer";
 import TableRBI from "../../../../../components/TableRBI";
@@ -79,7 +78,7 @@ const ListHistoryPaymentWarranty = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <BaseContainer header="PAYMENT WARRANTY HISTORY LIST">
@@ -102,7 +101,7 @@ const ListHistoryPaymentWarranty = () => {
                     />
                 </BaseContainer>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

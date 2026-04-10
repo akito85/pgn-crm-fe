@@ -17,9 +17,10 @@ const ButtonComponent = ({
   fullButton = false,
   isPrimary = false,
   loading = false,
+  directChildren = false,
 }) => {
   const isButtonLoading = isLoading || loading;
-  
+
   return (
     <div>
       <Button
@@ -33,7 +34,7 @@ const ButtonComponent = ({
         htmlType={htmlType}
         size={size || "small"}
         style={{
-          borderColor: `${border === false ? "#0075bf00" : "var(--primary)"}`,
+          borderColor: border === false ? "#0075bf00" : undefined,
           ...(fullButton ? { width: "100%" } : {}),
           backgroundColor: isPrimary && "var(--primary)",
           color: isPrimary && "#fff",
@@ -42,13 +43,17 @@ const ButtonComponent = ({
           cursor: disabled || isButtonLoading ? "not-allowed" : "pointer", // ← FIX: Cursor saat loading
         }}
       >
-        <div
-          className={
-            children ? `py-0.5 px-1 ${fontSizeClassname} text-center` : ``
-          }
-        >
-          {children}
-        </div>
+        {directChildren ? (
+          children
+        ) : (
+          <div
+            className={
+              children ? `py-0.5 px-1 ${fontSizeClassname} text-center` : ``
+            }
+          >
+            {children}
+          </div>
+        )}
       </Button>
     </div>
   );

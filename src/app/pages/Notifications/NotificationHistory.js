@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Notifications.css";
+import { buildApprovalState, getNotificationLink } from "../../../utils/approvalRouteHelper";
 import {
   Card,
   List,
@@ -40,8 +41,10 @@ import {
   selectDirectNotifications,
   selectUnreadCount,
   selectConnectionStatus,
+  selectCurrentPositionId,
   markAsRead,
   markAllAsRead,
+  markNotificationAsReadApi,
   removeNotification,
   clearAllNotifications,
   clearNotificationsByDirection,
@@ -55,7 +58,6 @@ import NxDateRangePicker from "../../../components/Nx/NxDateRangePicker";
 import NxSearchInput from "../../../components/Nx/NxSearchInput";
 import NxDropdownBase from "../../../components/Nx/NxDropdownBase";
 import NxTextButton from "../../../components/Nx/NxTextButton";
-import LayoutMenu from "../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../components/ButtonComponent";
 
 const { Title, Text } = Typography;
@@ -82,6 +84,11 @@ const NotificationHistory = () => {
   const directNotifications = useSelector(selectDirectNotifications) || [];
   const unreadCount = useSelector(selectUnreadCount);
   const connectionStatus = useSelector(selectConnectionStatus);
+
+  // Get current position for filtering
+  const authCurrentPosition = useSelector((state) => state.auth?.currentPosition);
+  const reduxCurrentPositionId = useSelector(selectCurrentPositionId);
+  const currentPositionId = authCurrentPosition?.positionId || reduxCurrentPositionId;
 
   // Defensive check: Ensure all notification arrays are actually arrays
   const safeAllNotifications = Array.isArray(allNotifications) ? allNotifications : [];
@@ -111,6 +118,25 @@ const NotificationHistory = () => {
   // Get filtered notifications based on all filters
   const getFilteredNotifications = () => {
     let notifications = safeAllNotifications;
+
+    // Filter by position - MUST be first to ensure position-based security
+    // Only show notifications that either:
+    // 1. Have no TO_POSITION_ID (broadcast/non-position notifications)
+    // 2. Have a TO_POSITION_ID that matches the user's current position
+    notifications = notifications.filter(notification => {
+      const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
+
+      // If notification has a position ID AND user has a current position set,
+      // only show when it matches. When no position is set, allow all through
+      // to prevent silently hiding notifications before user selects a position.
+      if (notifPositionId && currentPositionId) {
+        if (Number(notifPositionId) !== Number(currentPositionId)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     // Filter by tab (all/unread)
     if (activeTab === 'unread') {
@@ -159,9 +185,21 @@ const NotificationHistory = () => {
   const endIndex = startIndex + pageSize;
   const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
 
-  // Calculate counts for tabs
-  const allCount = safeAllNotifications.length;
-  const unreadCountForTab = safeAllNotifications.filter(notification =>
+  // Calculate counts for tabs - use position-filtered notifications (without other filters like search/date)
+  // Position filter must be applied for accurate counts
+  const positionFilteredNotifications = safeAllNotifications.filter(notification => {
+    const notifPositionId = notification.toPositionId || notification.TO_POSITION_ID;
+    // Only filter by position when both notification has position ID AND user has current position
+    if (notifPositionId && currentPositionId) {
+      if (Number(notifPositionId) !== Number(currentPositionId)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const allCount = positionFilteredNotifications.length;
+  const unreadCountForTab = positionFilteredNotifications.filter(notification =>
     (notification.STATUS || notification.status) !== "read"
   ).length;
 
@@ -170,8 +208,8 @@ const NotificationHistory = () => {
     setCurrentPage(1);
   }, [search, startDate, endDate, selectedNotificationType, activeTab]);
 
-  // Safe unread count
-  const safeUnreadCount = unreadCount !== undefined ? Math.min(unreadCount, unreadCountForTab) : unreadCountForTab;
+  // Use position-filtered unread count (more accurate than backend count)
+  const safeUnreadCount = unreadCountForTab;
 
   const tabs = [
     { id: 'all', label: 'All', count: allCount, badgeVariant: 'filled' },
@@ -356,7 +394,7 @@ const NotificationHistory = () => {
   };
 
   /**
-   * Handle notification click - State-based navigation
+   * Handle notification click - State-based navigation with standardized state
    */
   const handleNotificationClick = (notification) => {
     // Mark as read if not already read
@@ -364,55 +402,12 @@ const NotificationHistory = () => {
     const isRead = notification.read || notification.status === 'read' || notification.STATUS === 'read';
 
     if (!isRead && notificationId) {
-      dispatch(markAsRead(notificationId));
+      dispatch(markNotificationAsReadApi(notificationId));
     }
 
-    // Navigate using state-based routing pattern
-    const link = notification.link || notification.LINK;
-
+    const link = getNotificationLink(notification);
     if (link) {
-      // Parse NAVIGATION_STATE if it's a JSON string (Bug fix from NOTIFICATION_DOCUMENTATION_SUMMARY.md)
-      let parsedNavigationState = {};
-      const navState = notification.navigationState || notification.NAVIGATION_STATE;
-
-      if (navState) {
-        try {
-          parsedNavigationState = typeof navState === 'string' ? JSON.parse(navState) : navState;
-        } catch (e) {
-          parsedNavigationState = {};
-        }
-      }
-
-      // Build route state object
-      const routeState = {
-        id: notification.entityId || notification.ENTITY_ID,
-        type: notification.entityType || notification.ENTITY_TYPE,
-        ...parsedNavigationState, // Spread parsed navigation state (idAccount, idCustomer, etc.)
-      };
-
-      // Add approval context if present
-      const tappId = notification.tappId || notification.TAPP_ID;
-      const appHierId = notification.appHierId || notification.APP_HIER_ID;
-      const approvalAction = notification.approvalAction || notification.APPROVAL_ACTION;
-      const approvalLevel = notification.approvalLevel || notification.APPROVAL_LEVEL;
-
-      if (tappId) {
-        routeState.tappId = tappId;
-        routeState.appHierId = appHierId;
-        routeState.approvalAction = approvalAction;
-        routeState.approvalLevel = approvalLevel;
-      }
-
-      // Navigate based on presence of entity_id
-      if (notification.entityId || notification.ENTITY_ID) {
-        navigate(link, { state: routeState });
-      } else {
-        navigate(link, {
-          state: Object.keys(parsedNavigationState).length > 0
-            ? parsedNavigationState
-            : undefined
-        });
-      }
+      navigate(link, { state: buildApprovalState(null, notification) });
     }
   };
 
@@ -567,8 +562,9 @@ const NotificationHistory = () => {
 
 
   return (
-  <LayoutMenu>
+  <>
     <div className={transitionClass}>
+    {/*
     <div class="w-full flex flex-col justify-end items-end mb-5">
       <ButtonComponent 
         type={"submit"}
@@ -598,6 +594,7 @@ const NotificationHistory = () => {
           Setting
       </ButtonComponent>
     </div>
+    */}
     
     <div className="notification-history-page">
       {/* Page Header */}
@@ -917,7 +914,7 @@ const NotificationHistory = () => {
       </button>
     </div>
     </div>
-  </LayoutMenu>
+  </>
   );
 };
 

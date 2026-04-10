@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Form, Select } from "antd";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   getTosAttribute,
@@ -472,7 +471,7 @@ const TermOfServiceUpdate = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -680,7 +679,7 @@ const TermOfServiceUpdate = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

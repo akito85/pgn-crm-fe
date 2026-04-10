@@ -8,7 +8,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
     getDetailRestructure,
     approveOrRejectRestructure,
@@ -268,7 +267,7 @@ const ListDetailRestructure = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <div className="mt-5">
                 <RadioTabs data={tabData} onChange={handleSegmentedPage} currentPosition={segmentedPage} />
@@ -317,7 +316,7 @@ const ListDetailRestructure = () => {
                     </div>
                 )}
             </div>
-        </LayoutMenu>
+        </>
     );
 };
 

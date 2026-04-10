@@ -11,7 +11,7 @@ import Highlighter from "react-highlight-words";
 import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 
 import StatusComponent from "../../../../../../components/StatusComponent";
-import TablePagination from "../../../../../../components/TablePagination";
+import NxTable from "../../../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -71,7 +71,7 @@ const expandedRowRender = (record) => {
   return (
     <div>
       <p className="text-primary text-xs font-bold uppercase">CONTACT DETAIL</p>
-      <TablePagination
+      <NxTable
         useSelect={false}
         usePagination={false}
         // className="table-expand-custom"
@@ -134,6 +134,8 @@ const AccountContact = ({ id, idCustomer, type }) => {
   const location = useLocation();
   // state contact global
   const [openModalContact, setOpenModalContact] = useState(false);
+  const totalElements = data?.page?.totalElements || 0;
+  const hasMore = dataTable.length < totalElements;
 
   const assertChoose = useCallback((data) => {
     if (typeContact === 'choosed') {
@@ -287,23 +289,31 @@ const AccountContact = ({ id, idCustomer, type }) => {
     if (data?.result && data?.result.length > 0) {
       const dataModif = data?.result.map((a, index) => ({
         ...a,
-        key: index + 1,
+        key: a?.accountContactId || `${page}-${index + 1}`,
         contactDetail: a.contactDetail?.map((b, index) => ({
           ...b,
           key: index + 1,
         })),
       }));
-      setDataTable(dataModif);
+      setDataTable((prevState) => {
+        if (page === 1) {
+          return dataModif;
+        }
+        const existingKeys = new Set(prevState.map((item) => item.accountContactId));
+        const merged = [...prevState];
+        dataModif.forEach((item) => {
+          if (!existingKeys.has(item.accountContactId)) {
+            merged.push(item);
+          }
+        });
+        return merged;
+      });
     } else {
-      setDataTable([])
+      if (page === 1) {
+        setDataTable([])
+      }
     }
-  }, [data]);
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
+  }, [data, page]);
 
   // const handleSearch = (selectedKeys, confirm, dataIndex) => {
   //   confirm();
@@ -330,6 +340,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           setPage(1); // Reset the page only if there was a previous search
         }
         const { [dataIndex]: _, ...rest } = prevState; // Remove the current dataIndex from state
+        setDataTable([]);
         return rest;
       });
       return;
@@ -341,6 +352,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       setSearch((prevState) => {
         if (prevState[dataIndex] !== selectedKeys[0]) {
           setPage(1);
+          setDataTable([]);
         }
         return {
           ...prevState,
@@ -361,6 +373,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       setSearch((prevState) => {
         if (prevState[dataIndex]?.value !== tempSearchedText?.value) {
           setPage(1);
+          setDataTable([]);
         }
         return {
           ...prevState,
@@ -374,8 +387,17 @@ const AccountContact = ({ id, idCustomer, type }) => {
   const onSort = (_, __, sort) => {
     const dataOrder = sort.order === "ascend" ? "asc" : "desc";
     const dataSort = sort.order ? `${sort.field}~${dataOrder}` : "";
+    setPage(1);
+    setDataTable([]);
     setSort(dataSort);
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (!loading && hasMore) {
+      setPage((prevState) => prevState + 1);
+    }
+    return Promise.resolve();
+  }, [hasMore, loading]);
 
   // Handle Cancel Modal Active/Inactive
   const handleCancel = () => {
@@ -416,12 +438,14 @@ const AccountContact = ({ id, idCustomer, type }) => {
         // setRemark("");
         handleClear()
         form.resetFields();
+        setPage(1);
+        setDataTable([]);
 
         const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(
           getListDetailAccountContact({
             id,
-            page,
+            page: 1,
             pageSize,
             search: reqSearch,
             sort,
@@ -448,7 +472,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
         title: "NO",
         width: 60,
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         title: "PRIMARY",
@@ -856,11 +880,13 @@ const AccountContact = ({ id, idCustomer, type }) => {
 
       }
       setModalConfirm(false)
+      setPage(1);
+      setDataTable([]);
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       await dispatch(
         getListDetailAccountContact({
           id,
-          page,
+          page: 1,
           pageSize,
           search: reqSearch,
           sort,
@@ -875,7 +901,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
     } catch (error) {
 
     }
-  }, [body, dispatch, formContact, formModal, id, page, pageSize, search, sort, typeContact])
+  }, [body, dispatch, formContact, formModal, id, pageSize, search, sort, typeContact])
 
 
 
@@ -968,8 +994,9 @@ const AccountContact = ({ id, idCustomer, type }) => {
           <div className="flex w-full justify-end gap-3 mb-5">
             <ToolbarAccount items={itemActions} advancedAccess={access_account} />
           </div>
-          <div className={"w-full"}>
-            <TablePagination
+          <div className="flex flex-col gap-y-4">
+            <NxTable
+              idTable="account-contact-table"
               dataSource={data && data?.length === 0 ? null : dataTable}
               columns={[
                 ...columns(
@@ -986,13 +1013,15 @@ const AccountContact = ({ id, idCustomer, type }) => {
                   access_account
                 ),
               ]}
-              pageSize={pageSize}
-              current={page}
               expandable={{ expandedRowRender }}
               totalData={data?.page?.totalElements}
-              onChange={handleChangeSize}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
               onSort={onSort}
-              tableScrolled={{ x: 1300 }}
+              tableScrolled={{ y: 400, x: "max-content" }}
             />
           </div>
         </BaseContainer>

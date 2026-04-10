@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import { Form, Select, Space, Table, Tooltip } from "antd";
+import { Button, Form, Pagination, Select, Space, Table, Tooltip } from "antd";
+import { FilterOutlined } from "@ant-design/icons";
 import { columnsTableCriteriaInvoiceTemplate } from "../Table/TableCriteriaInvoiceTemplate";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -28,6 +29,9 @@ import DetailText from "../../../../../../components/DetailText";
 import { dateFormatting, hasValue } from "../../../../../../utils";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import InputComponent from "../../../../../../components/InputComponent";
+import ColumnSettings from "../../../../../../components/ColumnSettings/ColumnSettings";
+import SearchBar from "../../../../../../components/SearchBar";
+import AdvanceSearch from "../../../../../../components/AdvanceSearch";
 
 const EditableCell = ({
   editing,
@@ -259,6 +263,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
   const [dataHistory, setDataHistory] = useState({});
   const [modalHistory, setModalHistory] = useState(false);
   const [modalValidationTable, setModalValidationTable] = useState(false);
+  const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
 
   // Use Effect
   useEffect(() => {
@@ -662,7 +667,7 @@ const FunctionalCriteriaInvoiceTemplate = ({
             record.type !== "exist";
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="gap-2">
               {editable ? (
                 <>
                   <ButtonComponent
@@ -682,10 +687,10 @@ const FunctionalCriteriaInvoiceTemplate = ({
                 <div className="flex w-full justify-center gap-4">
                   {showAction === "show" ? (
                     <Tooltip title="Detail">
-                      <div className="pt-1">
+                      <div className="pt-0">
                         <SVGIcon
                           name="IconDetail"
-                          width={24}
+                          width={20}
                           onClick={() => handleDetail(record)}
                         />
                       </div>
@@ -754,15 +759,20 @@ const FunctionalCriteriaInvoiceTemplate = ({
   // Function Show/Hide Column
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
 
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
-
   const filterColumn = (dataColumn) => {
     return dataColumn.filter((col) => {
       return !optionSelectedCol.includes(col.title);
     });
   };
+
+  // Column definitions for ColumnSettings component
+  const columnDefinitions = columns()
+    .filter((col) => col.title !== "NO" && col.title !== "ACTION")
+    .map((col) => ({
+      key: col.title,
+      title: col.title,
+      dataIndex: col.dataIndex,
+    }));
 
   // Function length column
   const numColumns = 16;
@@ -800,87 +810,154 @@ const FunctionalCriteriaInvoiceTemplate = ({
           </ButtonComponent>
         </div>
       ) : null}
-      <div className="relative flex flex-col w-full">
-        <div
-          className={`${
-            totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-          } w-1/4 flex`}
-        >
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-full"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns()
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    optionSelectedCol.length > 3
-                      ? optionSelectedCol.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
+      <div className="flex flex-col w-full">
+        {/* Toolbar: Column Settings + Advanced Search + Search */}
+        <div className="w-full flex mb-3 justify-between items-center">
+          <div className="flex items-center gap-4">
+            <ColumnSettings
+              columns={columnDefinitions}
+              hiddenColumns={optionSelectedCol}
+              onHiddenColumnsChange={setOptionSelectedCol}
+              buttonText="Column Settings"
+              buttonStyle={{ height: "32px", fontSize: "12px" }}
+            />
+          </div>
+          <div className="flex justify-end gap-2 items-center">
+            <Button
+              onClick={() => setIsAdvanceOpen(true)}
+              className="flex items-center gap-2"
+              style={{
+                border: "1px solid #BDBDBD",
+                color: "black",
+                borderRadius: "8px",
+                height: "32px",
+                fontSize: "12px",
+              }}
+            >
+              <FilterOutlined style={{ fontSize: "14px" }} />
+              Advanced Search
+            </Button>
+            <div style={{ width: "250px" }}>
+              <SearchBar placeholder="Search Content" />
+            </div>
+          </div>
         </div>
-        <Form form={formTableCriteria} component={false}>
-          <Table
-            bordered
-            className="w-full"
-            dataSource={data}
-            columns={filterColumn(
-              columns().map((col) => ({
-                ...col,
-                onCell: (record) => ({
-                  record,
-                  inputType: col.inputType,
-                  dataIndex: col.dataIndex,
-                  title: col.title,
-                  editing: isEditing(record),
-                  options: col.option,
-                  indexValue: col.indexValue,
-                  dependDataIndex: col.dependDataIndex,
-                  dataEditRecord: editDataRecord,
-                  handleEditDataRecord: handleEditDataRecord,
-                  required: col.required,
-                  disableDate,
-                  formTableCriteria: formTableCriteria,
-                  validateStartDate: validStartDate,
-                  validateEndDate: validEndDate,
-                }),
-              }))
-            )}
-            pagination={{
-              position: ["topRight"],
-              current: page,
-              pageSize: pageSize,
-              onChange: handleChange,
-              className: "pr-1 w-3/4",
-              style: { marginLeft: "auto", marginRight: 0 },
-              showSizeChanger: true,
-              showTotal: (total, range) =>
-                `Showing ${range[0]} to ${range[1]} of ${total} records`,
-            }}
-            rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            scroll={scroll}
-            onChange={onChange}
+
+        <style>
+          {`
+            #criteria-table-invoice .ant-table-thead > tr > th {
+              background-color: #0075BF !important;
+              color: white !important;
+              text-transform: uppercase;
+              font-size: 10px;
+            }
+            #criteria-table-invoice .ant-table-thead > tr > th .ant-table-column-sorter {
+              color: white !important;
+            }
+            #criteria-table-invoice .ant-table-thead > tr > th .ant-table-filter-trigger {
+              color: white !important;
+            }
+            #criteria-table-invoice .ant-table-tbody > tr > td {
+              font-size: 11px;
+              padding: 2px 8px !important;
+            }
+            #criteria-table-invoice .ant-table-thead > tr > th {
+              padding: 2px 8px !important;
+            }
+            #criteria-table-invoice .ant-table-thead .ant-table-cell-fix-left,
+            #criteria-table-invoice .ant-table-thead .ant-table-cell-fix-right {
+              background-color: #0075BF !important;
+              color: white !important;
+            }
+          `}
+        </style>
+        <div id="criteria-table-invoice">
+          <Form form={formTableCriteria} component={false}>
+            <Table
+              bordered
+              size="small"
+              className="w-full"
+              dataSource={data}
+              columns={filterColumn(
+                columns().map((col) => ({
+                  ...col,
+                  onCell: (record) => ({
+                    record,
+                    inputType: col.inputType,
+                    dataIndex: col.dataIndex,
+                    title: col.title,
+                    editing: isEditing(record),
+                    options: col.option,
+                    indexValue: col.indexValue,
+                    dependDataIndex: col.dependDataIndex,
+                    dataEditRecord: editDataRecord,
+                    handleEditDataRecord: handleEditDataRecord,
+                    required: col.required,
+                    disableDate,
+                    formTableCriteria: formTableCriteria,
+                    validateStartDate: validStartDate,
+                    validateEndDate: validEndDate,
+                  }),
+                }))
+              )}
+              pagination={false}
+              rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+              components={{
+                body: {
+                  cell: EditableCell,
+                },
+              }}
+              scroll={scroll}
+              onChange={onChange}
+            />
+          </Form>
+        </div>
+
+        {/* Bottom Pagination Bar */}
+        <div className="w-full flex justify-between mt-3 items-center">
+          <div className="flex items-center gap-3">
+            <Select
+              value={pageSize}
+              onChange={(value) => handleChange(1, value)}
+              className="w-15"
+              style={{ fontSize: "12px" }}
+              size="small"
+            >
+              {[10, 20, 50, 100].map((size) => (
+                <Select.Option key={size} value={size}>
+                  {size}
+                </Select.Option>
+              ))}
+            </Select>
+            <span style={{ fontSize: "12px", color: "#666" }}>
+              Showing {totalData > 0 ? (page - 1) * pageSize + 1 : 0} to{" "}
+              {Math.min(page * pageSize, totalData)} of {totalData} entries
+              <span className="mx-2">•</span>
+              <span className="text-[#288C44] font-medium">
+                All data showed
+              </span>
+            </span>
+          </div>
+          <Pagination
+            total={totalData}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            showSizeChanger={false}
+            style={{ display: "flex", gap: "3px" }}
+            size="small"
           />
-        </Form>
+        </div>
       </div>
+
+      <AdvanceSearch
+        visible={isAdvanceOpen}
+        onClose={() => setIsAdvanceOpen(false)}
+        onSearch={() => setIsAdvanceOpen(false)}
+        onClear={() => {}}
+        columns={columnDefinitions}
+        modalWidth={600}
+      />
 
       {/* Modal Overlapping */}
       <ModalError

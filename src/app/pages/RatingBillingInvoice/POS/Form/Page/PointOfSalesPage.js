@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback, useEffect } from "react";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import SelectComponent from "../../../../../../components/SelectComponent";
-import { Form, Input, Select } from "antd";
+import { Form, Input, Select, Checkbox } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
 import { hasValue, requiredMessage } from "../../../../../../utils";
 import DateComponent from "../../../../../../components/DateComponent";
@@ -62,11 +62,13 @@ const PointOfSalesPage = ({
   setSelectedTransactionDate = () => {},
   selectedInvoiceDate = null,
   setSelectedInvoiceDate = () => {},
+  data_account_type = [],
+  data_classification_type = [],
 }) => {
   const [selectedBilingPeriod, setSelectedBillingPeriod] = useState("");
   const [defaultPicker, setDefaultPicker] = useState("");
   const [keyPicker, setKeyPicker] = useState(0);
-
+  const [genProInv, setGenProInv] = useState(false);
 
   useEffect(() => {
     if (hasValue(selectedBilingPeriod)) {
@@ -95,7 +97,7 @@ const PointOfSalesPage = ({
   const handleRangeDisableInvoiceDate = useCallback(
     (current) => {
       if (selectedTransactionDate) {
-        return current < moment(selectedTransactionDate).startOf('day');
+        return current < moment(selectedTransactionDate).startOf("day");
       }
       return current < moment(rangeDisableDate?.startDate);
     },
@@ -105,7 +107,7 @@ const PointOfSalesPage = ({
   const handleRangeDisableTOPDate = useCallback(
     (current) => {
       if (selectedInvoiceDate) {
-        return current < moment(selectedInvoiceDate).startOf('day');
+        return current < moment(selectedInvoiceDate).startOf("day");
       }
       return false;
     },
@@ -136,17 +138,17 @@ const PointOfSalesPage = ({
             </div>
           }
         >
-          <div className="w-full grid grid-cols-5 gap-1">
+          <div className="w-full grid grid-cols-4 gap-1">
             {/* Row 1 */}
-            <Form.Item
-              name="customerName"
-              label="Customer Name"
-              rules={[
-                { message: requiredMessage("Customer Name"), required: true },
-              ]}
-              style={{ marginBottom: 0 }}
-            >
-              <InputComponent placeholder="Enter Customer Name" />
+            <Form.Item label="Customer Type" style={{ marginBottom: 0 }}>
+              <InputComponent
+                disabled
+                value={
+                  customerType === "customer"
+                    ? "Customer"
+                    : "Prospective Customer"
+                }
+              />
             </Form.Item>
 
             <Form.Item
@@ -162,19 +164,45 @@ const PointOfSalesPage = ({
             >
               <InputComponent
                 placeholder="Enter Registration Number"
+                maxLength={16}
                 onChange={(e) => setAccountNumber(e.target.value)}
               />
             </Form.Item>
 
             <Form.Item
-              name="accountName"
-              label="Account Name"
+              name="accountNumber"
+              label="Account Number"
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled value={accountNumber || "-"} />
+            </Form.Item>
+
+            <Form.Item
+              name="customerNumber"
+              label="Customer Number"
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled value="-" />
+            </Form.Item>
+
+            {/* Row 2 */}
+            <Form.Item
+              name="customerName"
+              label="Customer Name"
               rules={[
-                { message: requiredMessage("Account Name"), required: true },
+                { message: requiredMessage("Customer Name"), required: true },
               ]}
               style={{ marginBottom: 0 }}
             >
-              <InputComponent placeholder="Enter Account Name" />
+              <InputComponent placeholder="Enter Customer Name" />
+            </Form.Item>
+
+            <Form.Item
+              name="accountName"
+              label="Account Name"
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled value="-" />
             </Form.Item>
 
             <div>
@@ -237,42 +265,6 @@ const PointOfSalesPage = ({
             </div>
 
             <Form.Item
-              noStyle
-              shouldUpdate={(prevValues, currentValues) =>
-                prevValues.costcenter !== currentValues.costcenter
-              }
-            >
-              {({ getFieldValue }) => {
-                const costCenter = getFieldValue("costcenter");
-                const isCostCenterFilled =
-                  costCenter &&
-                  (Array.isArray(costCenter) ? costCenter.length > 0 : true);
-
-                return (
-                  <Form.Item
-                    name="meterReadingCode"
-                    label="Meter Reading Code"
-                    style={{ marginBottom: 0 }}
-                  >
-                    <SelectComponent
-                      onChange={onMeterReadingCodeChange}
-                      disabled={
-                        !mergedArrayMrc ||
-                        mergedArrayMrc.length === 0 ||
-                        !isCostCenterFilled
-                      }
-                      placeholder="Select Meter Reading Code"
-                      options={(mergedArrayMrc || []).map((item) => ({
-                        label: item?.name,
-                        value: item?.id,
-                      }))}
-                    />
-                  </Form.Item>
-                );
-              }}
-            </Form.Item>
-
-            <Form.Item
               name="accountSegment"
               label="Account Segment"
               rules={[
@@ -289,6 +281,43 @@ const PointOfSalesPage = ({
                 }}
                 placeholder="Select Account Segment"
                 options={(data_account_segment || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="clasificationType"
+              label="Classification Type"
+              rules={[
+                {
+                  message: requiredMessage("Classification Type"),
+                  required: true,
+                },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                placeholder="Select Classification Type"
+                options={(data_classification_type || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="accountType"
+              label="Account Type"
+              rules={[
+                { message: requiredMessage("Account Type"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                placeholder="Select Account Type"
+                options={(data_account_type || []).map((item) => ({
                   label: item?.name,
                   value: item?.id,
                 }))}
@@ -315,6 +344,22 @@ const PointOfSalesPage = ({
             </Form.Item>
 
             <Form.Item
+              name="meterReadingCode"
+              label="Meter Reading Code"
+              style={{ marginBottom: 0 }}
+            >
+              <SelectComponent
+                onChange={onMeterReadingCodeChange}
+                disabled={!mergedArrayMrc || mergedArrayMrc.length === 0}
+                placeholder="Select Meter Reading Code"
+                options={(mergedArrayMrc || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
               name="email"
               label="Email"
               rules={[
@@ -326,26 +371,20 @@ const PointOfSalesPage = ({
               <InputComponent placeholder="Enter Email" />
             </Form.Item>
 
-            <div className="col-span-5">
-              <Form.Item
-                name="address"
-                label="Address"
-                rules={[
-                  { message: requiredMessage("Address"), required: true },
-                ]}
-              >
-                <InputComponent
-                  type="textarea"
-                  rows={3}
-                  placeholder="Enter Address"
-                />
-              </Form.Item>
-            </div>
+            <Form.Item
+              name="phoneNumber"
+              label="Phone Number"
+              rules={[
+                { message: requiredMessage("Phone Number"), required: true },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent placeholder="Enter Phone Number" maxLength={15} />
+            </Form.Item>
           </div>
         </CardContainer>
       );
     } else {
-      // Customer - TIDAK BERUBAH
       return (
         <CardContainer
           header={
@@ -357,6 +396,16 @@ const PointOfSalesPage = ({
           }
         >
           <div className="w-full grid grid-cols-5 gap-1">
+            <Form.Item label={"Customer Type"} style={{ marginBottom: 0 }}>
+              <InputComponent
+                disabled
+                value={
+                  customerType === "customer"
+                    ? "Customer"
+                    : "Prospective Customer"
+                }
+              />
+            </Form.Item>
             <Form.Item
               name={"accountNumber"}
               label={"Account Number"}
@@ -404,6 +453,23 @@ const PointOfSalesPage = ({
             >
               <InputComponent disabled />
             </Form.Item>
+
+            <Form.Item
+              name={"clasificationType"}
+              label={"Classification Type"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+
+            <Form.Item
+              name={"accountType"}
+              label={"Account Type"}
+              style={{ marginBottom: 0 }}
+            >
+              <InputComponent disabled />
+            </Form.Item>
+
             <Form.Item
               name={"accountGroupType"}
               label={"Account Group Type"}
@@ -445,6 +511,7 @@ const PointOfSalesPage = ({
             idPos={idPos}
             dataUomCodes={data_uom_codes}
             customerType={customerType}
+            data_globalCurrency={data_globalCurrency}
           />
         );
       case listDetailPage[1].value:
@@ -601,15 +668,19 @@ const PointOfSalesPage = ({
               onChange={(date) => {
                 setSelectedTransactionDate(date);
                 // Reset invoice date jika lebih kecil dari transaction date baru
-                const currentInvoiceDate = form.getFieldValue('invoiceDate');
-                if (currentInvoiceDate && date && moment(currentInvoiceDate).isBefore(moment(date), 'day')) {
+                const currentInvoiceDate = form.getFieldValue("invoiceDate");
+                if (
+                  currentInvoiceDate &&
+                  date &&
+                  moment(currentInvoiceDate).isBefore(moment(date), "day")
+                ) {
                   form.setFieldsValue({ invoiceDate: null });
                   setSelectedInvoiceDate(null);
                 }
               }}
             />
           </Form.Item>
-          
+
           <Form.Item
             name={"invoiceDate"}
             label={"Invoice Date"}
@@ -624,14 +695,21 @@ const PointOfSalesPage = ({
                 setTransactionDate(date);
                 setSelectedInvoiceDate(date);
                 // Reset TOP date jika lebih kecil dari invoice date baru
-                const currentTOPValue = form.getFieldValue(['termType', 'termValue']);
-                if (currentTOPValue && moment.isMoment(currentTOPValue) && 
-                    date && moment(currentTOPValue).isBefore(moment(date), 'day')) {
-                  form.setFieldsValue({ 
-                    termType: { 
-                      ...form.getFieldValue('termType'),
-                      termValue: null 
-                    } 
+                const currentTOPValue = form.getFieldValue([
+                  "termType",
+                  "termValue",
+                ]);
+                if (
+                  currentTOPValue &&
+                  moment.isMoment(currentTOPValue) &&
+                  date &&
+                  moment(currentTOPValue).isBefore(moment(date), "day")
+                ) {
+                  form.setFieldsValue({
+                    termType: {
+                      ...form.getFieldValue("termType"),
+                      termValue: null,
+                    },
                   });
                 }
               }}
@@ -694,6 +772,7 @@ const PointOfSalesPage = ({
             <Form.Item
               name={"remark"}
               label={"Remark"}
+              style={{ marginBottom: 0 }}
               rules={[
                 {
                   required: true,
@@ -702,6 +781,17 @@ const PointOfSalesPage = ({
               ]}
             >
               <InputComponent type="textarea" rows={3} />
+            </Form.Item>
+          </div>
+          <div className="col-span-5">
+            <Form.Item
+              name={"genProInv"}
+              valuePropName="checked"
+              style={{ marginBottom: 0 }}
+            >
+              <Checkbox onChange={(e) => setGenProInv(e.target.checked)}>
+                Generate Proforma Invoice
+              </Checkbox>
             </Form.Item>
           </div>
         </div>
