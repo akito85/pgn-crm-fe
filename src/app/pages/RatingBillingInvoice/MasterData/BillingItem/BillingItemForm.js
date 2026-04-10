@@ -149,6 +149,7 @@ const BillingItemForm = (props) => {
   const [category, setCategory] = useState("");
   const [startDateMap, setStartDateMap] = useState();
   const [endDateMap, setEndDateMap] = useState();
+  const [activeTab, setActiveTab] = useState("mapping");
   const [isEditable, setIsEditable] = useState(false);
 
   // Criteria States
@@ -931,6 +932,7 @@ const BillingItemForm = (props) => {
           description: "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
         })
       );
+      setActiveTab("criteria");
       setCurrent(0);
       return;
     }
@@ -943,6 +945,7 @@ const BillingItemForm = (props) => {
           description: "Mapping Detail is mandatory. Please add at least one mapping category.",
         })
       );
+      setActiveTab("mapping");
       setCurrent(0);
       return;
     }
@@ -963,6 +966,16 @@ const BillingItemForm = (props) => {
           description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
         })
       );
+
+      // Auto-open the first missing category detail
+      const firstMissing = missingCategories[0];
+      dispatch(getDetailMappingCategory(firstMissing.category));
+      setStartDateMap(moment(firstMissing.startDate));
+      setEndDateMap(firstMissing.endDate ? moment(firstMissing.endDate) : endDate || null);
+      setCategory(firstMissing.category);
+      setDetailMapping(true);
+      setActiveTab("mapping");
+      
       setCurrent(0);
       return;
     }
@@ -1095,6 +1108,7 @@ const BillingItemForm = (props) => {
       setSelectedCriteria(null);
       setDataCriteriaTable([]);
       setIsCriteriaEditing(false);
+      setActiveTab("mapping");
       setCurrent(0);
       setListSectionInfo([
         {
@@ -1268,6 +1282,8 @@ const BillingItemForm = (props) => {
               startDateMap={startDateMap}
               endDateMap={endDateMap}
               onCriteriaEditingChange={setIsCriteriaEditing}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
               onTabChange={() => {
                 setDetailMapping(false);
                 setCategory("");
