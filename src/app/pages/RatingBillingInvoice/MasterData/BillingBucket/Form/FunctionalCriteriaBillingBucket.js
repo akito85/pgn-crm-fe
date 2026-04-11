@@ -78,23 +78,31 @@ const EditableCell = ({
   };
 
   const handleDisableDateBetween = (current) => {
-    if (dataIndex === 'endDate' && hasValue(formTableCriteria.getFieldValue('startDate')) && hasValue(validateEndDate)) {
-      return moment(formTableCriteria.getFieldValue('startDate')) > current || current > moment(validateEndDate).add(1, 'days')
-    } else if (validateStartDate && validateEndDate) {
-      const startDate = moment(validateStartDate).startOf("day");
-      const endDate = moment(validateEndDate).endOf("day");
-      return current.isBefore(startDate) || current.isAfter(endDate);
-    } else {
-      return true; // Disable all dates if start or end date is not defined
+    if (!current) return false;
+
+    const headerStart = validateStartDate ? moment(validateStartDate).startOf("day") : null;
+    const headerEnd = validateEndDate ? moment(validateEndDate).endOf("day") : null;
+    const rowStart = formTableCriteria.getFieldValue("startDate") 
+      ? moment(formTableCriteria.getFieldValue("startDate")).startOf("day") 
+      : null;
+
+    if (headerStart && current.isBefore(headerStart, "day")) return true;
+    if (headerEnd && current.isAfter(headerEnd, "day")) return true;
+
+    if (dataIndex === "endDate" && rowStart && current.isBefore(rowStart, "day")) {
+      return true;
     }
+
+    return false;
   };
 
   // Validation Handle Start Date from Header Data
   const handleDisableDateBefore = (current) => {
-    if (validateStartDate !== null) {
-      return moment(validateStartDate) > current;
+    if (!current) return false;
+    if (validateStartDate) {
+      return current.isBefore(moment(validateStartDate).startOf("day"), "day");
     }
-    return moment().add(-1, "days") >= current;
+    return current.isBefore(moment().startOf("day"), "day");
   };
 
   const getInputNode = (inputType) => {
@@ -277,85 +285,85 @@ const FunctionalCriteriaBillingBucket = ({
 
 
   // Data Select Criteria
-  const budget = (data_budget || []).map((item) => {
+  const budget = (Array.isArray(data_budget) ? data_budget : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const province = (data_province || []).map((item) => {
+  const province = (Array.isArray(data_province) ? data_province : []).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const city = (data_city || []).map((item) => {
+  const city = (Array.isArray(data_city) ? data_city : []).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const industrialSector = (data_industrial_sector || []).map((item) => {
+  const industrialSector = (Array.isArray(data_industrial_sector) ? data_industrial_sector : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const district = (data_district || []).map((item) => {
+  const district = (Array.isArray(data_district) ? data_district : []).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const subDistrict = (data_sub_district || []).map((item) => {
+  const subDistrict = (Array.isArray(data_sub_district) ? data_sub_district : []).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const accountCategory = (data_account_Category || []).map((item) => {
+  const accountCategory = (Array.isArray(data_account_Category) ? data_account_Category : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const serviceType = (data_service_type || []).map((item) => {
+  const serviceType = (Array.isArray(data_service_type) ? data_service_type : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const accountGroup = (data_account_group || []).map((item) => {
+  const accountGroup = (Array.isArray(data_account_group) ? data_account_group : []).map((item) => {
     return {
       value: item.id,
       label: item.name,
     };
   });
-  const sor = (data_sor || []).map((item) => {
+  const sor = (Array.isArray(data_sor) ? data_sor : []).map((item) => {
     return {
       value: item.id,
       label: item.name,
     };
   });
-  const costCenter = (data_cost_center || []).map((item) => {
+  const costCenter = (Array.isArray(data_cost_center) ? data_cost_center : []).map((item) => {
     return {
       value: item.id,
       label: item.name,
     };
   });
-  const gsizes = (data_Gsizes || []).map((item) => {
+  const gsizes = (Array.isArray(data_Gsizes) ? data_Gsizes : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const customerSegment = (data_customer_segment || []).map((item) => {
+  const customerSegment = (Array.isArray(data_customer_segment) ? data_customer_segment : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const customer = (data_customer || []).map((item) => {
+  const customer = (Array.isArray(data_customer) ? data_customer : []).map((item) => {
     return {
       value: item.id,
       label: item.name,

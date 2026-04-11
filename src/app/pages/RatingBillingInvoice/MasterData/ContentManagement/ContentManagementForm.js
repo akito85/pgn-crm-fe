@@ -36,66 +36,123 @@ import { ModalConfirm, ModalError } from "../../../../../components/Modal/ModalP
 import ConfirmationContentManagement from "./Modal/ConfirmationContentManagement";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 
-// ✅ Helper function untuk transform data dari API ke format form
 const transformApiDataToForm = (apiData) => {
   if (!apiData) return null;
 
-  const contentTemplate = apiData.contentTemplate;
+  const isFlat = !apiData.contentTemplate;
+  const template = isFlat ? apiData : (apiData.contentTemplate || {});
+
+  // Criteria list (display names): new = criteriaDtoList, old = contentCriteria
+  const criteriaDtoList = apiData.criteriaDtoList || [];
   const contentCriteria = apiData.contentCriteria || [];
+
+  // Criteria data rows: new = criteriaDataDtoList, old = contentCriteria (filtered)
+  const criteriaDataDtoList = apiData.criteriaDataDtoList || [];
+
+  // Attachments: new = attachmentDtoList, old = mattachmentLists
+  const attachmentList = apiData.attachmentDtoList || apiData.mattachmentLists || [];
+
+  // Build criteria array (for form field "criteria" = array of criteria IDs)
+  const criteriaForForm = isFlat
+    ? criteriaDtoList.map((item) => ({
+        contentCriteriaId: item.id,
+        criteria: item.criteria, // criteria ID number
+      }))
+    : contentCriteria.map((item) => ({
+        contentCriteriaId: item.id,
+        criteria: item.criteriaId || null,
+      }));
+
+  // Build criteria data rows
+  const criteriaDataForForm = isFlat
+    ? criteriaDataDtoList.filter((item) => !item.allCriteria)
+    : contentCriteria.filter((item) => item.allCriteria !== "Y");
 
   return {
     information: {
-      id: contentTemplate?.id,
-      name: contentTemplate?.templateName,
-      format: contentTemplate?.formatType,
-      category: contentTemplate?.category,
-      media: contentTemplate?.mediaChannel,
-      startDate: contentTemplate?.startDate,
-      endDate: contentTemplate?.endDate,
-      description: contentTemplate?.description,
-      apphierId: contentTemplate?.approvalId,
-      status: contentTemplate?.status,
-      statusApproval: contentTemplate?.statusApproval,
+      id: template?.id,
+      name: template?.templateName,
+      format: template?.formatType,
+      category: template?.category,
+      media: template?.mediaChannel,
+      startDate: template?.startDate,
+      endDate: template?.endDate,
+      description: template?.description,
+      apphierId: template?.approvalId,
+      status: template?.status,
+      statusApproval: template?.statusApproval,
     },
     content: {
-      subject: contentTemplate?.contentSubject,
-      body: contentTemplate?.contentBody,
+      subject: template?.contentSubject,
+      body: template?.contentBody,
     },
-    criteria: contentCriteria.map((item) => ({
-      contentCriteriaId: item.id,
-      criteria: item.criteriaId || null,
+    criteria: criteriaForForm,
+    criteriaData: criteriaDataForForm.map((item) => ({
+      id: item.id,
+      // New API: field values already in {label, value} object format
+      // Old API: plain string values — wrap them
+      budget: item.budget
+        ? (typeof item.budget === "object" ? item.budget : { value: item.budget, label: item.budget })
+        : null,
+      subDistrict: item.subDistrict
+        ? (typeof item.subDistrict === "object" ? item.subDistrict : { value: item.subDistrict, label: item.subDistrict })
+        : null,
+      district: item.district
+        ? (typeof item.district === "object" ? item.district : { value: item.district, label: item.district })
+        : null,
+      city: item.city
+        ? (typeof item.city === "object" ? item.city : { value: item.city, label: item.city })
+        : null,
+      province: item.province
+        ? (typeof item.province === "object" ? item.province : { value: item.province, label: item.province })
+        : null,
+      area: item.area
+        ? (typeof item.area === "object" ? item.area : { value: item.area, label: item.area })
+        : null,
+      costCenter: item.area
+        ? (typeof item.area === "object" ? item.area : { value: item.area, label: item.area })
+        : null,
+      sor: item.sor
+        ? (typeof item.sor === "object" ? item.sor : { value: item.sor, label: item.sor })
+        : null,
+      industrialSector: item.industrialSector
+        ? (typeof item.industrialSector === "object" ? item.industrialSector : { value: item.industrialSector, label: item.industrialSector })
+        : null,
+      gsizes: item.gsizes
+        ? (typeof item.gsizes === "object" ? item.gsizes : { value: item.gsizes, label: item.gsizes })
+        : null,
+      customerSegment: item.customerSegment
+        ? (typeof item.customerSegment === "object" ? item.customerSegment : { value: item.customerSegment, label: item.customerSegment })
+        : null,
+      accountGroup: (item.accountGroup || item.accountGroupType)
+        ? (typeof (item.accountGroup || item.accountGroupType) === "object"
+            ? (item.accountGroup || item.accountGroupType)
+            : { value: (item.accountGroup || item.accountGroupType), label: (item.accountGroup || item.accountGroupType) })
+        : null,
+      accountClass: item.accountClass
+        ? (typeof item.accountClass === "object" ? item.accountClass : { value: item.accountClass, label: item.accountClass })
+        : null,
+      accountCategory: item.accountCategory
+        ? (typeof item.accountCategory === "object" ? item.accountCategory : { value: item.accountCategory, label: item.accountCategory })
+        : null,
+      serviceType: item.serviceType
+        ? (typeof item.serviceType === "object" ? item.serviceType : { value: item.serviceType, label: item.serviceType })
+        : null,
+      customer: item.customer
+        ? (typeof item.customer === "object" ? item.customer : { value: item.customer, label: item.customer })
+        : null,
+      product: item.product
+        ? (typeof item.product === "object" ? item.product : { value: item.product, label: item.product })
+        : null,
+      accountNumber: item.accountNumber
+        ? (typeof item.accountNumber === "object" ? item.accountNumber : { value: item.accountNumber, label: item.accountNumber })
+        : null,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      allCriteria: isFlat ? item.allCriteria : item.allCriteria === "Y",
     })),
-    criteriaData: contentCriteria
-      .filter((item) => item.allCriteria !== "Y")
-      .map((item) => ({
-        id: item.id,
-        budget: item.budget,
-        subDistrict: item.subDistrict,
-        district: item.district,
-        city: item.city,
-        province: item.province,
-        area: item.area,
-        costCenter: item.area,
-        sor: item.sor,
-        industrialSector: item.industrialSector,
-        gsizes: item.gsizes,
-        customerSegment: item.customerSegment,
-        accountGroup: item.accountGroupType,
-        accountClass: item.accountClass,
-        accountCategory: item.accountCategory,
-        serviceType: item.serviceType,
-        customer: item.customer,
-        product: item.product,
-        accountNumber: item.accountNumber,
-        startDate: item.startDate,
-        endDate: item.endDate,
-        allCriteria: item.allCriteria === "Y",
-      })),
-    mattachmentLists: apiData.mattachmentLists || [],
-    listCriteria: contentCriteria.map((item) => ({
-      contentCriteriaId: item.id,
-      criteria: item.criteriaId || null,
-    })),
+    mattachmentLists: attachmentList,
+    listCriteria: criteriaForForm,
   };
 };
 
@@ -166,6 +223,11 @@ const ContentManagementForm = ({ type }) => {
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
   const [subjectValue, setSubjectValue] = useState("");
@@ -198,6 +260,21 @@ const ContentManagementForm = ({ type }) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (!subjectValue || subjectValue.trim() === "") {
+              dispatch(showModalError({ title: "Failed", description: "Subject is required. Please input subject." }));
+              return;
+            }
+            if (!bodyValue || bodyValue.trim() === "") {
+              dispatch(showModalError({ title: "Failed", description: "Body content is required. Please input body." }));
+              return;
+            }
+            if (listDataCriteria.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(showModalError({ title: "Failed", description: "Criteria Mandatory. Please insert data." }));
+              return;
+            }
+          }
           if (current < steps.length - 1) {
             setCurrent(current + 1);
           }
@@ -256,51 +333,29 @@ const ContentManagementForm = ({ type }) => {
       transformedDraft?.information?.id === id &&
       transformedDetail?.information?.id === id
     ) {
-      const criteriaSelect = transformedDraft?.criteria?.map((item) => ({
-        contentCriteriaId: item.contentCriteriaId,
-        criteria: item.criteria,
-      }));
-      const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
+      const mappingCriteria = (transformedDraft?.criteria || []).map((a) => a.criteria);
 
-      const dataDraftAttachment = (transformedDetail?.mattachmentLists || []).map((item) => ({
+      const dataDraftAttachment = (transformedDraft?.mattachmentLists || []).map((item) => ({
         id: item.id,
-        size: item.size,
+        size: item.fileSize,
         fileName: item.fileName,
         fileSize: item.fileSize,
         fileType: item.fileType,
         fileCategoryId: item.fileCategoryId,
         fileCategoryName: item.fileCategoryName,
-        pathFile: item.pathFile,
-        urlFile1: item.urlFile1,
-        urlFile2: item.urlFile2,
+        pathFile: item.pathFile || "",
+        urlFile1: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        urlFile2: `/v1/dbs/api/content/download-attachment/${item.id}`,
         uploadBy: item.createdBy,
         uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
         dataType: "exist",
       }));
 
+      // criteriaData sudah dalam format {value, label} dari transformApiDataToForm
       const dataDraftCriteriaList = (transformedDraft?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
         .map((item, index) => ({
-          id: item.id,
-          budget: item.budget ? { value: item.budget, label: item.budget } : null,
-          subDistrict: item.subDistrict ? { value: item.subDistrict, label: item.subDistrict } : null,
-          district: item.district ? { value: item.district, label: item.district } : null,
-          city: item.city ? { value: item.city, label: item.city } : null,
-          province: item.province ? { value: item.province, label: item.province } : null,
-          area: item.area ? { value: item.area, label: item.area } : null,
-          sor: item.sor ? { value: item.sor, label: item.sor } : null,
-          industrialSector: item.industrialSector ? { value: item.industrialSector, label: item.industrialSector } : null,
-          gsizes: item.gsizes ? { value: item.gsizes, label: item.gsizes } : null,
-          customerSegment: item.customerSegment ? { value: item.customerSegment, label: item.customerSegment } : null,
-          accountGroup: item.accountGroup ? { value: item.accountGroup, label: item.accountGroup } : null,
-          accountClass: item.accountClass ? { value: item.accountClass, label: item.accountClass } : null,
-          accountCategory: item.accountCategory ? { value: item.accountCategory, label: item.accountCategory } : null,
-          serviceType: item.serviceType ? { value: item.serviceType, label: item.serviceType } : null,
-          customer: item.customer ? { value: item.customer, label: item.customer } : null,
-          product: item.product ? { value: item.product, label: item.product } : null,
-          accountNumber: item.accountNumber ? { value: item.accountNumber, label: item.accountNumber } : null,
-          startDate: item.startDate,
-          endDate: item.endDate,
+          ...item,
           key: index + 1,
           type: "exist",
         }));
@@ -322,7 +377,6 @@ const ContentManagementForm = ({ type }) => {
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataDraftCriteriaList);
-      // ✅ Set subject & body ke state (bukan form field)
       setSubjectValue(transformedDraft?.content?.subject || "");
       setBodyValue(transformedDraft?.content?.body || "");
 
@@ -331,51 +385,29 @@ const ContentManagementForm = ({ type }) => {
       !transformedDraft?.information?.id &&
       transformedDetail?.information?.id === id
     ) {
-      const criteriaSelect = transformedDetail?.criteria?.map((item) => ({
-        contentCriteriaId: item.contentCriteriaId,
-        criteria: item.criteria,
-      }));
-      const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
+      const mappingCriteria = (transformedDetail?.criteria || []).map((a) => a.criteria);
 
       const dataAttachment = (transformedDetail?.mattachmentLists || []).map((item) => ({
         id: item.id,
-        size: item.size,
+        size: item.fileSize,
         fileName: item.fileName,
         fileSize: item.fileSize,
         fileType: item.fileType,
         fileCategoryId: item.fileCategoryId,
         fileCategoryName: item.fileCategoryName,
-        pathFile: item.pathFile,
-        urlFile1: item.urlFile1,
-        urlFile2: item.urlFile2,
+        pathFile: item.pathFile || "",
+        urlFile1: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        urlFile2: `/v1/dbs/api/content/download-attachment/${item.id}`,
         uploadBy: item.createdBy,
         uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
         dataType: "exist",
       }));
 
+      // criteriaData sudah dalam format {value, label} dari transformApiDataToForm
       const dataCriteriaList = (transformedDetail?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
         .map((item, index) => ({
-          id: item.id,
-          budget: item.budget ? { value: item.budget, label: item.budget } : null,
-          subDistrict: item.subDistrict ? { value: item.subDistrict, label: item.subDistrict } : null,
-          district: item.district ? { value: item.district, label: item.district } : null,
-          city: item.city ? { value: item.city, label: item.city } : null,
-          province: item.province ? { value: item.province, label: item.province } : null,
-          area: item.area ? { value: item.area, label: item.area } : null,
-          sor: item.sor ? { value: item.sor, label: item.sor } : null,
-          industrialSector: item.industrialSector ? { value: item.industrialSector, label: item.industrialSector } : null,
-          product: item.product ? { value: item.product, label: item.product } : null,
-          gsizes: item.gsizes ? { value: item.gsizes, label: item.gsizes } : null,
-          customerSegment: item.customerSegment ? { value: item.customerSegment, label: item.customerSegment } : null,
-          accountGroup: item.accountGroup ? { value: item.accountGroup, label: item.accountGroup } : null,
-          accountClass: item.accountClass ? { value: item.accountClass, label: item.accountClass } : null,
-          accountCategory: item.accountCategory ? { value: item.accountCategory, label: item.accountCategory } : null,
-          serviceType: item.serviceType ? { value: item.serviceType, label: item.serviceType } : null,
-          customer: item.customer ? { value: item.customer, label: item.customer } : null,
-          accountNumber: item.accountNumber ? { value: item.accountNumber, label: item.accountNumber } : null,
-          startDate: item.startDate,
-          endDate: item.endDate,
+          ...item,
           key: index + 1,
           type: "exist",
         }));
@@ -397,7 +429,6 @@ const ContentManagementForm = ({ type }) => {
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataCriteriaList);
-      // ✅ Set subject & body ke state (bukan form field)
       setSubjectValue(transformedDetail?.content?.subject || "");
       setBodyValue(transformedDetail?.content?.body || "");
     }
@@ -576,10 +607,33 @@ const ContentManagementForm = ({ type }) => {
   };
 
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
+    const headerStart = formHeader?.startDate
+      ? moment(formHeader.startDate).startOf("day")
+      : null;
+    const headerEnd = formHeader?.endDate
+      ? moment(formHeader.endDate).startOf("day")
+      : null;
+
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
-        dataOverlap?.push(item);
+      const itemStart = item?.startDate
+        ? moment(item.startDate).startOf("day")
+        : null;
+      const itemEnd = item?.endDate
+        ? moment(item.endDate).startOf("day")
+        : null;
+
+      // Criteria startDate harus >= header startDate
+      const startOutOfRange =
+        headerStart && itemStart && itemStart.isBefore(headerStart);
+
+      // Criteria endDate harus <= header endDate
+      // Hanya dicek jika header memiliki endDate (bukan open-ended)
+      const endOutOfRange =
+        headerEnd && itemEnd && itemEnd.isAfter(headerEnd);
+
+      if (startOutOfRange || endOutOfRange) {
+        dataOverlap.push(item);
       }
     });
     return dataOverlap?.length > 0;
@@ -589,11 +643,13 @@ const ContentManagementForm = ({ type }) => {
   // karena komponen tidak unmount (display:none)
   const handleSave = async (formValue) => {
     if (!subjectValue || subjectValue.trim() === "") {
+      setCurrent(0);
       dispatch(showModalError({ title: "Failed", description: "Subject is required. Please input subject." }));
       return;
     }
 
     if (!bodyValue || bodyValue.trim() === "") {
+      setCurrent(0);
       dispatch(showModalError({ title: "Failed", description: "Body content is required. Please input body." }));
       return;
     }
@@ -602,21 +658,28 @@ const ContentManagementForm = ({ type }) => {
       setListSectionInfo((prev) =>
         prev.map((item) => item.value === "Attachment" ? { ...item, errorBadge: 1 } : { ...item, errorBadge: 0 })
       );
-      dispatch(showModalError({ title: "Failed", description: "Attachment is required. Please upload at least one file." }));
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
       return;
     }
 
     if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+      setCurrent(0);
       dispatch(showModalError({ title: "Failed", description: "Criteria Mandatory. Please insert data." }));
       return;
     }
 
     if (storedDataInline) {
+      setCurrent(0);
       dispatch(showModalError({ title: "Failed", description: "Please save data table inline before submit. Please try again." }));
       return;
     }
 
     if (validateCriteriaFields(criteriaOptions, formValue?.criteria, listDataCriteria, () => {}, 0)) {
+      setCurrent(0);
       dispatch(showModalError({ title: "Failed", description: "There is missing values in table criteria. Please try again" }));
       return;
     }
@@ -627,6 +690,7 @@ const ContentManagementForm = ({ type }) => {
     );
 
     if (hasOverlapping) {
+      setCurrent(0);
       dispatch(showModalError({ title: "Failed", description: "You can't add Criteria. Start date and end date can't be overlap" }));
       return;
     }
@@ -748,6 +812,20 @@ const ContentManagementForm = ({ type }) => {
 
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClear = () => {
@@ -771,6 +849,7 @@ const ContentManagementForm = ({ type }) => {
       dispatch(getDetailContentManagement(id));
       dispatch(getDetailDraftContentManagement(id));
     }
+    setCurrent(0);
   };
 
   const handleCloseModalError = () => {
@@ -952,6 +1031,25 @@ const ContentManagementForm = ({ type }) => {
             </div>
             <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "saved as draft"}. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>

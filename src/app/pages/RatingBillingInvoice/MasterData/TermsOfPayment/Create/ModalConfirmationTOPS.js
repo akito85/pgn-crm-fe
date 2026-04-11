@@ -7,6 +7,7 @@ import DetailText from "../../../../../../components/DetailText";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import { dateFormatting } from "../../../../../../utils";
 import FunctionalTableCriteriaTOP from "../TableCriteria/FunctionalTableCriteriaTOP";
+import BaseContainer from "../../../../../../components/BaseContainer";
 
 const ModalConfirmationTOPS = ({
   tabData,
@@ -31,11 +32,11 @@ const ModalConfirmationTOPS = ({
   const mapingCriteriaData = data?.criterias?.map((item) => item?.criteria);
   // find data criteria
   const matchedObjectsCriteria = apiCriteria?.filter((obj) =>
-    mapingCriteriaData?.includes(obj?.id)
+    mapingCriteriaData?.includes(obj?.id),
   );
 
   const matchedNamesCriteria = matchedObjectsCriteria
-    ?.map((obj) => obj.name)
+    ?.map((obj) => obj.text || obj.name)
     ?.reduce((current, next) => current + `, ${next}`, "");
 
   const types = datatype
@@ -82,25 +83,29 @@ const ModalConfirmationTOPS = ({
         );
       case tabData[1].value:
         return (
-          <ApprovalComponentGeneral
-            showSelect={false}
-            disableSelect={true}
-            approvalName={
-              (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
-              )?.[0].name || ""
-            }
-            dataTable={listDataAppHierDetail}
-            selectedHierarchy
-          />
+          <div className="pb-3">
+            <ApprovalComponentGeneral
+              showSelect={false}
+              disableSelect={true}
+              approvalName={
+                (dataOption || []).filter(
+                  (data) => data.value === selectedHierarchy,
+                )?.[0].name || ""
+              }
+              dataTable={listDataAppHierDetail}
+              selectedHierarchy
+            />
+          </div>
         );
       case tabData[2].value:
         return (
-          <AttachmentComponent
-            type={"preview"}
-            data={listDataAttachment}
-            typeSelector="top"
-          />
+          <div className="pb-3">
+            <AttachmentComponent
+              type={"preview"}
+              data={listDataAttachment}
+              typeSelector="top"
+            />
+          </div>
         );
       default:
         return <Fragment></Fragment>;
@@ -117,23 +122,34 @@ const ModalConfirmationTOPS = ({
         onChange={handleTop}
         currentPosition={valuePage}
       />
-      <div className="flex flex-col gap-4">
-        <div className="text-primary text-xs font-bold uppercase">
-          {`${valuePage} INFORMATION`}
-        </div>
-        {showSection()}
-      </div>
-      {valuePage === tabData[0].value ? (
-        <div className="flex flex-col gap-4">
+      <BaseContainer
+        border
+        header={
           <div className="text-primary text-xs font-bold uppercase">
-            {"CRITERIA INFORMATION"}
+            {`${valuePage} INFORMATION`}
           </div>
-          <FunctionalTableCriteriaTOP
-            type={"detail"}
-            data={listDataCriteria}
-            dataCriteria={criteriaValues}
-          />
-        </div>
+        }
+      >
+        {showSection()}
+      </BaseContainer>
+
+      {valuePage === tabData[0].value ? (
+        <BaseContainer
+          border
+          header={
+            <div className="text-primary text-xs font-bold uppercase">
+              {"CRITERIA INFORMATION"}
+            </div>
+          }
+        >
+          <div className="pb-3">
+            <FunctionalTableCriteriaTOP
+              type={"detail"}
+              data={listDataCriteria}
+              dataCriteria={criteriaValues}
+            />
+          </div>
+        </BaseContainer>
       ) : null}
     </div>
   );

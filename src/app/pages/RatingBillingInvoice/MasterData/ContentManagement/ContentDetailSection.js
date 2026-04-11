@@ -9,7 +9,8 @@ const ContentDetailSection = ({
   dataCriteria,
   criteriaList,
 }) => {
-  const contentTemplate = dataContentManagement?.contentTemplate || {};
+  // Support both new flat API (fields on root) and old nested structure
+  const contentTemplate = dataContentManagement?.contentTemplate || dataContentManagement || {};
 
   return (
     <CollapsibleContainer header={"CONTENT SETUP INFORMATION"} border={true} defaultOpen={true}>

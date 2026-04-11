@@ -137,9 +137,22 @@ const ListCreateForm = ({ type }) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (list.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                }),
+              );
+              return;
+            }
+          }
           if (current < STEPS.length - 1) {
             setCurrent(current + 1);
             setValuePage(STEPS[current + 1].value);
+            window.scrollTo(0, 0);
           }
         })
         .catch((error) => {
@@ -148,6 +161,7 @@ const ListCreateForm = ({ type }) => {
     } else if (current < STEPS.length - 1) {
       setCurrent(current + 1);
       setValuePage(STEPS[current + 1].value);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -155,6 +169,7 @@ const ListCreateForm = ({ type }) => {
     if (current > 0) {
       setCurrent(current - 1);
       setValuePage(STEPS[current - 1].value);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -267,8 +282,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail?.information?.apphierId);
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -305,6 +321,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail?.information?.startDate));
+      setEndDate(
+        data_detail?.information?.endDate
+          ? moment(data_detail?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)
@@ -339,8 +360,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail_draft?.information?.apphierId);
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -377,6 +399,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail_draft?.information?.startDate));
+      setEndDate(
+        data_detail_draft?.information?.endDate
+          ? moment(data_detail_draft?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail_draft?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)
@@ -457,6 +484,8 @@ const ListCreateForm = ({ type }) => {
     } else {
       dispatch(getDetailTOP(id));
       dispatch(getDetailDraftTOP(id));
+      setCurrent(0);
+      setValuePage(STEPS[0].value);
     }
   };
 
@@ -610,12 +639,14 @@ const ListCreateForm = ({ type }) => {
       // It seems like handleMandatory is called regardless of the condition
       handleMandatory(setTabData, listDataAttachment);
       if (list.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
       } else if (storedData) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description:
@@ -631,12 +662,14 @@ const ListCreateForm = ({ type }) => {
           0,
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
       } else if (isOverlapping) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
@@ -985,7 +1018,7 @@ const ListCreateForm = ({ type }) => {
         width={1000}
         type={"confirmation"}
         footer={
-          <div className="w-full flex justify-end gap-5 p-4">
+          <div className="w-full flex justify-end gap-2 p-4">
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>

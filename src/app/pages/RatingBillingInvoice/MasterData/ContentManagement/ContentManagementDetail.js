@@ -83,42 +83,66 @@ const ContentManagementDetail = () => {
     if (id) {
       dispatch(getDetailContentManagement(id));
       dispatch(getDetailDraftContentManagement(id));
-      fetchAttachments(id);
     }
   }, [dispatch, id]);
 
-  // Fetch Attachments
+  // Populate attachments dari data_detail.attachmentDtoList (new API)
+  // atau fallback ke endpoint list-attachment (old API)
+  useEffect(() => {
+    if (!data_detail) return;
+    const attachmentList = data_detail?.attachmentDtoList;
+    if (attachmentList && attachmentList.length > 0) {
+      // New API: attachments sudah ada di response detail
+      const dataAttachment = attachmentList.map((item) => ({
+        id: item.id,
+        size: item.fileSize,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        fileType: item.fileType,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
+        pathFile: item.pathFile || "",
+        // Download URL menggunakan file ID
+        urlFile1: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        urlFile2: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        createdBy: item.createdBy,
+        createdDate: item.createdDate
+          ? moment(item.createdDate).format("DD MMM YYYY")
+          : "",
+        dataType: "exist",
+      }));
+      setListDataAttachment(dataAttachment);
+    } else if (id) {
+      // Fallback: fetch dari endpoint list-attachment (old API)
+      fetchAttachments(id);
+    }
+  }, [data_detail, id]);
+
+  // Fallback: Fetch Attachments dari endpoint list-attachment (old API)
   const fetchAttachments = async (refId) => {
     try {
       const url = `/v1/dbs/api/content/list-attachment/${refId}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      
-      // Get base URL from config or construct it
-      const baseURL = configApp.RATING_BILLING_SERVICE || "";
-      
-      const dataAttachment = (response.data?.result || []).map((item) => {
-        // Generate full URL from pathFile if urlFile1/urlFile2 is null
-        const fullURL = item.urlFile1 || item.urlFile2 || (item.pathFile ? `${baseURL}${item.pathFile}` : null);
-        
-        return {
-          id: item.id,
-          size: item.fileSize,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile || "",
-          urlFile1: fullURL,
-          urlFile2: fullURL,
-          createdBy: item.createdBy,
-          createdDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        };
-      });
-      
+
+      const dataAttachment = (response.data?.result || []).map((item) => ({
+        id: item.id,
+        size: item.fileSize,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        fileType: item.fileType,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
+        pathFile: item.pathFile || "",
+        // Download URL menggunakan file ID
+        urlFile1: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        urlFile2: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        createdBy: item.createdBy,
+        createdDate: item.createdDate
+          ? moment(item.createdDate).format("DD MMM YYYY")
+          : "",
+        dataType: "exist",
+      }));
+
       setListDataAttachment(dataAttachment);
     } catch (error) {
       console.error("Error fetching attachments:", error);
@@ -127,110 +151,125 @@ const ContentManagementDetail = () => {
 
   // Process Detail Data
   useEffect(() => {
-    if (id && data_detail?.contentTemplate?.id === id) {
-      // Helper: extract label from object field { label, value }
+    // Support both new flat structure and old nested structure
+    const detailId = data_detail?.id ?? data_detail?.contentTemplate?.id;
+    const draftId = data_detail_draft?.id ?? data_detail_draft?.contentTemplate?.id;
+
+    if (id && detailId === id) {
       const extractLabel = (field) => {
         if (!field) return null;
         if (typeof field === "object") return field.label || null;
         return field;
       };
 
-      // Data Criteria Information (new response: criteriaData with object fields)
-      const dataCriteriaList = (data_detail?.criteriaData || data_detail?.contentCriteria || []).map(
-        (item, index) => {
-          return {
-            id: item.id,
-            budget: extractLabel(item.budget),
-            subDistrict: extractLabel(item.subDistrict),
-            district: extractLabel(item.district),
-            city: extractLabel(item.city),
-            province: extractLabel(item.province),
-            area: extractLabel(item.area) || extractLabel(item.costCenter),
-            sor: extractLabel(item.sor),
-            industrialSector: extractLabel(item.industrialSector),
-            product: extractLabel(item.product),
-            gsizes: extractLabel(item.gsizes),
-            customerSegment: extractLabel(item.customerSegment),
-            accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
-            accountClass: extractLabel(item.accountClass),
-            accountCategory: extractLabel(item.accountCategory),
-            serviceType: extractLabel(item.serviceType),
-            customer: extractLabel(item.customer),
-            startDate: item.startDate,
-            endDate: item.endDate,
-            allCriteria: item.allCriteria,
-            key: index + 1,
-            type: "exist",
-            createdDate: item.createdDate,
-            createdBy: item.createdBy,
-            updatedDate: item.updatedDate,
-            updatedBy: item.updatedBy,
-          };
-        }
-      );
+      // New flat API: criteriaDataDtoList; Old nested: criteriaData / contentCriteria
+      const rawCriteriaData =
+        data_detail?.criteriaDataDtoList ||
+        data_detail?.criteriaData ||
+        data_detail?.contentCriteria ||
+        [];
 
-      // Data History Log Information
+      const dataCriteriaList = rawCriteriaData.map((item, index) => ({
+        id: item.id,
+        budget: extractLabel(item.budget),
+        subDistrict: extractLabel(item.subDistrict),
+        district: extractLabel(item.district),
+        city: extractLabel(item.city),
+        province: extractLabel(item.province),
+        area: extractLabel(item.area) || extractLabel(item.costCenter),
+        sor: extractLabel(item.sor),
+        industrialSector: extractLabel(item.industrialSector),
+        product: extractLabel(item.product),
+        gsizes: extractLabel(item.gsizes),
+        customerSegment: extractLabel(item.customerSegment),
+        accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
+        accountClass: extractLabel(item.accountClass),
+        accountCategory: extractLabel(item.accountCategory),
+        serviceType: extractLabel(item.serviceType),
+        customer: extractLabel(item.customer),
+        startDate: item.startDate,
+        endDate: item.endDate,
+        allCriteria: item.allCriteria,
+        key: index + 1,
+        type: "exist",
+        createdDate: item.createdDate,
+        createdBy: item.createdBy,
+        updatedDate: item.updatedDate,
+        updatedBy: item.updatedBy,
+      }));
+
+      // History log — support both structures
+      const template = data_detail?.contentTemplate || data_detail;
       setDataLogInformation({
-        recordId: data_detail?.contentTemplate?.id,
-        createdDate: data_detail?.contentTemplate?.createdDate,
-        createdBy: data_detail?.contentTemplate?.createdBy,
-        updatedDate: data_detail?.contentTemplate?.updateDate,
-        updatedBy: data_detail?.contentTemplate?.updatedBy,
+        recordId: template?.id,
+        createdDate: template?.createdDate,
+        createdBy: template?.createdBy,
+        updatedDate: template?.updatedDate ?? template?.updateDate,
+        updatedBy: template?.updatedBy,
       });
 
       setDataDetail(data_detail);
       setDataCriteria(dataCriteriaList);
+
+      // Approval info — support both structures
+      const approvalInfo =
+        data_detail?.approvalDto ||
+        data_detail?.approvalInformation ||
+        {};
+
       setBodyApproval({
-        isApprover: data_detail?.approvalInformation?.isApprover,
-        tAppId: data_detail?.approvalInformation?.tAppId,
-        approvalDetail: data_detail?.approvalInformation,
-        approvalType: data_detail?.approvalInformation?.approvalType,
+        isApprover: approvalInfo?.isApprover,
+        tAppId: approvalInfo?.tAppId,
+        approvalDetail: approvalInfo,
+        approvalType: approvalInfo?.approvalType,
       });
     }
 
     // Process Draft Data
     if (
       id &&
-      data_detail_draft?.contentTemplate?.id === id &&
-      data_detail_draft?.contentTemplate?.id === data_detail?.contentTemplate?.id &&
+      draftId === id &&
+      draftId === (data_detail?.id ?? data_detail?.contentTemplate?.id) &&
       data_detail &&
-      (!data_detail?.approvalInformation?.approvalType ||
-        data_detail?.approvalInformation?.approvalType !== "INACTIVE_CONTENT_TEMPLATE")
+      (!(data_detail?.approvalDto?.approvalType || data_detail?.approvalInformation?.approvalType) ||
+        (data_detail?.approvalDto?.approvalType ?? data_detail?.approvalInformation?.approvalType) !== "INACTIVE_CONTENT_TEMPLATE")
     ) {
-      // Data Criteria Information Draft (new response: criteriaData with object fields)
-      const dataDraftCriteriaList = (data_detail_draft?.criteriaData || data_detail_draft?.contentCriteria || []).map(
-        (item, index) => {
-          const extractLabel = (field) => {
-            if (!field) return null;
-            if (typeof field === "object") return field.label || null;
-            return field;
-          };
-          return {
-            id: item.id,
-            budget: extractLabel(item.budget),
-            subDistrict: extractLabel(item.subDistrict),
-            district: extractLabel(item.district),
-            city: extractLabel(item.city),
-            province: extractLabel(item.province),
-            area: extractLabel(item.area) || extractLabel(item.costCenter),
-            sor: extractLabel(item.sor),
-            industrialSector: extractLabel(item.industrialSector),
-            product: extractLabel(item.product),
-            gsizes: extractLabel(item.gsizes),
-            customerSegment: extractLabel(item.customerSegment),
-            accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
-            accountClass: extractLabel(item.accountClass),
-            accountCategory: extractLabel(item.accountCategory),
-            serviceType: extractLabel(item.serviceType),
-            customer: extractLabel(item.customer),
-            startDate: item.startDate,
-            endDate: item.endDate,
-            allCriteria: item.allCriteria,
-            key: index + 1,
-            type: "exist",
-          };
-        }
-      );
+      const extractLabel = (field) => {
+        if (!field) return null;
+        if (typeof field === "object") return field.label || null;
+        return field;
+      };
+
+      const rawDraftCriteriaData =
+        data_detail_draft?.criteriaDataDtoList ||
+        data_detail_draft?.criteriaData ||
+        data_detail_draft?.contentCriteria ||
+        [];
+
+      const dataDraftCriteriaList = rawDraftCriteriaData.map((item, index) => ({
+        id: item.id,
+        budget: extractLabel(item.budget),
+        subDistrict: extractLabel(item.subDistrict),
+        district: extractLabel(item.district),
+        city: extractLabel(item.city),
+        province: extractLabel(item.province),
+        area: extractLabel(item.area) || extractLabel(item.costCenter),
+        sor: extractLabel(item.sor),
+        industrialSector: extractLabel(item.industrialSector),
+        product: extractLabel(item.product),
+        gsizes: extractLabel(item.gsizes),
+        customerSegment: extractLabel(item.customerSegment),
+        accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
+        accountClass: extractLabel(item.accountClass),
+        accountCategory: extractLabel(item.accountCategory),
+        serviceType: extractLabel(item.serviceType),
+        customer: extractLabel(item.customer),
+        startDate: item.startDate,
+        endDate: item.endDate,
+        allCriteria: item.allCriteria,
+        key: index + 1,
+        type: "exist",
+      }));
 
       setDataDraft(data_detail_draft);
       setDataCriteriaDraft(dataDraftCriteriaList);
@@ -290,7 +329,7 @@ const ContentManagementDetail = () => {
 
   // Render Content Tab (Subject & Body) for INFORMATION section
   const renderContentTab = () => {
-    const contentTemplate = dataDetail?.contentTemplate || {};
+    const contentTemplate = dataDetail?.contentTemplate || dataDetail || {};
     return (
       <CollapsibleContainer header={"CONTENT INFORMATION"} border={true} defaultOpen={true}>
         <div className="space-y-6 pb-3">
@@ -737,7 +776,7 @@ const ContentManagementDetail = () => {
                 key={"detail"}
                 dataContentManagement={dataDetail}
                 dataCriteria={dataCriteria}
-                criteriaList={dataDetail?.criteria}
+                criteriaList={dataDetail?.criteriaDtoList || dataDetail?.criteria}
               />
             </div>
 
@@ -753,7 +792,7 @@ const ContentManagementDetail = () => {
                   key={"draft"}
                   dataContentManagement={dataDraft}
                   dataCriteria={dataCriteriaDraft}
-                  criteriaList={dataDraft?.criteria}
+                  criteriaList={dataDraft?.criteriaDtoList || dataDraft?.criteria}
                 />
               </div>
             )}
@@ -887,7 +926,7 @@ const ContentManagementDetail = () => {
           header={approveOrReject}
           approveOrReject={approveOrReject}
           menu={"Content Management"}
-          named={dataDetail?.contentTemplate?.templateName}
+          named={dataDetail?.templateName || dataDetail?.contentTemplate?.templateName}
         />
 
         {/* Modal Retry */}

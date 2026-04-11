@@ -393,7 +393,12 @@ const ListFormPaymentChannel = (props) => {
 
   const handleSaveDraft = () => {
     const currentFormValue = form.getFieldsValue();
+    const existingId =
+      currentFormValue.id ||
+      data_detail?.peOpCi?.id ||
+      id;
     const dataValue = {
+      id: existingId,
       ciCode: currentFormValue.ciCode,
       name: currentFormValue.name,
       effStartDate: currentFormValue.effStartDate ? moment(currentFormValue.effStartDate).format(dateFormatting.date) : null,
@@ -406,8 +411,7 @@ const ListFormPaymentChannel = (props) => {
     dispatch(saveDraftPaymentChannel(dataValue))
       .unwrap()
       .then(() => {
-        handleClear();
-        handleBack();
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL);
       });
   };
 
@@ -480,6 +484,7 @@ const ListFormPaymentChannel = (props) => {
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
+                mandatory={true}
               />
             </CardContainer>
           </div>

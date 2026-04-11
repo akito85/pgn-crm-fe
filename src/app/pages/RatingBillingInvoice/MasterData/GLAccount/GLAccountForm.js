@@ -53,6 +53,11 @@ const GLAccountForm = ({ type }) => {
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const [flag, setFlag] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [current, setCurrent] = useState(0);
   const [listSectionInfo, setListSectionInfo] = useState([
     {
@@ -127,6 +132,7 @@ const GLAccountForm = ({ type }) => {
       const attachments = data_detail?.attachments || [];
 
       const mappedAttachment = attachments.map((item, index) => ({
+        key: index + 1,
         id: item.id || index,
         size: item.size || 0,
         fileName: item.fileName || "-",
@@ -142,7 +148,13 @@ const GLAccountForm = ({ type }) => {
         dataType: "exist",
       }));
 
-      const hierarchyId = glAccount?.apphierId || glAccount?.appHierId || glAccount?.approvalHierarchy || approvalInfo?.apphierId || approvalInfo?.appHierId || null;
+      const hierarchyId =
+        glAccount?.apphierId ||
+        glAccount?.appHierId ||
+        glAccount?.approvalHierarchy ||
+        approvalInfo?.apphierId ||
+        approvalInfo?.appHierId ||
+        null;
 
       form.setFieldsValue({
         glAccount: glAccount?.glAccount || "",
@@ -158,7 +170,7 @@ const GLAccountForm = ({ type }) => {
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getApprovalHierarchyDetail(selectedHierarchy));
+      dispatch(getApprovalHierarchyDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
@@ -212,47 +224,58 @@ const GLAccountForm = ({ type }) => {
     }
   };
 
-  const handleMandatory = (setListSectionInfo = () => {}, listDataAttachment, errorFields) => {
+  const handleMandatory = (
+    setListSectionInfo = () => {},
+    listDataAttachment,
+    errorFields
+  ) => {
     setListSectionInfo((prevState) => {
-      return prevState.map((item) => {
+      const res = prevState.map((item) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
                 (current, next) =>
-                  item.paramValue.includes(next.name[0]) ? current + 1 : current,
-                0,
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0
               )
             : listDataAttachment.length < 1
-              ? 1
-              : 0;
-        return { value: item.value, paramValue: item.paramValue, errorBadge };
+            ? 1
+            : 0;
+        return {
+          value: item.value,
+          paramValue: item.paramValue,
+          errorBadge,
+        };
       });
+      return res;
     });
   };
 
   const handleSave = async (formValue) => {
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
-      dispatch(showModalError({
-        title: "Failed",
-        description: "Attachment is mandatory. Please upload at least one file.",
-      }));
-      return;
-    }
-
-    handleMandatory(setListSectionInfo, listDataAttachment);
-    const isDataValid = await checkDataValidity(formValue);
-
-    if (isDataValid) {
-      setBodyData({ ...formValue });
-      setModalConfirm(true);
-      setListSectionInfo([
-        { value: "GL Account", paramValue: ["glAccount", "glAccountDesc", "remark"] },
-        { value: "Approval", paramValue: ["apphierId"] },
-        { value: "Attachment" },
-      ]);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
-      setModalConfirm(false);
+      handleMandatory(setListSectionInfo, listDataAttachment);
+      const isDataValid = await checkDataValidity(formValue);
+
+      if (isDataValid) {
+        setBodyData({ ...formValue });
+        setModalConfirm(true);
+        setListSectionInfo([
+          { value: "GL Account", paramValue: ["glAccount", "glAccountDesc", "remark"] },
+          { value: "Approval", paramValue: ["apphierId"] },
+          { value: "Attachment" },
+        ]);
+      } else {
+        setModalConfirm(false);
+      }
     }
   };
 
@@ -326,8 +349,24 @@ const GLAccountForm = ({ type }) => {
     }
   };
 
-  const handleError = ({ errorFields }) => {
+  // Handle Error Tab Form
+  const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClear = () => {
@@ -345,6 +384,7 @@ const GLAccountForm = ({ type }) => {
       ]);
     } else {
       dispatch(getDetailGLAccount(id));
+      setCurrent(0);
     }
   };
 
@@ -461,6 +501,25 @@ const GLAccountForm = ({ type }) => {
             </div>
             <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "created"}. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>

@@ -57,6 +57,7 @@ export const columnDailyRate = (
     key: "rateType",
     sorter: true,
     align: "left",
+    width: 120,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateType",
@@ -82,6 +83,7 @@ export const columnDailyRate = (
     key: "fromCurrencyName",
     sorter: true,
     align: "center",
+    width: 160,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fromCurrencyName",
@@ -107,6 +109,7 @@ export const columnDailyRate = (
     key: "toCurrencyName",
     sorter: true,
     align: "center",
+    width: 150,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "toCurrencyName",
@@ -132,6 +135,7 @@ export const columnDailyRate = (
     key: "rateDate",
     sorter: true,
     align: "center",
+    width: 140,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateDate",
@@ -158,6 +162,7 @@ export const columnDailyRate = (
     key: "convertedRate",
     sorter: true,
     align: "right",
+    width: 170,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convertedRate",
@@ -198,6 +203,7 @@ export const columnDailyRate = (
     dataIndex: "description",
     key: "description",
     sorter: true,
+    width: 250,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "description",
@@ -224,7 +230,7 @@ export const columnDailyRate = (
     title: "STATUS",
     dataIndex: "status",
     key: "status",
-    width: 150,
+    width: 130,
     sorter: true,
     align: "left",
     ...getColumnSearchPropsUseFilteredValue(
@@ -266,7 +272,7 @@ export const columnDailyRate = (
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     key: "statusApproval",
-    width: 200,
+    width: 180,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -516,7 +522,9 @@ const DailyRateView = ({ dispatch }) => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           type="submit"
           onClick={handleDownload}
         >
@@ -529,7 +537,9 @@ const DailyRateView = ({ dispatch }) => {
       render: (
         <NavLink to={RBI_ROUTES.DAILY_RATE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={20} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Daily Rates
@@ -550,7 +560,7 @@ const DailyRateView = ({ dispatch }) => {
           >
             <Tooltip title="Detail">
               <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -709,7 +719,11 @@ const DailyRateView = ({ dispatch }) => {
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
     itemGrantAccess,
-  );
+  ).map((col) => ({
+    ...col,
+    width: 60,
+    align: "center",
+  }));
 
   // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
@@ -806,7 +820,7 @@ const DailyRateView = ({ dispatch }) => {
             totalData={daily_rate_pagination?.totalElements || 0}
             onSort={onSort}
             tableScrolled={{
-              x: 2500,
+              x: "max-content",
               y: 525,
             }}
             handleDownload={handleDownload}

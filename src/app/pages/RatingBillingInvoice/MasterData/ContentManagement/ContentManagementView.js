@@ -20,6 +20,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   inactiveContentManagement,
+  downloadContentManagementList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -250,8 +251,24 @@ const ContentManagementView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    // Backend belum menyediakan endpoint download
-    console.log("Download feature not yet available");
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
+        }
+      }
+    }
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    dispatch(
+      downloadContentManagementList({
+        search: tempSearch,
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+      }),
+    );
   };
 
   // Grant Access Item - moved outside useMemo
@@ -346,36 +363,50 @@ const ContentManagementView = () => {
       type: "table",
       render: (record, data) => {
         const isActivateOrInactivate =
-          (record.statusApproval === "APPROVE" && record.status === "ACTIVE") ||
+          (record.statusApproval === "APPROVED" &&
+            record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
           (record.statusApproval === "REJECTED" &&
             record.status === "ACTIVE") ||
           (record.statusApproval === "WAITING APPROVAL" &&
             record.status === "ACTIVE");
 
-        return (
-          <div
-            className={`flex items-center gap-2 ${
-              !isActivateOrInactivate ? "cursor-not-allowed" : "cursor-pointer"
-            }`}
-            onClick={
-              isActivateOrInactivate ? () => handleInactive(record) : undefined
-            }
-          >
-            <Checkbox
-              className="inactive-check"
-              disabled={!isActivateOrInactivate}
-              checked={record.status !== "ACTIVE"}
-            />
-            <span
-              className={
-                isActivateOrInactivate ? "text-black" : "text-[#8D91A0]"
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  onClick={() => handleInactive(record)}
+                  disabled={record.status === "ACTIVE" ? false : true}
+                  checked={record.status === "ACTIVE" ? false : true}
+                />
               }
+              type={"action"}
+              border={false}
+              disabled={!isActivateOrInactivate}
+              onClick={() => handleInactive(record)}
             >
-              {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-            </span>
-          </div>
-        );
+              <span className="text-black ml-1">
+                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+            >
+              <div className="pt-1">
+                <Checkbox
+                  className="inactive-check"
+                  onClick={() => handleInactive(record)}
+                  disabled={record.status === "ACTIVE" ? false : true}
+                  checked={record.status === "ACTIVE" ? false : true}
+                />
+              </div>
+            </Tooltip>
+          );
+
+        return Content;
       },
     },
     {

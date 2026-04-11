@@ -174,6 +174,7 @@ const EFakturCodeForm = ({ type }) => {
 
       // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
+        key: index + 1,
         id: item.id || index,
         size: item.size || 0,
         fileName: item.fileName || "-",

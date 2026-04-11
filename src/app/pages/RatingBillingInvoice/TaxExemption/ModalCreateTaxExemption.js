@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Form, Select, Table, Button } from "antd";
+import axios from "axios";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import {
   PlusOutlined,
@@ -111,6 +113,25 @@ const TaxExemptionStep = ({
         }
         return { ...prev, [key]: updated };
       });
+    }
+  };
+
+  const handlePreviewProformaInvoice = async () => {
+    if (!record?.proformaInvoiceNumber) return;
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/rbi/proforma-invoice/download/latest/${record.proformaInvoiceNumber}`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        },
+      );
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Error previewing proforma invoice:", error);
     }
   };
 
@@ -332,13 +353,17 @@ const TaxExemptionStep = ({
         }
       >
         <div className="pb-2">
-          <a
-            href={record?.pathFile}
-            className="text-primary text-xs"
-            style={{ color: "#0075BF" }}
-          >
-            {record?.pathFile}
-          </a>
+          {record?.proformaInvoice ? (
+            <span
+              className="text-xs"
+              style={{ color: "#0075BF", cursor: "pointer" }}
+              onClick={handlePreviewProformaInvoice}
+            >
+              {record.proformaInvoice}
+            </span>
+          ) : (
+            <span className="text-xs text-gray-400">-</span>
+          )}
         </div>
       </BaseContainer>
 

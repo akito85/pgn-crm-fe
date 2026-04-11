@@ -12,7 +12,6 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { EyeOutlined } from "@ant-design/icons";
 import {
     getListPaymentPeriod,
     inactivePaymentPeriod,
@@ -306,7 +305,7 @@ const ListPaymentPeriod = () => {
                             to="/system-setup/payment-period/view"
                             state={{ id: record.idPaymentPeriod, statusApproval: record.statusApproval }}
                         >
-                            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+                            <SVGIcon name="IconDetail" width={20} />
                         </Link>
                     </Tooltip>
                 );

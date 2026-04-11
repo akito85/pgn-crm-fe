@@ -76,15 +76,15 @@ export const columnsInvoice = (
         ),
     },
     {
-      key: "templateName",
+      key: "template",
       title: "TEMPLATE",
-      dataIndex: "templateName",
+      dataIndex: "template",
       isClassification: true,
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "templateName",
+        "template",
         searchInput,
         searchedColumn,
         searchText,
@@ -92,8 +92,8 @@ export const columnsInvoice = (
       ),
       render: (text) =>
         renderColumn(
-          "templateName",
-          hasValue(search["templateName"]),
+          "template",
+          hasValue(search["template"]),
           searchText,
           text,
           false,

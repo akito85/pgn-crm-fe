@@ -59,6 +59,11 @@ const BillingCycleForm = ({ type }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const flagRef = React.useRef(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
@@ -135,8 +140,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const datadraftAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -177,8 +183,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const dataAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -297,6 +304,21 @@ const BillingCycleForm = ({ type }) => {
       });
       return res;
     });
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabData.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const processData = ({ bodyData, id, type, dateFormatting, flag }) => {
@@ -361,6 +383,11 @@ const BillingCycleForm = ({ type }) => {
           return item;
         });
       });
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
       const isDataValid = await checkDataValidity(formValue);
 
@@ -423,6 +450,7 @@ const BillingCycleForm = ({ type }) => {
     } else {
       dispatch(getInfoDetail(id));
       dispatch(getInfoDetailDraft(id));
+      setCurrent(0);
     }
   };
 
@@ -676,6 +704,25 @@ const BillingCycleForm = ({ type }) => {
               flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>

@@ -78,6 +78,11 @@ const TaxCodeForm = ({ type }) => {
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [current, setCurrent] = useState(0);
   const [tabPages, setTabPages] = useState([
     {
@@ -112,16 +117,46 @@ const TaxCodeForm = ({ type }) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
-          if (current < steps.length - 1) setCurrent(current + 1);
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (listDataCriteria.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+            if (listDataDetail.length === 0) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Condition Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+          }
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+            window.scrollTo(0, 0);
+          }
         })
         .catch(() => {});
     } else {
-      if (current < steps.length - 1) setCurrent(current + 1);
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+        window.scrollTo(0, 0);
+      }
     }
   };
 
   const prev = () => {
-    if (current > 0) setCurrent(current - 1);
+    if (current > 0) {
+      setCurrent(current - 1);
+      window.scrollTo(0, 0);
+    }
   };
 
   const isLoading = loading || loadingForm;
@@ -197,8 +232,9 @@ const TaxCodeForm = ({ type }) => {
 
       // Data Attachment Draft Information
       const dataAttachmentDraft = (data_detail?.taxCodeAttDtos || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -311,8 +347,9 @@ const TaxCodeForm = ({ type }) => {
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
       // Data Attachment Information
-      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item) => {
+      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
@@ -723,10 +760,14 @@ const TaxCodeForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
-      ) {
+      const itemStart = moment(item?.startDate).startOf("day");
+      const headerStart = moment(formHeader?.startDate).startOf("day");
+      const startOutOfRange = itemStart < headerStart;
+      const endOutOfRange =
+        hasValue(formHeader?.endDate) &&
+        hasValue(item?.endDate) &&
+        moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day");
+      if (startOutOfRange || endOutOfRange) {
         dataOverlap?.push(item);
       }
     });
@@ -749,15 +790,29 @@ const TaxCodeForm = ({ type }) => {
     );
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabPages, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: "ATTACHMENT",
+        stepIndex: 2,
+      });
     } else {
       handleMandatory(setTabPages, listDataAttachment);
       if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
+      } else if (listDataDetail.length === 0) {
+        setCurrent(0);
+        errorBody = {
+          title: "Failed",
+          description: "Condition Mandatory. Please insert data.",
+        };
+        dispatch(showModalError(errorBody));
       } else if (storedDataInline) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: `Please save data table inline before submit. Please try again.`,
@@ -772,18 +827,21 @@ const TaxCodeForm = ({ type }) => {
           0
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlapping) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlappingCondition) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Condition. Start date and end date can't be overlap`,
@@ -939,6 +997,21 @@ const TaxCodeForm = ({ type }) => {
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setTabPages, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabPages.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleSubmit = () => {
@@ -982,6 +1055,7 @@ const TaxCodeForm = ({ type }) => {
     } else {
       dispatch(getDetailTaxCode(id));
       dispatch(getDetailDraftTaxCode(id));
+      setCurrent(0);
     }
   };
 
@@ -1038,6 +1112,7 @@ const TaxCodeForm = ({ type }) => {
           form={form}
           onFinish={handleSave}
           onFinishFailed={handleError}
+          scrollToFirstError={true}
         >
           <div style={{ display: valuePage !== "Tax Code" ? "none" : undefined }}>
             <TaxCodeSectionForm
@@ -1140,12 +1215,31 @@ const TaxCodeForm = ({ type }) => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+              <p className="text-[18px]">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
               flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px]">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>

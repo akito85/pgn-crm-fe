@@ -145,8 +145,8 @@ export const FormFooter = ({
   usePrevious = true,
   noBorder = false,
 }) => {
-  const containerClasses = noBorder 
-    ? "p-4 w-full" 
+  const containerClasses = noBorder
+    ? "p-4 w-full"
     : "bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6";
 
   return (
@@ -163,7 +163,9 @@ export const FormFooter = ({
             <Button
               icon={
                 <SVGIcon
-                  name={`IconButtonClear`}
+                  name={
+                    type === "update" ? `IconButtonReset` : `IconButtonClear`
+                  }
                   width={18}
                 />
               }
@@ -179,17 +181,16 @@ export const FormFooter = ({
                 fontSize: "12px",
               }}
             >
-              Clear Data
+              {type === "update" ? "Reset Data" : "Clear Data"}
             </Button>
           )}
           {!isApprover && useSaveDraft && (
             <Button
               onClick={onSaveDraft}
-              disabled={disableSaveDraft || isLoading}
               style={{
-                backgroundColor: disableSaveDraft || isLoading ? "#E0E3E9" : "#E6F1F9",
-                borderColor: disableSaveDraft || isLoading ? "#E0E3E9" : "#E6F1F9",
-                color: disableSaveDraft || isLoading ? "#BFC4D0" : "#0075BF",
+                backgroundColor: "#E6F1F9",
+                borderColor: "#E6F1F9",
+                color: "#0075BF",
                 borderRadius: "6px",
                 height: "32px",
                 fontSize: "12px",
@@ -202,23 +203,21 @@ export const FormFooter = ({
           
           {useNavigation && (
             <>
-              {usePrevious && (
-                <Button
-                  disabled={current === 0}
-                  onClick={onPrev}
-                  style={{
-                    backgroundColor: current === 0 ? "#E0E3E9" : "#fff",
-                    borderColor: current === 0 ? "#E0E3E9" : "#DADDE5",
-                    color: current === 0 ? "#BFC4D0" : "#4B465C",
-                    borderRadius: "6px",
-                    height: "32px",
-                    fontSize: "12px",
-                    border: "1px solid #DADDE5",
-                  }}
-                >
-                  Previous
-                </Button>
-              )}
+              <Button
+                disabled={current === 0}
+                onClick={onPrev}
+                style={{
+                  backgroundColor: current === 0 ? "#E0E3E9" : "#fff",
+                  borderColor: current === 0 ? "#E0E3E9" : "#DADDE5",
+                  color: current === 0 ? "#BFC4D0" : "#4B465C",
+                  borderRadius: "6px",
+                  height: "32px",
+                  fontSize: "12px",
+                  border: "1px solid #DADDE5",
+                }}
+              >
+                Previous
+              </Button>
               {!isApprover &&
                 (current < totalSteps - 1 ? (
                   <Button
@@ -244,11 +243,11 @@ export const FormFooter = ({
                     onClick={onSubmit}
                     type="primary"
                     loading={isLoading}
-                    disabled={disableSubmit || isLoading}
+                    disabled={isLoading}
                     style={{
-                      backgroundColor: disableSubmit || isLoading ? "#E0E3E9" : "#388E3C",
-                      borderColor: disableSubmit || isLoading ? "#E0E3E9" : "#388E3C",
-                      color: disableSubmit || isLoading ? "#BFC4D0" : "#fff",
+                      backgroundColor: "#388E3C",
+                      borderColor: "#388E3C",
+                      color: "#fff",
                       borderRadius: "6px",
                       height: "32px",
                       fontSize: "12px",

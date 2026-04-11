@@ -60,7 +60,7 @@ const ViewPartnerCa = () => {
   const [sort, setSort] = useState("");
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const statusRef = useRef("");
+  const [currentStatus, setCurrentStatus] = useState("");
   const [id, setId] = useState("");
   const [nameModalActiveOrInactivate, setNameModalActiveOrInactivate] = useState("");
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
@@ -181,10 +181,12 @@ const ViewPartnerCa = () => {
         dataApprover: {
           create: dataApprovalHistory?.dataApprover?.PARTNER_CA || [],
           inactive: dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER_CA || [],
+          active: dataApprovalHistory?.dataApprover?.ACTIVE_PARTNER_CA || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.PARTNER_CA || [],
           inactive: dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER_CA || [],
+          active: dataApprovalHistory?.dataHistory?.ACTIVE_PARTNER_CA || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -343,7 +345,7 @@ const ViewPartnerCa = () => {
     setOpenModalInactivate(true);
     setId(r?.id);
     setNameModalActiveOrInactivate(r?.partner?.partnerName || r?.id);
-    statusRef.current = r?.status ?? "";
+    setCurrentStatus(r?.status ?? "");
   };
 
   const handleCancelModalInactivate = () => {
@@ -351,10 +353,11 @@ const ViewPartnerCa = () => {
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
+    const isCurrentlyInactive = (currentStatus || "").toLowerCase() === "inactive";
     const body = {
       id,
       appHierId: res.approvalHierarchy,
-      status: statusRef.current === "Inactive" ? "Active" : "Inactive",
+      status: isCurrentlyInactive ? "Active" : "Inactive",
       remark: res.remark,
     };
     dispatch(inactivePartnerCa({ body }))
@@ -673,7 +676,8 @@ const ViewPartnerCa = () => {
         getAPIOption={getAllApprovalList}
         getAPIDetail={getListApprovalById}
         selector="partnerCa"
-        alertMessage={`Are you sure you want to inactivate this Partner CA Mapping: ${nameModalActiveOrInactivate}?`}
+        header={(currentStatus || "").toLowerCase() === "inactive" ? "Activate Information" : "Inactive Information"}
+        alertMessage={`Are you sure you want to ${(currentStatus || "").toLowerCase() === "inactive" ? "activate" : "inactivate"} this Partner CA Mapping: ${nameModalActiveOrInactivate}?`}
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}

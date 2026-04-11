@@ -7,7 +7,6 @@ import CardContainer from "../../../../../components/CardContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { EyeOutlined } from "@ant-design/icons";
 import {
   renderColumn,
   renderDateColumn,
@@ -130,8 +129,8 @@ const ViewPartner = () => {
 
   const handleOptions = () => {
     const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
+    const tabOrder = ["create", "inactive", "active"];
+    return tabOrder.filter((key) => Object.prototype.hasOwnProperty.call(data, key)).map((item) => ({
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
@@ -154,19 +153,36 @@ const ViewPartner = () => {
     setSearchText("");
   }, []);
 
+  const normalizeApprovalTypeKey = (key) => {
+    const upperKey = (key || "").toUpperCase();
+    if (upperKey.includes("INACTIVE")) return "inactive";
+    if (upperKey.includes("ACTIVE")) return "active";
+    if (upperKey.includes("CREATE") || upperKey === "PARTNER") return "create";
+    return (key || "").toLowerCase();
+  };
+
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
+      const dataApprover = Object.keys(dataApprovalHistory?.dataApprover || {}).reduce((acc, key) => {
+        const normalizedKey = normalizeApprovalTypeKey(key);
+        acc[normalizedKey] = [
+          ...(acc[normalizedKey] || []),
+          ...(dataApprovalHistory?.dataApprover?.[key] || []),
+        ];
+        return acc;
+      }, {});
+      const dataHistory = Object.keys(dataApprovalHistory?.dataHistory || {}).reduce((acc, key) => {
+        const normalizedKey = normalizeApprovalTypeKey(key);
+        acc[normalizedKey] = [
+          ...(acc[normalizedKey] || []),
+          ...(dataApprovalHistory?.dataHistory?.[key] || []),
+        ];
+        return acc;
+      }, {});
+
       const temp = {
-        dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.PARTNER || [],
-          inactive:
-            dataApprovalHistory?.dataApprover?.INACTIVE_PARTNER || [],
-        },
-        dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.PARTNER || [],
-          inactive:
-            dataApprovalHistory?.dataHistory?.INACTIVE_PARTNER || [],
-        },
+        dataApprover,
+        dataHistory,
       };
       setDataApprovalHistoryFix(temp);
     } else {
@@ -412,7 +428,7 @@ const ViewPartner = () => {
           style={{ lineHeight: 0 }}
         >
           <Tooltip title="Detail">
-            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+            <SVGIcon name="IconDetail" width={20} />
           </Tooltip>
         </Link>
       ),
@@ -420,9 +436,25 @@ const ViewPartner = () => {
     {
       action: "Update",
       type: "table",
-      render: (record) => {
+      render: (record, data_length) => {
         const isEditable = record.statusApproval === "Draft" || record.statusApproval === "Rejected";
-        return (
+        return data_length > 3 ? (
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_PARTNER}
+            state={{ id: record?.id }}
+            className={!isEditable ? "pointer-events-none" : ""}
+          >
+            <ButtonComponent
+              className="gap-5"
+              icon={<SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />}
+              border={false}
+              disabled={!isEditable}
+              type="action"
+            >
+              <span className="text-black gap-2 text-center">Update</span>
+            </ButtonComponent>
+          </Link>
+        ) : (
           <Tooltip title="Update">
             <div
               onClick={(e) => { if (!isEditable) e.preventDefault(); }}
@@ -446,14 +478,34 @@ const ViewPartner = () => {
     {
       action: "Activate",
       type: "table",
-      render: (record) => {
+      render: (record, data_length) => {
         const statusLowerCase = record?.status?.toLowerCase();
-        return (
-          <Tooltip title={statusLowerCase === "active" || statusLowerCase === "draft" ? "Inactivate" : "Activate"}>
+        const isActive = statusLowerCase === "active";
+        return data_length > 3 ? (
+          <div className="w-full">
+            <ButtonComponent
+              border={false}
+              className="gap-5"
+              onClick={() => handleInactive(record)}
+              disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+              type="action"
+            >
+              <Checkbox
+                onClick={() => handleInactive(record)}
+                checked={!isActive}
+                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+              />
+              <span className="text-black ml-6 gap-2 text-center">
+                {statusLowerCase === "active" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          </div>
+        ) : (
+          <Tooltip title={statusLowerCase === "active" ? "Inactivate" : "Activate"}>
             <div>
               <Checkbox
                 onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
+                checked={!isActive}
                 disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
               />
             </div>
@@ -464,16 +516,27 @@ const ViewPartner = () => {
     {
       action: "history",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Approval History">
-          <div
-            style={{ lineHeight: 0 }}
+      render: (record, data_length) =>
+        data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
+            border={false}
             onClick={() => handleApprovalHistory(record?.id)}
+            type="action"
           >
-            <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
-          </div>
-        </Tooltip>
-      ),
+            <span className="text-black gap-2 text-center">Approval History</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title="Approval History">
+            <div
+              style={{ lineHeight: 0 }}
+              onClick={() => handleApprovalHistory(record?.id)}
+            >
+              <SVGIcon name="IconLogHistory" color="#0075bf" width={20} />
+            </div>
+          </Tooltip>
+        ),
     },
   ];
 
@@ -632,7 +695,7 @@ const ViewPartner = () => {
         getAPIOption={getAllApprovalList}
         getAPIDetail={getListApprovalById}
         selector={"partner"}
-        alertMessage={`Are you sure you want to inactivate this Partner with Partner Code ${nameModalActiveOrInactivate}?`}
+        alertMessage={`Are you sure you want to ${status === "Inactive" ? "activate" : "inactivate"} this Partner with Partner Code ${nameModalActiveOrInactivate}?`}
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
