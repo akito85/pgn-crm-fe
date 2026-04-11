@@ -208,12 +208,12 @@ const PaymentGuaranteeSection = ({
           </Form.Item>
         </Col>
         
-        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
+        <Col flex="0 0 30%" style={{ maxWidth: '30%' }}>
           <Form.Item label="Term Of Claim Period" required>
-            <Input.Group compact className="flex gap-2">
+            <div className="flex gap-2 w-full">
               <Form.Item 
                 name="claimPeriodTermType" 
-                style={{ width: '40%', marginBottom: 0 }}
+                style={{ flex: '0 0 75px', marginBottom: 0 }}
                 rules={[{ required: true, message: 'Required' }]}
                 // API: claimPeriodTermType
               >
@@ -223,20 +223,21 @@ const PaymentGuaranteeSection = ({
                   ))}
                 </Select>
               </Form.Item>
-              <Form.Item 
-                name="claimPeriodTermValue" 
-                style={{ width: '60%', marginBottom: 0 }}
-                rules={[{ required: true, message: 'Required' }]}
-                // API: claimPeriodTermValue
-              >
-                <DatePicker 
-                  disabled={isPartialEdit} 
-                  placeholder="Select Date" 
-                  className="w-full" 
-                  style={{ borderRadius: '8px' }} 
-                />
+              <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.claimPeriodTermType !== currentValues.claimPeriodTermType}>
+                {({ getFieldValue }) => {
+                  const termType = getFieldValue('claimPeriodTermType') || CLAIM_PERIOD_TERM_TYPES.DATE;
+                  return termType === CLAIM_PERIOD_TERM_TYPES.DATE || termType === 'Date' ? (
+                    <Form.Item name="claimPeriodTermDate" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
+                      <DatePicker disabled={isPartialEdit} placeholder="Select Date" className="w-full" style={{ borderRadius: '8px', minWidth: 0 }} />
+                    </Form.Item>
+                  ) : (
+                    <Form.Item name="claimPeriodTermValue" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
+                      <Input disabled={isPartialEdit} maxLength={2} placeholder="Input Value" onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} className="w-full" style={{ borderRadius: '8px', padding: '8px 12px', minWidth: 0 }} />
+                    </Form.Item>
+                  );
+                }}
               </Form.Item>
-            </Input.Group>
+            </div>
           </Form.Item>
         </Col>
 
