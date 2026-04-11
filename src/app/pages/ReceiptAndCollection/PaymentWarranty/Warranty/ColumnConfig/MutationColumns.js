@@ -178,43 +178,62 @@ export const columnMutation = (
 
         return (
           <div className="w-full flex justify-center items-center py-1 gap-2">
-            {!isCreate && (
-              <Popover
-                trigger="click"
-                placement="bottomRight"
-                content={
-                  <Space direction="vertical" style={{ width: 120 }}>
-                    <div
-                      className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
-                      onClick={() => !isDisabled && handleEdit(record)}
-                    >
-                      <SVGIcon name="IconEdit" width={18} color="#ACC424" />
-                      <span className="text-sm">Update</span>
-                    </div>
-                    <div
-                      className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
-                      onClick={() => !isDisabled && handleDelete(record)}
-                    >
-                      <SVGIcon name="IconDelete" width={18} color="#BE3036" />
-                      <span className="text-sm text-[#BE3036]">Delete</span>
-                    </div>
-                  </Space>
-                }
-              >
-                <div className="cursor-pointer">
-                  <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
-                </div>
-              </Popover>
-            )}
-            {!isCreate && (
-              <Tooltip title="Approval History">
-                <div
-                  className="cursor-pointer"
-                  onClick={() => handleHistory(record)}
+            {isCreate ? (
+              <>
+                <Tooltip title={tooltipEdit}>
+                  <div
+                    className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                    onClick={() => !isDisabled && handleEdit(record)}
+                  >
+                    <SVGIcon name="IconEdit" width={24} color={isDisabled ? "#C8CDD4" : "#0075BF"} />
+                  </div>
+                </Tooltip>
+                <Tooltip title={tooltipDelete}>
+                  <div
+                    className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                    onClick={() => !isDisabled && handleDelete(record)}
+                  >
+                    <SVGIcon name="IconDelete" width={24} color={isDisabled ? "#C8CDD4" : "#BE3036"} />
+                  </div>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Popover
+                  trigger="click"
+                  placement="bottomRight"
+                  content={
+                    <Space direction="vertical" style={{ width: 120 }}>
+                      <div
+                        className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
+                        onClick={() => !isDisabled && handleEdit(record)}
+                      >
+                        <SVGIcon name="IconEdit" width={18} color="#ACC424" />
+                        <span className="text-sm">Update</span>
+                      </div>
+                      <div
+                        className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
+                        onClick={() => !isDisabled && handleDelete(record)}
+                      >
+                        <SVGIcon name="IconDelete" width={18} color="#BE3036" />
+                        <span className="text-sm text-[#BE3036]">Delete</span>
+                      </div>
+                    </Space>
+                  }
                 >
-                  <SVGIcon name="IconLogHistory" width={24} color="#0075bf" />
-                </div>
-              </Tooltip>
+                  <div className="cursor-pointer">
+                    <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                  </div>
+                </Popover>
+                <Tooltip title="Approval History">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => handleHistory(record)}
+                  >
+                    <SVGIcon name="IconLogHistory" width={24} color="#0075bf" />
+                  </div>
+                </Tooltip>
+              </>
             )}
           </div>
         );

@@ -75,7 +75,8 @@ const ListFormWarranty = (props) => {
     dataPaymentWarrantyPartnerBranch, 
     data_detail, 
     dataMutation,
-    dataServiceAgreement
+    dataServiceAgreement,
+    loadingServiceAgreement
   } = useSelector((state) => state.warranty);
   
   const {
@@ -277,9 +278,10 @@ const ListFormWarranty = (props) => {
   const next = () => {
     if (current === 0) {
       form.validateFields([
-        "accountId", "warrantyType", "documentNumber", "documentDate",
+        "accountId", "saNumber", "warrantyType", "documentNumber", "documentDate",
         "issuerBank", "currency", "convertedCurrency", "rateType",
-        "rateDate", "effStartDate", "effEndDate", "description"
+        "rateDate", "effStartDate", "effEndDate", "description",
+        "claimPeriodTermType", "claimPeriodTermValue"
       ]).then(() => {
         setCurrent(current + 1);
       }).catch((e) => {
@@ -348,7 +350,7 @@ const ListFormWarranty = (props) => {
           rateType: values.rateType || null,
           rateAmount: parsedRateAmount,
           claimPeriodTermType: values.claimPeriodTermType ? values.claimPeriodTermType.toUpperCase() : "DATE",
-          claimPeriodTermValue: values.claimPeriodTermValue ? parseInt(values.claimPeriodTermValue, 10) : null,
+          claimPeriodTermValue: values.claimPeriodTermValue ? moment(values.claimPeriodTermValue).toISOString(true) : null,
           description: DOMPurify.sanitize(values.description || null),
           isDraft: isDraft,
           appHierId: selectedHierarchy || null,
@@ -483,7 +485,14 @@ const ListFormWarranty = (props) => {
       <Spin spinning={loadingDetail || loadingApproval || loadingSave}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         
-        <Form layout="vertical" form={form} id={"formRequest"} onFinish={handleSubmit} preserve={true}>
+        <Form 
+          layout="vertical" 
+          form={form} 
+          id={"formRequest"} 
+          onFinish={handleSubmit} 
+          onFinishFailed={(errorInfo) => console.log('Validation Failed:', errorInfo)}
+          preserve={true}
+        >
           
           <div style={{ display: current !== 0 ? "none" : undefined }}>
             <WarrantyForm
@@ -508,6 +517,7 @@ const ListFormWarranty = (props) => {
                 isPartialEdit={isPartialEdit}
                 isWaitingApproval={isWaitingApproval}
                 isApprover={data_detail?.isApprover}
+                loadingServiceAgreement={loadingServiceAgreement}
             />
           </div>
 
@@ -545,7 +555,13 @@ const ListFormWarranty = (props) => {
             onPrev={prev}
             onNext={next}
             onCancel={onBack}
-            onClear={() => { form.resetFields(); setSelectedHierarchy(null); setListDataAttachment([]); setMutationDataInfo([]); }}
+            onClear={() => { 
+              form.resetFields(); 
+              setCurrent(0);
+              setSelectedHierarchy(null); 
+              setListDataAttachment([]); 
+              setMutationDataInfo([]); 
+            }}
             onSaveDraft={handleSaveDraft}
             onSubmit={() => form.submit()}
             type={type}
@@ -579,6 +595,8 @@ const ListFormWarranty = (props) => {
           dataServiceAgreement={dataServiceAgreement}
           dataPaymentWarrantyPartner={dataPaymentWarrantyPartner}
           dataPaymentWarrantyPartnerBranch={dataPaymentWarrantyPartnerBranch}
+          rateTypeDDL={rateTypeDDL}
+          currencyDDL={currencyDDL}
         />
       </ModalCustom>
 

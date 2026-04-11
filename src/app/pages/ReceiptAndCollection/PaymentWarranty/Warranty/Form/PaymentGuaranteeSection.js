@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Form, Row, Col, Select, DatePicker, Input } from "antd";
 import CardContainer from "../../../../../../components/CardContainer";
 import InputComponent from "../../../../../../components/InputComponent";
-import { WARRANTY_TYPES, CLAIM_PERIOD_TERM_TYPES } from "../../../../../../constants/warranty";
+import { WARRANTY_TYPES, CLAIM_PERIOD_TERM_TYPES, CLAIM_PERIOD_TERM_OPTIONS } from "../../../../../../constants/warranty";
 
 const { Option } = Select;
 
@@ -18,12 +18,12 @@ const PaymentGuaranteeSection = ({
   getPaymentWarrantyPartnerBranchList,
   isPartialEdit
 }) => {
-  const { dataWarrantyTypeOptions } = useSelector((state) => state.warranty);
+  const { dataWarrantyTypeOptions, loadingPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
 
   return (
     <CardContainer header="PAYMENT GUARANTEE INFORMATION">
       <Row gutter={[16, 16]}>
-        <Col span={6}>
+        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
           <Form.Item 
             name="warrantyType" 
             label="Type" 
@@ -46,7 +46,7 @@ const PaymentGuaranteeSection = ({
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
           <Form.Item 
             name="documentNumber" 
             label="Document Number" 
@@ -56,7 +56,7 @@ const PaymentGuaranteeSection = ({
             <InputComponent disabled={isPartialEdit} placeholder="Document Number" />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
           <Form.Item 
             name="documentDate" 
             label="Document Date" 
@@ -66,7 +66,7 @@ const PaymentGuaranteeSection = ({
             <DatePicker disabled={isPartialEdit} placeholder="Select Document Date" className="w-full" style={{ borderRadius: '8px' }} />
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
           <Form.Item name="issuerBank" label="Issuer" rules={[{ required: true }]}>
             <Select disabled={isPartialEdit} placeholder="Select Issuer" onChange={(value) => { dispatch(getPaymentWarrantyPartnerBranchList(value)); form.setFieldsValue({ issuerBranch: null }); }}>
               {(Array.isArray(dataPaymentWarrantyPartner) ? dataPaymentWarrantyPartner : (dataPaymentWarrantyPartner?.data || [])).map((item) => (
@@ -76,16 +76,20 @@ const PaymentGuaranteeSection = ({
           </Form.Item>
         </Col>
 
-        <Col span={6}>
+        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
           <Form.Item name="issuerBranch" label="Issuer Branch" rules={[{ required: true }]}>
-            <Select disabled={isPartialEdit} placeholder="Select Issuer Branch">
+            <Select 
+              disabled={isPartialEdit} 
+              placeholder="Select Issuer Branch"
+              loading={loadingPaymentWarrantyPartnerBranch}
+            >
               {(Array.isArray(dataPaymentWarrantyPartnerBranch) ? dataPaymentWarrantyPartnerBranch : (dataPaymentWarrantyPartnerBranch?.data || [])).map((item) => (
                 <Option key={item.id} value={item.id}>{item.branchName}</Option>
               ))}
             </Select>
           </Form.Item>
         </Col>
-        <Col span={6}>
+        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
           <Form.Item 
             name="currency" 
             label="Currency" 
@@ -102,37 +106,42 @@ const PaymentGuaranteeSection = ({
             const isCash = getFieldValue('warrantyType') === WARRANTY_TYPES.CASH;
             return isCash ? (
               <>
-                <Col span={6}>
+                <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
                   <Form.Item 
                     name="rateType" 
                     label="Rate Type" 
                     rules={[{ required: true }]}
                     // API: rateType
                   >
-                    <Select disabled={isPartialEdit} placeholder="Select Rate Type">
-                      {rateTypeDDL?.data?.map((item) => (<Option key={item.id} value={item.name}>{`${item.name} - ${item.description}`}</Option>))}
+                    <Select placeholder="Select Rate Type" allowClear>
+                      {rateTypeDDL?.data?.filter(item => item.name || item.description).map((item) => (
+                        <Option key={item.id} value={item.id}>
+                          {item.name ? `${item.name}${item.description ? ` - ${item.description}` : ''}` : item.description}
+                        </Option>
+                      ))}
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={6}>
+                <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
                   <Form.Item 
                     name="rateDate" 
                     label="Rate Date" 
                     rules={[{ required: true }]}
                     // API: rateDate
                   >
-                    <DatePicker disabled={isPartialEdit} placeholder="Select Rate Date" className="w-full" style={{ borderRadius: '8px' }} />
+                    <DatePicker placeholder="Select Rate Date" className="w-full" style={{ borderRadius: '8px' }} />
                   </Form.Item>
                 </Col>
 
-                <Col span={6}>
+                <Col flex="0 0 20%" style={{ maxWidth: "20%" }}>
                   <Form.Item 
                     name="rateAmount" 
                     label="Rate"
                     getValueFromEvent={(val) => val.floatValue}
+                    rules={[{ required: false }]}
                   >
                     <InputComponent 
-                      disabled={isPartialEdit}
+                      disabled={true}
                       placeholder="Rate Amount" 
                       type="numeric"
                       thousandSeparator=","
@@ -146,7 +155,7 @@ const PaymentGuaranteeSection = ({
             ) : null;
           }}
         </Form.Item>
-        <Col span={6}>
+        <Col flex="0 0 20%" style={{ maxWidth: "20%" }}>
           <Form.Item 
             name="effStartDate" 
             label="Eff Start Date" 
@@ -156,18 +165,16 @@ const PaymentGuaranteeSection = ({
             <DatePicker disabled={isPartialEdit} placeholder="Select Eff Start Date" className="w-full" style={{ borderRadius: '8px' }} />
           </Form.Item>
         </Col>
-        <Col span={6}>
-          <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.warrantyType !== currentValues.warrantyType || prevValues.effStartDate !== currentValues.effStartDate}>
+        <Col flex="0 0 20%" style={{ maxWidth: "20%" }}>
+          <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.effStartDate !== currentValues.effStartDate}>
             {({ getFieldValue }) => {
-              const type = getFieldValue('warrantyType');
               const effStartDate = getFieldValue('effStartDate');
-              const isCash = type === WARRANTY_TYPES.CASH;
               return (
                 <Form.Item 
                   name="effEndDate" 
                   label="Eff End Date" 
                   rules={[
-                    { required: !isCash, message: 'End Date is required' },
+                    { required: true, message: 'End Date is required' },
                     {
                       validator: (_, value) => {
                         if (value && value.isAfter(moment().add(10, 'years'))) {
@@ -200,31 +207,33 @@ const PaymentGuaranteeSection = ({
             }}
           </Form.Item>
         </Col>
-        <Col span={6}>
-          <Form.Item label="Term Of Claim Period" style={{ marginBottom: 0 }}>
+        
+        <Col flex="0 0 20%" style={{ maxWidth: '20%' }}>
+          <Form.Item label="Term Of Claim Period" required>
             <Input.Group compact className="flex gap-2">
               <Form.Item 
                 name="claimPeriodTermType" 
                 style={{ width: '40%', marginBottom: 0 }}
+                rules={[{ required: true, message: 'Required' }]}
                 // API: claimPeriodTermType
               >
-                <Select disabled={isPartialEdit} placeholder="Type" defaultValue={CLAIM_PERIOD_TERM_TYPES.DATE}>
-                  <Option value={CLAIM_PERIOD_TERM_TYPES.DATE}>Date</Option>
-                  <Option value={CLAIM_PERIOD_TERM_TYPES.AFTER}>After</Option>
+                <Select disabled={isPartialEdit} placeholder="Type">
+                  {CLAIM_PERIOD_TERM_OPTIONS.map((opt) => (
+                    <Option key={opt.value} value={opt.value}>{opt.name}</Option>
+                  ))}
                 </Select>
               </Form.Item>
               <Form.Item 
                 name="claimPeriodTermValue" 
                 style={{ width: '60%', marginBottom: 0 }}
+                rules={[{ required: true, message: 'Required' }]}
                 // API: claimPeriodTermValue
               >
-                <Input 
+                <DatePicker 
                   disabled={isPartialEdit} 
-                  maxLength={2} 
-                  placeholder="Value" 
-                  onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} 
+                  placeholder="Select Date" 
                   className="w-full" 
-                  style={{ borderRadius: '8px', padding: '8px 12px' }} 
+                  style={{ borderRadius: '8px' }} 
                 />
               </Form.Item>
             </Input.Group>

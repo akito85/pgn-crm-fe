@@ -143,9 +143,14 @@ export const FormFooter = ({
   disableSubmit = false,
   disableSaveDraft = false,
   usePrevious = true,
+  noBorder = false,
 }) => {
+  const containerClasses = noBorder 
+    ? "p-4 w-full" 
+    : "bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6";
+
   return (
-    <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+    <div className={containerClasses}>
       <div className="flex w-full justify-between items-center">
         <ButtonComponent
           onClick={onCancel}

@@ -38,6 +38,7 @@ const initialState = warrantyAdapter.getInitialState({
 
   dataPaymentWarrantyPartnerBranch: [],
   loadingPaymentWarrantyPartnerBranch: false,
+  loadingServiceAgreement: false,
 
   dataWarrantyTypeOptions: [],
   dataMutationCategoryOptions: [],
@@ -1433,14 +1434,14 @@ const warrantySlice = createSlice({
 
     // Get Service Agreement By Account Id
     [getServiceAgreementByAccountId.pending]: (state) => {
-      state.loading = true;
+      state.loadingServiceAgreement = true;
     },
     [getServiceAgreementByAccountId.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingServiceAgreement = false;
       state.dataServiceAgreement = action.payload;
     },
     [getServiceAgreementByAccountId.rejected]: (state) => {
-      state.loading = false;
+      state.loadingServiceAgreement = false;
     },
   },
 });
