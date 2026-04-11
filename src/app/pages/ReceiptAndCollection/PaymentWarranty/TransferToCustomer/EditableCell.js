@@ -12,6 +12,8 @@ const EditableCell = ({
     children,
     ...restProps
 }) => {
+    const isAmount = dataIndex === "amount";
+
     return (
         <td {...restProps}>
             {editing ? (
@@ -20,18 +22,48 @@ const EditableCell = ({
                     style={{
                         margin: 0,
                     }}
-                    rules={[
-                        {
-                            required: true,
-                            message: `Please Input ${title}!`,
-                        },
-                    ]}
+                    getValueFromEvent={isAmount ? (val) => val.floatValue : undefined}
+                    rules={
+                        isAmount
+                            ? [
+                                { required: true, message: "Amount is required" },
+                                {
+                                    validator: (_, value) => {
+                                        const floatValue = value;
+                                        if (floatValue === undefined || floatValue === null || floatValue <= 0) {
+                                            return Promise.reject(new Error("Amount must be greater than 0"));
+                                        }
+                                        if (floatValue > 999999999999) {
+                                            return Promise.reject(new Error("Amount exceeds maximum allowed value"));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                            ]
+                            : [
+                                {
+                                    required: true,
+                                    message: `Please Input ${title}!`,
+                                },
+                            ]
+                    }
                 >
-                    {/* Simple toggle for now, can be sophisticated based on inputType */}
-                    {dataIndex === 'currency' ? (
+                    {dataIndex === "currency" ? (
                         <SelectComponent
                             placeholder="Select"
-                            options={[{ label: "IDR", value: "IDR" }, { label: "USD", value: "USD" }]}
+                            options={[
+                                { label: "IDR", value: "IDR" },
+                                { label: "USD", value: "USD" },
+                            ]}
+                        />
+                    ) : isAmount ? (
+                        <InputComponent
+                            placeholder="Amount"
+                            type="numeric"
+                            thousandSeparator=","
+                            decimalSeparator="."
+                            decimalScale={2}
+                            fixedDecimalScale={true}
                         />
                     ) : (
                         <InputComponent />

@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tooltip } from "antd";
-import { NavLink, Link } from "react-router-dom";
+import { Spin, Tooltip, Popover } from "antd";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { EyeOutlined } from "@ant-design/icons";
 import { debounce } from "lodash";
+
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -20,10 +21,18 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 // Column Configuration
 import { columns as columnTransferToCustomer } from "./Columns";
 
+// Modals
+import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
+
+
 // Redux / Service
 import {
     getAllTransferToCustomerListPaginate,
+    getListApprovalById,
+    deleteTransferToCustomer,
 } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
+
 
 const ViewTransferToCustomer = () => {
     const { data, loading } = useSelector(
@@ -40,6 +49,13 @@ const ViewTransferToCustomer = () => {
     const [searchText, setSearchText] = useState("");
     const [sort, setSort] = useState("");
     const [search, setSearch] = useState({});
+
+    const [openModalHistory, setOpenModalHistory] = useState(false);
+    const [openModalDelete, setOpenModalDelete] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState(null);
+
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         dispatch(
@@ -134,6 +150,36 @@ const ViewTransferToCustomer = () => {
         // Implement download logic if needed
     };
 
+    const handleHistory = (record) => {
+        setSelectedRecord(record);
+        setOpenModalHistory(true);
+        dispatch(getListApprovalById({ id: record.id }));
+    };
+
+    const handleDelete = (record) => {
+        setSelectedRecord(record);
+        setOpenModalDelete(true);
+    };
+
+    const handleConfirmDelete = () => {
+        dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap().then(() => {
+            setOpenModalDelete(false);
+            dispatch(
+                getAllTransferToCustomerListPaginate({
+                    search: encodeURIComponent(JSON.stringify(search)),
+                    page,
+                    pageSize,
+                    sort,
+                })
+            );
+        });
+    };
+
+    const handleDetail = (record) => {
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSFER_TO_CUSTOMER, { state: { id: record?.id } });
+    };
+
+
     const baseColumns = useMemo(() => {
         return columnTransferToCustomer(
             page,
@@ -154,58 +200,120 @@ const ViewTransferToCustomer = () => {
     ]);
 
     const itemActions = [
-        // toolbar items
+        {
+            action: "Download",
+            render: (
+                <ButtonComponent
+                    type="submit"
+                    onClick={handleDownload}
+                    icon={<SVGIcon name="IconButtonDownload" width={24} />}
+                >
+                    Download List
+                </ButtonComponent>
+            ),
+        },
         {
             action: "Create",
             render: (
                 <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_TRANSFER_TO_CUSTOMER}>
                     <ButtonComponent
-                        // icon={<SVGIcon name="IconButtonCreate" width={24} />} // Suspense suspect
                         type="submit"
+                        icon={<SVGIcon name="IconButtonCreate" width={24} />}
                     >
-                        Create Transfer To Customer
+                        Create Transfer to Customer
                     </ButtonComponent>
                 </NavLink>
             ),
         },
 
+
         // column action
         {
             action: "View",
             type: "table",
-            render: (record, data_length) => {
-                return (
-                    <Tooltip title={"Detail"}>
-                        <Link
-                            to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSFER_TO_CUSTOMER}
-                            state={{ id: record?.id }}
-                        >
-                            <EyeOutlined />
-                        </Link>
-                    </Tooltip>
-                );
-            },
+            render: (record) => (
+                <Tooltip title="Detail">
+                    <div 
+                        className="cursor-pointer" 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDetail(record);
+                        }}
+                    >
+                        <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
+                    </div>
+                </Tooltip>
+            ),
         },
-
         {
             action: "Delete",
             type: "table",
-            render: (record) => {
-                return (
-                    <Tooltip title={"Delete"}>
-                        <div onClick={() => console.log('Delete', record)} style={{ cursor: 'pointer' }}>
-                            <SVGIcon name="IconDelete" width={24} />
-                        </div>
-                    </Tooltip>
-                );
-            },
+            label: "Delete",
+            icon: "IconDelete",
+            color: "#BE3036",
+            onClick: handleDelete
+        },
+        {
+            action: "History",
+            type: "table",
+            label: "Approval History",
+            icon: "IconLogHistory",
+            color: "#000",
+            onClick: handleHistory
         }
     ];
 
-    const actionCols = useColumnActionPermission(
-        ["view", "delete"],
-        itemActions
-    );
+    const actionCols = useMemo(() => {
+        const tableActions = itemActions.filter(item => item.type === "table");
+        const detailAction = tableActions.find(a => a.action === "View");
+        const otherActions = tableActions.filter(a => a.action !== "View");
+
+        return [
+            {
+                key: "action",
+                title: "ACTION",
+                width: 150,
+                fixed: "right",
+                align: "center",
+                render: (_, record) => (
+                    <div className="flex justify-center items-center gap-4">
+                        {otherActions.length > 0 && (
+                            <Popover
+                                trigger="click"
+                                placement="bottomRight"
+                                showArrow={false}
+                                content={
+                                    <div className="flex flex-col gap-2">
+                                        {otherActions.map(action => (
+                                            <div 
+                                                key={action.action}
+                                                className="cursor-pointer flex items-center gap-2" 
+                                                style={{ color: action.color }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    action.onClick(record);
+                                                }}
+                                            >
+                                                <SVGIcon name={action.icon} width={18} color={action.color} />
+                                                <span>{action.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                }
+                            >
+                                <div className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                                    <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                                </div>
+                            </Popover>
+                        )}
+                        {detailAction && detailAction.render(record)}
+                    </div>
+                ),
+            }
+        ];
+    }, [itemActions]);
+
+
 
     return (
         <>
@@ -217,6 +325,9 @@ const ViewTransferToCustomer = () => {
                         <div className="flex gap-2">
                             <Toolbar items={itemActions} />
                         </div>
+
+
+
                     </div>
                 }>
                     <TableRBI
@@ -235,14 +346,36 @@ const ViewTransferToCustomer = () => {
                         onAdvanceSearch={handleAdvanceSearch}
                         handleDownload={handleDownload}
                         tableScrolled={{
-                            x: 2500,
+                            x: 'max-content',
                             y: 525,
                         }}
+
                     />
                 </CardContainer>
+
+                <ModalHistory
+                    isOpen={openModalHistory}
+                    handleClose={() => setOpenModalHistory(false)}
+                    header="Approval History"
+                    dataApprover={useSelector(state => state.transferToCustomer.dataListAppHierDetail?.dataApprover || [])}
+                    dataHistory={useSelector(state => state.transferToCustomer.dataListAppHierDetail?.dataHistory || [])}
+                    loading={loading}
+                />
+
+                <ModalConfirm
+                    isOpen={openModalDelete}
+                    handleCancel={() => setOpenModalDelete(false)}
+                    handleOk={handleConfirmDelete}
+                >
+                    <div className="flex flex-col items-center gap-4">
+                        <SVGIcon name="IconFailed" width={64} />
+                        <p className="text-center font-bold text-lg">Are you sure want to delete this data?</p>
+                    </div>
+                </ModalConfirm>
             </Spin>
         </>
     );
 };
+
 
 export default ViewTransferToCustomer;

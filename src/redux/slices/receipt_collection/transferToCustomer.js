@@ -166,6 +166,27 @@ export const getListApprovalById = createAsyncThunk(
     }
 );
 
+export const deleteTransferToCustomer = createAsyncThunk(
+    "DELETE_TRANSFER_TO_CUSTOMER",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/transfer-to-customer/${id}`;
+            await receiptCollectionHttpService.delete(url);
+            return id;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = {
+                title: "Failed",
+                description: `${message}`,
+            };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+
 
 export const getListWarranty = createAsyncThunk(
     "GET_LIST_WARRANTY_CUSTOMER",
@@ -432,8 +453,20 @@ const transferToCustomerSlice = createSlice({
         [getListCategory.rejected]: (state) => {
             // state.loading = false;
         },
+
+        // Delete
+        [deleteTransferToCustomer.pending]: (state) => {
+            state.loading = true;
+        },
+        [deleteTransferToCustomer.fulfilled]: (state) => {
+            state.loading = false;
+        },
+        [deleteTransferToCustomer.rejected]: (state) => {
+            state.loading = false;
+        },
     },
 });
+
 
 const { reducer } = transferToCustomerSlice;
 export default reducer;
