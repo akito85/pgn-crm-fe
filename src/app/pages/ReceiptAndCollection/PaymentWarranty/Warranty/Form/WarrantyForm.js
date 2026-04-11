@@ -31,6 +31,7 @@ const WarrantyForm = ({
   mutationPageSize,
   onMutationPageChange,
   loadingMutation,
+  loadingServiceAgreement,
 }) => {
   return (
     <div className="flex flex-col gap-8 mt-8 pb-4">
@@ -44,6 +45,7 @@ const WarrantyForm = ({
         form={form}
         dataServiceAgreement={dataServiceAgreement}
         disabled={isPartialEdit}
+        loading={loadingServiceAgreement}
       />
       <PaymentGuaranteeSection 
         form={form}
