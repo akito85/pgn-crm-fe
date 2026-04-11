@@ -29,7 +29,7 @@ import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 // Redux / Service
 import {
     getAllTransferToCustomerListPaginate,
-    getListApprovalById,
+    getApprovalHistoryTransferToCustomer,
     deleteTransferToCustomer,
     exportTransferToCustomerToExcel,
     clearApprovalHistory,
@@ -37,7 +37,7 @@ import {
 
 
 const ViewTransferToCustomer = () => {
-    const { data, loading, loadingApproval, dataListAppHierDetail } = useSelector(
+    const { data, loading, loadingApproval, dataApprovalHistory } = useSelector(
         (state) => state.transferToCustomer
     );
 
@@ -162,7 +162,7 @@ const ViewTransferToCustomer = () => {
     const handleHistory = (record) => {
         setSelectedRecord(record);
         setOpenModalHistory(true);
-        dispatch(getListApprovalById({ id: record.id }));
+        dispatch(getApprovalHistoryTransferToCustomer(record.id));
     };
 
     const handleDelete = (record) => {
@@ -373,8 +373,8 @@ const ViewTransferToCustomer = () => {
                             <span>Approval History</span>
                         </div>
                     }
-                    dataApprover={dataListAppHierDetail?.dataApprover || []}
-                    dataHistory={dataListAppHierDetail?.dataHistory || []}
+                    dataApprover={dataApprovalHistory?.dataApprover || []}
+                    dataHistory={dataApprovalHistory?.dataHistory || []}
                     loading={loadingApproval}
                 />
 

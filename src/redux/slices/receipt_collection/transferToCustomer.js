@@ -125,6 +125,33 @@ export const getListApprovalById = createAsyncThunk(
     "GET_LIST_APPROVAL_BY_ID_TRANSFER_CUSTOMER",
     async ({ id }, thunkAPI) => {
         try {
+            const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getApprovalHistoryTransferToCustomer = createAsyncThunk(
+    "GET_APPROVAL_HISTORY_TRANSFER_CUSTOMER",
+    async (id, thunkAPI) => {
+        try {
             const url = `/v1/dbs/api/payment-warranty/transfer-to-customer/approval-history/${id}`;
             const response = await receiptCollectionHttpService.getAll(url);
             return response.data;
@@ -346,6 +373,7 @@ const initialState = {
     dataListAppHierId: [],
     data_detail: null,
     dataListAppHierDetail: [],
+    dataApprovalHistory: null,
     dataListCategory: [],
     loading: false,
     loadingApproval: false,
@@ -383,6 +411,7 @@ const transferToCustomerSlice = createSlice({
     reducers: {
         clearApprovalHistory: (state) => {
             state.dataListAppHierDetail = [];
+            state.dataApprovalHistory = null;
         },
     },
     extraReducers: {
@@ -471,7 +500,7 @@ const transferToCustomerSlice = createSlice({
             state.loading = false;
         },
 
-        // Get List Approval By Id
+        // Get List Approval By Id (appHierId → array of approval levels)
         [getListApprovalById.pending]: (state) => {
             state.loadingApproval = true;
         },
@@ -480,6 +509,18 @@ const transferToCustomerSlice = createSlice({
             state.loadingApproval = false;
         },
         [getListApprovalById.rejected]: (state) => {
+            state.loadingApproval = false;
+        },
+
+        // Get Approval History (transfer HDR id → {dataApprover, dataHistory})
+        [getApprovalHistoryTransferToCustomer.pending]: (state) => {
+            state.loadingApproval = true;
+        },
+        [getApprovalHistoryTransferToCustomer.fulfilled]: (state, action) => {
+            state.dataApprovalHistory = action.payload;
+            state.loadingApproval = false;
+        },
+        [getApprovalHistoryTransferToCustomer.rejected]: (state) => {
             state.loadingApproval = false;
         },
 
