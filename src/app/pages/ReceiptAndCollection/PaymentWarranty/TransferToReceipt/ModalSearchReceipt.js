@@ -4,11 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
+import InputComponent from "../../../../../components/InputComponent";
 import moment from "moment";
 import { getListReceipt } from "../../../../../redux/slices/receipt_collection/transferToReceipt";
 import { getReceiptListColumns } from "./ReceiptListColumns";
 
-const ModalSearchReceipt = ({ isOpen, onClose, onConfirm }) => {
+const ModalSearchReceipt = ({ isOpen, onClose, onConfirm, category }) => {
     const dispatch = useDispatch();
     const { listReceipt } = useSelector((state) => state.transferToReceipt);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -23,12 +24,24 @@ const ModalSearchReceipt = ({ isOpen, onClose, onConfirm }) => {
 
     useEffect(() => {
         if (listReceipt) {
-            setDataSource(listReceipt);
+            setDataSource(listReceipt.map(item => ({ ...item, key: item.id })));
         }
     }, [listReceipt]);
 
+    const handleAmountChange = (record, value) => {
+        setDataSource(prev => prev.map(item => 
+            item.id === record.id ? { ...item, amount: value } : item
+        ));
+        // Also update selectedRows if the edited record is currently selected
+        setSelectedRows(prev => prev.map(item => 
+            item.id === record.id ? { ...item, amount: value } : item
+        ));
+    };
+
     const columns = getReceiptListColumns({
-        actionType: "none",
+        isModal: true,
+        category: category,
+        onAmountChange: handleAmountChange,
     });
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -80,6 +93,8 @@ const ModalSearchReceipt = ({ isOpen, onClose, onConfirm }) => {
                     pagination={false}
                     tableScrolled={{ x: 1500, y: 400 }}
                     usePagination={false}
+                    showSearchBar={true}
+                    showAdvanceSearch={true}
                 />
             </div>
         </ModalCustom>

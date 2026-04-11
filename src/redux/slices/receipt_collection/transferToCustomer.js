@@ -12,6 +12,8 @@ import hc_ddl_deduction_period from "./temp_hardcoded_json/transferToReceipt/get
 import hc_ddl_type from "./temp_hardcoded_json/transferToReceipt/get-ddl-type.json";
 import hc_list_warranty from "./temp_hardcoded_json/transferToCustomer/get-list-warranty.json";
 import hc_list_from_customer from "./temp_hardcoded_json/transferToCustomer/get-list-from-customer.json";
+import hc_approval_history from "./temp_hardcoded_json/transferToCustomer/get-approval-history.json";
+import hc_detail from "./temp_hardcoded_json/transferToCustomer/get-detail-transferToCustomer.json";
 
 
 export const submitTransferToCustomer = createAsyncThunk(
@@ -58,59 +60,9 @@ export const getDetailTransferToCustomer = createAsyncThunk(
     "GET_DETAIL_TRANSFER_CUSTOMER",
     async (id, thunkAPI) => {
         try {
-            // Simulator Detail Transfer To Customer
-            const response = {
-                data: {
-                    transferToCustomer: {
-                        deductionPeriod: "Jan 2025",
-                        type: "Gas",
-                        deductionDate: "2025-01-01",
-                        appHierId: 502,
-                        customerList: hc_transfer_to_customer_list.data.result.slice(0, 1),
-                        id: id,
-                        status: "DRAFT",
-                        statusApproval: "Draft",
-                        createdBy: "admin",
-                        createdDate: "2025-01-01T00:00:00.000+00:00",
-                        updatedBy: "admin",
-                        updatedDate: "2025-01-01T00:00:00.000+00:00",
-
-                        // Transfer Info
-                        fromCustomerId: "12345678",
-                        fromCustomerName: "PT. SUMBER REJEKI",
-                        areaCode: "01",
-
-                        // Warranty Info
-                        paymentWarrantyCode: "PW-2025-001",
-                        warrantyAreaCode: "01",
-                        areaName: "Medan",
-                        customerId: "87654321",
-                        customerName: "PT. GAS NEGARA",
-                        customerSegment: "Industrial",
-                        customerGroup: "Gold",
-                        publisher: "Bank Mandiri",
-                        currency: "IDR",
-                        balance: 150000000,
-                        rate: 1,
-                        rateDate: "2025-01-01",
-                        equivalent: 150000000,
-                        documentNumber: "DOC-001/2025",
-                        mutationDate: "2025-01-15",
-                        effectiveDate: "2025-01-01",
-                        expiringDate: "2026-01-01",
-                        endDateClaim: "2026-02-01",
-                    },
-                    attachmentDtoList: [],
-                    tApprovalDto: {
-                        approvalType: "TRANSFER_TO_CUSTOMER",
-                        status: "DRAFT",
-                        isApprover: true
-                    },
-                }
-            };
-
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data;
+            // Simulator Detail Transfer To Customer from JSON
+            const response = { data: hc_detail };
+            return response.data.data;
 
         } catch (error) {
             const message =
@@ -150,18 +102,11 @@ export const getListApprovalById = createAsyncThunk(
     "GET_LIST_APPROVAL_BY_ID_TRANSFER_CUSTOMER",
     async ({ id }, thunkAPI) => {
         try {
-            const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
-            const response = await receiptCollectionHttpService.getDetail(url);
+            // Simulator dummy data from external JSON
+            const response = hc_approval_history;
             return response.data;
         } catch (error) {
-            const message =
-                error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = {
-                title: "Failed",
-                description: `${message}`,
-            };
-            thunkAPI.dispatch(showModalError(errorBody));
-            return thunkAPI.rejectWithValue(error.response);
+            return error;
         }
     }
 );
