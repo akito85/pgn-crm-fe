@@ -5,7 +5,7 @@ import { getListWarranty } from "../../../../../redux/slices/receipt_collection/
 import SVGIcon from "../../../../../assets/Icon/index";
 import TableRBI from "../../../../../components/TableRBI";
 
-const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
+const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
     const dispatch = useDispatch();
     const { listWarranty } = useSelector((state) => state.transferToReceipt);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -15,7 +15,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
 
     useEffect(() => {
         if (isOpen) {
-            dispatch(getListWarranty());
+            dispatch(getListWarranty(customerId));
             setSelectedRowKeys([]);
             setSelectedRecord(null);
         }
@@ -41,8 +41,8 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
         },
         {
             title: "PAYMENT GUARANTEE CODE",
-            dataIndex: "paymentWarrantyCode",
-            key: "paymentWarrantyCode",
+            dataIndex: "warrantyCode",
+            key: "warrantyCode",
             width: 200,
             align: "center",
             fixed: "left",
@@ -52,7 +52,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
             key: "costCenter",
             width: 250,
             align: "left",
-            render: (_, record) => `${record.areaCode || ""} - ${record.areaName || ""}`,
+            render: (_, record) => record.costCenter || "",
         },
         {
             title: "ACCOUNT NUMBER",
@@ -70,8 +70,8 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
         },
         {
             title: "CUSTOMER NUMBER",
-            dataIndex: "customerId",
-            key: "customerId",
+            dataIndex: "customerNumber",
+            key: "customerNumber",
             width: 150,
             align: "center",
         },
@@ -98,8 +98,8 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
         },
         {
             title: "TYPE",
-            dataIndex: "type",
-            key: "type",
+            dataIndex: "warrantyType",
+            key: "warrantyType",
             width: 120,
             align: "center",
         },
@@ -119,8 +119,8 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
         },
         {
             title: "ISSUER",
-            dataIndex: "publisher",
-            key: "publisher",
+            dataIndex: "issuerBank",
+            key: "issuerBank",
             width: 150,
             align: "center",
         },
@@ -286,7 +286,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
                 <TableRBI
                     idTable="warrantySearchTable"
                     columns={columns}
-                    dataSource={listWarranty?.map(item => ({ ...item, key: item.id }))}
+                    dataSource={listWarranty?.map((item, idx) => ({ ...item, key: item.warrantyId || idx }))}
                     rowSelection={rowSelection}
                     pagination={true}
                     current={page}

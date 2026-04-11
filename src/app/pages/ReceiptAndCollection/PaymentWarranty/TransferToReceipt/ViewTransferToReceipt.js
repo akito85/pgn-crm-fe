@@ -29,7 +29,7 @@ import {
   getAllTransferToReceiptListPaginate,
   downloadTransferToReceiptList,
   deleteTransferToReceipt,
-  getListApprovalById,
+  getApprovalHistoryTransferToReceipt,
 } from "../../../../../redux/slices/receipt_collection/transferToReceipt";
 
 const ViewTransferToReceipt = () => {
@@ -167,7 +167,7 @@ const ViewTransferToReceipt = () => {
   const handleHistory = (record) => {
     setSelectedRecord(record);
     setOpenModalHistory(true);
-    dispatch(getListApprovalById({ id: record.id }));
+    dispatch(getApprovalHistoryTransferToReceipt(record.id));
   };
 
   const handleDelete = (record) => {
@@ -364,8 +364,8 @@ const ViewTransferToReceipt = () => {
           isOpen={openModalHistory}
           handleClose={() => setOpenModalHistory(false)}
           header="Approval History"
-          dataApprover={useSelector(state => state.transferToReceipt.dataListAppHierDetail?.dataApprover || [])}
-          dataHistory={useSelector(state => state.transferToReceipt.dataListAppHierDetail?.dataHistory || [])}
+          dataApprover={useSelector(state => state.transferToReceipt.dataApprovalHistory?.dataApprover || [])}
+          dataHistory={useSelector(state => state.transferToReceipt.dataApprovalHistory?.dataHistory || [])}
           loading={loading}
         />
 

@@ -1,4 +1,4 @@
-import { Form } from "antd";
+import { Form, message } from "antd";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -61,7 +61,7 @@ const ListFormTransferToReceipt = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
-    const { dataListAppHierId, dataListAppHierDetail, loading } = useSelector((state) => state.transferToReceipt);
+    const { dataListAppHierId, dataListAppHierDetail, loading, listFromCustomer } = useSelector((state) => state.transferToReceipt);
 
     useEffect(() => {
         dispatch(getAllApprovalList());
@@ -112,16 +112,22 @@ const ListFormTransferToReceipt = () => {
     const handleNext = async () => {
         if (currentStep === 0) {
             try {
-                await form.validateFields();
+                // Validate only fields in the first step
+                await form.validateFields(["fromCustomerId", "category", "description"]);
                 if (receiptList.length === 0) {
+                    message.error("Please add at least one receipt to the list.");
                     return;
                 }
                 setCurrentStep(1);
             } catch (error) {
                 console.log("Validation Failed:", error);
+                message.warning("Please fill all required fields correctly.");
             }
         } else if (currentStep === 1) {
-            if (!selectedHierarchy) return;
+            if (!selectedHierarchy) {
+                message.error("Please select an Approval Hierarchy.");
+                return;
+            }
             setCurrentStep(2);
         }
     };
@@ -132,31 +138,33 @@ const ListFormTransferToReceipt = () => {
 
     const handleConfirmWarranty = (record) => {
         form.setFieldsValue({
-            paymentWarrantyCode: record.paymentWarrantyCode,
-            warrantyAreaCode: `${record.areaCode} - ${record.areaName}`,
+            paymentWarrantyCode: record.warrantyCode,
+            warrantyAreaCode: record.costCenter,
             accountNumber: record.accountNumber,
             accountName: record.accountName,
-            customerId: record.customerId,
+            customerId: record.customerNumber,
             customerName: record.customerName,
             customerSegment: record.customerSegment,
             customerGroup: record.customerGroup,
-            type: record.type,
+            type: record.warrantyType,
             documentNumber: record.documentNumber,
-            mutationDate: record.mutationDate ? moment(record.mutationDate) : null,
-            publisher: record.publisher,
+            mutationDate: record.effectiveDate ? moment(record.effectiveDate) : null,
+            publisher: record.issuerBank,
             issuerBranch: record.issuerBranch,
             currency: record.currency,
             balance: record.balance,
             rateType: record.rateType,
             rateDate: record.rateDate ? moment(record.rateDate) : null,
             rate: record.rate,
-            equivalent: record.equivalent,
+            equivalent: record.currencyBalance,
             effectiveDate: record.effectiveDate ? moment(record.effectiveDate) : null,
             expiringDate: record.expiringDate ? moment(record.expiringDate) : null,
             endDateClaim: record.endDateClaim ? moment(record.endDateClaim) : null,
             accountType: record.accountType,
             classificationType: record.classificationType,
             description: record.description,
+            sourcePayWarrantyId: record.warrantyId,
+            fromAccountId: record.accountId
         });
     };
 
@@ -196,7 +204,11 @@ const ListFormTransferToReceipt = () => {
         const formData = form.getFieldsValue();
         const body = {
             ...formData,
-            receiptList: receiptList.map(item => ({ receiptId: item.receiptId })),
+            receiptList: receiptList.map(item => ({ 
+                receiptId: item.receiptId, 
+                receiptNo: item.receiptNo, 
+                amount: typeof item.amount === 'string' ? parseFloat(item.amount.replace(/,/g, '')) : item.amount 
+            })),
             attachmentList: listDataAttachment.map(item => ({ id: item.id })),
             appHierId: selectedHierarchy
         };
@@ -310,12 +322,16 @@ const ListFormTransferToReceipt = () => {
                 category={category}
                 onClose={() => setShowModalReceipt(false)}
                 onConfirm={handleConfirmReceipt}
+                customerNumber={form.getFieldValue("fromCustomerId")}
             />
 
             <ModalSearchWarranty 
                 isOpen={showModalWarranty}
                 onClose={() => setShowModalWarranty(false)}
                 onConfirm={handleConfirmWarranty}
+                customerId={form.getFieldValue("fromCustomerId") ? 
+                    listFromCustomer?.find(c => c.customerNumber === form.getFieldValue("fromCustomerId"))?.customerId 
+                    : null}
             />
 
             <ModalCustom

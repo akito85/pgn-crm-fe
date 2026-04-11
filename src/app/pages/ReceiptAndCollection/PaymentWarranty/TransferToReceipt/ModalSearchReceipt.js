@@ -9,7 +9,7 @@ import moment from "moment";
 import { getListReceipt } from "../../../../../redux/slices/receipt_collection/transferToReceipt";
 import { getReceiptListColumns } from "./ReceiptListColumns";
 
-const ModalSearchReceipt = ({ isOpen, onClose, onConfirm, category }) => {
+const ModalSearchReceipt = ({ isOpen, onClose, onConfirm, category, customerNumber }) => {
     const dispatch = useDispatch();
     const { listReceipt } = useSelector((state) => state.transferToReceipt);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -18,13 +18,40 @@ const ModalSearchReceipt = ({ isOpen, onClose, onConfirm, category }) => {
 
     useEffect(() => {
         if (isOpen) {
-            dispatch(getListReceipt());
+            dispatch(getListReceipt(customerNumber));
         }
     }, [dispatch, isOpen]);
 
     useEffect(() => {
         if (listReceipt) {
-            setDataSource(listReceipt.map(item => ({ ...item, key: item.id })));
+            setDataSource(listReceipt.map((item, idx) => ({
+                ...item,
+                key: item.id || idx,
+                receiptId: item.id,
+                receiptNo: item.receiptNumber,
+                areaCode: item.costCenter,
+                customerNumber: item.customer?.split(' - ')?.[0]?.trim(),
+                customerName: item.customer?.split(' - ')?.[1]?.trim(),
+                source: item.source,
+                type: item.paymentType,
+                method: item.paymentMethod,
+                referenceNumber: item.refNumber,
+                amount: item.unAppliedAmountReal || parseFloat(String(item.unAppliedAmount || '0').replace(/,/g, '')),
+                currency: item.currency,
+                status: item.statusApproval,
+                receiptDate: item.receiptDate,
+                receiptChannel: item.receiptChannel,
+                bankName: item.bank,
+                collectingAgent: item.collectingAgent,
+                deliveryChannel: item.deliveryChannel,
+                rateType: item.rateType,
+                rate: item.rateAmountReal,
+                convertedCurrency: item.convertedCurrency,
+                eqvAmount: item.equivalentAmountReal,
+                appliedAmount: item.appliedAmountReal,
+                unappliedAmount: item.unAppliedAmountReal,
+                remark: item.remark,
+            })));
         }
     }, [listReceipt]);
 

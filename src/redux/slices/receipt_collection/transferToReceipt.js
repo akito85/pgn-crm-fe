@@ -5,18 +5,12 @@ import {
   setBodyError,
   showModalSuccess,
 } from "../general_slice";
-import getListTransferToReceipt from "./temp_hardcoded_json/transferToReceipt/get-list-transferToReceipt.json";
-import getDetailTransferToReceiptMock from "./temp_hardcoded_json/transferToReceipt/get-detail-transferToReceipt.json";
-import getApprovalHistoryMock from "./temp_hardcoded_json/transferToReceipt/get-approval-history.json";
-import getListWarrantyMock from "./temp_hardcoded_json/transferToReceipt/get-list-warranty.json";
-import getFromCustomerMock from "./temp_hardcoded_json/transferToReceipt/get-list-from-customer.json";
-import getListReceiptMock from "./temp_hardcoded_json/transferToReceipt/get-list-receipt.json";
 
 export const submitTransferToReceipt = createAsyncThunk(
   "SUBMIT_TRANSFER_TO_RECEIPT",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/payment-warranty/transfer-receipt`;
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/submit`;
       const response = await receiptCollectionHttpService.createData(url, body);
       return response.data;
     } catch (error) {
@@ -101,11 +95,13 @@ export const getDetailTransferToReceipt = createAsyncThunk(
   "GET_DETAIL_TRANSFER",
   async (id, thunkAPI) => {
     try {
-      // USE EXTERNAL DUMMY DATA FOR SIMULATION
-      const response = { data: getDetailTransferToReceiptMock };
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/get-detail/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
       return response.data.data;
     } catch (error) {
-      return error;
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -131,17 +127,38 @@ export const approveOrRejectTransferToReceipt = createAsyncThunk(
   }
 );
 
+// Called with appHierId — returns approval hierarchy chain (array of levels + employees)
+// Used in: ListFormTransferToReceipt, ListDetailTransferToReceipt (step 2 approval selection)
 export const getListApprovalById = createAsyncThunk(
   "GET_LIST_APPROVAL_BY_ID_TRANSFER",
-    async ({ id }, thunkAPI) => {
-        try {
-            // Simulator dummy data from external JSON
-            const response = { data: getApprovalHistoryMock };
-            return response.data.data;
-        } catch (error) {
-            return error;
-        }
+  async ({ id }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
+  }
+);
+
+// Called with transfer HDR id — returns { dataApprover, dataHistory } for the history modal
+// Used in: ViewTransferToReceipt (history popup)
+export const getApprovalHistoryTransferToReceipt = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_TRANSFER_TO_RECEIPT",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/approval-history-get/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
 );
 
 export const getListCategory = createAsyncThunk(
@@ -177,7 +194,8 @@ const initialState = {
   ddlType: [], // Store options for Type
   dataListAppHierId: [],
   data_detail: null,
-  dataListAppHierDetail: [],
+  dataListAppHierDetail: [], // Hierarchy chain (array) — used by form/detail step 2
+  dataApprovalHistory: null, // { dataApprover, dataHistory } — used by list view history modal
   dataListCategory: [],
   cashBalance: 0,
   listWarrantyCash: [],
@@ -191,22 +209,29 @@ export const getAllTransferToReceiptListPaginate = createAsyncThunk(
   "GET_ALL_TRANSFER_TO_RECEIPT_LIST_PAGINATE",
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
-      // USE EXTERNAL DUMMY DATA FOR SIMULATION
-      const response = { data: getListTransferToReceipt };
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/get-list?page=${page || 1}&size=${pageSize || 10}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await receiptCollectionHttpService.getPagination(url);
       return response.data.data;
     } catch (error) {
-      return error;
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
 
 export const getListWarranty = createAsyncThunk(
   "GET_LIST_WARRANTY",
-  async (_, thunkAPI) => {
+  async (customerId, thunkAPI) => {
     try {
-      // USE EXTERNAL DUMMY DATA FOR SIMULATION
-      const response = { data: getListWarrantyMock };
-      return response.data.data;
+      let url = `/v1/dbs/api/payment-warranty/warranties`;
+      if (customerId) {
+        url += `?customerId=${customerId}`;
+      }
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
@@ -217,9 +242,9 @@ export const getListFromCustomer = createAsyncThunk(
   "GET_LIST_FROM_CUSTOMER",
   async (_, thunkAPI) => {
     try {
-      // USE EXTERNAL DUMMY DATA FOR SIMULATION
-      const response = { data: getFromCustomerMock };
-      return response.data.data;
+      const url = `/v1/dbs/api/payment-warranty/warranties`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
@@ -228,11 +253,22 @@ export const getListFromCustomer = createAsyncThunk(
 
 export const getListReceipt = createAsyncThunk(
   "GET_LIST_RECEIPT",
-  async (_, thunkAPI) => {
+  async (customerNumber, thunkAPI) => {
     try {
-      // USE EXTERNAL DUMMY DATA FOR SIMULATION
-      const response = { data: getListReceiptMock };
-      return response.data.data;
+      // TODO: remove hardcode after testing
+      const custNum = customerNumber || "CST0000000070";
+      const searchObj = { customer: custNum, statusApproval: "Approved" };
+      const searchParam = encodeURIComponent(JSON.stringify(searchObj));
+      const url = `/v1/dbs/api/receipt/get-list?page=1&size=1000&searchs=${searchParam}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      const allReceipts = response.data?.result || response.data || [];
+      // TODO: uncomment unapplied filter after testing
+      // const unappliedReceipts = allReceipts.filter(item => {
+      //   const unappliedVal = item.unAppliedAmountReal || parseFloat(String(item.unAppliedAmount || "0").replace(/,/g, ""));
+      //   return unappliedVal > 0;
+      // });
+      // return unappliedReceipts;
+      return allReceipts;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       const errorBody = { title: "Failed", description: `${message}` };
@@ -331,7 +367,7 @@ const transferToReceiptSlice = createSlice({
     [getListWarranty.pending]: (state) => {
     },
     [getListWarranty.fulfilled]: (state, action) => {
-      state.listWarranty = action.payload?.result || action.payload || [];
+      state.listWarranty = action.payload?.customers || action.payload?.result || action.payload || [];
     },
     [getListWarranty.rejected]: (state) => {
     },
@@ -340,7 +376,15 @@ const transferToReceiptSlice = createSlice({
     [getListFromCustomer.pending]: (state) => {
     },
     [getListFromCustomer.fulfilled]: (state, action) => {
-      state.listFromCustomer = action.payload?.result || action.payload || [];
+      const allCustomers = action.payload?.customers || action.payload?.result || action.payload || [];
+      // Deduplicate by customerNumber — one customer may have multiple warranties
+      const uniqueMap = new Map();
+      allCustomers.forEach(item => {
+        if (!uniqueMap.has(item.customerNumber)) {
+          uniqueMap.set(item.customerNumber, item);
+        }
+      });
+      state.listFromCustomer = Array.from(uniqueMap.values());
     },
     [getListFromCustomer.rejected]: (state) => {
     },
@@ -434,15 +478,24 @@ const transferToReceiptSlice = createSlice({
       state.loading = false;
     },
 
-    // Get List Approval By Id
+    // Get Approval Hierarchy By Id (appHierId) — for form/detail step 2
     [getListApprovalById.pending]: (state) => {
-      // state.loading = true;
     },
     [getListApprovalById.fulfilled]: (state, action) => {
-      state.dataListAppHierDetail = action.payload;
+      state.dataListAppHierDetail = action.payload || [];
     },
     [getListApprovalById.rejected]: (state) => {
-      // state.loading = false;
+      state.dataListAppHierDetail = [];
+    },
+
+    // Get Approval History by transfer HDR id — for list view history modal
+    [getApprovalHistoryTransferToReceipt.pending]: (state) => {
+    },
+    [getApprovalHistoryTransferToReceipt.fulfilled]: (state, action) => {
+      state.dataApprovalHistory = action.payload;
+    },
+    [getApprovalHistoryTransferToReceipt.rejected]: (state) => {
+      state.dataApprovalHistory = null;
     },
 
     // Get List Category
