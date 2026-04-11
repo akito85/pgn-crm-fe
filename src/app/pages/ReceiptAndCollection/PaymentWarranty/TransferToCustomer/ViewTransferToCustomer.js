@@ -373,8 +373,8 @@ const ViewTransferToCustomer = () => {
                             <span>Approval History</span>
                         </div>
                     }
-                    dataApprover={dataApprovalHistory?.dataApprover || []}
-                    dataHistory={dataApprovalHistory?.dataHistory || []}
+                    dataApprover={dataApprovalHistory?.dataApprover ? (Object.values(dataApprovalHistory.dataApprover)[0] || []) : []}
+                    dataHistory={dataApprovalHistory?.dataHistory ? (Object.values(dataApprovalHistory.dataHistory)[0] || []) : []}
                     loading={loadingApproval}
                 />
 

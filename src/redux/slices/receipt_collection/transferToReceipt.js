@@ -112,7 +112,7 @@ export const approveOrRejectTransferToReceipt = createAsyncThunk(
     try {
       // Customize endpoint if needed, for new reusing setting endpoint
       const url = `/v1/dbs/api/approval/approve-reject`;
-      const response = await receiptCollectionHttpService.post(url, body);
+      const response = await receiptCollectionHttpService.createData(url, body);
       return response.data;
     } catch (error) {
       const message =

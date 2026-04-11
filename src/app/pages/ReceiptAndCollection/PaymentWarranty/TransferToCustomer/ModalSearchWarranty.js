@@ -288,7 +288,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
                 <TableRBI
                     idTable="warrantySearchTable"
                     columns={columns}
-                    dataSource={listWarranty?.map(item => ({ ...item, key: item.id }))}
+                    dataSource={listWarranty?.map((item, idx) => ({ ...item, key: item.warrantyId || idx }))}
                     rowSelection={rowSelection}
                     pagination={true}
                     current={page}

@@ -7,7 +7,7 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import DateComponent from "../../../../../components/DateComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { getDDLDeductionPeriod, getListFromCustomer } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
+import { getListFromCustomer } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
 import { TRANSFER_CATEGORY } from "../../../../../constants/transferToCustomer";
 
 import SubSectionCard from "../../../../../components/SubSectionCard";
@@ -21,18 +21,11 @@ const TransferToCustomerForm = ({ form, onSearchWarranty }) => {
     }, [dispatch]);
 
     const handleFromCustomerChange = (value) => {
-        const dataList = listFromCustomer?.result || listFromCustomer || [];
-        const selected = dataList.find(item => 
-            item.fromCustomerId === value || 
-            item.customerId === value ||
-            item.customerNumber === value
-        );
+        const selected = listFromCustomer.find(item => item.customerNumber === value);
         if (selected) {
             form.setFieldsValue({
-                fromCustomerNumber: selected.customerNumber || selected.fromCustomerNumber,
-                fromCustomerName: selected.customerName || selected.fromCustomerName,
-                areaCode: selected.areaCode || selected.costCenter,
-                fromAccountId: selected.accountId || selected.fromAccountId,
+                fromCustomerName: selected.customerName,
+                areaCode: selected.costCenter,
             });
         }
     };
@@ -55,10 +48,7 @@ const TransferToCustomerForm = ({ form, onSearchWarranty }) => {
                                 >
                                     <SelectComponent
                                         placeholder="Select From Customer Number"
-                                        options={(listFromCustomer?.result || listFromCustomer || []).map(item => ({ 
-                                            label: item.customerNumber || item.customerId || item.fromCustomerId, 
-                                            value: item.customerId !== undefined && item.customerId !== null ? item.customerId : (item.fromCustomerId || item.customerNumber) 
-                                        }))}
+                                        options={listFromCustomer.map(item => ({ label: item.customerNumber, value: item.customerNumber }))}
                                         onChange={handleFromCustomerChange}
                                     />
                                 </Form.Item>
@@ -127,86 +117,86 @@ const TransferToCustomerForm = ({ form, onSearchWarranty }) => {
                         <SubSectionCard>
                             <div className="grid grid-cols-4 gap-x-6 gap-y-4">
                                 {/* Row 1 */}
-                                <Form.Item label="Payment Guarantee Code" name="paymentWarrantyCode" rules={formMessageRequired("Payment Guarantee Code")}>
+                                <Form.Item label="Payment Guarantee Code" name="paymentWarrantyCode">
                                     <InputComponent placeholder="Type Payment Guarantee Code" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Cost Center" name="warrantyAreaCode" rules={formMessageRequired("Cost Center")}>
+                                <Form.Item label="Cost Center" name="warrantyAreaCode">
                                     <InputComponent placeholder="Type Cost Center" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Account Number" name="accountNumber" rules={formMessageRequired("Account Number")}>
+                                <Form.Item label="Account Number" name="accountNumber">
                                     <InputComponent placeholder="Type Account Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Account Name" name="accountName" rules={formMessageRequired("Account Name")}>
+                                <Form.Item label="Account Name" name="accountName">
                                     <InputComponent placeholder="Type Account Name" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
 
                                 {/* Row 2 */}
-                                <Form.Item label="Customer Number" name="customerId" rules={formMessageRequired("Customer Number")}>
+                                <Form.Item label="Customer Number" name="customerId">
                                     <InputComponent placeholder="Type Customer Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Customer Name" name="customerName" rules={formMessageRequired("Customer Name")}>
+                                <Form.Item label="Customer Name" name="customerName">
                                     <InputComponent placeholder="Type Customer Name" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Customer Segment" name="customerSegment" rules={formMessageRequired("Customer Segment")}>
+                                <Form.Item label="Customer Segment" name="customerSegment">
                                     <InputComponent placeholder="Type Customer Segment" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Customer Group" name="customerGroup" rules={formMessageRequired("Customer Group")}>
+                                <Form.Item label="Customer Group" name="customerGroup">
                                     <InputComponent placeholder="Type Customer Group" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
 
                                 {/* Row 3 */}
-                                <Form.Item label="Type" name="type" rules={formMessageRequired("Type")}>
+                                <Form.Item label="Type" name="type">
                                     <InputComponent placeholder="Type..." disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Document Number" name="documentNumber" rules={formMessageRequired("Document Number")}>
+                                <Form.Item label="Document Number" name="documentNumber">
                                     <InputComponent placeholder="Type Document Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Document Date" name="mutationDate" rules={formMessageRequired("Document Date")}>
+                                <Form.Item label="Document Date" name="mutationDate">
                                     <DateComponent placeholder="Select Mutation Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Issuer" name="publisher" rules={formMessageRequired("Issuer")}>
+                                <Form.Item label="Issuer" name="publisher">
                                     <InputComponent placeholder="Type Issuer" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
 
                                 {/* Row 4 */}
-                                <Form.Item label="Issuer Branch" name="issuerBranch" rules={formMessageRequired("Issuer Branch")}>
+                                <Form.Item label="Issuer Branch" name="issuerBranch">
                                     <InputComponent placeholder="Type Issuer Branch" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Currency" name="currency" rules={formMessageRequired("Currency")}>
+                                <Form.Item label="Currency" name="currency">
                                     <InputComponent placeholder="Type Currency" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Balance Amount" name="balance" rules={formMessageRequired("Balance Amount")}>
+                                <Form.Item label="Balance Amount" name="balance">
                                     <InputComponent placeholder="Type Balance Amount" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Rate Type" name="rateType" rules={formMessageRequired("Rate Type")}>
+                                <Form.Item label="Rate Type" name="rateType">
                                     <InputComponent placeholder="Type Rate Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
 
                                 {/* Row 5 */}
-                                <Form.Item label="Rate Date" name="rateDate" rules={formMessageRequired("Rate Date")}>
+                                <Form.Item label="Rate Date" name="rateDate">
                                     <DateComponent placeholder="Select Rate Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Rate" name="rate" rules={formMessageRequired("Rate")}>
+                                <Form.Item label="Rate" name="rate">
                                     <InputComponent placeholder="Type Rate" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="EQV Balance Amount" name="equivalent" rules={formMessageRequired("EQV Balance Amount")}>
+                                <Form.Item label="EQV Balance Amount" name="equivalent">
                                     <InputComponent placeholder="Type EQV Balance Amount" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Reff. Start Date" name="effectiveDate" rules={formMessageRequired("Reff. Start Date")}>
+                                <Form.Item label="Reff. Start Date" name="effectiveDate">
                                     <DateComponent placeholder="Select Reff. Start Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
 
                                 {/* Row 6 */}
-                                <Form.Item label="Reff. End Date" name="expiringDate" rules={formMessageRequired("Reff. End Date")}>
+                                <Form.Item label="Reff. End Date" name="expiringDate">
                                     <DateComponent placeholder="Select Reff. End Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Claim Period" name="endDateClaim" rules={formMessageRequired("Claim Period")}>
+                                <Form.Item label="Claim Period" name="endDateClaim">
                                     <DateComponent placeholder="Select Claim Period" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Account Type" name="accountType" rules={formMessageRequired("Account Type")}>
+                                <Form.Item label="Account Type" name="accountType">
                                     <InputComponent placeholder="Type Account Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
-                                <Form.Item label="Classification Type" name="classificationType" rules={formMessageRequired("Classification Type")}>
+                                <Form.Item label="Classification Type" name="classificationType">
                                     <InputComponent placeholder="Type Classification Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
                                 </Form.Item>
                             </div>

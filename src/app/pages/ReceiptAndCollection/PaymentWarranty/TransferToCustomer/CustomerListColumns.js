@@ -16,7 +16,9 @@ export const getCustomerListColumns = ({
     actionType = "none",
     listCustomer = [],
     currencyDDL = [],
-    handleCustomerChange = () => { }
+    handleCustomerChange = () => { },
+    onCustomerPopupScroll = () => { },
+    loadingMoreCustomers = false,
 }) => {
     const defaultCellProps = {
         style: { padding: '4px 12px' }
@@ -33,8 +35,8 @@ export const getCustomerListColumns = ({
         },
         {
             title: "CUSTOMER NUMBER",
-            dataIndex: "customer",
-            key: "customer",
+            dataIndex: "customerNumber",
+            key: "customerNumber",
             width: 180,
             render: (text, record) => {
                 const editable = isEditing(record);
@@ -47,11 +49,17 @@ export const getCustomerListColumns = ({
                         >
                             <SelectComponent
                                 placeholder="Select Customer Number"
-                                options={listCustomer.map(item => ({ 
-                                    label: item.customerNumber || item.customerId, 
-                                    value: item.customerId !== undefined && item.customerId !== null ? item.customerId : item.customerNumber 
+                                options={listCustomer.map(item => ({
+                                    label: item.customerNumber && item.customerName
+                                        ? `${item.customerNumber} - ${item.customerName}`
+                                        : item.customerNumber || item.customerId,
+                                    value: item.customerId !== undefined && item.customerId !== null ? item.customerId : item.customerNumber
                                 }))}
                                 onChange={(val) => handleCustomerChange(val)}
+                                onPopupScroll={onCustomerPopupScroll}
+                                loading={loadingMoreCustomers}
+                                dropdownMatchSelectWidth={false}
+                                dropdownStyle={{ minWidth: 380 }}
                             />
                         </Form.Item>
                     </div>
@@ -81,8 +89,8 @@ export const getCustomerListColumns = ({
         },
         {
             title: "TO CUSTOMER NAME",
-            dataIndex: "toCustomerName",
-            key: "toCustomerName",
+            dataIndex: "customerName",
+            key: "customerName",
             width: 200,
             render: (text, record) => {
                 const editable = isEditing(record);

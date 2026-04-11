@@ -14,7 +14,7 @@ export const submitTransferToCustomer = createAsyncThunk(
     async (body, thunkAPI) => {
         try {
             const url = "/v1/dbs/api/payment-warranty/transfer-to-customer";
-            const response = await receiptCollectionHttpService.post(url, body);
+            const response = await receiptCollectionHttpService.createData(url, body);
             return response.data;
         } catch (error) {
             const message =
@@ -237,11 +237,9 @@ export const getListWarranty = createAsyncThunk(
 
 export const getListFromCustomer = createAsyncThunk(
     "GET_LIST_FROM_CUSTOMER_CUSTOMER",
-    async ({ search, page, pageSize, sort } = {}, thunkAPI) => {
+    async (_, thunkAPI) => {
         try {
-            const searchParams = search === undefined ? "" : search;
-            const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-            const url = `/v1/dbs/api/payment-warranty/customer/get-list?page=${page || 1}&size=${pageSize || 10}&sort=${sortParams}&searchs=${searchParams}`;
+            const url = `/v1/dbs/api/payment-warranty/warranties`;
             const response = await receiptCollectionHttpService.getAll(url);
             return response.data;
         } catch (error) {
@@ -421,7 +419,14 @@ const transferToCustomerSlice = createSlice({
         },
         // Get List From Customer
         [getListFromCustomer.fulfilled]: (state, action) => {
-            state.listFromCustomer = action.payload;
+            const allCustomers = action.payload?.customers || action.payload?.result || action.payload || [];
+            const uniqueMap = new Map();
+            allCustomers.forEach(item => {
+                if (!uniqueMap.has(item.customerNumber)) {
+                    uniqueMap.set(item.customerNumber, item);
+                }
+            });
+            state.listFromCustomer = Array.from(uniqueMap.values());
         },
 
         // Get Currency DDL

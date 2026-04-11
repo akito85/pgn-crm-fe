@@ -364,8 +364,8 @@ const ViewTransferToReceipt = () => {
           isOpen={openModalHistory}
           handleClose={() => setOpenModalHistory(false)}
           header="Approval History"
-          dataApprover={useSelector(state => state.transferToReceipt.dataApprovalHistory?.dataApprover || [])}
-          dataHistory={useSelector(state => state.transferToReceipt.dataApprovalHistory?.dataHistory || [])}
+          dataApprover={useSelector(state => state.transferToReceipt.dataApprovalHistory?.dataApprover ? (Object.values(state.transferToReceipt.dataApprovalHistory.dataApprover)[0] || []) : [])}
+          dataHistory={useSelector(state => state.transferToReceipt.dataApprovalHistory?.dataHistory ? (Object.values(state.transferToReceipt.dataApprovalHistory.dataHistory)[0] || []) : [])}
           loading={loading}
         />
 

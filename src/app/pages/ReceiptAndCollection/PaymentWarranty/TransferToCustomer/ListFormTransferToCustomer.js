@@ -41,7 +41,7 @@ const ListFormTransferToCustomer = (props) => {
         dataListAppHierId,
         dataListAppHierDetail,
         loading,
-        listCustomer,
+        listFromCustomer,
         currencyDDL
     } = useSelector((state) => state.transferToCustomer);
 
@@ -61,10 +61,17 @@ const ListFormTransferToCustomer = (props) => {
     const [customerList, setCustomerList] = useState([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [showSearchWarrantyModal, setShowSearchWarrantyModal] = useState(false);
+    const [showSearchWarrantyModal, setShowSearchWarrantyModal] = useState(false); // boolean
     const [editingKey, setEditingKey] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [sendBody, setSendBody] = useState(null);
+
+    // Customer dropdown infinite scroll state
+    const [customerOptions, setCustomerOptions] = useState([]);
+    const [customerDropdownPage, setCustomerDropdownPage] = useState(1);
+    const [customerHasMore, setCustomerHasMore] = useState(true);
+    const [loadingMoreCustomers, setLoadingMoreCustomers] = useState(false);
+    const CUSTOMER_PAGE_SIZE = 10;
 
     const steps = [
         { title: "CREATE TRANSFER TO CUSTOMER", value: "Partner" },
@@ -167,38 +174,37 @@ const ListFormTransferToCustomer = (props) => {
             message.warning("Please select a From Customer Number first.");
             return;
         }
-        setShowSearchWarrantyModal(fromCustomerId);
+        setShowSearchWarrantyModal(true);
     }
 
     const handleConfirmWarranty = (record) => {
         form.setFieldsValue({
-            paymentGuaranteeCode: record.warrantyCode,
+            paymentWarrantyCode: record.warrantyCode,
             warrantyAreaCode: record.costCenter,
-            accountNumber: record.accountNumber || "-",
-            accountName: record.accountName || "-",
-            customerId: record.customerNumber || record.customerId,
+            accountNumber: record.accountNumber,
+            accountName: record.accountName,
+            customerId: record.customerNumber,
             customerName: record.customerName,
             customerSegment: record.customerSegment,
             customerGroup: record.customerGroup,
-            type: record.warrantyType || record.type,
-            publisher: record.issuerBank || record.publisher,
-            issuerBranch: record.issuerBranch || "-",
+            type: record.warrantyType,
+            publisher: record.issuerBank,
+            issuerBranch: record.issuerBranch,
             currency: record.currency,
             balance: record.balance,
-            equivalent: record.currencyBalance || record.equivalent,
+            equivalent: record.currencyBalance,
             documentNumber: record.documentNumber,
+            mutationDate: record.mutationDate ? moment(record.mutationDate) : null,
             effectiveDate: record.effectiveDate ? moment(record.effectiveDate) : null,
             expiringDate: record.expiringDate ? moment(record.expiringDate) : null,
-            sourcePayWarrantyId: record.warrantyId,
-            fromAccountId: record.accountId,
-            // Fields needing BE confirmation but setting defaults for now
-            rateType: record.rateType || "-",
-            rate: record.rate || 1,
+            rateType: record.rateType,
+            rate: record.rate,
             rateDate: record.rateDate ? moment(record.rateDate) : null,
             endDateClaim: record.endDateClaim ? moment(record.endDateClaim) : null,
-            accountType: record.accountType || "-",
-            classificationType: record.classificationType || "-",
-            mutationDate: record.effectiveDate ? moment(record.effectiveDate) : null,
+            accountType: record.accountType,
+            classificationType: record.classificationType,
+            sourcePayWarrantyId: record.warrantyId,
+            fromAccountId: record.accountId,
         });
     }
 
@@ -212,9 +218,8 @@ const ListFormTransferToCustomer = (props) => {
     };
 
     const handleCustomerChange = (customerId) => {
-        const dataList = listCustomer?.result || listCustomer || [];
-        const selectedCustomer = dataList.find(item => 
-            item.customerId === customerId || 
+        const selectedCustomer = customerOptions.find(item =>
+            item.customerId === customerId ||
             item.customerNumber === customerId
         );
         if (selectedCustomer) {
@@ -235,10 +240,34 @@ const ListFormTransferToCustomer = (props) => {
         []
     );
 
+    const loadCustomers = useCallback(async (pageToLoad) => {
+        if (loadingMoreCustomers) return;
+        setLoadingMoreCustomers(true);
+        try {
+            const result = await dispatch(getListCustomer({ page: pageToLoad, pageSize: CUSTOMER_PAGE_SIZE })).unwrap();
+            const newItems = result?.result || [];
+            const totalElements = result?.page?.totalElements || 0;
+            setCustomerOptions(prev => pageToLoad === 1 ? newItems : [...prev, ...newItems]);
+            setCustomerDropdownPage(pageToLoad);
+            setCustomerHasMore(pageToLoad * CUSTOMER_PAGE_SIZE < totalElements);
+        } catch (_) {
+            // error already handled in thunk
+        } finally {
+            setLoadingMoreCustomers(false);
+        }
+    }, [dispatch, loadingMoreCustomers]);
+
+    const handleCustomerPopupScroll = (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.target;
+        if (scrollHeight - scrollTop - clientHeight < 50 && customerHasMore && !loadingMoreCustomers) {
+            loadCustomers(customerDropdownPage + 1);
+        }
+    };
+
     useEffect(() => {
         dispatch(getAllApprovalList());
-        dispatch(getListCustomer());
         dispatch(getCurrencyDDL());
+        loadCustomers(1);
         if (id && type === "update") {
             dispatch(getDetailTransferToCustomer(id));
         }
@@ -291,11 +320,6 @@ const ListFormTransferToCustomer = (props) => {
         if (current === 0) {
             const fieldsToValidate = [
                 "fromCustomerId", "fromCustomerName", "areaCode", "category", "description",
-                "paymentWarrantyCode", "warrantyAreaCode", "accountNumber", "accountName",
-                "customerId", "customerName", "customerSegment", "customerGroup",
-                "type", "documentNumber", "mutationDate", "publisher", "issuerBranch",
-                "currency", "balance", "rateType", "rateDate", "rate", "equivalent",
-                "effectiveDate", "expiringDate", "endDateClaim", "accountType", "classificationType"
             ];
 
             form.validateFields(fieldsToValidate)
@@ -346,14 +370,14 @@ const ListFormTransferToCustomer = (props) => {
             const values = isDraft ? form.getFieldsValue(true) : await form.validateFields();
             
             const payload = {
-                fromCustomerNumber: values.fromCustomerNumber,
+                fromCustomerNumber: values.fromCustomerId,
                 fromCustomerName: values.fromCustomerName,
                 areaCode: values.areaCode,
                 category: values.category,
                 description: values.description,
-                paymentGuaranteeCode: values.paymentGuaranteeCode,
-                sourcePayWarrantyId: values.sourcePayWarrantyId,
-                fromAccountId: values.fromAccountId,
+                paymentGuaranteeCode: values.paymentWarrantyCode,
+                sourcePayWarrantyId: form.getFieldValue("sourcePayWarrantyId"),
+                fromAccountId: form.getFieldValue("fromAccountId"),
                 appHierId: selectedHierarchy,
                 approvalRemarks: values.description, // Reusing description as remarks
                 attachmentIds: listDataAttachment.map(a => a.id).filter(id => !!id),
@@ -418,9 +442,11 @@ const ListFormTransferToCustomer = (props) => {
         save,
         cancel,
         form,
-        listCustomer: listCustomer?.result || listCustomer || [],
+        listCustomer: customerOptions,
         currencyDDL: currencyDDL?.data || currencyDDL || [],
-        handleCustomerChange
+        handleCustomerChange,
+        onCustomerPopupScroll: handleCustomerPopupScroll,
+        loadingMoreCustomers,
     });
 
     const routesBread = [
@@ -554,8 +580,10 @@ const ListFormTransferToCustomer = (props) => {
             </ModalConfirm>
 
             <ModalSearchWarranty
-                isOpen={!!showSearchWarrantyModal}
-                customerId={typeof showSearchWarrantyModal !== 'boolean' ? showSearchWarrantyModal : null}
+                isOpen={showSearchWarrantyModal}
+                customerId={form.getFieldValue("fromCustomerId") ?
+                    listFromCustomer?.find(c => c.customerNumber === form.getFieldValue("fromCustomerId"))?.customerId
+                    : null}
                 onClose={() => setShowSearchWarrantyModal(false)}
                 onConfirm={handleConfirmWarranty}
             />
