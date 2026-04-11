@@ -12,6 +12,7 @@ import {
     getAllApprovalList,
     getListApprovalById
 } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
+import { showModalSuccess } from "../../../../../redux/slices/general_slice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailTransferToCustomer from "./DetailTransferToCustomer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -207,9 +208,16 @@ const ListDetailTransferToCustomer = () => {
             action: approveOrReject.toUpperCase(),
         };
 
-        dispatch(approveOrRejectTransferToCustomer({ body: data }));
-        handleClear();
-        setModalApprove(false);
+        dispatch(approveOrRejectTransferToCustomer({ body: data }))
+            .unwrap()
+            .then((payload) => {
+                handleClear();
+                setModalApprove(false);
+            })
+            .catch(() => {
+                handleClear();
+                setModalApprove(false);
+            });
     };
 
     const handleCancel = () => {

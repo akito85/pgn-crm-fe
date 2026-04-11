@@ -1,11 +1,12 @@
 import { Modal, Button } from "antd";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getListWarranty } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import TableRBI from "../../../../../components/TableRBI";
 
-const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
+const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
     const dispatch = useDispatch();
     const { listWarranty } = useSelector((state) => state.transferToCustomer);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -15,11 +16,11 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
 
     useEffect(() => {
         if (isOpen) {
-            dispatch(getListWarranty());
+            dispatch(getListWarranty(customerId));
             setSelectedRowKeys([]);
             setSelectedRecord(null);
         }
-    }, [isOpen, dispatch]);
+    }, [isOpen, dispatch, customerId]);
 
 
     const handleConfirm = () => {
@@ -41,18 +42,18 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
         },
         {
             title: "PAYMENT GUARANTEE CODE",
-            dataIndex: "paymentWarrantyCode",
-            key: "paymentWarrantyCode",
+            dataIndex: "warrantyCode",
+            key: "warrantyCode",
             width: 200,
             align: "center",
             fixed: "left",
         },
         {
             title: "COST CENTER",
+            dataIndex: "costCenter",
             key: "costCenter",
             width: 250,
             align: "left",
-            render: (_, record) => `${record.areaCode || ""} - ${record.areaName || ""}`,
         },
         {
             title: "ACCOUNT NUMBER",
@@ -112,15 +113,16 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
         },
         {
             title: "DOCUMENT DATE",
-            dataIndex: "mutationDate",
-            key: "mutationDate",
+            dataIndex: "effectiveDate",
+            key: "effectiveDate",
             width: 150,
             align: "left",
+            render: (val) => val ? moment(val).format("DD-MM-YYYY") : "-"
         },
         {
             title: "ISSUER",
-            dataIndex: "publisher",
-            key: "publisher",
+            dataIndex: "issuerBank",
+            key: "issuerBank",
             width: 150,
             align: "center",
         },
@@ -169,8 +171,8 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm }) => {
         },
         {
             title: "EQV BALANCE AMOUNT",
-            dataIndex: "equivalent",
-            key: "equivalent",
+            dataIndex: "currencyBalance",
+            key: "currencyBalance",
             width: 180,
             align: "center",
             render: (val) => val?.toLocaleString(),

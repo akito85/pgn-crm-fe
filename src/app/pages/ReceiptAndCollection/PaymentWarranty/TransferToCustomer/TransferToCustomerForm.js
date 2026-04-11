@@ -14,19 +14,25 @@ import SubSectionCard from "../../../../../components/SubSectionCard";
 
 const TransferToCustomerForm = ({ form, onSearchWarranty }) => {
     const dispatch = useDispatch();
-    const { ddlDeductionPeriod, listFromCustomer } = useSelector((state) => state.transferToCustomer);
+    const { listFromCustomer } = useSelector((state) => state.transferToCustomer);
 
     useEffect(() => {
-        dispatch(getDDLDeductionPeriod());
         dispatch(getListFromCustomer());
     }, [dispatch]);
 
     const handleFromCustomerChange = (value) => {
-        const selected = listFromCustomer.find(item => item.fromCustomerId === value);
+        const dataList = listFromCustomer?.result || listFromCustomer || [];
+        const selected = dataList.find(item => 
+            item.fromCustomerId === value || 
+            item.customerId === value ||
+            item.customerNumber === value
+        );
         if (selected) {
             form.setFieldsValue({
-                fromCustomerName: selected.fromCustomerName,
-                areaCode: selected.areaCode,
+                fromCustomerNumber: selected.customerNumber || selected.fromCustomerNumber,
+                fromCustomerName: selected.customerName || selected.fromCustomerName,
+                areaCode: selected.areaCode || selected.costCenter,
+                fromAccountId: selected.accountId || selected.fromAccountId,
             });
         }
     };
@@ -49,7 +55,10 @@ const TransferToCustomerForm = ({ form, onSearchWarranty }) => {
                                 >
                                     <SelectComponent
                                         placeholder="Select From Customer Number"
-                                        options={listFromCustomer.map(item => ({ label: item.fromCustomerId, value: item.fromCustomerId }))}
+                                        options={(listFromCustomer?.result || listFromCustomer || []).map(item => ({ 
+                                            label: item.customerNumber || item.customerId || item.fromCustomerId, 
+                                            value: item.customerId !== undefined && item.customerId !== null ? item.customerId : (item.fromCustomerId || item.customerNumber) 
+                                        }))}
                                         onChange={handleFromCustomerChange}
                                     />
                                 </Form.Item>

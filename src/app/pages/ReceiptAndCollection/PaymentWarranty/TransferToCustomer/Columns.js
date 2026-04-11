@@ -24,22 +24,21 @@ export const columns = (
         {
             key: "costCenter",
             title: "COST CENTER",
-            dataIndex: "areaCode",
+            dataIndex: "costCenter",
             width: 200,
-            sorter: (a, b) => a?.areaCode?.localeCompare(b?.areaCode),
+            sorter: (a, b) => a?.costCenter?.localeCompare(b?.costCenter),
             ...getColumnSearchPropsPaging(
-                "areaCode",
+                "costCenter",
                 searchInput,
                 searchedColumn,
                 searchText,
                 handleSearch
             ),
             onFilter: (value, record) =>
-                record["areaCode"]
+                record["costCenter"]
                     ?.toString()
                     .toLowerCase()
-                    .includes(value.toLowerCase()),
-            render: (text, record) => `${record.areaCode || ""} - ${record.areaName || ""}`,
+                    .includes(value.toLowerCase())
         },
 
         {

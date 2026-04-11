@@ -31,11 +31,13 @@ import {
     getAllTransferToCustomerListPaginate,
     getListApprovalById,
     deleteTransferToCustomer,
+    exportTransferToCustomerToExcel,
+    clearApprovalHistory,
 } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
 
 
 const ViewTransferToCustomer = () => {
-    const { data, loading } = useSelector(
+    const { data, loading, loadingApproval, dataListAppHierDetail } = useSelector(
         (state) => state.transferToCustomer
     );
 
@@ -147,7 +149,14 @@ const ViewTransferToCustomer = () => {
     };
 
     const handleDownload = () => {
-        // Implement download logic if needed
+        dispatch(
+            exportTransferToCustomerToExcel({
+                search: encodeURIComponent(JSON.stringify(search)),
+                page,
+                pageSize,
+                sort,
+            })
+        );
     };
 
     const handleHistory = (record) => {
@@ -355,11 +364,18 @@ const ViewTransferToCustomer = () => {
 
                 <ModalHistory
                     isOpen={openModalHistory}
-                    handleClose={() => setOpenModalHistory(false)}
-                    header="Approval History"
-                    dataApprover={useSelector(state => state.transferToCustomer.dataListAppHierDetail?.dataApprover || [])}
-                    dataHistory={useSelector(state => state.transferToCustomer.dataListAppHierDetail?.dataHistory || [])}
-                    loading={loading}
+                    handleClose={() => {
+                        setOpenModalHistory(false);
+                        dispatch(clearApprovalHistory());
+                    }}
+                    header={
+                        <div className="flex items-center gap-2">
+                            <span>Approval History</span>
+                        </div>
+                    }
+                    dataApprover={dataListAppHierDetail?.dataApprover || []}
+                    dataHistory={dataListAppHierDetail?.dataHistory || []}
+                    loading={loadingApproval}
                 />
 
                 <ModalConfirm

@@ -15,6 +15,7 @@ export const getCustomerListColumns = ({
     form,
     actionType = "none",
     listCustomer = [],
+    currencyDDL = [],
     handleCustomerChange = () => { }
 }) => {
     const defaultCellProps = {
@@ -46,7 +47,10 @@ export const getCustomerListColumns = ({
                         >
                             <SelectComponent
                                 placeholder="Select Customer Number"
-                                options={listCustomer.map(item => ({ label: item.customerId, value: item.customerId }))}
+                                options={listCustomer.map(item => ({ 
+                                    label: item.customerNumber || item.customerId, 
+                                    value: item.customerId !== undefined && item.customerId !== null ? item.customerId : item.customerNumber 
+                                }))}
                                 onChange={(val) => handleCustomerChange(val)}
                             />
                         </Form.Item>
@@ -100,6 +104,7 @@ export const getCustomerListColumns = ({
             dataIndex: "currency",
             key: "currency",
             width: 150,
+            align: "center",
             render: (text, record) => {
                 const editable = isEditing(record);
                 return editable ? (
@@ -111,7 +116,10 @@ export const getCustomerListColumns = ({
                         >
                             <SelectComponent
                                 placeholder="Select Currency"
-                                options={[{ label: "IDR", value: "IDR" }, { label: "USD", value: "USD" }]}
+                                options={currencyDDL.map(item => ({ 
+                                    label: item.name || item.text || item.id, 
+                                    value: item.id 
+                                }))}
                             />
                         </Form.Item>
                     </div>

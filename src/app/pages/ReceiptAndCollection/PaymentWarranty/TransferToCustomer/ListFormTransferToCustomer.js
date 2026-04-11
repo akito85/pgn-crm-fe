@@ -24,6 +24,7 @@ import {
     getListApprovalById,
     getListCategory,
     getListCustomer,
+    getCurrencyDDL,
 } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
 
 import TransferToCustomerForm from "./TransferToCustomerForm";
@@ -40,7 +41,8 @@ const ListFormTransferToCustomer = (props) => {
         dataListAppHierId,
         dataListAppHierDetail,
         loading,
-        listCustomer
+        listCustomer,
+        currencyDDL
     } = useSelector((state) => state.transferToCustomer);
 
     const navigate = useNavigate();
@@ -110,6 +112,8 @@ const ListFormTransferToCustomer = (props) => {
                 toCustomerName: row.itemToCustomerName,
                 currency: row.itemCurrency,
                 amount: row.itemAmount,
+                toAccountId: form.getFieldValue("itemToAccountId"),
+                customerNumber: form.getFieldValue("itemCustomerNumber"),
             };
 
             const newData = [...customerList];
@@ -131,6 +135,12 @@ const ListFormTransferToCustomer = (props) => {
     };
 
     const handleAddCustomer = () => {
+        const category = form.getFieldValue("category");
+        if (!category) {
+            message.warning("Please select a Category first.");
+            return;
+        }
+
         const newData = {
             key: customerList.length + 1,
             no: customerList.length + 1,
@@ -152,36 +162,43 @@ const ListFormTransferToCustomer = (props) => {
     };
 
     const handleSearchWarranty = () => {
-        setShowSearchWarrantyModal(true);
+        const fromCustomerId = form.getFieldValue("fromCustomerId");
+        if (!fromCustomerId) {
+            message.warning("Please select a From Customer Number first.");
+            return;
+        }
+        setShowSearchWarrantyModal(fromCustomerId);
     }
 
     const handleConfirmWarranty = (record) => {
         form.setFieldsValue({
-            paymentWarrantyCode: record.paymentWarrantyCode,
-            warrantyAreaCode: record.areaCode,
+            paymentGuaranteeCode: record.warrantyCode,
+            warrantyAreaCode: record.costCenter,
             accountNumber: record.accountNumber || "-",
             accountName: record.accountName || "-",
-            areaName: record.areaName,
-            customerId: record.customerId,
+            customerId: record.customerNumber || record.customerId,
             customerName: record.customerName,
             customerSegment: record.customerSegment,
             customerGroup: record.customerGroup,
-            type: record.type,
-            publisher: record.publisher,
+            type: record.warrantyType || record.type,
+            publisher: record.issuerBank || record.publisher,
             issuerBranch: record.issuerBranch || "-",
             currency: record.currency,
             balance: record.balance,
-            rateType: record.rateType || "-",
-            rate: record.rate,
-            rateDate: record.rateDate ? moment(record.rateDate) : null,
-            equivalent: record.equivalent,
+            equivalent: record.currencyBalance || record.equivalent,
             documentNumber: record.documentNumber,
-            mutationDate: record.mutationDate ? moment(record.mutationDate) : null,
             effectiveDate: record.effectiveDate ? moment(record.effectiveDate) : null,
             expiringDate: record.expiringDate ? moment(record.expiringDate) : null,
+            sourcePayWarrantyId: record.warrantyId,
+            fromAccountId: record.accountId,
+            // Fields needing BE confirmation but setting defaults for now
+            rateType: record.rateType || "-",
+            rate: record.rate || 1,
+            rateDate: record.rateDate ? moment(record.rateDate) : null,
             endDateClaim: record.endDateClaim ? moment(record.endDateClaim) : null,
             accountType: record.accountType || "-",
             classificationType: record.classificationType || "-",
+            mutationDate: record.effectiveDate ? moment(record.effectiveDate) : null,
         });
     }
 
@@ -195,11 +212,17 @@ const ListFormTransferToCustomer = (props) => {
     };
 
     const handleCustomerChange = (customerId) => {
-        const selectedCustomer = listCustomer.find(item => item.customerId === customerId);
+        const dataList = listCustomer?.result || listCustomer || [];
+        const selectedCustomer = dataList.find(item => 
+            item.customerId === customerId || 
+            item.customerNumber === customerId
+        );
         if (selectedCustomer) {
             form.setFieldsValue({
-                itemAreaCode: selectedCustomer.areaCode,
-                itemToCustomerName: selectedCustomer.customerName,
+                itemAreaCode: selectedCustomer.costCenter || selectedCustomer.areaCode,
+                itemToCustomerName: selectedCustomer.customerName || selectedCustomer.toCustomerName,
+                itemToAccountId: selectedCustomer.accountId,
+                itemCustomerNumber: selectedCustomer.customerNumber,
             });
         }
     };
@@ -215,6 +238,7 @@ const ListFormTransferToCustomer = (props) => {
     useEffect(() => {
         dispatch(getAllApprovalList());
         dispatch(getListCustomer());
+        dispatch(getCurrencyDDL());
         if (id && type === "update") {
             dispatch(getDetailTransferToCustomer(id));
         }
@@ -322,10 +346,27 @@ const ListFormTransferToCustomer = (props) => {
             const values = isDraft ? form.getFieldsValue(true) : await form.validateFields();
             
             const payload = {
-                ...values,
-                isDraft,
+                fromCustomerNumber: values.fromCustomerNumber,
+                fromCustomerName: values.fromCustomerName,
+                areaCode: values.areaCode,
+                category: values.category,
+                description: values.description,
+                paymentGuaranteeCode: values.paymentGuaranteeCode,
+                sourcePayWarrantyId: values.sourcePayWarrantyId,
+                fromAccountId: values.fromAccountId,
                 appHierId: selectedHierarchy,
-                customerList: customerList,
+                approvalRemarks: values.description, // Reusing description as remarks
+                attachmentIds: listDataAttachment.map(a => a.id).filter(id => !!id),
+                customers: customerList.map(item => ({
+                    customerNumber: item.customerNumber,
+                    areaCode: item.areaCode,
+                    customerName: item.toCustomerName,
+                    toAccountId: item.toAccountId,
+                    currency: item.currency,
+                    amount: item.amount,
+                })),
+                // Keep these for FE reference or draft if needed
+                isDraft,
                 id: id,
                 rateDate: values.rateDate?.format("YYYY-MM-DD"),
                 mutationDate: values.mutationDate?.format("YYYY-MM-DD"),
@@ -377,7 +418,8 @@ const ListFormTransferToCustomer = (props) => {
         save,
         cancel,
         form,
-        listCustomer,
+        listCustomer: listCustomer?.result || listCustomer || [],
+        currencyDDL: currencyDDL?.data || currencyDDL || [],
         handleCustomerChange
     });
 
@@ -512,7 +554,8 @@ const ListFormTransferToCustomer = (props) => {
             </ModalConfirm>
 
             <ModalSearchWarranty
-                isOpen={showSearchWarrantyModal}
+                isOpen={!!showSearchWarrantyModal}
+                customerId={typeof showSearchWarrantyModal !== 'boolean' ? showSearchWarrantyModal : null}
                 onClose={() => setShowSearchWarrantyModal(false)}
                 onConfirm={handleConfirmWarranty}
             />
