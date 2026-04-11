@@ -350,7 +350,7 @@ const ListFormWarranty = (props) => {
           rateType: values.rateType || null,
           rateAmount: parsedRateAmount,
           claimPeriodTermType: values.claimPeriodTermType ? values.claimPeriodTermType.toUpperCase() : "DATE",
-          claimPeriodTermValue: values.claimPeriodTermValue ? moment(values.claimPeriodTermValue).toISOString(true) : null,
+          claimPeriodTermValue: values.claimPeriodTermValue ? moment(values.claimPeriodTermValue).format("YYYY-MM-DD") : null,
           description: DOMPurify.sanitize(values.description || null),
           isDraft: isDraft,
           appHierId: selectedHierarchy || null,
