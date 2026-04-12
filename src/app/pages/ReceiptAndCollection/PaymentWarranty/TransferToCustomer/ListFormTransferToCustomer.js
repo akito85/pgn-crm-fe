@@ -1,6 +1,7 @@
 import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin, message } from "antd";
 import moment from "moment";
+import DOMPurify from 'dompurify';
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -369,17 +370,21 @@ const ListFormTransferToCustomer = (props) => {
 
             const values = isDraft ? form.getFieldsValue(true) : await form.validateFields();
             
+            const sanitizedDescription = values.description 
+                ? DOMPurify.sanitize(values.description, { ALLOWED_TAGS: [] })
+                : null;
+
             const payload = {
                 fromCustomerNumber: values.fromCustomerId,
                 fromCustomerName: values.fromCustomerName,
                 areaCode: values.areaCode,
                 category: values.category,
-                description: values.description,
+                description: sanitizedDescription,
                 paymentGuaranteeCode: values.paymentWarrantyCode,
                 sourcePayWarrantyId: form.getFieldValue("sourcePayWarrantyId"),
                 fromAccountId: form.getFieldValue("fromAccountId"),
                 appHierId: selectedHierarchy,
-                approvalRemarks: values.description, // Reusing description as remarks
+                approvalRemarks: sanitizedDescription, // Reusing description as remarks
                 attachmentIds: listDataAttachment.map(a => a.id).filter(id => !!id),
                 customers: customerList.map(item => ({
                     customerNumber: item.customerNumber,

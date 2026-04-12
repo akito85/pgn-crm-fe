@@ -15,11 +15,21 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
     const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
+        let isMounted = true;
+        
         if (isOpen) {
-            dispatch(getListWarranty(customerId));
-            setSelectedRowKeys([]);
-            setSelectedRecord(null);
+            dispatch(getListWarranty(customerId))
+                .then(() => {
+                    if (isMounted) {
+                        setSelectedRowKeys([]);
+                        setSelectedRecord(null);
+                    }
+                });
         }
+        
+        return () => {
+            isMounted = false;
+        };
     }, [isOpen, dispatch, customerId]);
 
 
