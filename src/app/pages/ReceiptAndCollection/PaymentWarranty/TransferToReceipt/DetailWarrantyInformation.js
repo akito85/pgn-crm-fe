@@ -1,5 +1,4 @@
 import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
 import SubSectionCard from "../../../../../components/SubSectionCard";
 
@@ -55,7 +54,7 @@ const DetailWarrantyInformation = ({ data_detail }) => {
                     {data_detail?.currency || "-"}
                 </DetailText>
                 <DetailText label={"Balance Amount"}>
-                    {data_detail?.balance || "-"}
+                    {data_detail?.balance?.toLocaleString("id-ID") || "-"}
                 </DetailText>
                 <DetailText label={"Rate Type"}>
                     {data_detail?.rateType || "-"}
@@ -67,10 +66,10 @@ const DetailWarrantyInformation = ({ data_detail }) => {
                         : "-"}
                 </DetailText>
                 <DetailText label={"Rate"}>
-                    {data_detail?.rate || "-"}
+                    {data_detail?.rate?.toLocaleString("id-ID") || "-"}
                 </DetailText>
                 <DetailText label={"EQV Balance Amount"}>
-                    {data_detail?.equivalent || "-"}
+                    {data_detail?.equivalent?.toLocaleString("id-ID") || "-"}
                 </DetailText>
                 <DetailText label={"Reff. Start Date"}>
                     {data_detail?.effectiveDate

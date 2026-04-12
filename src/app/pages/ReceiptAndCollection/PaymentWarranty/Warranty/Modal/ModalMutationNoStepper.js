@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Spin, Button, message } from "antd";
+import { Form, Spin, message } from "antd";
 import moment from "moment";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import MutationForm from "../Form/MutationForm";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { 
   getMutationCategoryOptions,
   getDetailMutation
@@ -85,7 +86,6 @@ const ModalMutationNoStepper = ({
     try {
       const values = await form.validateFields();
       
-      // values.convertedCurrency is already the currency name (Option value={item.name})
       const currencyName = values.convertedCurrency || "IDR";
       
       const mutationWithDisplay = {
@@ -101,7 +101,7 @@ const ModalMutationNoStepper = ({
       );
 
       if (isDuplicate) {
-        message.error("Mutation Number must be unique.");
+        message.warn("Mutation Number must be unique.");
         return;
       }
 
@@ -119,31 +119,40 @@ const ModalMutationNoStepper = ({
       handleCancel={handleClose}
       header={`${modalType === "create" ? "CREATE" : "UPDATE"} MUTATION`}
       width={1100}
-      footer={
-        <div className="flex justify-end gap-2 pb-4 px-6">
-            <Button onClick={handleClose} className="rounded-md border-[#0075bf] text-[#0075bf] hover:text-[#005a94] hover:border-[#005a94]">
-                Cancel
-            </Button>
-            <Button 
-                type="primary" 
-                onClick={handleSubmit} 
-                className="rounded-md bg-[#28a745] border-[#28a745] hover:bg-[#218838] hover:border-[#218838]"
-            >
-                Submit
-            </Button>
-        </div>
-      }
+      footer={null}
+      type="confirmation"
     >
       <Spin spinning={loadingMutation}>
         <div className="w-full h-full flex flex-col pt-4 gap-y-5">
             <Form layout="vertical" form={form} id="formMutationNoStepper">
-                <div className="px-6 pb-6">
+                <div className="mb-[30px]">
                     <MutationForm 
                         disabled={false} 
                         currencyDDL={currencyDDL} 
                         warrantyType={warrantyType}
                         headerCurrency={headerCurrency}
+                        title={null}
                     />
+                </div>
+
+                <div className="w-full">
+                    <div style={{ borderTop: "1px solid #C8CDD4", marginLeft: "-16px", marginRight: "-16px", marginBottom: "24px" }} />
+                    <div className="flex justify-between items-center gap-5 px-2 pb-2">
+                        <ButtonComponent 
+                          onClick={handleClose} 
+                          type="default" 
+                          className="!w-fit px-8"
+                        >
+                          Cancel
+                        </ButtonComponent>
+                        <ButtonComponent 
+                            isPrimary={true} 
+                            onClick={handleSubmit} 
+                            className="!w-fit px-8"
+                        >
+                            Submit
+                        </ButtonComponent>
+                    </div>
                 </div>
             </Form>
         </div>

@@ -1,207 +1,145 @@
+import React, { useState } from "react";
+import { Tabs } from "antd";
 import moment from "moment";
-import { Fragment, useState } from "react";
-import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
-import { dateFormatting } from "../../../../../utils";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
 import TableRBI from "../../../../../components/TableRBI";
-import SVGIcon from "../../../../../assets/Icon/index";
+import SubSectionCard from "../../../../../components/SubSectionCard";
 import { getReceiptListColumns } from "./ReceiptListColumns";
 
+const { TabPane } = Tabs;
 
 const ContentModalConfirm = ({
-  data,
-  listDataAttachment = [],
-  listDataAppHierDetail = [],
-  tabData = [],
-  dataOption,
-  selectedHierarchy,
-  receiptList = [],
+    data,
+    listDataAttachment = [],
+    listDataAppHierDetail = [],
+    dataOption,
+    selectedHierarchy,
+    receiptList = [],
+    category = "",
 }) => {
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+    const [activeTab, setActiveTab] = useState("Transfer");
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
-  const handlePageChange = (page) => {
-    setPage(page);
-  };
+    const handlePageChange = (page) => {
+        setPage(page);
+    };
 
-  const handleSizeChange = (current, size) => {
-    setPage(1);
-    setPageSize(size);
-  };
+    const handleSizeChange = (current, size) => {
+        setPage(1);
+        setPageSize(size);
+    };
 
-  const columnsReceipt = [
-    {
-      title: "NO",
-      dataIndex: "no",
-      key: "no",
-      width: 50,
-      render: (text, record, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "RECEIPT DATA",
-      dataIndex: "receiptData",
-      key: "receiptData",
-      width: 150,
-    },
-    {
-      title: "RECEIPT ID",
-      dataIndex: "receiptId",
-      key: "receiptId",
-      width: 150,
-    },
-    {
-      title: "CUSTOMER NUMBER",
-      dataIndex: "customerNumber",
-      key: "customerNumber",
-      width: 150,
-    },
-    {
-      title: "CUSTOMER NAME",
-      dataIndex: "customerName",
-      key: "customerName",
-      width: 250,
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
-      width: 150,
-    },
-    {
-      title: "TYPE",
-      dataIndex: "type",
-      key: "type",
-      width: 100,
-    },
-    {
-      title: "CUR",
-      dataIndex: "currency",
-      key: "currency",
-      width: 80,
-    },
-    {
-      title: "AMOUNT",
-      dataIndex: "amount",
-      key: "amount",
-      width: 150,
-      render: (value) => value ? value.toLocaleString("id-ID") : 0,
-      align: "right",
-    },
-    {
-      title: "REMARK",
-      dataIndex: "remark",
-      key: "remark",
-      width: 200,
-    },
-    {
-      title: "EGL",
-      dataIndex: "egl",
-      key: "egl",
-      width: 100,
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      width: 100,
-    },
-    {
-      title: "ACTION",
-      key: "action",
-      width: 80,
-      align: "center",
-      fixed: "right",
-      render: (text, record) => (
-        <div style={{ display: "flex", justifyContent: "center", opacity: 0.5, cursor: "not-allowed" }}>
-          <SVGIcon
-            name="IconDelete"
-            width={24}
-          />
+    const columnsReceipt = getReceiptListColumns({
+        page,
+        pageSize,
+        actionType: "none",
+        category,
+        isModal: false,
+    });
+
+    return (
+        <div className="flex flex-col gap-0 bg-white overflow-hidden">
+            <Tabs
+                activeKey={activeTab}
+                onChange={(key) => setActiveTab(key)}
+                className="custom-confirm-tabs"
+                tabBarStyle={{
+                    paddingLeft: "16px",
+                    paddingRight: "16px",
+                    marginBottom: 0,
+                    borderBottom: "1px solid #dbdade"
+                }}
+            >
+                <TabPane tab="Transfer to Receipt" key="Transfer">
+                    <div className="py-6 bg-white max-h-[60vh] overflow-y-auto">
+                        {/* TRANSFER INFORMATION */}
+                        <SubSectionCard title="TRANSFER TO RECEIPT INFORMATION" className="mx-6 mb-4">
+                            <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
+                                <DetailText label="From Customer Number">{data?.fromCustomerId || "-"}</DetailText>
+                                <DetailText label="From Customer Name">{data?.fromCustomerName || "-"}</DetailText>
+                                <DetailText label="Area Code">{data?.areaCode || "-"}</DetailText>
+                                <DetailText label="Category">{data?.category || "-"}</DetailText>
+                                <div className="col-span-4">
+                                    <DetailText label="Description">{data?.description || "-"}</DetailText>
+                                </div>
+                            </div>
+                        </SubSectionCard>
+
+                        {/* GUARANTEE INFORMATION */}
+                        <SubSectionCard title="GUARANTEE INFORMATION" className="mx-6 mb-4">
+                            <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
+                                <DetailText label="Payment Guarantee Code">{data?.paymentWarrantyCode || "-"}</DetailText>
+                                <DetailText label="Cost Center">{data?.warrantyAreaCode || "-"}</DetailText>
+                                <DetailText label="Account Number">{data?.accountNumber || "-"}</DetailText>
+                                <DetailText label="Account Name">{data?.accountName || "-"}</DetailText>
+                                <DetailText label="Customer Number">{data?.customerId || "-"}</DetailText>
+                                <DetailText label="Customer Name">{data?.customerName || "-"}</DetailText>
+                                <DetailText label="Customer Segment">{data?.customerSegment || "-"}</DetailText>
+                                <DetailText label="Customer Group">{data?.customerGroup || "-"}</DetailText>
+                                <DetailText label="Type">{data?.type || "-"}</DetailText>
+                                <DetailText label="Document Number">{data?.documentNumber || "-"}</DetailText>
+                                <DetailText label="Document Date">{data?.mutationDate ? moment(data.mutationDate).format("DD MMM YYYY") : (data?.receiptDate ? moment(data.receiptDate).format("DD MMM YYYY") : "-")}</DetailText>
+                                <DetailText label="Issuer">{data?.publisher || "-"}</DetailText>
+                                <DetailText label="Issuer Branch">{data?.issuerBranch || "-"}</DetailText>
+                                <DetailText label="Currency">{data?.currency || "-"}</DetailText>
+                                <DetailText label="Balance Amount">{data?.balance?.toLocaleString("id-ID") || "-"}</DetailText>
+                                <DetailText label="Rate Type">{data?.rateType || "-"}</DetailText>
+                                <DetailText label="Rate Date">{data?.rateDate ? moment(data.rateDate).format("DD MMM YYYY") : "-"}</DetailText>
+                                <DetailText label="Rate">{data?.rate?.toLocaleString("id-ID") || "-"}</DetailText>
+                                <DetailText label="EQV Balance Amount">{data?.equivalent?.toLocaleString("id-ID") || "-"}</DetailText>
+                                <DetailText label="Reff. Start Date">{data?.effectiveDate ? moment(data.effectiveDate).format("DD MMM YYYY") : "-"}</DetailText>
+                                <DetailText label="Reff. End Date">{data?.expiringDate ? moment(data.expiringDate).format("DD MMM YYYY") : "-"}</DetailText>
+                                <DetailText label="Claim Period">{data?.endDateClaim ? moment(data.endDateClaim).format("DD MMM YYYY") : "-"}</DetailText>
+                                <DetailText label="Account Type">{data?.accountType || "-"}</DetailText>
+                                <DetailText label="Classification Type">{data?.classificationType || "-"}</DetailText>
+                            </div>
+                        </SubSectionCard>
+
+                        {/* RECEIPT INFORMATION TABLE */}
+                        <SubSectionCard title="RECEIPT INFORMATION" className="mx-6 mb-4">
+                            <TableRBI
+                                columns={columnsReceipt}
+                                dataSource={receiptList}
+                                pagination={false}
+                                tableScrolled={{ x: 3500 }}
+                                totalData={receiptList?.length || 0}
+                                current={page}
+                                pageSize={pageSize}
+                                onChange={handlePageChange}
+                                onSizeChanger={handleSizeChange}
+                                className="custom-table-confirm"
+                            />
+                        </SubSectionCard>
+                    </div>
+                </TabPane>
+                <TabPane tab="Approval" key="Approval">
+                    <div className="py-6 bg-white max-h-[60vh] overflow-y-auto">
+                        <SubSectionCard title="APPROVAL INFORMATION" className="mx-6 mb-4">
+                            <ApprovalComponentGeneral
+                                showSelect={false}
+                                disableSelect={true}
+                                approvalName={
+                                    (dataOption || []).find((item) => item.value === selectedHierarchy)?.name || ""
+                                }
+                                dataTable={listDataAppHierDetail}
+                                selectedHierarchy={selectedHierarchy}
+                            />
+                        </SubSectionCard>
+                    </div>
+                </TabPane>
+                <TabPane tab="Attachment" key="Attachment">
+                    <div className="py-6 bg-white max-h-[60vh] overflow-y-auto">
+                        <SubSectionCard title="ATTACHMENT INFORMATION" className="mx-6 mb-4">
+                            <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+                        </SubSectionCard>
+                    </div>
+                </TabPane>
+            </Tabs>
         </div>
-      ),
-    },
-  ];
-
-  const showSection = () => {
-    switch (valuePage) {
-      case tabData[0].value:
-        return (
-          <div className="flex flex-col gap-5 w-full">
-            <div>
-              <div className="text-primary text-xs font-bold uppercase mb-3">
-                TRANSFER TO RECEIPT INFORMATION
-              </div>
-              <div className="grid grid-cols-3 w-full gap-5">
-                <DetailText label={"Deduction Period"}>
-                  {data?.deductionPeriod}
-                </DetailText>
-
-                <DetailText label={"Type"}>
-                  {data?.type}
-                </DetailText>
-
-                <DetailText label={"Deduaction Date"}>
-                  {data?.deductionDate}
-                </DetailText>
-              </div>
-            </div>
-
-            <div>
-              <div className="text-primary text-xs font-bold uppercase mb-3">
-                RECEIPT INFORMATION
-              </div>
-              <TableRBI
-                columns={columnsReceipt}
-                dataSource={receiptList.slice((page - 1) * pageSize, page * pageSize)}
-                pagination={false}
-                tableScrolled={{ x: 1800 }}
-                totalData={receiptList?.length || 0}
-                current={page}
-                pageSize={pageSize}
-                onChange={handlePageChange}
-                onSizeChanger={handleSizeChange}
-              />
-            </div>
-          </div>
-        );
-      case tabData[1].value:
-        return (
-          <ApprovalComponentGeneral
-            showSelect={false}
-            disableSelect={true}
-            approvalName={
-              (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
-              )?.[0].name || ""
-            }
-            dataTable={listDataAppHierDetail}
-            selectedHierarchy
-          />
-        );
-      case tabData[2].value:
-        return (
-          <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
-        );
-      default:
-        return <Fragment></Fragment>;
-    }
-  };
-  const handleMethod = (e) => {
-    setValuePage(e.target.value);
-  };
-
-  return (
-    <div className="flex flex-col gap-4">
-      <RadioTabs data={tabData} onChange={handleMethod} />
-      <div className="flex flex-col gap-4">
-        {/* Removed generic header since it is now inside the specific tab sections for more control or as per design */}
-        {showSection()}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ContentModalConfirm;
