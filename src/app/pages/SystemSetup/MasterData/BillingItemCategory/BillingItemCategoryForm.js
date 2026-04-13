@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Form, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -59,6 +59,7 @@ const BillingItemCategoryForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
@@ -121,6 +122,23 @@ const BillingItemCategoryForm = ({ type }) => {
   };
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // Use Effect
   useEffect(() => {
@@ -410,6 +428,12 @@ const BillingItemCategoryForm = ({ type }) => {
         .then(async (dataForm) => {
           const billingItemCategoryId = dataForm?.id;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const bodyAttachment = {
@@ -448,6 +472,12 @@ const BillingItemCategoryForm = ({ type }) => {
             (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const bodyAttachment = {
@@ -519,6 +549,7 @@ const BillingItemCategoryForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListSectionInfo([
         {
@@ -627,7 +658,7 @@ const BillingItemCategoryForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_bucket"

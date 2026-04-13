@@ -69,6 +69,7 @@ const BillingBucketForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [listDataBI, setListDataBI] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
@@ -129,12 +130,15 @@ const BillingBucketForm = ({ type }) => {
         .then(() => {
           if (current === 0) {
             const formData = form.getFieldsValue();
-            if (listDataCriteria.length === 0 && !formData?.criteria?.includes(24)) {
+            if (
+              listDataCriteria.length === 0 &&
+              !formData?.criteria?.includes(24)
+            ) {
               dispatch(
                 showModalError({
                   title: "Failed",
                   description: "Criteria Mandatory. Please insert data.",
-                })
+                }),
               );
               return;
             }
@@ -142,8 +146,9 @@ const BillingBucketForm = ({ type }) => {
               dispatch(
                 showModalError({
                   title: "Failed",
-                  description: "Billing Item Detail Mandatory. Please insert data.",
-                })
+                  description:
+                    "Billing Item Detail Mandatory. Please insert data.",
+                }),
               );
               return;
             }
@@ -172,18 +177,25 @@ const BillingBucketForm = ({ type }) => {
   };
 
   const isDisabledDate = useMemo(() => {
-    if (
-      hasValue(form?.getFieldsValue()?.endDate) === true &&
-      listDataCriteria?.map((item) => ({
-        startDate: item?.startDate,
-        endDate: item?.endDate,
-      }))?.length > 0
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }, [form, listDataCriteria]);
+    return listDataCriteria?.length > 0;
+  }, [listDataCriteria]);
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   const isLoading = loading || loadingForm;
 
@@ -782,14 +794,18 @@ const BillingBucketForm = ({ type }) => {
     dataTable?.forEach((item) => {
       let isOverlap = false;
 
-      if (moment(item?.startDate).startOf("day") < moment(formHeader?.startDate).startOf("day")) {
+      if (
+        moment(item?.startDate).startOf("day") <
+        moment(formHeader?.startDate).startOf("day")
+      ) {
         isOverlap = true;
       }
 
       if (formHeader?.endDate) {
         if (
           !item?.endDate ||
-          moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day")
+          moment(item?.endDate).startOf("day") >
+            moment(formHeader?.endDate).startOf("day")
         ) {
           isOverlap = true;
         }
@@ -942,6 +958,12 @@ const BillingBucketForm = ({ type }) => {
         .then(async (dataForm) => {
           const billingBucketCode = dataForm?.billingBucketCode;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const body = {
@@ -980,7 +1002,13 @@ const BillingBucketForm = ({ type }) => {
             (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
+          for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
               files: element.file,
@@ -1047,7 +1075,7 @@ const BillingBucketForm = ({ type }) => {
     if (errorFields?.length > 0) {
       const firstError = errorFields[0].name[0];
       const stepIndex = listSectionInfo.findIndex((page) =>
-        page.paramValue?.includes(firstError)
+        page.paramValue?.includes(firstError),
       );
 
       if (stepIndex !== -1) {
@@ -1067,6 +1095,7 @@ const BillingBucketForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListDataCriteria([]);
       setCriteriaValues([]);
@@ -1254,7 +1283,7 @@ const BillingBucketForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_bucket"
@@ -1340,7 +1369,9 @@ const BillingBucketForm = ({ type }) => {
             setCurrent(modalIncomplete.stepIndex);
             setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
           }}
-          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          handleCancel={() =>
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })
+          }
           customText="Go to Step"
         >
           <div className="px-5 pt-5 pb-[10px] justify-center">
@@ -1348,7 +1379,10 @@ const BillingBucketForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
             </div>
-            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+            <p className="pl-[70px]">
+              Please complete the mandatory fields in the{" "}
+              <b>{modalIncomplete.stepName}</b> section before proceeding.
+            </p>
           </div>
         </ModalError>
       </Spin>
