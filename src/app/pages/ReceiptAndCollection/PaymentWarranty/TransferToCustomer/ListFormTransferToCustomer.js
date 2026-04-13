@@ -42,6 +42,7 @@ const ListFormTransferToCustomer = (props) => {
         dataListAppHierId,
         dataListAppHierDetail,
         loading,
+        loadingApproval,
         listFromCustomer,
         currencyDDL
     } = useSelector((state) => state.transferToCustomer);
@@ -479,6 +480,8 @@ const ListFormTransferToCustomer = (props) => {
             }));
             setModalConfirm(false);
         } catch (error) {
+            console.error(error);
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -549,12 +552,14 @@ const ListFormTransferToCustomer = (props) => {
                                 header={"APPROVAL INFORMATION"}
                                 collapsible={true}
                             >
-                                <ApprovalComponentGeneral
-                                    dataTable={appHierDataDetail}
-                                    dataOption={appHierOptions}
-                                    selectedHierarchy={selectedHierarchy}
-                                    updateSelectedHierarchy={setSelectedHierarchy}
-                                />
+                                <Spin spinning={loadingApproval}>
+                                    <ApprovalComponentGeneral
+                                        dataTable={appHierDataDetail}
+                                        dataOption={appHierOptions}
+                                        selectedHierarchy={selectedHierarchy}
+                                        updateSelectedHierarchy={setSelectedHierarchy}
+                                    />
+                                </Spin>
                             </CardContainer>
                         </div>
 

@@ -176,6 +176,8 @@ const ViewTransferToReceipt = () => {
   };
 
   const handleConfirmDelete = () => {
+    setOpenModalDelete(false);
+    setSelectedRecord(null);
     dispatch(deleteTransferToReceipt(selectedRecord.id)).unwrap()
       .then(() => {
         dispatch(
@@ -186,7 +188,7 @@ const ViewTransferToReceipt = () => {
             sort,
           })
         );
-    });
+      });
   };
 
   const handleDetail = (record) => {

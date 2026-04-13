@@ -10,7 +10,8 @@ import {
     approveOrRejectTransferToCustomer,
     getListCategory,
     getAllApprovalList,
-    getListApprovalById
+    getListApprovalById,
+    resetDetailState
 } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
 import { showModalSuccess } from "../../../../../redux/slices/general_slice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -213,7 +214,7 @@ const ListDetailTransferToCustomer = () => {
             handleClear();
             setModalApprove(false);
         } catch (error) {
-            // Error sudah di-handle di thunk, tapi tetap clear UI
+            // Error sudah di-handle di thunk
             handleClear();
             setModalApprove(false);
         }

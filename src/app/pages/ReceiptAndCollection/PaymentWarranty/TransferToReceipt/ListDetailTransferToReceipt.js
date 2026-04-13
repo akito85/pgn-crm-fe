@@ -10,9 +10,11 @@ import {
   approveOrRejectTransferToReceipt,
   getListCategory,
   getAllApprovalList,
-  getListApprovalById
+  getListApprovalById,
+  resetDetailState
 } from "../../../../../redux/slices/receipt_collection/transferToReceipt";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import { showModalSuccess } from "../../../../../redux/slices/general_slice";
 import DetailTransferToReceipt from "./DetailTransferToReceipt";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -192,7 +194,7 @@ const ListDetailTransferToReceipt = () => {
         },
     ];
 
-    const handleConfirm = (res, handleClear) => {
+    const handleConfirm = async (res, handleClear) => {
         const data = {
             id: id,
             remark: res.remark,
@@ -200,9 +202,14 @@ const ListDetailTransferToReceipt = () => {
             action: approveOrReject.toUpperCase(),
         };
 
-        dispatch(approveOrRejectTransferToReceipt({ body: data }));
-        handleClear();
-        setModalApprove(false);
+        try {
+            await dispatch(approveOrRejectTransferToReceipt({ body: data })).unwrap();
+            handleClear();
+            setModalApprove(false);
+        } catch (error) {
+            handleClear();
+            setModalApprove(false);
+        }
     };
 
     const handleCancel = () => {

@@ -96,10 +96,6 @@ export const approveOrRejectTransferToCustomer = createAsyncThunk(
         try {
             const url = "/v1/dbs/api/payment-warranty/transfer-customer/approve-reject";
             const response = await receiptCollectionHttpService.createData(url, body);
-            thunkAPI.dispatch(showModalSuccess({
-                title: "Success",
-                description: response?.message || "Success Approve Transfer To Customer"
-            }));
             return response.data;
         } catch (error) {
             const message =
@@ -408,8 +404,11 @@ const transferToCustomerSlice = createSlice({
     initialState,
     reducers: {
         clearApprovalHistory: (state) => {
-            state.dataListAppHierDetail = [];
             state.dataApprovalHistory = null;
+        },
+        resetDetailState: (state) => {
+            state.data_detail = null;
+            state.dataListAppHierDetail = [];
         },
     },
     extraReducers: {
@@ -457,6 +456,18 @@ const transferToCustomerSlice = createSlice({
         },
         [getListCustomer.rejected]: (state) => {
             // state.loading = false;
+        },
+
+        // Get List Warranty
+        [getListWarranty.pending]: (state) => {
+            state.loading = true;
+        },
+        [getListWarranty.fulfilled]: (state, action) => {
+            state.listWarranty = action.payload;
+            state.loading = false;
+        },
+        [getListWarranty.rejected]: (state) => {
+            state.loading = false;
         },
 
 
@@ -555,5 +566,5 @@ const transferToCustomerSlice = createSlice({
 
 
 const { reducer, actions } = transferToCustomerSlice;
-export const { clearApprovalHistory } = actions;
+export const { clearApprovalHistory, resetDetailState } = actions;
 export default reducer;

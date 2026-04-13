@@ -180,6 +180,8 @@ const ViewTransferToCustomer = () => {
     };
 
     const handleConfirmDelete = () => {
+        setOpenModalDelete(false);
+        setSelectedRecord(null);
         dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap()
             .then(() => {
                 dispatch(
@@ -190,11 +192,9 @@ const ViewTransferToCustomer = () => {
                         sort,
                     })
                 );
-            })
-            .finally(() => {
-                setOpenModalDelete(false);
             });
     };
+
 
     const handleDetail = (record) => {
         navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSFER_TO_CUSTOMER, { state: { id: record?.id } });

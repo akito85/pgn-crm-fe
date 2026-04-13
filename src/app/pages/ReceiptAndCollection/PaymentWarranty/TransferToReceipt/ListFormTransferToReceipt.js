@@ -1,4 +1,4 @@
-import { Form, message } from "antd";
+import { Form, message, Spin } from "antd";
 import { showModalError, showModalSuccess } from "../../../../../redux/slices/general_slice";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
@@ -62,6 +62,7 @@ const ListFormTransferToReceipt = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { dataListAppHierId, dataListAppHierDetail, loading, listFromCustomer } = useSelector((state) => state.transferToReceipt);
 
     useEffect(() => {
@@ -163,7 +164,6 @@ const ListFormTransferToReceipt = () => {
             endDateClaim: record.endDateClaim ? moment(record.endDateClaim) : null,
             accountType: record.accountType,
             classificationType: record.classificationType,
-            description: record.description,
             sourcePayWarrantyId: record.warrantyId,
             fromAccountId: record.accountId
         });
@@ -245,18 +245,22 @@ const ListFormTransferToReceipt = () => {
         const formData = form.getFieldsValue();
         const body = {
             ...formData,
+            sourcePayWarrantyId: form.getFieldValue("sourcePayWarrantyId"),
+            fromAccountId: form.getFieldValue("fromAccountId"),
             receiptList: receiptList.map(item => ({ 
                 receiptId: item.receiptId, 
                 receiptNo: item.receiptNo, 
                 amount: typeof item.amount === 'string' ? parseFloat(item.amount.replace(/,/g, '')) : item.amount 
             })),
-            attachmentList: listDataAttachment.map(item => ({ id: item.id })),
-            appHierId: selectedHierarchy
+            attachmentList: listDataAttachment.filter(item => item.id).map(item => ({ id: item.id })),
+            appHierId: selectedHierarchy,
+            isDraft: false
         };
         
+        setIsSubmitting(true);
         try {
             const res = await dispatch(submitTransferToReceipt(body)).unwrap();
-            const createdId = res?.data?.transferHdrId || res?.data?.id;
+            const createdId = res?.transferHdrId || res?.id;
 
             if (createdId) {
                 await uploadFiles(createdId);
@@ -270,7 +274,45 @@ const ListFormTransferToReceipt = () => {
             setShowConfirmSubmit(false);
         } catch (error) {
             console.error("Submission failed:", error);
-            setShowConfirmSubmit(false);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleSaveDraft = async () => {
+        const formData = form.getFieldsValue(true); // Get values without validation
+        const body = {
+            ...formData,
+            sourcePayWarrantyId: form.getFieldValue("sourcePayWarrantyId"),
+            fromAccountId: form.getFieldValue("fromAccountId"),
+            receiptList: receiptList.map(item => ({ 
+                receiptId: item.receiptId, 
+                receiptNo: item.receiptNo, 
+                amount: typeof item.amount === 'string' ? parseFloat(item.amount.replace(/,/g, '')) : item.amount 
+            })),
+            attachmentList: listDataAttachment.filter(item => item.id).map(item => ({ id: item.id })),
+            appHierId: selectedHierarchy,
+            isDraft: true
+        };
+
+        setIsSubmitting(true);
+        try {
+            const res = await dispatch(submitTransferToReceipt(body)).unwrap();
+            const createdId = res?.transferHdrId || res?.id;
+
+            if (createdId) {
+                await uploadFiles(createdId);
+            }
+
+            dispatch(showModalSuccess({
+                title: "Success",
+                description: "Data saved as draft successfully",
+                onOk: () => navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT)
+            }));
+        } catch (error) {
+            console.error("Draft saving failed:", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -322,12 +364,14 @@ const ListFormTransferToReceipt = () => {
                         >
                             <div className="mx-2 mb-4 mt-2">
                                 <SubSectionCard>
-                                    <ApprovalComponentGeneral
-                                        dataOption={appHierOptions}
-                                        dataTable={appHierDataDetail}
-                                        selectedHierarchy={selectedHierarchy}
-                                        updateSelectedHierarchy={setSelectedHierarchy}
-                                    />
+                                    <Spin spinning={loading}>
+                                        <ApprovalComponentGeneral
+                                            dataOption={appHierOptions}
+                                            dataTable={appHierDataDetail}
+                                            selectedHierarchy={selectedHierarchy}
+                                            updateSelectedHierarchy={setSelectedHierarchy}
+                                        />
+                                    </Spin>
                                 </SubSectionCard>
                             </div>
                         </CardContainerNoBorder>
@@ -364,9 +408,10 @@ const ListFormTransferToReceipt = () => {
                     onNext={handleNext}
                     onCancel={() => navigate(-1)}
                     onClear={() => { form.resetFields(); setReceiptList([]); setListDataAttachment([]); }}
+                    onSaveDraft={handleSaveDraft}
                     onSubmit={handleSubmit}
-                    isLoading={loading}
-                    useSaveDraft={false}
+                    isLoading={isSubmitting}
+                    useSaveDraft={true}
                 />
             </div>
 
@@ -399,7 +444,7 @@ const ListFormTransferToReceipt = () => {
                         <div style={{ borderTop: "1px solid #C8CDD4", marginLeft: "-16px", marginRight: "-16px", marginBottom: "24px" }} />
                         <div className="flex justify-between gap-5 px-2 pb-2">
                             <ButtonComponent onClick={() => setShowConfirmSubmit(false)} type="default" className="!w-fit px-8">Cancel</ButtonComponent>
-                            <ButtonComponent isPrimary onClick={() => confirmSubmit()} loading={loading} className="!w-fit px-8">Confirm</ButtonComponent>
+                            <ButtonComponent isPrimary onClick={() => confirmSubmit()} loading={isSubmitting} className="!w-fit px-8">Confirm</ButtonComponent>
                         </div>
                     </div>
                 }
