@@ -23,6 +23,7 @@ import {
   getDowloadDailyRate,
   getListApprovalById,
   inactiveDailyRates,
+  requestActivateDailyRates,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/dailyrate";
 import {
   hasValue,
@@ -398,11 +399,15 @@ const DailyRateView = ({ dispatch }) => {
           create: dataApprovalHistory?.dataApprover?.DAILY_RATES || [],
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_DAILY_RATES || [],
+          activate:
+            dataApprovalHistory?.dataApprover?.ACTIVATED_DAILY_RATES || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.DAILY_RATES || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_DAILY_RATES || [],
+          activate:
+            dataApprovalHistory?.dataHistory?.ACTIVATED_DAILY_RATES || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -430,6 +435,7 @@ const DailyRateView = ({ dispatch }) => {
   //handle inactive
   const handleInactive = (r) => {
     setRatesId(r?.ratesId);
+    setDataInactivate(r || {});
     setOpenModalInactivate(true);
   };
   const handleCancelModalInactivate = () => {
@@ -473,12 +479,20 @@ const DailyRateView = ({ dispatch }) => {
   }, [dispatch, search, sort]);
 
   const handleSubmitModalInactivate = (res, handleClear) => {
+    const selectedStatus = (dataInactivate?.status || "").toUpperCase();
+    const isActivateRequest = selectedStatus === "INACTIVE";
+
     const body = {
       ratesId: ratesId,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveDailyRates({ body }))
+
+    const activationAction = isActivateRequest
+      ? requestActivateDailyRates({ body })
+      : inactiveDailyRates({ body });
+
+    dispatch(activationAction)
       .unwrap()
       .then(() => {
         handleClear();
@@ -633,7 +647,10 @@ const DailyRateView = ({ dispatch }) => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
+        const normalizedStatus = (record.status || "").toUpperCase();
+        const isActivateRequest = normalizedStatus === "INACTIVE";
+
+        const isInactivateRequest =
           (record.statusApproval === "APPROVED" &&
             record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
@@ -643,6 +660,9 @@ const DailyRateView = ({ dispatch }) => {
             record.status === "ACTIVE") ||
           moment(record?.rateDate).isBefore(moment(), "day");
 
+        const isActivateOrInactivate = isActivateRequest || isInactivateRequest;
+        const actionText = isActivateRequest ? "Activate" : "Inactivate";
+
         const Content =
           data > 3 ? (
             <ButtonComponent
@@ -650,7 +670,7 @@ const DailyRateView = ({ dispatch }) => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
@@ -659,19 +679,15 @@ const DailyRateView = ({ dispatch }) => {
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-1">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-              </span>
+              <span className="text-black ml-1">{actionText}</span>
             </ButtonComponent>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title={actionText}>
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               </div>
@@ -801,6 +817,9 @@ const DailyRateView = ({ dispatch }) => {
     });
   }, [baseColumns, fixedColumns]);
 
+  const selectedStatus = (dataInactivate?.status || "").toUpperCase();
+  const isActivateFlow = selectedStatus === "INACTIVE";
+
   return (
     <div>
       <Spin spinning={loading}>
@@ -843,7 +862,9 @@ const DailyRateView = ({ dispatch }) => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"daily_rate"}
-          alertMessage={`Are you sure you want to inactivate `}
+          alertMessage={`Are you sure you want to ${
+            isActivateFlow ? "activate" : "inactivate"
+          } `}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}

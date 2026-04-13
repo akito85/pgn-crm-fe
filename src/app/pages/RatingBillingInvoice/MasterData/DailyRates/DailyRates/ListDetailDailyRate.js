@@ -14,6 +14,7 @@ import ratingBillingHttpService from "../../../../../../redux/services/ratingBil
 import { getConfigFileRBIData } from "../../../../../../redux/slices/attachmentSlice";
 import {
   approveCreate,
+  approveRejectActivated,
   approveRejectInactive,
   getDetailDR,
   getDetailDraftDR,
@@ -104,29 +105,37 @@ const ListDetailDailyRate = () => {
   }, [id, data_detail, data_detail_draft]);
 
   const showButtonApproval = data_detail?.isApprover;
+  const approvalType = (data_detail?.approvalType || "").toUpperCase();
+  const isCreateApproval = approvalType === "DAILY_RATES";
+  const isInactiveApproval =
+    approvalType === "INACTIVE_DAILY_RATES" ||
+    approvalType === "INACTIVE_DAILY_RATE";
+  const isActivatedApproval =
+    approvalType === "ACTIVATED_DAILY_RATES" ||
+    approvalType === "ACTIVATED_DAILY_RATE";
+
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    if (data_detail?.approvalType === "DAILY_RATES") {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tappId,
-        action: approveOrReject,
-      };
-      setModalConfirm(false);
+    const data = {
+      id: id,
+      remark: res.remark,
+      approvalId: data_detail?.tappId,
+      action: approveOrReject,
+    };
+
+    setModalConfirm(false);
+
+    if (isCreateApproval) {
       dispatch(approveCreate({ body: data }));
-      handleClear();
-    } else {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tappId,
-        action: approveOrReject,
-      };
-      setModalConfirm(false);
+    } else if (isActivatedApproval) {
+      dispatch(approveRejectActivated({ body: data }));
+    } else if (isInactiveApproval) {
       dispatch(approveRejectInactive({ body: data }));
-      handleClear();
+    } else {
+      dispatch(approveRejectInactive({ body: data }));
     }
+
+    handleClear();
   };
 
   const tempValue = convertedRates ? (convertedRates + "").split(".") : [];
