@@ -107,34 +107,50 @@ export const getDetailTransferToReceipt = createAsyncThunk(
 );
 
 export const approveOrRejectTransferToReceipt = createAsyncThunk(
-    "APPROVE_OR_REJECT_TRANSFER",
-    async ({ body }, thunkAPI) => {
-        try {
-            const url = `/v1/dbs/api/payment-warranty/transfer-receipt/approve-reject`;
-            const response = await receiptCollectionHttpService.createData(url, body);
-            thunkAPI.dispatch(showModalSuccess({
-                title: "Success",
-                description: response?.message || "Success Approve Transfer To Receipt"
-            }));
-            return response.data;
-        } catch (error) {
-            const message =
-                error?.response?.data?.message || error?.message || error?.toString();
-            if (
-                error?.response?.data?.code === 500 ||
-                error?.response?.data?.code === 419
-            ) {
-                thunkAPI.dispatch(setBodyError(error));
-            } else {
-                const errorBody = {
-                    title: "Failed",
-                    description: `${message}`,
-                };
-                thunkAPI.dispatch(showModalError(errorBody));
-            }
-            return thunkAPI.rejectWithValue(error.response);
-        }
+    // "APPROVE_OR_REJECT_TRANSFER",
+    // async ({ body }, thunkAPI) => {
+    //     try {
+    //         const url = `/v1/dbs/api/payment-warranty/transfer-receipt/approve-reject`;
+    //         const response = await receiptCollectionHttpService.createData(url, body);
+    //         thunkAPI.dispatch(showModalSuccess({
+    //             title: "Success",
+    //             description: response?.message || "Success Approve Transfer To Receipt"
+    //         }));
+    //         return response.data;
+    //     } catch (error) {
+    //         const message =
+    //             error?.response?.data?.message || error?.message || error?.toString();
+    //         if (
+    //             error?.response?.data?.code === 500 ||
+    //             error?.response?.data?.code === 419
+    //         ) {
+    //             thunkAPI.dispatch(setBodyError(error));
+    //         } else {
+    //             const errorBody = {
+    //                 title: "Failed",
+    //                 description: `${message}`,
+    //             };
+    //             thunkAPI.dispatch(showModalError(errorBody));
+    //         }
+    //         return thunkAPI.rejectWithValue(error.response);
+    //     }
+  "APPROVE_OR_REJECT_TRANSFER",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/approval-decision`;
+      const response = await receiptCollectionHttpService.createData(url, body);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error.response);
     }
+  }
 );
 
 // Called with appHierId — returns approval hierarchy chain (array of levels + employees)

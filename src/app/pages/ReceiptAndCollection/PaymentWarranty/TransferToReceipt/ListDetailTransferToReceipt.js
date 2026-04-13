@@ -202,14 +202,22 @@ const ListDetailTransferToReceipt = () => {
             action: approveOrReject.toUpperCase(),
         };
 
-        try {
-            await dispatch(approveOrRejectTransferToReceipt({ body: data })).unwrap();
-            handleClear();
-            setModalApprove(false);
-        } catch (error) {
-            handleClear();
-            setModalApprove(false);
-        }
+        // try {
+        //     await dispatch(approveOrRejectTransferToReceipt({ body: data })).unwrap();
+        //     handleClear();
+        //     setModalApprove(false);
+        // } catch (error) {
+        //     handleClear();
+        //     setModalApprove(false);
+        // }
+        
+        dispatch(approveOrRejectTransferToReceipt({ body: data })).then((result) => {
+            if (result?.meta?.requestStatus === "fulfilled") {
+                navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT);
+            }
+        });
+        handleClear();
+        setModalApprove(false);
     };
 
     const handleCancel = () => {
