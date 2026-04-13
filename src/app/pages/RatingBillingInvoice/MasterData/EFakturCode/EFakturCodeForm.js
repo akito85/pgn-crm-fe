@@ -84,6 +84,7 @@ const EFakturCodeForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listAdditionalCode, setListAdditionalCode] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
@@ -98,6 +99,23 @@ const EFakturCodeForm = ({ type }) => {
   const [bodyData, setBodyData] = useState({});
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // Stepper navigation handlers
   useEffect(() => {
@@ -422,6 +440,12 @@ const EFakturCodeForm = ({ type }) => {
         .then(async (dataForm) => {
           const efakturCode = dataForm?.einvoiceCodeId;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let i = 0; i < listDataAttachment.length; i++) {
             const element = listDataAttachment[i];
             const body = {
@@ -457,6 +481,12 @@ const EFakturCodeForm = ({ type }) => {
             (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let i = 0; i < filterDataAttach.length; i++) {
             const element = filterDataAttach[i];
             const body = {
@@ -526,6 +556,7 @@ const EFakturCodeForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListAdditionalCode([]);
       setStoredDataInline(false);
@@ -623,7 +654,7 @@ const EFakturCodeForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 typeSelector="billing_bucket"
                 getAPICategory={getAttachmentCategory}

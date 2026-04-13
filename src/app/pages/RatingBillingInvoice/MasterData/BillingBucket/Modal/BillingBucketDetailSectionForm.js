@@ -111,16 +111,11 @@ const BillingBucketDetailSectionForm = ({
   };
 
   const handleDisableDateBefore = (current) => {
-<<<<<<< HEAD
     if (hasValue(startDate) && hasValue(validEndDate)) {
       return (
-        moment(startDate) > current ||
-        current > moment(validEndDate).startOf("day")
+        current.isBefore(moment(startDate).startOf("day")) ||
+        current.isAfter(moment(validEndDate).endOf("day"))
       );
-=======
-    if (hasValue(startDate) && hasValue(validEndDate)) { 
-      return current.isBefore(moment(startDate).startOf("day")) || current.isAfter(moment(validEndDate).endOf("day"));
->>>>>>> testing-rbip
     } else if (hasValue(validStartDate) && hasValue(validEndDate) === false) {
       return current.isBefore(moment(validStartDate).startOf("day"));
     } else if (hasValue(validStartDate) && hasValue(validEndDate)) {
