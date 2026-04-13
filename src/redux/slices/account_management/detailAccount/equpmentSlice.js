@@ -83,7 +83,7 @@ export const createEqupment = createAsyncThunk(
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: "Your data has been created.",
+        description: body?.id ? "Your data has been updated." : "Your data has been created.",
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
