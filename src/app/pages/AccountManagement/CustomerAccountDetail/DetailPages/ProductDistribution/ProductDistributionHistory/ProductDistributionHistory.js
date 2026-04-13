@@ -12,7 +12,7 @@ import {
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ProductDistributionDetail from "./ProductDistributionDetail";
-import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import { deletePD, getAllPDHistoryPaginate, getCurrentPB, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
@@ -270,13 +270,16 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         setModalDetail(false);
         setIdData();
         setEffectiveData();
+        setPage(1);
+        dispatch(getCurrentPB(id));
         dispatch(
           getAllPDHistoryPaginate({
             id: id,
             search: encodeURIComponent(JSON?.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           })
         );
       })

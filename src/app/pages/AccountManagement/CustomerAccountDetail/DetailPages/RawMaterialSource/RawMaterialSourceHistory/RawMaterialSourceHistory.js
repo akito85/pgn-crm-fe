@@ -17,6 +17,7 @@ import {
 import {
   deleteRMS,
   getAllRMSHistoryPaginate,
+  getCurrentRaw,
   getDetailRMSHistory,
 } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
 import { useColumnActionPermissionAccount } from "../../../../ComponentAccount/ColumnActionPermissionAccount";
@@ -272,6 +273,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
         setIdData();
         setEffectiveData();
         setPage(1);
+        dispatch(getCurrentRaw(id));
         dispatch(
           getAllRMSHistoryPaginate({
             id: id,
