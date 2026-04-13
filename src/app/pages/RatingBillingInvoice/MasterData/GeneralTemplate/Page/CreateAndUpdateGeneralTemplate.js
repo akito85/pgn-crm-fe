@@ -93,6 +93,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
 
   //state attachment
   const [dataAttachment, setDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
 
   //general template
   const [fileList, setFileList] = useState([]);
@@ -184,9 +185,10 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       }
 
       setDataAttachment([
-        ...(data_detail?.attachment || []).map((item) => {
+        ...(data_detail?.attachment || []).map((item, index) => {
           return {
             ...item,
+            key: index + 1,
             createdDate: moment(item.createdDate).format(dateFormatting.date),
             uploadBy: item.createdBy,
             uploadDate: moment(item.createdDate).format(dateFormatting.date),
@@ -314,6 +316,23 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
+  const handleUpdateAttachment = useCallback((updater) => {
+    setDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
+
   //general template form
   const handleStartDate = (e) => {
     form.resetFields(["endDate"]);
@@ -416,6 +435,12 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   );
 
   const handleSendDataFile = async (data) => {
+    if (type === "update" && deletedAttachmentIds.length > 0) {
+      await ratingBillingHttpService.deleteDataWithBody(
+        `/v1/dbs/api/attachment/delete-attachment`,
+        { fileId: deletedAttachmentIds }
+      );
+    }
     if (fileList[0]?.dataType !== "exist") {
       const body_upload = {
         files: fileList[0].file,
@@ -558,6 +583,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       setDataApprovalId();
       setDataListDetailApproval([]);
       setDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setTypeSubmit(false);
       setStartDate(undefined);
       setTabData([
@@ -688,7 +714,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
               <GeneralTempalteAttachment
                 dispatch={dispatch}
                 dataAttachment={dataAttachment}
-                setDataAttachment={setDataAttachment}
+                setDataAttachment={handleUpdateAttachment}
               />
             </BaseContainer>
           </div>

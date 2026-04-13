@@ -213,7 +213,7 @@ export const columnsCondition = (
           autoEscape
           textToHighlight={text ? moment(text).format(dateFormatting.date) : ""}
         />
-      ) : text === null ? (
+      ) : !text ? (
         ""
       ) : (
         moment(text).format(dateFormatting.date)

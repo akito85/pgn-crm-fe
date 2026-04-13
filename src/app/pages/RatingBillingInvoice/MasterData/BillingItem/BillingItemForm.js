@@ -174,6 +174,7 @@ const BillingItemForm = (props) => {
 
   // Attachment States
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
 
   // Submission States
   const [typeSubmit, setTypeSubmit] = useState(false);
@@ -181,6 +182,23 @@ const BillingItemForm = (props) => {
   const [loadingForm, setLoadingForm] = useState(false);
 
   const isLoading = loading || loadingForm || loadingDetail;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // Initial data fetch
   useEffect(() => {
@@ -416,8 +434,9 @@ const BillingItemForm = (props) => {
 
       setListDataAttachment(
         dataDetail?.attachmentDtoList
-          ? (dataDetail?.attachmentDtoList || [])?.map((item) => ({
+          ? (dataDetail?.attachmentDtoList || [])?.map((item, index) => ({
               ...item,
+              key: index + 1,
               createdDate: moment(item.createdDate).format(dateFormatting.date),
               dataType: "exist",
             }))
@@ -1115,6 +1134,12 @@ const BillingItemForm = (props) => {
         const filterDataAttach = listDataAttachment.filter(
           (item) => item.dataType !== "exist",
         );
+        if (type === "update" && deletedAttachmentIds.length > 0) {
+          await ratingBillingHttpService.deleteDataWithBody(
+            `/v1/dbs/api/attachment/delete-attachment`,
+            { fileId: deletedAttachmentIds }
+          );
+        }
         for (let icon = 0; icon < filterDataAttach.length; icon++) {
           const element = filterDataAttach[icon];
           const body = {
@@ -1161,6 +1186,7 @@ const BillingItemForm = (props) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy();
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setIsEditable(false);
       setCheckedLateCharge(false);
       setCheckedPaymentWarranty(false);
@@ -1398,7 +1424,7 @@ const BillingItemForm = (props) => {
               <AttachmentSectionComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_item"

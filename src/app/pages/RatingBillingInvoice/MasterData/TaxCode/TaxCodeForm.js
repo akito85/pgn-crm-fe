@@ -22,6 +22,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   getListCategory,
+  getGlAccountList,
   updateTaxCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
@@ -48,6 +49,7 @@ const TaxCodeForm = ({ type }) => {
     data_detail,
     data_detail_draft,
     data_criteria,
+    data_gl_account_list,
   } = useSelector((state) => state.tax_code);
 
   // Declaration
@@ -63,6 +65,7 @@ const TaxCodeForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -161,6 +164,23 @@ const TaxCodeForm = ({ type }) => {
 
   const isLoading = loading || loadingForm;
 
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
+
   // Use Effect
   useEffect(() => {
     dispatch(getListApprovalHierarchy());
@@ -170,6 +190,7 @@ const TaxCodeForm = ({ type }) => {
     dispatch(getConditionName());
     dispatch(getConditionOperator());
     dispatch(getConditionType());
+    dispatch(getGlAccountList());
   }, [dispatch]);
 
   useEffect(() => {
@@ -291,7 +312,9 @@ const TaxCodeForm = ({ type }) => {
         taxCodeName: data_detail_draft?.taxCodeName,
         taxRate: data_detail_draft?.taxRate,
         category: data_detail_draft?.category,
-        glAccount: data_detail_draft?.glAccount,
+        glAccount: data_detail_draft?.glAccount
+          ? (data_gl_account_list?.find((g) => g.glAccount === data_detail_draft.glAccount || g.id === data_detail_draft.glAccount)?.id ?? data_detail_draft?.glAccount)
+          : undefined,
         startDate: moment(data_detail_draft?.startDate),
         endDate: data_detail_draft?.endDate
           ? moment(data_detail_draft?.endDate)
@@ -403,7 +426,9 @@ const TaxCodeForm = ({ type }) => {
         taxCodeName: data_detail?.taxCodeName,
         taxRate: data_detail?.taxRate,
         category: data_detail?.category,
-        glAccount: data_detail?.glAccount,
+        glAccount: data_detail?.glAccount
+          ? (data_gl_account_list?.find((g) => g.glAccount === data_detail.glAccount || g.id === data_detail.glAccount)?.id ?? data_detail?.glAccount)
+          : undefined,
         startDate: moment(data_detail?.startDate),
         endDate: data_detail?.endDate
           ? moment(data_detail?.endDate)
@@ -935,6 +960,12 @@ const TaxCodeForm = ({ type }) => {
             (item) => item.dataType !== "exist"
           );
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds }
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
@@ -1031,6 +1062,7 @@ const TaxCodeForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListDataCriteria([]);
       setCriteriaValues([]);
@@ -1133,6 +1165,7 @@ const TaxCodeForm = ({ type }) => {
               handleStartDate={handleStartDate}
               handleEndDate={handleEndDate}
               disabledDate={isDisabledDate}
+              data_gl_account_list={data_gl_account_list}
             />
           </div>
 
@@ -1153,7 +1186,7 @@ const TaxCodeForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 typeSelector="tax_code"

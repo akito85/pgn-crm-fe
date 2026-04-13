@@ -71,6 +71,7 @@ const InvoiceTemplateForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
@@ -112,6 +113,23 @@ const InvoiceTemplateForm = ({ type }) => {
   const [endDate, setEndDate] = useState();
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   const steps = [
     { title: "INVOICE TEMPLATE", value: "Invoice Template" },
@@ -804,6 +822,7 @@ const InvoiceTemplateForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListDataCriteria([]);
       setCriteriaValues([]);
@@ -890,6 +909,12 @@ const InvoiceTemplateForm = ({ type }) => {
             (item) => item.dataType !== "exist"
           );
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds }
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
@@ -1067,7 +1092,7 @@ const InvoiceTemplateForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 typeSelector="invoice_template"

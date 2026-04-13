@@ -26,6 +26,7 @@ import {
   getAttachmentCategory,
   getDetailContentManagement,
   getDetailDraftContentManagement,
+  getContentAttachmentList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -167,6 +168,7 @@ const ContentManagementForm = ({ type }) => {
     data_detail,
     dataListAppHierId,
     dataListAppHierDetail,
+    data_AttachmentTable,
     loading,
   } = useSelector((state) => state.contentManagement);
 
@@ -210,6 +212,7 @@ const ContentManagementForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
@@ -248,6 +251,23 @@ const ContentManagementForm = ({ type }) => {
   }, [form, listDataCriteria]);
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // Stepper navigation handlers
   useEffect(() => {
@@ -310,6 +330,7 @@ const ContentManagementForm = ({ type }) => {
     if (id && type === "update") {
       dispatch(getDetailContentManagement(id));
       dispatch(getDetailDraftContentManagement(id));
+      dispatch(getContentAttachmentList(id));
     }
   }, [dispatch, id, type]);
 
@@ -335,22 +356,6 @@ const ContentManagementForm = ({ type }) => {
     ) {
       const mappingCriteria = (transformedDraft?.criteria || []).map((a) => a.criteria);
 
-      const dataDraftAttachment = (transformedDraft?.mattachmentLists || []).map((item) => ({
-        id: item.id,
-        size: item.fileSize,
-        fileName: item.fileName,
-        fileSize: item.fileSize,
-        fileType: item.fileType,
-        fileCategoryId: item.fileCategoryId,
-        fileCategoryName: item.fileCategoryName,
-        pathFile: item.pathFile || "",
-        urlFile1: `/v1/dbs/api/content/download-attachment/${item.id}`,
-        urlFile2: `/v1/dbs/api/content/download-attachment/${item.id}`,
-        uploadBy: item.createdBy,
-        uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
-        dataType: "exist",
-      }));
-
       // criteriaData sudah dalam format {value, label} dari transformApiDataToForm
       const dataDraftCriteriaList = (transformedDraft?.criteriaData || [])
         .filter((data) => data?.allCriteria !== true)
@@ -374,7 +379,6 @@ const ContentManagementForm = ({ type }) => {
 
       setStartDate(moment(transformedDraft?.information?.startDate));
       setSelectedHierarchy(transformedDraft?.information?.apphierId);
-      setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataDraftCriteriaList);
       setSubjectValue(transformedDraft?.content?.subject || "");
@@ -386,22 +390,6 @@ const ContentManagementForm = ({ type }) => {
       transformedDetail?.information?.id === id
     ) {
       const mappingCriteria = (transformedDetail?.criteria || []).map((a) => a.criteria);
-
-      const dataAttachment = (transformedDetail?.mattachmentLists || []).map((item) => ({
-        id: item.id,
-        size: item.fileSize,
-        fileName: item.fileName,
-        fileSize: item.fileSize,
-        fileType: item.fileType,
-        fileCategoryId: item.fileCategoryId,
-        fileCategoryName: item.fileCategoryName,
-        pathFile: item.pathFile || "",
-        urlFile1: `/v1/dbs/api/content/download-attachment/${item.id}`,
-        urlFile2: `/v1/dbs/api/content/download-attachment/${item.id}`,
-        uploadBy: item.createdBy,
-        uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
-        dataType: "exist",
-      }));
 
       // criteriaData sudah dalam format {value, label} dari transformApiDataToForm
       const dataCriteriaList = (transformedDetail?.criteriaData || [])
@@ -426,13 +414,35 @@ const ContentManagementForm = ({ type }) => {
 
       setStartDate(moment(transformedDetail?.information?.startDate));
       setSelectedHierarchy(transformedDetail?.information?.apphierId);
-      setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
       setListDataCriteria(dataCriteriaList);
       setSubjectValue(transformedDetail?.content?.subject || "");
       setBodyValue(transformedDetail?.content?.body || "");
     }
   }, [id, type, form, data_detail, data_detail_draft]);
+
+  // Load attachments from dedicated endpoint in update mode
+  useEffect(() => {
+    if (type === "update" && Array.isArray(data_AttachmentTable)) {
+      const formattedAttachments = data_AttachmentTable.map((item, index) => ({
+        id: item.id,
+        key: index + 1,
+        size: item.fileSize,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        fileType: item.fileType,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
+        pathFile: item.pathFile || "",
+        urlFile1: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        urlFile2: `/v1/dbs/api/content/download-attachment/${item.id}`,
+        createdBy: item.createdBy,
+        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
+        dataType: "exist",
+      }));
+      setListDataAttachment(formattedAttachments);
+    }
+  }, [type, data_AttachmentTable]);
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
@@ -770,6 +780,12 @@ const ContentManagementForm = ({ type }) => {
         .then(async () => {
           const filterDataAttach = listDataAttachment.filter((item) => item.dataType !== "exist");
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds }
+            );
+          }
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             try {
@@ -834,6 +850,7 @@ const ContentManagementForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListDataCriteria([]);
       setCriteriaValues([]);
@@ -942,7 +959,7 @@ const ContentManagementForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="contentManagement"
