@@ -120,7 +120,7 @@ const columns = (
   ];
 };
 
-const RawMaterialSourceHistory = ({ id, idCustomer }) => {
+const RawMaterialSourceHistory = ({ id, idCustomer, setActiveKey }) => {
   // Selector
   const {
     list_rawMaterialSourceHistory,
@@ -274,6 +274,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer }) => {
         setEffectiveData();
         setPage(1);
         dispatch(getCurrentRaw(id));
+        setActiveKey?.("current");
         dispatch(
           getAllRMSHistoryPaginate({
             id: id,

@@ -110,7 +110,7 @@ const columns = (
   ];
 };
 
-const ProductDistributionHistory = ({ id, idCustomer }) => {
+const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
   const navigate = useNavigate();
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
@@ -272,6 +272,7 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         setEffectiveData();
         setPage(1);
         dispatch(getCurrentPB(id));
+        setActiveKey?.("current");
         dispatch(
           getAllPDHistoryPaginate({
             id: id,
