@@ -44,6 +44,7 @@ const PosPage = () => {
 
   // Declaration
   const searchInput = useRef(null);
+  const detailContainerRef = useRef(null);
   const dispatch = useDispatch();
   const dataSource = data_view?.result;
 
@@ -69,6 +70,18 @@ const PosPage = () => {
 
   // State loading lokal untuk list POS
   const [tableLoading, setTableLoading] = useState(false);
+
+  // Auto-scroll ke detail saat dibuka
+  useEffect(() => {
+    if (openDetail && detailContainerRef.current) {
+      setTimeout(() => {
+        detailContainerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 300);
+    }
+  }, [openDetail, dataDetail]);
 
   const handlePreviewInvoice = async (record) => {
     try {
@@ -455,15 +468,18 @@ const PosPage = () => {
       type: "table",
       width: 40,
       render: (record) => {
-        const isMeterai = record.is_meterai === true || record.is_meterai === "true";
+        const isMeterai =
+          record?.isMeterai === true ||
+          record?.isMeterai === "true" ||
+          record?.is_meterai === true ||
+          record?.is_meterai === "true";
 
         const isEditable =
           !isMeterai &&
           (record.statusApproval === "DRAFT" ||
             record.statusApproval === "REJECTED");
 
-        const isApproved =
-          !isMeterai && record.statusApproval === "APPROVED";
+        const isApproved = !isMeterai && record.statusApproval === "APPROVED";
 
         const isDelete =
           !isMeterai &&
@@ -553,15 +569,24 @@ const PosPage = () => {
         ];
 
         return (
-          <Tooltip title={isMeterai ? "Disabled (Materai)" : "Aksi Lainnya"}>
+          <Tooltip
+            title={isMeterai ? "This is a Meterai item" : "More Actions"}
+          >
             <Dropdown
               menu={{ items: menuItems }}
               trigger={["click"]}
               placement="bottomRight"
               disabled={isMeterai}
             >
-              <div className={isMeterai ? "cursor-not-allowed" : "cursor-pointer"}>
-                <MoreOutlined style={{ fontSize: 20, color: isMeterai ? "#8D91A0" : "#0075BF" }} />
+              <div
+                className={isMeterai ? "cursor-not-allowed" : "cursor-pointer"}
+              >
+                <MoreOutlined
+                  style={{
+                    fontSize: 20,
+                    color: isMeterai ? "#8D91A0" : "#0075BF",
+                  }}
+                />
               </div>
             </Dropdown>
           </Tooltip>
@@ -573,17 +598,27 @@ const PosPage = () => {
       type: "table",
       width: 40,
       render: (record) => {
-        const isMeterai = record.is_meterai === true || record.is_meterai === "true";
+        const isMeterai =
+          record?.isMeterai === true ||
+          record?.isMeterai === "true" ||
+          record?.is_meterai === true ||
+          record?.is_meterai === "true";
 
         return (
-          <Tooltip title={isMeterai ? "Disabled (Materai)" : "Detail"}>
+          <Tooltip title={isMeterai ? "This is a Meterai item" : "Detail"}>
             <div
-              className={isMeterai ? "cursor-not-allowed" : "pt-0 cursor-pointer"}
+              className={
+                isMeterai ? "cursor-not-allowed" : "pt-0 cursor-pointer"
+              }
               onClick={() => {
                 if (!isMeterai) handleOpenDetail(record);
               }}
             >
-              <SVGIcon name="IconDetail" color={isMeterai ? "#8D91A0" : "#0075BF"} width={20} />
+              <SVGIcon
+                name="IconDetail"
+                color={isMeterai ? "#8D91A0" : "#0075BF"}
+                width={20}
+              />
             </div>
           </Tooltip>
         );
@@ -638,7 +673,7 @@ const PosPage = () => {
       </CardContainer>
 
       {openDetail === true ? (
-        <div className="mb-5">
+        <div ref={detailContainerRef} className="mb-5">
           <PosDetail id={dataDetail} dispatch={dispatch} />
         </div>
       ) : null}
