@@ -467,7 +467,7 @@ const ContentManagementForm = ({ type }) => {
   const routes = [
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
-    { path: RBI_ROUTES.CONTENT_MANAGEMENT_VIEW, breadcrumbName: "Content Management" },
+    { path: RBI_ROUTES.CONTENT_MANAGEMENT, breadcrumbName: "Content Management" },
     {
       path: type === "create" ? RBI_ROUTES.CONTENT_MANAGEMENT_CREATE : RBI_ROUTES.CONTENT_MANAGEMENT_UPDATE,
       breadcrumbName: type === "create" ? "Create Content Management" : "Update Content Management",

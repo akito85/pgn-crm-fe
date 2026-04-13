@@ -553,12 +553,18 @@ const FunctionalTableCriteriaTOP = ({
   };
 
   const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-    if (moment(rowValue?.startDate).startOf("day") < moment(formHeaderValue?.startDate).startOf("day")) {
+    if (
+      hasValue(formHeaderValue?.startDate) &&
+      hasValue(rowValue?.startDate) &&
+      moment(rowValue?.startDate).startOf("day") <
+        moment(formHeaderValue?.startDate).startOf("day")
+    ) {
       return true;
     } else if (
       hasValue(rowValue?.endDate) &&
-      moment(rowValue?.endDate).startOf("day") > moment(formHeaderValue?.endDate).startOf("day") &&
-      hasValue(formHeaderValue?.endDate)
+      hasValue(formHeaderValue?.endDate) &&
+      moment(rowValue?.endDate).startOf("day") >
+        moment(formHeaderValue?.endDate).startOf("day")
     ) {
       return true;
     } else {
@@ -612,20 +618,29 @@ const FunctionalTableCriteriaTOP = ({
   // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || (hasValue(formHeader?.endDate) && moment(item?.endDate) > moment(formHeader?.endDate))) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      const isStartConflict =
+        hasValue(formHeader?.startDate) &&
+        hasValue(item?.startDate) &&
+        moment(item?.startDate).startOf("day") <
+          moment(formHeader?.startDate).startOf("day");
+
+      const isEndConflict =
+        hasValue(formHeader?.endDate) &&
+        hasValue(item?.endDate) &&
+        moment(item?.endDate).startOf("day") >
+          moment(formHeader?.endDate).startOf("day");
+
+      if (isStartConflict || isEndConflict) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
-    // }
-
   }, []);
 
 

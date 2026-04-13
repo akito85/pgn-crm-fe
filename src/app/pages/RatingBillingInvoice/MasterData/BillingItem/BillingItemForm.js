@@ -517,54 +517,84 @@ const BillingItemForm = (props) => {
     buildCriteriaTableFromResponse,
   ]);
 
+  const validateTransactionMappingStep = useCallback(() => {
+    const selectedCriteriaValue = form.getFieldValue("criteria");
+
+    if (hasValue(selectedCriteriaValue) && dataCriteriaTable.length === 0) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description:
+            "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
+        }),
+      );
+      setActiveTab("criteria");
+      setCurrent(0);
+      return false;
+    }
+
+    if (dataTable.length === 0) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description:
+            "Mapping Detail is mandatory. Please add at least one mapping category.",
+        }),
+      );
+      setActiveTab("mapping");
+      setDetailMapping(false);
+      setCategory("");
+      setCurrent(0);
+      return false;
+    }
+
+    const missingCategories = dataTable.filter(
+      (item) =>
+        !allDataDetailTable[item.category] ||
+        allDataDetailTable[item.category].length === 0,
+    );
+
+    if (missingCategories.length > 0) {
+      const categoryNames = missingCategories
+        .map((item) => item.categoryName || item.category)
+        .join(", ");
+
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
+        }),
+      );
+
+      const firstMissing = missingCategories[0];
+      dispatch(getDetailMappingCategory(firstMissing.category));
+      setStartDateMap(moment(firstMissing.startDate));
+      setEndDateMap(
+        firstMissing.endDate ? moment(firstMissing.endDate) : endDate || null,
+      );
+      setCategory(firstMissing.category);
+      setDetailMapping(true);
+      setActiveTab("mapping");
+      setCurrent(0);
+      return false;
+    }
+
+    return true;
+  }, [
+    allDataDetailTable,
+    dataCriteriaTable,
+    dataTable,
+    dispatch,
+    endDate,
+    form,
+  ]);
+
   const next = () => {
     const fieldsToValidate = listSectionInfo[current]?.paramValue;
 
     const proceedNext = () => {
       if (current === 0) {
-        // Criteria Detail wajib diisi jika criteria dipilih
-        if (
-          selectedCriteria !== null &&
-          selectedCriteria !== undefined &&
-          dataCriteriaTable.length === 0
-        ) {
-          dispatch(
-            showModalError({
-              title: "Failed",
-              description: "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
-            })
-          );
-          return;
-        }
-
-        // Mapping Detail wajib ada minimal satu kategori
-        if (dataTable.length === 0) {
-          dispatch(
-            showModalError({
-              title: "Failed",
-              description: "Mapping Detail is mandatory. Please add at least one mapping category.",
-            })
-          );
-          return;
-        }
-
-        // Setiap kategori mapping wajib punya minimal satu detail
-        const missingCategories = dataTable.filter(
-          (item) =>
-            !allDataDetailTable[item.category] ||
-            allDataDetailTable[item.category].length === 0
-        );
-
-        if (missingCategories.length > 0) {
-          const categoryNames = missingCategories
-            .map((c) => c.categoryName || c.category)
-            .join(", ");
-          dispatch(
-            showModalError({
-              title: "Failed",
-              description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
-            })
-          );
+        if (!validateTransactionMappingStep()) {
           return;
         }
       }
@@ -920,63 +950,7 @@ const BillingItemForm = (props) => {
       return;
     }
 
-    // Criteria Detail wajib diisi jika criteria dipilih
-    if (
-      selectedCriteria !== null &&
-      selectedCriteria !== undefined &&
-      dataCriteriaTable.length === 0
-    ) {
-      dispatch(
-        showModalError({
-          title: "Failed",
-          description: "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
-        })
-      );
-      setActiveTab("criteria");
-      setCurrent(0);
-      return;
-    }
-
-    // Mapping Detail wajib ada minimal satu kategori
-    if (dataTable.length === 0) {
-      dispatch(
-        showModalError({
-          title: "Failed",
-          description: "Mapping Detail is mandatory. Please add at least one mapping category.",
-        })
-      );
-      setActiveTab("mapping");
-      setCurrent(0);
-      return;
-    }
-
-    // Setiap kategori mapping wajib punya minimal satu detail
-    const missingCategories = dataTable.filter(
-      (item) =>
-        !allDataDetailTable[item.category] ||
-        allDataDetailTable[item.category].length === 0
-    );
-    if (missingCategories.length > 0) {
-      const categoryNames = missingCategories
-        .map((c) => c.categoryName || c.category)
-        .join(", ");
-      dispatch(
-        showModalError({
-          title: "Failed",
-          description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
-        })
-      );
-
-      // Auto-open the first missing category detail
-      const firstMissing = missingCategories[0];
-      dispatch(getDetailMappingCategory(firstMissing.category));
-      setStartDateMap(moment(firstMissing.startDate));
-      setEndDateMap(firstMissing.endDate ? moment(firstMissing.endDate) : endDate || null);
-      setCategory(firstMissing.category);
-      setDetailMapping(true);
-      setActiveTab("mapping");
-      
-      setCurrent(0);
+    if (!validateTransactionMappingStep()) {
       return;
     }
 

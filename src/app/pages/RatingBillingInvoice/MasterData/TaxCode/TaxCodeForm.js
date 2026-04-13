@@ -478,8 +478,8 @@ const TaxCodeForm = ({ type }) => {
     {
       path:
         type === "create"
-          ? RBI_ROUTES.INVOICE_TEMPLATE_CREATE
-          : RBI_ROUTES.INVOICE_TEMPLATE_UPDATE,
+          ? RBI_ROUTES.TAX_CODE_CREATE
+          : RBI_ROUTES.TAX_CODE_UPDATE,
       breadcrumbName: type === "create" ? "Create Tax Code" : "Update Tax Code",
     },
   ];
