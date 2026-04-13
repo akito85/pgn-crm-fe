@@ -1,0 +1,11 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get From Customer List",
+    "data": {
+        "result": [
+            { "fromCustomerId": "CUST-001", "fromCustomerName": "Customer A", "areaCode": "JKT" },
+            { "fromCustomerId": "CUST-002", "fromCustomerName": "Customer B", "areaCode": "BND" }
+        ]
+    }
+}

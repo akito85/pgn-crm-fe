@@ -1,0 +1,88 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Detail Transfer To Receipt",
+    "data": {
+        "transferToReceipt": {
+            "id": 1,
+            "recordId": "MUT-2026-001",
+            "fromCustomerId": "CUST-001",
+            "fromCustomerName": "PT. ENERGI TERBARUKAN",
+            "areaCode": "JKT01",
+            "category": "SPLIT",
+            "description": "Transfer warranty balance to multiple receipts for Q1 payment.",
+            "paymentWarrantyCode": "WARR-001",
+            "warrantyAreaCode": "JKT01",
+            "accountNumber": "1234567890",
+            "accountName": "PT. ENERGI TERBARUKAN",
+            "customerId": "CUST-001",
+            "customerName": "PT. ENERGI TERBARUKAN",
+            "customerSegment": "INDUSTRIAL",
+            "customerGroup": "MINING",
+            "type": "BANK GUARANTEE",
+            "documentNumber": "DOC/WARR/001",
+            "mutationDate": "2026-01-10",
+            "publisher": "BANK MANDIRI",
+            "issuerBranch": "PLAZA MANDIRI",
+            "currency": "IDR",
+            "balance": 100000000,
+            "rateType": "FIXED",
+            "rateDate": "2026-01-01",
+            "rate": 1,
+            "equivalent": 100000000,
+            "effectiveDate": "2026-01-01",
+            "expiringDate": "2026-12-31",
+            "endDateClaim": "2027-01-31",
+            "accountType": "SAVING",
+            "classificationType": "SECURED",
+            "createdDate": "2026-04-10T08:00:00Z",
+            "createdBy": "Dedi Suwandi",
+            "updatedDate": "2026-04-11T10:00:00Z",
+            "updatedBy": "Admin PGN",
+            "receiptList": [
+                {
+                    "key": 0,
+                    "no": 1,
+                    "receiptId": "130252590",
+                    "customerNumber": "CUST-000",
+                    "customerName": "PLN (PERSERO), PT",
+                    "type": "Gas",
+                    "currency": "IDR",
+                    "amount": 1000000,
+                    "remark": "Payment Allocation A"
+                },
+                {
+                    "key": 1,
+                    "no": 2,
+                    "receiptId": "130252591",
+                    "customerNumber": "CUST-001",
+                    "customerName": "PT. JAYA MOTOR",
+                    "type": "Non-Gas",
+                    "currency": "IDR",
+                    "amount": 2000000,
+                    "remark": "Payment Allocation B"
+                }
+            ],
+            "appHierId": 123,
+            "approvalName": "General Manager Approval"
+        },
+        "attachmentDtoList": [
+            {
+                "id": 101,
+                "fileName": "warranty_document.pdf",
+                "fileSize": 1024000,
+                "fileType": "pdf",
+                "fileCategoryId": 1,
+                "fileCategoryName": "Legal Document",
+                "pathFile": "/attachments/warranty_001.pdf",
+                "createdBy": "Dedi Suwandi",
+                "createdDate": "2026-04-10T08:10:00Z"
+            }
+        ],
+        "tApprovalDto": {
+            "isApprover": true,
+            "tAppId": 888,
+            "status": "PENDING"
+        }
+    }
+}
