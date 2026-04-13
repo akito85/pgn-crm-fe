@@ -208,8 +208,9 @@ const InvoiceTemplateForm = ({ type }) => {
 
       // Data Attachment Draft Information
       const dataDraftAttachment = (data_detail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -277,6 +278,11 @@ const InvoiceTemplateForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.startDate));
+      setEndDate(
+        data_detail_draft?.endDate
+          ? moment(data_detail_draft?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail_draft?.apphierId);
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
@@ -296,8 +302,9 @@ const InvoiceTemplateForm = ({ type }) => {
 
       // Data Attachment Information
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -363,6 +370,11 @@ const InvoiceTemplateForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.startDate));
+      setEndDate(
+        data_detail?.endDate
+          ? moment(data_detail?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail?.apphierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
@@ -451,10 +463,10 @@ const InvoiceTemplateForm = ({ type }) => {
         id: item?.id || null,
         invoiceTemplateId: item?.invoiceTemplateId || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
+          ? moment(item.startDate).format(dateFormatting.date)
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
+          ? moment(item.endDate).format(dateFormatting.date)
           : null,
         customer: item.customer?.value || null,
         budget: item.budget?.value || null,
@@ -686,10 +698,14 @@ const InvoiceTemplateForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
-      ) {
+      const itemStart = moment(item?.startDate).startOf("day");
+      const headerStart = moment(formHeader?.startDate).startOf("day");
+      const startOutOfRange = itemStart < headerStart;
+      const endOutOfRange =
+        hasValue(formHeader?.endDate) &&
+        hasValue(item?.endDate) &&
+        moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day");
+      if (startOutOfRange || endOutOfRange) {
         dataOverlap?.push(item);
       }
     });
@@ -812,6 +828,7 @@ const InvoiceTemplateForm = ({ type }) => {
     } else {
       dispatch(getDetailInvoiceTemplate(id));
       dispatch(getDetailDraftInvoiceTemplate(id));
+      setCurrent(0);
     }
   };
 
@@ -978,18 +995,8 @@ const InvoiceTemplateForm = ({ type }) => {
   };
 
   const isDisabledDate = useMemo(() => {
-    if (
-      hasValue(form?.getFieldsValue()?.endDate) === true &&
-      listDataCriteria?.map((item) => ({
-        startDate: item?.startDate,
-        endDate: item?.endDate,
-      }))?.length > 0
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }, [form, listDataCriteria]);
+    return listDataCriteria?.some((item) => hasValue(item?.endDate));
+  }, [listDataCriteria]);
 
   return (
     <>

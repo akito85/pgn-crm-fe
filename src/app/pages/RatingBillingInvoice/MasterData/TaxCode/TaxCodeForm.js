@@ -232,8 +232,9 @@ const TaxCodeForm = ({ type }) => {
 
       // Data Attachment Draft Information
       const dataAttachmentDraft = (data_detail?.taxCodeAttDtos || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -346,8 +347,9 @@ const TaxCodeForm = ({ type }) => {
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
       // Data Attachment Information
-      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item) => {
+      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
@@ -476,8 +478,8 @@ const TaxCodeForm = ({ type }) => {
     {
       path:
         type === "create"
-          ? RBI_ROUTES.INVOICE_TEMPLATE_CREATE
-          : RBI_ROUTES.INVOICE_TEMPLATE_UPDATE,
+          ? RBI_ROUTES.TAX_CODE_CREATE
+          : RBI_ROUTES.TAX_CODE_UPDATE,
       breadcrumbName: type === "create" ? "Create Tax Code" : "Update Tax Code",
     },
   ];
@@ -758,10 +760,14 @@ const TaxCodeForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
-      ) {
+      const itemStart = moment(item?.startDate).startOf("day");
+      const headerStart = moment(formHeader?.startDate).startOf("day");
+      const startOutOfRange = itemStart < headerStart;
+      const endOutOfRange =
+        hasValue(formHeader?.endDate) &&
+        hasValue(item?.endDate) &&
+        moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day");
+      if (startOutOfRange || endOutOfRange) {
         dataOverlap?.push(item);
       }
     });
@@ -1049,6 +1055,7 @@ const TaxCodeForm = ({ type }) => {
     } else {
       dispatch(getDetailTaxCode(id));
       dispatch(getDetailDraftTaxCode(id));
+      setCurrent(0);
     }
   };
 
@@ -1208,7 +1215,7 @@ const TaxCodeForm = ({ type }) => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+              <p className="text-[18px]">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
               flagRef.current ? "submitted" : "created"
@@ -1230,7 +1237,7 @@ const TaxCodeForm = ({ type }) => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+              <p className="text-[18px]">{"Incomplete Data"}</p>
             </div>
             <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>

@@ -577,7 +577,7 @@ const TaxCodeView = () => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+              <p className="text-[18px]">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>

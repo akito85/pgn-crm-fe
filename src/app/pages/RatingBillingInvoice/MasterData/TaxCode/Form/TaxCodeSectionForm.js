@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Select } from "antd";
 import moment from "moment";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import DateComponent from "../../../../../../components/DateComponent";
@@ -128,7 +128,7 @@ const TaxCodeSectionForm = ({
 
   return (
     <div>
-      <BaseContainer header={"Tax Code Information"}>
+      <CardContainer header={"Tax Code Information"}>
         <div className="w-full grid grid-cols-4 gap-4">
           <Form.Item
             label={"Tax Code"}
@@ -308,9 +308,9 @@ const TaxCodeSectionForm = ({
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer
+      <CardContainer
         header={"CRITERIA INFORMATION"}
         type={"tabs"}
         element={
@@ -350,7 +350,7 @@ const TaxCodeSectionForm = ({
             />
           )}
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

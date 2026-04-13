@@ -140,8 +140,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const datadraftAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -182,8 +183,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const dataAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -448,6 +450,7 @@ const BillingCycleForm = ({ type }) => {
     } else {
       dispatch(getInfoDetail(id));
       dispatch(getInfoDetailDraft(id));
+      setCurrent(0);
     }
   };
 

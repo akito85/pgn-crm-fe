@@ -43,6 +43,8 @@ const MappingInformation = ({
   endDateMap = null,
   onCriteriaEditingChange = () => {},
   onTabChange = () => {},
+  activeTab = "mapping",
+  setActiveTab = () => {},
 }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -52,8 +54,7 @@ const MappingInformation = ({
   const [search, setSearch] = useState({});
   const [dataCategoryMap, setDataCategoryMap] = useState([]);
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState("mapping");
+  // Tab state (pending tab remains local for modal logic)
   const [pendingTab, setPendingTab] = useState(null);
   const [showTabWarning, setShowTabWarning] = useState(false);
 

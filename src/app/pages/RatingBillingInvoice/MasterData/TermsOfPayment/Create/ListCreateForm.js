@@ -188,7 +188,7 @@ const ListCreateForm = ({ type }) => {
     },
     {
       path: RBI_ROUTES.TERMS_OF_PAYMENT_CREATE,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      breadcrumbName: `${type === "create" ? "Create Terms of Payment" : "Update Terms of Payment"}`,
     },
   ];
 
@@ -282,8 +282,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail?.information?.apphierId);
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -320,6 +321,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail?.information?.startDate));
+      setEndDate(
+        data_detail?.information?.endDate
+          ? moment(data_detail?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)
@@ -354,8 +360,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail_draft?.information?.apphierId);
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -392,6 +399,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail_draft?.information?.startDate));
+      setEndDate(
+        data_detail_draft?.information?.endDate
+          ? moment(data_detail_draft?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail_draft?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)
@@ -472,6 +484,8 @@ const ListCreateForm = ({ type }) => {
     } else {
       dispatch(getDetailTOP(id));
       dispatch(getDetailDraftTOP(id));
+      setCurrent(0);
+      setValuePage(STEPS[0].value);
     }
   };
 

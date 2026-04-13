@@ -198,8 +198,9 @@ const DailyRateForm = ({ type }) => {
   const asserDataDetail = useCallback(
     (data_detail) => {
       const appHier = data_detail?.appHierId || [];
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
+      const dataAttachment = (data_detail?.mattachments || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
@@ -240,8 +241,9 @@ const DailyRateForm = ({ type }) => {
     (data_detail_draft, data_detail) => {
       const appHier = data_detail_draft?.appHierId || [];
       setSelectedHierarchy(appHier);
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
+      const dataAttachment = (data_detail?.mattachments || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
@@ -329,7 +331,7 @@ const DailyRateForm = ({ type }) => {
     },
     {
       path: RBI_ROUTES.DAILY_RATE_CREATE,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      breadcrumbName: `${type === "create" ? "Create Daily Rate" : "Update Daily Rate"}`,
     },
   ];
 
