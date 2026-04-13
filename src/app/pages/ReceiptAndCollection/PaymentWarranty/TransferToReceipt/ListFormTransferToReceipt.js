@@ -245,18 +245,23 @@ const ListFormTransferToReceipt = () => {
         const formData = form.getFieldsValue();
         const body = {
             ...formData,
-            receiptList: receiptList.map(item => ({ 
-                receiptId: item.receiptId, 
-                receiptNo: item.receiptNo, 
-                amount: typeof item.amount === 'string' ? parseFloat(item.amount.replace(/,/g, '')) : item.amount 
+            // Bug fix: sourcePayWarrantyId & fromAccountId tidak ada Form.Item
+            // sehingga tidak terjamin ada di getFieldsValue() — ambil eksplisit
+            sourcePayWarrantyId: form.getFieldValue('sourcePayWarrantyId'),
+            fromAccountId: form.getFieldValue('fromAccountId'),
+            receiptList: receiptList.map(item => ({
+                receiptId: item.receiptId,
+                receiptNo: item.receiptNo,
+                amount: typeof item.amount === 'string' ? parseFloat(item.amount.replace(/,/g, '')) : item.amount
             })),
             attachmentList: listDataAttachment.map(item => ({ id: item.id })),
             appHierId: selectedHierarchy
         };
-        
+
         try {
             const res = await dispatch(submitTransferToReceipt(body)).unwrap();
-            const createdId = res?.data?.transferHdrId || res?.data?.id;
+            // Bug fix: backend mengembalikan data: Long (bukan { id } atau { transferHdrId })
+            const createdId = typeof res?.data === 'number' ? res.data : (res?.data?.transferHdrId || res?.data?.id);
 
             if (createdId) {
                 await uploadFiles(createdId);

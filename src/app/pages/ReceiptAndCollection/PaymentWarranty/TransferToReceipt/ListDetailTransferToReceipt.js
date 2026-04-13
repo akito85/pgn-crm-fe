@@ -200,7 +200,11 @@ const ListDetailTransferToReceipt = () => {
             action: approveOrReject.toUpperCase(),
         };
 
-        dispatch(approveOrRejectTransferToReceipt({ body: data }));
+        dispatch(approveOrRejectTransferToReceipt({ body: data })).then((result) => {
+            if (result?.meta?.requestStatus === "fulfilled") {
+                navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT);
+            }
+        });
         handleClear();
         setModalApprove(false);
     };

@@ -110,8 +110,7 @@ export const approveOrRejectTransferToReceipt = createAsyncThunk(
   "APPROVE_OR_REJECT_TRANSFER",
   async ({ body }, thunkAPI) => {
     try {
-      // Customize endpoint if needed, for new reusing setting endpoint
-      const url = `/v1/dbs/api/approval/approve-reject`;
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/approval-decision`;
       const response = await receiptCollectionHttpService.createData(url, body);
       return response.data;
     } catch (error) {
