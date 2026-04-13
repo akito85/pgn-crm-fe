@@ -1,12 +1,12 @@
 import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailText from "../../../../../components/DetailText";
+import SubSectionCard from "../../../../../components/SubSectionCard";
 
 const DetailTransferToCustomer = ({ data_detail }) => {
     return (
-        <BaseContainer header={"TRANSFER INFORMATION"}>
-            <div className="w-full grid grid-cols-3 gap-3">
-                <DetailText label={"From Customer ID"}>
+        <SubSectionCard title="TRANSFER TO CUSTOMER INFORMATION">
+            <div className="w-full grid grid-cols-4 gap-3">
+                <DetailText label={"From Customer Number"}>
                     {data_detail?.fromCustomerId || "-"}
                 </DetailText>
 
@@ -17,8 +17,17 @@ const DetailTransferToCustomer = ({ data_detail }) => {
                 <DetailText label={"Area Code"}>
                     {data_detail?.areaCode || "-"}
                 </DetailText>
+
+                <DetailText label={"Category"}>
+                    {data_detail?.category || "-"}
+                </DetailText>
             </div>
-        </BaseContainer>
+            <div className="mt-4">
+                <DetailText label={"Description"}>
+                    {data_detail?.description || "-"}
+                </DetailText>
+            </div>
+        </SubSectionCard>
     );
 };
 

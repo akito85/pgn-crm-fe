@@ -9,7 +9,7 @@ import ApprovalComponentGeneral from "../../../../../../components/Approval/Appr
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
 import MutationForm from "../Form/MutationForm";
 import DetailText from "../../../../../../components/DetailText";
-import SectionCard from "../../../../../../components/SectionCard";
+import SubSectionCard from "../../../../../../components/SubSectionCard";
 import { 
   getAllApprovalList,
   getListApprovalById,
@@ -21,6 +21,7 @@ import {
 import { getCurrencyDDL } from "../../../../../../redux/slices/receipt_collection/receipt";
 
 import InputComponent from "../../../../../../components/InputComponent";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
 
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
@@ -285,7 +286,7 @@ const ModalMutation = ({
         <Tabs activeKey={valuePage} onChange={setValuePage} items={tabItems} className="mb-4" />
         
         <div style={{ display: valuePage !== "Mutation Details" ? "none" : undefined }}>
-          <SectionCard title="MUTATION INFORMATION" defaultActiveKey={['1']}>
+          <SubSectionCard title="MUTATION INFORMATION">
             <div className="grid grid-cols-5 gap-y-4 gap-x-4">
               <DetailText label="Source"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.source || '-') }} /></DetailText>
               <DetailText label="Mutation Number"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.mutationNumber || '-') }} /></DetailText>
@@ -300,11 +301,11 @@ const ModalMutation = ({
                 <DetailText label="Description"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.description || '-') }} /></DetailText>
               </div>
             </div>
-          </SectionCard>
+          </SubSectionCard>
         </div>
 
         <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
-          <SectionCard title="APPROVAL INFORMATION" defaultActiveKey={['1']}>
+          <SubSectionCard title="APPROVAL INFORMATION">
             <ApprovalComponentGeneral
               showSelect={false}
               disableSelect={true}
@@ -312,11 +313,11 @@ const ModalMutation = ({
               dataTable={appHierDataDetail}
               selectedHierarchy={selectedHierarchy}
             />
-          </SectionCard>
+          </SubSectionCard>
         </div>
 
         <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
-          <SectionCard title="ATTACHMENT INFORMATION" defaultActiveKey={['1']}>
+          <SubSectionCard title="ATTACHMENT INFORMATION">
             <AttachmentComponent
               type="detail"
               data={listDataAttachment}
@@ -329,7 +330,7 @@ const ModalMutation = ({
               typeRBI={"data"}
               disabled={true}
             />
-          </SectionCard>
+          </SubSectionCard>
         </div>
       </div>
     );
@@ -350,29 +351,27 @@ const ModalMutation = ({
         
         <Form layout="vertical" form={form} onFinish={handleSubmit} id="formRequest">
           <div className={`steps-content my-[30px] ${current !== 0 ? "hidden" : ""}`}>
-            <SectionCard title="MUTATION INFORMATION" defaultActiveKey={['1']}>
-              <MutationForm 
-                disabled={false} 
-                currencyDDL={currencyDDL} 
-                warrantyType={warrantyType}
-                headerCurrency={headerCurrency}
-              />
-            </SectionCard>
+            <MutationForm 
+              disabled={false} 
+              currencyDDL={currencyDDL} 
+              warrantyType={warrantyType}
+              headerCurrency={headerCurrency}
+            />
           </div>
 
           <div className={`steps-content my-[30px] ${current !== 1 ? "hidden" : ""}`}>
-            <SectionCard title="APPROVAL INFORMATION" defaultActiveKey={['1']}>
+            <SubSectionCard title="APPROVAL INFORMATION">
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </SectionCard>
+            </SubSectionCard>
           </div>
 
           <div className={`steps-content my-[30px] ${current !== 2 ? "hidden" : ""}`}>
-            <SectionCard title="ATTACHMENT INFORMATION" defaultActiveKey={['1']}>
+            <SubSectionCard title="ATTACHMENT INFORMATION">
               <AttachmentComponent
                 type={modalType}
                 data={listDataAttachment}
@@ -386,7 +385,7 @@ const ModalMutation = ({
                 mandatory={true}
                 disabled={false}
               />
-            </SectionCard>
+            </SubSectionCard>
           </div>
 
           <div className={`steps-content my-[30px] ${current !== 3 ? "hidden" : ""}`}>
@@ -409,6 +408,7 @@ const ModalMutation = ({
             useSaveDraft={false}
             onSubmit={handleSubmit}
             type={modalType}
+            noBorder={true}
             isLoading={loadingMutation || loadingApproval || loadingCreate || isSubmitting}
           />
         </Form>

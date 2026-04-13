@@ -1,156 +1,210 @@
-import { useEffect, useMemo } from "react";
-import { Form, Input, InputNumber } from "antd";
+import { useEffect } from "react";
+import { Form, Row, Col } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import { formMessageRequired } from "../../../../../utils";
 import SelectComponent from "../../../../../components/SelectComponent";
-import {
-  getCashBalance,
-  getWarrantyCashByAccountId
-} from "../../../../../redux/slices/receipt_collection/transferToReceipt";
-import { getAllAccountNumberDDL } from "../../../../../redux/slices/receipt_collection/receipt";
+import DateComponent from "../../../../../components/DateComponent";
+import InputComponent from "../../../../../components/InputComponent";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import { getDDLDeductionPeriod, getListFromCustomer } from "../../../../../redux/slices/receipt_collection/transferToReceipt";
+import { TRANSFER_CATEGORY_RECEIPT } from "../../../../../constants/transferToReceipt";
 
-const TransferToReceiptForm = (props) => {
-  const { form } = props;
-  const dispatch = useDispatch();
+import SubSectionCard from "../../../../../components/SubSectionCard";
 
-  // Ambil state dari Redux
-  const { cashBalance, listWarrantyCash } = useSelector(
-    (state) => state.transferToReceipt
-  );
-  // Re-use dataAccNumber dari receipt slice
-  const { dataAccNumber } = useSelector((state) => state.receipt);
+const TransferToReceiptForm = ({ form, onSearchWarranty }) => {
+    const dispatch = useDispatch();
+    const { ddlDeductionPeriod, listFromCustomer } = useSelector((state) => state.transferToReceipt);
 
-  useEffect(() => {
-    // Ambil list Account saat komponen dimount
-    dispatch(getAllAccountNumberDDL());
-  }, [dispatch]);
+    useEffect(() => {
+        dispatch(getDDLDeductionPeriod());
+        dispatch(getListFromCustomer());
+    }, [dispatch]);
 
-  // Handle onChange Account (Reset warranty & balance, ambil warranty cash aktif)
-  const handleAccountChange = (value) => {
-    form.setFieldsValue({ payWarrantyId: undefined, amount: undefined });
-    dispatch(getWarrantyCashByAccountId(value));
-    // Reset cash balance at Redux state level by dispatching with invalid id or let it be handled when warranty is selected
-  };
+    const handleFromCustomerChange = (value) => {
+        const selected = listFromCustomer.find(item => item.customerNumber === value);
+        if (selected) {
+            form.setFieldsValue({
+                fromCustomerName: selected.customerName,
+                areaCode: selected.costCenter,
+            });
+        }
+    };
 
-  // Handle onChange Warranty (Ambil cash balance account terkait)
-  const handleWarrantyChange = (value) => {
-    const accountId = form.getFieldValue("accountId");
-    if (accountId) {
-      dispatch(getCashBalance(accountId));
-    }
-  };
+    return (
+        <div className="flex flex-col gap-8">
+            {/* SECTION 1: TRANSFER TO RECEIPT INFORMATION */}
+            <CardContainerNoBorder 
+                header={"TRANSFER TO RECEIPT INFORMATION"}
+                collapsible={true}
+            >
+                <div className="mx-2 mb-4 mt-4">
+                    <SubSectionCard>
+                        <Row gutter={[24, 0]}>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="From Customer Number"
+                                    name="fromCustomerId"
+                                    rules={formMessageRequired("From Customer Number")}
+                                >
+                                    <SelectComponent
+                                        placeholder="Select From Customer Number"
+                                        options={listFromCustomer.map(item => ({ label: item.customerNumber, value: item.customerNumber }))}
+                                        onChange={handleFromCustomerChange}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="From Customer Name"
+                                    name="fromCustomerName"
+                                >
+                                    <InputComponent disabled />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="Area Code"
+                                    name="areaCode"
+                                >
+                                    <InputComponent disabled />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="Category"
+                                    name="category"
+                                    rules={formMessageRequired("Category")}
+                                >
+                                    <SelectComponent
+                                        placeholder="Select category"
+                                        options={TRANSFER_CATEGORY_RECEIPT}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={24}>
+                                <Form.Item
+                                    label="Description"
+                                    name="description"
+                                    rules={formMessageRequired("Description")}
+                                >
+                                    <InputComponent
+                                        type="textarea"
+                                        placeholder="Type..."
+                                        rows={4}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </SubSectionCard>
+                </div>
+            </CardContainerNoBorder>
 
-  // Format opsi dropdown Account
-  const accountOptions = useMemo(() => {
-    if (Array.isArray(dataAccNumber?.data)) {
-      return dataAccNumber.data.map((item) => ({
-        value: item.id,
-        label: item.name || "Unknown Account",
-      }));
-    } else if (Array.isArray(dataAccNumber)) {
-      return dataAccNumber.map((item) => ({
-        value: item.id,
-        label: item.name || "Unknown Account",
-      }));
-    }
-    return [];
-  }, [dataAccNumber]);
+            {/* SECTION 2: GUARANTEE INFORMATION */}
+            <CardContainerNoBorder 
+                collapsible={true}
+                header="GUARANTEE INFORMATION"
+            >
+                <div className="flex flex-col gap-4 mt-2">
+                    <div className="flex justify-end pr-2">
+                        <ButtonComponent type="primary" onClick={onSearchWarranty}>
+                            Search Guarantee
+                        </ButtonComponent>
+                    </div>
+                    
+                    <div className="mx-2 mb-4">
+                        <SubSectionCard>
+                            <div className="grid grid-cols-4 gap-x-6 gap-y-4">
+                                {/* Row 1 */}
+                                <Form.Item label="Payment Guarantee Code" name="paymentWarrantyCode">
+                                    <InputComponent placeholder="Type Payment Guarantee Code" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Cost Center" name="warrantyAreaCode">
+                                    <InputComponent placeholder="Type Cost Center" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Account Number" name="accountNumber">
+                                    <InputComponent placeholder="Type Account Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Account Name" name="accountName">
+                                    <InputComponent placeholder="Type Account Name" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-  // Format opsi dropdown Warranty
-  const warrantyOptions = useMemo(() => {
-    if (Array.isArray(listWarrantyCash)) {
-      return listWarrantyCash.map((item) => ({
-        value: item.id,
-        label: item.paymentWarrantyNo,
-      }));
-    }
-    return [];
-  }, [listWarrantyCash]);
+                                {/* Row 2 */}
+                                <Form.Item label="Customer Number" name="customerId">
+                                    <InputComponent placeholder="Type Customer Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Customer Name" name="customerName">
+                                    <InputComponent placeholder="Type Customer Name" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Customer Segment" name="customerSegment">
+                                    <InputComponent placeholder="Type Customer Segment" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Customer Group" name="customerGroup">
+                                    <InputComponent placeholder="Type Customer Group" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-  return (
-    <div>
-      <BaseContainer header={"TRANSFER TO RECEIPT INFORMATION"}>
-        <div className="w-full grid grid-cols-2 gap-5">
-          <Form.Item
-            label={"Account"}
-            name={"accountId"}
-            rules={formMessageRequired("Account")}
-          >
-            <SelectComponent
-              placeholder="Select Account"
-              options={accountOptions}
-              onChange={handleAccountChange}
-              showSearch
-              filterOption={(input, option) =>
-                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-              }
-            />
-          </Form.Item>
+                                {/* Row 3 */}
+                                <Form.Item label="Type" name="type">
+                                    <InputComponent placeholder="Type..." disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Document Number" name="documentNumber">
+                                    <InputComponent placeholder="Type Document Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Document Date" name="mutationDate">
+                                    <DateComponent placeholder="Select Mutation Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Issuer" name="publisher">
+                                    <InputComponent placeholder="Type Issuer" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item
-            label={"Payment Warranty"}
-            name={"payWarrantyId"}
-            rules={formMessageRequired("Payment Warranty")}
-          >
-            <SelectComponent
-              placeholder="Select Payment Warranty (CASH)"
-              options={warrantyOptions}
-              onChange={handleWarrantyChange}
-              showSearch
-              filterOption={(input, option) =>
-                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-              }
-            />
-          </Form.Item>
+                                {/* Row 4 */}
+                                <Form.Item label="Issuer Branch" name="issuerBranch">
+                                    <InputComponent placeholder="Type Issuer Branch" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Currency" name="currency">
+                                    <InputComponent placeholder="Type Currency" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Balance Amount" name="balance">
+                                    <InputComponent placeholder="Type Balance Amount" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Rate Type" name="rateType">
+                                    <InputComponent placeholder="Type Rate Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item label={"Available Cash Balance"}>
-            <Input
-              value={new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(cashBalance || 0)}
-              disabled
-              className="bg-gray-100 text-black"
-            />
-          </Form.Item>
+                                {/* Row 5 */}
+                                <Form.Item label="Rate Date" name="rateDate">
+                                    <DateComponent placeholder="Select Rate Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Rate" name="rate">
+                                    <InputComponent placeholder="Type Rate" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="EQV Balance Amount" name="equivalent">
+                                    <InputComponent placeholder="Type EQV Balance Amount" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Reff. Start Date" name="effectiveDate">
+                                    <DateComponent placeholder="Select Reff. Start Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item
-            label={"Amount"}
-            name={"amount"}
-            rules={[
-              ...formMessageRequired("Amount"),
-              {
-                validator: (_, value) => {
-                  if (value > cashBalance) {
-                    return Promise.reject(new Error("Amount cannot exceed Available Cash Balance"));
-                  }
-                  if (value <= 0) {
-                    return Promise.reject(new Error("Amount must be greater than 0"));
-                  }
-                  return Promise.resolve();
-                },
-              }
-            ]}
-          >
-            <InputNumber
-              placeholder="Input Transfer Amount"
-              className="w-full"
-              style={{ width: "100%" }}
-              controls={false}
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={"Remarks"}
-            name={"remarks"}
-            className="col-span-2"
-          >
-            <Input.TextArea placeholder="Input Remarks" rows={3} />
-          </Form.Item>
+                                {/* Row 6 */}
+                                <Form.Item label="Reff. End Date" name="expiringDate">
+                                    <DateComponent placeholder="Select Reff. End Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Claim Period" name="endDateClaim">
+                                    <DateComponent placeholder="Select Claim Period" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Account Type" name="accountType">
+                                    <InputComponent placeholder="Type Account Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Classification Type" name="classificationType">
+                                    <InputComponent placeholder="Type Classification Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                            </div>
+                        </SubSectionCard>
+                    </div>
+                </div>
+            </CardContainerNoBorder>
         </div>
-      </BaseContainer>
-    </div>
-  );
+    );
 };
 
 export default TransferToReceiptForm;
