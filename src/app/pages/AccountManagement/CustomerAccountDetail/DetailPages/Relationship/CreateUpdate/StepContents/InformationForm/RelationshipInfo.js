@@ -13,6 +13,7 @@ import { requiredMessage } from "../../../../../../../../../utils";
 import ModalChooseRelated from "./ModalChooseRelated";
 import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
+import moment from "moment";
 
 /**
  * Relationship info step component 
@@ -159,6 +160,7 @@ const RelationshipInfo = ({
             name="startDate"
             label="Start Date"
             rules={[{ message: requiredMessage("Start Date"), required: true }]}
+            getValueProps={(value) => ({ value: value && moment(value)})}
             className="no-margin-form"
           >
             <DateComponent disabled={!isDraft && isUpdate} />
@@ -169,6 +171,7 @@ const RelationshipInfo = ({
             name="endDate"
             label="End Date"
             rules={[{ message: requiredMessage("End Date"), required: false }]}
+            getValueProps={(value) => ({ value: value && moment(value)})}
             className="no-margin-form"
           >
             <DateComponent disabled={!isDraft && isUpdate} />

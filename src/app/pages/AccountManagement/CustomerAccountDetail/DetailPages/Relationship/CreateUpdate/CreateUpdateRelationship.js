@@ -47,6 +47,8 @@ const CreateUpdateRelationship = ({
   const {
     list_relationshipAttachmentCategory,
     list_relationshipApprovalHierarchy,
+    list_relationshipType,
+    list_relationshipCategory,
     detail_relationshipApprovalHierarchy,
     detail_relationship,
     detailDraft_relationship,
@@ -111,22 +113,25 @@ const CreateUpdateRelationship = ({
   useEffect(() => {
     if (
       isUpdate &&
-      detail.appHierId &&
-      list_relationshipApprovalHierarchy?.length
+      list_relationshipApprovalHierarchy.length && 
+      list_relationshipType.length &&
+      list_relationshipCategory.length
     ) {
       form.setFieldsValue({
         relationshipType: detail.relationshipType,
         relationshipCategory: detail.relationshipCategory,
+        relatedName: detail.accountName,
+        relatedNumber: detail.accountNumber,
         startDate: NxDate.formatForAPI(detail.startDate),
         endDate: NxDate.formatForAPI(detail.endDate),
         description: detail.description || "",
         appHierId: detail.appHierId,
       });
 
-      if (detail.relatedDetail && detail.relatedDetail.length > 0)
+      if (Array.isArray(detail.relatedDetail))
         setRelatedDetails(detail.relatedDetail);
     }
-  }, [detail_relationship, list_relationshipApprovalHierarchy, formType]);
+  }, [detail, list_relationshipApprovalHierarchy, formType]);
 
   const handleSelectHierarchy = (appHierId, approvalName) => {
     if (accountId && appHierId)
