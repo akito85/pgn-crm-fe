@@ -1409,6 +1409,9 @@ span.ant-tree-title {
 .rc-bank-small table {
   font-size: 0.75rem;
 }
+.rc-bank-small .ant-table-thead > tr > th {
+  font-size: 0.75rem;
+}
 .rc-bank-small .ant-table-cell {
   white-space: nowrap;
   max-width: 280px;

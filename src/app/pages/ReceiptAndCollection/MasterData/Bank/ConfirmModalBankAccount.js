@@ -137,7 +137,7 @@ const ConfirmModalBankAccount = ({
       {valuePage === tabData[0].value ? (
         <Collapse
           defaultActiveKey={["gl", "category", "criteria"]}
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-2 rc-bank-small"
         >
           <Panel
             key="category"

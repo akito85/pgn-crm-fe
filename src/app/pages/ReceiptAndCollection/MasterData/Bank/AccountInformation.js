@@ -775,7 +775,7 @@ const AccountInformation = ({ type, bankId }) => {
               parentOptions={data_parent_options}
             />
           </div>
-          <div className={`${currentStepIndex !== 1 ? "hidden" : ""}`}>
+          <div className={`rc-bank-small${currentStepIndex !== 1 ? " hidden" : ""}`}>
             <BaseContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
@@ -785,7 +785,7 @@ const AccountInformation = ({ type, bankId }) => {
               />
             </BaseContainer>
           </div>
-          <div className={`${currentStepIndex !== 2 ? "hidden" : ""}`}>
+          <div className={`rc-bank-small${currentStepIndex !== 2 ? " hidden" : ""}`}>
             <BaseContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentSectionForm
                 type={type}

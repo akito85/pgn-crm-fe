@@ -142,7 +142,7 @@ export const updateBankAccountGLAccounts = createAsyncThunk(
   async ({ id, data }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/bank-accounts/${id}/gl-accounts`;
-      const res = await receiptCollectionHttpService.createData(url, data);
+      const res = await receiptCollectionHttpService.updateData(url, data);
       return res.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
@@ -157,7 +157,7 @@ export const updateBankAccountCriteria = createAsyncThunk(
   async ({ id, data }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/bank-accounts/${id}/criteria`;
-      const res = await receiptCollectionHttpService.createData(url, data);
+      const res = await receiptCollectionHttpService.updateData(url, data);
       return res.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
