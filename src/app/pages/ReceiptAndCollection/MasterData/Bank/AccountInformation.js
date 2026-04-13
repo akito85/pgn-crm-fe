@@ -1,6 +1,6 @@
 import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin, message } from "antd";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -47,6 +47,9 @@ import {
 } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 
+// ID criteria "All / Semua" dari backend — digunakan di beberapa validasi
+const CRITERIA_ALL_ID = 24;
+
 const AccountInformation = ({ type, bankId }) => {
   const {
     dataEntity,
@@ -70,6 +73,7 @@ const AccountInformation = ({ type, bankId }) => {
   const navigate = useNavigate();
   const id = location?.state?.id;
   const [form] = Form.useForm();
+  const formValue = form.getFieldsValue();
 
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
@@ -90,8 +94,9 @@ const AccountInformation = ({ type, bankId }) => {
   // Watch form fields for conditional logic
   const typeValue = Form.useWatch('type', form);
   const headerCategory = Form.useWatch('category', form);
-  const typeLabel = data_type_detail?.find(t => t.id === typeValue)?.name || '';
-  const parentRequired = typeLabel.toLowerCase() === 'pooling';
+  // null = data belum diload; string kosong = tidak ditemukan
+  const typeLabel = data_type_detail?.find(t => t.id === typeValue)?.name ?? null;
+  const parentRequired = typeLabel !== null && typeLabel.toLowerCase() === 'pooling';
 
   useEffect(() => {
     if (!parentRequired) {
@@ -121,12 +126,13 @@ const AccountInformation = ({ type, bankId }) => {
     }
   }, [dispatch, type, id]);
 
+  // Ekstrak ke nilai primitif agar useEffect tidak re-run setiap referensi data_modal berubah
+  const bankIdFromModal = data_modal?.accountBankDto?.bankId;
   useEffect(() => {
-    const bankIdFromModal = data_modal?.accountBankDto?.bankId;
     if (type === "update" && bankIdFromModal) {
       dispatch(getParentAccountOptions(bankIdFromModal));
     }
-  }, [dispatch, type, data_modal]);
+  }, [dispatch, type, bankIdFromModal]);
 
   useEffect(() => {
     if (dataListAppHierId && dataListAppHierId.length > 0) {
@@ -163,37 +169,43 @@ const AccountInformation = ({ type, bankId }) => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
 
+  // Ref digunakan agar handleUpdateAttachment bisa membaca state terkini
+  // tanpa memanggil setState bersarang di dalam setState (anti-pattern React)
+  const listDataAttachmentRef = useRef(listDataAttachment);
+  useEffect(() => {
+    listDataAttachmentRef.current = listDataAttachment;
+  }, [listDataAttachment]);
+
   const handleUpdateAttachment = (updater) => {
-    setListDataAttachment((prev) => {
-      const next = typeof updater === "function" ? updater(prev) : updater;
+    const prev = listDataAttachmentRef.current;
+    const next = typeof updater === "function" ? updater(prev) : updater;
 
-      // Undo: existing item's pendingDelete changed from true → false
-      const undone = next.filter(
-        (n) => n.dataType === "exist" && !n.pendingDelete &&
-          prev.find((p) => p.id === n.id && p.pendingDelete)
+    // Undo: existing item's pendingDelete changed from true → false
+    const undone = next.filter(
+      (n) => n.dataType === "exist" && !n.pendingDelete &&
+        prev.find((p) => p.id === n.id && p.pendingDelete)
+    );
+    if (undone.length > 0) {
+      setListDataAttachment(next);
+      setDeletedAttachmentIds((ids) =>
+        ids.filter((id) => !undone.map((u) => u.id).includes(id))
       );
-      if (undone.length > 0) {
-        setDeletedAttachmentIds((ids) =>
-          ids.filter((id) => !undone.map((u) => u.id).includes(id))
-        );
-        return next;
-      }
+      return;
+    }
 
-      // Delete: existing item removed from array — keep it but mark as pending
-      const removed = prev.filter(
-        (item) => item.dataType === "exist" && !item.pendingDelete &&
-          !next.find((n) => n.id === item.id)
-      );
-      if (removed.length > 0) {
-        setDeletedAttachmentIds((ids) => [
-          ...ids,
-          ...removed.map((r) => r.id).filter(Boolean),
-        ]);
-        return [...next, ...removed.map((r) => ({ ...r, pendingDelete: true }))];
-      }
+    // Delete: existing item removed from array — keep it but mark as pending
+    const removed = prev.filter(
+      (item) => item.dataType === "exist" && !item.pendingDelete &&
+        !next.find((n) => n.id === item.id)
+    );
+    if (removed.length > 0) {
+      const idsToAdd = removed.map((r) => r.id).filter(Boolean);
+      setListDataAttachment([...next, ...removed.map((r) => ({ ...r, pendingDelete: true }))]);
+      setDeletedAttachmentIds((ids) => [...ids, ...idsToAdd]);
+      return;
+    }
 
-      return next;
-    });
+    setListDataAttachment(next);
   };
   const [modalConfirm, setModalConfirm] = useState(false);
   const [data, setData] = useState([]);
@@ -393,7 +405,7 @@ const AccountInformation = ({ type, bankId }) => {
         if (parentRequired) {
           await form.validateFields(['parent']);
         }
-        setCurrentStepIndex(currentStepIndex + 1);
+        setCurrentStepIndex(1);
       } catch {
         message.error("Mohon lengkapi data mandatori di Step 1");
       }
@@ -402,10 +414,9 @@ const AccountInformation = ({ type, bankId }) => {
         message.error("Approval Information wajib diisi sebelum lanjut!");
         return;
       }
-      setCurrentStepIndex(currentStepIndex + 1);
-    } else if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex(currentStepIndex + 1);
+      setCurrentStepIndex(2);
     }
+    // currentStepIndex === 2 (Attachment) adalah step terakhir — tidak ada next
   };
 
   const handlePrev = () => {
@@ -414,7 +425,7 @@ const AccountInformation = ({ type, bankId }) => {
 
   const handleClear = () => {
     if (type === "update") {
-      // Reset: re-fetch original data from API; useEffect will re-hydrate all fields and tables
+      // Reset: re-fetch data asli dari API; useEffect akan mengisi ulang semua field
       dispatch(getDetailAccountInformation(id));
       setBankInfoDirty(false);
       setGlDirty(false);
@@ -422,10 +433,14 @@ const AccountInformation = ({ type, bankId }) => {
       setCriteriaDirty(false);
       setDeletedAttachmentIds([]);
     } else {
-      // Clear: wipe only the table rows; keep Bank Account Info header, Approval, and Attachment
+      // Clear: wipe semua form fields, tabel, dan state tambahan
+      form.resetFields();
+      setCriteriaValues([]);
+      setSelectedHierarchy(undefined);
       setListDataGLAccountInfo([]);
       setListDataCategoryInfo([]);
       setListDataCriteria([]);
+      setListDataAttachment([]);
     }
     setCurrentStepIndex(0);
   };
@@ -448,7 +463,7 @@ const AccountInformation = ({ type, bankId }) => {
         description: "GL Account Information wajib diisi. Silahkan menambahkan minimal 1 data.",
       };
       dispatch(showModalError(errorBody));
-    } else if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+    } else if (listDataCriteria.length === 0 && !formValue.criteria.includes(CRITERIA_ALL_ID)) {
       errorBody = {
         title: "Failed",
         description: "Criteria Information wajib diisi. Silahkan menambahkan minimal 1 data.",
@@ -636,7 +651,7 @@ const AccountInformation = ({ type, bankId }) => {
 
     // create flow
     let temp = { ...kirimBody };
-    if ((temp.criteriaIdList || []).includes(24)) {
+    if ((temp.criteriaIdList || []).includes(CRITERIA_ALL_ID)) {
       temp = { ...temp, criteriaDataDtoList: [{ allCriteria: true }] };
     }
     dispatch(createAccountInformation(temp))
@@ -682,7 +697,7 @@ const AccountInformation = ({ type, bankId }) => {
       if (res.includes(39)) res.push(15);
       if (res.includes(20)) res.push(19);
       let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-      outputArray = outputArray.includes(24) ? [24] : outputArray;
+      outputArray = outputArray.includes(CRITERIA_ALL_ID) ? [CRITERIA_ALL_ID] : outputArray;
       setCriteriaValues(outputArray);
       form.setFieldsValue({ criteria: outputArray });
       if (type === "update") setCriteriaDirty(true);
@@ -698,7 +713,7 @@ const AccountInformation = ({ type, bankId }) => {
       if (!res.includes(14)) res = res.filter((item) => item !== 13);
       if (!res.includes(19)) res = res.filter((item) => item !== 20);
       let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-      outputArray = outputArray.includes(24) ? [24] : outputArray;
+      outputArray = outputArray.includes(CRITERIA_ALL_ID) ? [CRITERIA_ALL_ID] : outputArray;
       setCriteriaValues(outputArray);
       form.setFieldsValue({ criteria: outputArray });
       if (type === "update") setCriteriaDirty(true);
@@ -709,8 +724,6 @@ const AccountInformation = ({ type, bankId }) => {
   const handleClearCriteria = () => {
     setCriteriaValues([]);
   };
-
-  const formValue = form.getFieldsValue();
 
   return (
     <>

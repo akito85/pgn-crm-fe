@@ -360,8 +360,8 @@ const DetailBank = ({
     // initial tab is set after data loads via useEffect watching data_modal
     dispatch(getDetailAccountInformation(record));
     dispatch(getAccountCriteriaView(record));
-    dispatch(getListCriteria());
-    dispatch(getParentAccountOptions(id));
+    // getListCriteria & getParentAccountOptions dipanggil di useEffect mount,
+    // tidak perlu dipanggil ulang setiap buka modal
   };
 
   const columnContact = (
@@ -506,6 +506,14 @@ const DetailBank = ({
       })
     );
   }, [id, pageBank, pageSizeBank, sortBank, searchBank, dispatch]);
+
+  // Fetch data yang hanya perlu diambil sekali saat komponen mount atau id berubah
+  useEffect(() => {
+    if (id) {
+      dispatch(getListCriteria());
+      dispatch(getParentAccountOptions(id));
+    }
+  }, [dispatch, id]);
 
   const handleSearchBank = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -1108,6 +1116,14 @@ const DetailBank = ({
     setOpenModal(true);
   };
 
+  // Hitung categoryTabs di luar JSX agar tidak perlu IIFE anti-pattern di render
+  const accountCategory = data_modal?.accountBankDto?.category;
+  const categoryTabs = !accountCategory
+    ? [{ value: "Nomenklatur" }]
+    : accountCategory === "Online Payment"
+      ? [{ value: "OP Account" }, { value: "OP Transaction" }, { value: "OP Custom" }, { value: "Nomenklatur" }]
+      : [{ value: "VA Account" }, { value: "VA Transaction" }, { value: "Nomenklatur" }];
+
   return (
     <div className="w-full gap-5">
       <Spin spinning={loading}>
@@ -1369,47 +1385,39 @@ const DetailBank = ({
                   {modalCategoryCollapsed ? <DownOutlined /> : <UpOutlined />}
                 </div>
               </div>
-              {!modalCategoryCollapsed && (() => {
-                const accountCategory = data_modal?.accountBankDto?.category;
-                const categoryTabs = !accountCategory
-                  ? [{ value: "Nomenklatur" }]
-                  : accountCategory === "Online Payment"
-                    ? [{ value: "OP Account" }, { value: "OP Transaction" }, { value: "OP Custom" }, { value: "Nomenklatur" }]
-                    : [{ value: "VA Account" }, { value: "VA Transaction" }, { value: "Nomenklatur" }];
-                return (
-                  <div className="mt-4 rc-bank-small">
-                    <RadioTabs
-                      data={categoryTabs}
-                      onChange={(e) => setCategoryInfoTab(e.target.value)}
-                      currentPosition={categoryInfoTab}
-                    />
-                    <div className="mt-3">
-                      {categoryInfoTab === "VA Account" && (
-                        <FunctionalTableVAAccount id={idVA} />
-                      )}
-                      {categoryInfoTab === "VA Transaction" && (
-                        <FunctionalTableVATransaction id={idVA} />
-                      )}
-                      {categoryInfoTab === "OP Account" && (
-                        <FunctionalTableOPAccount id={idVA} />
-                      )}
-                      {categoryInfoTab === "OP Transaction" && (
-                        <FunctionalTableOPTransaction id={idVA} />
-                      )}
-                      {categoryInfoTab === "OP Custom" && (
-                        <FunctionalTableOPCustom id={idVA} />
-                      )}
-                      {categoryInfoTab === "Nomenklatur" && (
-                        <FunctionalTableCategoryInformation
-                          type="detail"
-                          data={listDataCategoryInfoModal}
-                          updateData={() => {}}
-                        />
-                      )}
-                    </div>
+              {!modalCategoryCollapsed && (
+                <div className="mt-4 rc-bank-small">
+                  <RadioTabs
+                    data={categoryTabs}
+                    onChange={(e) => setCategoryInfoTab(e.target.value)}
+                    currentPosition={categoryInfoTab}
+                  />
+                  <div className="mt-3">
+                    {categoryInfoTab === "VA Account" && (
+                      <FunctionalTableVAAccount id={idVA} />
+                    )}
+                    {categoryInfoTab === "VA Transaction" && (
+                      <FunctionalTableVATransaction id={idVA} />
+                    )}
+                    {categoryInfoTab === "OP Account" && (
+                      <FunctionalTableOPAccount id={idVA} />
+                    )}
+                    {categoryInfoTab === "OP Transaction" && (
+                      <FunctionalTableOPTransaction id={idVA} />
+                    )}
+                    {categoryInfoTab === "OP Custom" && (
+                      <FunctionalTableOPCustom id={idVA} />
+                    )}
+                    {categoryInfoTab === "Nomenklatur" && (
+                      <FunctionalTableCategoryInformation
+                        type="detail"
+                        data={listDataCategoryInfoModal}
+                        updateData={() => {}}
+                      />
+                    )}
                   </div>
-                );
-              })()}
+                </div>
+              )}
             </div>
 
             {/* GL Account Information */}

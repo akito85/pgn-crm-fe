@@ -7,7 +7,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import { columnsTableCategoryInformation } from "./TableCategoryInformation";
 import FunctionalTableDetailBillingItem from "./FunctionalTableDetailBillingItem";
 import {
-  getBillingItemOptionsByCategory,
+  getBillingItemOptions,
   getDisplayOptions,
   getNomenklatur1Options,
   getNomenklatur2Options,
@@ -112,7 +112,7 @@ const FunctionalTableCategoryInformation = ({
 
   const isEditing = (record) => record.key === editingKey;
 
-  const { data_va_category, data_nomenklatur1, data_nomenklatur2, data_display } =
+  const { data_va_category, data_nomenklatur1, data_nomenklatur2, data_display, data_billing_item } =
     useSelector((state) => state.bank);
   const dispatch = useDispatch();
 
@@ -122,6 +122,9 @@ const FunctionalTableCategoryInformation = ({
       dispatch(getNomenklatur1Options());
       dispatch(getNomenklatur2Options());
       dispatch(getDisplayOptions());
+      // Fetch billing items sekali di parent agar tidak terjadi N+1 call
+      // saat expanded rows dari FunctionalTableDetailBillingItem masing-masing fetch sendiri
+      dispatch(getBillingItemOptions());
     }
   }, [type, dispatch]);
 
@@ -150,6 +153,11 @@ const FunctionalTableCategoryInformation = ({
 
   // Disable Create button when every category type already has a row
   const allCategoriesUsed = filteredCategoryOptions.length > 0 && categoryOptionsForNewRow.length === 0;
+
+  const billingItemOptions = (data_billing_item || []).map((item) => ({
+    value: item?.id ?? item?.Id,
+    label: item?.name ?? item?.text ?? "",
+  }));
 
   const nomenklatur1Options = (data_nomenklatur1 || []).map((item) => ({
     value: item?.id ?? item?.Id,
@@ -443,6 +451,7 @@ const FunctionalTableCategoryInformation = ({
                   type={type}
                   status={status}
                   statusApproval={statusApproval}
+                  billingItemOptions={billingItemOptions}
                 />
               ),
             }}

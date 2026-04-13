@@ -77,6 +77,7 @@ const initialState = {
   // ------------------------------------------
   dataCriteriaView: [],
   data_parent_options: [],
+  parentOptionsLoading: false,
 };
 
 export const createAccountInformation = createAsyncThunk(
@@ -2710,13 +2711,14 @@ const bankSlice = createSlice({
     [approveVaActivation.fulfilled]: (state) => { state.loading = false; },
     [approveVaActivation.rejected]: (state) => { state.loading = false; },
 
-    // Parent account options
-    [getParentAccountOptions.pending]: (state) => { state.loading = true; },
+    // Parent account options — gunakan parentOptionsLoading agar tidak mempengaruhi
+    // global loading spinner yang digunakan komponen lain
+    [getParentAccountOptions.pending]: (state) => { state.parentOptionsLoading = true; },
     [getParentAccountOptions.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.parentOptionsLoading = false;
       state.data_parent_options = action.payload ?? [];
     },
-    [getParentAccountOptions.rejected]: (state) => { state.loading = false; },
+    [getParentAccountOptions.rejected]: (state) => { state.parentOptionsLoading = false; },
     // ----------------------------------------
   },
 });

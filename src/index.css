@@ -1409,8 +1409,11 @@ span.ant-tree-title {
 .rc-bank-small table {
   font-size: 0.75rem;
 }
-.rc-bank-small td {
+.rc-bank-small .ant-table-cell {
   white-space: nowrap;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rc-bank-small .ant-form-item-label label {
   font-size: 0.75rem;

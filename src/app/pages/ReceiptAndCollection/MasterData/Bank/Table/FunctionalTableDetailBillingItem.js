@@ -1,39 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Form, Select, Space, Table, Tooltip } from "antd";
-import { useDispatch } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import { getBillingItemOptions } from "../../../../../../redux/slices/receipt_collection/bankSlice";
 
+// billingItemOptions di-fetch sekali oleh komponen induk (FunctionalTableCategoryInformation)
+// dan diteruskan sebagai prop untuk menghindari N+1 API call per expanded row
 const FunctionalTableDetailBillingItem = ({
   data = [],
   updateData = () => {},
   type,
   status,
   statusApproval,
+  billingItemOptions = [],
 }) => {
   const [formDetail] = Form.useForm();
   const [editingKey, setEditingKey] = useState("");
   const [statusAction, setStatusAction] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [localBillingItems, setLocalBillingItems] = useState([]);
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getBillingItemOptions())
-      .unwrap()
-      .then((result) => setLocalBillingItems(result ?? []))
-      .catch(() => setLocalBillingItems([]));
-  }, [dispatch]);
 
   const isEditing = (record) => record.key === editingKey;
-
-  const billingItemOptions = localBillingItems.map((item) => ({
-    value: item?.id ?? item?.Id,
-    label: item?.name ?? item?.text ?? "",
-  }));
 
   const addRow = () => {
     formDetail.resetFields();

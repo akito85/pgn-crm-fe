@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import TablePagination from "../../../../../../components/TablePagination";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ColumnSettings from "../../../../../../components/ColumnSettings/ColumnSettings";
-import { columnVAAccount } from "./TableVAAccount";
+import { columnOPAccount } from "./TableOPAccount";
 import { getOPAccountList } from "../../../../../../redux/slices/receipt_collection/bankSlice";
 
 const FunctionalTableOPAccount = ({ id }) => {
@@ -23,7 +23,7 @@ const FunctionalTableOPAccount = ({ id }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
 
-  const columns = columnVAAccount(
+  const columns = columnOPAccount(
     page,
     pageSize,
     searchInput,

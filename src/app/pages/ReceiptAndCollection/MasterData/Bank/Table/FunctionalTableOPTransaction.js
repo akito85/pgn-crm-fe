@@ -4,7 +4,7 @@ import { FilterOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import TablePagination from "../../../../../../components/TablePagination";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { columnVATransaction } from "./TableVATransaction";
+import { columnOPTransaction } from "./TableOPAccount";
 import { getOPTransactionList } from "../../../../../../redux/slices/receipt_collection/bankSlice";
 
 const FunctionalTableOPTransaction = ({ id }) => {
@@ -27,7 +27,7 @@ const FunctionalTableOPTransaction = ({ id }) => {
     setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
   };
 
-  const columns = columnVATransaction(
+  const columns = columnOPTransaction(
     page,
     pageSize,
     searchInput,
