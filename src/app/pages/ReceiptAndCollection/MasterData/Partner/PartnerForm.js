@@ -62,9 +62,12 @@ const PartnerForm = (props) => {
           <Form.Item
             label={"Partner Name"}
             name={"partnerName"}
-            rules={formMessageRequired("Partner Name")}
+            rules={[
+              ...formMessageRequired("Partner Name"),
+              { max: 20, message: "partnerName maximum length is 20" },
+            ]}
           >
-            <InputComponent placeholder="Input Partner Name" />
+            <InputComponent maxLength={20} placeholder="Input Partner Name" />
           </Form.Item>
 
           <Form.Item

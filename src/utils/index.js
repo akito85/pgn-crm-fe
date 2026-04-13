@@ -311,7 +311,6 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
       if (
         lowerStatusApproval === "waiting approval" ||
         lowerStatusApproval === "draft" ||
-        lowerStatusApproval === "rejected" ||
         lowerStatus === "draft"
       ) {
         return true;
