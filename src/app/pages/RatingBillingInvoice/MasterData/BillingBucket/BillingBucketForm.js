@@ -69,6 +69,7 @@ const BillingBucketForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [listDataBI, setListDataBI] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
@@ -146,6 +147,23 @@ const BillingBucketForm = ({ type }) => {
     return listDataCriteria?.length > 0;
   }, [listDataCriteria]);
 
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
+
   const isLoading = loading || loadingForm;
 
   // Use Effect
@@ -213,8 +231,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Draft Attachment Information
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: item.id ?? index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -324,8 +343,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Attachment Information
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: item.id ?? index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -888,6 +908,12 @@ const BillingBucketForm = ({ type }) => {
         .then(async (dataForm) => {
           const billingBucketCode = dataForm?.billingBucketCode;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const body = {
@@ -926,7 +952,13 @@ const BillingBucketForm = ({ type }) => {
             (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
+          for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
               files: element.file,
@@ -998,6 +1030,7 @@ const BillingBucketForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListDataCriteria([]);
       setCriteriaValues([]);
@@ -1185,7 +1218,7 @@ const BillingBucketForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_bucket"
