@@ -45,7 +45,7 @@ const EditableCell = ({
   disableDate,
   validateStartDate,
   validateEndDate,
-  handleEditDataRecord = () => { },
+  handleEditDataRecord = () => {},
   ...restProps
 }) => {
   const dispatch = useDispatch();
@@ -80,16 +80,24 @@ const EditableCell = ({
   const handleDisableDateBetween = (current) => {
     if (!current) return false;
 
-    const headerStart = validateStartDate ? moment(validateStartDate).startOf("day") : null;
-    const headerEnd = validateEndDate ? moment(validateEndDate).endOf("day") : null;
-    const rowStart = formTableCriteria.getFieldValue("startDate") 
-      ? moment(formTableCriteria.getFieldValue("startDate")).startOf("day") 
+    const headerStart = validateStartDate
+      ? moment(validateStartDate).startOf("day")
+      : null;
+    const headerEnd = validateEndDate
+      ? moment(validateEndDate).endOf("day")
+      : null;
+    const rowStart = formTableCriteria.getFieldValue("startDate")
+      ? moment(formTableCriteria.getFieldValue("startDate")).startOf("day")
       : null;
 
     if (headerStart && current.isBefore(headerStart, "day")) return true;
     if (headerEnd && current.isAfter(headerEnd, "day")) return true;
 
-    if (dataIndex === "endDate" && rowStart && current.isBefore(rowStart, "day")) {
+    if (
+      dataIndex === "endDate" &&
+      rowStart &&
+      current.isBefore(rowStart, "day")
+    ) {
       return true;
     }
 
@@ -190,13 +198,13 @@ const EditableCell = ({
             inputType !== "endDate"
               ? rules()
               : [
-                {
-                  validator: (_, value) =>
-                    endDateValidator(
-                      formTableCriteria.getFieldValue().startDate
-                    )(_, value),
-                },
-              ]
+                  {
+                    validator: (_, value) =>
+                      endDateValidator(
+                        formTableCriteria.getFieldValue().startDate,
+                      )(_, value),
+                  },
+                ]
           }
         >
           {inputNode}
@@ -212,9 +220,9 @@ const FunctionalCriteriaBillingBucket = ({
   type,
   data = [],
   dataCriteria = [],
-  updateData = () => { },
+  updateData = () => {},
   storedData = false,
-  setStoredData = () => { },
+  setStoredData = () => {},
   required,
   disableDate,
   status,
@@ -261,8 +269,6 @@ const FunctionalCriteriaBillingBucket = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [modalValidationTable, setModalValidationTable] = useState(false);
 
-
-
   // Use Effect
   useEffect(() => {
     setTotalData(data.length);
@@ -283,7 +289,6 @@ const FunctionalCriteriaBillingBucket = ({
     }
   }, [type]);
 
-
   // Data Select Criteria
   const budget = (Array.isArray(data_budget) ? data_budget : []).map((item) => {
     return {
@@ -291,49 +296,63 @@ const FunctionalCriteriaBillingBucket = ({
       label: item.text,
     };
   });
-  const province = (Array.isArray(data_province) ? data_province : []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
+  const province = (Array.isArray(data_province) ? data_province : []).map(
+    (item) => {
+      return {
+        value: item.value,
+        label: item.name,
+      };
+    },
+  );
   const city = (Array.isArray(data_city) ? data_city : []).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const industrialSector = (Array.isArray(data_industrial_sector) ? data_industrial_sector : []).map((item) => {
+  const industrialSector = (
+    Array.isArray(data_industrial_sector) ? data_industrial_sector : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const district = (Array.isArray(data_district) ? data_district : []).map((item) => {
+  const district = (Array.isArray(data_district) ? data_district : []).map(
+    (item) => {
+      return {
+        value: item.value,
+        label: item.name,
+      };
+    },
+  );
+  const subDistrict = (
+    Array.isArray(data_sub_district) ? data_sub_district : []
+  ).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const subDistrict = (Array.isArray(data_sub_district) ? data_sub_district : []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
-  const accountCategory = (Array.isArray(data_account_Category) ? data_account_Category : []).map((item) => {
+  const accountCategory = (
+    Array.isArray(data_account_Category) ? data_account_Category : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const serviceType = (Array.isArray(data_service_type) ? data_service_type : []).map((item) => {
+  const serviceType = (
+    Array.isArray(data_service_type) ? data_service_type : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const accountGroup = (Array.isArray(data_account_group) ? data_account_group : []).map((item) => {
+  const accountGroup = (
+    Array.isArray(data_account_group) ? data_account_group : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.name,
@@ -345,7 +364,9 @@ const FunctionalCriteriaBillingBucket = ({
       label: item.name,
     };
   });
-  const costCenter = (Array.isArray(data_cost_center) ? data_cost_center : []).map((item) => {
+  const costCenter = (
+    Array.isArray(data_cost_center) ? data_cost_center : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.name,
@@ -357,18 +378,22 @@ const FunctionalCriteriaBillingBucket = ({
       label: item.text,
     };
   });
-  const customerSegment = (Array.isArray(data_customer_segment) ? data_customer_segment : []).map((item) => {
+  const customerSegment = (
+    Array.isArray(data_customer_segment) ? data_customer_segment : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const customer = (Array.isArray(data_customer) ? data_customer : []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
+  const customer = (Array.isArray(data_customer) ? data_customer : []).map(
+    (item) => {
+      return {
+        value: item.id,
+        label: item.name,
+      };
+    },
+  );
 
   // Declare data list option
   const listOption = {
@@ -525,11 +550,15 @@ const FunctionalCriteriaBillingBucket = ({
   };
 
   const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-    if (moment(rowValue?.startDate).startOf("day") < moment(formHeaderValue?.startDate).startOf("day")) {
+    if (
+      moment(rowValue?.startDate).startOf("day") <
+      moment(formHeaderValue?.startDate).startOf("day")
+    ) {
       return true;
     } else if (
       hasValue(rowValue?.endDate) &&
-      moment(rowValue?.endDate).startOf("day") > moment(formHeaderValue?.endDate).startOf("day").add(1, "days") &&
+      moment(rowValue?.endDate).startOf("day") >
+        moment(formHeaderValue?.endDate).startOf("day").add(1, "days") &&
       hasValue(formHeaderValue?.endDate)
     ) {
       return true;
@@ -538,22 +567,24 @@ const FunctionalCriteriaBillingBucket = ({
     }
   }, []);
 
-
   // Function Save Data
   const save = async (key) => {
     try {
       const row = await formTableCriteria.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
-      const isOverlappingDate = checkOverlappingDate({ startDate: validStartDate, endDate: validEndDate }, row);
+      const isOverlappingDate = checkOverlappingDate(
+        { startDate: validStartDate, endDate: validEndDate },
+        row,
+      );
       if (isOverlappingDate) {
         formTableCriteria.setFields([
           {
-            name: 'startDate',
+            name: "startDate",
             errors: [`Overlapping date found`],
           },
           {
-            name: 'endDate',
+            name: "endDate",
             errors: [`Overlapping date found`],
           },
         ]);
@@ -568,7 +599,6 @@ const FunctionalCriteriaBillingBucket = ({
         setStoredData(false);
         setStatusAction("");
         formTableCriteria.resetFields();
-
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
@@ -578,26 +608,31 @@ const FunctionalCriteriaBillingBucket = ({
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, 'days')) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate) < moment(formHeader?.startDate) ||
+        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
+      ) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
     // }
-
   }, []);
 
   // Function Add Row Data
   const addRow = () => {
-    const hasOverlapping = checkOverlappingData({ startDate: validStartDate, endDate: validEndDate }, data);
+    const hasOverlapping = checkOverlappingData(
+      { startDate: validStartDate, endDate: validEndDate },
+      data,
+    );
     if (hasOverlapping) {
-      setModalValidationTable(true)
+      setModalValidationTable(true);
     } else {
       formTableCriteria.resetFields();
       setStoredData(true);
@@ -620,7 +655,7 @@ const FunctionalCriteriaBillingBucket = ({
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -640,7 +675,7 @@ const FunctionalCriteriaBillingBucket = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -690,8 +725,9 @@ const FunctionalCriteriaBillingBucket = ({
                           <SVGIcon
                             name="IconEdit"
                             color={editingKey ? "#8D91A0" : "#ACC424"}
-                            className={`${editingKey ? "cursor-not-allowed" : ""
-                              }`}
+                            className={`${
+                              editingKey ? "cursor-not-allowed" : ""
+                            }`}
                             width={24}
                             onClick={
                               !editingKey ? () => edit(record) : undefined
@@ -735,11 +771,11 @@ const FunctionalCriteriaBillingBucket = ({
         : temp.filter((col) => col.title !== "ACTION");
     return filterCol.filter((col) =>
       col.title !== "NO" &&
-        col.title !== "ACTION" &&
-        col.title !== "START DATE" &&
-        col.title !== "END DATE"
+      col.title !== "ACTION" &&
+      col.title !== "START DATE" &&
+      col.title !== "END DATE"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
 
@@ -795,8 +831,9 @@ const FunctionalCriteriaBillingBucket = ({
       ) : null}
       <div className="relative flex flex-col w-full">
         <div
-          className={`${totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-            } w-1/4 flex`}
+          className={`${
+            totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
+          } w-1/4 flex`}
         >
           <Select
             mode="multiple"
@@ -849,7 +886,7 @@ const FunctionalCriteriaBillingBucket = ({
                   validateStartDate: validStartDate,
                   validateEndDate: validEndDate,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],

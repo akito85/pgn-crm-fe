@@ -46,6 +46,9 @@ import {
   generateTransactionMappingCode,
   getSpecialGLList,
   getGLAccountList,
+  getBankList,
+  getBankAccountList,
+  getGlAccountBankById,
   getClassificationTypeList,
   getAccountTypeList,
   resetApprovalState,
@@ -81,6 +84,9 @@ const BillingItemForm = (props) => {
     data_categoryList,
     data_specialGLList,
     data_glAccountList,
+    data_bankList,
+    data_bankAccountList,
+    data_glAccountBankList,
     data_classificationTypeList,
     data_accountTypeList,
     loading,
@@ -114,6 +120,9 @@ const BillingItemForm = (props) => {
         "startDate",
         "endDate",
         "description",
+        "bank",
+        "bankValue",
+        "bankAccountNumber",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -140,6 +149,7 @@ const BillingItemForm = (props) => {
   const [checkedPaymentWarranty, setCheckedPaymentWarranty] = useState(false);
   const [checkedInstallmentRestructure, setCheckedInstallmentRestructure] =
     useState(false);
+  const [checkedBank, setCheckedBank] = useState(false);
 
   // Mapping States
   const [dataTable, setdataTable] = useState([]);
@@ -164,6 +174,7 @@ const BillingItemForm = (props) => {
 
   // Attachment States
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
 
   // Submission States
   const [typeSubmit, setTypeSubmit] = useState(false);
@@ -171,6 +182,23 @@ const BillingItemForm = (props) => {
   const [loadingForm, setLoadingForm] = useState(false);
 
   const isLoading = loading || loadingForm || loadingDetail;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // Initial data fetch
   useEffect(() => {
@@ -183,6 +211,7 @@ const BillingItemForm = (props) => {
     dispatch(getBillingItemCategoryList());
     dispatch(getSpecialGLList());
     dispatch(getGLAccountList());
+    dispatch(getBankList());
     dispatch(getClassificationTypeList());
     dispatch(getAccountTypeList());
   }, [dispatch]);
@@ -370,6 +399,11 @@ const BillingItemForm = (props) => {
       const firstCriteriaCode = dataDetail?.criteria?.[0]?.criteriaCode;
       const criteriaId = resolveCriteriaId(firstCriteriaCode);
 
+      const isBankChecked = dataDetail?.isBank || dataDetail?.bank || false;
+      const resolvedBankId = isBankChecked
+        ? (data_bankList?.find((b) => b.bankName === dataDetail?.bankValue)?.bankId ?? null)
+        : null;
+
       form.setFieldsValue({
         ...dataDetail,
         billingItemCategory: dataDetail?.billingItemCategoryId,
@@ -381,6 +415,9 @@ const BillingItemForm = (props) => {
         criteria: criteriaId,
         startDate: dataDetail?.startDate ? moment(dataDetail?.startDate) : null,
         endDate: dataDetail?.endDate ? moment(dataDetail?.endDate) : null,
+        bank: isBankChecked,
+        bankValue: resolvedBankId,
+        bankAccountNumber: dataDetail?.bankAccountNumber || null,
       });
 
       setSelectedCriteria(criteriaId);
@@ -388,11 +425,18 @@ const BillingItemForm = (props) => {
       setCheckedLateCharge(dataDetail?.lateCharge || false);
       setCheckedPaymentWarranty(dataDetail?.paymentWarranty || false);
       setCheckedInstallmentRestructure(dataDetail?.installment || false);
+      setCheckedBank(isBankChecked);
+
+      if (isBankChecked && resolvedBankId) {
+        dispatch(getBankAccountList({ bankId: resolvedBankId }));
+        dispatch(getGlAccountBankById({ id: resolvedBankId }));
+      }
 
       setListDataAttachment(
         dataDetail?.attachmentDtoList
-          ? (dataDetail?.attachmentDtoList || [])?.map((item) => ({
+          ? (dataDetail?.attachmentDtoList || [])?.map((item, index) => ({
               ...item,
+              key: index + 1,
               createdDate: moment(item.createdDate).format(dateFormatting.date),
               dataType: "exist",
             }))
@@ -457,7 +501,7 @@ const BillingItemForm = (props) => {
         setDataCriteriaTable([]);
       }
     },
-    [form, resolveTypeId, resolveCriteriaId, buildCriteriaTableFromResponse],
+    [form, resolveTypeId, resolveCriteriaId, buildCriteriaTableFromResponse, data_bankList, dispatch],
   );
 
   useEffect(() => {
@@ -517,54 +561,84 @@ const BillingItemForm = (props) => {
     buildCriteriaTableFromResponse,
   ]);
 
+  const validateTransactionMappingStep = useCallback(() => {
+    const selectedCriteriaValue = form.getFieldValue("criteria");
+
+    if (hasValue(selectedCriteriaValue) && dataCriteriaTable.length === 0) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description:
+            "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
+        }),
+      );
+      setActiveTab("criteria");
+      setCurrent(0);
+      return false;
+    }
+
+    if (dataTable.length === 0) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description:
+            "Mapping Detail is mandatory. Please add at least one mapping category.",
+        }),
+      );
+      setActiveTab("mapping");
+      setDetailMapping(false);
+      setCategory("");
+      setCurrent(0);
+      return false;
+    }
+
+    const missingCategories = dataTable.filter(
+      (item) =>
+        !allDataDetailTable[item.category] ||
+        allDataDetailTable[item.category].length === 0,
+    );
+
+    if (missingCategories.length > 0) {
+      const categoryNames = missingCategories
+        .map((item) => item.categoryName || item.category)
+        .join(", ");
+
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
+        }),
+      );
+
+      const firstMissing = missingCategories[0];
+      dispatch(getDetailMappingCategory(firstMissing.category));
+      setStartDateMap(moment(firstMissing.startDate));
+      setEndDateMap(
+        firstMissing.endDate ? moment(firstMissing.endDate) : endDate || null,
+      );
+      setCategory(firstMissing.category);
+      setDetailMapping(true);
+      setActiveTab("mapping");
+      setCurrent(0);
+      return false;
+    }
+
+    return true;
+  }, [
+    allDataDetailTable,
+    dataCriteriaTable,
+    dataTable,
+    dispatch,
+    endDate,
+    form,
+  ]);
+
   const next = () => {
     const fieldsToValidate = listSectionInfo[current]?.paramValue;
 
     const proceedNext = () => {
       if (current === 0) {
-        // Criteria Detail wajib diisi jika criteria dipilih
-        if (
-          selectedCriteria !== null &&
-          selectedCriteria !== undefined &&
-          dataCriteriaTable.length === 0
-        ) {
-          dispatch(
-            showModalError({
-              title: "Failed",
-              description: "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
-            })
-          );
-          return;
-        }
-
-        // Mapping Detail wajib ada minimal satu kategori
-        if (dataTable.length === 0) {
-          dispatch(
-            showModalError({
-              title: "Failed",
-              description: "Mapping Detail is mandatory. Please add at least one mapping category.",
-            })
-          );
-          return;
-        }
-
-        // Setiap kategori mapping wajib punya minimal satu detail
-        const missingCategories = dataTable.filter(
-          (item) =>
-            !allDataDetailTable[item.category] ||
-            allDataDetailTable[item.category].length === 0
-        );
-
-        if (missingCategories.length > 0) {
-          const categoryNames = missingCategories
-            .map((c) => c.categoryName || c.category)
-            .join(", ");
-          dispatch(
-            showModalError({
-              title: "Failed",
-              description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
-            })
-          );
+        if (!validateTransactionMappingStep()) {
           return;
         }
       }
@@ -615,6 +689,27 @@ const BillingItemForm = (props) => {
     setCheckedInstallmentRestructure(e.target.checked);
   };
 
+  const handleChangesBank = (e) => {
+    const isChecked = e.target.checked;
+    setCheckedBank(isChecked);
+    form.setFieldsValue({ bank: isChecked });
+
+    if (!isChecked) {
+      form.setFieldsValue({
+        bankValue: null,
+        bankAccountNumber: null,
+      });
+    }
+  };
+
+  const handleBankValueChange = async (bankId) => {
+    form.setFieldsValue({ bankAccountNumber: null });
+    if (!bankId) return;
+
+    await dispatch(getBankAccountList({ bankId }));
+    await dispatch(getGlAccountBankById({ id: bankId }));
+  };
+
   const handleCategoryChange = async (categoryId) => {
     form.setFieldsValue({ transactionMappingCode: null });
     if (!categoryId) return;
@@ -638,8 +733,43 @@ const BillingItemForm = (props) => {
   };
 
   const handleChangesCriteriaTable = (e) => {
+    if (checkedBank && data_glAccountBankList?.length > 0) {
+      const selectedBankGl = data_glAccountBankList[0];
+      const matchingGl = data_glAccountList?.find(
+        (g) => (g.account ?? g.glAccount) === selectedBankGl?.glNumber,
+      );
+      const resolvedGlId = matchingGl ? matchingGl.id : selectedBankGl?.glNumber;
+      const resolvedDesc = selectedBankGl?.glDescription || "";
+      setDataCriteriaTable(
+        e.map((item) => ({
+          ...item,
+          glAccountId: resolvedGlId || item.glAccountId,
+          descriptionAccount: resolvedDesc || item.descriptionAccount,
+        })),
+      );
+      return;
+    }
+
     setDataCriteriaTable(e);
   };
+
+  useEffect(() => {
+    if (!checkedBank || data_glAccountBankList?.length === 0) return;
+
+    const selectedBankGl = data_glAccountBankList[0];
+    const matchingGl = data_glAccountList?.find(
+      (g) => (g.account ?? g.glAccount) === selectedBankGl?.glNumber,
+    );
+    const resolvedGlId = matchingGl ? matchingGl.id : selectedBankGl?.glNumber;
+    const resolvedDesc = selectedBankGl?.glDescription || "";
+    setDataCriteriaTable((prevState) =>
+      (prevState || []).map((item) => ({
+        ...item,
+        glAccountId: resolvedGlId || item.glAccountId,
+        descriptionAccount: resolvedDesc || item.descriptionAccount,
+      })),
+    );
+  }, [checkedBank, data_glAccountBankList, data_glAccountList]);
 
   const handleCheckDetailDateConflict = (data) => {
     const index = data_billingItemCategory
@@ -885,6 +1015,11 @@ const BillingItemForm = (props) => {
   };
 
   const buildRequestBody = (allValues, criteriaPayload) => {
+    const selectedBank = (data_bankList || []).find(
+      (item) => item.bankId === allValues.bankValue,
+    );
+    const isBankSelected = checkedBank || !!allValues.bank;
+
     return {
       transMappingType:
         data_typeList?.find((t) => t.id === allValues.type)?.code ||
@@ -902,6 +1037,11 @@ const BillingItemForm = (props) => {
       lateCharge: checkedLateCharge || false,
       installment: checkedInstallmentRestructure || false,
       paymentWarranty: checkedPaymentWarranty || false,
+      bank: !!isBankSelected,
+      bankValue: isBankSelected ? selectedBank?.bankName || null : null,
+      bankAccountNumber: isBankSelected
+        ? allValues.bankAccountNumber || null
+        : null,
       mappingInfo: handleMappingInfo(allDataDetailTable),
       criteria: criteriaPayload,
       appHierId: allValues.apphierId,
@@ -920,63 +1060,7 @@ const BillingItemForm = (props) => {
       return;
     }
 
-    // Criteria Detail wajib diisi jika criteria dipilih
-    if (
-      selectedCriteria !== null &&
-      selectedCriteria !== undefined &&
-      dataCriteriaTable.length === 0
-    ) {
-      dispatch(
-        showModalError({
-          title: "Failed",
-          description: "Criteria Detail is mandatory. Please add at least one row in the Criteria Detail table.",
-        })
-      );
-      setActiveTab("criteria");
-      setCurrent(0);
-      return;
-    }
-
-    // Mapping Detail wajib ada minimal satu kategori
-    if (dataTable.length === 0) {
-      dispatch(
-        showModalError({
-          title: "Failed",
-          description: "Mapping Detail is mandatory. Please add at least one mapping category.",
-        })
-      );
-      setActiveTab("mapping");
-      setCurrent(0);
-      return;
-    }
-
-    // Setiap kategori mapping wajib punya minimal satu detail
-    const missingCategories = dataTable.filter(
-      (item) =>
-        !allDataDetailTable[item.category] ||
-        allDataDetailTable[item.category].length === 0
-    );
-    if (missingCategories.length > 0) {
-      const categoryNames = missingCategories
-        .map((c) => c.categoryName || c.category)
-        .join(", ");
-      dispatch(
-        showModalError({
-          title: "Failed",
-          description: `Please fill the Mapping Detail Information for: ${categoryNames}.`,
-        })
-      );
-
-      // Auto-open the first missing category detail
-      const firstMissing = missingCategories[0];
-      dispatch(getDetailMappingCategory(firstMissing.category));
-      setStartDateMap(moment(firstMissing.startDate));
-      setEndDateMap(firstMissing.endDate ? moment(firstMissing.endDate) : endDate || null);
-      setCategory(firstMissing.category);
-      setDetailMapping(true);
-      setActiveTab("mapping");
-      
-      setCurrent(0);
+    if (!validateTransactionMappingStep()) {
       return;
     }
 
@@ -1050,6 +1134,12 @@ const BillingItemForm = (props) => {
         const filterDataAttach = listDataAttachment.filter(
           (item) => item.dataType !== "exist",
         );
+        if (type === "update" && deletedAttachmentIds.length > 0) {
+          await ratingBillingHttpService.deleteDataWithBody(
+            `/v1/dbs/api/attachment/delete-attachment`,
+            { fileId: deletedAttachmentIds }
+          );
+        }
         for (let icon = 0; icon < filterDataAttach.length; icon++) {
           const element = filterDataAttach[icon];
           const body = {
@@ -1096,10 +1186,12 @@ const BillingItemForm = (props) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy();
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setIsEditable(false);
       setCheckedLateCharge(false);
       setCheckedPaymentWarranty(false);
       setCheckedInstallmentRestructure(false);
+      setCheckedBank(false);
       setTypeSubmit(false);
       setStartDate(null);
       setStartDateMap(null);
@@ -1122,6 +1214,9 @@ const BillingItemForm = (props) => {
             "startDate",
             "endDate",
             "description",
+            "bank",
+            "bankValue",
+            "bankAccountNumber",
           ],
         },
         { value: "Approval", paramValue: ["apphierId"] },
@@ -1237,11 +1332,13 @@ const BillingItemForm = (props) => {
               checkedLateCharge={checkedLateCharge}
               checkedPaymentWarranty={checkedPaymentWarranty}
               checkedInstallmentRestructure={checkedInstallmentRestructure}
+              checkedBank={checkedBank}
               onChangeLateCharge={handleChangesLateCharge}
               onChangePayment={handleChangesPayment}
               onChangeInstallmentRestructure={
                 handleChangesInstallmentRestructure
               }
+              onChangeBank={handleChangesBank}
               startDate={startDate}
               endDate={endDate}
               handleStartDate={handleStartDate}
@@ -1249,6 +1346,9 @@ const BillingItemForm = (props) => {
               handleEndDate={handleEndDate}
               onCategoryChange={handleCategoryChange}
               isCriteriaDisabled={isCriteriaEditing}
+              data_bankList={data_bankList}
+              data_bankAccountList={data_bankAccountList}
+              onChangeBankValue={handleBankValueChange}
             />
 
             <MappingInformation
@@ -1284,6 +1384,10 @@ const BillingItemForm = (props) => {
               onCriteriaEditingChange={setIsCriteriaEditing}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
+              defaultCriteriaValues={{}}
+              disabledCriteriaColumns={[]}
+              isBank={checkedBank}
+              data_glAccountBankList={data_glAccountBankList}
               onTabChange={() => {
                 setDetailMapping(false);
                 setCategory("");
@@ -1320,7 +1424,7 @@ const BillingItemForm = (props) => {
               <AttachmentSectionComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_item"

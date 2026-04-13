@@ -28,7 +28,8 @@ const TaxCodeSectionForm = ({
   statusApproval,
   handleStartDate = () => {},
   handleEndDate = () => { },
-  disabledDate = false
+  disabledDate = false,
+  data_gl_account_list = [],
 }) => {
   // Selector
   const { data_category, data_criteria } = useSelector(
@@ -224,14 +225,14 @@ const TaxCodeSectionForm = ({
           <Form.Item
             label={"GL Account"}
             name={"glAccount"}
-            // rules={[
-            //   {
-            //     required: true,
-            //     message: "Please input your GL Account!",
-            //   },
-            // ]}
           >
-            <SelectComponent disabled={true} />
+            <SelectComponent showSearch optionFilterProp="children">
+              {data_gl_account_list?.map((item) => (
+                <Select.Option value={item.id} key={item.id}>
+                  {item.glAccount}
+                </Select.Option>
+              ))}
+            </SelectComponent>
           </Form.Item>
 
           <Form.Item
