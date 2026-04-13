@@ -74,7 +74,8 @@ const BillingBucketView = () => {
       };
   });
 
-  const normalizeStatus = (value) => (value || "").toString().toUpperCase();
+  const normalizeStatus = (value) =>
+    (value || "").toString().trim().toUpperCase();
 
   useEffect(() => {
     localStorage.setItem(
@@ -238,8 +239,11 @@ const BillingBucketView = () => {
   const handleOk = (res, handleClear) => {
     const selectedStatus = normalizeStatus(chooseId?.status);
     const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isApprovedStatus = ["APPROVED", "APPROVE"].includes(
+      selectedStatusApproval,
+    );
     const isActivateRequest =
-      selectedStatus === "INACTIVE" && selectedStatusApproval === "APPROVED";
+      selectedStatus === "INACTIVE" && isApprovedStatus;
     const dataValue = {
       billingBucketCode: chooseId.billingBucketCode,
       apphierId: res.approvalHierarchy,
@@ -443,13 +447,15 @@ const BillingBucketView = () => {
       render: (record, data) => {
         const rowStatus = normalizeStatus(record.status);
         const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const isApprovedStatus = ["APPROVED", "APPROVE"].includes(
+          rowStatusApproval,
+        );
         const canInactivate =
           rowStatus === "ACTIVE" &&
           ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
-            rowStatusApproval
+            rowStatusApproval,
           );
-        const canActivate =
-          rowStatus === "INACTIVE";
+        const canActivate = rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
         const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
