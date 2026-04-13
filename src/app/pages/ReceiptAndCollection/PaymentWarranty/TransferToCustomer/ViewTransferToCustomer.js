@@ -55,6 +55,7 @@ const ViewTransferToCustomer = () => {
     const [openModalHistory, setOpenModalHistory] = useState(false);
     const [openModalDelete, setOpenModalDelete] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const navigate = useNavigate();
 
@@ -148,15 +149,23 @@ const ViewTransferToCustomer = () => {
         setSort(dataSort);
     };
 
-    const handleDownload = () => {
-        dispatch(
-            exportTransferToCustomerToExcel({
-                search: encodeURIComponent(JSON.stringify(search)),
-                page,
-                pageSize,
-                sort,
-            })
-        );
+    const handleDownload = async () => {
+        if (isExporting) return;
+        setIsExporting(true);
+        try {
+            await dispatch(
+                exportTransferToCustomerToExcel({
+                    search: encodeURIComponent(JSON.stringify(search)),
+                    page,
+                    pageSize,
+                    sort,
+                })
+            ).unwrap();
+        } catch (error) {
+            // Error sudah di-handle di thunk
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     const handleHistory = (record) => {
@@ -171,18 +180,21 @@ const ViewTransferToCustomer = () => {
     };
 
     const handleConfirmDelete = () => {
-        dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap().then(() => {
-            setOpenModalDelete(false);
-            dispatch(
-                getAllTransferToCustomerListPaginate({
-                    search: encodeURIComponent(JSON.stringify(search)),
-                    page,
-                    pageSize,
-                    sort,
-                })
-            );
-        });
+        setOpenModalDelete(false);
+        setSelectedRecord(null);
+        dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap()
+            .then(() => {
+                dispatch(
+                    getAllTransferToCustomerListPaginate({
+                        search: encodeURIComponent(JSON.stringify(search)),
+                        page,
+                        pageSize,
+                        sort,
+                    })
+                );
+            });
     };
+
 
     const handleDetail = (record) => {
         navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSFER_TO_CUSTOMER, { state: { id: record?.id } });
@@ -215,6 +227,8 @@ const ViewTransferToCustomer = () => {
                 <ButtonComponent
                     type="submit"
                     onClick={handleDownload}
+                    loading={isExporting}
+                    disabled={isExporting}
                     icon={<SVGIcon name="IconButtonDownload" width={24} />}
                 >
                     Download List

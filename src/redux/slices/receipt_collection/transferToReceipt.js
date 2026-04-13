@@ -97,7 +97,7 @@ export const getDetailTransferToReceipt = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/get-detail/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -107,11 +107,37 @@ export const getDetailTransferToReceipt = createAsyncThunk(
 );
 
 export const approveOrRejectTransferToReceipt = createAsyncThunk(
+    // "APPROVE_OR_REJECT_TRANSFER",
+    // async ({ body }, thunkAPI) => {
+    //     try {
+    //         const url = `/v1/dbs/api/payment-warranty/transfer-receipt/approve-reject`;
+    //         const response = await receiptCollectionHttpService.createData(url, body);
+    //         thunkAPI.dispatch(showModalSuccess({
+    //             title: "Success",
+    //             description: response?.message || "Success Approve Transfer To Receipt"
+    //         }));
+    //         return response.data;
+    //     } catch (error) {
+    //         const message =
+    //             error?.response?.data?.message || error?.message || error?.toString();
+    //         if (
+    //             error?.response?.data?.code === 500 ||
+    //             error?.response?.data?.code === 419
+    //         ) {
+    //             thunkAPI.dispatch(setBodyError(error));
+    //         } else {
+    //             const errorBody = {
+    //                 title: "Failed",
+    //                 description: `${message}`,
+    //             };
+    //             thunkAPI.dispatch(showModalError(errorBody));
+    //         }
+    //         return thunkAPI.rejectWithValue(error.response);
+    //     }
   "APPROVE_OR_REJECT_TRANSFER",
   async ({ body }, thunkAPI) => {
     try {
-      // Customize endpoint if needed, for new reusing setting endpoint
-      const url = `/v1/dbs/api/approval/approve-reject`;
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/approval-decision`;
       const response = await receiptCollectionHttpService.createData(url, body);
       return response.data;
     } catch (error) {
@@ -135,7 +161,7 @@ export const getListApprovalById = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -152,7 +178,7 @@ export const getApprovalHistoryTransferToReceipt = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -213,7 +239,7 @@ export const getAllTransferToReceiptListPaginate = createAsyncThunk(
       const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/get-list?page=${page || 1}&size=${pageSize || 10}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await receiptCollectionHttpService.getPagination(url);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -316,7 +342,11 @@ export const deleteTransferToReceipt = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-warranty/transfer-receipt/${id}`;
       const response = await receiptCollectionHttpService.deleteData(url);
-      thunkAPI.dispatch(showModalSuccess({ title: "Success", description: "Data has been deleted successfully" }));
+      thunkAPI.dispatch(showModalSuccess({ 
+        title: "Success", 
+        description: "Data has been deleted successfully",
+        return: false
+      }));
       return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
@@ -351,6 +381,12 @@ export const downloadTransferToReceiptList = createAsyncThunk(
 const transferToReceiptSlice = createSlice({
   name: "transferToReceipt",
   initialState,
+  reducers: {
+    resetDetailState: (state) => {
+      state.data_detail = null;
+      state.dataListAppHierDetail = [];
+    },
+  },
   extraReducers: {
     // Get All Pagination
     [getAllTransferToReceiptListPaginate.pending]: (state) => {
@@ -365,17 +401,22 @@ const transferToReceiptSlice = createSlice({
     },
     // Get List Warranty
     [getListWarranty.pending]: (state) => {
+      state.loading = true;
     },
     [getListWarranty.fulfilled]: (state, action) => {
+      state.loading = false;
       state.listWarranty = action.payload?.customers || action.payload?.result || action.payload || [];
     },
     [getListWarranty.rejected]: (state) => {
+      state.loading = false;
     },
 
     // Get List From Customer
     [getListFromCustomer.pending]: (state) => {
+      state.loading = true;
     },
     [getListFromCustomer.fulfilled]: (state, action) => {
+      state.loading = false;
       const allCustomers = action.payload?.customers || action.payload?.result || action.payload || [];
       // Deduplicate by customerNumber — one customer may have multiple warranties
       const uniqueMap = new Map();
@@ -391,14 +432,14 @@ const transferToReceiptSlice = createSlice({
 
     // Get List Receipt
     [getListReceipt.pending]: (state) => {
-      // state.loading = true; // Optional: separate loading state if needed
+      state.loading = true;
     },
     [getListReceipt.fulfilled]: (state, action) => {
-      // state.loading = false;
+      state.loading = false;
       state.listReceipt = action.payload?.result || action.payload || [];
     },
     [getListReceipt.rejected]: (state) => {
-      // state.loading = false;
+      state.loading = false;
     },
 
     // Get DDL Deduction Period
@@ -480,22 +521,28 @@ const transferToReceiptSlice = createSlice({
 
     // Get Approval Hierarchy By Id (appHierId) — for form/detail step 2
     [getListApprovalById.pending]: (state) => {
+      state.loading = true;
     },
     [getListApprovalById.fulfilled]: (state, action) => {
       state.dataListAppHierDetail = action.payload || [];
+      state.loading = false;
     },
     [getListApprovalById.rejected]: (state) => {
       state.dataListAppHierDetail = [];
+      state.loading = false;
     },
 
     // Get Approval History by transfer HDR id — for list view history modal
     [getApprovalHistoryTransferToReceipt.pending]: (state) => {
+      state.loading = true;
     },
     [getApprovalHistoryTransferToReceipt.fulfilled]: (state, action) => {
       state.dataApprovalHistory = action.payload;
+      state.loading = false;
     },
     [getApprovalHistoryTransferToReceipt.rejected]: (state) => {
       state.dataApprovalHistory = null;
+      state.loading = false;
     },
 
     // Get List Category
@@ -532,5 +579,6 @@ const transferToReceiptSlice = createSlice({
   },
 });
 
-const { reducer } = transferToReceiptSlice;
+const { reducer, actions } = transferToReceiptSlice;
+export const { resetDetailState } = actions;
 export default reducer;
