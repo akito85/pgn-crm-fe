@@ -613,6 +613,10 @@ const BankForm = ({ type }) => {
             listDataAppHierDetail={appHierDataDetail}
             dataOption={appHierOptions}
             selectedHierarchy={selectedHierarchy}
+            glTypeOptions={glTypeOptions}
+            jobOptions={jobOptions}
+            positionOptions={positionOptions}
+            addressOptions={addressOptions}
           />
         </ModalCustom>
 
