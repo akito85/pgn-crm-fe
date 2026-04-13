@@ -37,6 +37,7 @@ import {
   getUomCodes,
   getAccountTypeList,
   getClassificationTypeList,
+  resetPOSFormState,
 } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import PointOfSalesPageAttachment from "./Page/PointOfSalesPageAttachment";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -316,6 +317,8 @@ const PosForm = ({ type }) => {
         data_detailPos?.costcenter || data_detailPos?.costCenter || "";
       form.setFieldsValue({
         ...data_detailPos,
+        genProInv: !!data_detailPos?.isGenerateProforma,
+        remark: data_detailPos?.remark ?? "",
         currency: data_globalCurrency?.find(
           (item) => item.text === data_detailPos?.currency,
         )?.Id,
@@ -411,6 +414,40 @@ const PosForm = ({ type }) => {
   }, [type, customerType, data_detailPos, mergedArrayMrc, form, idUpdate]);
 
   useEffect(() => {
+    if (
+      type === "update" &&
+      customerType === "prospective" &&
+      data_detailPos &&
+      data_detailPos.id === idUpdate &&
+      data_classification_type &&
+      data_classification_type.length > 0
+    ) {
+      const classificationTypeId = data_classification_type?.find(
+        (item) =>
+          item.name ===
+          (data_detailPos?.classificationType || data_detailPos?.clasificationType),
+      )?.id;
+      const accountTypeId = data_account_type?.find(
+        (item) => item.name === data_detailPos?.accountType,
+      )?.id;
+      if (classificationTypeId || accountTypeId) {
+        form.setFieldsValue({
+          ...(classificationTypeId && { clasificationType: classificationTypeId }),
+          ...(accountTypeId && { accountType: accountTypeId }),
+        });
+      }
+    }
+  }, [
+    type,
+    customerType,
+    data_detailPos,
+    data_classification_type,
+    data_account_type,
+    form,
+    idUpdate,
+  ]);
+
+  useEffect(() => {
     if (data_rate === null || data_rate?.success === false) {
       setInvoiceDate(null);
       form.resetFields(["invoiceDate"]);
@@ -447,6 +484,12 @@ const PosForm = ({ type }) => {
     dispatch(getGlobalProductItem());
     dispatch(getGlobalBillingItem());
     dispatch(getUomCodes());
+  }, [dispatch]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetPOSFormState());
+    };
   }, [dispatch]);
 
   useEffect(() => {
@@ -523,7 +566,8 @@ const PosForm = ({ type }) => {
         const sorId = data_sor_list?.find(
           (item) => item.name === data_detailPos?.sor,
         )?.id;
-        const costCenterString = data_detailPos?.costcenter || "";
+        const costCenterString =
+          data_detailPos?.costcenter || data_detailPos?.costCenter || "";
         const costCenterCode = costCenterString.split(" - ")[0]?.trim();
         const ccId = data_cost_center_list?.find(
           (item) =>
@@ -579,7 +623,8 @@ const PosForm = ({ type }) => {
               item.name === data_detailPos?.billingCycle,
           )?.id,
           billingPeriod: data_detailPos?.billingPeriodId || data_detailPos?.billingPeriod,
-          remark: data_detailPos?.remark,
+          remark: data_detailPos?.remark ?? "",
+          genProInv: !!data_detailPos?.isGenerateProforma,
           sor: sorId,
           costcenter: ccId,
           accountSegment: accountSegmentId,
@@ -669,6 +714,8 @@ const PosForm = ({ type }) => {
     data_cost_center_list,
     data_account_segment,
     data_account_group_type,
+    data_account_type,
+    data_classification_type,
     form,
     dispatch,
   ]);
@@ -1423,8 +1470,10 @@ const PosForm = ({ type }) => {
           const sorId = data_sor_list?.find(
             (item) => item.name === data_detailPos?.sor,
           )?.id;
-          const costCenterNames = data_detailPos?.costcenter
-            ? data_detailPos.costcenter.split(",").map((name) => name.trim())
+          const costCenterValue =
+            data_detailPos?.costcenter || data_detailPos?.costCenter || "";
+          const costCenterNames = costCenterValue
+            ? costCenterValue.split(",").map((name) => name.trim())
             : [];
           const costCenterIds =
             costCenterNames.length > 0
@@ -1440,6 +1489,14 @@ const PosForm = ({ type }) => {
               (item.glbValue || item.name) ===
               data_detailPos?.accountGroupType,
           )?.glbTypeValId;
+          const classificationTypeId = data_classification_type?.find(
+            (item) =>
+              item.name ===
+              (data_detailPos?.classificationType || data_detailPos?.clasificationType),
+          )?.id;
+          const accountTypeId = data_account_type?.find(
+            (item) => item.name === data_detailPos?.accountType,
+          )?.id;
           form.setFieldsValue({
             customerName: data_detailPos?.customerName,
             registrationNumber: data_detailPos?.registrationNumber,
@@ -1458,12 +1515,15 @@ const PosForm = ({ type }) => {
                 item.name === data_detailPos?.billingCycle,
             )?.id,
             billingPeriod: data_detailPos?.billingPeriodId || data_detailPos?.billingPeriod,
-            remark: data_detailPos?.remark,
+            remark: data_detailPos?.remark ?? "",
+            genProInv: !!data_detailPos?.isGenerateProforma,
             sor: sorId,
             costcenter:
               costCenterIds.length > 0 ? costCenterIds[0] : undefined,
             accountSegment: accountSegmentId,
             accountGroupType: accountGroupTypeId,
+            clasificationType: classificationTypeId,
+            accountType: accountTypeId,
           });
           setAccountNumber(data_detailPos?.registrationNumber);
         } else {

@@ -350,8 +350,8 @@ const PointOfSalesPage = ({
             >
               <SelectComponent
                 onChange={onMeterReadingCodeChange}
-                disabled={!mergedArrayMrc || mergedArrayMrc.length === 0}
                 placeholder="Select Meter Reading Code"
+                notFoundContent="No data"
                 options={(mergedArrayMrc || []).map((item) => ({
                   label: item?.name,
                   value: item?.id,
