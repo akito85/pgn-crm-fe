@@ -143,18 +143,8 @@ const BillingBucketForm = ({ type }) => {
   };
 
   const isDisabledDate = useMemo(() => {
-    if (
-      hasValue(form?.getFieldsValue()?.endDate) === true &&
-      listDataCriteria?.map((item) => ({
-        startDate: item?.startDate,
-        endDate: item?.endDate,
-      }))?.length > 0
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }, [form, listDataCriteria]);
+    return listDataCriteria?.length > 0;
+  }, [listDataCriteria]);
 
   const isLoading = loading || loadingForm;
 
