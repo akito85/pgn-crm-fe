@@ -455,15 +455,20 @@ const PosPage = () => {
       type: "table",
       width: 40,
       render: (record) => {
-        const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+        const isMeterai = record.is_meterai === true || record.is_meterai === "true";
 
-        const isApproved = record.statusApproval === "APPROVED";
+        const isEditable =
+          !isMeterai &&
+          (record.statusApproval === "DRAFT" ||
+            record.statusApproval === "REJECTED");
+
+        const isApproved =
+          !isMeterai && record.statusApproval === "APPROVED";
 
         const isDelete =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+          !isMeterai &&
+          (record.statusApproval === "DRAFT" ||
+            record.statusApproval === "REJECTED");
 
         const customerTypeForNav =
           record.customerType === 2 ? "prospective" : "customer";
@@ -548,14 +553,15 @@ const PosPage = () => {
         ];
 
         return (
-          <Tooltip title="Aksi Lainnya">
+          <Tooltip title={isMeterai ? "Disabled (Materai)" : "Aksi Lainnya"}>
             <Dropdown
               menu={{ items: menuItems }}
               trigger={["click"]}
               placement="bottomRight"
+              disabled={isMeterai}
             >
-              <div className="cursor-pointer">
-                <MoreOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+              <div className={isMeterai ? "cursor-not-allowed" : "cursor-pointer"}>
+                <MoreOutlined style={{ fontSize: 20, color: isMeterai ? "#8D91A0" : "#0075BF" }} />
               </div>
             </Dropdown>
           </Tooltip>
@@ -567,13 +573,17 @@ const PosPage = () => {
       type: "table",
       width: 40,
       render: (record) => {
+        const isMeterai = record.is_meterai === true || record.is_meterai === "true";
+
         return (
-          <Tooltip title="Detail">
+          <Tooltip title={isMeterai ? "Disabled (Materai)" : "Detail"}>
             <div
-              className="pt-0 cursor-pointer"
-              onClick={() => handleOpenDetail(record)}
+              className={isMeterai ? "cursor-not-allowed" : "pt-0 cursor-pointer"}
+              onClick={() => {
+                if (!isMeterai) handleOpenDetail(record);
+              }}
             >
-              <SVGIcon name="IconDetail" color="#0075BF" width={20} />
+              <SVGIcon name="IconDetail" color={isMeterai ? "#8D91A0" : "#0075BF"} width={20} />
             </div>
           </Tooltip>
         );
