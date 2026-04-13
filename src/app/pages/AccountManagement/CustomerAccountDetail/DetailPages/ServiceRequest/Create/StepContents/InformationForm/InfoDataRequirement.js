@@ -11,8 +11,6 @@ import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseCont
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
-
 import { requiredMessage } from "../../../../../../../../../utils";
 import { getSrDataRequirementValues } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
@@ -32,8 +30,6 @@ export default function InfoDataRequirement({
   const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [selectedTypeValue, setSelectedTypeValue] = useState(null);
   const [modalForm] = Form.useForm();
-
-  const navigate = useNavigate();
 
   // Sync local table state with form data on mount (for persistence across step navigation)
   useEffect(() => {
@@ -236,56 +232,15 @@ export default function InfoDataRequirement({
     <>
       <NxCardContainer header={"DATA REQUIREMENT"}>
         <NxBaseContainer border>
-        <div className="w-full flex justify-between items-center gap-5 mb-5">
-          <div className="flex justify-end items-center gap-2.5">
-            {/* Download List Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {}}
-              icon={
-                <DownloadOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Download List
-            </ButtonComponent>
-
-            {/* Approval Button */}
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => {setIsDataRequirement(true)}}
-              icon={
-                <PlusOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Create
-            </ButtonComponent>
-          </div>
+        <div className="w-full flex justify-end items-center gap-4">
+          <Button
+            icon={<SVGIcon name="IconButtonCreate" width={14} />}
+            type={"submit"}
+            border={false}
+            onClick={() => {setIsDataRequirement(true)}}
+          >
+            Create
+          </Button>
         </div>
 
         <NxTable
