@@ -388,7 +388,7 @@ export default function InfoMultiDestination({
           ]}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateFormal)
+            value: value && moment(value)
           })}
         >
           <NxDate
@@ -406,7 +406,7 @@ export default function InfoMultiDestination({
           label={"End Date"}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateFormal)
+            value: value && moment(value)
           })}
         >
           <NxDate

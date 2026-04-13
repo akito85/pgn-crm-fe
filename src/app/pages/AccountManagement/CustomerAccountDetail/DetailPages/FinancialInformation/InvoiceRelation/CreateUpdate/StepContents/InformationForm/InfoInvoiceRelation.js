@@ -216,7 +216,7 @@ export default function InfoInvoiceRelation({
             }
           ]}
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateFormal)
+            value: value && moment(value)
           })}
           className="no-margin-form"
         >
@@ -234,7 +234,7 @@ export default function InfoInvoiceRelation({
           name={"endDate"}
           label={"End Date"}
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateFormal)
+            value: value && moment(value)
           })}
           className="no-margin-form"
         >
