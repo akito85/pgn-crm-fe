@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { DownloadOutlined, FilterOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Form, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../../../assets/Icon";
@@ -232,26 +231,26 @@ export default function InfoDataRequirement({
     <>
       <NxCardContainer header={"DATA REQUIREMENT"}>
         <NxBaseContainer border>
-        <div className="w-full flex justify-end items-center gap-4">
-          <Button
-            icon={<SVGIcon name="IconButtonCreate" width={14} />}
-            type={"submit"}
-            border={false}
-            onClick={() => {setIsDataRequirement(true)}}
-          >
-            Create
-          </Button>
-        </div>
+          <div className="w-full flex justify-end items-center gap-4">
+            <Button
+              icon={<SVGIcon name="IconButtonCreate" width={14} />}
+              type={"submit"}
+              border={false}
+              onClick={() => {setIsDataRequirement(true)}}
+            >
+              Choose
+            </Button>
+          </div>
 
-        <NxTable
-          idTable={"DataRequirement"}
-          usePagination={false}
-          useSelect={true}
-          tableScrolled={{ y: 400, x: "max-content" }}
-          dataMain={dataRequirement}
-          columnMain={columnMain}
-          showAdvanceSearch={false}
-        />
+          <NxTable
+            idTable={"DataRequirement"}
+            usePagination={false}
+            useSelect={true}
+            tableScrolled={{ y: 400, x: "max-content" }}
+            dataMain={dataRequirement}
+            columnMain={columnMain}
+            showAdvanceSearch={false}
+          />
         </NxBaseContainer>
       </NxCardContainer>
 

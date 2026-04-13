@@ -19,7 +19,7 @@ import { configApp } from "../../../../../../../constants/configApp";
 import {
   ModalConfirm,
   ModalError,
-  ModalSuccess,
+  ModalSuccess
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
@@ -33,24 +33,24 @@ import {
   getGlobalMartialStatus,
   getGlobalSex,
   getListCategoryFile,
-  updateCustomer,
+  updateCustomer
 } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
 
 import { getDetailContact } from "../../../../../../../redux/slices/account_management/MasterData/contact_slice";
 
 import {
   getListDetailAccountContact,
-  getDetailAccountContact,
+  getDetailAccountContact
 } from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
 
 import {
   getListDetailAccountAddress,
-  getListChooseAddress,
+  getListChooseAddress
 } from "../../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
 
 import {
   getAccountStandardDetail,
-  getAccountOneTimeDetail,
+  getAccountOneTimeDetail
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 
 import {
@@ -69,11 +69,12 @@ import {
   getSrPrerequisiteTypes,
   getSrAttachmentCategories,
   createServiceRequest,
-  updateServiceRequest,
+  updateServiceRequest
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import moment from "moment";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 
 const CreateCustomerServiceRequest = (props) => {
   const location = useLocation();
@@ -92,11 +93,11 @@ const CreateCustomerServiceRequest = (props) => {
     data_globalIdentificationType,
     data_globalSex,
     data_globalMartialStatus,
-    loading,
+    loading
   } = useSelector((state) => state.customerAccount);
 
   const { data_accountDetail, loading: loadingAccount } = useSelector(
-    (state) => state.accountManagement,
+    (state) => state.accountManagement
   );
 
   const {
@@ -113,7 +114,7 @@ const CreateCustomerServiceRequest = (props) => {
     list_srAttachmentCategories,
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
-    loading_createUpdateSr,
+    loading_createUpdateSr
   } = useSelector((state) => state.serviceRequest);
 
   // Map state keys to the dropdowns structure expected by child components
@@ -125,7 +126,7 @@ const CreateCustomerServiceRequest = (props) => {
     serviceRequestChannels: list_srChannels,
     serviceRequestSources: list_srSources,
     serviceRequestPrerequisites: list_srPrerequisiteTypes,
-    serviceRequestDataRequirements: list_srDataRequirementTypes,
+    serviceRequestDataRequirements: list_srDataRequirementTypes
   };
 
   const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
@@ -139,7 +140,7 @@ const CreateCustomerServiceRequest = (props) => {
     data_subdistrict,
     data_postalcode,
     data_type,
-    data_business_purpose,
+    data_business_purpose
   } = useSelector((state) => state.accountAddress);
 
   const { idAccount, idCustomer, accountType, id } = useMemo(() => {
@@ -149,7 +150,7 @@ const CreateCustomerServiceRequest = (props) => {
         idAccount: location.state.idAccount,
         idCustomer: location.state.idCustomer,
         accountType: location.state.type,
-        id: location.state.id || null,
+        id: location.state.id || null
       };
     }
     // Prioritas 2: Fallback ke sessionStorage (setelah reload)
@@ -160,7 +161,7 @@ const CreateCustomerServiceRequest = (props) => {
         idAccount: parsedData.idAccount,
         idCustomer: parsedData.idCustomer,
         accountType: parsedData.type,
-        id: parsedData.id || null,
+        id: parsedData.id || null
       };
     }
     // Default jika tidak ada data sama sekali
@@ -204,33 +205,29 @@ const CreateCustomerServiceRequest = (props) => {
 
   const isLoading = loading || loadingForm || loadingAccount;
 
-  const {
-    InformationForm,
-    ContactForm,
-    PreRequisiteForm,
-  } = StepContents;
+  const { InformationForm, ContactForm, PreRequisiteForm } = StepContents;
 
   const routes = [
     {
       path: "",
-      breadcrumbName: "Account",
+      breadcrumbName: "Account"
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
-      breadcrumbName: "Account - Standard",
+      breadcrumbName: "Account - Standard"
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      breadcrumbName: "Detail Account",
+      breadcrumbName: "Detail Account"
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
-      breadcrumbName: "Service Requests",
+      breadcrumbName: "Service Requests"
     },
     {
       path: "",
-      breadcrumbName: "Create",
-    },
+      breadcrumbName: "Create"
+    }
   ];
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
@@ -256,18 +253,20 @@ const CreateCustomerServiceRequest = (props) => {
         id: idAccount,
         page: 1,
         pageSize: 111,
-        sort: "createdDate~desc",
-      }),
+        sort: "createdDate~desc"
+      })
     );
 
     dispatch(getDetailAccountContact(idCustomer));
-    dispatch(getListDetailAccountAddress({
+    dispatch(
+      getListDetailAccountAddress({
         id: idAccount,
         search: "",
         sort: "createdDate~desc",
         page: 1,
-        pageSize: 999,
-      }));
+        pageSize: 999
+      })
+    );
     // dispatch(getSrById(idAccount));
   }, [dispatch, idAccount]);
 
@@ -286,7 +285,6 @@ const CreateCustomerServiceRequest = (props) => {
     dispatch(getSrDataRequirementTypes());
     dispatch(getSrApprovalHierarchies());
   }, [dispatch]);
-
 
   // Load detail + detail-draft when in update mode
   useEffect(() => {
@@ -307,9 +305,10 @@ const CreateCustomerServiceRequest = (props) => {
     const isRejectApproval = statusApproval.toUpperCase() === "REJECT";
 
     // Use draft data if ACTIVE record has pending changes
-    const detail = (isActive && (isDraftApproval || isRejectApproval))
-      ? serviceRequestDetailDraft
-      : serviceRequestDetail;
+    const detail =
+      isActive && (isDraftApproval || isRejectApproval)
+        ? serviceRequestDetailDraft
+        : serviceRequestDetail;
 
     if (!detail) return;
 
@@ -323,7 +322,7 @@ const CreateCustomerServiceRequest = (props) => {
       serviceRequestReference: detail.reference,
       appHierId: detail.apphierId,
       channel: detail.channel,
-      requestSource: detail.source,
+      requestSource: detail.source
     });
 
     if (detail.apphierId) {
@@ -335,7 +334,6 @@ const CreateCustomerServiceRequest = (props) => {
     formCreate.setFieldsValue({ appHierId: value, appHierName: label });
     if (value) dispatch(getSrApprovalHierarchy(value));
   };
-
 
   const handleSetData = (e) => {
     const temp = (e?.customerName || "").split(" ");
@@ -352,7 +350,7 @@ const CreateCustomerServiceRequest = (props) => {
       middleName: (temp[1] || "").toUpperCase(),
       lastName: (temp[2] || "").toUpperCase(),
       customerName: (e?.customerName || "").toUpperCase(),
-      description: e?.description,
+      description: e?.description
     });
     setFirstName((temp[0] || "").toUpperCase());
     setMiddleName((temp[1] || "").toUpperCase());
@@ -369,7 +367,7 @@ const CreateCustomerServiceRequest = (props) => {
   useEffect(() => {
     if (customerType === 58) {
       setIdentificationDdlValue(
-        data_globalIdentificationType?.filter((item) => item?.id !== 1123),
+        data_globalIdentificationType?.filter((item) => item?.id !== 1123)
       );
     } else {
       setIdentificationDdlValue(data_globalIdentificationType);
@@ -378,14 +376,14 @@ const CreateCustomerServiceRequest = (props) => {
 
   useEffect(() => {
     formCreate.setFieldsValue({
-      customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`,
+      customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstName, middleName, lastName]);
 
   useEffect(() => {
     formCreate.setFieldsValue({
-      ...data,
+      ...data
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -431,12 +429,20 @@ const CreateCustomerServiceRequest = (props) => {
         srFormCity: premiseAddress?.city?.name || "",
         srFormCountry: premiseAddress?.country?.name || "",
         srFormLatitude: premiseAddress?.latitude || "",
-        srFormLongitude: premiseAddress?.longitude || "",
+        srFormLongitude: premiseAddress?.longitude || ""
       });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data_account_address, data_accountDetail, data_detail, data_district, data_subdistrict, data_city, data_country]);
+  }, [
+    data_account_address,
+    data_accountDetail,
+    data_detail,
+    data_district,
+    data_subdistrict,
+    data_city,
+    data_country
+  ]);
 
   const handleChangeName = (e, type) => {
     switch (type) {
@@ -467,7 +473,7 @@ const CreateCustomerServiceRequest = (props) => {
           dropdowns={dropdowns}
         />
       ),
-      disabled: false,
+      disabled: false
     },
     {
       title: "Contact",
@@ -479,7 +485,7 @@ const CreateCustomerServiceRequest = (props) => {
           accountType={accountType}
         />
       ),
-      disabled: false,
+      disabled: false
     },
     {
       title: "Pre-Requisite",
@@ -492,7 +498,7 @@ const CreateCustomerServiceRequest = (props) => {
           currentStep={current}
         />
       ),
-      disabled: false,
+      disabled: false
     },
     {
       title: "Approval",
@@ -504,7 +510,7 @@ const CreateCustomerServiceRequest = (props) => {
           handleSelectHiararchy={handleSelectHiararchy}
         />
       ),
-      disabled: false,
+      disabled: false
     },
     {
       title: "Attachment",
@@ -519,27 +525,43 @@ const CreateCustomerServiceRequest = (props) => {
           configApplication={configApp.ACCOUNT_SERVICE}
         />
       ),
-      disabled: false,
-    },
+      disabled: false
+    }
   ];
 
   const navigate = useNavigate();
   // Field yang divalidasi FE saat klik Next (submit mode — semua required)
   const stepFieldMap = [
-    ["category", "priority", "requestSource", "type", "subCategory", "channel", "requestDate"],
+    [
+      "category",
+      "priority",
+      "requestSource",
+      "type",
+      "subCategory",
+      "channel",
+      "requestDate"
+    ],
     [],
     [],
     ["appHierId"],
-    [],
+    []
   ];
 
   // Field yang divalidasi FE saat Save as Draft — approval tidak required untuk draft
   const stepFieldMapDraft = [
-    ["category", "priority", "requestSource", "type", "subCategory", "channel", "requestDate"],
+    [
+      "category",
+      "priority",
+      "requestSource",
+      "type",
+      "subCategory",
+      "channel",
+      "requestDate"
+    ],
     [],
     [],
     [], // appHierId tidak wajib untuk draft
-    [],
+    []
   ];
 
   const stepValidationTypes = [
@@ -547,7 +569,7 @@ const CreateCustomerServiceRequest = (props) => {
     "CONTACT",
     "PREREQUISITE",
     "APPROVAL",
-    "ATTACHMENT",
+    "ATTACHMENT"
   ];
 
   const next = () => {
@@ -564,7 +586,9 @@ const CreateCustomerServiceRequest = (props) => {
     return {
       requestType: values.type ? parseInt(values.type) : null,
       requestCategory: values.category ? parseInt(values.category) : null,
-      requestSubCategory: values.subCategory ? parseInt(values.subCategory) : null,
+      requestSubCategory: values.subCategory
+        ? parseInt(values.subCategory)
+        : null,
       priority: values.priority ? parseInt(values.priority) : null,
       description: values.description || null,
       requestedDate: NxDate.formatForAPI(values.requestDate),
@@ -581,17 +605,25 @@ const CreateCustomerServiceRequest = (props) => {
       dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
         requirementType: dr.typeId ? parseInt(dr.typeId) : null,
         requirementValue: dr.value || null,
-        requirementDesc: null,
+        requirementDesc: null
       })),
       prerequisites: (values.srFormPreRequisites || []).map((pr) => ({
         prerequisiteId: pr.prerequisiteId,
         prerequisiteName: pr.prerequisiteName,
         prerequisiteComments: pr.prerequisiteComments || null,
-        ...(pr.prerequisiteStatus && { prerequisiteStatus: pr.prerequisiteStatus }),
-        ...(pr.prerequisiteValue && { prerequisiteValue: pr.prerequisiteValue }),
-        ...(pr.prerequisiteDueDate && { prerequisiteDueDate: pr.prerequisiteDueDate }),
-        ...(pr.prerequisiteAssignedTo && { prerequisiteAssignedTo: pr.prerequisiteAssignedTo }),
-      })),
+        ...(pr.prerequisiteStatus && {
+          prerequisiteStatus: pr.prerequisiteStatus
+        }),
+        ...(pr.prerequisiteValue && {
+          prerequisiteValue: pr.prerequisiteValue
+        }),
+        ...(pr.prerequisiteDueDate && {
+          prerequisiteDueDate: pr.prerequisiteDueDate
+        }),
+        ...(pr.prerequisiteAssignedTo && {
+          prerequisiteAssignedTo: pr.prerequisiteAssignedTo
+        })
+      }))
     };
   };
 
@@ -615,8 +647,8 @@ const CreateCustomerServiceRequest = (props) => {
         body: payload,
         services: accountManagementService,
         endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-step`,
-        type: "create",
-      }),
+        type: "create"
+      })
     ).unwrap();
   };
 
@@ -657,8 +689,8 @@ const CreateCustomerServiceRequest = (props) => {
             body: payload,
             services: accountManagementService,
             endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-create`,
-            type: "create",
-          }),
+            type: "create"
+          })
         ).unwrap();
 
         setDataSend(payload);
@@ -673,7 +705,9 @@ const CreateCustomerServiceRequest = (props) => {
   const handleConfirmSubmit = async () => {
     setModalConfirm(false);
     setLoadingForm(true);
-    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
+    const newAttachments = attachmentDataSource.filter(
+      (a) => a.dataType === "new"
+    );
     try {
       if (isUpdate && id) {
         await dispatch(
@@ -683,7 +717,7 @@ const CreateCustomerServiceRequest = (props) => {
             body: { ...dataSend, serviceRequestId: id },
             attachments: newAttachments,
             action: confirmationType.toUpperCase(),
-            successBodyExtra: { return: false },
+            successBodyExtra: { return: false }
           })
         ).unwrap();
       } else {
@@ -693,12 +727,17 @@ const CreateCustomerServiceRequest = (props) => {
             body: dataSend,
             attachments: newAttachments,
             action: confirmationType.toUpperCase(),
-            successBodyExtra: { return: false },
+            successBodyExtra: { return: false }
           })
         ).unwrap();
       }
       navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
-        state: { idAccount, idCustomer, type: accountType, section: "Service Request" },
+        state: {
+          idAccount,
+          idCustomer,
+          type: accountType,
+          section: "Service Request"
+        }
       });
     } catch (error) {
       // thunk sudah dispatch showModalError
@@ -731,101 +770,95 @@ const CreateCustomerServiceRequest = (props) => {
         srFormCity: premiseAddress?.city?.name || "",
         srFormCountry: premiseAddress?.country?.name || "",
         srFormLatitude: premiseAddress?.latitude || "",
-        srFormLongitude: premiseAddress?.longitude || "",
+        srFormLongitude: premiseAddress?.longitude || ""
       });
     }
   };
 
   return (
     <>
-      <BreadCrumb routes={routes} />
       <Spin spinning={isLoading}>
         <Form
-        id="accountForm"
-        form={formCreate}
-        layout={"vertical"}
-        preserve={true}
-        onFinish={() => {
-          if (current === steps.length - 1) {
-            handleOpenConfirmation("submit");
-          }
-        }}
-        // onFinishFailed={handleErrorSubmit}
-        scrollToFirstError={true}
-      >
-        <HeaderDetail
-          data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-          dispatch={dispatch}
-          idAccount={idAccount}
-          idCustomer={idCustomer}
-          type={accountType}
-          collapsible={true}
-        />
+          id="accountForm"
+          form={formCreate}
+          layout={"vertical"}
+          preserve={true}
+          onFinish={() => {
+            if (current === steps.length - 1) {
+              handleOpenConfirmation("submit");
+            }
+          }}
+          scrollToFirstError={true}
+          className="flex flex-col gap-y-4"
+        >
+          <NxBreadCrumb routes={routes} />
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            type={accountType}
+            collapsible={true}
+          />
 
-        <div className="my-4">
           <NxFormStepper
             steps={steps}
             current={current}
             onPrev={prev}
             onNext={handleButtonNext}
           />
-        </div>
 
-        <div className="steps-content my-6">{steps[current].content}</div>
+          <div className="steps-content flex flex-col gap-y-4">{steps[current].content}</div>
 
-        {/* Section Action Steps */}
-        <NxBaseContainer border>
-          <div className="flex justify-between">
-            <Button
-              type={"menu"}
-              onClick={() => {
-                setModalBack(true);
-              }}
-            >
-              Cancel
-            </Button>
-            <div className="flex w-full justify-end gap-x-2">
+          {/* Section Action Steps */}
+          <NxBaseContainer border>
+            <div className="flex justify-between">
               <Button
-                onClick={handleClear}
-                type={"reject"}
-                icon={<SVGIcon name="IconButtonClear" width={14} />}
-              >
-                {isUpdate ? "Reset" : "Clear"}
-              </Button>
-              <Button
-                onClick={() => handleOpenConfirmation("draft")}
-                type={"secondary"}
-              >
-                Save as Draft
-              </Button>
-              <Button
-                onClick={prev}
                 type={"menu"}
-                disabled={current < 1}
+                onClick={() => {
+                  setModalBack(true);
+                }}
               >
-                Previous
+                Cancel
               </Button>
-              {current < steps.length - 1 && (
+              <div className="flex w-full justify-end gap-x-2">
                 <Button
-                  onClick={handleButtonNext}
-                  type={"submit"}
-                  disabled={steps[current].disabled}
+                  onClick={handleClear}
+                  type={"reject"}
+                  icon={<SVGIcon name="IconButtonClear" width={14} />}
                 >
-                  Next
+                  {isUpdate ? "Reset" : "Clear"}
                 </Button>
-              )}
-              {current === steps.length - 1 && (
                 <Button
-                  onClick={() => handleOpenConfirmation("submit")}
-                  type={"submit"}
-                  loading={loadingForm}
+                  onClick={() => handleOpenConfirmation("draft")}
+                  type={"secondary"}
                 >
-                  Save & Submit
+                  Save as Draft
                 </Button>
-              )}
+                <Button onClick={prev} type={"menu"} disabled={current < 1}>
+                  Previous
+                </Button>
+                {current < steps.length - 1 && (
+                  <Button
+                    onClick={handleButtonNext}
+                    type={"submit"}
+                    disabled={steps[current].disabled}
+                  >
+                    Next
+                  </Button>
+                )}
+                {current === steps.length - 1 && (
+                  <Button
+                    onClick={() => handleOpenConfirmation("submit")}
+                    type={"submit"}
+                    loading={loadingForm}
+                  >
+                    Save & Submit
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        </NxBaseContainer>
+          </NxBaseContainer>
         </Form>
       </Spin>
 
@@ -864,7 +897,10 @@ const CreateCustomerServiceRequest = (props) => {
         handleOk={() => setModalError(false)}
         width={400}
         title={bodyError?.title || "Failed"}
-        description={bodyError?.description || "Failed to create service request. Please try again."}
+        description={
+          bodyError?.description ||
+          "Failed to create service request. Please try again."
+        }
       />
     </>
   );
