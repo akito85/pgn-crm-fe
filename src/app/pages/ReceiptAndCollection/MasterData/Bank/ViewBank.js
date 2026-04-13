@@ -7,7 +7,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
-import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { DownloadOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import TableRBI from "../../../../../components/TableRBI";
 import StatusComponent from "../../../../../components/StatusComponent";
@@ -41,7 +41,7 @@ export const columnsBank = (
   {
     title: "NO",
     width: 60,
-    align: "center",
+    align: "left",
     isClassification: true,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
@@ -50,7 +50,7 @@ export const columnsBank = (
     dataIndex: "bankCode",
     key: "bankCode",
     sorter: true,
-    align: "center",
+    align: "right",
     ...getColumnSearchPropsPaging("bankCode", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
@@ -70,6 +70,17 @@ export const columnsBank = (
     ...getColumnSearchPropsPaging("bankShortName", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
+    title: "OFFICE TYPE",
+    dataIndex: "isBranch",
+    key: "branchName",
+    sorter: true,
+    align: "center",
+    render: (_, record) => {
+      const val = record.isBranch;
+      return val === true || val === "Y" || val === "BRANCH" ? "BRANCH" : "HEAD OFFICE";
+    },
+  },
+  {
     title: "BRANCH NAME",
     dataIndex: "branchName",
     key: "branchName",
@@ -82,7 +93,7 @@ export const columnsBank = (
     dataIndex: "npwp",
     key: "npwp",
     sorter: (a, b) => a.npwp.length - b.npwp.length,
-    align: "left",
+    align: "right",
     ...getColumnSearchPropsPaging("npwp", searchInput, searchedColumn, searchText, handleSearch, true),
     render: (text) =>
       searchedColumn === "npwp" ? (
@@ -103,7 +114,7 @@ export const columnsBank = (
     dataIndex: "phoneNumber",
     key: "phoneNumber",
     sorter: true,
-    align: "left",
+    align: "right",
     ...getColumnSearchPropsPaging("phoneNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
@@ -361,80 +372,81 @@ const ViewBank = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Detail">
-            <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK} state={{ id: record?.id }}>
-              <EyeOutlined style={{ fontSize: "24px" }} />
-            </Link>
-          </Tooltip>
+          <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK} state={{ id: record?.id }}>
+            <Tooltip title="Detail">
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={24} />
+              </div>
+            </Tooltip>
+          </Link>
         );
       },
     },
     {
       action: "Update",
       type: "table",
-      render: (record, data_length) => {
+      render: (record, data) => {
         const isDisabled = disabledActionByStatus("update", record?.status, record?.statusApproval);
-        return data_length > 3 ? (
-          <Link
-            to={!isDisabled && RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-            state={!isDisabled && { id: record?.id }}
+        const linkContent = data > 3 ? (
+          <ButtonComponent
+            icon={<SVGIcon name="IconEdit" color={isDisabled ? "#8D91A0" : "#0075bf"} width={24} />}
+            type={"action"}
+            border={false}
+            disabled={isDisabled}
           >
-            <ButtonComponent
-              className="gap-5 w-full"
-              icon={<SVGIcon name="IconEdit" width={24} color="#0075BF" />}
-              border={false}
-            >
-              <span className="text-black gap-2 text-xl text-center w-full">Update</span>
-            </ButtonComponent>
-          </Link>
+            <span className={`ml-0 ${isDisabled ? "text-[#8D91A0]" : "text-black"}`}> Update</span>
+          </ButtonComponent>
         ) : (
-          <Tooltip title="Update" className={isDisabled ? "cursor-not-allowed" : "cursor-pointer"}>
-            <Link
-              to={!isDisabled && RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-              state={!isDisabled && { id: record?.id }}
-            >
-              <div border={false}>
-                <SVGIcon
-                  name="IconEdit"
-                  color={isDisabled ? "#d3d3d3" : "#ACC424"}
-                  width={24}
-                  className={isDisabled ? "cursor-not-allowed" : "cursor-pointer"}
-                />
-              </div>
-            </Link>
+          <Tooltip title="Update">
+            <div className="pt-0">
+              <SVGIcon
+                name="IconEdit"
+                width={24}
+                color={isDisabled ? "#8D91A0" : "#ACC424"}
+                className={isDisabled ? "cursor-not-allowed" : undefined}
+              />
+            </div>
           </Tooltip>
+        );
+        return isDisabled ? (
+          <div>{linkContent}</div>
+        ) : (
+          <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK} state={{ id: record?.id }}>
+            {linkContent}
+          </Link>
         );
       },
     },
     {
       action: "Activate",
       type: "table",
-      render: (record, data_length) => {
+      render: (record, data) => {
         const statusLowerCase = record?.status?.toLowerCase();
         const isDisabled = disabledActionByStatus("activate", record?.status, record?.statusApproval);
-        return data_length > 3 ? (
-          <div className="w-full">
-            <ButtonComponent
-              border={false}
-              className="gap-5 w-full"
-              onClick={() => handleInactive(record)}
-              disabled={isDisabled}
-            >
+        const Content = data > 3 ? (
+          <ButtonComponent
+            icon={
               <Checkbox
+                className="inactive-check"
                 onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
                 disabled={isDisabled}
+                checked={record?.status !== "Active"}
               />
-              <span className="text-black ml-6 gap-2 text-xl text-center w-full">
-                {record?.status === "Active" ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
-          </div>
+            }
+            type={"action"}
+            border={false}
+            disabled={isDisabled}
+            onClick={() => handleInactive(record)}
+          >
+            <span className="text-black ml-1">
+              {record?.status === "Active" ? "Inactivate" : "Activate"}
+            </span>
+          </ButtonComponent>
         ) : (
           <Tooltip title={statusLowerCase === "active" || statusLowerCase === "draft" ? "Inactivate" : "Activate"}>
-            <div>
+            <div className="pt-1">
               <Checkbox
-                border={false}
+                className="inactive-check"
                 onClick={() => handleInactive(record)}
                 checked={record?.status !== "Active"}
                 disabled={isDisabled}
@@ -442,25 +454,31 @@ const ViewBank = () => {
             </div>
           </Tooltip>
         );
+        return Content;
       },
     },
     {
       action: "history",
       type: "table",
-      render: (record, data_length) => {
-        return data_length > 3 ? (
+      render: (record, data) => {
+        return data > 3 ? (
           <ButtonComponent
-            className="gap-5"
-            icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
+            icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+            type={"action"}
             border={false}
             onClick={() => handleApprovalHistory(record)}
           >
-            <span className="text-black gap-2 text-xl text-center">Approval History</span>
+            <span className={"text-black ml-0"}>Approval History</span>
           </ButtonComponent>
         ) : (
           <Tooltip title="Approval History">
-            <div border={false} onClick={() => handleApprovalHistory(record)}>
-              <SVGIcon name="IconLogHistory" color="#0075bf" width={24} />
+            <div className="pt-1">
+              <SVGIcon
+                name="IconLogHistory"
+                color={"#0075bf"}
+                width={24}
+                onClick={() => handleApprovalHistory(record)}
+              />
             </div>
           </Tooltip>
         );
@@ -486,6 +504,8 @@ const ViewBank = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
+  console.log(data)
+
   return (
     <>
       <Spin spinning={loading}>
@@ -494,9 +514,8 @@ const ViewBank = () => {
           header={
             <div className="flex -my-4 justify-between items-center">
               <p className="mt-[15px] font-bold">BANK LIST</p>
-              <div className="flex gap-2">
-                <Toolbar items={itemActions} />
-              </div>
+
+              <Toolbar items={itemActions} />
             </div>
           }
         >
