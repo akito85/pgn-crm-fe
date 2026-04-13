@@ -64,7 +64,8 @@ const BillingCycleView = ({ type }) => {
       };
   });
 
-  const normalizeStatus = (value) => (value || "").toString().toUpperCase();
+  const normalizeStatus = (value) =>
+    (value || "").toString().trim().toUpperCase();
 
   useEffect(() => {
     try {
@@ -205,7 +206,8 @@ const BillingCycleView = ({ type }) => {
     const selectedStatus = normalizeStatus(chooseId?.status);
     const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
     const isActivateRequest =
-      selectedStatus === "INACTIVE" && selectedStatusApproval === "APPROVED";
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       billingCycleId: chooseId.billingCycleId,
       appHierId: res.approvalHierarchy,
@@ -406,10 +408,10 @@ const BillingCycleView = ({ type }) => {
         const canInactivate =
           rowStatus === "ACTIVE" &&
           ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
-            rowStatusApproval
+            rowStatusApproval,
           );
         const canActivate =
-          rowStatus === "INACTIVE" && rowStatusApproval === "APPROVED";
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
         const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
