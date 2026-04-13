@@ -5,7 +5,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
 import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
@@ -19,10 +18,8 @@ import { configApp } from "../../../../../../../constants/configApp";
 import {
   ModalConfirm,
   ModalError,
-  ModalSuccess
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
-import { bytesConverter } from "../../../../../../../utils/bytesConverter";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 
 import {
