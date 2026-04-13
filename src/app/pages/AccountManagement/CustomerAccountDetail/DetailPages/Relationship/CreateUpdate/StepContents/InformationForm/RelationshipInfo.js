@@ -206,12 +206,12 @@ const RelationshipInfo = ({
 
             const relatedName = isCustomer ? selected.customerName : selected.accountName;
             const relatedNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
-            const accountId = isCustomer ? selected.id : selected.accountId;
+            const relatedId = isCustomer ? selected.id : selected.accountId;
 
             form.setFieldsValue({
               relatedName,
               relatedNumber,
-              accountId,
+              relatedId,
             });
 
             // Pass allAccount data to parent for display in RelatedDetailCard

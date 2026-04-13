@@ -120,10 +120,11 @@ const CreateUpdateRelationship = ({
       form.setFieldsValue({
         relationshipType: detail.relationshipType,
         relationshipCategory: detail.relationshipCategory,
+        relatedId: detail.accountId,
         relatedName: detail.accountName,
         relatedNumber: detail.accountNumber,
-        startDate: NxDate.formatForAPI(detail.startDate),
-        endDate: NxDate.formatForAPI(detail.endDate),
+        startDate: detail.startDate,
+        endDate: detail.endDate,
         description: detail.description || "",
         appHierId: detail.appHierId,
       });
@@ -139,11 +140,11 @@ const CreateUpdateRelationship = ({
     form.setFieldValue("appHierName", approvalName);
   };
 
-  const handleSubmitForm = () => {
+  const handleSubmitForm = async () => {
     const {
       relationshipType,
       relationshipCategory,
-      accountId: relatedAccountId,
+      relatedId: relatedAccountId,
       startDate,
       endDate,
       appHierId,
@@ -169,37 +170,32 @@ const CreateUpdateRelationship = ({
       attachments,
     };
 
-    const detailRoute = isStandard
+    const targetRoute = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
       : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME;
 
-    if (formType === "create")
-      dispatch(createRelationship({
-        accountId,
-        payload,
-        attachments: newAttachments
-      }))
-        .unwrap()
-        .then(() => {
-          setTimeout(() => {
-            navigate(detailRoute, { state: { idAccount: accountId, idCustomer: customerId } });
-          }, 2000);
-        })
-        .catch(() => {});
-    else if (isUpdate)
-      dispatch(updateRelationship({
-        accountId,
-        idRelationship: id,
-        payload,
-        attachments: newAttachments
-      }))
-        .unwrap()
-        .then(() => {
-          setTimeout(() => {
-            navigate(detailRoute, { state: { idAccount: accountId, idCustomer: customerId } });
-          }, 2000);
-        })
-        .catch(() => {});
+    try {
+      if (isCreate) {
+        await dispatch(createRelationship({
+          accountId,
+          payload,
+          attachments: newAttachments
+        })).unwrap(); 
+      } else if (isUpdate) {
+        await dispatch(updateRelationship({
+          accountId,
+          idRelationship: id,
+          payload,
+          attachments: newAttachments
+        })).unwrap();
+      } else return;
+    } catch {
+      return
+    }
+
+    setTimeout(() => {
+      navigate(targetRoute, { state: { idAccount: accountId, idCustomer: customerId } });
+    }, 2000);
   };
 
   /**
@@ -226,7 +222,7 @@ const CreateUpdateRelationship = ({
             const {
               relationshipType,
               relationshipCategory,
-              accountId: relatedAccountId,
+              relatedId: relatedAccountId,
               startDate,
               endDate,
               description,
@@ -268,7 +264,7 @@ const CreateUpdateRelationship = ({
       const {
         relationshipType,
         relationshipCategory,
-        accountId: relatedAccountId,
+        relatedId: relatedAccountId,
         startDate,
         endDate,
         description,
@@ -377,7 +373,7 @@ const CreateUpdateRelationship = ({
         const {
           relationshipType,
           relationshipCategory,
-          accountId: relatedAccountId,
+          relatedId: relatedAccountId,
           startDate,
           endDate,
           description,
