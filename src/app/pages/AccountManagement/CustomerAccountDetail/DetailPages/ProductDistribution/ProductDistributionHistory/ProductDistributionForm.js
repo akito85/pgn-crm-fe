@@ -134,10 +134,6 @@ const ProductDistributionForm = ({ type }) => {
     return value;
   };
 
-  const disabledDate = (current) => {
-    return false;
-  };
-
   const processData = (data) => {
     const mapListDataDetail = listDataDetail.map((item) => {
       return {
@@ -339,7 +335,6 @@ const ProductDistributionForm = ({ type }) => {
                     <DateComponent
                       disabled={type !== "create" ? true : false}
                       onChange={(e) => handleStartDate(e)}
-                      dateDisable={disabledDate}
                     />
                   </Form.Item>
 
