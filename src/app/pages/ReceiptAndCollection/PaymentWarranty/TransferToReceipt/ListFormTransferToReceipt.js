@@ -1,4 +1,5 @@
 import { Form, message } from "antd";
+import { showModalError, showModalSuccess } from "../../../../../redux/slices/general_slice";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -88,7 +89,7 @@ const ListFormTransferToReceipt = () => {
             const data = dataListAppHierDetail.map((a, index) => ({
                 ...a,
                 key: index + 1,
-                employeeDetail: a.employeeDetail.map((b, index) => ({
+                employeeDetail: a?.employeeDetail?.map((b, index) => ({
                     ...b,
                     key: index + 1,
                 })),
@@ -200,7 +201,47 @@ const ListFormTransferToReceipt = () => {
         setShowConfirmSubmit(true);
     };
 
-    const confirmSubmit = () => {
+    const uploadFiles = async (id) => {
+        const filterDataAttach = listDataAttachment.filter(
+            (item) => item.dataType !== "exist"
+        );
+
+        const failedUploads = [];
+
+        for (let i = 0; i < filterDataAttach.length; i++) {
+            const element = filterDataAttach[i];
+            const body = {
+                referensiId: id,
+                files: element.file,
+                category: "PAYMENT_WARRANTY_TRANSFER_RECEIPT",
+                fileCategoryId: element.fileCategoryId,
+            };
+
+            try {
+                await receiptCollectionHttpService.uploadImage(
+                    `/v1/dbs/api/attachment/upload/v1`,
+                    body
+                );
+            } catch (error) {
+                console.error(`Failed to upload file ${i + 1}:`, error);
+                failedUploads.push(element);
+            }
+        }
+
+        if (failedUploads.length > 0) {
+            dispatch(
+                showModalError({
+                    title: "Upload Warning",
+                    description: `${failedUploads.length} file(s) failed to upload. Please try again.`,
+                    return: false,
+                })
+            );
+        }
+
+        return failedUploads;
+    };
+
+    const confirmSubmit = async () => {
         const formData = form.getFieldsValue();
         const body = {
             ...formData,
@@ -213,12 +254,24 @@ const ListFormTransferToReceipt = () => {
             appHierId: selectedHierarchy
         };
         
-        dispatch(submitTransferToReceipt(body)).then((res) => {
-            if (!res.error) {
-                navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT);
+        try {
+            const res = await dispatch(submitTransferToReceipt(body)).unwrap();
+            const createdId = res?.data?.transferHdrId || res?.data?.id;
+
+            if (createdId) {
+                await uploadFiles(createdId);
             }
-        });
-        setShowConfirmSubmit(false);
+
+            dispatch(showModalSuccess({
+                title: "Success",
+                description: "Data submitted successfully",
+                onOk: () => navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT)
+            }));
+            setShowConfirmSubmit(false);
+        } catch (error) {
+            console.error("Submission failed:", error);
+            setShowConfirmSubmit(false);
+        }
     };
 
     const routes = [

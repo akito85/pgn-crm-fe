@@ -30,8 +30,8 @@ const ContentModalConfirm = ({
         },
         {
             title: "CUSTOMER NUMBER",
-            dataIndex: "customer",
-            key: "customer",
+            dataIndex: "customerNumber",
+            key: "customerNumber",
             width: 150,
         },
         {
@@ -42,8 +42,8 @@ const ContentModalConfirm = ({
         },
         {
             title: "TO CUSTOMER NAME",
-            dataIndex: "toCustomerName",
-            key: "toCustomerName",
+            dataIndex: "customerName",
+            key: "customerName",
             width: 200,
         },
         {
@@ -80,8 +80,8 @@ const ContentModalConfirm = ({
                         {/* TRANSFER INFORMATION */}
                         <SubSectionCard title="TRANSFER TO CUSTOMER INFORMATION" className="mx-6 mb-4">
                             <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
-                                <DetailText label="Number">{data?.fromCustomerId || "-"}</DetailText>
-                                <DetailText label="Customer Name">{data?.fromCustomerName || "-"}</DetailText>
+                                <DetailText label="From Customer Number">{data?.fromCustomerNumber || "-"}</DetailText>
+                                <DetailText label="From Customer Name">{data?.fromCustomerName || "-"}</DetailText>
                                 <DetailText label="Area Code">{data?.areaCode || "-"}</DetailText>
                                 <DetailText label="Category">{data?.category || "-"}</DetailText>
                                 <div className="col-span-4">
@@ -92,7 +92,7 @@ const ContentModalConfirm = ({
 
                         {/* GUARANTEE INFORMATION */}
                         <SubSectionCard title="GUARANTEE INFORMATION" className="mx-6 mb-4">
-                            <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
+                            <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                                 <DetailText label="Payment Guarantee Code">{data?.paymentWarrantyCode || "-"}</DetailText>
                                 <DetailText label="Cost Center">{data?.warrantyAreaCode || "-"}</DetailText>
                                 <DetailText label="Account Number">{data?.accountNumber || "-"}</DetailText>

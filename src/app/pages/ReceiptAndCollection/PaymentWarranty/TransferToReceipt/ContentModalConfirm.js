@@ -70,7 +70,7 @@ const ContentModalConfirm = ({
 
                         {/* GUARANTEE INFORMATION */}
                         <SubSectionCard title="GUARANTEE INFORMATION" className="mx-6 mb-4">
-                            <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
+                            <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                                 <DetailText label="Payment Guarantee Code">{data?.paymentWarrantyCode || "-"}</DetailText>
                                 <DetailText label="Cost Center">{data?.warrantyAreaCode || "-"}</DetailText>
                                 <DetailText label="Account Number">{data?.accountNumber || "-"}</DetailText>

@@ -176,16 +176,16 @@ const ViewTransferToReceipt = () => {
   };
 
   const handleConfirmDelete = () => {
-    dispatch(deleteTransferToReceipt(selectedRecord.id)).unwrap().then(() => {
-      setOpenModalDelete(false);
-      dispatch(
-        getAllTransferToReceiptListPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
+    dispatch(deleteTransferToReceipt(selectedRecord.id)).unwrap()
+      .then(() => {
+        dispatch(
+          getAllTransferToReceiptListPaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page,
+            pageSize,
+            sort,
+          })
+        );
     });
   };
 

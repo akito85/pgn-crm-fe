@@ -180,17 +180,20 @@ const ViewTransferToCustomer = () => {
     };
 
     const handleConfirmDelete = () => {
-        dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap().then(() => {
-            setOpenModalDelete(false);
-            dispatch(
-                getAllTransferToCustomerListPaginate({
-                    search: encodeURIComponent(JSON.stringify(search)),
-                    page,
-                    pageSize,
-                    sort,
-                })
-            );
-        });
+        dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap()
+            .then(() => {
+                dispatch(
+                    getAllTransferToCustomerListPaginate({
+                        search: encodeURIComponent(JSON.stringify(search)),
+                        page,
+                        pageSize,
+                        sort,
+                    })
+                );
+            })
+            .finally(() => {
+                setOpenModalDelete(false);
+            });
     };
 
     const handleDetail = (record) => {

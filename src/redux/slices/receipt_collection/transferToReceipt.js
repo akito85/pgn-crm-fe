@@ -97,7 +97,7 @@ export const getDetailTransferToReceipt = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/get-detail/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -135,7 +135,7 @@ export const getListApprovalById = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -152,7 +152,7 @@ export const getApprovalHistoryTransferToReceipt = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/approval-history-get/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -365,17 +365,22 @@ const transferToReceiptSlice = createSlice({
     },
     // Get List Warranty
     [getListWarranty.pending]: (state) => {
+      state.loading = true;
     },
     [getListWarranty.fulfilled]: (state, action) => {
+      state.loading = false;
       state.listWarranty = action.payload?.customers || action.payload?.result || action.payload || [];
     },
     [getListWarranty.rejected]: (state) => {
+      state.loading = false;
     },
 
     // Get List From Customer
     [getListFromCustomer.pending]: (state) => {
+      state.loading = true;
     },
     [getListFromCustomer.fulfilled]: (state, action) => {
+      state.loading = false;
       const allCustomers = action.payload?.customers || action.payload?.result || action.payload || [];
       // Deduplicate by customerNumber — one customer may have multiple warranties
       const uniqueMap = new Map();
@@ -391,14 +396,14 @@ const transferToReceiptSlice = createSlice({
 
     // Get List Receipt
     [getListReceipt.pending]: (state) => {
-      // state.loading = true; // Optional: separate loading state if needed
+      state.loading = true;
     },
     [getListReceipt.fulfilled]: (state, action) => {
-      // state.loading = false;
+      state.loading = false;
       state.listReceipt = action.payload?.result || action.payload || [];
     },
     [getListReceipt.rejected]: (state) => {
-      // state.loading = false;
+      state.loading = false;
     },
 
     // Get DDL Deduction Period

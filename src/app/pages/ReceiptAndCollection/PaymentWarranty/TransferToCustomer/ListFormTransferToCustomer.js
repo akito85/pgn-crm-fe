@@ -16,7 +16,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import { showModalSuccess } from "../../../../../redux/slices/general_slice";
+import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import {
     submitTransferToCustomer,
@@ -115,13 +115,13 @@ const ListFormTransferToCustomer = (props) => {
             ]);
             
             const mappedRow = {
-                customer: row.itemCustomer,
+                customerNumber: form.getFieldValue("itemCustomerNumber"), 
+                customerId: row.itemCustomer, 
                 areaCode: row.itemAreaCode,
-                toCustomerName: row.itemToCustomerName,
+                customerName: row.itemToCustomerName,
                 currency: row.itemCurrency,
                 amount: row.itemAmount,
                 toAccountId: form.getFieldValue("itemToAccountId"),
-                customerNumber: form.getFieldValue("itemCustomerNumber"),
             };
 
             const newData = [...customerList];
@@ -152,9 +152,9 @@ const ListFormTransferToCustomer = (props) => {
         const newData = {
             key: customerList.length + 1,
             no: customerList.length + 1,
-            customer: "",
+            customerNumber: "",
+            customerName: "",
             areaCode: "",
-            toCustomerName: "",
             currency: "IDR",
             amount: 0,
         };
@@ -325,6 +325,10 @@ const ListFormTransferToCustomer = (props) => {
 
             form.validateFields(fieldsToValidate)
                 .then(() => {
+                    if (editingKey) {
+                        message.warning("Please save your changes in the customer list first.");
+                        return;
+                    }
                     if (customerList.length === 0) {
                         message.warning("Please add at least one customer to the list");
                         return;
@@ -359,7 +363,7 @@ const ListFormTransferToCustomer = (props) => {
         }
     };
 
-    const processSubmit = async (isDraft = false) => {
+    const processSubmit = async (isDraft = false, valuesArg = null) => {
         if (isSubmitting) return;
 
         try {
@@ -368,19 +372,21 @@ const ListFormTransferToCustomer = (props) => {
                 return;
             }
 
-            const values = isDraft ? form.getFieldsValue(true) : await form.validateFields();
+            const values = isDraft ? form.getFieldsValue(true) : (valuesArg || await form.validateFields());
             
             const sanitizedDescription = values.description 
                 ? DOMPurify.sanitize(values.description, { ALLOWED_TAGS: [] })
                 : null;
 
             const payload = {
+                ...values,
                 fromCustomerNumber: values.fromCustomerId,
                 fromCustomerName: values.fromCustomerName,
                 areaCode: values.areaCode,
                 category: values.category,
                 description: sanitizedDescription,
                 paymentGuaranteeCode: values.paymentWarrantyCode,
+                paymentWarrantyCode: values.paymentWarrantyCode,
                 sourcePayWarrantyId: form.getFieldValue("sourcePayWarrantyId"),
                 fromAccountId: form.getFieldValue("fromAccountId"),
                 appHierId: selectedHierarchy,
@@ -389,7 +395,7 @@ const ListFormTransferToCustomer = (props) => {
                 customers: customerList.map(item => ({
                     customerNumber: item.customerNumber,
                     areaCode: item.areaCode,
-                    customerName: item.toCustomerName,
+                    customerName: item.customerName,
                     toAccountId: item.toAccountId,
                     currency: item.currency,
                     amount: item.amount,
@@ -416,20 +422,65 @@ const ListFormTransferToCustomer = (props) => {
         }
     };
 
-    const handleSave = (payloadToSave) => {
+    const uploadFiles = async (id) => {
+        const filterDataAttach = listDataAttachment.filter(
+            (item) => item.dataType !== "exist"
+        );
+
+        const failedUploads = [];
+
+        for (let i = 0; i < filterDataAttach.length; i++) {
+            const element = filterDataAttach[i];
+            const body = {
+                referensiId: id,
+                files: element.file,
+                category: "PAYMENT_WARRANTY_TRANSFER_CUSTOMER",
+                fileCategoryId: element.fileCategoryId,
+            };
+
+            try {
+                await receiptCollectionHttpService.uploadImage(
+                    `/v1/dbs/api/attachment/upload/v1`,
+                    body
+                );
+            } catch (error) {
+                console.error(`Failed to upload file ${i + 1}:`, error);
+                failedUploads.push(element);
+            }
+        }
+
+        if (failedUploads.length > 0) {
+            dispatch(
+                showModalError({
+                    title: "Upload Warning",
+                    description: `${failedUploads.length} file(s) failed to upload. Please try again.`,
+                    return: false,
+                })
+            );
+        }
+
+        return failedUploads;
+    };
+
+    const handleSave = async (payloadToSave) => {
         setIsSubmitting(true);
-        dispatch(submitTransferToCustomer(payloadToSave || sendBody))
-            .unwrap()
-            .then(() => {
-                dispatch(showModalSuccess({
-                    title: "Success",
-                    description: "Data submitted successfully",
-                    onOk: () => navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER)
-                }));
-            })
-            .catch(() => {
-                setIsSubmitting(false);
-            });
+        try {
+            const data = await dispatch(submitTransferToCustomer(payloadToSave || sendBody)).unwrap();
+            const createdId = data?.transferHdrId || data?.id;
+
+            if (createdId) {
+                await uploadFiles(createdId);
+            }
+
+            dispatch(showModalSuccess({
+                title: "Success",
+                description: "Data submitted successfully",
+                onOk: () => navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER)
+            }));
+            setModalConfirm(false);
+        } catch (error) {
+            setIsSubmitting(false);
+        }
     };
 
     const handleDeleteCustomer = (record) => {
@@ -470,8 +521,7 @@ const ListFormTransferToCustomer = (props) => {
                 <Form 
                     layout="vertical" 
                     form={form} 
-                    onFinish={() => processSubmit(false)} 
-                    preserve={false}
+                    onFinish={(values) => processSubmit(false, values)} 
                     onFinishFailed={() => message.error("Please check all required fields")}
                 >
                     <div className="mt-8 flex flex-col gap-8">

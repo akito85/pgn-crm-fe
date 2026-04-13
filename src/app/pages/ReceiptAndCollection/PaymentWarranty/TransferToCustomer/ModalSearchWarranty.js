@@ -8,7 +8,7 @@ import TableRBI from "../../../../../components/TableRBI";
 
 const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
     const dispatch = useDispatch();
-    const { listWarranty } = useSelector((state) => state.transferToCustomer);
+    const { listWarranty, loading } = useSelector((state) => state.transferToCustomer);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [page, setPage] = useState(1);
@@ -301,6 +301,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
                     dataSource={listWarranty?.map((item, idx) => ({ ...item, key: item.warrantyId || idx }))}
                     rowSelection={rowSelection}
                     pagination={true}
+                    loading={loading}
                     current={page}
                     pageSize={pageSize}
                     totalData={listWarranty?.length || 0}
