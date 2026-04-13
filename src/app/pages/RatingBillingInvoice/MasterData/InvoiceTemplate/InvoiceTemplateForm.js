@@ -698,10 +698,14 @@ const InvoiceTemplateForm = ({ type }) => {
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
-      ) {
+      const itemStart = moment(item?.startDate).startOf("day");
+      const headerStart = moment(formHeader?.startDate).startOf("day");
+      const startOutOfRange = itemStart < headerStart;
+      const endOutOfRange =
+        hasValue(formHeader?.endDate) &&
+        hasValue(item?.endDate) &&
+        moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day");
+      if (startOutOfRange || endOutOfRange) {
         dataOverlap?.push(item);
       }
     });
@@ -824,6 +828,7 @@ const InvoiceTemplateForm = ({ type }) => {
     } else {
       dispatch(getDetailInvoiceTemplate(id));
       dispatch(getDetailDraftInvoiceTemplate(id));
+      setCurrent(0);
     }
   };
 
@@ -990,18 +995,8 @@ const InvoiceTemplateForm = ({ type }) => {
   };
 
   const isDisabledDate = useMemo(() => {
-    if (
-      hasValue(form?.getFieldsValue()?.endDate) === true &&
-      listDataCriteria?.map((item) => ({
-        startDate: item?.startDate,
-        endDate: item?.endDate,
-      }))?.length > 0
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }, [form, listDataCriteria]);
+    return listDataCriteria?.some((item) => hasValue(item?.endDate));
+  }, [listDataCriteria]);
 
   return (
     <>

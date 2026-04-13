@@ -1,14 +1,13 @@
 import { Modal, Button } from "antd";
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getListWarranty } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
+import { getListWarranty } from "../../../../../redux/slices/receipt_collection/transferToReceipt";
 import SVGIcon from "../../../../../assets/Icon/index";
 import TableRBI from "../../../../../components/TableRBI";
 
 const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
     const dispatch = useDispatch();
-    const { listWarranty } = useSelector((state) => state.transferToCustomer);
+    const { listWarranty } = useSelector((state) => state.transferToReceipt);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [page, setPage] = useState(1);
@@ -20,7 +19,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
             setSelectedRowKeys([]);
             setSelectedRecord(null);
         }
-    }, [isOpen, dispatch, customerId]);
+    }, [isOpen, dispatch]);
 
 
     const handleConfirm = () => {
@@ -36,7 +35,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
             dataIndex: "no",
             key: "no",
             width: 60,
-            align: "left",
+            align: "center",
             fixed: "left",
             render: (text, record, index) => (page - 1) * pageSize + index + 1,
         },
@@ -50,10 +49,10 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
         },
         {
             title: "COST CENTER",
-            dataIndex: "costCenter",
             key: "costCenter",
             width: 250,
             align: "left",
+            render: (_, record) => record.costCenter || "",
         },
         {
             title: "ACCOUNT NUMBER",
@@ -71,8 +70,8 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
         },
         {
             title: "CUSTOMER NUMBER",
-            dataIndex: "customerId",
-            key: "customerId",
+            dataIndex: "customerNumber",
+            key: "customerNumber",
             width: 150,
             align: "center",
         },
@@ -99,8 +98,8 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
         },
         {
             title: "TYPE",
-            dataIndex: "type",
-            key: "type",
+            dataIndex: "warrantyType",
+            key: "warrantyType",
             width: 120,
             align: "center",
         },
@@ -113,11 +112,10 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
         },
         {
             title: "DOCUMENT DATE",
-            dataIndex: "effectiveDate",
-            key: "effectiveDate",
+            dataIndex: "mutationDate",
+            key: "mutationDate",
             width: 150,
-            align: "left",
-            render: (val) => val ? moment(val).format("DD-MM-YYYY") : "-"
+            align: "center",
         },
         {
             title: "ISSUER",
@@ -160,7 +158,7 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
             dataIndex: "rateDate",
             key: "rateDate",
             width: 150,
-            align: "left",
+            align: "center",
         },
         {
             title: "RATE",
@@ -171,10 +169,10 @@ const ModalSearchWarranty = ({ isOpen, onClose, onConfirm, customerId }) => {
         },
         {
             title: "EQV BALANCE AMOUNT",
-            dataIndex: "currencyBalance",
-            key: "currencyBalance",
+            dataIndex: "equivalent",
+            key: "equivalent",
             width: 180,
-            align: "center",
+            align: "right",
             render: (val) => val?.toLocaleString(),
         },
         {

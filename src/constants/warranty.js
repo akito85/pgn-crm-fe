@@ -31,3 +31,8 @@ export const CLAIM_PERIOD_TERM_TYPES = {
     AFTER: 'AFTER',
 };
 
+export const CLAIM_PERIOD_TERM_OPTIONS = [
+    { name: 'Date', value: CLAIM_PERIOD_TERM_TYPES.DATE },
+    { name: 'After', value: CLAIM_PERIOD_TERM_TYPES.AFTER },
+];
+
