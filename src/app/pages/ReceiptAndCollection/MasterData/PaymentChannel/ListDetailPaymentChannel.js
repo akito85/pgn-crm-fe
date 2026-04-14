@@ -11,7 +11,7 @@ import {
   getDetailPaymentChannel,
 } from "../../../../../redux/slices/receipt_collection/paymentChannel";
 import FooterDetail from "../../../../../components/FooterDetail";
-import { Tabs } from "antd";
+import { Tabs, Spin } from "antd";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailPaymentChannel from "./DetailPaymentChannel";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -24,6 +24,7 @@ const ListDetailPaymentChannel = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [modalApprove, setModalApprove] = useState(false);
+  const [loadingConfirm, setLoadingConfirm] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
   const id = location?.state?.id;
   const [dataHeader, setDataHeader] = useState({});
@@ -101,6 +102,7 @@ const ListDetailPaymentChannel = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
+    setLoadingConfirm(true);
     if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_PAYMENT_CHANNEL") {
       const data = {
         id: id,
@@ -113,7 +115,9 @@ const ListDetailPaymentChannel = () => {
         .then(() => {
           handleClear();
           setModalApprove(false);
-        });
+          setLoadingConfirm(false);
+        })
+        .catch(() => setLoadingConfirm(false));
     } else {
       const data = {
         id: id,
@@ -126,7 +130,9 @@ const ListDetailPaymentChannel = () => {
         .then(() => {
           handleClear();
           setModalApprove(false);
-        });
+          setLoadingConfirm(false);
+        })
+        .catch(() => setLoadingConfirm(false));
     }
   };
 
@@ -139,9 +145,10 @@ const ListDetailPaymentChannel = () => {
   return (
     <>
       <BreadCrumb routes={routes} />
-      <div>
-        <Tabs
-          activeKey={segmentedPage}
+      <Spin spinning={loading}>
+        <div>
+          <Tabs
+            activeKey={segmentedPage}
           onChange={setSegmentedPage}
           items={[
             {
@@ -173,7 +180,8 @@ const ListDetailPaymentChannel = () => {
             },
           ]}
         />
-      </div>
+        </div>
+      </Spin>
 
       <ModalApproveOrReject
         isOpen={modalApprove}
@@ -182,8 +190,8 @@ const ListDetailPaymentChannel = () => {
         header={approveOrReject}
         approveOrReject={approveOrReject}
         menu={"Delivery Channel"}
-        named={data_detail?.peOpCi?.name
-        }
+        named={data_detail?.peOpCi?.name}
+        loading={loadingConfirm}
       />
 
       <FooterDetail
