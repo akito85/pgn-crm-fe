@@ -185,15 +185,16 @@ const ViewPaymentChannel = () => {
     }
   }, [dataApprovalHistory]);
 
-  const handleApprovalHistory = async (id) => {
+  const handleApprovalHistory = async (recordId) => {
     try {
-      setBody(id);
-      await dispatch(getApprovalHistory(id))?.unwrap();
+      setBody(recordId);
+      await dispatch(getApprovalHistory(recordId))?.unwrap();
       setOpenModalHistory(true);
-    } catch (error) {
+    } catch {
       setOpenModalHistory(false);
     }
   };
+
   const handleInactive = (r) => {
     setOpenModalInactivate(true);
     setId(r?.id);
@@ -209,19 +210,28 @@ const ViewPaymentChannel = () => {
 
   const handleSubmitModalInactivate = (res, handleClear) => {
     const targetStatus = (status || "").toLowerCase() === "inactive" ? "Active" : "Inactive";
-    const body = {
-      id: id,
+    const reqBody = {
+      id,
       appHierId: res.approvalHierarchy,
       status: targetStatus,
       remark: res.remark,
     };
-    setBody({ body });
-    dispatch(inactivePaymentChannel({ body }))
+    setBody({ body: reqBody });
+    dispatch(inactivePaymentChannel({ body: reqBody }))
       .unwrap()
       .then(() => {
         handleClear();
         handleCancelModalInactivate();
-        handleRefresh();
+        dispatch(
+          getPaginatePaymentChannel({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+            isLoadMore: false,
+          })
+        );
+        setPage(1);
       });
   };
 
@@ -253,6 +263,7 @@ const ViewPaymentChannel = () => {
         dataIndex: "code",
         width: 180,
         sorter: true,
+        align: "left",
         isClassification: true,
         filteredValue: search?.code !== undefined ? [search.code] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -263,10 +274,11 @@ const ViewPaymentChannel = () => {
       },
       {
         key: "name",
-        title: "NAME",
+        title: "DELIVERY CHANNEL NAME",
         dataIndex: "name",
         width: 180,
         sorter: true,
+        align: "left",
         isClassification: true,
         filteredValue: search?.name !== undefined ? [search.name] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -276,25 +288,12 @@ const ViewPaymentChannel = () => {
           renderColumn("name", hasValue(search["name"]), searchText, text, true, "input", search),
       },
       {
-        key: "category",
-        title: "CATEGORY",
-        dataIndex: "category",
-        width: 150,
-        sorter: true,
-        isClassification: true,
-        filteredValue: search?.category !== undefined ? [search.category] : null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search, "category", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
-        ),
-        render: (text) =>
-          renderColumn("category", hasValue(search["category"]), searchText, text, true, "input", search),
-      },
-      {
         key: "startDate",
         title: "START DATE",
         dataIndex: "startDate",
         width: 130,
         sorter: true,
+        align: "left",
         isClassification: true,
         filteredValue: search?.startDate !== undefined ? [search.startDate] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -309,6 +308,7 @@ const ViewPaymentChannel = () => {
         dataIndex: "endDate",
         width: 130,
         sorter: true,
+        align: "left",
         isClassification: true,
         filteredValue: search?.endDate !== undefined ? [search.endDate] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -316,6 +316,20 @@ const ViewPaymentChannel = () => {
         ),
         render: (text) =>
           renderDateColumn("endDate", hasValue(search["endDate"]), searchText, text, "date", search),
+      },
+      {
+        key: "category",
+        title: "CATEGORY",
+        dataIndex: "category",
+        width: 150,
+        sorter: true,
+        isClassification: true,
+        filteredValue: search?.category !== undefined ? [search.category] : null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search, "category", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
+        ),
+        render: (text) =>
+          renderColumn("category", hasValue(search["category"]), searchText, text, true, "input", search),
       },
       {
         key: "status",
@@ -478,7 +492,6 @@ const ViewPaymentChannel = () => {
           >
             <div>
               <Checkbox
-                onClick={() => handleInactive(record)}
                 checked={!isActive}
                 disabled={disabledActionByStatus(
                   "activate",
