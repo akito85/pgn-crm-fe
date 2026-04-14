@@ -39,7 +39,7 @@ const Relationship = ({
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateId, setInactivateId] = useState(0);
-  const [inactivateName, setInactivateName] = useState("");
+  const [inactivateNumber, setInactivateNumber] = useState("");
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
@@ -53,14 +53,15 @@ const Relationship = ({
    * @param {number} relationshipId
    * @param {string} name
    */
-  const handleInactivateModal = (show, relationshipId = 0, name = "") => {
+  const handleInactivateModal = (show, relationshipId = 0, relatedNumber = "") => {
+    console.log({show, relationshipId, relatedNumber});
     if (show) {
       setInactivateId(relationshipId);
-      setInactivateName(name);
+      setInactivateNumber(relatedNumber);
       setShowInactiveModal(true);
     } else {
       setInactivateId(0);
-      setInactivateName("");
+      setInactivateNumber("");
       setShowInactiveModal(false);
     }
   };
@@ -161,9 +162,9 @@ const Relationship = ({
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
-          customMessage={`Are you sure you want to inactivate relationship - ${inactivateName}?`}
+          customMessage={`Are you sure you want to inactivate relationship - ${inactivateNumber}?`}
           onFinish={({ remark, appHierId }, handleClear) => handleInactivate({ remark, appHierId }, handleClear)}
-          named={inactivateName}
+          named={inactivateNumber}
           menu="relationship"
           sliceName="relationship"
           approvalOptionsName="list_relationshipApprovalHierarchy"

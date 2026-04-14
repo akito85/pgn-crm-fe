@@ -59,7 +59,7 @@ const NxInactivateModal = ({
 
   useEffect(() => {
     dispatch(getApprovalOptions())
-  }, [])
+  }, []);
 
   return (
     <NxModal
