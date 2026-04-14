@@ -29,21 +29,24 @@ import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer"
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import { nxRemoveKeys } from "../../../../../../../components/Nx/NxRemoveKeys";
 
+/**
+ * Three-step form (Relationship → Approval → Attachment) for creating or
+ * updating a relationship record against an existing account.
+ * Supports Standard and One-Time account types. Navigates back to the
+ * appropriate account detail page on success.
+ *
+ * @param {{ formType?: "create" | "update"; accountType?: "standard" | "oneTime"; }} props
+ */
 const CreateUpdateRelationship = ({
   accountType = "standard",
   formType = "create",
 }) => {
-  //declare
-  const [form] = Form.useForm();
-  const navigate = useNavigate();
+  // --- Hooks ---
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const containerRef = useRef(null);
-  const id = location?.state?.id;
-
-  const accountId = location?.state?.idAccount;
-  const customerId = location?.state?.idCustomer;
-
+  const [form] = Form.useForm();
   const {
     list_relationshipAttachmentCategory,
     list_relationshipApprovalHierarchy,
@@ -56,13 +59,19 @@ const CreateUpdateRelationship = ({
     loading_detailRelationshipApprovalHierarchy,
     loading_listRelationshipApprovalHierarchy,
     loading_detailDraftRelationship,
-  } = useSelector(
-    (state) => state.relationship
-  );
+  } = useSelector((state) => state.relationship);
 
+  // --- State ---
+  const [current, setCurrent] = useState(0);
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [confirmationType, setConfirmationType] = useState("");
+  const [relatedDetails, setRelatedDetails] = useState([]);
+
+  // --- Derived values ---
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
-
   const isCreate = formType === "create";
   const isUpdate = formType === "update";
 
@@ -71,6 +80,10 @@ const CreateUpdateRelationship = ({
     loading_listRelationshipApprovalHierarchy ||
     loading_detailRelationshipApprovalHierarchy ||
     loading_detailDraftRelationship;
+
+  const id = location?.state?.id;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
 
   const status = detail_relationship.status || "DRAFT";
   const statusApproval = detail_relationship.statusApproval || "DRAFT";
@@ -87,19 +100,27 @@ const CreateUpdateRelationship = ({
     ? detailDraft_relationship
     : detail_relationship;
 
-  //state
-  const [current, setCurrent] = useState(0);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [confirmationType, setConfirmationType] = useState("");
+  const formFields = [
+    [
+      "relationshipType",
+      "relationshipCategory",
+      "relatedName",
+      "relatedNumber",
+      "startDate",
+    ],
+    [
+      "appHierId",
+    ],
+    []
+  ];
 
-  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
-  const [deletedAttachments, setDeletedAttachments] = useState([]);
-  const [relatedDetails, setRelatedDetails] = useState([]);
-
+  // --- Effects ---
+  // Fetch approval hierarchy options
   useEffect(() => {
     dispatch(getRelationshipApprovalHierarchies());
   }, []);
 
+  // Fetch relationship record and draft
   useEffect(() => {
     if (formType === "update" && id) {
       dispatch(getRelationship({ accountId, idRelationship: id }));
@@ -107,10 +128,11 @@ const CreateUpdateRelationship = ({
     }
   }, [formType, id]);
 
+  // Pre-fill form fields when record and hierarchy are loaded
   useEffect(() => {
     if (
       isUpdate &&
-      list_relationshipApprovalHierarchy.length && 
+      list_relationshipApprovalHierarchy.length &&
       list_relationshipType.length &&
       list_relationshipCategory.length
     ) {
@@ -131,71 +153,66 @@ const CreateUpdateRelationship = ({
     }
   }, [detail, list_relationshipApprovalHierarchy, formType]);
 
+  // --- Functions / handlers ---
+  /**
+   * Fetches and displays the approval hierarchy for the selected option,
+   * then sets `appHierName` in the form.
+   *
+   * @param {number} appHierId
+   * @param {string} approvalName
+   */
   const handleSelectHierarchy = (appHierId, approvalName) => {
     if (accountId && appHierId)
       dispatch(getRelationshipApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
-  const handleSubmitForm = async () => {
-    const {
-      relationshipType,
-      relationshipCategory,
-      relatedId: relatedAccountId,
-      startDate,
-      endDate,
-      appHierId,
-      remark,
-    } = form.getFieldsValue(true);
+  /** Resets the form to its initial state based on `formType`. */
+  const handleClear = () => {
+    if (isCreate) {
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
+      setRelatedDetails([]);
+      form.resetFields();
+      setCurrent(0);
+    } else if (isUpdate) {
+      if (detail_relationship && detail_relationship.id) {
+        form.setFieldsValue({
+          relationshipType: detail.relationshipType,
+          relationshipCategory: detail.relationshipCategory,
+          relatedName: detail.accountName,
+          relatedNumber: detail.accountNumber,
+          startDate: detail.startDate,
+          endDate: detail.endDate,
+          description: detail.description || "",
+          appHierId: detail.appHierId,
+          appHierName: detail.appHierName,
+        });
 
-    const attachments = nxRemoveKeys([
-      ...attachmentDataSource.filter((a) => ["exist", "draft"].includes(a.dataType)),
-      ...deletedAttachments,
-    ]);
-    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
+        const appHierOption = list_relationshipApprovalHierarchy.find(
+          (option) => option.appHierId === detail.appHierId
+        );
+        if (appHierOption)
+          handleSelectHierarchy(detail.appHierId, appHierOption.approvalName);
 
-    const payload = {
-      relationshipType,
-      relationshipCategory,
-      relatedAccountId,
-      accountId,
-      startDate: NxDate.formatForAPI(startDate),
-      endDate: NxDate.formatForAPI(endDate),
-      appHierId,
-      action: confirmationType,
-      remark,
-      attachments,
-    };
+        if (detail.relatedDetail && detail.relatedDetail.length > 0) {
+          setRelatedDetails(detail.relatedDetail);
+        } else {
+          setRelatedDetails([]);
+        }
+      }
 
-    const targetRoute = isStandard
-      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
-      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME;
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
 
-    try {
-      if (isCreate) {
-        await dispatch(createRelationship({
-          accountId,
-          payload,
-          attachments: newAttachments
-        })).unwrap(); 
-      } else if (isUpdate) {
-        await dispatch(updateRelationship({
-          accountId,
-          idRelationship: id,
-          payload,
-          attachments: newAttachments
-        })).unwrap();
-      } else return;
-    } catch {
-      return
+      setCurrent(0);
     }
-
-    setTimeout(() => {
-      navigate(targetRoute, { state: { idAccount: accountId, idCustomer: customerId } });
-    }, 2000);
   };
 
   /**
+   * Validates the current step (and runs pre-submission API validation for
+   * "submit" actions) before opening the confirmation modal.
+   *
    * @param {boolean} show
    * @param {"draft" | "submit"} submitType
    */
@@ -299,59 +316,11 @@ const CreateUpdateRelationship = ({
     }
   };
 
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "Account",
-    },
-    {
-      path:
-        isStandard ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
-        isOneTime ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
-          "",
-      breadcrumbName:
-        isStandard ?
-          "Account - Standard" :
-        isOneTime ?
-          "Account - One Time" :
-          "",
-    },
-    {
-      path:
-        isStandard ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
-        isOneTime ?
-          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
-          "",
-      breadcrumbName: "Detail Account",
-      state: {
-        idAccount: accountId,
-        idCustomer: customerId,
-      }
-    },
-    {
-      path: "",
-      breadcrumbName:
-        isCreate ? "Create Relationship" : "Update Relationship",
-    },
-  ];
-
-  const formFields = [
-    [
-      "relationshipType",
-      "relationshipCategory",
-      "relatedName",
-      "relatedNumber",
-      "startDate",
-    ],
-    [
-      "appHierId",
-    ],
-    []
-  ];
-
+  /**
+   * Validates the current step and calls
+   * `POST /v1/dbs/api/accounts/${accountId}/relationships/validate-step`
+   * before advancing to the next step.
+   */
   const next = async () => {
     try {
       if (current === 2) {
@@ -407,67 +376,132 @@ const CreateUpdateRelationship = ({
     setCurrent(current + 1);
   };
 
+  /** Moves back one step without validation. */
   const prev = () => {
     setCurrent(current - 1);
   };
 
+  /** Scrolls the step container right by 250 px. */
   const scrollRightHandler = () => {
     if (containerRef.current) {
       containerRef.current.scrollLeft += 250;
     }
   };
 
+  /** Async wrapper for `next()` bound to the Next button's `onClick`. */
+  const handleButtonNext = async () => {
+    await next();
+    scrollRightHandler();
+  };
+
+  /** Scrolls the step container left by 250 px. */
   const scrollLeftHandler = () => {
     if (containerRef.current) {
       containerRef.current.scrollLeft -= 250;
     }
   };
 
-  const handleClear = () => {
-    if (isCreate) {
-      setAttachmentDataSource([]);
-      setDeletedAttachments([]);
-      setRelatedDetails([]);
-      form.resetFields();
-      setCurrent(0);
-    } else if (isUpdate) {
-      if (detail_relationship && detail_relationship.id) {
-        form.setFieldsValue({
-          relationshipType: detail.relationshipType,
-          relationshipCategory: detail.relationshipCategory,
-          relatedName: detail.accountName,
-          relatedNumber: detail.accountNumber,
-          startDate: detail.startDate,
-          endDate: detail.endDate,
-          description: detail.description || "",
-          appHierId: detail.appHierId,
-          appHierName: detail.appHierName,
-        });
+  /**
+   * Builds the submission payload and dispatches `createRelationship` or
+   * `updateRelationship`, then uploads new attachments and navigates on success.
+   */
+  const handleSubmitForm = async () => {
+    const {
+      relationshipType,
+      relationshipCategory,
+      relatedId: relatedAccountId,
+      startDate,
+      endDate,
+      appHierId,
+      remark,
+    } = form.getFieldsValue(true);
 
-        const appHierOption = list_relationshipApprovalHierarchy.find(
-          (option) => option.appHierId === detail.appHierId
-        );
-        if (appHierOption)
-          handleSelectHierarchy(detail.appHierId, appHierOption.approvalName);
+    const attachments = nxRemoveKeys([
+      ...attachmentDataSource.filter((a) => ["exist", "draft"].includes(a.dataType)),
+      ...deletedAttachments,
+    ]);
+    // Filter only new attachments (not existing ones)
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
 
-        if (detail.relatedDetail && detail.relatedDetail.length > 0) {
-          setRelatedDetails(detail.relatedDetail);
-        } else {
-          setRelatedDetails([]);
-        }
-      }
+    const payload = {
+      relationshipType,
+      relationshipCategory,
+      relatedAccountId,
+      accountId,
+      startDate: NxDate.formatForAPI(startDate),
+      endDate: NxDate.formatForAPI(endDate),
+      appHierId,
+      action: confirmationType,
+      remark,
+      attachments,
+    };
 
-      setAttachmentDataSource([]);
-      setDeletedAttachments([]);
+    const targetRoute = isStandard
+      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME;
 
-      setCurrent(0);
+    try {
+      if (isCreate) {
+        await dispatch(createRelationship({
+          accountId,
+          payload,
+          attachments: newAttachments
+        })).unwrap();
+      } else if (isUpdate) {
+        await dispatch(updateRelationship({
+          accountId,
+          idRelationship: id,
+          payload,
+          attachments: newAttachments
+        })).unwrap();
+      } else return;
+    } catch {
+      return
     }
+
+    setTimeout(() => {
+      navigate(targetRoute, { state: { idAccount: accountId, idCustomer: customerId } });
+    }, 2000);
   };
 
-  const handleButtonNext = async () => {
-    await next();
-    scrollRightHandler();
-  };
+  const routes = [
+    {
+      path: "",
+      breadcrumbName: "Account",
+    },
+    {
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME :
+          "",
+      breadcrumbName:
+        isStandard ?
+          "Account - Standard" :
+        isOneTime ?
+          "Account - One Time" :
+          "",
+    },
+    {
+      path:
+        isStandard ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD :
+        isOneTime ?
+          ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME :
+          "",
+      breadcrumbName: "Detail Account",
+      state: {
+        idAccount: accountId,
+        idCustomer: customerId,
+      }
+    },
+    {
+      path: "",
+      breadcrumbName:
+        isCreate ? "Create Relationship" : "Update Relationship",
+    },
+  ];
 
   const steps = [
     {
