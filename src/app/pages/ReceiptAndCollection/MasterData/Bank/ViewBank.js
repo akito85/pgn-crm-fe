@@ -36,7 +36,8 @@ export const columnsBank = (
   searchText,
   handleSearch = () => {},
   handleInactive = () => {},
-  handleApprovalHistory = () => {}
+  handleApprovalHistory = () => {},
+  search = {}
 ) => [
   {
     title: "NO",
@@ -51,7 +52,7 @@ export const columnsBank = (
     key: "bankCode",
     sorter: true,
     align: "right",
-    ...getColumnSearchPropsPaging("bankCode", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsPaging("bankCode", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
   },
   {
     title: "BANK NAME",
@@ -59,7 +60,7 @@ export const columnsBank = (
     key: "bankName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("bankName", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsPaging("bankName", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
   },
   {
     title: "SHORT BANK NAME",
@@ -67,7 +68,7 @@ export const columnsBank = (
     key: "bankShortName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("bankShortName", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsPaging("bankShortName", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
   },
   {
     title: "OFFICE TYPE",
@@ -86,7 +87,7 @@ export const columnsBank = (
     key: "branchName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("branchName", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsPaging("branchName", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
   },
   {
     title: "TAX IDENTIFICATION NUMBER (NPWP)",
@@ -94,7 +95,7 @@ export const columnsBank = (
     key: "npwp",
     sorter: (a, b) => a.npwp.length - b.npwp.length,
     align: "right",
-    ...getColumnSearchPropsPaging("npwp", searchInput, searchedColumn, searchText, handleSearch, true),
+    ...getColumnSearchPropsPaging("npwp", searchInput, searchedColumn, searchText, handleSearch, true, "input", search),
     render: (text) =>
       searchedColumn === "npwp" ? (
         <Highlighter
@@ -115,7 +116,7 @@ export const columnsBank = (
     key: "phoneNumber",
     sorter: true,
     align: "right",
-    ...getColumnSearchPropsPaging("phoneNumber", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsPaging("phoneNumber", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
   },
   {
     title: "EMAIL",
@@ -123,7 +124,7 @@ export const columnsBank = (
     key: "email",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("email", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsPaging("email", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
   },
   {
     title: "ADDRESS",
@@ -131,7 +132,7 @@ export const columnsBank = (
     key: "address",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("address", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsPaging("address", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
   },
   {
     title: "STATUS",
@@ -140,7 +141,7 @@ export const columnsBank = (
     align: "left",
     fixed: "right",
     width: 150,
-    ...getColumnSearchPropsPaging("status", searchInput, searchedColumn, searchText, handleSearch, true),
+    ...getColumnSearchPropsPaging("status", searchInput, searchedColumn, searchText, handleSearch, true, "input", search),
     render: (a) => (
       <div className="flex justify-center">
         <StatusComponent colour={a}>{a}</StatusComponent>
@@ -154,7 +155,7 @@ export const columnsBank = (
     align: "left",
     fixed: "right",
     width: 250,
-    ...getColumnSearchPropsPaging("statusApproval", searchInput, searchedColumn, searchText, handleSearch, true),
+    ...getColumnSearchPropsPaging("statusApproval", searchInput, searchedColumn, searchText, handleSearch, true, "input", search),
     render: (a) => (
       <div className="flex justify-center">
         <StatusComponent colour={a}>{a}</StatusComponent>
@@ -504,8 +505,6 @@ const ViewBank = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
-  console.log(data)
-
   return (
     <>
       <Spin spinning={loading}>
@@ -533,7 +532,8 @@ const ViewBank = () => {
                 searchText,
                 handleSearch,
                 handleInactive,
-                handleApprovalHistory
+                handleApprovalHistory,
+                search
               ),
               ...useColumnActionPermission(["view", "history", "update", "activate"], itemActions),
             ]}
