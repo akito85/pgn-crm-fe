@@ -83,7 +83,7 @@ const TaxCodeDetail = () => {
       breadcrumbName: "Tax Code",
     },
     {
-      path: RBI_ROUTES.TAX_CODE_DETAIL,
+      path: "",
       breadcrumbName: "Detail Tax Code",
     },
   ];
@@ -176,7 +176,7 @@ const TaxCodeDetail = () => {
             updatedDate: data.updatedDate,
             updatedBy: data.updatedBy,
           };
-        }
+        },
       );
       setListDataDetail(dataConditionList);
       setListDataCriteria(dataCriteriaList);
@@ -211,7 +211,7 @@ const TaxCodeDetail = () => {
             id: item.id,
             criteria: item.criteria,
           };
-        }
+        },
       );
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
@@ -372,7 +372,7 @@ const TaxCodeDetail = () => {
           })
         : approvalRejectTaxCode({
             body: data,
-          })
+          }),
     )
       .unwrap()
       .then(() => {
