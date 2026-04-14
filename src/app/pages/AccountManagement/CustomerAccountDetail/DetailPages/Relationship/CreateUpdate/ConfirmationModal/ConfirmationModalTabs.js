@@ -58,6 +58,7 @@ const ConfirmationModalTabs = ({
       label: "Remark",
       disabled,
       children: <NxRemarkInput disabled={disabled} />,
+      required: true,
     },
   ]
     .filter(Boolean)
@@ -66,7 +67,7 @@ const ConfirmationModalTabs = ({
       children: tab.key === 0
         ? tab.children
         : (
-          <NxBaseContainer border header={tab.label.toUpperCase()}>
+          <NxBaseContainer border header={tab.label.toUpperCase()} required={tab.required}>
             {tab.children}
           </NxBaseContainer>
         ),
