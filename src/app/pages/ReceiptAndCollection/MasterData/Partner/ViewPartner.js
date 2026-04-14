@@ -223,6 +223,7 @@ const ViewPartner = () => {
         title: "PARTNER NAME",
         dataIndex: "partnerName",
         width: 200,
+        align: "left",
         sorter: true,
         isClassification: true,
         filteredValue: search?.partnerName !== undefined ? [search.partnerName] : null,
@@ -230,7 +231,9 @@ const ViewPartner = () => {
           search, "partnerName", searchInput, searchedColumn, searchText, handleSearch, true, "input", [], handleReset
         ),
         render: (text) =>
-          renderColumn("partnerName", hasValue(search["partnerName"]), searchText, text, true, "input", search),
+          <div className="w-full text-left">
+            {renderColumn("partnerName", hasValue(search["partnerName"]), searchText, text, true, "input", search)}
+          </div>,
       },
       {
         key: "effStartDate",
@@ -267,6 +270,7 @@ const ViewPartner = () => {
         title: "SEC KEY SIGNATURE",
         dataIndex: "secKeySignature",
         width: 180,
+        align: "left",
         sorter: true,
         isClassification: true,
         filteredValue: search?.secKeySignature !== undefined ? [search.secKeySignature] : null,
@@ -274,7 +278,9 @@ const ViewPartner = () => {
           search, "secKeySignature", searchInput, searchedColumn, searchText, handleSearch, false, "input", [], handleReset
         ),
         render: (text) =>
-          renderColumn("secKeySignature", hasValue(search["secKeySignature"]), searchText, text, true, "input", search),
+          <div className="w-full text-left">
+            {renderColumn("secKeySignature", hasValue(search["secKeySignature"]), searchText, text, true, "input", search)}
+          </div>,
       },
       {
         key: "tokenExpirationTime",

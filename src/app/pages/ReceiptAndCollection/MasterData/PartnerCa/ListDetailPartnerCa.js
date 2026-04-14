@@ -7,7 +7,7 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import { Tabs } from "antd";
+import { Tabs, Spin } from "antd";
 import {
   approveOrRejectPartner,
   approveOrRejectInactivePartnerCa,
@@ -144,41 +144,43 @@ const ListDetailPartnerCa = () => {
   return (
     <>
       <BreadCrumb routes={routes} />
-      <div>
-        <Tabs
-          activeKey={segmentedPage}
-          onChange={setSegmentedPage}
-          items={[
-            {
-              label: "Partner Collecting Agent Mapping",
-              key: "Partner Ca",
-              children: (
-                <DetailPartnerCa
-                  key={"active"}
-                  data_detail={dataHeader}
-                  data_req={data_detail?.tApprovalDto}
-                />
-              ),
-            },
-            {
-              label: "Attachment",
-              key: "Attachment",
-              children: (
-                <BaseContainer header={"ATTACHMENT INFORMATION"}>
-                  <AttachmentComponent
-                    type={"detail"}
-                    data={listDataAttachment}
-                    updateData={setListDataAttachment}
-                    typeSelector="partner"
-                    service={receiptCollectionHttpService}
-                    configApplication={configApp.PAYMENT_SERVICE}
+      <Spin spinning={loading}>
+        <div>
+          <Tabs
+            activeKey={segmentedPage}
+            onChange={setSegmentedPage}
+            items={[
+              {
+                label: "Partner Collecting Agent Mapping",
+                key: "Partner Ca",
+                children: (
+                  <DetailPartnerCa
+                    key={"active"}
+                    data_detail={dataHeader}
+                    data_req={data_detail?.tApprovalDto}
                   />
-                </BaseContainer>
-              ),
-            },
-          ]}
-        />
-      </div>
+                ),
+              },
+              {
+                label: "Attachment",
+                key: "Attachment",
+                children: (
+                  <BaseContainer header={"ATTACHMENT INFORMATION"}>
+                    <AttachmentComponent
+                      type={"detail"}
+                      data={listDataAttachment}
+                      updateData={setListDataAttachment}
+                      typeSelector="partner"
+                      service={receiptCollectionHttpService}
+                      configApplication={configApp.PAYMENT_SERVICE}
+                    />
+                  </BaseContainer>
+                ),
+              },
+            ]}
+          />
+        </div>
+      </Spin>
 
       <ModalApproveOrReject
         isOpen={modalApprove}

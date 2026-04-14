@@ -10,7 +10,8 @@ import {
     approveOrRejectTransferToCustomer,
     getListCategory,
     getAllApprovalList,
-    getListApprovalById
+    getListApprovalById,
+    resetDetailState
 } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
 import { showModalSuccess } from "../../../../../redux/slices/general_slice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -200,7 +201,7 @@ const ListDetailTransferToCustomer = () => {
         },
     ];
 
-    const handleConfirm = (res, handleClear) => {
+    const handleConfirm = async (res, handleClear) => {
         const data = {
             id: id,
             remark: res.remark,
@@ -208,16 +209,15 @@ const ListDetailTransferToCustomer = () => {
             action: approveOrReject.toUpperCase(),
         };
 
-        dispatch(approveOrRejectTransferToCustomer({ body: data }))
-            .unwrap()
-            .then((payload) => {
-                handleClear();
-                setModalApprove(false);
-            })
-            .catch(() => {
-                handleClear();
-                setModalApprove(false);
-            });
+        try {
+            await dispatch(approveOrRejectTransferToCustomer({ body: data })).unwrap();
+            handleClear();
+            setModalApprove(false);
+        } catch (error) {
+            // Error sudah di-handle di thunk
+            handleClear();
+            setModalApprove(false);
+        }
     };
 
     const handleCancel = () => {
