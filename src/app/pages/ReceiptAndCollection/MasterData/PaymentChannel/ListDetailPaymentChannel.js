@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import {
   approveOrRejectPaymentChannel,
@@ -11,7 +10,7 @@ import {
   getDetailPaymentChannel,
 } from "../../../../../redux/slices/receipt_collection/paymentChannel";
 import FooterDetail from "../../../../../components/FooterDetail";
-import { Tabs, Spin } from "antd";
+import { Tabs, Spin, message } from "antd";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailPaymentChannel from "./DetailPaymentChannel";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -103,41 +102,36 @@ const ListDetailPaymentChannel = () => {
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
     setLoadingConfirm(true);
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_PAYMENT_CHANNEL") {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectInactivePaymentChannel({ body: data }))
-        .unwrap()
-        .then(() => {
-          handleClear();
-          setModalApprove(false);
-          setLoadingConfirm(false);
-        })
-        .catch(() => setLoadingConfirm(false));
-    } else {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectPaymentChannel({ body: data }))
-        .unwrap()
-        .then(() => {
-          handleClear();
-          setModalApprove(false);
-          setLoadingConfirm(false);
-        })
-        .catch(() => setLoadingConfirm(false));
-    }
+    const data = {
+      id: id,
+      remark: res.remark,
+      approvalId: data_detail?.tApprovalDto?.tAppId,
+      action: approveOrReject.toUpperCase(),
+    };
+
+    const actionCreator =
+      data_detail?.tApprovalDto?.approvalType === "INACTIVE_PAYMENT_CHANNEL"
+        ? approveOrRejectInactivePaymentChannel
+        : approveOrRejectPaymentChannel;
+
+    dispatch(actionCreator({ body: data }))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        setModalApprove(false);
+      })
+      .catch((error) => {
+        message.error(
+          error?.response?.data?.message ||
+            error?.data?.message ||
+            error?.message ||
+            "Gagal memproses permintaan. Silakan coba lagi."
+        );
+      })
+      .finally(() => setLoadingConfirm(false));
   };
 
   const handleCancel = () => {
-    // setRemark("");
     setModalApprove(false);
   };
 
