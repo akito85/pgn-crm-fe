@@ -1,8 +1,10 @@
-import RelationshipDetailAttch from "./RelationshipDetailAttch";
 import RelationshipDetailInfo from "./RelationshipDetailInfo";
 import { useState } from "react";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
+import { configApp } from "../../../../../../../constants/configApp";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 
 const RelationshipDetailTabs = ({
   detail = {},
@@ -19,8 +21,11 @@ const RelationshipDetailTabs = ({
       key: "attch",
       label: "Attachment",
       children: (
-        <RelationshipDetailAttch
-          attachments={attachments}
+        <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
         />
       ),
     },
