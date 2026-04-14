@@ -197,7 +197,9 @@ const ViewPaymentChannel = () => {
   const handleInactive = (r) => {
     setOpenModalInactivate(true);
     setId(r?.id);
-    setNameModalActiveOrInactivate(r?.code + " - " + r?.name);
+    const code = r?.code ?? r?.ciCode ?? "Unknown";
+    const name = r?.name ?? "-";
+    setNameModalActiveOrInactivate(`${code} - ${name}`);
     setStatus(r?.status);
   };
 
@@ -456,7 +458,6 @@ const ViewPaymentChannel = () => {
               type="action"
             >
               <Checkbox
-                onClick={() => handleInactive(record)}
                 checked={!isActive}
                 disabled={disabledActionByStatus(
                   "activate",

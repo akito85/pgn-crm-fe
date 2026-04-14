@@ -113,7 +113,7 @@ const GLAccountDetail = () => {
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
     { path: RBI_ROUTES.GLACCOUNT, breadcrumbName: "GL Account" },
-    { path: RBI_ROUTES.GLACCOUNT_DETAIL, breadcrumbName: "Detail" },
+    { path: RBI_ROUTES.GLACCOUNT_DETAIL, breadcrumbName: "Detail GL Account" },
   ];
 
   const handleRetry = () => {
@@ -162,7 +162,7 @@ const GLAccountDetail = () => {
     <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        
+
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
