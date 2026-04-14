@@ -113,7 +113,8 @@ const RelationshipApprovalModal = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const [tempFilters, setTempFilters] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
@@ -124,11 +125,12 @@ const RelationshipApprovalModal = ({
   useEffect(() => {
     if (isOpen) {
       const body = {
-        inputFields: tempFilters,
         page,
         size: loadMoreSize,
         sort,
         searchs: search,
+        filters,
+        filterRules,
       };
 
       dispatch(
@@ -175,11 +177,12 @@ const RelationshipApprovalModal = ({
 
     if (nextPage <= totalPages) {
       const body = {
-        inputFields: tempFilters,
         page: nextPage,
         size: loadMoreSize,
         sort,
         searchs: search,
+        filters,
+        filterRules,
       };
 
       dispatch(
