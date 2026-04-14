@@ -71,6 +71,7 @@ const ListCreateForm = ({ type }) => {
   const [criteriaOptions, setCriteriaOptions] = useState([]);
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [list, setList] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [storedData, setStoredData] = useState(false);
@@ -188,7 +189,7 @@ const ListCreateForm = ({ type }) => {
     },
     {
       path: RBI_ROUTES.TERMS_OF_PAYMENT_CREATE,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      breadcrumbName: `${type === "create" ? "Create Terms of Payment" : "Update Terms of Payment"}`,
     },
   ];
 
@@ -267,6 +268,23 @@ const ListCreateForm = ({ type }) => {
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setTabData, listDataAttachment, errorFields);
   };
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // untuk upadate
 
@@ -463,6 +481,7 @@ const ListCreateForm = ({ type }) => {
       form.resetFields();
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setAppHierDataDetail([]);
       setIsC(false);
       setIsSat(false);
@@ -799,6 +818,12 @@ const ListCreateForm = ({ type }) => {
         .then(async (data) => {
           let id = data?.termsOfPaymentId;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const body = {
@@ -834,6 +859,12 @@ const ListCreateForm = ({ type }) => {
         .unwrap()
         .then(async () => {
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist",
           );
@@ -968,7 +999,7 @@ const ListCreateForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 typeSelector="top"

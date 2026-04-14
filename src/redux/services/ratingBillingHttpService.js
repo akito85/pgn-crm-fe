@@ -81,7 +81,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       baseUrl + url,
       { id: id },
-      { headers: buildHeaders(baseUrl) }
+      { headers: buildHeaders(baseUrl) },
     );
     return response?.data;
   } catch (error) {
@@ -227,6 +227,20 @@ const deleteData = async (url) => {
   }
 };
 
+const deleteDataWithBody = async (url, body) => {
+  try {
+    const baseUrl = configApp.RATING_BILLING_SERVICE;
+
+    const response = await axios.delete(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+      data: body,
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const activationWithRemark = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
@@ -262,7 +276,7 @@ const uploadAttachment = async (url, body, onProgress, customBaseUrl) => {
       headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
       onUploadProgress: (progressEvent) => {
         const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
+          (progressEvent.loaded * 100) / progressEvent.total,
         );
         onProgress(percentCompleted);
       },
@@ -358,7 +372,7 @@ const previewOrDownloadData = async (url, params, customBaseUrl) => {
 const downloadXlsx = async (
   url,
   fallbackFilename = "download",
-  customBaseUrl
+  customBaseUrl,
 ) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
@@ -468,6 +482,7 @@ const ratingBillingHttpService = {
   updateData,
   activationWithRemark,
   deleteData,
+  deleteDataWithBody,
   getWithBody,
   getListPagination,
   downloadData,

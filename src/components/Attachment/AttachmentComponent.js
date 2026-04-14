@@ -75,12 +75,14 @@ const columnAttachmentData = (
 ) => {
   const res = [
     {
+      key: "no",
       title: "NO",
       width: 30,
       align: "center",
       render: (text, object, index) => index + 1,
     },
     {
+      key: "fileCategoryName",
       title: "CATEGORY",
       width: 75,
       dataIndex: "fileCategoryName",
@@ -96,6 +98,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "fileName",
       title: "FILE NAME",
       width: 200,
       dataIndex: "fileName",
@@ -131,6 +134,7 @@ const columnAttachmentData = (
         ),
     },
     {
+      key: "createdBy",
       title: "UPLOADED BY",
       width: 100,
       dataIndex: "createdBy",
@@ -145,6 +149,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "createdDate",
       title: "UPLOADED DATE",
       align: "center",
       width: 100,
@@ -160,6 +165,7 @@ const columnAttachmentData = (
       ),
     },
     {
+      key: "fileSize",
       title: "FILE SIZE",
       align: "center",
       width: 100,

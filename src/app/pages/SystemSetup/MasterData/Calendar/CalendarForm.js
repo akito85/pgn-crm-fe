@@ -262,6 +262,7 @@ const CalendarForm = ({ type }) => {
     });
 
     setStartDate(callendar.startDate ? moment(callendar.startDate) : undefined);
+    setEndDate(callendar.endDate ? moment(callendar.endDate) : undefined);
     setSelectedHierarchy(callendar.apphierId);
     setListDataAttachment(mapAttachments(data_detail?.attachments));
     setCriteriaValues(criteriaSelect || []);
@@ -812,13 +813,7 @@ const CalendarForm = ({ type }) => {
                     },
                   ]}
                 >
-                  <DateComponent
-                    onChange={(e) => handleStartDate(e)}
-                    disabled={
-                      (status !== "DRAFT" && type === "update") ||
-                      isDisabledDate
-                    }
-                  />
+                  <DateComponent onChange={(e) => handleStartDate(e)} />
                 </Form.Item>
 
                 <Form.Item
@@ -838,7 +833,6 @@ const CalendarForm = ({ type }) => {
                   <DateComponent
                     onChange={(e) => handleEndDate(e)}
                     dateDisable={handleDisableEndDate}
-                    disabled={isDisabledDate}
                   />
                 </Form.Item>
 

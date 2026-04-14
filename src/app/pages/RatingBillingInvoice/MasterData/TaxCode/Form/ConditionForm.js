@@ -299,7 +299,11 @@ const ConditionForm = ({
 
   const handleFinish = useCallback(
     (value) => {
-      const setDataRow = setRow(value, data);
+      const normalizedValue = {
+        ...value,
+        endDate: value.endDate ? value.endDate : null,
+      };
+      const setDataRow = setRow(normalizedValue, data);
 
       const isNameChosen = data.some(
         (item) =>

@@ -96,6 +96,7 @@ const BankForm = ({ type }) => {
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
 
+  const [flag, setFlag] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [kirimBody, setKirimBody] = useState({});
   const [codeBank, setCodeBank] = useState("");
@@ -150,6 +151,7 @@ const BankForm = ({ type }) => {
         phoneNumber: bank.phoneNumber,
         email: bank.email,
         address: bank.address,
+        apphierId: bank.appHierId,
       });
       setCodeBank(bank.bankCode);
 
@@ -195,7 +197,8 @@ const BankForm = ({ type }) => {
       }
 
       if (data_detail.attachmentDtoList?.length > 0) {
-        const mappedAtt = data_detail.attachmentDtoList.map((att) => ({
+        const mappedAtt = data_detail.attachmentDtoList.map((att, index) => ({
+          key: index + 1,
           id: att.id,
           uid: att.id,
           name: att.fileName,
@@ -363,7 +366,17 @@ const BankForm = ({ type }) => {
     setListDataAttachment([]);
   };
 
-  const handleSaveSubmit = async () => {
+  const handleSubmit = () => {
+    setFlag(true);
+    handleSaveSubmit(true);
+  };
+
+  const handleSaveDraft = () => {
+    setFlag(false);
+    handleSaveSubmit(false);
+  };
+
+  const handleSaveSubmit = async (isSubmit = true) => {
     try {
       if (listDataAttachment.length === 0) {
         message.error("Attachment wajib diupload minimal 1 dokumen!");
@@ -424,6 +437,7 @@ const BankForm = ({ type }) => {
         bankShortName: formValue.bankShortName,
         bankContacts: formattedContacts,
         glAccounts: formattedGLAccounts,
+        isSubmit,
       };
 
       setKirimBody(dataValue);
@@ -482,8 +496,12 @@ const BankForm = ({ type }) => {
         setLoadingForm(false);
         setModalConfirm(false);
         handleClear();
-        dispatch(showModalSuccess({ title: "Successful", description: "Your data has been submitted" }));
-        navigate(-1);
+        dispatch(showModalSuccess({
+          title: "Successful",
+          description: `Your data has been ${kirimBody.isSubmit ? "submitted" : "saved as draft"}.`,
+          return: false,
+        }));
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK);
       })
       .catch((error) => {
         setLoadingForm(false);
@@ -581,7 +599,8 @@ const BankForm = ({ type }) => {
               onNext={handleNext}
               onCancel={handleBack}
               onClear={handleClear}
-              onSubmit={handleSaveSubmit}
+              onSaveDraft={handleSaveDraft}
+              onSubmit={handleSubmit}
               type={type}
             />
           </Form>
@@ -613,6 +632,10 @@ const BankForm = ({ type }) => {
             listDataAppHierDetail={appHierDataDetail}
             dataOption={appHierOptions}
             selectedHierarchy={selectedHierarchy}
+            glTypeOptions={glTypeOptions}
+            jobOptions={jobOptions}
+            positionOptions={positionOptions}
+            addressOptions={addressOptions}
           />
         </ModalCustom>
 

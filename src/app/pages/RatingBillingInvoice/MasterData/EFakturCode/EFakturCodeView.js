@@ -288,7 +288,9 @@ const EFakturCodeView = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20px" }} />
+          }
           onClick={() => {
             handleDownload();
           }}
@@ -302,7 +304,9 @@ const EFakturCodeView = () => {
       render: (
         <NavLink to={RBI_ROUTES.EFAKTUR_CODE_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20px" }} />
+            }
             type="submit"
           >
             Create E-Faktur Code

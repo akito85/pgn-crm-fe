@@ -176,17 +176,19 @@ const ViewTransferToReceipt = () => {
   };
 
   const handleConfirmDelete = () => {
-    dispatch(deleteTransferToReceipt(selectedRecord.id)).unwrap().then(() => {
-      setOpenModalDelete(false);
-      dispatch(
-        getAllTransferToReceiptListPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
-          sort,
-        })
-      );
-    });
+    setOpenModalDelete(false);
+    setSelectedRecord(null);
+    dispatch(deleteTransferToReceipt(selectedRecord.id)).unwrap()
+      .then(() => {
+        dispatch(
+          getAllTransferToReceiptListPaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page,
+            pageSize,
+            sort,
+          })
+        );
+      });
   };
 
   const handleDetail = (record) => {

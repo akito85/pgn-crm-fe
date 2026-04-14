@@ -153,12 +153,12 @@ const EFakturCodeDetail = () => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.EFAKTUR_CODE_VIEW,
-      breadcrumbName: "Efaktur Code",
+      path: RBI_ROUTES.EFAKTUR_CODE,
+      breadcrumbName: "E-faktur Code",
     },
     {
       path: RBI_ROUTES.EFAKTUR_CODE_DETAIL,
-      breadcrumbName: "Detail Efaktur Code",
+      breadcrumbName: "Detail E-faktur Code",
     },
   ];
 

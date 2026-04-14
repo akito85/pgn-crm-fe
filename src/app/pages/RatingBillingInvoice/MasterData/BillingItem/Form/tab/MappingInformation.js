@@ -45,6 +45,10 @@ const MappingInformation = ({
   onTabChange = () => {},
   activeTab = "mapping",
   setActiveTab = () => {},
+  defaultCriteriaValues = {},
+  disabledCriteriaColumns = [],
+  isBank = false,
+  data_glAccountBankList = [],
 }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -271,6 +275,10 @@ const MappingInformation = ({
             endDateLock={endDate}
             setModalRequired={setModalRequired}
             onCancelEdit={handleCriteriaCancelEdit}
+            defaultNewRowValues={defaultCriteriaValues}
+            disabledColumns={disabledCriteriaColumns}
+            isBank={isBank}
+            data_glAccountBankList={data_glAccountBankList}
           />
         )}
       </CardContainer>

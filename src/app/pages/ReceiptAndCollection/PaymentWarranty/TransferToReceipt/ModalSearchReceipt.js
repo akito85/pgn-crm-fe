@@ -11,7 +11,7 @@ import { getReceiptListColumns } from "./ReceiptListColumns";
 
 const ModalSearchReceipt = ({ isOpen, onClose, onConfirm, category, customerNumber }) => {
     const dispatch = useDispatch();
-    const { listReceipt } = useSelector((state) => state.transferToReceipt);
+    const { listReceipt, loading } = useSelector((state) => state.transferToReceipt);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [dataSource, setDataSource] = useState([]);
@@ -118,6 +118,7 @@ const ModalSearchReceipt = ({ isOpen, onClose, onConfirm, category, customerNumb
                     dataSource={dataSource}
                     rowSelection={rowSelection}
                     pagination={false}
+                    loading={loading}
                     tableScrolled={{ x: 1500, y: 400 }}
                     usePagination={false}
                     showSearchBar={true}
