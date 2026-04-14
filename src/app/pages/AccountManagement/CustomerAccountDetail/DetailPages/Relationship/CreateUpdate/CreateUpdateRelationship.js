@@ -97,11 +97,8 @@ const CreateUpdateRelationship = ({
   const [relatedDetails, setRelatedDetails] = useState([]);
 
   useEffect(() => {
-    if (accountId) {
-      dispatch(getRelationshipAttachmentCategories({ accountId }));
-      dispatch(getRelationshipApprovalHierarchies({ accountId }));
-    }
-  }, [accountId]);
+    dispatch(getRelationshipApprovalHierarchies());
+  }, []);
 
   useEffect(() => {
     if (formType === "update" && id) {
@@ -136,7 +133,7 @@ const CreateUpdateRelationship = ({
 
   const handleSelectHierarchy = (appHierId, approvalName) => {
     if (accountId && appHierId)
-      dispatch(getRelationshipApprovalHierarchy({ accountId, appHierId }));
+      dispatch(getRelationshipApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -528,7 +525,7 @@ const CreateUpdateRelationship = ({
               data={attachmentDataSource}
               updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
-              getAPICategory={() => getRelationshipAttachmentCategories({ accountId })}
+              getAPICategory={getRelationshipAttachmentCategories}
               categoryData={list_relationshipAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}

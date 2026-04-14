@@ -38,6 +38,8 @@ const initialState = {
 
   // --- Approve / Reject ---
   loading_approveRejectRelationship: false,
+  loading_approveRelationship: false,
+  loading_rejectRelationship: false,
 
   // --- Inactivate ---
   loading_inactivateRelationship: false,
@@ -182,9 +184,9 @@ export const getRelationshipCategories = createAsyncThunk(
 // Get Approval Hierarchies
 export const getRelationshipApprovalHierarchies = createAsyncThunk(
   "GET_RELATION_APPROVAL_HIERARCHIES",
-  async ({ accountId }, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approval-hierarchies`;
+      const url = `/v1/dbs/api/accounts/relationships/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -196,9 +198,9 @@ export const getRelationshipApprovalHierarchies = createAsyncThunk(
 // Get Approval Hierarchy Detail
 export const getRelationshipApprovalHierarchy = createAsyncThunk(
   "GET_RELATIONSHIP_APPROVAL_HIERARCHY",
-  async ({ accountId, appHierId }, thunkAPI) => {
+  async (appHierId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approval-hierarchy/${appHierId}`;
+      const url = `/v1/dbs/api/accounts/relationships/approval-hierarchy/${appHierId}`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -353,9 +355,9 @@ export const updateRelationship = createAsyncThunk(
 // Get Attachment Category
 export const getRelationshipAttachmentCategories = createAsyncThunk(
   "GET_RELATIONSHIP_ATTACHMENT_CATEGORIES",
-  async ({ accountId }, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/relationships/attachment-category`;
+      const url = `/v1/dbs/api/accounts/relationships/attachment-category`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
@@ -467,6 +469,56 @@ export const approveOrRejectInactiveRelationship = createAsyncThunk(
 
       thunkAPI.dispatch(showModalError(errorBody));
 
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Approve or Reject All Relationship (active + inactive in one dispatch)
+export const approveOrRejectAllRelationship = createAsyncThunk(
+  "APPROVE_OR_REJECT_ALL_RELATIONSHIP",
+  async ({ accountId, body, inactiveBody, action }, thunkAPI) => {
+    try {
+      const approveUrl = `/v1/dbs/api/accounts/${accountId}/relationships/approve`;
+      const approveInactiveUrl = `/v1/dbs/api/accounts/${accountId}/relationships/approve-inactive`;
+
+      await Promise.all(
+        [
+          body && body.length > 0
+            ? accountManagementService.activationWithRemark(approveUrl, body, {
+                headers: { Accept: "application/json" },
+              })
+            : null,
+          inactiveBody && inactiveBody.length > 0
+            ? accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody, {
+                headers: { Accept: "application/json" },
+              })
+            : null,
+        ].filter(Boolean)
+      );
+
+      const successBody = {
+        title: "Successful",
+        description: `Your data has been ${action === "APPROVE" ? "approved" : "rejected"}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return { body, inactiveBody, action };
+    } catch (error) {
+      let message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occurred";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -778,6 +830,20 @@ const relationshipSlice = createSlice({
     },
     [approveOrRejectInactiveRelationship.rejected]: (state) => {
       state.loading_approveRejectRelationship = false;
+    },
+
+    // Approve or Reject All Relationship (combined)
+    [approveOrRejectAllRelationship.pending]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE") state.loading_approveRelationship = true;
+      else if (action.meta.arg?.action === "REJECT") state.loading_rejectRelationship = true;
+    },
+    [approveOrRejectAllRelationship.fulfilled]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE") state.loading_approveRelationship = false;
+      else if (action.meta.arg?.action === "REJECT") state.loading_rejectRelationship = false;
+    },
+    [approveOrRejectAllRelationship.rejected]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE") state.loading_approveRelationship = false;
+      else if (action.meta.arg?.action === "REJECT") state.loading_rejectRelationship = false;
     },
   },
 });
