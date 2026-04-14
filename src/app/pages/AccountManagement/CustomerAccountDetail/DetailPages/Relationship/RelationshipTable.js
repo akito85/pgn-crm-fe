@@ -340,7 +340,7 @@ const RelationshipTable = ({
         searchText,
         handleSearch
       ),
-    [search, searchText, searchedColumn]
+    [search, searchText, searchText, searchedColumn]
   );
 
   const columnDefinitions = useMemo(() => {
