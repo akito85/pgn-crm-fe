@@ -115,6 +115,27 @@ const columnAttachmentData = (
   return res;
 };
 
+/**
+ * Shared attachment input component used across create, update, detail,
+ * preview, and confirmation contexts.
+ *
+ * Renders a file attachment table with search, fixed-column pinning, and
+ * preview/download actions. In non-detail/non-confirmation/non-preview modes
+ * it also renders a "Choose File" button that opens the upload modal.
+ *
+ * @param {{
+ *   data?: object[];
+ *   updateData?: (updater: (prev: object[]) => object[]) => void;
+ *   setDeleted?: (updater: (prev: object[]) => object[]) => void;
+ *   type?: "detail" | "preview" | "confirmation" | undefined;
+ *   getAPICategory?: () => void;
+ *   categoryData?: { id: string|number; text: string }[];
+ *   service?: object;
+ *   configApplication?: string;
+ *   getAPIGuard?: () => any;
+ *   mandatory?: boolean;
+ * }} props
+ */
 const NxAttachmentInput = ({
   data = [],
   updateData = () => {},
@@ -127,6 +148,7 @@ const NxAttachmentInput = ({
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -157,6 +179,14 @@ const NxAttachmentInput = ({
     }
   }, [dispatch, getAPIGuard, type]);
 
+  // --- Functions / handlers ---
+
+  /**
+   * Confirms a column search and updates the active search state.
+   * @param {string[]} selectedKeys
+   * @param {() => void} confirm
+   * @param {string} dataIndex
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -164,6 +194,12 @@ const NxAttachmentInput = ({
     setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
   };
 
+  /**
+   * Removes an attachment from the list. If the record was previously saved
+   * as a draft (`dataType === "draft"`), it is also added to the deleted list
+   * so the API can clean it up on submit.
+   * @param {object} record
+   */
   const handleDelete = (record) => {
     updateData((prevState) =>
       prevState.filter((attachment) => attachment.key !== record.key)
@@ -180,11 +216,23 @@ const NxAttachmentInput = ({
     }
   };
 
+  /**
+   * Opens the attachment upload modal and fetches category options.
+   */
   const handleOpenModal = () => {
     setModalUpload(true);
     dispatch(getAPICategory());
   };
 
+  /**
+   * Previews or downloads a file attachment.
+   * - `dataType === "new"`: file exists only in memory (base64). Office files
+   *   are saved via FileSaver; others are opened in a preview window.
+   * - Otherwise: file lives on the server. Office files are downloaded via the
+   *   service thunk; others are fetched as a blob, converted to base64, and
+   *   opened in a preview window.
+   * @param {object} r - Attachment record
+   */
   const handleShow = async (r) => {
     if (r.dataType === "new") {
       if (r.fileType.includes("application/vnd")) {
