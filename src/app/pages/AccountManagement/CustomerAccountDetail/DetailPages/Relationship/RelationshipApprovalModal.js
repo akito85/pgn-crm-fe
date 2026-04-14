@@ -1,19 +1,20 @@
-import { useRef, useState, useEffect, useMemo, Fragment } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
 import DetailText from "../../../../../../components/DetailText";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import {
   getRelationshipApprovals,
-  approveOrRejectRelationship,
-  approveOrRejectInactiveRelationship,
+  approveOrRejectAllRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getRelationshipColumns } from "./getRelationshipColumns";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../../../assets/Icon/index";
 import TablePagination from "../../../../../../components/TablePagination";
 
 // Nested columns configuration for expandable rows
@@ -89,27 +90,29 @@ const RelationshipApprovalModal = ({
   afterFinish = () => {},
 }) => {
   // Selector
-  const { list_relationship, pagination_listRelationship, loading_listRelationshipApproval, loading_approveRejectRelationship } = useSelector(
-    (state) => state.relationship
-  );
+  const {
+    list_relationshipApproval,
+    pagination_listRelationshipApproval,
+    loading_listRelationshipApproval,
+    loading_approveRelationship,
+    loading_rejectRelationship,
+  } = useSelector((state) => state.relationship);
+
+  const loadingApproval = loading_approveRelationship || loading_rejectRelationship;
 
   // Declaration
-  const containerRef = useRef(null);
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
   // State
   const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [approvalData, setApprovalData] = useState([]);
-
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -145,14 +148,7 @@ const RelationshipApprovalModal = ({
       );
       setPage(1);
     }
-  }, [dispatch, isOpen, search, sort]);
-
-  // Update approval data when list changes
-  useEffect(() => {
-    if (isOpen) {
-      setApprovalData(list_relationship);
-    }
-  }, [list_relationship, isOpen]);
+  }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -173,7 +169,7 @@ const RelationshipApprovalModal = ({
   // Load more handler
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_listRelationship?.totalPages || 0;
+    const totalPages = pagination_listRelationshipApproval?.totalPages || 0;
 
     if (nextPage <= totalPages) {
       const body = {
@@ -199,7 +195,7 @@ const RelationshipApprovalModal = ({
     }
   };
 
-  const hasMore = approvalData.length < (pagination_listRelationship?.totalElements || 0);
+  const hasMore = list_relationshipApproval.length < (pagination_listRelationshipApproval?.totalElements || 0);
 
   // Sort Table
   const onSort = (_, __, sorter) => {
@@ -222,12 +218,8 @@ const RelationshipApprovalModal = ({
 
   // Step
   const steps = [
-    {
-      title: "RELATIONSHIP",
-    },
-    {
-      title: "CONFIRMATION",
-    },
+    { key: "relationship", title: "RELATIONSHIP" },
+    { key: "confirmation", title: "CONFIRMATION" },
   ];
 
   const formFields = [["remark"]];
@@ -259,38 +251,10 @@ const RelationshipApprovalModal = ({
     setCurrent((prev) => prev - 1);
   };
 
-  // Scroll Left Handler
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  // Scroll Right Handler
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  // Scroll Handler
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
-  };
-
   // Handle Next
   const handleButtonNext = () => {
     next();
-    scrollRightHandler();
   };
-
-  // Mapping Step
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
 
   // Handle Cancel Form
   const handleCancelForm = () => {
@@ -306,12 +270,26 @@ const RelationshipApprovalModal = ({
     form.resetFields();
   };
 
+  const resetForm = () => {
+    afterFinish();
+    setCurrent(0);
+    form.resetFields();
+    handleCancel();
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+  };
+
   const handleSave = async (action) => {
     try {
       const values = await form.validateFields();
 
-      const regularBody = selectedRows
-        .filter((row) => row.approvalType === "RELATIONSHIP")
+      const body = selectedRows
+        .filter((row) => row.approvalType === "ACCOUNT_RELATIONSHIP")
         .map((row) => ({
           id: row.id,
           approvalId: row.tappId || row.approvalId,
@@ -320,7 +298,7 @@ const RelationshipApprovalModal = ({
         }));
 
       const inactiveBody = selectedRows
-        .filter((row) => row.approvalType === "INACTIVE_RELATIONSHIP")
+        .filter((row) => row.approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP")
         .map((row) => ({
           id: row.id,
           approvalId: row.tappId || row.approvalId,
@@ -328,51 +306,14 @@ const RelationshipApprovalModal = ({
           description: values.remark,
         }));
 
-      const promises = [];
-
-      if (regularBody.length > 0) {
-        promises.push(
-          dispatch(
-            approveOrRejectRelationship({
-              accountId,
-              body: regularBody,
-              action,
-            })
-          ).unwrap()
-        );
-      }
-
-      if (inactiveBody.length > 0) {
-        promises.push(
-          dispatch(
-            approveOrRejectInactiveRelationship({
-              accountId,
-              body: inactiveBody,
-              action,
-            })
-          ).unwrap()
-        );
-      }
-
-      Promise.all(promises)
-        .then(() => {
-          afterFinish();
-          setCurrent(0);
-          form.resetFields();
-          handleCancel();
-          setSelectedRowKeys([]);
-          setSelectedRows([]);
-          setSearch({});
-          setPage(1);
-          setSort("");
-          setSearchText("");
-          setSearchedColumn("");
-        })
+      dispatch(approveOrRejectAllRelationship({ accountId, body, inactiveBody, action }))
+        .unwrap()
+        .then(() => { resetForm(); })
         .catch(() => {});
     } catch {}
   };
 
-  const baseColumns = useMemo(
+  const columnDefinitions = useMemo(
     () =>
       getRelationshipColumns(
         search,
@@ -385,34 +326,19 @@ const RelationshipApprovalModal = ({
     [page, loadMoreSize, searchedColumn, searchText]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(() => {
+    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
+  }, [columnDefinitions, fixedColumns]);
 
   const dataSourceWithKeys = useMemo(() => {
-    return approvalData?.map((item, index) => ({
+    return list_relationshipApproval?.map((item, index) => ({
       ...item,
       key: index + 1,
     }));
-  }, [approvalData]);
+  }, [list_relationshipApproval]);
 
   return (
-    <Fragment>
+    <>
       <NxModal
         isOpen={isOpen}
         type={"confirmation"}
@@ -420,20 +346,18 @@ const RelationshipApprovalModal = ({
         handleCancel={handleCancelForm}
         width={1000}
         hidePadding={true}
+        loading={loadingApproval}
         footer={
           <div className="flex justify-between">
-            <Button type={"menu"} onClick={handleCancelForm}>
+            <Button type={"menu"} onClick={handleCancelForm} disabled={loadingApproval}>
               Cancel
             </Button>
 
             <div className="flex">
               <Button
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"default"}
-                disabled={current < 1}
+                onClick={prev}
+                type={"menu"}
+                disabled={current < 1 || loadingApproval}
               >
                 Previous
               </Button>
@@ -442,7 +366,7 @@ const RelationshipApprovalModal = ({
                 <Button
                   onClick={() => handleButtonNext()}
                   type={"submit"}
-                  disabled={current > steps.length - 1 || steps[current].disabled}
+                  disabled={current > steps.length - 1 || steps[current].disabled || loadingApproval}
                 >
                   Next
                 </Button>
@@ -452,14 +376,20 @@ const RelationshipApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
-                    loading={loading_approveRejectRelationship}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
+                    disabled={!loading_rejectRelationship && loadingApproval}
+                    loading={loading_rejectRelationship}
                   >
                     Reject
                   </Button>
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
-                    loading={loading_approveRejectRelationship}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
+                    disabled={!loading_approveRelationship && loadingApproval}
+                    loading={loading_approveRelationship}
                   >
                     Approve
                   </Button>
@@ -469,24 +399,13 @@ const RelationshipApprovalModal = ({
           </div>
         }
       >
-        <NxBaseContainer
-          border={{
-            top: false,
-            right: false,
-            left: false,
-          }}
-          rounded={false}
-        >
-          <div className="flex flex-row justify-center">
-            <div
-              onScroll={handleScroll}
-              ref={containerRef}
-              className="overflow-x-scroll scrollStepsCstm"
-            >
-              <Steps current={current} items={items} labelPlacement="vertical" />
-            </div>
-          </div>
-        </NxBaseContainer>
+        <NxFormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={handleButtonNext}
+          inModal
+        />
 
         <div className="p-4">
           {/* STEP 1: RELATIONSHIP INFORMATION */}
@@ -498,8 +417,8 @@ const RelationshipApprovalModal = ({
                     idTable="relationship-approval-table"
                     className={"[&_.ant-checkbox]:scale-90"}
                     dataSource={dataSourceWithKeys}
-                    columns={processedColumns}
-                    totalData={pagination_listRelationship?.totalElements || 0}
+                    columns={columns}
+                    totalData={pagination_listRelationshipApproval?.totalElements || 0}
                     tableScrolled={{
                       x: dataSourceWithKeys.length ? "max-content" : 2000,
                     }}
@@ -546,7 +465,7 @@ const RelationshipApprovalModal = ({
                 <NxTable
                   idTable="relationship-approval-confirm-table"
                   dataSource={selectedRows}
-                  columns={processedColumns}
+                  columns={columns}
                   totalData={selectedRows.length}
                   tableScrolled={{
                     x: selectedRows.length ? "max-content" : 2000,
@@ -572,7 +491,7 @@ const RelationshipApprovalModal = ({
           </div>
         </div>
       </NxModal>
-    </Fragment>
+    </>
   );
 };
 
