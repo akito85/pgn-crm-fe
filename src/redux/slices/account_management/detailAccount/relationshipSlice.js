@@ -284,7 +284,7 @@ export const createRelationship = createAsyncThunk(
 
       const successMessage = {
         title: "Successful",
-        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Relationship has been ${payload?.action === "draft" ? 'drafted' : 'submitted'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
