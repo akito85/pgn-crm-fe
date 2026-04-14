@@ -317,7 +317,7 @@ const RelationshipTable = ({
     handleApproval,
     handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
+    handleInactivate: ({ id, relatedNumber }) => handleInactivateModal(true, id, relatedNumber),
   });
 
   const actionCols = useColumnActionPermission(
