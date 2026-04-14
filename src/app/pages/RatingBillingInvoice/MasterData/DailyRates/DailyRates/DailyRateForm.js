@@ -352,7 +352,10 @@ const DailyRateForm = ({ type }) => {
       breadcrumbName: "Daily Rate",
     },
     {
-      path: RBI_ROUTES.DAILY_RATE_CREATE,
+      path:
+        type === "create"
+          ? RBI_ROUTES.DAILY_RATE_CREATE
+          : RBI_ROUTES.DAILY_RATE_UPDATE,
       breadcrumbName: `${type === "create" ? "Create Daily Rate" : "Update Daily Rate"}`,
     },
   ];
