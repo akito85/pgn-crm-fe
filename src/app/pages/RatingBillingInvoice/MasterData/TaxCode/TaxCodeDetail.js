@@ -5,7 +5,7 @@ import { LeftOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import RadioTabs from "../../../../../components/RadioTabs";
-import BaseContainer from "../../../../../components/BaseContainer";
+
 import DetailSectionTaxCode from "./Utils/DetailSection";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -24,6 +24,7 @@ import DetailText from "../../../../../components/DetailText";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+import CardContainer from "../../../../../components/CardContainer";
 
 const TaxCodeDetail = () => {
   // Selector
@@ -32,7 +33,7 @@ const TaxCodeDetail = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const id = useLocation().state.id;
+  const id = useLocation().state?.id;
 
   const [bodyError, setBodyError] = useState({});
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -325,7 +326,7 @@ const TaxCodeDetail = () => {
         );
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <CardContainer header={"Attachment Information"}>
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
@@ -334,7 +335,7 @@ const TaxCodeDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return <></>;
@@ -404,7 +405,7 @@ const TaxCodeDetail = () => {
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_TAX_CODE" && (
-              <BaseContainer header={"inactive request information"}>
+              <CardContainer header={"inactive request information"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate}
@@ -416,7 +417,7 @@ const TaxCodeDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
+              </CardContainer>
             )}
           <RadioTabs
             data={listSectionInfo}
@@ -426,20 +427,8 @@ const TaxCodeDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex my-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex my-[10px]">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 

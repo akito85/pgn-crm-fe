@@ -178,30 +178,6 @@ const BillingItemCategoryForm = ({ type }) => {
     ) {
       const draftCategory = data_detail_draft?.billingCategory;
 
-      // Data Draft Attachment Information
-      const dataDraftAttachment = (data_detail?.attachments || []).map(
-        (item, index) => {
-          return {
-            key: item.id || index + 1,
-            id: item.id,
-            size: item.size,
-            fileName: item.fileName,
-            fileSize: item.fileSize,
-            fileType: item.type,
-            fileCategoryId: item.fileCategoryId,
-            fileCategoryName: item.fileCategoryName,
-            pathFile: item.pathFile,
-            urlFile1: item.urlFile1,
-            urlFile2: item.urlFile2,
-            uploadBy: item.createdBy,
-            uploadDate: item.createdDate
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        },
-      );
-
       const draftApprovalId =
         draftCategory?.appHierId ?? draftCategory?.apphierId ?? undefined;
 
@@ -222,40 +198,10 @@ const BillingItemCategoryForm = ({ type }) => {
         draftCategory?.startDate ? moment(draftCategory.startDate) : undefined,
       );
       setSelectedHierarchy(draftApprovalId);
-      setListDataAttachment(dataDraftAttachment);
-      setInitialAttachmentIds(
-        dataDraftAttachment
-          .filter((item) => item.dataType === "exist" && item.id)
-          .map((item) => item.id),
-      );
     } else if (id && data_detail?.billingCategory?.id === id) {
       const billingCategory = data_detail?.billingCategory;
       const billingApprovalId =
         billingCategory?.appHierId ?? billingCategory?.apphierId ?? undefined;
-
-      // Data Attachment Information
-      const dataAttachment = (data_detail?.attachments || []).map(
-        (item, index) => {
-          return {
-            key: item.id || index + 1,
-            id: item.id,
-            size: item.size,
-            fileName: item.fileName,
-            fileSize: item.fileSize,
-            fileType: item.type,
-            fileCategoryId: item.fileCategoryId,
-            fileCategoryName: item.fileCategoryName,
-            pathFile: item.pathFile,
-            urlFile1: item.urlFile1,
-            urlFile2: item.urlFile2,
-            uploadBy: item.createdBy,
-            uploadDate: item.createdDate
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        },
-      );
 
       form.setFieldsValue({
         code: billingCategory?.code,
@@ -276,14 +222,53 @@ const BillingItemCategoryForm = ({ type }) => {
           : undefined,
       );
       setSelectedHierarchy(billingApprovalId);
-      setListDataAttachment(dataAttachment);
-      setInitialAttachmentIds(
-        dataAttachment
-          .filter((item) => item.dataType === "exist" && item.id)
-          .map((item) => item.id),
-      );
     }
   }, [id, type, form, data_detail, data_detail_draft]);
+
+  // Fetch attachments from endpoint
+  useEffect(() => {
+    if (id && type === "update") {
+      ratingBillingHttpService
+        .getPagination(
+          `/v1/dbs/api/billing-item-category/list-attachment/${id}`,
+        )
+        .then((response) => {
+          const dataAttachment = (
+            response?.data?.result ||
+            response?.data ||
+            []
+          ).map((item, index) => {
+            return {
+              key: item.id || index + 1,
+              id: item.id,
+              size: item.size,
+              fileName: item.fileName,
+              fileSize: item.fileSize,
+              fileType: item.type,
+              fileCategoryId: item.fileCategoryId,
+              fileCategoryName: item.fileCategoryName,
+              pathFile: item.pathFile,
+              urlFile1: item.urlFile1,
+              urlFile2: item.urlFile2,
+              uploadBy: item.createdBy,
+              uploadDate: item.createdDate
+                ? moment(item.createdDate).format("DD MMM YYYY")
+                : "",
+              dataType: "exist",
+            };
+          });
+          setListDataAttachment(dataAttachment);
+          setInitialAttachmentIds(
+            dataAttachment
+              .filter((item) => item.dataType === "exist" && item.id)
+              .map((item) => item.id),
+          );
+        })
+        .catch((error) => {
+          console.log("Error fetching attachments:", error);
+        });
+    }
+  }, [id, type]);
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
