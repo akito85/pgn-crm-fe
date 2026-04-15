@@ -3,20 +3,33 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
-const getPaymentRelationColumns = (
+/**
+ * Returns the column definitions for the Payment Relation list table.
+ *
+ * @param {Object}          params                   - Column configuration options.
+ * @param {Object}          params.search            - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput       - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn    - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText        - The current search text value.
+ * @param {Function}        params.handleSearch      - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=true] - When true, omits the statusApproval and status columns.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getPaymentRelationColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-  includeStatus = true,
-) => [
+  isApproval = true,
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",  
     dataIndex: "no",
     width: 40,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
@@ -97,13 +110,14 @@ const getPaymentRelationColumns = (
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
-  includeStatus && {
+  !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     width: 170,
     sorter: true,
     align: "center",
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -130,12 +144,13 @@ const getPaymentRelationColumns = (
       );
     },
   },
-  includeStatus && {
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
     width: 120,
     sorter: true,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
