@@ -7,27 +7,23 @@ import { sorterFunction } from "../../../../utils/sorterFunction";
 /**
  * Returns the column definitions for the Gas Deposit Detail table.
  *
- * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValueFE`
- * for client-side filtering, and uses `sorterFunction` for client-side sorting.
- * The period column is formatted as "DD MMM YYYY". Numeric balance columns use
- * right-aligned text. The status column is conditionally included based on `includeStatus`.
- *
- * @param {Object} search - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} searchInput - Ref to the search input element (used for focus).
- * @param {string} searchedColumn - The dataIndex of the column currently being searched.
- * @param {string} searchText - The current search text value.
- * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
- * @param {boolean} [includeStatus=true] - Whether to include the status column.
+ * @param {Object}          params                      - Column configuration options.
+ * @param {Object}          params.search               - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput          - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn       - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText           - The current search text value.
+ * @param {Function}        params.handleSearch         - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.includeStatus=true] - When false, omits the status column.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
-const getGasDepositDetailColumns = (
+const getGasDepositDetailColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
   includeStatus = true,
-) => [
+}) => [
   {
     key: "no",
     title: "NO",

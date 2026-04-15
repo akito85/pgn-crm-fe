@@ -6,18 +6,15 @@ import NxDate from "../../../../components/Nx/NxDatePicker";
 /**
  * Returns the column definitions for the Gas Deposit table.
  *
- * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValue`.
- * Date columns (earnPeriodStart, earnPeriodEnd, redeemPeriodStart, redeemPeriodEnd) are
- * formatted as "DD MMM YYYY". Status columns are conditionally included based on `includeStatus`.
- *
- * @param {Object} search - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} searchInput - Ref to the search input element (used for focus).
- * @param {string} searchedColumn - The dataIndex of the column currently being searched.
- * @param {string} searchText - The current search text value.
- * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
- * @param {boolean} [includeStatus=true] - Whether to include the statusApproval and status columns.
- * @param {boolean} [isUnderAccount=false] - Whether to define that the table is inside a stand alone module or an under account one.
- * @param {boolean} [isFrontEnd=false] - Whether to define that the table logic is FE only.
+ * @param {Object}          params                        - Column configuration options.
+ * @param {Object}          params.search                 - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput            - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn         - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText             - The current search text value.
+ * @param {Function}        params.handleSearch           - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=false]     - When true, fixes the NO column left and shows the statusApproval column.
+ * @param {boolean}         [params.isUnderAccount=false] - When true, omits the accountNumber and accountName columns.
+ * @param {boolean}         [params.isFrontEnd=false]     - When true, uses client-side search/filter props.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
 const getGasDepositColumns = ({
@@ -26,7 +23,7 @@ const getGasDepositColumns = ({
   searchedColumn,
   searchText,
   handleSearch,
-  includeStatus = true,
+  isApproval = false,
   isUnderAccount = false,
   isFrontEnd = false,
 }) => [
@@ -36,6 +33,7 @@ const getGasDepositColumns = ({
     align: "center",
     dataIndex: "no",
     width: 40,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   !isUnderAccount && {
@@ -257,13 +255,14 @@ const getGasDepositColumns = ({
       handleSearch,
     ),
   },
-  includeStatus && {
+  isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     width: 170,
     sorter: true,
     align: "center",
+    fixed: "right",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "statusApproval",
@@ -291,12 +290,13 @@ const getGasDepositColumns = ({
       );
     },
   },
-  includeStatus && {
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
     width: 120,
     sorter: true,
+    fixed: "right",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "status",

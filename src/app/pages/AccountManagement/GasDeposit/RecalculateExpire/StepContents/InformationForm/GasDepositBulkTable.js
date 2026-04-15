@@ -6,7 +6,6 @@ import {
   getGasDeposits,
 } from "../../../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { getGasDepositColumns } from "../../../getGasDepositColumns";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 
 /**
  * Gas deposit table for bulk recalculate/expire.
@@ -50,7 +49,6 @@ const GasDepositBulkTable = ({
   const [searchedColumn, setSearchedColumn] = useState("");
   const [filters] = useState([]);
   const [filterRules] = useState([]);
-  const [fixedColumns, setFixedColumns] = useState({ left: ["no"], right: [] }); // tracks which columns are pinned left/right
   const searchInput = useRef(null); // ref forwarded to filter dropdowns for auto-focus
 
   // --- Functions / handlers ---
@@ -106,7 +104,7 @@ const GasDepositBulkTable = ({
     preserveSelectedRowKeys: true,
   };
 
-  const columnDefinitions = useMemo(() =>
+  const columns = useMemo(() =>
     getGasDepositColumns({
       search,
       searchInput,
@@ -118,11 +116,6 @@ const GasDepositBulkTable = ({
       isFrontEnd: readOnly
     }),
     [readOnly, search, searchInput, searchedColumn, searchText]
-  );
-
-  const columns = useMemo(
-    () => nxApplyFixedColumns(columnDefinitions, fixedColumns),
-    [columnDefinitions, fixedColumns]
   );
 
   // --- Effects ---
@@ -149,9 +142,7 @@ const GasDepositBulkTable = ({
       totalData={readOnly ? dataSource?.length : pagination_listGd.totalElement}
       tableScrolled={{ x: dataSource?.length ? "max-content" : 3000 }}
       onSort={readOnly ? undefined : onSort}
-      columnDefinitions={columnDefinitions}
-      fixedColumns={fixedColumns}
-      setFixedColumns={readOnly ? undefined : setFixedColumns}
+      useSelect={!readOnly}
       loading={readOnly ? false : loading_listGd}
       usePagination={false}
       useInfiniteScroll={!readOnly}

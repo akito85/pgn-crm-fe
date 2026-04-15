@@ -8,7 +8,6 @@ import {
   getGasDepositApprovals,
   approveOrRejectAllGasDeposit
 } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { getGasDepositColumns } from "./getGasDepositColumns";
 import { showModalError } from "../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -59,11 +58,6 @@ const GasDepositApprovalModal = ({
 
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: []
-  });
 
   // --- Derived values ---
   const totalElement = pagination.totalElement;
@@ -309,7 +303,7 @@ const GasDepositApprovalModal = ({
     } catch {}
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
       getGasDepositColumns({
         search,
@@ -322,10 +316,6 @@ const GasDepositApprovalModal = ({
       }),
     [search, searchInput, searchedColumn, searchText]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   // --- Effects ---
   // Fetches the first page of pending approvals whenever the modal opens or
@@ -443,9 +433,6 @@ const GasDepositApprovalModal = ({
                       x: gasDepositApprovals.length ? "max-content" : 3000
                     }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listGdApproval}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -488,9 +475,6 @@ const GasDepositApprovalModal = ({
                     x: selectedRowKeys.length ? "max-content" : 3000
                   }}
                   onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}
