@@ -100,6 +100,8 @@ const CreateUpdateRelationship = ({
     ? detailDraft_relationship
     : detail_relationship;
 
+  const attachments = detail.attachments;
+
   const formFields = [
     [
       "relationshipType",
@@ -127,6 +129,15 @@ const CreateUpdateRelationship = ({
       dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
     }
   }, [formType, id]);
+
+  // Sync attachment list from loaded record
+  useEffect(() => {
+    if (isUpdate && attachments)
+      setAttachmentDataSource([...attachments.map((attachment) => ({
+        ...attachment,
+        key: attachment.id,
+      }))]);
+  }, [attachments]);
 
   // Pre-fill form fields when record and hierarchy are loaded
   useEffect(() => {
@@ -202,7 +213,9 @@ const CreateUpdateRelationship = ({
         }
       }
 
-      setAttachmentDataSource([]);
+      if (attachments)
+        setAttachmentDataSource([...attachments]);
+
       setDeletedAttachments([]);
 
       setCurrent(0);
