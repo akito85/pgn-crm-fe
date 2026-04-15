@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {Link, NavLink} from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import {RECEIPT_AND_COLLECTION_ROUTES} from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
-import { DownloadOutlined } from "@ant-design/icons";
-import { Checkbox, Spin, Tooltip } from "antd";
+import {DownloadOutlined} from "@ant-design/icons";
+import {Checkbox, Spin, Tooltip} from "antd";
 import TableRBI from "../../../../../components/TableRBI";
-import StatusComponent from "../../../../../components/StatusComponent";
 import {
   getAllApprovalList,
   getApprovalHistory,
@@ -20,13 +19,16 @@ import {
   inactiveBank,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
-import { intToNPWP } from "../../../../../utils/npwp";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import {intToNPWP} from "../../../../../utils/npwp";
+import {
+  getColumnSearchPropsUseFilteredValue
+} from "../../../../../utils/getColumnSearchProps";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
-import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
+import {useTryAgainHooks} from "../../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
-import { disabledActionByStatus } from "../../../../../utils";
+import {useColumnActionPermission} from "../../../../../components/ColumnActionPermission";
+import {disabledActionByStatus, hasValue, renderColumn} from "../../../../../utils";
+import {applyFixedColumns} from "../../../../../utils/applyFixedColumns";
 
 export const columnsBank = (
   page = 1,
@@ -41,9 +43,9 @@ export const columnsBank = (
 ) => [
   {
     title: "NO",
+    key: "no",
     width: 60,
     align: "left",
-    isClassification: true,
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -52,7 +54,26 @@ export const columnsBank = (
     key: "bankCode",
     sorter: true,
     align: "right",
-    ...getColumnSearchPropsPaging("bankCode", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
+    filteredValue: [search?.bankCode] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "bankCode",
+        hasValue(search["bankCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "BANK NAME",
@@ -60,7 +81,26 @@ export const columnsBank = (
     key: "bankName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("bankName", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
+    filteredValue: [search?.bankName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "bankName",
+        hasValue(search["bankName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "SHORT BANK NAME",
@@ -68,17 +108,55 @@ export const columnsBank = (
     key: "bankShortName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("bankShortName", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
+    filteredValue: [search?.bankShortName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankShortName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "bankShortName",
+        hasValue(search["bankShortName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "OFFICE TYPE",
     dataIndex: "isBranch",
-    key: "branchName",
+    key: "isBranch",
     sorter: true,
     align: "center",
+    filteredValue: [search?.isBranch] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "isBranch",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
     render: (_, record) => {
       const val = record.isBranch;
-      return val === true || val === "Y" || val === "BRANCH" ? "BRANCH" : "HEAD OFFICE";
+      const display = val === true || val === "Y" || val === "BRANCH" ? "BRANCH" : "HEAD OFFICE";
+      return renderColumn(
+        "isBranch",
+        hasValue(search["isBranch"]),
+        searchText,
+        display,
+        false,
+        "input",
+        search,
+      );
     },
   },
   {
@@ -87,7 +165,26 @@ export const columnsBank = (
     key: "branchName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("branchName", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
+    filteredValue: [search?.branchName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "branchName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "branchName",
+        hasValue(search["branchName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TAX IDENTIFICATION NUMBER (NPWP)",
@@ -95,7 +192,16 @@ export const columnsBank = (
     key: "npwp",
     sorter: (a, b) => a.npwp.length - b.npwp.length,
     align: "right",
-    ...getColumnSearchPropsPaging("npwp", searchInput, searchedColumn, searchText, handleSearch, true, "input", search),
+    filteredValue: [search?.npwp] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "npwp",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
     render: (text) =>
       searchedColumn === "npwp" ? (
         <Highlighter
@@ -116,7 +222,26 @@ export const columnsBank = (
     key: "phoneNumber",
     sorter: true,
     align: "right",
-    ...getColumnSearchPropsPaging("phoneNumber", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
+    filteredValue: [search?.phoneNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "phoneNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "phoneNumber",
+        hasValue(search["phoneNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "EMAIL",
@@ -124,7 +249,26 @@ export const columnsBank = (
     key: "email",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("email", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
+    filteredValue: [search?.email] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "email",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "email",
+        hasValue(search["email"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ADDRESS",
@@ -132,35 +276,82 @@ export const columnsBank = (
     key: "address",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("address", searchInput, searchedColumn, searchText, handleSearch, false, "input", search),
+    filteredValue: [search?.address] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "address",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "address",
+        hasValue(search["address"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
+    key: "status",
     title: "STATUS",
     dataIndex: "status",
     sorter: true,
-    align: "left",
     fixed: "right",
     width: 150,
-    ...getColumnSearchPropsPaging("status", searchInput, searchedColumn, searchText, handleSearch, true, "input", search),
-    render: (a) => (
-      <div className="flex justify-center">
-        <StatusComponent colour={a}>{a}</StatusComponent>
-      </div>
+    filteredValue: [search?.status] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
     ),
+    render: (text) =>
+        renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+        ),
   },
   {
+    key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     sorter: true,
-    align: "left",
     fixed: "right",
-    width: 250,
-    ...getColumnSearchPropsPaging("statusApproval", searchInput, searchedColumn, searchText, handleSearch, true, "input", search),
-    render: (a) => (
-      <div className="flex justify-center">
-        <StatusComponent colour={a}>{a}</StatusComponent>
-      </div>
+    width: 150,
+    filteredValue: [search?.statusApproval] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusApproval",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
     ),
+    render: (text) =>
+        renderColumn(
+            "statusApproval",
+            hasValue(search["statusApproval"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+        ),
   },
 ];
 
@@ -183,6 +374,10 @@ const ViewBank = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "statusApproval", "action"],
+  }));
 
   const handleFetch = useCallback(() => {
     dispatch(
@@ -503,6 +698,29 @@ const ViewBank = () => {
     }
   };
 
+  const actionCols = useColumnActionPermission(["view", "history", "update", "activate"], itemActions);
+
+  const allColumns = useMemo(() => {
+    return [
+        ...columnsBank(page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleInactive,
+        handleApprovalHistory,
+        search
+        ), ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+  }, [actionCols, handleApprovalHistory, handleSearch, page, pageSize, search, searchText, searchedColumn]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
@@ -512,7 +730,7 @@ const ViewBank = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">BANK LIST</p>
+              <p className="mt-[15px] font-bold text-nowrap">BANK LIST</p>
 
               <Toolbar items={itemActions} />
             </div>
@@ -523,26 +741,15 @@ const ViewBank = () => {
             pageSize={pageSize}
             showExport={true}
             handleDownload={handleDownload}
-            columns={[
-              ...columnsBank(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleInactive,
-                handleApprovalHistory,
-                search
-              ),
-              ...useColumnActionPermission(["view", "history", "update", "activate"], itemActions),
-            ]}
+            columns={processedColumns}
             current={page}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{ x: "max-content", y: 525 }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
         </CardContainer>
 

@@ -114,7 +114,7 @@ const BankForm = ({ type }) => {
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
     { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK, breadcrumbName: "Bank" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK, breadcrumbName: type === "create" ? "Create" : "Update" },
+    { path: type === "create" ? RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK : RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK, breadcrumbName: type === "create" ? "Create" : "Update" },
   ];
 
   useEffect(() => {
