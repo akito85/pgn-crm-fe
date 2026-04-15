@@ -138,7 +138,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
       );
 
       if (appHierOption)
-        handleSelectHiararchy(appHierId, appHierOption.approvalName);
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
   }, [detail, list_irApprovalHierarchy]);
 
@@ -164,7 +164,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
    * @param {number} appHierId
    * @param {string} approvalName
    */
-  const handleSelectHiararchy = (appHierId, approvalName) => {
+  const handleSelectHierarchy = (appHierId, approvalName) => {
     dispatch(getIrApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
@@ -539,7 +539,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         );
 
         if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+          handleSelectHierarchy(appHierId, appHierOption.approvalName);
       }
 
       if (attachments)
@@ -613,7 +613,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
               form={form}
               hierarchyDetails={detail_irApprovalHierarchy}
               options={list_irApprovalHierarchy}
-              handleSelectHiararchy={handleSelectHiararchy}
+              handleSelectHierarchy={handleSelectHierarchy}
               key={`invoice-relation-tab-1`}
             />
           )

@@ -52,7 +52,7 @@ const NxInactivateModal = ({
     onFinish(data, handleClear);
   };
 
-  const handleSelectHiararchy = (appHierId) => {
+  const handleSelectHierarchy = (appHierId) => {
     if (appHierId)
       dispatch(getApprovalHierarchyDetails(appHierId));
   }
@@ -113,7 +113,7 @@ const NxInactivateModal = ({
             form={form}
             hierarchyDetails={approvalHierarchyDetails}
             options={approvalOptions}
-            handleSelectHiararchy={handleSelectHiararchy}
+            handleSelectHierarchy={handleSelectHierarchy}
             loading={inactivateLoading || loadingApprovalOptions || loadingHierarchyDetails}
             tableLoading={loadingHierarchyDetails}
           />
