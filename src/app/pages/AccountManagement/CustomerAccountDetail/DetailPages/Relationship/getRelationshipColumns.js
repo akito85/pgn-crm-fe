@@ -134,6 +134,7 @@ const getRelationshipColumns = ({
     dataIndex: "statusApproval",
     width: 180,
     sorter: true,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -168,6 +169,7 @@ const getRelationshipColumns = ({
     dataIndex: "status",
     width: 120,
     sorter: true,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
