@@ -13,7 +13,6 @@ import FileSaver from "file-saver";
 import { configApp } from "../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../redux/slices/product_promo/product";
 import NxTable from "./NxTable";
-import { nxApplyFixedColumns } from "../../utils/Nx/nxApplyFixedColumns";
 
 const columnAttachmentData = (
   search,
@@ -157,10 +156,6 @@ const NxAttachmentInput = ({
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["action"],
-    left: []
-  }));
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
 
   useEffect(() => {
@@ -261,7 +256,7 @@ const NxAttachmentInput = ({
     }
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
       columnAttachmentData(
         search,
@@ -274,11 +269,6 @@ const NxAttachmentInput = ({
         handleShow
       ),
     [search, searchedColumn, searchText, type]
-  );
-
-  const columns = useMemo(
-    () => nxApplyFixedColumns(columnDefinitions, fixedColumns),
-    [columnDefinitions, fixedColumns]
   );
 
   return (
@@ -307,12 +297,9 @@ const NxAttachmentInput = ({
             idTable={"attachment-table"}
             dataSource={data}
             totalData={data.length}
-            tableScrolled={{ x: 1500 }}
+            tableScrolled={{ x: data.length ? "max-content" : 1000 }}
             columns={columns}
             usePagination={false}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            columnDefinitions={columnDefinitions}
             showAdvanceSearch={true}
           />
         </div>
