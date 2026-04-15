@@ -6,84 +6,12 @@ import NxTable from "../../../../../../components/Nx/NxTable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getRelationshipColumns } from "./getRelationshipColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
-import TablePagination from "../../../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
+import RelationshipDetailTable from "./RelationshipDetailTable";
 import {
   getRelationships,
   downloadRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-
-// Nested columns configuration for expandable rows
-const NESTED_COLUMNS = [
-  {
-    title: "NO",
-    align: "center",
-    width: 60,
-    render: (text, object, index) => (
-      <div style={{ padding: "8px 0" }}>{index + 1}</div>
-    ),
-  },
-  {
-    title: "ACCOUNT NUMBER",
-    dataIndex: "accountNumber",
-    align: "left",
-    sorter: (a, b) => (a.accountNumber || "").localeCompare(b.accountNumber || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "ACCOUNT NAME",
-    dataIndex: "accountName",
-    align: "left",
-    sorter: (a, b) => (a.accountName || "").localeCompare(b.accountName || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "ACCOUNT CATEGORY",
-    dataIndex: "accountCategory",
-    align: "left",
-    sorter: (a, b) => (a.accountCategory || "").localeCompare(b.accountCategory || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "SOR",
-    dataIndex: "sor",
-    align: "left",
-    sorter: (a, b) => (a.sor || "").localeCompare(b.sor || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "COST CENTER",
-    dataIndex: "costCenter",
-    align: "left",
-    sorter: (a, b) => (a.costCenter || "").localeCompare(b.costCenter || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "METER READING CODE",
-    dataIndex: "meterReadingCode",
-    align: "left",
-    sorter: (a, b) => (a.meterReadingCode || "").localeCompare(b.meterReadingCode || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-];
-
-// Expandable row renderer for Related Detail
-const expandedRowRender = (record) => {
-  const relatedDetailData = record?.relatedDetail || [];
-
-  return (
-    <div className="bg-blue-50 -mx-2 pl-6 py-2">
-      <h4 className="text-[#0075bf] font-semibold text-sm my-2">RELATED DETAIL</h4>
-      <TablePagination
-        useSelect={false}
-        usePagination={false}
-        dataSource={relatedDetailData}
-        columns={NESTED_COLUMNS}
-        className="related-detail-nested-table"
-      />
-    </div>
-  );
-};
 
 /**
  * Relationship list table (container + presentational component).
@@ -344,6 +272,8 @@ const RelationshipTable = ({
     }));
   }, [baseColumns, actionCols]);
 
+  const expandedRowRender = (record) => <RelationshipDetailTable relatedDetail={record.relatedDetail} />;
+
   return (
     <div className="flex flex-col gap-y-4">
       <Toolbar items={itemActions} type="detail" />
@@ -363,7 +293,6 @@ const RelationshipTable = ({
         loading={loading}
         expandable={{
           expandedRowRender,
-          rowExpandable: (record) => record?.relatedDetail && record.relatedDetail.length > 0,
         }}
       />
     </div>

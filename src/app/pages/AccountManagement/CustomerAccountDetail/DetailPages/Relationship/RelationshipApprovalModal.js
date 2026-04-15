@@ -14,73 +14,7 @@ import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../components/Nx/NxModal";
 import { NxFormStepper } from "../../../../../../components/Nx/NxFormStepNavigation";
 import SVGIcon from "../../../../../../assets/Icon/index";
-import TablePagination from "../../../../../../components/TablePagination";
-
-// Nested columns configuration for expandable rows
-const NESTED_COLUMNS = [
-  {
-    title: "NO",
-    align: "center",
-    width: 60,
-    render: (text, object, index) => (
-      <div style={{ padding: "8px 0" }}>{index + 1}</div>
-    ),
-  },
-  {
-    title: "ACCOUNT NUMBER",
-    dataIndex: "accountNumber",
-    align: "left",
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "ACCOUNT NAME",
-    dataIndex: "accountName",
-    align: "left",
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "ACCOUNT CATEGORY",
-    dataIndex: "accountCategory",
-    align: "left",
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "SOR",
-    dataIndex: "sor",
-    align: "left",
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "COST CENTER",
-    dataIndex: "costCenter",
-    align: "left",
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "METER READING CODE",
-    dataIndex: "meterReadingCode",
-    align: "left",
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-];
-
-// Expandable row renderer
-const expandedRowRender = (record) => {
-  const relatedDetailData = record?.relatedDetail || [];
-
-  return (
-    <div className="bg-blue-50 -mx-2 pl-6 py-2">
-      <h4 className="text-[#0075bf] font-semibold text-sm my-2">RELATED DETAIL</h4>
-      <TablePagination
-        useSelect={false}
-        usePagination={false}
-        dataSource={relatedDetailData}
-        columns={NESTED_COLUMNS}
-        className="related-detail-nested-table"
-      />
-    </div>
-  );
-};
+import RelationshipDetailTable from "./RelationshipDetailTable";
 
 const RelationshipApprovalModal = ({
   accountId = 0,
@@ -309,16 +243,18 @@ const RelationshipApprovalModal = ({
 
   const columns = useMemo(
     () =>
-      getRelationshipColumns(
+      getRelationshipColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false
-      ),
+        isApproval: true
+    }),
     [page, loadMoreSize, searchedColumn, searchText]
   );
+
+  const expandedRowRender = (record) => <RelationshipDetailTable relatedDetail={record?.relatedDetail} />;
 
   return (
     <>
@@ -414,11 +350,7 @@ const RelationshipApprovalModal = ({
                     onLoadMore={handleLoadMore}
                     hasMore={hasMore}
                     loadMoreThreshold={20}
-                    expandable={{
-                      expandedRowRender,
-                      rowExpandable: (record) =>
-                        record?.relatedDetail && record.relatedDetail.length > 0,
-                    }}
+                    expandable={{ expandedRowRender }}
                   />
                   <Form.Item
                     key="remark"
@@ -456,8 +388,6 @@ const RelationshipApprovalModal = ({
                   useInfiniteScroll={false}
                   expandable={{
                     expandedRowRender,
-                    rowExpandable: (record) =>
-                      record?.relatedDetail && record.relatedDetail.length > 0,
                   }}
                 />
                 <DetailText label={"Remark"} className="flex flex-col gap-y-2">
