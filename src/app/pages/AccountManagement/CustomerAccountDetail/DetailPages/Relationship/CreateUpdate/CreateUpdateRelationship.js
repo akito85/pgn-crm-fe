@@ -115,55 +115,7 @@ const CreateUpdateRelationship = ({
     ],
     []
   ];
-
-  // --- Effects ---
-  // Fetch approval hierarchy options
-  useEffect(() => {
-    dispatch(getRelationshipApprovalHierarchies());
-  }, []);
-
-  // Fetch relationship record and draft
-  useEffect(() => {
-    if (formType === "update" && id) {
-      dispatch(getRelationship({ accountId, idRelationship: id }));
-      dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
-    }
-  }, [formType, id]);
-
-  // Sync attachment list from loaded record
-  useEffect(() => {
-    if (isUpdate && attachments)
-      setAttachmentDataSource([...attachments.map((attachment) => ({
-        ...attachment,
-        key: attachment.id,
-      }))]);
-  }, [attachments]);
-
-  // Pre-fill form fields when record and hierarchy are loaded
-  useEffect(() => {
-    if (
-      isUpdate &&
-      list_relationshipApprovalHierarchy.length &&
-      list_relationshipType.length &&
-      list_relationshipCategory.length
-    ) {
-      form.setFieldsValue({
-        relationshipType: detail.relationshipType,
-        relationshipCategory: detail.relationshipCategory,
-        relatedId: detail.accountId,
-        relatedName: detail.accountName,
-        relatedNumber: detail.accountNumber,
-        startDate: detail.startDate,
-        endDate: detail.endDate,
-        description: detail.description || "",
-        appHierId: detail.appHierId,
-      });
-
-      if (Array.isArray(detail.relatedDetail))
-        setRelatedDetails(detail.relatedDetail);
-    }
-  }, [detail, list_relationshipApprovalHierarchy, formType]);
-
+  
   // --- Functions / handlers ---
   /**
    * Fetches and displays the approval hierarchy for the selected option,
@@ -205,7 +157,7 @@ const CreateUpdateRelationship = ({
         );
         if (appHierOption)
           handleSelectHierarchy(detail.appHierId, appHierOption.approvalName);
-
+        
         if (detail.relatedDetail && detail.relatedDetail.length > 0) {
           setRelatedDetails(detail.relatedDetail);
         } else {
@@ -221,14 +173,14 @@ const CreateUpdateRelationship = ({
       setCurrent(0);
     }
   };
-
+  
   /**
    * Validates the current step (and runs pre-submission API validation for
    * "submit" actions) before opening the confirmation modal.
-   *
-   * @param {boolean} show
-   * @param {"draft" | "submit"} submitType
-   */
+  *
+  * @param {boolean} show
+  * @param {"draft" | "submit"} submitType
+  */
   const handleSetShowConfirmationModal = async (show, submitType) => {
     if (show) {
       try {
@@ -348,7 +300,7 @@ const CreateUpdateRelationship = ({
         }
       } else {
         await form.validateFields(formFields[current]);
-
+        
         const {
           relationshipType,
           relationshipCategory,
@@ -388,7 +340,7 @@ const CreateUpdateRelationship = ({
 
     setCurrent(current + 1);
   };
-
+  
   /** Moves back one step without validation. */
   const prev = () => {
     setCurrent(current - 1);
@@ -406,19 +358,19 @@ const CreateUpdateRelationship = ({
     await next();
     scrollRightHandler();
   };
-
+  
   /** Scrolls the step container left by 250 px. */
   const scrollLeftHandler = () => {
     if (containerRef.current) {
       containerRef.current.scrollLeft -= 250;
     }
   };
-
+  
   /**
    * Builds the submission payload and dispatches `createRelationship` or
    * `updateRelationship`, then uploads new attachments and navigates on success.
-   */
-  const handleSubmitForm = async () => {
+  */
+ const handleSubmitForm = async () => {
     const {
       relationshipType,
       relationshipCategory,
@@ -435,7 +387,7 @@ const CreateUpdateRelationship = ({
     ]);
     // Filter only new attachments (not existing ones)
     const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
-
+    
     const payload = {
       relationshipType,
       relationshipCategory,
@@ -492,7 +444,7 @@ const CreateUpdateRelationship = ({
       breadcrumbName:
         isStandard ?
           "Account - Standard" :
-        isOneTime ?
+          isOneTime ?
           "Account - One Time" :
           "",
     },
@@ -529,7 +481,7 @@ const CreateUpdateRelationship = ({
               setRelatedDetails={setRelatedDetails}
               isDraft={isDraft}
               isUpdate={isUpdate}
-            />
+              />
           )
         },
         {
@@ -551,10 +503,10 @@ const CreateUpdateRelationship = ({
           header: "Approval",
           content: (
             <NxApprovalInput
-              form={form}
+            form={form}
               options={list_relationshipApprovalHierarchy}
               hierarchyDetails={detail_relationshipApprovalHierarchy || []}
-              handleSelectHiararchy={handleSelectHierarchy}
+              handleSelectHierarchy={handleSelectHierarchy}
               loading={loading_detailRelationshipApprovalHierarchy}
               key={`relationship-tab-1`}
             />
@@ -569,21 +521,89 @@ const CreateUpdateRelationship = ({
           header: "Attachment",
           content: (
             <NxAttachmentInput
-              data={attachmentDataSource}
-              updateData={setAttachmentDataSource}
-              setDeleted={setDeletedAttachments}
-              getAPICategory={getRelationshipAttachmentCategories}
-              categoryData={list_relationshipAttachmentCategory}
-              service={accountManagementService}
-              configApplication={configApp.ACCOUNT_SERVICE}
+            data={attachmentDataSource}
+            updateData={setAttachmentDataSource}
+            setDeleted={setDeletedAttachments}
+            getAPICategory={getRelationshipAttachmentCategories}
+            categoryData={list_relationshipAttachmentCategory}
+            service={accountManagementService}
+            configApplication={configApp.ACCOUNT_SERVICE}
               mandatory={attachmentIsRequired}
               key={`relationship-tab-2`}
-            />
+              />
           )
         }
       ]
     },
   ];
+
+  // --- Effects ---
+  // Fetch approval hierarchy options
+  useEffect(() => {
+    dispatch(getRelationshipApprovalHierarchies());
+  }, []);
+
+  // Fetch relationship record and draft
+  useEffect(() => {
+    if (formType === "update" && id) {
+      dispatch(getRelationship({ accountId, idRelationship: id }));
+      dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
+    }
+  }, [formType, id]);
+
+  // Sync attachment list from loaded record
+  useEffect(() => {
+    if (isUpdate && attachments)
+      setAttachmentDataSource([...attachments.map((attachment) => ({
+        ...attachment,
+        key: attachment.id,
+      }))]);
+  }, [attachments]);
+
+  // Pre-fill form fields when record and hierarchy are loaded
+  useEffect(() => {
+    if (
+      isUpdate &&
+      list_relationshipApprovalHierarchy.length &&
+      list_relationshipType.length &&
+      list_relationshipCategory.length
+    ) {
+      const {
+        relationshipType,
+        relationshipCategory,
+        accountId: relatedId,
+        accountName: relatedName,
+        accountNumber: relatedNumber,
+        startDate,
+        endDate,
+        description,
+        appHierId,
+        relatedDetail
+      } = detail;
+
+      form.setFieldsValue({
+        relationshipType,
+        relationshipCategory,
+        relatedId,
+        relatedName,
+        relatedNumber,
+        startDate,
+        endDate,
+        description,
+        appHierId,
+      });
+
+      const appHierOption = list_relationshipApprovalHierarchy.find(
+        (option) => option.appHierId === appHierId
+      );
+
+      if (appHierOption)
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
+
+      if (Array.isArray(relatedDetail))
+        setRelatedDetails(detail.relatedDetail);
+    }
+  }, [detail, list_relationshipApprovalHierarchy, formType]);
 
   return (
     <>
