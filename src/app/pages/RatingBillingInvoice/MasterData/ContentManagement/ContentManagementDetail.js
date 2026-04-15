@@ -30,7 +30,7 @@ import CardComponent from "../../../../../components/Card/CardComponent";
 const ContentManagementDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.contentManagement
+    (state) => state.contentManagement,
   );
 
   // Declaration
@@ -153,7 +153,8 @@ const ContentManagementDetail = () => {
   useEffect(() => {
     // Support both new flat structure and old nested structure
     const detailId = data_detail?.id ?? data_detail?.contentTemplate?.id;
-    const draftId = data_detail_draft?.id ?? data_detail_draft?.contentTemplate?.id;
+    const draftId =
+      data_detail_draft?.id ?? data_detail_draft?.contentTemplate?.id;
 
     if (id && detailId === id) {
       const extractLabel = (field) => {
@@ -182,7 +183,9 @@ const ContentManagementDetail = () => {
         product: extractLabel(item.product),
         gsizes: extractLabel(item.gsizes),
         customerSegment: extractLabel(item.customerSegment),
-        accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
+        accountGroupType:
+          extractLabel(item.accountGroupType) ||
+          extractLabel(item.accountGroup),
         accountClass: extractLabel(item.accountClass),
         accountCategory: extractLabel(item.accountCategory),
         serviceType: extractLabel(item.serviceType),
@@ -213,9 +216,7 @@ const ContentManagementDetail = () => {
 
       // Approval info — support both structures
       const approvalInfo =
-        data_detail?.approvalDto ||
-        data_detail?.approvalInformation ||
-        {};
+        data_detail?.approvalDto || data_detail?.approvalInformation || {};
 
       setBodyApproval({
         isApprover: approvalInfo?.isApprover,
@@ -231,8 +232,13 @@ const ContentManagementDetail = () => {
       draftId === id &&
       draftId === (data_detail?.id ?? data_detail?.contentTemplate?.id) &&
       data_detail &&
-      (!(data_detail?.approvalDto?.approvalType || data_detail?.approvalInformation?.approvalType) ||
-        (data_detail?.approvalDto?.approvalType ?? data_detail?.approvalInformation?.approvalType) !== "INACTIVE_CONTENT_TEMPLATE")
+      (!(
+        data_detail?.approvalDto?.approvalType ||
+        data_detail?.approvalInformation?.approvalType
+      ) ||
+        (data_detail?.approvalDto?.approvalType ??
+          data_detail?.approvalInformation?.approvalType) !==
+          "INACTIVE_CONTENT_TEMPLATE")
     ) {
       const extractLabel = (field) => {
         if (!field) return null;
@@ -259,7 +265,9 @@ const ContentManagementDetail = () => {
         product: extractLabel(item.product),
         gsizes: extractLabel(item.gsizes),
         customerSegment: extractLabel(item.customerSegment),
-        accountGroupType: extractLabel(item.accountGroupType) || extractLabel(item.accountGroup),
+        accountGroupType:
+          extractLabel(item.accountGroupType) ||
+          extractLabel(item.accountGroup),
         accountClass: extractLabel(item.accountClass),
         accountCategory: extractLabel(item.accountCategory),
         serviceType: extractLabel(item.serviceType),
@@ -297,7 +305,7 @@ const ContentManagementDetail = () => {
       breadcrumbName: "Content Management",
     },
     {
-      path: RBI_ROUTES.CONTENT_MANAGEMENT_DETAIL,
+      path: "",
       breadcrumbName: "Detail Content Management",
     },
   ];
@@ -331,7 +339,11 @@ const ContentManagementDetail = () => {
   const renderContentTab = () => {
     const contentTemplate = dataDetail?.contentTemplate || dataDetail || {};
     return (
-      <CollapsibleContainer header={"CONTENT INFORMATION"} border={true} defaultOpen={true}>
+      <CollapsibleContainer
+        header={"CONTENT INFORMATION"}
+        border={true}
+        defaultOpen={true}
+      >
         <div className="space-y-6 pb-3">
           {/* Subject */}
           <div>
@@ -392,10 +404,11 @@ const ContentManagementDetail = () => {
     const dynamicColumns = [];
 
     // Helper: check if any record has a non-null/non-empty value for a field
-    const hasField = (field) => dataCriteria?.some(item => {
-      const val = item[field];
-      return val !== null && val !== undefined && val !== "" && val !== "-";
-    });
+    const hasField = (field) =>
+      dataCriteria?.some((item) => {
+        const val = item[field];
+        return val !== null && val !== undefined && val !== "" && val !== "-";
+      });
 
     const hasCustomer = hasField("customer");
     const hasBudget = hasField("budget");
@@ -581,15 +594,17 @@ const ContentManagementDetail = () => {
         dataIndex: "startDate",
         key: "startDate",
         width: 130,
-        render: (text) => text ? moment(text).format(dateFormatting.date) : "-",
+        render: (text) =>
+          text ? moment(text).format(dateFormatting.date) : "-",
       },
       {
         title: "END DATE",
         dataIndex: "endDate",
         key: "endDate",
         width: 130,
-        render: (text) => text ? moment(text).format(dateFormatting.date) : "-",
-      }
+        render: (text) =>
+          text ? moment(text).format(dateFormatting.date) : "-",
+      },
     );
 
     // Action column
@@ -687,11 +702,11 @@ const ContentManagementDetail = () => {
       approvalId: bodyApproval.tAppId,
       action: approveOrReject.toUpperCase(),
     };
-    
+
     dispatch(
       bodyApproval.approvalType === "INACTIVE_CONTENT_TEMPLATE"
         ? approveRejectInactiveContentManagement({ body: data })
-        : approveRejectContentManagement({ body: data })
+        : approveRejectContentManagement({ body: data }),
     )
       .unwrap()
       .then(() => {
@@ -732,7 +747,7 @@ const ContentManagementDetail = () => {
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
+                          bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormatting.date)
                       : ""}
                   </DetailText>
@@ -748,9 +763,7 @@ const ContentManagementDetail = () => {
 
           {/* ===== CONTENT SETUP DETAIL - CardContainer with tabs INSIDE ===== */}
           <CardContainer
-            header={
-              <p className="w-full text-primary">CONTENT SETUP DETAIL</p>
-            }
+            header={<p className="w-full text-primary">CONTENT SETUP DETAIL</p>}
             className="!overflow-visible [&>div]:!overflow-visible"
           >
             {/* Tabs inside the card */}
@@ -769,14 +782,17 @@ const ContentManagementDetail = () => {
             <div
               className="[&>div]:!mt-[2px]"
               style={{
-                display: valuePage === "Content Management" ? undefined : "none",
+                display:
+                  valuePage === "Content Management" ? undefined : "none",
               }}
             >
               <ContentDetailSection
                 key={"detail"}
                 dataContentManagement={dataDetail}
                 dataCriteria={dataCriteria}
-                criteriaList={dataDetail?.criteriaDtoList || dataDetail?.criteria}
+                criteriaList={
+                  dataDetail?.criteriaDtoList || dataDetail?.criteria
+                }
               />
             </div>
 
@@ -792,7 +808,9 @@ const ContentManagementDetail = () => {
                   key={"draft"}
                   dataContentManagement={dataDraft}
                   dataCriteria={dataCriteriaDraft}
-                  criteriaList={dataDraft?.criteriaDtoList || dataDraft?.criteria}
+                  criteriaList={
+                    dataDraft?.criteriaDtoList || dataDraft?.criteria
+                  }
                 />
               </div>
             )}
@@ -856,7 +874,7 @@ const ContentManagementDetail = () => {
               <DetailText label="Created Date">
                 {dataLogInformation.createdDate
                   ? moment(dataLogInformation.createdDate).format(
-                      dateFormatting.dateTime
+                      dateFormatting.dateTime,
                     )
                   : "-"}
               </DetailText>
@@ -866,7 +884,7 @@ const ContentManagementDetail = () => {
               <DetailText label="Updated Date">
                 {dataLogInformation.updatedDate
                   ? moment(dataLogInformation.updatedDate).format(
-                      dateFormatting.dateTime
+                      dateFormatting.dateTime,
                     )
                   : "-"}
               </DetailText>
@@ -926,7 +944,10 @@ const ContentManagementDetail = () => {
           header={approveOrReject}
           approveOrReject={approveOrReject}
           menu={"Content Management"}
-          named={dataDetail?.templateName || dataDetail?.contentTemplate?.templateName}
+          named={
+            dataDetail?.templateName ||
+            dataDetail?.contentTemplate?.templateName
+          }
         />
 
         {/* Modal Retry */}
@@ -962,19 +983,29 @@ const ContentManagementDetail = () => {
           }
         >
           <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-            <DetailText label="Record ID">{dataHistoryDetail.recordId}</DetailText>
+            <DetailText label="Record ID">
+              {dataHistoryDetail.recordId}
+            </DetailText>
             <DetailText label="Created Date">
               {dataHistoryDetail?.createdDate
-                ? moment(dataHistoryDetail.createdDate).format(dateFormatting.dateTime)
+                ? moment(dataHistoryDetail.createdDate).format(
+                    dateFormatting.dateTime,
+                  )
                 : ""}
             </DetailText>
-            <DetailText label="Created By">{dataHistoryDetail?.createdBy}</DetailText>
+            <DetailText label="Created By">
+              {dataHistoryDetail?.createdBy}
+            </DetailText>
             <DetailText label="Updated Date">
               {dataHistoryDetail?.updatedDate
-                ? moment(dataHistoryDetail.updatedDate).format(dateFormatting.dateTime)
+                ? moment(dataHistoryDetail.updatedDate).format(
+                    dateFormatting.dateTime,
+                  )
                 : ""}
             </DetailText>
-            <DetailText label="Updated By">{dataHistoryDetail?.updatedBy}</DetailText>
+            <DetailText label="Updated By">
+              {dataHistoryDetail?.updatedBy}
+            </DetailText>
           </CardComponent>
         </ModalCustom>
       </Spin>
