@@ -59,7 +59,7 @@ const RateTypeCreate = ({ type }) => {
       breadcrumbName: "Daily Rate",
     },
     {
-      path: RBI_ROUTES.DAILY_RATE_CREATE,
+      path: "",
       breadcrumbName: `${type === "create" ? "Create" : "Update"} Rate Type`,
     },
   ];

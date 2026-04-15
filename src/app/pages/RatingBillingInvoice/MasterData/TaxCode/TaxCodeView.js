@@ -24,11 +24,9 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 
 const TaxCodeView = () => {
-  const {
-    data,
-    loading,
-    data_approval_history,
-  } = useSelector((state) => state.tax_code);
+  const { data, loading, data_approval_history } = useSelector(
+    (state) => state.tax_code,
+  );
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
@@ -107,7 +105,9 @@ const TaxCodeView = () => {
       } else {
         setAllData((prev) => {
           const ids = new Set(prev.map((item) => item.taxCodeId));
-          const newItems = data.result.filter((item) => !ids.has(item.taxCodeId));
+          const newItems = data.result.filter(
+            (item) => !ids.has(item.taxCodeId),
+          );
           return [...prev, ...newItems];
         });
       }
@@ -578,7 +578,7 @@ const TaxCodeView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Tax Code with name ${
+          alertMessage={`Are you sure want to inactivate this Tax Code with name ${
             chooseId?.taxCodeName || ""
           }?`}
           openModalInactivate={modalInactive}
