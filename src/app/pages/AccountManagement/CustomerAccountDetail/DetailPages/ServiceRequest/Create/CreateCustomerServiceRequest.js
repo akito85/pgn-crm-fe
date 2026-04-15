@@ -327,7 +327,7 @@ const CreateCustomerServiceRequest = (props) => {
     }
   }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSelectHiararchy = (value, label) => {
+  const handleSelectHierarchy = (value, label) => {
     formCreate.setFieldsValue({ appHierId: value, appHierName: label });
     if (value) dispatch(getSrApprovalHierarchy(value));
   };
@@ -504,7 +504,7 @@ const CreateCustomerServiceRequest = (props) => {
           form={formCreate}
           options={list_srApprovalHierarchy}
           hierarchyDetails={detail_srApprovalHierarchy}
-          handleSelectHiararchy={handleSelectHiararchy}
+          handleSelectHierarchy={handleSelectHierarchy}
         />
       ),
       disabled: false

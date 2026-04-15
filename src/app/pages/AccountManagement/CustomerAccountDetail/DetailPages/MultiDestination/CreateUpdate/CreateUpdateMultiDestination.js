@@ -174,7 +174,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       const appHierOption = list_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
 
       if (appHierOption)
-        handleSelectHiararchy(appHierId, appHierOption.approvalName);
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
   }, [detail, list_mdApprovalHierarchy]);
 
@@ -368,7 +368,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
     });
   };
 
-  const handleSelectHiararchy = (appHierId, approvalName) => {
+  const handleSelectHierarchy = (appHierId, approvalName) => {
     dispatch(getMdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
@@ -400,7 +400,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             form={form}
             hierarchyDetails={detail_mdApprovalHierarchy || []}
             options={list_mdApprovalHierarchy}
-            handleSelectHiararchy={handleSelectHiararchy}
+            handleSelectHierarchy={handleSelectHierarchy}
             key={`multi-destination-tab-1`}
           />
         )
@@ -689,7 +689,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         const appHierOption = list_mdApprovalHierarchy.find((option) => option.appHierId === appHierId);
 
         if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+          handleSelectHierarchy(appHierId, appHierOption.approvalName);
       }
 
       if (detail?.attachments)

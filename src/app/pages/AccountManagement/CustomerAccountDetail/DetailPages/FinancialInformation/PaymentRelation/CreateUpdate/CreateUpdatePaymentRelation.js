@@ -138,7 +138,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
       );
 
       if (appHierOption)
-        handleSelectHiararchy(appHierId, appHierOption.approvalName);
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
   }, [detail, list_prApprovalHierarchy]);
 
@@ -289,7 +289,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     form.setFieldValue("accountName", accountName);
   };
 
-  const handleSelectHiararchy = (appHierId, approvalName) => {
+  const handleSelectHierarchy = (appHierId, approvalName) => {
     dispatch(getPrApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
@@ -324,7 +324,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
               form={form}
               hierarchyDetails={detail_prApprovalHierarchy}
               options={list_prApprovalHierarchy}
-              handleSelectHiararchy={handleSelectHiararchy}
+              handleSelectHierarchy={handleSelectHierarchy}
               key={`payment-relation-tab-1`}
             />
           )
@@ -603,7 +603,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         );
 
         if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+          handleSelectHierarchy(appHierId, appHierOption.approvalName);
       }
 
       if (attachments)

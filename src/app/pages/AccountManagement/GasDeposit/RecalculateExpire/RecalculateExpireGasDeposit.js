@@ -139,7 +139,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
       );
 
       if (appHierOption)
-        handleSelectHiararchy(appHierId, appHierOption.approvalName);
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
   }, [detail, list_gdApprovalHierarchy]);
 
@@ -165,7 +165,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
    * @param {number} appHierId
    * @param {string} approvalName
    */
-  const handleSelectHiararchy = (appHierId, approvalName) => {
+  const handleSelectHierarchy = (appHierId, approvalName) => {
     dispatch(getGdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
@@ -192,7 +192,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         );
 
         if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+          handleSelectHierarchy(appHierId, appHierOption.approvalName);
       }
 
       if (attachments)
@@ -509,7 +509,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
               form={form}
               hierarchyDetails={detail_gdApprovalHierarchy}
               options={list_gdApprovalHierarchy}
-              handleSelectHiararchy={handleSelectHiararchy}
+              handleSelectHierarchy={handleSelectHierarchy}
               key="tab-1-card-0"
             />
           )

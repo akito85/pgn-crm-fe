@@ -10,7 +10,7 @@ const NxApprovalInput = ({
   options = [],
   hierarchyDetails = [],
   formView = true,
-  handleSelectHiararchy = () => {},
+  handleSelectHierarchy = () => {},
   loading = false,
   tableLoading = false,
 }) => {
@@ -79,7 +79,7 @@ const NxApprovalInput = ({
             className="no-margin-form w-1/3"
           >
             <SelectComponent
-              onChange={(value, option) => handleSelectHiararchy(value, option.children)}
+              onChange={(value, option) => handleSelectHierarchy(value, option.children)}
               disabled={loading}
             >
               {options.map((data, index) => (
