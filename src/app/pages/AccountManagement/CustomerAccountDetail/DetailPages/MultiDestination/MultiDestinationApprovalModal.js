@@ -8,7 +8,6 @@ import {
   getMultiDestinationApprovals,
   approveOrRejectAllMultiDestination
 } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
@@ -56,11 +55,6 @@ const MultiDestinationApprovalModal = ({
 
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: []
-  });
 
   // --- Effects ---
   // Fetches the first page of pending approvals whenever the modal opens or
@@ -296,22 +290,17 @@ const MultiDestinationApprovalModal = ({
     } catch {}
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
-      getMultiDestinationColumns(
+      getMultiDestinationColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false
-      ),
+        includeStatus: false
+      }),
     [search, searchInput, searchedColumn, searchText]
-  );
-
-  const columns = useMemo(
-    () => nxApplyFixedColumns(columnDefinitions, fixedColumns),
-    [columnDefinitions, fixedColumns]
   );
 
   const dataSourceWithKeys = useMemo(() => {
@@ -422,9 +411,6 @@ const MultiDestinationApprovalModal = ({
                       x: dataSourceWithKeys.length ? "max-content" : 5000
                     }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listMdApproval}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -468,9 +454,6 @@ const MultiDestinationApprovalModal = ({
                     x: selectedRows.length ? "max-content" : 5000
                   }}
                   onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}

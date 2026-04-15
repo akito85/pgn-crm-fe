@@ -6,33 +6,29 @@ import NxDate from "../../../../../../components/Nx/NxDatePicker";
 /**
  * Returns the column definitions for the Multi Destination list table.
  *
- * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValue`
- * for server-side filtering, with `filteredValue` set per column. Sorting is handled
- * server-side via `sorter: true`. The two trailing columns (`statusApproval`, `status`)
- * are conditionally included via the `includeStatus` flag.
- *
- * @param {Object}          search               - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} searchInput          - Ref to the search input element (used for focus).
- * @param {string}          searchedColumn       - The dataIndex of the column currently being searched.
- * @param {string}          searchText           - The current search text value.
- * @param {Function}        handleSearch         - Callback invoked when a search/filter is confirmed.
- * @param {boolean}         [includeStatus=true] - When false, omits the statusApproval and status columns.
+ * @param {Object}          search             - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} searchInput        - Ref to the search input element (used for focus).
+ * @param {string}          searchedColumn     - The dataIndex of the column currently being searched.
+ * @param {string}          searchText         - The current search text value.
+ * @param {Function}        handleSearch       - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [isApproval=false] - When true, omits the statusApproval and status columns.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
-const getMultiDestinationColumns = (
+const getMultiDestinationColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-  includeStatus = true,
-) => [
+  isApproval = false,
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",
     dataIndex: "no",
     width: 40,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
@@ -418,13 +414,14 @@ const getMultiDestinationColumns = (
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
-  includeStatus && {
+  !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     width: 170,
     sorter: true,
     align: "center",
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -451,12 +448,13 @@ const getMultiDestinationColumns = (
       );
     },
   },
-  includeStatus && {
+  !isApproval && {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
     width: 120,
     sorter: true,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
