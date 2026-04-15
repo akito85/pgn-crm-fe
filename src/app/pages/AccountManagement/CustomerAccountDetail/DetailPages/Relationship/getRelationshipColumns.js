@@ -3,20 +3,33 @@ import { dateFormatting, toTitleCase } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
-const getRelationshipColumns = (
+/**
+ * Returns the column definitions for the Relationship list table.
+ *
+ * @param {Object}          params                    - Column configuration options.
+ * @param {Object}          params.search             - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput        - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn     - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText         - The current search text value.
+ * @param {Function}        params.handleSearch       - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=false] - When true, omits the statusApproval and status columns.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getRelationshipColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-  includeStatus = true,
-) => [
+  isApproval = false,
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",
     dataIndex: "no",
     width: 50,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
@@ -115,7 +128,7 @@ const getRelationshipColumns = (
     ),
     render: (endDate) => endDate ? moment(endDate).format(dateFormatting.date) : "-",
   },
-  includeStatus && {
+  !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
@@ -149,7 +162,7 @@ const getRelationshipColumns = (
       );
     },
   },
-  includeStatus && {
+  !isApproval && {
     key: "status",
     title: "STATUS",
     dataIndex: "status",

@@ -6,12 +6,13 @@ import NxDate from "../../../../../../components/Nx/NxDatePicker";
 /**
  * Returns the column definitions for the Multi Destination list table.
  *
- * @param {Object}          search             - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} searchInput        - Ref to the search input element (used for focus).
- * @param {string}          searchedColumn     - The dataIndex of the column currently being searched.
- * @param {string}          searchText         - The current search text value.
- * @param {Function}        handleSearch       - Callback invoked when a search/filter is confirmed.
- * @param {boolean}         [isApproval=false] - When true, omits the statusApproval and status columns.
+ * @param {Object}          params                    - Column configuration options.
+ * @param {Object}          params.search             - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput        - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn     - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText         - The current search text value.
+ * @param {Function}        params.handleSearch       - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=false] - When true, omits the statusApproval and status columns.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
 const getMultiDestinationColumns = ({

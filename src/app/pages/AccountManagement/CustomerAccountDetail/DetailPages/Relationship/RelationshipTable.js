@@ -6,7 +6,6 @@ import NxTable from "../../../../../../components/Nx/NxTable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getRelationshipColumns } from "./getRelationshipColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import TablePagination from "../../../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -134,11 +133,6 @@ const RelationshipTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: [],
-  }));
 
   // --- Handlers ---
   const handleRefresh = () => {
@@ -333,26 +327,22 @@ const RelationshipTable = ({
 
   const baseColumns = useMemo(
     () =>
-      getRelationshipColumns(
+      getRelationshipColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
-      ),
+      }),
     [search, searchText, searchText, searchedColumn]
   );
 
-  const columnDefinitions = useMemo(() => {
+  const columns = useMemo(() => {
     return [...baseColumns, ...actionCols].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
   }, [baseColumns, actionCols]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -370,9 +360,6 @@ const RelationshipTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
         expandable={{
           expandedRowRender,

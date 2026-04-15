@@ -5,7 +5,6 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getRelatedDetailColumns } from "../getRelatedDetailColumns";
 
 const RelationshipDetailInfo = ({ detail = {} }) => {
@@ -16,12 +15,7 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: [],
-    left: [],
-  }));
-
-  const listRelatedDetail = detail?.relatedDetail || [];
+  const listRelatedDetail = detail.relatedDetail || [];
 
   /**
    * @param {string[]} selectedKeys
@@ -42,43 +36,23 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
 
   const baseColumns = useMemo(
     () =>
-      getRelatedDetailColumns(
+      getRelatedDetailColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
-      ),
+      }),
     [search, searchText, searchedColumn]
   );
 
-  const allColumns = useMemo(() => {
+  const columns = useMemo(() => {
     const columnsWithKeys = baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
     return columnsWithKeys;
   }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!listRelatedDetail?.length) return [];
-
-    return listRelatedDetail.map((item, index) => ({
-      ...item,
-      key: `related-${item.id || item.accountNumber || index}`,
-    }));
-  }, [listRelatedDetail]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -120,14 +94,11 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
       <NxBaseContainer border header="RELATED DETAIL">
         <NxTable
           idTable="relationship-related-detail-table"
-          dataSource={dataSourceWithKeys}
+          dataSource={listRelatedDetail}
           tableScrolled={{ x: listRelatedDetail.length ? "max-content" : 3000 }}
-          columns={processedColumns}
+          columns={columns}
           usePagination={false}
           useInfiniteScroll={false}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          columnDefinitions={columnDefinitions}
           showAdvanceSearch={false}
         />
       </NxBaseContainer>

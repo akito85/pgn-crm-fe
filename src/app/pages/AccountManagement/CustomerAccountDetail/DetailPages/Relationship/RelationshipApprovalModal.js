@@ -8,7 +8,6 @@ import {
   getRelationshipApprovals,
   approveOrRejectAllRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getRelationshipColumns } from "./getRelationshipColumns";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
@@ -118,11 +117,6 @@ const RelationshipApprovalModal = ({
 
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: [],
-  });
 
   // Initial fetch - Load data when modal opens
   useEffect(() => {
@@ -313,7 +307,7 @@ const RelationshipApprovalModal = ({
     } catch {}
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
       getRelationshipColumns(
         search,
@@ -325,17 +319,6 @@ const RelationshipApprovalModal = ({
       ),
     [page, loadMoreSize, searchedColumn, searchText]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
-
-  const dataSourceWithKeys = useMemo(() => {
-    return list_relationshipApproval?.map((item, index) => ({
-      ...item,
-      key: index + 1,
-    }));
-  }, [list_relationshipApproval]);
 
   return (
     <>
@@ -416,16 +399,13 @@ const RelationshipApprovalModal = ({
                   <NxTable
                     idTable="relationship-approval-table"
                     className={"[&_.ant-checkbox]:scale-90"}
-                    dataSource={dataSourceWithKeys}
+                    dataSource={list_relationshipApproval}
                     columns={columns}
-                    totalData={pagination_listRelationshipApproval?.totalElements || 0}
+                    totalData={pagination_listRelationshipApproval.totalElements || 0}
                     tableScrolled={{
-                      x: dataSourceWithKeys.length ? "max-content" : 2000,
+                      x: pagination_listRelationshipApproval.totalElements ? "max-content" : 2000,
                     }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listRelationshipApproval}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -471,9 +451,6 @@ const RelationshipApprovalModal = ({
                     x: selectedRows.length ? "max-content" : 2000,
                   }}
                   onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}
