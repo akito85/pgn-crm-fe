@@ -6,7 +6,6 @@ import NxTable from "../../../../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getInvoiceRelations,
@@ -61,11 +60,6 @@ const InvoiceRelationTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: []
-  }));
 
   // --- Handlers ---
   /**
@@ -236,29 +230,26 @@ const InvoiceRelationTable = ({
   ).map((col) => ({
     ...col,
     width: 70,
-    align: "center"
+    align: "center",
+    fixed: "right",
   }));
 
   const baseColumns = useMemo(
     () =>
-      getInvoiceRelationColumns(
+      getInvoiceRelationColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
-      ),
+      }),
     [search, searchInput, searchText, searchedColumn]
   );
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () => [...baseColumns, ...actionCols],
     [baseColumns, actionCols]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -276,9 +267,6 @@ const InvoiceRelationTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
       />
     </div>
