@@ -12,6 +12,7 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../redux/slices/product_promo/product";
+import { bytesConverter } from "../../utils/bytesConverter";
 import NxTable from "./NxTable";
 
 const columnAttachmentData = (
@@ -74,6 +75,7 @@ const columnAttachmentData = (
         searchText,
         handleSearch
       ),
+      render: (value) => (typeof value === "number" ? bytesConverter(value) : value),
     },
     {
       key: "action",
