@@ -162,7 +162,7 @@ const getRelationshipColumns = ({
       );
     },
   },
-  !isApproval && {
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",

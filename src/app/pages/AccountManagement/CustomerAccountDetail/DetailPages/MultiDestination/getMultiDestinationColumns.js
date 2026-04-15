@@ -449,7 +449,7 @@ const getMultiDestinationColumns = ({
       );
     },
   },
-  !isApproval && {
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
