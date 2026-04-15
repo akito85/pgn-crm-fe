@@ -323,6 +323,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
       if (
         lowerStatusApproval === "waiting approval" ||
         lowerStatus === "inactive"
+          || (lowerStatus === 'active' && lowerStatusApproval === 'approved')
       ) {
         return true;
       } else {

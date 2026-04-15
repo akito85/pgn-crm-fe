@@ -211,6 +211,7 @@ const ContactSection = ({
               value={tempRow.inputType}
               onChange={(val) => setTempRow({ ...tempRow, inputType: val })}
               options={inputTypeOptions}
+              disabled={true}
             />
           );
         }
