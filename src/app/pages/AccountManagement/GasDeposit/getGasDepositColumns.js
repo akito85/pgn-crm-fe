@@ -13,6 +13,7 @@ import NxDate from "../../../../components/Nx/NxDatePicker";
  * @param {string}          params.searchText             - The current search text value.
  * @param {Function}        params.handleSearch           - Callback invoked when a search/filter is confirmed.
  * @param {boolean}         [params.isApproval=false]     - When true, fixes the NO column left and shows the statusApproval column.
+ * @param {boolean}         [params.includeStatus=true]   - When false, hide the status and statusApproval columns.
  * @param {boolean}         [params.isUnderAccount=false] - When true, omits the accountNumber and accountName columns.
  * @param {boolean}         [params.isFrontEnd=false]     - When true, uses client-side search/filter props.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
@@ -24,6 +25,7 @@ const getGasDepositColumns = ({
   searchText,
   handleSearch,
   isApproval = false,
+  includeStatus = true,
   isUnderAccount = false,
   isFrontEnd = false,
 }) => [
@@ -255,7 +257,7 @@ const getGasDepositColumns = ({
       handleSearch,
     ),
   },
-  isApproval && {
+  !isApproval && includeStatus && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
@@ -290,7 +292,7 @@ const getGasDepositColumns = ({
       );
     },
   },
-  {
+  includeStatus && {
     key: "status",
     title: "STATUS",
     dataIndex: "status",

@@ -311,7 +311,7 @@ const GasDepositApprovalModal = ({
         searchedColumn,
         searchText,
         handleSearch,
-        includeStatus: false,
+        isApproval: true,
         isUnderAccount
       }),
     [search, searchInput, searchedColumn, searchText]
