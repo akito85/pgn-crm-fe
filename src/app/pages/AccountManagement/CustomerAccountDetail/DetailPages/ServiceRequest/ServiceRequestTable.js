@@ -10,7 +10,6 @@ import Toolbar from "../../../../../../components/Toolbar";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import { getServiceRequestColumns } from "./getServiceRequestColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 
 /**
  * Service request list table (container + presentational component).
@@ -58,10 +57,6 @@ const ServiceRequestTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "statusPrerequisite", "status", "action"],
-    left: [],
-  }));
 
   // --- Handlers ---
   const handleRefresh = () => {
@@ -102,7 +97,7 @@ const ServiceRequestTable = ({
           body: { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules },
           isLoadMore: true,
         })
-      );
+      ).unwrap();
       setPage(nextPage);
     }
   };
@@ -170,37 +165,19 @@ const ServiceRequestTable = ({
 
   const baseColumns = useMemo(
     () =>
-      getServiceRequestColumns(
+      getServiceRequestColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
-      ),
+      }),
     [search, searchText, searchedColumn]
   );
 
-  const allColumns = useMemo(
-    () =>
-      [...baseColumns, ...actionCols].map((col) => ({
-        ...col,
-        key: col.key || col.dataIndex || col.title,
-      })),
+  const columns = useMemo(
+    () => [...baseColumns, ...actionCols],
     [baseColumns, actionCols]
-  );
-
-  const processedColumns = useMemo(
-    () => nxApplyFixedColumns(allColumns, fixedColumns),
-    [allColumns, fixedColumns]
-  );
-
-  const columnDefinitions = useMemo(
-    () =>
-      allColumns.map((col) => ({
-        key: col.key || col.dataIndex || col.title,
-        title: col.title,
-      })),
-    [allColumns]
   );
 
   return (
@@ -213,15 +190,12 @@ const ServiceRequestTable = ({
         current={page}
         tableScrolled={{ y: 400, x: "max-content" }}
         onSort={onSort}
-        columns={processedColumns}
+        columns={columns}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading_listSr}
       />
     </div>

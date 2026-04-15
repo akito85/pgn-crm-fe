@@ -8,7 +8,6 @@ import {
   approveOrRejectAllServiceRequest,
   getServiceRequestApprovals,
 } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getServiceRequestColumns } from "./getServiceRequestColumns";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
@@ -53,11 +52,6 @@ const ServiceRequestApprovalModal = ({
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: [],
-  });
 
   // Fetch page 1 whenever the modal opens or any filter/sort changes.
   useEffect(() => {
@@ -178,16 +172,17 @@ const ServiceRequestApprovalModal = ({
     } catch {}
   };
 
-  const columnDefinitions = useMemo(
-    () =>
-      getServiceRequestColumns(search, searchInput, searchedColumn, searchText, handleSearch, false)
-        .filter((col) => !STATUS_KEYS.includes(col.key)),
-    [search, searchInput, searchedColumn, searchText]
-  );
-
   const columns = useMemo(
-    () => nxApplyFixedColumns(columnDefinitions, fixedColumns),
-    [columnDefinitions, fixedColumns]
+    () =>
+      getServiceRequestColumns({
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        isApproval: true
+      }).filter((col) => !STATUS_KEYS.includes(col.key)),
+    [search, searchInput, searchedColumn, searchText]
   );
 
   return (
@@ -271,9 +266,6 @@ const ServiceRequestApprovalModal = ({
                     totalData={totalElement}
                     tableScrolled={{ x: srApprovals.length ? "max-content" : 1200 }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listSrApprovals}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -310,9 +302,6 @@ const ServiceRequestApprovalModal = ({
                   columns={columns}
                   tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}
