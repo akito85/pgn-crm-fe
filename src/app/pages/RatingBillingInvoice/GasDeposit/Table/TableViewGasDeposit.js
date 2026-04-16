@@ -1,6 +1,8 @@
+import React from "react";
 import { hasValue, renderColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { numberFormatting } from "../../../../../utils/formatCurrency";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 export const columnsGasDeposit = (
   page = 0,
@@ -16,6 +18,7 @@ export const columnsGasDeposit = (
     title: "NO",
     isClassification: true,
     width: 15,
+    align: "center",
     render: (text, object, index) => index + 1,
   },
   {
@@ -52,6 +55,7 @@ export const columnsGasDeposit = (
     isClassification: true,
     width: 100,
     sorter: true,
+    align: "left",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -106,6 +110,7 @@ export const columnsGasDeposit = (
     isClassification: true,
     width: 100,
     sorter: true,
+    align: "left",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -154,33 +159,6 @@ export const columnsGasDeposit = (
       ),
   },
   {
-    key: "paymentGuaranteeCode",
-    title: "PAYMENT GUARANTEE CODE",
-    dataIndex: "paymentGuaranteeCode",
-    isClassification: true,
-    width: 90,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "paymentGuaranteeCode",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "paymentGuaranteeCode",
-        hasValue(search["paymentGuaranteeCode"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
@@ -214,6 +192,7 @@ export const columnsGasDeposit = (
     isClassification: true,
     width: 70,
     sorter: true,
+    align: "left",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "costCenter",
@@ -343,11 +322,87 @@ export const columnsGasDeposit = (
       ),
   },
   {
+    key: "termsEarn",
+    title: "TERMS EARN",
+    dataIndex: "termsEarn",
+    isClassification: true,
+    width: 80,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "termsEarn",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "termsRedeem",
+    title: "TERMS REDEEM",
+    dataIndex: "termsRedeem",
+    isClassification: true,
+    width: 80,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "termsRedeem",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "periodEarn",
+    title: "PERIOD EARN",
+    dataIndex: "periodEarn",
+    isClassification: true,
+    width: 80,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "periodEarn",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "periodRedeem",
+    title: "PERIOD REDEEM",
+    children: [
+      {
+        key: "periodRedeemStart",
+        title: "START",
+        dataIndex: "periodRedeemStart",
+        isClassification: true,
+        width: 70,
+        render: (text) => text ?? "-",
+      },
+      {
+        key: "periodRedeemEnd",
+        title: "END",
+        dataIndex: "periodRedeemEnd",
+        isClassification: true,
+        width: 70,
+        render: (text) => text ?? "-",
+      },
+    ],
+  },
+  {
     key: "period",
     title: "PERIOD",
     dataIndex: "period",
     isClassification: true,
-    width: 60,
+    width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -358,27 +413,37 @@ export const columnsGasDeposit = (
       handleSearch,
       true,
     ),
-    render: (text) =>
-      renderColumn(
-        "period",
-        hasValue(search["period"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
+    render: (text) => text ?? "-",
   },
   {
-    key: "currentPeriodVolume",
-    title: "CURRENT PERIOD VOLUME",
-    dataIndex: "currentPeriodVolume",
+    key: "timeUnit",
+    title: "TIME UNIT",
+    dataIndex: "timeUnit",
     isClassification: true,
-    width: 90,
+    width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "currentPeriodVolume",
+      "timeUnit",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "amount",
+    title: "AMOUNT",
+    dataIndex: "amount",
+    isClassification: true,
+    width: 90,
+    sorter: true,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "amount",
       searchInput,
       searchedColumn,
       searchText,
@@ -388,15 +453,16 @@ export const columnsGasDeposit = (
     render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-"),
   },
   {
-    key: "currentPeriodAmount",
-    title: "CURRENT PERIOD AMOUNT",
-    dataIndex: "currentPeriodAmount",
+    key: "cashBalance",
+    title: "CASH BALANCE",
+    dataIndex: "cashBalance",
     isClassification: true,
     width: 90,
     sorter: true,
+    align: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "currentPeriodAmount",
+      "cashBalance",
       searchInput,
       searchedColumn,
       searchText,
@@ -404,13 +470,31 @@ export const columnsGasDeposit = (
       true,
     ),
     render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-"),
+  },
+  {
+    key: "type",
+    title: "TYPE",
+    dataIndex: "type",
+    isClassification: true,
+    width: 70,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "type",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => text ?? "-",
   },
   {
     key: "accountType",
     title: "ACCOUNT TYPE",
     dataIndex: "accountType",
     isClassification: true,
-    width: 70,
+    width: 80,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -457,6 +541,78 @@ export const columnsGasDeposit = (
         false,
         "input",
         search,
+      ),
+  },
+  {
+    key: "source",
+    title: "SOURCE",
+    dataIndex: "source",
+    isClassification: true,
+    width: 80,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "source",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "description",
+    title: "DESCRIPTION",
+    dataIndex: "description",
+    isClassification: true,
+    width: 120,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "description",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    isClassification: true,
+    width: 70,
+    sorter: true,
+    align: "center",
+    render: (text) =>
+      text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text?.toLowerCase()}>{text}</StatusComponent>
+        </div>
+      ) : (
+        "-"
+      ),
+  },
+  {
+    key: "statusApproval",
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
+    isClassification: true,
+    width: 100,
+    sorter: true,
+    align: "center",
+    render: (text) =>
+      text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text?.toLowerCase()?.replaceAll(" ", "_")}>
+            {text}
+          </StatusComponent>
+        </div>
+      ) : (
+        "-"
       ),
   },
 ];

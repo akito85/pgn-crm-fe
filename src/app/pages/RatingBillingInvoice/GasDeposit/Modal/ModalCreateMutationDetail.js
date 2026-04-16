@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
@@ -18,13 +18,25 @@ import {
   getListApprovalById,
 } from "../../../../../redux/slices/rating_billing_invoice/billing";
 import {
-  getPeriodOptions,
   getUomOptions,
   getMutationTypeOptions,
-  getTypeOptions,
   createMutationDetail,
   getCategoryListGasDeposit,
 } from "../../../../../redux/slices/rating_billing_invoice/gasDeposit";
+
+const BILLING_PERIOD_OPTIONS = [
+  { label: "JAN 26", value: "JAN 26" },
+  { label: "JUL 26", value: "JUL 26" },
+  { label: "AUG 26", value: "AUG 26" },
+  { label: "DEC 26", value: "DEC 26" },
+];
+
+const CATEGORY_OPTIONS = [
+  { label: "Billing Adjustment", value: "Billing Adjustment" },
+  { label: "Expired", value: "Expired" },
+  { label: "Cancel Expired", value: "Cancel Expired" },
+  { label: "Redeem", value: "Redeem" },
+];
 
 const ModalCreateMutationDetail = ({
   isOpen,
@@ -35,16 +47,14 @@ const ModalCreateMutationDetail = ({
   const dispatch = useDispatch();
   const [form] = Form.useForm();
 
-  const { data_approval, data_approval_list, loading } = useSelector(
+  const { data_approval, data_approval_list } = useSelector(
     (state) => state.billing,
   );
 
   const {
-    data_period_options: periodOptions,
     data_uom_options: uomOptions,
     data_mutation_type_options: mutationTypeOptions,
-    data_type_options: typeOptions,
-  } = useSelector((state) => state.gasDeposit);
+  } = useSelector((state) => state.gasDepositRbi);
 
   // Step state
   const [currentStep, setCurrentStep] = useState(0);
@@ -61,13 +71,17 @@ const ModalCreateMutationDetail = ({
   // Fetch dropdown options & approval list
   useEffect(() => {
     if (isOpen) {
-      dispatch(getPeriodOptions());
       dispatch(getUomOptions());
       dispatch(getMutationTypeOptions());
-      dispatch(getTypeOptions());
       dispatch(getAllApprovalList());
+      form.setFieldsValue({
+        source: "MANUAL",
+        type: "Adjustment",
+        price: "{value}",
+        amount: "{value}",
+      });
     }
-  }, [dispatch, isOpen]);
+  }, [dispatch, isOpen, form]);
 
   // Map approval hierarchy list to options
   useEffect(() => {
@@ -106,7 +120,7 @@ const ModalCreateMutationDetail = ({
 
   // Steps definition
   const steps = [
-    { title: "MUTATION DETAIL" },
+    { title: "CREATE" },
     { title: "APPROVAL" },
     { title: "ATTACHMENT" },
   ];
@@ -115,14 +129,13 @@ const ModalCreateMutationDetail = ({
     if (currentStep === 0) {
       try {
         await form.validateFields([
-          "period",
+          "billingPeriod",
           "mutationDate",
           "mutationType",
+          "category",
           "uom",
-          "volume",
-          "price",
-          "amount",
-          "type",
+          "quantity",
+          "description",
         ]);
       } catch {
         return;
@@ -160,10 +173,17 @@ const ModalCreateMutationDetail = ({
       attachments: listDataAttachment,
     };
 
+    // Used in create page slicing before gasDepositId exists
+    if (!selectedData?.gasDepositId) {
+      handleCancelForm();
+      handleRefresh(values);
+      return;
+    }
+
     dispatch(createMutationDetail(body)).then((res) => {
       if (!res.error) {
         handleCancelForm();
-        handleRefresh();
+        handleRefresh(values);
       }
     });
   };
@@ -275,166 +295,103 @@ const ModalCreateMutationDetail = ({
         <div
           className={`steps-content my-[20px] ${currentStep !== 0 ? "hidden" : ""}`}
         >
-          <BaseContainer
-            subHeader={
-              <p className="-mt-[10px] text-primary">MUTATION DETAIL INFORMATION</p>
-            }
-            border
-            className="mb-3"
-          >
+          <BaseContainer border header="MUTATION INFORMATION" className="mb-3">
             <div className="grid grid-cols-5 gap-3">
-            <Form.Item
-              label="Period"
-              name="period"
-              rules={[{ required: true, message: "Please select Period!" }]}
-            >
-              <SelectComponent
-                placeholder="Select Period"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
+              <Form.Item
+                label="Source"
+                name="source"
+                rules={[{ required: true, message: "Please input Source!" }]}
+                style={{ marginBottom: 0 }}
               >
-                {periodOptions.map((opt) => (
-                  <Select.Option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
+                <InputComponent disabled placeholder="MANUAL" />
+              </Form.Item>
 
-            <Form.Item
-              label="Mutation Date"
-              name="mutationDate"
-              rules={[
-                { required: true, message: "Please select Mutation Date!" },
-              ]}
-            >
-              <DateComponent placeholder="Select Mutation Date" />
-            </Form.Item>
-
-            <Form.Item
-              label="Mutation Type"
-              name="mutationType"
-              rules={[
-                { required: true, message: "Please select Mutation Type!" },
-              ]}
-            >
-              <SelectComponent
-                placeholder="Select Mutation Type"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
+              <Form.Item
+                label="Billing Period"
+                name="billingPeriod"
+                rules={[{ required: true, message: "Please select Billing Period!" }]}
+                style={{ marginBottom: 0 }}
               >
-                {mutationTypeOptions.map((opt) => (
-                  <Select.Option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
+                <SelectComponent placeholder="Select Billing Period" options={BILLING_PERIOD_OPTIONS} />
+              </Form.Item>
 
-            <Form.Item
-              label="UOM"
-              name="uom"
-              rules={[{ required: true, message: "Please select UOM!" }]}
-            >
-              <SelectComponent
-                placeholder="Select UOM"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
+              <Form.Item
+                label="Mutation Date"
+                name="mutationDate"
+                rules={[{ required: true, message: "Please select Mutation Date!" }]}
+                style={{ marginBottom: 0 }}
               >
-                {uomOptions.map((opt) => (
-                  <Select.Option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
+                <DateComponent placeholder="Select Date" />
+              </Form.Item>
 
-            <Form.Item
-              label="Volume"
-              name="volume"
-              rules={[{ required: true, message: "Please input Volume!" }]}
-              getValueFromEvent={(e) => e.floatValue}
-            >
-              <InputComponent
-                type="numeric"
-                placeholder="Enter Volume"
-                thousandSeparator="."
-                decimalSeparator=","
-                decimalScale={2}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Price"
-              name="price"
-              rules={[{ required: true, message: "Please input Price!" }]}
-              getValueFromEvent={(e) => e.floatValue}
-            >
-              <InputComponent
-                type="numeric"
-                placeholder="Enter Price"
-                thousandSeparator="."
-                decimalSeparator=","
-                decimalScale={2}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Amount"
-              name="amount"
-              rules={[{ required: true, message: "Please input Amount!" }]}
-              getValueFromEvent={(e) => e.floatValue}
-            >
-              <InputComponent
-                type="numeric"
-                placeholder="Enter Amount"
-                thousandSeparator="."
-                decimalSeparator=","
-                decimalScale={2}
-              />
-            </Form.Item>
-
-            <Form.Item
-              label="Type"
-              name="type"
-              rules={[{ required: true, message: "Please select Type!" }]}
-            >
-              <SelectComponent
-                placeholder="Select Type"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
+              <Form.Item
+                label="Mutation Type"
+                name="mutationType"
+                rules={[{ required: true, message: "Please select Mutation Type!" }]}
+                style={{ marginBottom: 0 }}
               >
-                {typeOptions.map((opt) => (
-                  <Select.Option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
+                <SelectComponent placeholder="Select Mutation Type">
+                  {mutationTypeOptions.map((opt) => (
+                    <Select.Option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Select.Option>
+                  ))}
+                </SelectComponent>
+              </Form.Item>
 
-            <Form.Item label="Description" name="description" className="col-span-5">
-              <InputComponent
-                type="textarea"
-                rows={3}
-                placeholder="Type description..."
-              />
-            </Form.Item>
+              <Form.Item
+                label="Select Category"
+                name="category"
+                rules={[{ required: true, message: "Please select Category!" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent placeholder="Select Category" options={CATEGORY_OPTIONS} />
+              </Form.Item>
+
+              <Form.Item
+                label="UOM"
+                name="uom"
+                rules={[{ required: true, message: "Please select UOM!" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent placeholder="Select UOM">
+                  {uomOptions.map((opt) => (
+                    <Select.Option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Select.Option>
+                  ))}
+                </SelectComponent>
+              </Form.Item>
+
+              <Form.Item
+                label="Quantity"
+                name="quantity"
+                rules={[{ required: true, message: "Please input Quantity!" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <InputComponent placeholder="Input.." />
+              </Form.Item>
+
+              <Form.Item label="Price" name="price" style={{ marginBottom: 0 }}>
+                <InputComponent disabled placeholder="{value}" />
+              </Form.Item>
+
+              <Form.Item label="Amount" name="amount" style={{ marginBottom: 0 }}>
+                <InputComponent disabled placeholder="{value}" />
+              </Form.Item>
+
+              <Form.Item label="Type" name="type" style={{ marginBottom: 0 }}>
+                <InputComponent disabled placeholder="Adjustment" />
+              </Form.Item>
+
+              <Form.Item
+                label="Description"
+                name="description"
+                className="col-span-5"
+                style={{ marginBottom: 0 }}
+              >
+                <InputComponent type="textarea" rows={3} placeholder="Input.." />
+              </Form.Item>
             </div>
           </BaseContainer>
         </div>

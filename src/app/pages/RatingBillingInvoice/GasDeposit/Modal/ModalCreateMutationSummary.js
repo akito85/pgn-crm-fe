@@ -48,7 +48,7 @@ const ModalCreateMutationSummary = ({
     data_uom_options: uomOptions,
     data_time_unit_options: timeUnitOptions,
     data_redem_period_options: redemPeriodOptions,
-  } = useSelector((state) => state.gasDeposit);
+  } = useSelector((state) => state.gasDepositRbi);
 
   // Step state
   const [currentStep, setCurrentStep] = useState(0);

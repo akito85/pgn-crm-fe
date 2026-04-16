@@ -151,7 +151,7 @@ import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice"
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
-import gasDepositReducer from "../slices/rating_billing_invoice/gasDeposit";
+import gasDepositRbiReducer from "../slices/rating_billing_invoice/gasDeposit";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -271,7 +271,7 @@ const reducer = combineReducers({
   digitalSignature: digitalSignatureReducer,
   glAccount: glAccountReducer,
   contentManagement: contentManagementReducer,
-  gasDeposit: gasDepositReducer,
+  gasDepositRbi: gasDepositRbiReducer,
 
   //receipt and collection
   receipt: receiptReducer,

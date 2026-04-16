@@ -1,6 +1,8 @@
+import React from "react";
 import { hasValue, renderColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { numberFormatting } from "../../../../../utils/formatCurrency";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 export const columnsMutationDetail = (
   page = 0,
@@ -16,7 +18,21 @@ export const columnsMutationDetail = (
     title: "NO",
     isClassification: true,
     width: 15,
+    align: "center",
     render: (text, object, index) => index + 1,
+  },
+  {
+    key: "documentNumber",
+    title: "DOCUMENT NUMBER",
+    dataIndex: "documentNumber",
+    isClassification: true,
+    width: 100,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "documentNumber", searchInput, searchedColumn, searchText, handleSearch, true,
+    ),
+    render: (text) =>
+      renderColumn("documentNumber", hasValue(search["documentNumber"]), searchText, text, false, "input", search),
   },
   {
     key: "source",
@@ -32,43 +48,54 @@ export const columnsMutationDetail = (
       renderColumn("source", hasValue(search["source"]), searchText, text, false, "input", search),
   },
   {
-    key: "period",
-    title: "PERIOD",
-    dataIndex: "period",
+    key: "billingPeriod",
+    title: "BILLING PERIOD",
+    dataIndex: "billingPeriod",
     isClassification: true,
-    width: 60,
+    width: 90,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
-      search, "period", searchInput, searchedColumn, searchText, handleSearch, true,
+      search, "billingPeriod", searchInput, searchedColumn, searchText, handleSearch, true,
     ),
-    render: (text) =>
-      renderColumn("period", hasValue(search["period"]), searchText, text, false, "input", search),
+    render: (text) => text ?? "-",
   },
   {
     key: "mutationDate",
     title: "MUTATION DATE",
     dataIndex: "mutationDate",
     isClassification: true,
-    width: 70,
+    width: 90,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "mutationDate", searchInput, searchedColumn, searchText, handleSearch, true,
     ),
-    render: (text) =>
-      renderColumn("mutationDate", hasValue(search["mutationDate"]), searchText, text, false, "input", search),
+    render: (text) => text ?? "-",
   },
   {
     key: "mutationType",
     title: "MUTATION TYPE",
     dataIndex: "mutationType",
     isClassification: true,
-    width: 70,
+    width: 80,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "mutationType", searchInput, searchedColumn, searchText, handleSearch, true,
     ),
     render: (text) =>
       renderColumn("mutationType", hasValue(search["mutationType"]), searchText, text, false, "input", search),
+  },
+  {
+    key: "category",
+    title: "CATEGORY",
+    dataIndex: "category",
+    isClassification: true,
+    width: 80,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "category", searchInput, searchedColumn, searchText, handleSearch, true,
+    ),
+    render: (text) =>
+      renderColumn("category", hasValue(search["category"]), searchText, text, false, "input", search),
   },
   {
     key: "uom",
@@ -84,12 +111,16 @@ export const columnsMutationDetail = (
       renderColumn("uom", hasValue(search["uom"]), searchText, text, false, "input", search),
   },
   {
-    key: "volume",
-    title: "VOLUME",
-    dataIndex: "volume",
+    key: "quantity",
+    title: "QUANTITY",
+    dataIndex: "quantity",
     isClassification: true,
-    width: 60,
+    width: 80,
     sorter: true,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "quantity", searchInput, searchedColumn, searchText, handleSearch, true,
+    ),
     render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-"),
   },
   {
@@ -97,8 +128,12 @@ export const columnsMutationDetail = (
     title: "PRICE",
     dataIndex: "price",
     isClassification: true,
-    width: 60,
+    width: 80,
     sorter: true,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "price", searchInput, searchedColumn, searchText, handleSearch, true,
+    ),
     render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-"),
   },
   {
@@ -106,8 +141,12 @@ export const columnsMutationDetail = (
     title: "AMOUNT",
     dataIndex: "amount",
     isClassification: true,
-    width: 70,
+    width: 90,
     sorter: true,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "amount", searchInput, searchedColumn, searchText, handleSearch, true,
+    ),
     render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-"),
   },
   {
@@ -115,25 +154,59 @@ export const columnsMutationDetail = (
     title: "TYPE",
     dataIndex: "type",
     isClassification: true,
-    width: 60,
+    width: 70,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "type", searchInput, searchedColumn, searchText, handleSearch, true,
     ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "description",
+    title: "DESCRIPTION",
+    dataIndex: "description",
+    isClassification: true,
+    width: 120,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "description", searchInput, searchedColumn, searchText, handleSearch, true,
+    ),
+    render: (text) => text ?? "-",
+  },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    isClassification: true,
+    width: 70,
+    sorter: true,
+    align: "center",
     render: (text) =>
-      renderColumn("type", hasValue(search["type"]), searchText, text, false, "input", search),
+      text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text?.toLowerCase()}>{text}</StatusComponent>
+        </div>
+      ) : (
+        "-"
+      ),
   },
   {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     isClassification: true,
-    width: 70,
+    width: 100,
     sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, true,
-    ),
+    align: "center",
     render: (text) =>
-      renderColumn("statusApproval", hasValue(search["statusApproval"]), searchText, text, false, "input", search),
+      text ? (
+        <div className="flex justify-center">
+          <StatusComponent colour={text?.toLowerCase()?.replaceAll(" ", "_")}>
+            {text}
+          </StatusComponent>
+        </div>
+      ) : (
+        "-"
+      ),
   },
 ];

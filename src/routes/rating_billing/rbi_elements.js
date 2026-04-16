@@ -60,6 +60,8 @@ import GLAccountForm from "../../app/pages/RatingBillingInvoice/MasterData/GLAcc
 import GLAccountDetail from "../../app/pages/RatingBillingInvoice/MasterData/GLAccount/GLAccountDetail";
 import ContentManagementDetail from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementDetail";
 import GasDepositPage from "../../app/pages/RatingBillingInvoice/GasDeposit/GasDepositPage";
+import GasDepositCreatePage from "../../app/pages/RatingBillingInvoice/GasDeposit/GasDepositCreatePage";
+import GasDepositExpiredCreatePage from "../../app/pages/RatingBillingInvoice/GasDeposit/GasDepositExpiredCreatePage";
 
 export const RBI_ELEMENTS = {
   // prabilling elements render
@@ -193,4 +195,7 @@ export const RBI_ELEMENTS = {
 
   // Gas Deposit
   GAS_DEPOSIT_VIEW_ELEMENT: <GasDepositPage />,
+  GAS_DEPOSIT_CREATE_ELEMENT: <GasDepositCreatePage />,
+  GAS_DEPOSIT_UPDATE_ELEMENT: <GasDepositCreatePage />,
+  GAS_DEPOSIT_EXPIRED_CREATE_ELEMENT: <GasDepositExpiredCreatePage />,
 };

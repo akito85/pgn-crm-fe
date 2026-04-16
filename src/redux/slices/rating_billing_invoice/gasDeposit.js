@@ -479,6 +479,7 @@ const initialState = {
   data_detail: [],
   data_mutation_summary: [],
   data_mutation_detail: [],
+  data_approval_history: {},
   data_period_options: [],
   data_currency_options: [],
   data_uom_options: [],
@@ -490,6 +491,7 @@ const initialState = {
   loading: false,
   loading_mutation_summary: false,
   loading_mutation_detail: false,
+  loading_history: false,
   loading_dropdown: false,
   isFailed: false,
   isSuccess: false,
@@ -805,6 +807,22 @@ export const createMutationDetail = createAsyncThunk(
   },
 );
 
+export const getApprovalHistory = createAsyncThunk(
+  "GET_GAS_DEPOSIT_APPROVAL_HISTORY",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/approval-history/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return Array.isArray(response.data) ? {} : response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
+);
+
 // ===================== SLICE =====================
 const gasDepositSlice = createSlice({
   name: "gasDeposit",
@@ -990,6 +1008,19 @@ const gasDepositSlice = createSlice({
     [createMutationDetail.rejected]: (state) => {
       state.loading = false;
       state.isFailed = true;
+    },
+
+    // Approval History
+    [getApprovalHistory.pending]: (state) => {
+      state.loading_history = true;
+    },
+    [getApprovalHistory.fulfilled]: (state, action) => {
+      state.loading_history = false;
+      state.data_approval_history = action.payload || {};
+    },
+    [getApprovalHistory.rejected]: (state) => {
+      state.loading_history = false;
+      state.data_approval_history = {};
     },
   },
 });
