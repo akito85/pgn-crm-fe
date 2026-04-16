@@ -300,7 +300,7 @@ export const createRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
+        description: `Relationship was not ${payload?.action === "draft" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
@@ -330,7 +330,7 @@ export const updateRelationship = createAsyncThunk(
 
       const successMessage = {
         title: "Successful",
-        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Relationship has been ${payload?.action === "draft" ? 'drafted' : 'submitted'}.`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -344,7 +344,7 @@ export const updateRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
+        description: `Relationship was not ${payload?.action === "draft" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
