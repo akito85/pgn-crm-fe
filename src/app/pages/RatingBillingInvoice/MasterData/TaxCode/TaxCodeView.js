@@ -13,6 +13,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   inactiveTaxCode,
+  requestActivateTaxCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 import { useDispatch, useSelector } from "react-redux";
 import { columnsTaxCodeList } from "./Table/TableTaxCodeList";
@@ -47,6 +48,14 @@ const TaxCodeView = () => {
   const [modalError, setModalError] = useState(false);
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
+
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
@@ -100,10 +109,13 @@ const TaxCodeView = () => {
           create: data_approval_history?.dataApprover?.TAX_CODE || [],
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_TAX_CODE || [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_TAX_CODE || [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.TAX_CODE || [],
           inactive: data_approval_history?.dataHistory?.INACTIVE_TAX_CODE || [],
+          activate: data_approval_history?.dataHistory?.ACTIVATED_TAX_CODE || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -206,12 +218,19 @@ const TaxCodeView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       taxCodeId: chooseId.taxCodeId,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveTaxCode(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateTaxCode : inactiveTaxCode)(dataValue),
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -234,7 +253,12 @@ const TaxCodeView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -311,9 +335,8 @@ const TaxCodeView = () => {
               disabled={!isEditable}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -352,14 +375,16 @@ const TaxCodeView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -368,8 +393,8 @@ const TaxCodeView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               type={"action"}
@@ -378,19 +403,19 @@ const TaxCodeView = () => {
               onClick={() => handleInactive(record)}
             >
               <span className="text-black ml-1">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+                {rowStatus !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -549,9 +574,10 @@ const TaxCodeView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Tax Code with name ${
-            chooseId?.taxCodeName || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+              ? "activate"
+              : "inactivate"
+            } this Tax Code with name ${chooseId?.taxCodeName || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -579,7 +605,8 @@ const TaxCodeView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px]">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError?.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
