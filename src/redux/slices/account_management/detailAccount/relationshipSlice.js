@@ -638,7 +638,7 @@ const relationshipSlice = createSlice({
       state.loading_detailRelationship = true;
     },
     [getRelationship.fulfilled]: (state, action) => {
-      state.detail_relationship = action.payload.result;
+      state.detail_relationship = action.payload.result || {};
       state.loading_detailRelationship = false;
     },
     [getRelationship.rejected]: (state) => {
@@ -650,7 +650,7 @@ const relationshipSlice = createSlice({
       state.loading_detailDraftRelationship = true;
     },
     [getRelationshipDraft.fulfilled]: (state, action) => {
-      state.detailDraft_relationship = action.payload.result;
+      state.detailDraft_relationship = action.payload.result || {};
       state.loading_detailDraftRelationship = false;
     },
     [getRelationshipDraft.rejected]: (state) => {
