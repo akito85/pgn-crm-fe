@@ -16,9 +16,14 @@ import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
 import moment from "moment";
 
 /**
- * Relationship info step component 
- * @param {{ form: import("antd").FormInstance; values?: {relationshipType?: number; relationshipCategory?: number; relationshipName?: string; relationshipNumber?: string; relationshipTypeName?: string; relationshipCategoryName?: string; }; setRelatedDetails?: React.Dispatch<React.SetStateAction<any[]>>; formView?: boolean; }} props
- * @returns {JSX.Element}
+ * Relationship information step — renders editable form or read-only detail view.
+ *
+ * @param {object}   props
+ * @param {object}   props.form                        - Ant Design Form instance.
+ * @param {Function} [props.setRelatedDetails=()=>{}]  - Updates parent related-detail list.
+ * @param {boolean}  [props.formView=true]             - true = editable form, false = read-only view.
+ * @param {boolean}  [props.isDraft=false]             - Whether the record is a draft.
+ * @param {boolean}  [props.isUpdate=false]            - Whether the form is in update mode.
  */
 const RelationshipInfo = ({
   form,
@@ -27,13 +32,16 @@ const RelationshipInfo = ({
   isDraft = false,
   isUpdate = false,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
   const location = useLocation();
   const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
 
+  // --- State ---
   const [modalChoose, setModalChoose] = useState(false);
 
-  // Initialize form field states
+  // --- Form state ---
   const relationshipType = Form.useWatch("relationshipType", { form });
   const relationshipCategory = Form.useWatch("relationshipCategory", { form });
   const relationshipTypeName = Form.useWatch("relationshipTypeName", { form, preserve: true });
@@ -44,11 +52,11 @@ const RelationshipInfo = ({
   const endDate = Form.useWatch("endDate", { form });
   const description = Form.useWatch("description", { form });
 
-  // Get data from Redux store
+  // --- Redux ---
   const { list_relationshipType, list_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
     useSelector((state) => state.relationship);
 
-  // Fetch relationship type and category on component mount
+  // --- Effects ---
   useEffect(() => {
     if (accountId && formView) {
       dispatch(getRelationshipTypes({ accountId }));
@@ -76,7 +84,7 @@ const RelationshipInfo = ({
                 form.setFieldValue("relationshipTypeName", option.children)
                 setRelatedDetails([]);
                 // Also clear related name/number fields
-                form.resetFields(["relatedName", "relatedNumber"]);
+                form.resetFields(["relatedName", "relatedNumber", "formAccountId", "relatedId"]);
               }}
             >
               {list_relationshipType?.map((item) => (
@@ -206,9 +214,11 @@ const RelationshipInfo = ({
 
             const relatedName = isCustomer ? selected.customerName : selected.accountName;
             const relatedNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+            const formAccountId = isCustomer ? customerId : accountId;
             const relatedId = isCustomer ? selected.customerId : selected.accountId;
 
             form.setFieldsValue({
+              formAccountId,
               relatedName,
               relatedNumber,
               relatedId,

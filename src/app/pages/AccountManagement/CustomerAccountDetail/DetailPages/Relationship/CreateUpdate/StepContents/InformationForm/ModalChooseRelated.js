@@ -8,6 +8,19 @@ import { getCustomerColumns } from "./getCustomerColumns";
 import { getAccountColumns } from "./getAccountColumns";
 import { Button } from "antd";
 
+/**
+ * Modal for selecting a related account or customer record.
+ * Table type (account vs. customer) is derived from `relationshipTypeName`.
+ *
+ * @param {object}   props
+ * @param {boolean}  [props.isOpen=false]             - Controls modal visibility.
+ * @param {Function} [props.handleCancel=()=>{}]      - Closes the modal.
+ * @param {Function} [props.handleSelect=()=>{}]      - Called with the chosen record.
+ * @param {*}        [props.accountId=null]            - Current account identifier.
+ * @param {*}        props.relationshipType            - Relationship type ID.
+ * @param {*}        props.relationshipCategory        - Relationship category ID.
+ * @param {string}   props.relationshipTypeName        - Human-readable relationship type name.
+ */
 const ModalChooseRelated = ({
   isOpen = false,
   handleCancel = () => {},
@@ -17,9 +30,11 @@ const ModalChooseRelated = ({
   relationshipCategory,
   relationshipTypeName,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
+  // --- State ---
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [search, setSearch] = useState({});
@@ -27,9 +42,11 @@ const ModalChooseRelated = ({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
 
+  // --- Redux ---
   const { list_relatedObject, pagination_listRelatedObject, loading_listRelatedObject } =
     useSelector((state) => state.relationship);
 
+  // --- Derived values ---
   // Normalize relationshipTypeName for comparison (convert "Child Of" to "CHILD_OF")
   const normalizedRelationType = relationshipTypeName
     ? relationshipTypeName.trim().toUpperCase().replace(/\s+/g, "_")
@@ -41,6 +58,13 @@ const ModalChooseRelated = ({
     normalizedRelationType &&
     ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
 
+  // --- Handlers ---
+  /**
+   * Updates sort state from Ant Design table onChange.
+   * @param {*}      _        - Ignored pagination arg
+   * @param {*}      __       - Ignored filters arg
+   * @param {object} sortInfo - Sort descriptor from NxTable
+   */
   const onSort = (_, __, sortInfo) => {
     const dataSort = sortInfo.order
       ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
@@ -48,6 +72,12 @@ const ModalChooseRelated = ({
     setSort(dataSort);
   };
 
+  /**
+   * Applies column search filter and resets page to 0 on new queries.
+   * @param {string[]} selectedKeys - Active filter values
+   * @param {Function} confirm      - Antd confirm callback
+   * @param {string}   dataIndex    - Column key being searched
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -63,6 +93,9 @@ const ModalChooseRelated = ({
     });
   };
 
+  /**
+   * Fetches the next page of related objects and appends to the list.
+   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = pagination_listRelatedObject?.totalPages || 0;
@@ -88,6 +121,7 @@ const ModalChooseRelated = ({
     setPage(nextPage);
   };
 
+  // --- Effects ---
   useEffect(() => {
     if (accountId && relationshipType && relationshipCategory) {
       const body = {
@@ -110,6 +144,7 @@ const ModalChooseRelated = ({
     }
   }, [dispatch, accountId, relationshipType, relationshipCategory, sort, search]);
 
+  // --- Columns ---
   const baseColumns = useMemo(() => {
     const columnFn = isAccountType ? getAccountColumns : getCustomerColumns;
     return columnFn(

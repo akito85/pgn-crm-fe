@@ -201,6 +201,7 @@ const CreateUpdateRelationship = ({
             const {
               relationshipType,
               relationshipCategory,
+              formAccountId: accountId,
               relatedId: relatedAccountId,
               startDate,
               endDate,
@@ -243,6 +244,7 @@ const CreateUpdateRelationship = ({
       const {
         relationshipType,
         relationshipCategory,
+        formAccountId: accountId,
         relatedId: relatedAccountId,
         startDate,
         endDate,
@@ -304,6 +306,7 @@ const CreateUpdateRelationship = ({
         const {
           relationshipType,
           relationshipCategory,
+          formAccountId: accountId,
           relatedId: relatedAccountId,
           startDate,
           endDate,
@@ -374,7 +377,8 @@ const CreateUpdateRelationship = ({
     const {
       relationshipType,
       relationshipCategory,
-      relatedId: relatedAccountId,
+      formAccountId,
+      relatedId,
       startDate,
       endDate,
       appHierId,
@@ -391,8 +395,8 @@ const CreateUpdateRelationship = ({
     const payload = {
       relationshipType,
       relationshipCategory,
-      relatedAccountId,
-      accountId,
+      relatedAccountId: relatedId,
+      accountId: formAccountId,
       startDate: NxDate.formatForAPI(startDate),
       endDate: NxDate.formatForAPI(endDate),
       appHierId,
@@ -481,7 +485,7 @@ const CreateUpdateRelationship = ({
               setRelatedDetails={setRelatedDetails}
               isDraft={isDraft}
               isUpdate={isUpdate}
-              />
+            />
           )
         },
         {
@@ -571,9 +575,10 @@ const CreateUpdateRelationship = ({
       const {
         relationshipType,
         relationshipCategory,
-        accountId: relatedId,
-        accountName: relatedName,
-        accountNumber: relatedNumber,
+        accountId: formAccountId,
+        relatedAccountId: relatedId,
+        relatedAccountName: relatedName,
+        relatedAccountNumber: relatedNumber,
         startDate,
         endDate,
         description,
@@ -584,6 +589,7 @@ const CreateUpdateRelationship = ({
       form.setFieldsValue({
         relationshipType,
         relationshipCategory,
+        formAccountId,
         relatedId,
         relatedName,
         relatedNumber,

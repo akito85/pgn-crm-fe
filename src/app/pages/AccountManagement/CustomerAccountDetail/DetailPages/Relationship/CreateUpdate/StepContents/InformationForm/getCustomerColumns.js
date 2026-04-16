@@ -2,6 +2,18 @@ import { Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
+/**
+ * Builds Ant Design column definitions for the customer selection table.
+ *
+ * @param {object}   search          - Active search filters keyed by dataIndex.
+ * @param {object}   searchInput     - Ref attached to the search input element.
+ * @param {string}   searchedColumn  - dataIndex of the currently searched column.
+ * @param {string}   searchText      - Current search text value.
+ * @param {Function} handleSearch    - Column search submit handler.
+ * @param {Function} [handleSelect]  - Called with the selected row record.
+ * @param {Function} [handleCancel]  - Closes the parent modal.
+ * @returns {object[]} Array of Ant Design column definition objects.
+ */
 const getCustomerColumns = (
   search,
   searchInput,
