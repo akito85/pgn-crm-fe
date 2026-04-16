@@ -71,10 +71,9 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
-  const { status, statusApproval } = detail_relationship;
+  const { status, statusApproval, approvalType } = detail_relationship;
   const {
     id,
-    approvalType,
     relatedAccountNumber,
     createdDate,
     createdBy,
