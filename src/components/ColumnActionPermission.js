@@ -1,25 +1,25 @@
 import { Popover, Skeleton } from "antd";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
 import IconThreeDots from "../assets/Icon/Nx/IconThreeDots";
 
 // render content column
-export const RenderContentActions = (
-  text,
+export const RenderContentActions = ({
   record,
-  index,
   itemRender = [],
   totalLength,
   permissions = [],
   sliceColumn = "View",
   stopClickPropagation = false,
-) => {
-
+}) => {
+  const [open, setOpen] = useState(false);
 
   if (totalLength > 3) {
     return (
       <div className="w-full flex justify-center items-center gap-2.5">
         <Popover
+          open={open}
+          onOpenChange={setOpen}
           trigger={"click"}
           placement="bottomRight"
           showArrow={false}
@@ -31,7 +31,11 @@ export const RenderContentActions = (
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
-                    return item?.render(record, totalLength, index);
+                    return (
+                      <div key={item.action} onClick={() => setOpen(false)}>
+                        {item?.render(record, totalLength, index)}
+                      </div>
+                    );
                   } else {
                     return null;
                   }
@@ -151,17 +155,18 @@ export const useColumnActionPermission = (
         dataIndex: "action",
         fixed: "right",
         width: 150,
-        render: (text, record, index) =>
-          RenderContentActions(
-            text,
-            record,
-            index,
-            lowerCaseItemsRender,
-            arrayActions.length,
-            arrayActions,
-            sliceColumn,
-            stopClickPropagation,
-          ),
+        render: (text, record, index) => (
+          <RenderContentActions
+            text={text}
+            record={record}
+            index={index}
+            itemRender={lowerCaseItemsRender}
+            totalLength={arrayActions.length}
+            permissions={arrayActions}
+            sliceColumn={sliceColumn}
+            stopClickPropagation={stopClickPropagation}
+          />
+        ),
       },
     ];
   }, [isLoading, arrayActions, lowerCaseItemsRender, sliceColumn, stopClickPropagation]);
