@@ -240,9 +240,8 @@ export const createEfakturCode = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.isSubmit === false ? "created" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "created" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -259,9 +258,8 @@ export const createEfakturCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "created" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "created" : "submitted"
+              }. ${message}.`,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -280,9 +278,8 @@ export const updateEfakturCode = createAsyncThunk(
       const response = await ratingBillingHttpService.updateData(url, body);
       const successMessage = {
         title: "Successful",
-        description: `Your data has been ${
-          body.isSubmit === false ? "updated" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "updated" : "submitted"
+          }.`,
       };
       thunkApi.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -299,9 +296,8 @@ export const updateEfakturCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "updated" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "updated" : "submitted"
+              }. ${message}.`,
           };
           thunkApi.dispatch(showModalError(errorBody));
         }
@@ -349,6 +345,43 @@ export const inactiveEfakturCode = createAsyncThunk(
   },
 );
 
+export const requestActivateEfakturCode = createAsyncThunk(
+  "REQUEST_ACTIVATE_EFAKTUR_CODE",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/faktur-code/request-activate`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successBody = {
+        title: "Successful",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not submitted. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+
 export const approveRejectEfakturCode = createAsyncThunk(
   "APPROVE_REJECT_EFAKTUR_CODE",
   async ({ id, body }, thunkAPI) => {
@@ -357,9 +390,8 @@ export const approveRejectEfakturCode = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -376,9 +408,8 @@ export const approveRejectEfakturCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -398,9 +429,8 @@ export const approveRejectInactiveEfakturCode = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -417,9 +447,47 @@ export const approveRejectInactiveEfakturCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+
+export const approveRejectActivatedEfakturCode = createAsyncThunk(
+  "APPROVE_REJECT_ACTIVATED_EFAKTUR_CODE",
+  async ({ id, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/faktur-code/${id}/approval-activated`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successApprove = {
+        title: `Successful`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successApprove));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -591,6 +659,19 @@ const efakturCodeSlice = createSlice({
         state.loading = false;
         state.message = action.payload;
       })
+      // request activate
+      .addCase(requestActivateEfakturCode.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(requestActivateEfakturCode.fulfilled, (state) => {
+        state.isSuccess = true;
+        state.loading = false;
+      })
+      .addCase(requestActivateEfakturCode.rejected, (state, action) => {
+        state.isFailed = true;
+        state.loading = false;
+        state.message = action.payload;
+      })
       // approve reject
       .addCase(approveRejectEfakturCode.pending, (state) => {
         state.loading = true;
@@ -613,6 +694,19 @@ const efakturCodeSlice = createSlice({
         state.loading = false;
       })
       .addCase(approveRejectInactiveEfakturCode.rejected, (state, action) => {
+        state.isFailed = true;
+        state.loading = false;
+        state.message = action.payload;
+      })
+      // approve reject activated
+      .addCase(approveRejectActivatedEfakturCode.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(approveRejectActivatedEfakturCode.fulfilled, (state) => {
+        state.isSuccess = true;
+        state.loading = false;
+      })
+      .addCase(approveRejectActivatedEfakturCode.rejected, (state, action) => {
         state.isFailed = true;
         state.loading = false;
         state.message = action.payload;

@@ -20,6 +20,7 @@ import {
   getDetailEfakturCode,
   approveRejectEfakturCode,
   approveRejectInactiveEfakturCode,
+  approveRejectActivatedEfakturCode,
   resetEfakturCodeState,
   getCategoryList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
@@ -222,10 +223,15 @@ const EFakturCodeDetail = () => {
     dispatch(
       bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
         ? approveRejectInactiveEfakturCode({
+          id: id,
+          body: data,
+        })
+        : bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+          ? approveRejectActivatedEfakturCode({
             id: id,
             body: data,
           })
-        : approveRejectEfakturCode({
+          : approveRejectEfakturCode({
             id: id,
             body: data,
           }),
@@ -261,14 +267,22 @@ const EFakturCodeDetail = () => {
         <div className="flex flex-col w-full">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE" && (
-              <BaseContainer header={"Inactive Request Information"}>
+            ["INACTIVE_FAKTUR_CODE", "ACTIVATED_FAKTUR_CODE"].includes(
+              bodyApproval.approvalType,
+            ) && (
+              <BaseContainer
+                header={
+                  bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+                    ? "Activate Request Information"
+                    : "Inactive Request Information"
+                }
+              >
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail?.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate,
-                        ).format(dateFormatting.date)
+                        bodyApproval.approvalDetail.requestedDate,
+                      ).format(dateFormatting.date)
                       : "-"}
                   </DetailText>
                   <DetailText label={"Requested By"}>
@@ -307,13 +321,17 @@ const EFakturCodeDetail = () => {
                   setApproveOrReject(
                     bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
                       ? "Approve Inactive"
-                      : "Approve",
+                      : bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+                        ? "Approve Activate"
+                        : "Approve",
                   );
                 }}
               >
                 {bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
                   ? "Approve Inactive"
-                  : "Approve"}
+                  : bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+                    ? "Approve Activate"
+                    : "Approve"}
               </ButtonComponent>
             </div>
           ) : null}
@@ -342,9 +360,8 @@ const EFakturCodeDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
