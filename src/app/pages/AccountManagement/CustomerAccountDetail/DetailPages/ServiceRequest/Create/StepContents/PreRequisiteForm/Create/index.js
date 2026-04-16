@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { createPrerequisiteForServiceRequest } from "../../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { createSrPrerequisite } from "../../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { Form, Select, Input, Spin, message } from "antd";
 import { UpOutlined, DownOutlined } from "@ant-design/icons";
 
@@ -47,23 +47,23 @@ const PreRequisiteCreateFrom = () => {
   const dispatch = useDispatch();
 
   const {
-    data_types,
-    data_categories,
-    data_subcategories,
-    data_priorities,
-    data_channels,
-    data_sources,
-    data_prerequisite_types,
+    list_srTypes,
+    list_srCategories,
+    list_srSubcategories,
+    list_srPriorities,
+    list_srChannels,
+    list_srSources,
+    list_srPrerequisiteTypes,
   } = useSelector((state) => state.serviceRequest);
 
   const dropdowns = {
-    serviceRequestTypes: data_types,
-    serviceRequestCategories: data_categories,
-    serviceRequestSubcategories: data_subcategories,
-    serviceRequestPriorities: data_priorities,
-    serviceRequestChannels: data_channels,
-    serviceRequestSources: data_sources,
-    serviceRequestPrerequisites: data_prerequisite_types,
+    serviceRequestTypes: list_srTypes,
+    serviceRequestCategories: list_srCategories,
+    serviceRequestSubcategories: list_srSubcategories,
+    serviceRequestPriorities: list_srPriorities,
+    serviceRequestChannels: list_srChannels,
+    serviceRequestSources: list_srSources,
+    serviceRequestPrerequisites: list_srPrerequisiteTypes,
   };
 
   const {
@@ -155,7 +155,7 @@ const PreRequisiteCreateFrom = () => {
       if (srId) {
         // UPDATE flow: SR sudah ada, simpan langsung ke backend
         await dispatch(
-          createPrerequisiteForServiceRequest({ accountId, srId, body: prerequisiteData }),
+          createSrPrerequisite({ accountId, srId, body: prerequisiteData }),
         ).unwrap();
         navigateBack();
       } else {

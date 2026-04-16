@@ -8,6 +8,7 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_managem
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   showModalError,
+  validateCreateUpdate,
 } from "../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../constants/configApp";
@@ -138,7 +139,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
       );
 
       if (appHierOption)
-        handleSelectHiararchy(appHierId, appHierOption.approvalName);
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
   }, [detail, list_gdApprovalHierarchy]);
 
@@ -164,7 +165,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
    * @param {number} appHierId
    * @param {string} approvalName
    */
-  const handleSelectHiararchy = (appHierId, approvalName) => {
+  const handleSelectHierarchy = (appHierId, approvalName) => {
     dispatch(getGdApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
@@ -191,7 +192,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         );
 
         if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+          handleSelectHierarchy(appHierId, appHierOption.approvalName);
       }
 
       if (attachments)
@@ -244,14 +245,14 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
                 }
               }
 
-              // await dispatch(
-              //   validateCreateUpdate({
-              //     body,
-              //     services: accountManagementService,
-              //     endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
-              //     type: formType
-              //   })
-              // ).unwrap();
+              await dispatch(
+                validateCreateUpdate({
+                  body,
+                  services: accountManagementService,
+                  endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+                  type: formType
+                })
+              ).unwrap();
             }
           }
         } else
@@ -270,18 +271,18 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         action: submitType
       };
 
-      // try {
-      //   await dispatch(
-      //     validateCreateUpdate({
-      //       body,
-      //       services: accountManagementService,
-      //       endPoint: `/v1/dbs/api/gas-deposit/validate-${formType}`,
-      //       type: formType
-      //     })
-      //   ).unwrap()
-      // } catch {
-      //   return;
-      // }
+      try {
+        await dispatch(
+          validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/gas-deposit/validate-${formType}`,
+            type: formType
+          })
+        ).unwrap()
+      } catch {
+        return;
+      }
 
       setShowConfirmationModal(show);
       setConfirmationType(submitType);
@@ -333,14 +334,14 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
           }
         }
 
-        // await dispatch(
-        //   validateCreateUpdate({
-        //     body,
-        //     services: accountManagementService,
-        //     endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
-        //     type: formType
-        //   })
-        // ).unwrap();
+        await dispatch(
+          validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+            type: formType
+          })
+        ).unwrap();
       }
     } catch (err) {
       return;
@@ -482,7 +483,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
             />
           )
         },
-        {
+        isBulk && {
           header: "Gas Deposit List",
           content: (
             <GasDepositBulkTable
@@ -508,7 +509,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
               form={form}
               hierarchyDetails={detail_gdApprovalHierarchy}
               options={list_gdApprovalHierarchy}
-              handleSelectHiararchy={handleSelectHiararchy}
+              handleSelectHierarchy={handleSelectHierarchy}
               key="tab-1-card-0"
             />
           )

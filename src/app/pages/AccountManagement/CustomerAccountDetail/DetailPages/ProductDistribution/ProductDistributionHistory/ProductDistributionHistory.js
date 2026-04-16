@@ -12,7 +12,7 @@ import {
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ProductDistributionDetail from "./ProductDistributionDetail";
-import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import { deletePD, getAllPDHistoryPaginate, getCurrentPB, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
@@ -110,7 +110,7 @@ const columns = (
   ];
 };
 
-const ProductDistributionHistory = ({ id, idCustomer }) => {
+const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
   const navigate = useNavigate();
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
@@ -270,13 +270,17 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         setModalDetail(false);
         setIdData();
         setEffectiveData();
+        setPage(1);
+        dispatch(getCurrentPB(id));
+        setActiveKey?.("current");
         dispatch(
           getAllPDHistoryPaginate({
             id: id,
             search: encodeURIComponent(JSON?.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           })
         );
       })

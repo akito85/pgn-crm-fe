@@ -8,7 +8,6 @@ import {
   getGasDepositApprovals,
   approveOrRejectAllGasDeposit
 } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { getGasDepositColumns } from "./getGasDepositColumns";
 import { showModalError } from "../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -35,10 +34,11 @@ const GasDepositApprovalModal = ({
     list_gasDepositApproval: gasDepositApprovals,
     pagination_listGdApproval: pagination,
     loading_listGdApproval,
-    loading_approveRejectGd
+    loading_approveGd,
+    loading_rejectGd
   } = useSelector((state) => state.gasDeposit);
 
-  const loadingApproval = loading_approveRejectGd;
+  const loadingApproval = loading_approveGd || loading_rejectGd;
 
   const searchInput = useRef(null);
   const [form] = Form.useForm();
@@ -58,11 +58,6 @@ const GasDepositApprovalModal = ({
 
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: []
-  });
 
   // --- Derived values ---
   const totalElement = pagination.totalElement;
@@ -308,7 +303,7 @@ const GasDepositApprovalModal = ({
     } catch {}
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
       getGasDepositColumns({
         search,
@@ -316,15 +311,11 @@ const GasDepositApprovalModal = ({
         searchedColumn,
         searchText,
         handleSearch,
-        includeStatus: false,
+        isApproval: true,
         isUnderAccount
       }),
     [search, searchInput, searchedColumn, searchText]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   // --- Effects ---
   // Fetches the first page of pending approvals whenever the modal opens or
@@ -394,8 +385,8 @@ const GasDepositApprovalModal = ({
                     onClick={() => handleSave("REJECT")}
                     icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
                     className="flex-row-reverse"
-                    disabled={loadingApproval}
-                    loading={loadingApproval}
+                    disabled={!loading_rejectGd && loadingApproval}
+                    loading={loading_rejectGd}
                   >
                     Reject
                   </Button>
@@ -404,8 +395,8 @@ const GasDepositApprovalModal = ({
                     onClick={() => handleSave("APPROVE")}
                     icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
                     className="flex-row-reverse"
-                    disabled={loadingApproval}
-                    loading={loadingApproval}
+                    disabled={!loading_approveGd && loadingApproval}
+                    loading={loading_approveGd}
                   >
                     Approve
                   </Button>
@@ -442,9 +433,6 @@ const GasDepositApprovalModal = ({
                       x: gasDepositApprovals.length ? "max-content" : 3000
                     }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listGdApproval}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -487,9 +475,6 @@ const GasDepositApprovalModal = ({
                     x: selectedRowKeys.length ? "max-content" : 3000
                   }}
                   onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}

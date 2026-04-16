@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { getWorkOrdersByServiceRequest } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getSrWorkOrders } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 const COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
@@ -92,17 +92,17 @@ const CustomerServiceRequestWorkOrder = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { data_work_orders, loading_work_orders } = useSelector(
+  const { list_srWorkOrders, loading_listSrWorkOrders } = useSelector(
     (state) => state.serviceRequest
   );
 
   useEffect(() => {
     if (id && idAccount) {
-      dispatch(getWorkOrdersByServiceRequest({ accountId: idAccount, srId: id }));
+      dispatch(getSrWorkOrders({ accountId: idAccount, srId: id }));
     }
   }, [dispatch, id, idAccount]);
 
-  const raw = data_work_orders;
+  const raw = list_srWorkOrders;
   const items = Array.isArray(raw?.result)
     ? raw.result
     : Array.isArray(raw?.data)
@@ -124,7 +124,7 @@ const CustomerServiceRequestWorkOrder = ({
       fontSize="small"
       tablePadding="small"
       tableScrolled={{ x: "max-content" }}
-      loading={loading_work_orders}
+      loading={loading_listSrWorkOrders}
       onSort={onSort}
     />
   );

@@ -8,8 +8,8 @@ import {
   getGrantedAccessAccount,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 import {
-  getRelationshipDetail,
-  getDetailDraftRelationship,
+  getRelationship,
+  getRelationshipDraft,
   approveOrRejectRelationship,
   approveOrRejectInactiveRelationship,
 } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
@@ -36,12 +36,11 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   const dispatch = useDispatch();
 
   const {
-    data_relationshipDetail,
-    detailDraft_relationshipDetail,
+    detail_relationship,
+    detailDraft_relationship,
     loading_detailRelationship,
     loading_detailDraftRelationship,
     loading_approveRejectRelationship,
-    data_attachmentList,
   } = useSelector((state) => state.relationship);
 
   const { loading: loadingCustomer, loadingAccount } = useSelector(
@@ -63,7 +62,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   ];
   const originalKey = tabOptions[0]?.key;
   const [activeKey, setActiveKey] = useState(originalKey || "");
-  const detail = (activeKey === originalKey ? data_relationshipDetail : detailDraft_relationshipDetail) || {};
+  const detail = (activeKey === originalKey ? detail_relationship : detailDraft_relationship) || {};
 
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
@@ -72,17 +71,14 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
-  const { status, statusApproval } = data_relationshipDetail;
+  const { status, statusApproval, approvalType } = detail_relationship;
   const {
     id,
-    approvalType,
-    subjectName,
-    objectName,
+    relatedAccountNumber,
     createdDate,
     createdBy,
     updatedDate,
     updatedBy,
-    tappId,
   } = detail;
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
@@ -146,7 +142,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
    * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    const { id, approvalType, tappId } = data_relationshipDetail;
+    const { id, approvalType, tappId } = detail_relationship;
     const body = [
       {
         id,
@@ -196,13 +192,13 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
 
   useEffect(() => {
     if (accountId && idRelationship) {
-      dispatch(getRelationshipDetail({ accountId, idRelationship }));
+      dispatch(getRelationship({ accountId, idRelationship }));
     }
   }, [accountId, idRelationship]);
 
   useEffect(() => {
     if (accountId && idRelationship && draftExist)
-      dispatch(getDetailDraftRelationship({ accountId, idRelationship }));
+      dispatch(getRelationshipDraft({ accountId, idRelationship }));
   }, [accountId, idRelationship, draftExist]);
 
   return (
@@ -282,11 +278,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
             : ""
         }
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${
-          data_relationshipDetail?.subjectName ||
-          data_relationshipDetail?.objectName ||
-          ""
-        }?`}
+        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) =>
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }

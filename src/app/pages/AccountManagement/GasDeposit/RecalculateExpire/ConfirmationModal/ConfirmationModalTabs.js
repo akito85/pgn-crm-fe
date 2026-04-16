@@ -1,5 +1,4 @@
 import { useSelector } from "react-redux";
-import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxAttachmentInput from "../../../../../../components/Nx/NxAttachmentInput";
@@ -7,7 +6,34 @@ import NxApprovalInput from "../../../../../../components/Nx/NxApprovalInput";
 import InfoGasDeposit from "../StepContents/InformationForm/InfoGasDeposit";
 import GasDepositDetailTable from "../../GasDepositDetailTable";
 import GasDepositBulkTable from "../StepContents/InformationForm/GasDepositBulkTable";
+import NxRemarkInput from "../../../../../../components/Nx/NxRemarkIInput";
 
+/**
+ * Tabbed content area inside the confirmation modal.
+ * Renders Gas Deposit, Approval, Attachment, and (for submit) Remark tabs.
+ * In bulk mode the Gas Deposit tab shows a read-only GasDepositBulkTable
+ * of the selected rows; in single mode it shows InfoGasDeposit + detail table.
+ *
+ * @param {{
+ *   form: import("antd").FormInstance;
+ *   detail: object;
+ *   id: number;
+ *   parentKey: string;
+ *   approvalData: object;
+ *   attachmentDataSource: object[];
+ *   service: object;
+ *   accountId: number;
+ *   type?: string;
+ *   configApplication: string;
+ *   activeTab?: number;
+ *   setActiveTab?: (tab: number) => void;
+ *   disabled?: boolean;
+ *   isBulk?: boolean;
+ *   selectedRowKeys?: (string|number)[];
+ *   openedMemo?: Record<string|number, true>;
+ *   onExpand?: (expanded: boolean, record: object) => void;
+ * }} props
+ */
 const ConfirmationModalTabs = ({
   form,
   detail,
@@ -27,9 +53,11 @@ const ConfirmationModalTabs = ({
   openedMemo = {},
   onExpand = () => {},
 }) => {
+  // --- Hooks ---
   const { list_gasDeposit } = useSelector((state) => state.gasDeposit);
 
-  const selectedRows = isBulk
+  // --- Derived values ---
+  const selectedRows = isBulk // rows selected in step 0, passed to the read-only recap table
     ? list_gasDeposit.filter((item) => selectedRowKeys.includes(item.id))
     : [];
 
@@ -104,7 +132,7 @@ const ConfirmationModalTabs = ({
       label: "Remark",
       cards: [
         {
-          content: <ConfirmationModalRemark disabled={disabled} />,
+          content: <NxRemarkInput disabled={disabled} />,
           header: "Remark",
           required: true,
         },

@@ -6,10 +6,9 @@ import NxTable from "../../../../../../components/Nx/NxTable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getMultiDestination,
+  getMultiDestinations,
   downloadMultiDestination
 } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 
@@ -40,7 +39,7 @@ const MultiDestinationTable = ({
   const dispatch = useDispatch();
   const {
     list_multiDestination: dataSource,
-    pagination_multiDestination: pagination,
+    pagination_listMd: pagination,
     loading_listMd: loading,
   } = useSelector((state) => state.multiDestination);
 
@@ -62,11 +61,6 @@ const MultiDestinationTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: [],
-  }));
-
   // --- Handlers ---
   const handleRefresh = () => {
     const body = {
@@ -78,7 +72,7 @@ const MultiDestinationTable = ({
       filterRules,
     };
 
-    dispatch(getMultiDestination({ id: accountId, body, isLoadMore: false }));
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -132,7 +126,7 @@ const MultiDestinationTable = ({
       };
 
       await dispatch(
-        getMultiDestination({ id: accountId, body, isLoadMore: true })
+        getMultiDestinations({ id: accountId, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -165,7 +159,7 @@ const MultiDestinationTable = ({
     };
 
     setPage(0);
-    dispatch(getMultiDestination({ id: accountId, body, isLoadMore: false }));
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
@@ -227,29 +221,26 @@ const MultiDestinationTable = ({
       ...col,
       width: 70,
       align: "center",
+      fixed: "right",
     })
   );
 
   const baseColumns = useMemo(() =>
-    getMultiDestinationColumns(
+    getMultiDestinationColumns({
       search,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
-    ),
+    }),
   [search, searchText, searchedColumn]);
 
-  const columnDefinitions = useMemo(() => {
+  const columns = useMemo(() => {
     return [...baseColumns, ...actionCols].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
   }, [baseColumns, actionCols]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -267,9 +258,6 @@ const MultiDestinationTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
       />
     </div>

@@ -5,6 +5,8 @@ import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { Tabs } from "antd";
 
 const RawMaterialSource = ({ id, idCustomer }) => {
+  const [activeKey, setActiveKey] = useState("current");
+
   const tabOptions = [
     {
       key: "current",
@@ -23,12 +25,11 @@ const RawMaterialSource = ({ id, idCustomer }) => {
         <RawMaterialSourceHistory
           id={id}
           idCustomer={idCustomer}
+          setActiveKey={setActiveKey}
         />
       )
     },
   ];
-
-  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
 
   return (
     <NxCardContainer

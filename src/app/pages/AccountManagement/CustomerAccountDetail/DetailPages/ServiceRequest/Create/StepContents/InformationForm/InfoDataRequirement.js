@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { DownloadOutlined, FilterOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Form, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../../../assets/Icon";
@@ -11,10 +10,8 @@ import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseCont
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
-
 import { requiredMessage } from "../../../../../../../../../utils";
-import { getDataRequirementValuesByType } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getSrDataRequirementValues } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 export default function InfoDataRequirement({
   dropdowns,
@@ -22,7 +19,7 @@ export default function InfoDataRequirement({
   accountId
 }) {
   const dispatch = useDispatch();
-  const { data_data_requirement_values, loading_data_requirement_values } = useSelector(
+  const { detail_srDataRequirementValues, loading_srDataRequirementValues } = useSelector(
     (state) => state.serviceRequest
   );
 
@@ -32,8 +29,6 @@ export default function InfoDataRequirement({
   const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [selectedTypeValue, setSelectedTypeValue] = useState(null);
   const [modalForm] = Form.useForm();
-
-  const navigate = useNavigate();
 
   // Sync local table state with form data on mount (for persistence across step navigation)
   useEffect(() => {
@@ -143,16 +138,16 @@ export default function InfoDataRequirement({
     setSelectedTypeId(typeId);
     setSelectedTypeValue(typeValue);
     modalForm.setFieldsValue({ srFormDataRequirementValue: undefined });
-    if (typeId && accountId && typeValue && !data_data_requirement_values[typeValue]) {
-      dispatch(getDataRequirementValuesByType({ typeValue, accountId }));
+    if (typeId && accountId && typeValue && !detail_srDataRequirementValues[typeValue]) {
+      dispatch(getSrDataRequirementValues({ typeValue, accountId }));
     }
   };
 
   const handleEdit = (record) => {
     setSelectedTypeId(record.typeId);
     setSelectedTypeValue(record.typeValue);
-    if (record.typeValue && accountId && !data_data_requirement_values[record.typeValue]) {
-      dispatch(getDataRequirementValuesByType({ typeValue: record.typeValue, accountId }));
+    if (record.typeValue && accountId && !detail_srDataRequirementValues[record.typeValue]) {
+      dispatch(getSrDataRequirementValues({ typeValue: record.typeValue, accountId }));
     }
     modalForm.setFieldsValue({
       srFormDataRequirementType: record.typeId,
@@ -236,67 +231,26 @@ export default function InfoDataRequirement({
     <>
       <NxCardContainer header={"DATA REQUIREMENT"}>
         <NxBaseContainer border>
-        <div className="w-full flex justify-between items-center gap-5 mb-5">
-          <div className="flex justify-end items-center gap-2.5">
-            {/* Download List Button */}
-            <ButtonComponent
+          <div className="w-full flex justify-end items-center gap-4">
+            <Button
+              icon={<SVGIcon name="IconButtonCreate" width={14} />}
               type={"submit"}
-              onClick={() => {}}
-              icon={
-                <DownloadOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
-            >
-              Download List
-            </ButtonComponent>
-
-            {/* Approval Button */}
-            <ButtonComponent
-              type={"submit"}
+              border={false}
               onClick={() => {setIsDataRequirement(true)}}
-              icon={
-                <PlusOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                borderRadius: "5px",
-                height: "48px"
-              }}
             >
-              Create
-            </ButtonComponent>
+              Choose
+            </Button>
           </div>
-        </div>
 
-        <NxTable
-          idTable={"DataRequirement"}
-          usePagination={false}
-          useSelect={true}
-          tableScrolled={{ y: 400, x: "max-content" }}
-          dataMain={dataRequirement}
-          columnMain={columnMain}
-          showAdvanceSearch={false}
-        />
+          <NxTable
+            idTable={"DataRequirement"}
+            usePagination={false}
+            useSelect={true}
+            tableScrolled={{ y: 400, x: "max-content" }}
+            dataMain={dataRequirement}
+            columnMain={columnMain}
+            showAdvanceSearch={false}
+          />
         </NxBaseContainer>
       </NxCardContainer>
 
@@ -351,8 +305,8 @@ export default function InfoDataRequirement({
               usePagination={false}
               tableScrolled={{ y: 400, x: "max-content" }}
               useSelect={false}
-              loading={loading_data_requirement_values}
-              dataMain={(data_data_requirement_values[selectedTypeValue] || []).map((item, idx) => ({
+              loading={loading_srDataRequirementValues}
+              dataMain={(detail_srDataRequirementValues[selectedTypeValue] || []).map((item, idx) => ({
                 ...item,
                 key: item.id,
                 no: idx + 1,

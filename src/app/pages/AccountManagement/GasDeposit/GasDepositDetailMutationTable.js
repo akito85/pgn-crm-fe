@@ -1,6 +1,5 @@
 import NxTable from "../../../../components/Nx/NxTable";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { getGasDepositDetailMutationColumns } from "./getGasDepositDetailMutationColumns";
 import { useDispatch, useSelector } from "react-redux";
 import { getGasDepositDetailMutations } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
@@ -156,17 +155,15 @@ const GasDepositDetailMutationTable = ({
   }, [sort, search, filters, filterRules]);
 
   // --- Column configuration ---
-  const columnDefinitions = useMemo(() =>
-    getGasDepositDetailMutationColumns(
+  const columns = useMemo(() =>
+    getGasDepositDetailMutationColumns({
       search,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
-    ),
-  [search, searchText, searchedColumn]);
-
-  const columns = [...columnDefinitions];
+    }),
+  [search, searchInput, searchText, searchedColumn]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -183,7 +180,6 @@ const GasDepositDetailMutationTable = ({
         loadMoreThreshold={20}
         onLoadMore={handleLoadMore}
         loading={loading}
-        columnDefinitions={columnDefinitions}
         onRefresh={handleRefresh}
         showAdvanceSearch={false}
         showSearchBar={false}
