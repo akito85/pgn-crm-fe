@@ -39,3 +39,6 @@ jobs:
       DOCKERFILE_NAME: Dockerfile
       FILE_VALUES: pgn-frontend/values-${{ needs.Preparation.outputs.ENV_SERVER }}.yaml
       SONAR_SOURCES: ./src
+      RP_PROJECT_NAME: ${{ vars.RP_PROJECT_NAME }}
+      RP_SERVICE_NAME: ${{ vars.RP_SERVICE_NAME }}
+      SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
