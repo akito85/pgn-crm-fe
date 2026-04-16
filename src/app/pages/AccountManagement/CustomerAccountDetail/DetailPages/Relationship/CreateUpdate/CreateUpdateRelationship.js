@@ -381,6 +381,7 @@ const CreateUpdateRelationship = ({
       relatedId,
       startDate,
       endDate,
+      description,
       appHierId,
       remark,
     } = form.getFieldsValue(true);
@@ -399,6 +400,7 @@ const CreateUpdateRelationship = ({
       accountId: formAccountId,
       startDate: NxDate.formatForAPI(startDate),
       endDate: NxDate.formatForAPI(endDate),
+      description,
       appHierId,
       action: confirmationType,
       remark,

@@ -171,7 +171,13 @@ const RelationshipInfo = ({
             getValueProps={(value) => ({ value: value && moment(value)})}
             className="no-margin-form"
           >
-            <DateComponent disabled={!isDraft && isUpdate} />
+            <NxDate
+              disabled={!isDraft && isUpdate}
+              onChange={date => {
+                if (date && endDate && date.isAfter(endDate, "day"))
+                  form.resetFields(["endDate"])
+              }}
+            />
           </Form.Item>
 
           {/* Row 2 - Col 3: End Date */}
@@ -182,7 +188,12 @@ const RelationshipInfo = ({
             getValueProps={(value) => ({ value: value && moment(value)})}
             className="no-margin-form"
           >
-            <DateComponent disabled={!isDraft && isUpdate} />
+            <NxDate
+              dateDisable={(current) => {
+                if (!moment.isMoment(current)) return false;
+                return current.isBefore(startDate, "day");
+              }}
+            />
           </Form.Item>
         </div>
 
