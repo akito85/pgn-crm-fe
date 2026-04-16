@@ -92,11 +92,11 @@ const CreateUpdateRelationship = ({
   const isActive = status === "ACTIVE";
 
   const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectApproval = statusApproval === "REJECT";
+  const isRejectedApproval = statusApproval === "REJECTED";
 
   const attachmentIsRequired = true;
 
-  const detail = (isActive && (isDraftApproval || isRejectApproval))
+  const detail = (isActive && (isDraftApproval || isRejectedApproval))
     ? detailDraft_relationship
     : detail_relationship;
 
