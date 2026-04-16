@@ -7,20 +7,40 @@ import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import { getRelatedDetailColumns } from "../getRelatedDetailColumns";
 
+/**
+ * Displays relationship info fields and the related-detail table for a single record.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Relationship detail record.
+ */
 const RelationshipDetailInfo = ({ detail = {} }) => {
+  // --- Refs ---
   const searchInput = useRef(null);
 
-  // Related Detail table state
+  // --- State ---
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
 
+  // --- Derived values ---
+  const {
+    relationshipTypeName,
+    relationshipCategoryName,
+    relatedAccountName,
+    relatedAccountNumber,
+    startDate,
+    endDate,
+    status,
+    description,
+  } = detail;
   const listRelatedDetail = detail.relatedDetail || [];
 
+  // --- Handlers ---
   /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
+   * Applies column search filter and updates search state.
+   * @param {string[]} selectedKeys - Active filter values
+   * @param {Function} confirm      - Antd confirm callback
+   * @param {string}   dataIndex    - Column key being searched
    */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -34,6 +54,7 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
     });
   };
 
+  // --- Columns ---
   const baseColumns = useMemo(
     () =>
       getRelatedDetailColumns({
@@ -60,32 +81,32 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
         <div className="flex flex-col gap-y-4">
           <div className="w-full grid grid-cols-4 gap-4">
             <NxDetailText label="Relationship Type">
-              {detail?.relationshipTypeName?.toUpperCase() || "-"}
+              {relationshipTypeName?.toUpperCase()}
             </NxDetailText>
             <NxDetailText label="Relationship Category">
-              {detail?.relationshipCategoryName?.toUpperCase() || "-"}
+              {relationshipCategoryName?.toUpperCase()}
             </NxDetailText>
             <NxDetailText label="Related Name">
-              {detail?.subjectName || detail?.objectName || "-"}
+              {relatedAccountName}
             </NxDetailText>
             <NxDetailText label="Related Number">
-              {detail?.subjectNumber || detail?.objectNumber || "-"}
+              {relatedAccountNumber}
             </NxDetailText>
             <NxDetailText label="Start Date">
-              {NxDate.formatDate(detail?.startDate, dateFormatting.date)}
+              {NxDate.formatDate(startDate, dateFormatting.date)}
             </NxDetailText>
             <NxDetailText label="End Date">
-              {NxDate.formatDate(detail?.endDate, dateFormatting.date)}
+              {NxDate.formatDate(endDate, dateFormatting.date)}
             </NxDetailText>
             <NxDetailText label="Status">
-              <StatusComponent colour={detail?.status}>
-                {detail?.status || "-"}
+              <StatusComponent colour={status}>
+                {status}
               </StatusComponent>
             </NxDetailText>
           </div>
           <div className="w-full">
             <NxDetailText label="Description">
-              {detail?.description || "-"}
+              {description}
             </NxDetailText>
           </div>
         </div>

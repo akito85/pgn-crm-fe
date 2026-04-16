@@ -75,13 +75,11 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   const {
     id,
     approvalType,
-    subjectName,
-    objectName,
+    relatedAccountNumber,
     createdDate,
     createdBy,
     updatedDate,
     updatedBy,
-    tappId,
   } = detail;
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
@@ -281,11 +279,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
             : ""
         }
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${
-          detail_relationship?.subjectName ||
-          detail_relationship?.objectName ||
-          ""
-        }?`}
+        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) =>
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }
