@@ -53,7 +53,7 @@ import { errorCode } from "../../utils";
 
 const { Content, Sider, Header } = Layout;
 
-const LayoutMenu = ({ children }) => {
+const LayoutMenu = ({ children, grantPath }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -137,9 +137,9 @@ const LayoutMenu = ({ children }) => {
 
   // use effect check grant access
   useEffect(() => {
-    dispatch(checkGrantedAccess(location?.pathname));
+    dispatch(checkGrantedAccess(grantPath || location?.pathname));
     dispatch(getProfile());
-  }, [dispatch, location, data_switch]);
+  }, [dispatch, location, grantPath, data_switch]);
 
   // useEffect(() => {
   //   dispatch(getGlobalFormatConfig());

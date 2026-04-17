@@ -79,6 +79,7 @@ const ModalHistory = (props) => {
     handleClose = () => {},
     header,
     width,
+    cancelText = "Back",
     tabOptions,
     dataApprover,
     dataHistory,
@@ -138,12 +139,12 @@ const ModalHistory = (props) => {
       onCancel={handleClose}
       className={"modal-custom"}
       centered={true}
-      width={550}
+      width={width || 550}
       closable={false}
       footer={
         <div className="w-full flex justify-end">
           <ButtonComponent onClick={handleClose} type="default">
-            Back
+            {cancelText}
           </ButtonComponent>
         </div>
       }

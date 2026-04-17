@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Input, Select, message, Modal } from "antd";
+import { Spin, Input, Select, message } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -14,6 +14,7 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 import { getColumnsPendingApprovals } from "./Table/TablePendingApprovals";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import ModalHistory from "../../../../components/Modal/ModalHistory";
 
 const { Option } = Select;
 
@@ -34,6 +35,8 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
   const [search, setSearch] = useState({});
   const [filterArea, setFilterArea] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [isApprovalHistoryOpen, setIsApprovalHistoryOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   // State untuk fix column
   const [fixedColumns, setFixedColumns] = useState({
@@ -109,36 +112,60 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
   };
 
   const handleApprovalDetail = (record) => {
-    Modal.info({
-      title: "Approval Detail",
-      content: (
-        <div>
-          <p>
-            <strong>Batch ID:</strong> {record.batchId}
-          </p>
-          <p>
-            <strong>Account Number:</strong> {record.accountNumber}
-          </p>
-          <p>
-            <strong>Billing Period:</strong> {record.billingPeriod}
-          </p>
-          <p>
-            <strong>Total Customers:</strong> {record.totalCustomers}
-          </p>
-          <p>
-            <strong>Estimated Amount:</strong> Rp{" "}
-            {record.estimatedAmount?.toLocaleString("id-ID")}
-          </p>
-          <p>
-            <strong>Created By:</strong> {record.createdBy}
-          </p>
-          <p>
-            <strong>Created At:</strong> {record.createdAt}
-          </p>
-        </div>
-      ),
-      width: 600,
-    });
+    setSelectedRecord(record);
+    setIsApprovalHistoryOpen(true);
+  };
+
+  const getMockApprovalHistoryData = (record) => {
+    const approvers = [
+      { name: record?.createdBy || "-", role: "Divisi Name", status: "SUBMITTED" },
+      { name: "Abi Satya Mancanegara Abinawa", role: "Divisi Name", status: "APPROVED" },
+      { name: "Maulana Malik Ibrahim", role: "Divisi Name", status: "REJECTED" },
+      { name: record?.createdBy || "-", role: "Divisi Name", status: "RE-SUBMITTED" },
+    ];
+    const history = [
+      {
+        id: 4,
+        status: "RE-SUBMITTED",
+        hierarchy: "SUBMITTER",
+        name: record?.createdBy || "-",
+        role: "UI/UX Designer",
+        taskDate: record?.createdAt,
+        actionDate: record?.createdAt,
+        description: "Request Ulang",
+      },
+      {
+        id: 3,
+        status: "REJECTED",
+        hierarchy: "APPROVAL_BILLING",
+        name: "Maulana Malik Ibrahim",
+        role: "General Manager, Sales and Operation Region II",
+        taskDate: record?.createdAt,
+        actionDate: record?.createdAt,
+        description: "Ditolak",
+      },
+      {
+        id: 2,
+        status: "APPROVED",
+        hierarchy: "APPROVAL_BILLING",
+        name: "Abi Satya Mancanegara Abinawa",
+        role: "General Manager, Sales and Operation Region I",
+        taskDate: record?.createdAt,
+        actionDate: record?.createdAt,
+        description: "Disetujui",
+      },
+      {
+        id: 1,
+        status: "SUBMITTED",
+        hierarchy: "SUBMITTER",
+        name: record?.createdBy || "-",
+        role: "UI/UX Designer",
+        taskDate: record?.createdAt,
+        actionDate: record?.createdAt,
+        description: "Pengajuan Persetujuan",
+      },
+    ];
+    return { approvers, history };
   };
 
   // Get columns from separated file
@@ -265,6 +292,19 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
             />
           </div>
         </CardContainer>
+
+        <ModalHistory
+          isOpen={isApprovalHistoryOpen}
+          handleClose={() => {
+            setIsApprovalHistoryOpen(false);
+            setSelectedRecord(null);
+          }}
+          header="APPROVAL HISTORY"
+          width={700}
+          cancelText="Cancel"
+          dataApprover={getMockApprovalHistoryData(selectedRecord).approvers}
+          dataHistory={getMockApprovalHistoryData(selectedRecord).history}
+        />
       </Spin>
     </LayoutMenu>
   );

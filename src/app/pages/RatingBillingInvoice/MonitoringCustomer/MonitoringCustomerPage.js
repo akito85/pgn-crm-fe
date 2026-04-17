@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Spin, Row, Col, Select, Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -10,37 +11,51 @@ import ComparisonCard from "../../../../components/ComparisonCard";
 import DetailStatsCard from "../../../../components/DetailStatsCard";
 import DonutChartCard from "../../../../components/DonutChartCard";
 import TableRBI from "../../../../components/TableRBI";
+import StatusComponent from "../../../../components/StatusComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
-  getSummaryData,
-  getListBillingPeriod,
+  getParameters,
+  getDashboardSummary,
+  getFailedCustomers,
+  getPriorityList,
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 
 const { Option } = Select;
 
 const MonitoringCustomerPage = () => {
-  const { loading, summaryData, list_billing_period } = useSelector(
+  const { loading, loadingKpi, loadingDashboard, periodLov, dashboardSummary, failedCustomers, priorityList } = useSelector(
     (state) => state.monitoring
   );
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [filterPeriod, setFilterPeriod] = useState(340);
+  const [filterPeriod, setFilterPeriod] = useState(null);
+  const [failedPage, setFailedPage] = useState(1);
 
   // Table columns definition for failed customers
   const tableColumns = [
     {
+      title: "NO",
+      dataIndex: "no",
+      key: "no",
+      width: 60,
+      align: "center",
+      fixed: "left",
+    },
+    {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       key: "accountNumber",
-      width: 140,
+      width: 150,
+      fixed: "left",
     },
     {
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
       key: "accountName",
-      width: 150,
+      width: 160,
     },
     {
       title: "CUSTOMER NUMBER",
@@ -52,12 +67,30 @@ const MonitoringCustomerPage = () => {
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       key: "customerName",
-      width: 150,
+      width: 160,
     },
     {
       title: "CUSTOMER TYPE",
       dataIndex: "customerType",
       key: "customerType",
+      width: 130,
+    },
+    {
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      key: "accountSegment",
+      width: 150,
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      key: "accountGroupType",
+      width: 160,
+    },
+    {
+      title: "ACCOUNT TYPE",
+      dataIndex: "accountType",
+      key: "accountType",
       width: 130,
     },
     {
@@ -76,19 +109,7 @@ const MonitoringCustomerPage = () => {
       title: "METER READING CODE",
       dataIndex: "meterReadingCode",
       key: "meterReadingCode",
-      width: 160,
-    },
-    {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accountSegment",
-      key: "accountSegment",
-      width: 150,
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      key: "accountGroupType",
-      width: 160,
+      width: 170,
     },
     {
       title: "CATEGORY",
@@ -100,34 +121,34 @@ const MonitoringCustomerPage = () => {
       title: "CLASSIFICATION TYPE",
       dataIndex: "classificationType",
       key: "classificationType",
-      width: 160,
-    },
-    {
-      title: "ACCOUNT TYPE",
-      dataIndex: "accountType",
-      key: "accountType",
-      width: 130,
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      width: 100,
+      width: 170,
     },
     {
       title: "MESSAGE",
       dataIndex: "message",
       key: "message",
-      width: 200,
+      width: 220,
+      ellipsis: true,
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      align: "center",
+      fixed: "right",
+      render: (text) => (
+        <StatusComponent colour={text}>{text}</StatusComponent>
+      ),
     },
   ];
 
-  // Table columns definition for priority list
-  const priorityListColumns = [
+  // Table columns factory for priority list tabs
+  const makePriorityColumns = (targetRoute) => [
     {
       title: "NO",
-      dataIndex: "no",
-      key: "no",
+      dataIndex: "noUrut",
+      key: "noUrut",
       width: 80,
       align: "center",
     },
@@ -139,8 +160,8 @@ const MonitoringCustomerPage = () => {
     },
     {
       title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
+      dataIndex: "accountNum",
+      key: "accountNum",
       width: 200,
     },
     {
@@ -158,17 +179,36 @@ const MonitoringCustomerPage = () => {
       width: 100,
       align: "center",
       fixed: "right",
-      render: () => (
-        <div className="flex justify-center">
-          <SVGIcon name="iconDetail" style={{ cursor: "pointer" }} />
+      render: (_, record) => (
+        <div
+          className="flex justify-center cursor-pointer"
+          onClick={() => navigate(targetRoute, { state: { period: filterPeriod, accountNumber: record.accountNum } })}
+        >
+          <SVGIcon name="IconDetail" width={20} height={20} style={{ cursor: "pointer" }} />
         </div>
       ),
     },
   ];
 
   useEffect(() => {
-    dispatch(getListBillingPeriod());
-    dispatch(getSummaryData());
+    dispatch(getParameters());
+  }, [dispatch]);
+
+  // Set default period to the first entry once the LOV loads
+  useEffect(() => {
+    if (periodLov.length > 0 && filterPeriod === null) {
+      setFilterPeriod(periodLov[0].value);
+    }
+  }, [periodLov, filterPeriod]);
+
+  // Fetch dashboard data whenever the selected period changes
+  useEffect(() => {
+    if (filterPeriod) {
+      dispatch(getDashboardSummary(filterPeriod));
+      dispatch(getFailedCustomers({ period: filterPeriod, page: 0, size: 10 }));
+      dispatch(getPriorityList(filterPeriod));
+      setFailedPage(1);
+    }
   }, [filterPeriod, dispatch]);
 
   const routes = [
@@ -182,9 +222,29 @@ const MonitoringCustomerPage = () => {
     },
   ];
 
+  const c1Total = dashboardSummary.totMasterCustomer ?? 0;
+  const c1Success = dashboardSummary.totSuccessCustomer ?? 0;
+  const c1Remaining = Math.max(0, c1Total - c1Success);
+  const c1Approved = c1Total > 0 ? parseFloat(((c1Success / c1Total) * 100).toFixed(1)) : 0;
+  const c1Rest = c1Total > 0 ? parseFloat(((c1Remaining / c1Total) * 100).toFixed(1)) : 0;
+
+  const c2Billing = dashboardSummary.volBilling ?? 0;
+  const c2Rating = dashboardSummary.volRating ?? 0;
+  const c2Master = dashboardSummary.volMasterUsage ?? 0;
+  const c2Total = c2Billing + c2Rating + c2Master;
+  const c2BillingPct = c2Total > 0 ? parseFloat(((c2Billing / c2Total) * 100).toFixed(1)) : 0;
+  const c2RatingPct = c2Total > 0 ? parseFloat(((c2Rating / c2Total) * 100).toFixed(1)) : 0;
+  const c2MasterPct = c2Total > 0 ? parseFloat(((c2Master / c2Total) * 100).toFixed(1)) : 0;
+
+  const c3Total = dashboardSummary.totMasterData ?? 0;
+  const c3Processed = dashboardSummary.totProcessedData ?? 0;
+  const c3Remaining = Math.max(0, c3Total - c3Processed);
+  const c3ProcessedPct = c3Total > 0 ? parseFloat(((c3Processed / c3Total) * 100).toFixed(1)) : 0;
+  const c3RestPct = c3Total > 0 ? parseFloat(((c3Remaining / c3Total) * 100).toFixed(1)) : 0;
+
   return (
     <LayoutMenu>
-      <Spin spinning={loading}>
+      <Spin spinning={loading || loadingKpi}>
         <BreadCrumb routes={routes} />
 
         {/* Main Card Container: Monitoring Billing Process */}
@@ -202,20 +262,23 @@ const MonitoringCustomerPage = () => {
                 option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
-              {list_billing_period.map((period) => (
-                <Option key={period.id} value={period.id}>
-                  {period.name}
+              {periodLov.map((p) => (
+                <Option key={p.value} value={p.value}>
+                  {p.label}
                 </Option>
               ))}
             </Select>
           </div>
 
-          {/* Top Stats Cards - Total Success & Total Failed */}
-          <Row gutter={[12, 12]} className="mb-3">
+          {/* Dashboard KPI + Charts: wrapped in its own Spin for dashboard-summary API */}
+          <Spin spinning={loadingDashboard}>
+            <>
+            {/* Top Stats Cards - Total Success & Total Failed */}
+            <Row gutter={[12, 12]} className="mb-3">
             <Col xs={24} sm={12}>
               <StatCard
                 title="TOTAL SUCCESS RATING LIST"
-                value={summaryData.totalSuccessRating || 3000}
+                value={dashboardSummary.totalSuccessRating ?? 0}
                 percentage={80}
                 isPositive={true}
                 type="success"
@@ -224,7 +287,7 @@ const MonitoringCustomerPage = () => {
             <Col xs={24} sm={12}>
               <StatCard
                 title="TOTAL FAILED RATING LIST"
-                value={summaryData.totalFailedRating || 7867}
+                value={dashboardSummary.totalFailedRating ?? 0}
                 percentage={35}
                 isPositive={true}
                 type="failed"
@@ -239,14 +302,15 @@ const MonitoringCustomerPage = () => {
                 title="PRA-BILLING VS RATING"
                 leftColumn={{
                   title: "Pra-Billing",
-                  count: summaryData.praBillingCount || 8097,
-                  valueUsage: summaryData.praBillingValue || 26908,
+                  count: dashboardSummary.totPraBilling ?? 0,
+                  valueUsage: dashboardSummary.volMasterUsage ?? 0,
                 }}
                 rightColumn={{
                   title: "Rating",
-                  count: summaryData.ratingCount || 12908,
-                  valueUsage: summaryData.ratingValue || 11908,
+                  count: dashboardSummary.totRating ?? 0,
+                  valueUsage: dashboardSummary.volRating ?? 0,
                 }}
+                onSeeDetails={() => navigate(RBI_ROUTES.MONITORING_CUSTOMER_PRA_BILLING_VS_RATING, { state: { period: filterPeriod } })}
               />
             </Col>
             <Col xs={24} lg={12}>
@@ -254,14 +318,15 @@ const MonitoringCustomerPage = () => {
                 title="RATING VS BILLING"
                 leftColumn={{
                   title: "Rating",
-                  count: summaryData.ratingCount2 || 12908,
-                  valueUsage: summaryData.ratingValue2 || 11908,
+                  count: dashboardSummary.totRating ?? 0,
+                  valueUsage: dashboardSummary.volRating ?? 0,
                 }}
                 rightColumn={{
                   title: "Billing",
-                  count: summaryData.billingCount || 60678,
-                  valueUsage: summaryData.billingValue || 120008,
+                  count: dashboardSummary.totBilling ?? 0,
+                  valueUsage: dashboardSummary.volBilling ?? 0,
                 }}
+                onSeeDetails={() => navigate(RBI_ROUTES.MONITORING_CUSTOMER_RATING_VS_BILLING, { state: { period: filterPeriod } })}
               />
             </Col>
           </Row>
@@ -271,19 +336,18 @@ const MonitoringCustomerPage = () => {
             <Col xs={24} lg={12}>
               <DetailStatsCard
                 title="TOTAL CUSTOMER NEED TO PROCESSED"
-                totalValue={summaryData.customerNeedProcessed || 312}
+                totalValue={(dashboardSummary.totPraBilling ?? 0) + (dashboardSummary.totRating ?? 0) + (dashboardSummary.totBilling ?? 0)}
                 details={[
-                  { label: "Pra-Billing", value: 28 },
-                  { label: "Rating", value: 12 },
-                  { label: "Billing", value: 272 },
-                  { label: "", value: "" },
+                  { label: "Pra-Billing", value: dashboardSummary.totPraBilling ?? 0 },
+                  { label: "Rating", value: dashboardSummary.totRating ?? 0 },
+                  { label: "Billing", value: dashboardSummary.totBilling ?? 0 },
                 ]}
               />
             </Col>
             <Col xs={24} lg={12}>
               <DetailStatsCard
                 title="TOTAL CUSTOMER IN EACH STAGE NOT APPROVED YET"
-                totalValue={summaryData.customerNotApproved || 312}
+                totalValue={312}
                 details={[
                   { label: "Master", value: 28 },
                   { label: "Pra-Billing", value: 12 },
@@ -295,28 +359,29 @@ const MonitoringCustomerPage = () => {
             <Col xs={24} lg={12}>
               <DetailStatsCard
                 title="GAP PRA-BILLING VS MASTER"
-                totalValue={summaryData.gapPraBillingMaster || 3000}
+                totalValue={dashboardSummary.grandTotalGap ?? 0}
                 percentage={80}
                 isPositive={false}
+                type="warning"
                 details={[
-                  { label: "Usage", value: 1800 },
-                  { label: "Price", value: 870 },
-                  { label: "Promo", value: 330 },
-                  { label: "", value: "" },
+                  { label: "Usage", value: dashboardSummary.totalGapUsage ?? 0 },
+                  { label: "Price", value: dashboardSummary.totalGapPrice ?? 0 },
+                  { label: "Promo", value: dashboardSummary.totalGapPromo ?? 0 },
                 ]}
               />
             </Col>
             <Col xs={24} lg={12}>
               <DetailStatsCard
                 title="TOTAL ERROR PROCESS"
-                totalValue={summaryData.totalErrorProcess || 7867}
+                totalValue={dashboardSummary.grandTotalError ?? 0}
                 percentage={35}
                 isPositive={true}
+                type="error"
                 details={[
-                  { label: "Master", value: 1578 },
-                  { label: "Pra-Billing", value: 2356 },
-                  { label: "Rating", value: 1879 },
-                  { label: "Billing", value: 2065 },
+                  { label: "Master", value: dashboardSummary.errMaster ?? 0 },
+                  { label: "Pra-Billing", value: dashboardSummary.errPraBill ?? 0 },
+                  { label: "Rating", value: dashboardSummary.errRating ?? 0 },
+                  { label: "Billing", value: dashboardSummary.errBilling ?? 0 },
                 ]}
               />
             </Col>
@@ -327,15 +392,15 @@ const MonitoringCustomerPage = () => {
             <Col xs={24} lg={8}>
               <DonutChartCard
                 title="COMPARISON OF THE NUMBER OF SUCCESSFUL CUSTOMER"
-                data={[60, 40]}
-                labels={["Pra-billing, Rating, Billing, Approved", "Master"]}
+                data={[c1Approved, c1Rest]}
+                labels={["Approved", "Not Yet Approved"]}
                 colors={["#1C8CCC", "#FF8C42"]}
               />
             </Col>
             <Col xs={24} lg={8}>
               <DonutChartCard
                 title="COMPARISON OF MEASURE QUANTITIES"
-                data={[25, 35, 40]}
+                data={[c2BillingPct, c2RatingPct, c2MasterPct]}
                 labels={["Billing", "Rating", "Master Usage"]}
                 colors={["#1C8CCC", "#FF8C42", "#4CAF51"]}
               />
@@ -343,12 +408,14 @@ const MonitoringCustomerPage = () => {
             <Col xs={24} lg={8}>
               <DonutChartCard
                 title="COMPARISON OF DATA FOR EACH COMPONENT"
-                data={[35, 65]}
-                labels={["Pra-billing, Rating, Billing, Approved", "Master"]}
+                data={[c3ProcessedPct, c3RestPct]}
+                labels={["Approved", "Not Yet Processed"]}
                 colors={["#1C8CCC", "#FF8C42"]}
               />
             </Col>
           </Row>
+            </>
+          </Spin>
 
           {/* Table Section with Tabs */}
           <div className="mt-3">
@@ -368,17 +435,23 @@ const MonitoringCustomerPage = () => {
                         <div className="pb-3">
                           <TableRBI
                             idTable="table-rating-failed"
-                            dataSource={[]}
+                            dataSource={failedCustomers.result.filter(
+                              (r) => r.failPhase && r.failPhase.toLowerCase().includes("rating")
+                            )}
                             columns={tableColumns}
                             pageSize={10}
-                            current={1}
-                            loading={false}
-                            totalData={0}
+                            current={failedPage}
+                            loading={loadingKpi}
+                            totalData={failedCustomers.page.totalElements}
                             tableScrolled={{ x: "max-content" }}
                             usePagination={true}
                             useSelect={true}
                             showAdvanceSearch={true}
                             showSearchBar={true}
+                            onChange={(p) => {
+                              setFailedPage(p);
+                              dispatch(getFailedCustomers({ period: filterPeriod, page: p - 1, size: 10 }));
+                            }}
                           />
                         </div>
                       ),
@@ -390,17 +463,23 @@ const MonitoringCustomerPage = () => {
                         <div className="pb-3">
                           <TableRBI
                             idTable="table-billing-failed"
-                            dataSource={[]}
+                            dataSource={failedCustomers.result.filter(
+                              (r) => r.failPhase && r.failPhase.toLowerCase().includes("billing")
+                            )}
                             columns={tableColumns}
                             pageSize={10}
-                            current={1}
-                            loading={false}
-                            totalData={0}
+                            current={failedPage}
+                            loading={loadingKpi}
+                            totalData={failedCustomers.page.totalElements}
                             tableScrolled={{ x: "max-content" }}
                             usePagination={true}
                             useSelect={true}
                             showAdvanceSearch={true}
                             showSearchBar={true}
+                            onChange={(p) => {
+                              setFailedPage(p);
+                              dispatch(getFailedCustomers({ period: filterPeriod, page: p - 1, size: 10 }));
+                            }}
                           />
                         </div>
                       ),
@@ -426,12 +505,12 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-pending-transactions"
-                      dataSource={[]}
-                      columns={priorityListColumns}
+                      dataSource={priorityList.priorPendingTransactions}
+                      columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_DETAIL_PENDING_TRANSACTIONS)}
                       pageSize={5}
                       current={1}
-                      loading={false}
-                      totalData={0}
+                      loading={loading}
+                      totalData={priorityList.priorPendingTransactions.length}
                       tableScrolled={{ x: "max-content" }}
                       usePagination={false}
                       useSelect={false}
@@ -448,12 +527,12 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-pending-approvals"
-                      dataSource={[]}
-                      columns={priorityListColumns}
+                      dataSource={priorityList.priorApprovalBatches}
+                      columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_DETAIL_PENDING_APPROVALS)}
                       pageSize={5}
                       current={1}
-                      loading={false}
-                      totalData={0}
+                      loading={loading}
+                      totalData={priorityList.priorApprovalBatches.length}
                       tableScrolled={{ x: "max-content" }}
                       usePagination={false}
                       useSelect={false}
@@ -470,12 +549,12 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-gap-rating-billing"
-                      dataSource={[]}
-                      columns={priorityListColumns}
+                      dataSource={priorityList.priorGapRatingBilling}
+                      columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_RATING_VS_BILLING)}
                       pageSize={5}
                       current={1}
-                      loading={false}
-                      totalData={0}
+                      loading={loading}
+                      totalData={priorityList.priorGapRatingBilling.length}
                       tableScrolled={{ x: "max-content" }}
                       usePagination={false}
                       useSelect={false}
@@ -492,12 +571,12 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-gap-prabilling-master"
-                      dataSource={[]}
-                      columns={priorityListColumns}
+                      dataSource={priorityList.priorGapPrabillingMaster}
+                      columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_DETAIL_GAP_PRA_BILLING_MASTER)}
                       pageSize={5}
                       current={1}
-                      loading={false}
-                      totalData={0}
+                      loading={loading}
+                      totalData={priorityList.priorGapPrabillingMaster.length}
                       tableScrolled={{ x: "max-content" }}
                       usePagination={false}
                       useSelect={false}

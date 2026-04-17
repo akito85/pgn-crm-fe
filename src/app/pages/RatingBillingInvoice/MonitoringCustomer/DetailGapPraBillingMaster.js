@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Input, Select, message, Modal } from "antd";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { SyncOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import SVGIcon from "../../../../assets/Icon/index";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   getGapPraBillingMaster,
@@ -17,7 +18,6 @@ import { getColumnsGapPraBillingMaster } from "./Table/TableGapPraBillingMaster"
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const { Option } = Select;
-const { confirm } = Modal;
 
 const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   const { loading, gapPraBillingMasterData } = useSelector(
@@ -37,6 +37,13 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   const [filterArea, setFilterArea] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
 
+  // State untuk sync modals
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
+  const [syncRecord, setSyncRecord] = useState(null);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [failedModalOpen, setFailedModalOpen] = useState(false);
+  const [dataInfoExpanded, setDataInfoExpanded] = useState(true);
+
   // State untuk fix column
   const [fixedColumns, setFixedColumns] = useState({
     no: "left",
@@ -44,15 +51,16 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   });
 
   useEffect(() => {
-    dispatch(
-      getGapPraBillingMaster({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [search, page, pageSize, sort, dispatch]);
+    if (filterPeriod) {
+      dispatch(
+        getGapPraBillingMaster({
+          period: filterPeriod,
+          page: page - 1,
+          pageSize,
+        })
+      );
+    }
+  }, [filterPeriod, page, pageSize, dispatch]);
 
   const routes = [
     {
@@ -111,46 +119,37 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   };
 
   const handleSyncData = (record) => {
-    confirm({
-      title: "Konfirmasi Sinkronisasi Data",
-      icon: <ExclamationCircleOutlined />,
-      content: (
-        <div>
-          <p>
-            Anda akan menyinkronkan data untuk customer:{" "}
-            <strong>{record.customerId}</strong>
-          </p>
-          <p style={{ marginTop: 8 }}>
-            <strong>Field:</strong> {record.fieldMismatch}
-          </p>
-          <p>
-            <strong>Pra-Billing Value:</strong> {record.praBillingValue}
-          </p>
-          <p>
-            <strong>Master Value:</strong> {record.masterValue}
-          </p>
-          <p style={{ marginTop: 12, color: "#fa8c16" }}>
-            Data Pra-Billing akan diperbarui mengikuti Master Data. Lanjutkan?
-          </p>
-        </div>
-      ),
-      okText: "Ya, Sinkronkan",
-      cancelText: "Batal",
-      onOk() {
-        message.success(
-          `Data ${record.customerId} berhasil disinkronkan dengan Master Data`
-        );
-        // Refresh data
-        dispatch(
-          getGapPraBillingMaster({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
-            sort,
-          })
-        );
-      },
-    });
+    setSyncRecord(record);
+    setDataInfoExpanded(true);
+    setSyncModalOpen(true);
+  };
+
+  const handleConfirmSync = () => {
+    setSyncModalOpen(false);
+    // TODO: wire real API call; on success -> setSuccessModalOpen(true), on error -> setFailedModalOpen(true)
+    setSuccessModalOpen(true);
+  };
+
+  const handleCloseSyncModal = () => {
+    setSyncModalOpen(false);
+    setSyncRecord(null);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setSuccessModalOpen(false);
+    setSyncRecord(null);
+    dispatch(
+      getGapPraBillingMaster({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
+  };
+
+  const handleCloseFailedModal = () => {
+    setFailedModalOpen(false);
   };
 
   const handleCreateTicket = (record) => {
@@ -325,6 +324,157 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
             />
           </div>
         </CardContainer>
+
+        {/* Modal 1: Sync Confirmation */}
+        <ModalCustom
+          isOpen={syncModalOpen}
+          type="confirmation"
+          header="DATA SYNCHRONIZATION CONFIRMATION"
+          width={550}
+          handleCancel={handleCloseSyncModal}
+          footer={
+            <div className="w-full flex justify-end gap-3 px-4 py-3">
+              <ButtonComponent type="default" onClick={handleCloseSyncModal}>
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                type="submit"
+                icon={<SyncOutlined />}
+                onClick={handleConfirmSync}
+              >
+                Sync Data
+              </ButtonComponent>
+            </div>
+          }
+        >
+          <div
+            style={{
+              border: "1px solid #d9e8f5",
+              borderRadius: 6,
+              backgroundColor: "#f0f7ff",
+            }}
+          >
+            <div
+              className="flex justify-between items-center cursor-pointer px-4 py-2"
+              style={{
+                borderBottom: dataInfoExpanded ? "1px solid #d9e8f5" : "none",
+              }}
+              onClick={() => setDataInfoExpanded((prev) => !prev)}
+            >
+              <span style={{ fontWeight: 600, fontSize: 13, color: "#0075bf" }}>
+                DATA INFORMATION
+              </span>
+              <span style={{ fontSize: 16, color: "#0075bf" }}>
+                {dataInfoExpanded ? "^" : "v"}
+              </span>
+            </div>
+            {dataInfoExpanded && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "8px 16px",
+                  padding: "12px 16px",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>
+                    Customer ID
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>
+                    {syncRecord?.customerId ?? "-"}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>
+                    Feld Mismatch
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>
+                    {syncRecord?.fieldMismatch ?? "-"}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>
+                    Pra-Billing Value
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: "#fa8c16" }}>
+                    {syncRecord?.praBillingValue ?? "-"}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>
+                    Master Value
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 13, color: "#52c41a" }}>
+                    {syncRecord?.masterValue ?? "-"}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </ModalCustom>
+
+        {/* Modal 2: Success */}
+        <Modal
+          open={successModalOpen}
+          onCancel={handleCloseSuccessModal}
+          centered
+          width={450}
+          maskClosable={false}
+          className="modal-custom"
+          footer={[
+            <div key="footer" className="w-full flex justify-center pb-2">
+              <ButtonComponent type="submit" onClick={handleCloseSuccessModal}>
+                Done
+              </ButtonComponent>
+            </div>,
+          ]}
+        >
+          <div className="flex flex-col items-center text-center py-8 px-4">
+            <SVGIcon name="IconSuccess" width={64} />
+            <p style={{ fontWeight: 700, fontSize: 18, marginTop: 16, marginBottom: 8 }}>
+              Successful
+            </p>
+            <p style={{ fontSize: 13, color: "#555" }}>
+              Your data has been Successfuly syncronized with the Master Data
+            </p>
+          </div>
+        </Modal>
+
+        {/* Modal 3: Failed */}
+        <Modal
+          open={failedModalOpen}
+          onCancel={handleCloseFailedModal}
+          centered
+          width={450}
+          maskClosable={false}
+          className="modal-custom"
+          footer={[
+            <div key="footer" className="w-full flex justify-center pb-2">
+              <ButtonComponent type="submit" onClick={handleCloseFailedModal}>
+                Done
+              </ButtonComponent>
+            </div>,
+          ]}
+        >
+          <div className="flex flex-col items-center text-center py-8 px-4">
+            <SVGIcon name="IconFailed" width={64} />
+            <p style={{ fontWeight: 700, fontSize: 18, marginTop: 16, marginBottom: 8 }}>
+              Unsuccessful
+            </p>
+            <div
+              style={{
+                width: "80%",
+                borderTop: "1px dashed #d9d9d9",
+                margin: "8px auto 12px",
+              }}
+            />
+            <p style={{ fontSize: 13, color: "#555", whiteSpace: "pre-line" }}>
+              {"Failed to syncronizzed data with Master Data\nPlease try again.."}
+            </p>
+          </div>
+        </Modal>
+
       </Spin>
     </LayoutMenu>
   );
