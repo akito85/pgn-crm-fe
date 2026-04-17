@@ -645,6 +645,7 @@ const BillingItemForm = (props) => {
 
       if (current < steps.length - 1) {
         setCurrent(current + 1);
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
       }
     };
 
@@ -665,6 +666,7 @@ const BillingItemForm = (props) => {
   const prev = () => {
     if (current > 0) {
       setCurrent(current - 1);
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }
   };
 
