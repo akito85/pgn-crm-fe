@@ -21,7 +21,7 @@ const getPaymentRelationColumns = ({
   searchedColumn,
   searchText,
   handleSearch,
-  isApproval = true,
+  isApproval = false,
 }) => [
   {
     key: "no",
