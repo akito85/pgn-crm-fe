@@ -55,6 +55,7 @@ const PosPage = () => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [tableLoading, setTableLoading] = useState(false);
 
   const [openApproval, setOpenAproval] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
