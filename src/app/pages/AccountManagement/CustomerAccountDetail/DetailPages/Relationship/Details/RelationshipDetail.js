@@ -245,7 +245,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
             <NxBaseContainer border>
               <div className="flex justify-between">
                 <Button type={"menu"} onClick={() => navigate(-1)}>Cancel</Button>
-                <div className={"w-full flex justify-end gap-5"}>
+                <div className={"w-full flex justify-end gap-x-2"}>
                   <Button
                     type="reject"
                     icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
