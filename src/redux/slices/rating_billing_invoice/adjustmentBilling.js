@@ -626,6 +626,37 @@ export const getListRateType = createAsyncThunk(
   },
 );
 
+export const getRateAdjustment = createAsyncThunk(
+  "GET_RATE_ADJUSTMENT",
+  async ({ rateDate, rateType }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/adjustment/rate-adjustment";
+      const response = await ratingBillingHttpService.createData(url, {
+        rateDate,
+        rateType,
+      });
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+
+      return thunkAPI.rejectWithValue(error?.response?.data || message);
+    }
+  },
+);
+
 export const getListTermsOfPayment = createAsyncThunk(
   "GET_LIST_TERMS_OF_PAYMENT",
   async (thunkAPI) => {
@@ -914,9 +945,11 @@ export const getDetailAdjustmentBilling = createAsyncThunk(
 
 export const recalculateAdjustmentBilling = createAsyncThunk(
   "RECALCULATE_ADJUSTMENT_BILLING",
-  async ({ body }, thunkAPI) => {
+  async ({ body, id }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/rbi/adjustment/recalculate";
+      const url = id
+        ? `/v1/dbs/api/rbi/adjustment/recalculate/${id}`
+        : "/v1/dbs/api/rbi/adjustment/recalculate";
       const response = await ratingBillingHttpService.createData(url, body);
       return response.data;
     } catch (error) {

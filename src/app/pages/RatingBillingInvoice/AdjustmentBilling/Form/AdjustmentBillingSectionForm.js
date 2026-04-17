@@ -19,6 +19,7 @@ import {
   getListInvoiceInformation,
   getListType,
   getListRateType,
+  getRateAdjustment,
   getListClassification,
   getListCalculationType,
   getListPostInvoice,
@@ -52,6 +53,7 @@ const AdjustmentBillingSectionForm = ({
   setSelectedPostInvoice = () => {},
   onRecalculate = () => {},
   loadingRecalculate = false,
+  disableRecalculate = false,
   canCreateBillingAdjustmentItem = true,
 }) => {
   // Selector
@@ -80,6 +82,8 @@ const AdjustmentBillingSectionForm = ({
   const [keyPicker, setKeyPicker] = useState(0);
   const [referenceInvoiceNumber, setReferenceInvoiceNumber] = useState();
   const [transactionDate, setTransactionDate] = useState(null);
+  const selectedRateType = Form.useWatch("rateType", form);
+  const selectedRateDate = Form.useWatch("rateDate", form);
 
   const currentBillingPeriodSource = Array.isArray(dataCurrentBillingPeriod)
     ? dataCurrentBillingPeriod?.[0]
@@ -308,6 +312,39 @@ const AdjustmentBillingSectionForm = ({
       setKeyPicker((prev) => prev + 1);
     }
   }, [rangeDisableDate?.startDate]);
+
+  useEffect(() => {
+    const fetchRateAdjustment = async () => {
+      if (!selectedRateType || !selectedRateDate) {
+        form.setFieldsValue({ rate: undefined });
+        return;
+      }
+
+      try {
+        const response = await dispatch(
+          getRateAdjustment({
+            rateDate: moment(selectedRateDate).format("YYYY-MM-DD"),
+            rateType: selectedRateType,
+          }),
+        ).unwrap();
+
+        const resolvedRate =
+          response?.convertedValue ??
+          response?.data?.convertedValue ??
+          response?.rate ??
+          response?.data?.rate ??
+          response?.value;
+
+        form.setFieldsValue({
+          rate: hasValue(resolvedRate) ? resolvedRate : undefined,
+        });
+      } catch (_error) {
+        form.setFieldsValue({ rate: undefined });
+      }
+    };
+
+    fetchRateAdjustment();
+  }, [dispatch, form, selectedRateDate, selectedRateType]);
 
   // Sync transactionDate state from form value (for update mode)
   useEffect(() => {
@@ -564,6 +601,7 @@ const AdjustmentBillingSectionForm = ({
               type={"primary"}
               onClick={onRecalculate}
               loading={loadingRecalculate}
+              disabled={disableRecalculate}
               icon={<SVGIcon name="IconRatingReconculate" width={16} />}
             >
               Recalculate
@@ -605,7 +643,10 @@ const AdjustmentBillingSectionForm = ({
             >
               {dataListClassification &&
                 dataListClassification?.map((data, index) => (
-                  <Select.Option value={data.name || data.text} key={index}>
+                  <Select.Option
+                    value={data.code || data.id || data.value}
+                    key={index}
+                  >
                     {data.name || data.text}
                   </Select.Option>
                 ))}
@@ -708,7 +749,10 @@ const AdjustmentBillingSectionForm = ({
             >
               {dataListCalculationType &&
                 dataListCalculationType?.map((data, index) => (
-                  <Select.Option value={data.id} key={index}>
+                  <Select.Option
+                    value={data.name || data.text || data.value || data.id}
+                    key={index}
+                  >
                     {data.name}
                   </Select.Option>
                 ))}

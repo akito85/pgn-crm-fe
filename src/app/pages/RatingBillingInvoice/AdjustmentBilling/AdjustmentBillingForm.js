@@ -17,11 +17,11 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   getListCategory,
-  getRecalculateAdjustmentBillingDetail,
   getSelectTOP,
   recalculateAdjustmentBilling,
   updateAdjustmentBilling,
   getListType,
+  getTransactionMappingInformation,
 } from "../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import ModalBack from "../../../../components/Modal/ModalBack";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
@@ -37,18 +37,33 @@ import CardContainer from "../../../../components/CardContainer";
 const normalizeSelectionText = (value) =>
   typeof value === "string" ? value.trim().toLowerCase() : "";
 
+const isCalculationInProgress = (value) => {
+  const normalizedValue = normalizeSelectionText(value);
+  return (
+    normalizedValue === "inprogress" ||
+    normalizedValue === "in progress" ||
+    normalizedValue === "processing"
+  );
+};
+
 const isCarryForwardOrOffCycleSelection = ({
   classificationAdjustment,
   postInvoice,
   onDemand,
 } = {}) => {
   const candidates = [classificationAdjustment, postInvoice, onDemand]
-    .map(normalizeSelectionText)
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((v) => {
+      const normalized = normalizeSelectionText(v);
+      return (
+        normalized === "carry_forward" ||
+        normalized === "off_cycle" ||
+        normalized.includes("carry forward") ||
+        normalized.includes("off cycle")
+      );
+    });
 
-  return candidates.some(
-    (value) => value.includes("carry forward") || value.includes("off cycle"),
-  );
+  return candidates.some((v) => v === true);
 };
 
 const AdjustmentBillingForm = ({ type }) => {
@@ -57,8 +72,10 @@ const AdjustmentBillingForm = ({ type }) => {
     loading,
     dataListAppHierDetail,
     dataListAppHierId,
+    dataListCalculationType,
     dataListSelectTOP,
     dataDetail,
+    dataListClassification,
   } = useSelector((state) => state.adjustmentBilling);
 
   // Declaration
@@ -120,6 +137,8 @@ const AdjustmentBillingForm = ({ type }) => {
   const [loadingRecalculate, setLoadingRecalculate] = useState(false);
   const [hasSuccessfulRecalculate, setHasSuccessfulRecalculate] =
     useState(false);
+  const [recalculateId, setRecalculateId] = useState();
+  const [calculationStatus, setCalculationStatus] = useState();
 
   const isLoading = loading || loadingForm;
 
@@ -177,15 +196,29 @@ const AdjustmentBillingForm = ({ type }) => {
 
       // Determine classificationAdjustment value from saved data
       let classificationAdjustmentValue = null;
+      let classificationLabelValue = null;
       let postInvoiceValue = null;
       let onDemandValue = null;
 
-      if (dataDetail?.classification === "Internal") {
-        classificationAdjustmentValue = "Internal";
-      } else if (dataDetail?.postInvoice) {
-        classificationAdjustmentValue = "Post Invoice";
-        postInvoiceValue = dataDetail?.postInvoice;
-        onDemandValue = dataDetail?.onDemand;
+      if (dataDetail?.classification) {
+        // Backend sends classification as code; store as-is
+        classificationAdjustmentValue = dataDetail?.classification;
+
+        // For UI logic, store label by finding matching classification in list
+        if (dataListClassification && dataListClassification.length > 0) {
+          const matchedClassification = dataListClassification.find(
+            (item) =>
+              item.code === dataDetail?.classification ||
+              item.id === dataDetail?.classification,
+          );
+          classificationLabelValue =
+            matchedClassification?.name || matchedClassification?.text || null;
+        }
+
+        if (dataDetail?.postInvoice || dataDetail?.calculationType) {
+          postInvoiceValue = dataDetail?.postInvoice;
+          onDemandValue = dataDetail?.onDemand;
+        }
       }
 
       const obj = {
@@ -210,7 +243,9 @@ const AdjustmentBillingForm = ({ type }) => {
           dataDetail?.billingPeriodName ??
           null,
         correctionBillingPeriod:
-          dataDetail?.correctionBillingPeriod ?? dataDetail?.billingPeriod,
+          dataDetail?.correctionBillPeriod ??
+          dataDetail?.correctionBillingPeriod ??
+          dataDetail?.billingPeriod,
         referenceInvoiceNumber: dataDetail?.referenceInvoiceNumber,
         currency: dataDetail?.currency,
         documentDate: moment(dataDetail?.documentDate),
@@ -224,11 +259,13 @@ const AdjustmentBillingForm = ({ type }) => {
         remark: dataDetail?.remark,
         apphierId: apphierId,
         classificationAdjustment: classificationAdjustmentValue,
-        postInvoice: postInvoiceValue,
+        postInvoice: dataDetail?.calculationType || null,
         onDemand: onDemandValue,
       };
 
       form.setFieldsValue(obj);
+      setRecalculateId(dataDetail?.id);
+      setCalculationStatus(dataDetail?.calculationStatus);
       setCycleId(dataDetail?.billingCycle);
       setIdAccount(dataDetail?.accountId);
       if (!preserveHierarchy) {
@@ -237,12 +274,19 @@ const AdjustmentBillingForm = ({ type }) => {
       //ADJUSTMENT ID INVOICE AND BILLING PERIOD IS EMPTY EVEN AFTER UPDATE
       setIdInvoice(dataDetail.referenceInvoiceNumber);
       setBillingPeriodId(
-        dataDetail?.correctionBillingPeriod ?? dataDetail?.billingPeriod,
+        dataDetail?.correctionBillPeriod ??
+          dataDetail?.correctionBillingPeriod ??
+          dataDetail?.billingPeriod,
       );
       setDataInvoice(dataDetail?.invoiceInformation || null);
 
-      // Set classification states for conditional rendering
-      setSelectedClassification(classificationAdjustmentValue);
+      const detailBillingCode = dataDetail?.invoiceInformation?.billingCode;
+      if (detailBillingCode) {
+        dispatch(getTransactionMappingInformation(detailBillingCode));
+      }
+
+      // Set classification states for conditional rendering (use label for compatibility)
+      setSelectedClassification(classificationLabelValue);
       setSelectedPostInvoice(postInvoiceValue);
 
       if (!preserveAttachments) {
@@ -273,7 +317,7 @@ const AdjustmentBillingForm = ({ type }) => {
         (dataDetail?.tAdjustmentBillingDetail || []).length > 0,
       );
     },
-    [form],
+    [form, dataListClassification, dispatch],
   );
 
   const buildAdjustmentRequestBody = useCallback(
@@ -299,38 +343,33 @@ const AdjustmentBillingForm = ({ type }) => {
         0,
       );
 
-      let classificationValue = null;
-      let postInvoiceValue = null;
-      let onDemandValue = null;
-
-      const classificationAdjustment = formValue?.classificationAdjustment;
-
-      if (classificationAdjustment === "Internal") {
-        classificationValue = classificationAdjustment;
-      } else if (classificationAdjustment === "Post Invoice") {
-        const postInvoice = formValue?.postInvoice;
-        const normalizedPostInvoice = normalizeSelectionText(postInvoice);
-
-        if (
-          normalizedPostInvoice.includes("carry forward") ||
-          normalizedPostInvoice.includes("off cycle")
-        ) {
-          classificationValue = postInvoice;
-          postInvoiceValue = postInvoice;
-        } else if (postInvoice === "On Demand") {
-          classificationValue = classificationAdjustment;
-          postInvoiceValue = postInvoice;
-          onDemandValue = formValue?.onDemand || null;
-        }
-      }
-
       const {
         accountNumberWithName,
         classificationAdjustment: _classificationAdjustment,
         currentBillingPeriod,
         correctionBillingPeriod,
+        postInvoice: calculationTypeFormValue,
+        onDemand: onDemandFormValue,
         ...restFormValue
       } = formValue;
+
+      const classificationAdjustment = formValue?.classificationAdjustment;
+      const calculationTypeValue =
+        dataListCalculationType?.find((item) => {
+          const candidates = [
+            item?.id,
+            item?.value,
+            item?.name,
+            item?.text,
+            item?.label,
+          ]
+            .filter(
+              (candidate) => candidate !== null && candidate !== undefined,
+            )
+            .map((candidate) => String(candidate));
+
+          return candidates.includes(String(calculationTypeFormValue));
+        })?.id ?? calculationTypeFormValue;
 
       const body = {
         ...restFormValue,
@@ -339,10 +378,10 @@ const AdjustmentBillingForm = ({ type }) => {
         adjustmentBillingDetails: modifiedArray,
         submit,
         documentDate: formValue?.documentDate
-          ? moment(formValue?.documentDate).format("YYYY-MM-DDTHH:mm:ss")
+          ? moment(formValue?.documentDate).format("YYYY-MM-DD")
           : null,
         accountingDate: formValue?.accountingDate
-          ? moment(formValue?.accountingDate).format("YYYY-MM-DDTHH:mm:ss")
+          ? moment(formValue?.accountingDate).format("YYYY-MM-DD")
           : null,
         transactionDate: formValue?.transactionDate
           ? moment(formValue?.transactionDate).format("YYYY-MM-DDTHH:mm:ss")
@@ -353,12 +392,15 @@ const AdjustmentBillingForm = ({ type }) => {
           ? moment(formValue?.rateDate).format("YYYY-MM-DDTHH:mm:ss")
           : dataInvoice?.rateDate,
         billingPeriod: correctionBillingPeriod,
+        correctionBillPeriod: correctionBillingPeriod,
         accountId: idAccount,
         totalAdjustmentAmountIdr: sumIDR || null,
         totalAdjustmentAmountUsd: sumUSD || null,
-        classification: classificationValue,
-        postInvoice: postInvoiceValue,
-        onDemand: onDemandValue,
+        classification: classificationAdjustment || null,
+        billingCode: dataInvoice?.billingCode || null,
+        calculationType: calculationTypeValue || null,
+        postInvoice: calculationTypeFormValue || null,
+        onDemand: onDemandFormValue || null,
       };
 
       const bodyValue = {};
@@ -370,7 +412,15 @@ const AdjustmentBillingForm = ({ type }) => {
 
       return bodyValue;
     },
-    [adjustmentNumber, dataInvoice, id, idAccount, listDataABI, type],
+    [
+      adjustmentNumber,
+      dataInvoice,
+      dataListCalculationType,
+      id,
+      idAccount,
+      listDataABI,
+      type,
+    ],
   );
 
   useEffect(() => {
@@ -378,6 +428,36 @@ const AdjustmentBillingForm = ({ type }) => {
       applyAdjustmentBillingDetail(dataDetail);
     }
   }, [id, type, dataDetail, applyAdjustmentBillingDetail]);
+
+  useEffect(() => {
+    if (!recalculateId || !isCalculationInProgress(calculationStatus)) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const detailResult = await dispatch(
+          getDetailAdjustmentBilling(recalculateId),
+        ).unwrap();
+
+        if (detailResult) {
+          applyAdjustmentBillingDetail(detailResult, {
+            preserveAttachments: true,
+            preserveHierarchy: true,
+          });
+        }
+      } catch (_error) {
+        // Keep current state; explicit error handling is done in thunk.
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    applyAdjustmentBillingDetail,
+    calculationStatus,
+    dispatch,
+    recalculateId,
+  ]);
 
   // Breadcrumbs
   const routes = [
@@ -427,6 +507,8 @@ const AdjustmentBillingForm = ({ type }) => {
       setSelectedClassification(undefined);
       setSelectedPostInvoice(undefined);
       setHasSuccessfulRecalculate(false);
+      setRecalculateId(undefined);
+      setCalculationStatus(undefined);
     } else {
       applyAdjustmentBillingDetail(dataDetail);
     }
@@ -455,14 +537,18 @@ const AdjustmentBillingForm = ({ type }) => {
       setLoadingRecalculate(true);
       const body = buildAdjustmentRequestBody(formValue, { submit: false });
       const recalculateResult = await dispatch(
-        recalculateAdjustmentBilling({ body }),
+        recalculateAdjustmentBilling({
+          body,
+          id: hasSuccessfulRecalculate ? recalculateId : undefined,
+        }),
       ).unwrap();
 
-      const recalculateId = recalculateResult?.id;
+      const latestRecalculateId = recalculateResult?.id || recalculateId;
 
-      if (recalculateId) {
+      if (latestRecalculateId) {
+        setRecalculateId(latestRecalculateId);
         const detailResult = await dispatch(
-          getRecalculateAdjustmentBillingDetail(recalculateId),
+          getDetailAdjustmentBilling(latestRecalculateId),
         ).unwrap();
 
         if (detailResult) {
@@ -701,6 +787,7 @@ const AdjustmentBillingForm = ({ type }) => {
               setSelectedPostInvoice={setSelectedPostInvoice}
               onRecalculate={handleRecalculate}
               loadingRecalculate={loadingRecalculate}
+              disableRecalculate={isCalculationInProgress(calculationStatus)}
               canCreateBillingAdjustmentItem={canCreateBillingAdjustmentItem()}
             />
           </div>
