@@ -109,7 +109,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
       else
         dispatch(getPaymentRelation(id));
     }
-  }, [formType, id]);
+  }, [isUpdate, id, accountId, isActive, isDraftApproval, isRejectedApproval]);
 
   useEffect(() => {
     if (isUpdate && list_prApprovalHierarchy.length) {
