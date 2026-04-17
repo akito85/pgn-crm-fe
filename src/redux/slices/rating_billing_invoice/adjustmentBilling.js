@@ -20,6 +20,7 @@ const initialState = {
   dataListType: [],
   dataListBillingCycle: [],
   dataListBillingPeriod: [],
+  dataCurrentBillingPeriod: null,
   dataListInvoice: [],
   dataListAdjustmentReason: [],
   dataListInvoiceInformation: [],
@@ -31,7 +32,9 @@ const initialState = {
   dataListRateType: [],
   dataInvoiceInfo: null,
   dataBillingItemList: [],
+  dataTransactionMappingInformation: [],
   dataListClassification: [],
+  dataListCalculationType: [],
   dataListPostInvoice: [],
   dataListOnDemand: [],
   loading: false,
@@ -74,7 +77,7 @@ export const createAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const updateAdjustmentBilling = createAsyncThunk(
@@ -113,7 +116,7 @@ export const updateAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const getAdjustmentBillingPaginate = createAsyncThunk(
@@ -142,7 +145,7 @@ export const getAdjustmentBillingPaginate = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchy = createAsyncThunk(
@@ -168,7 +171,7 @@ export const getListApprovalHierarchy = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListApprovalHierarchyDetail = createAsyncThunk(
@@ -194,7 +197,7 @@ export const getListApprovalHierarchyDetail = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -220,7 +223,7 @@ export const getApprovalHistory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const deleteAdjustmentBilling = createAsyncThunk(
@@ -259,7 +262,7 @@ export const deleteAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 export const getListCategory = createAsyncThunk(
@@ -285,7 +288,7 @@ export const getListCategory = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const downloadAdjustmentBilling = createAsyncThunk(
@@ -304,11 +307,11 @@ export const downloadAdjustmentBilling = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_ADJUSTMENT_BILLING",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getListAccount = createAsyncThunk(
@@ -334,7 +337,7 @@ export const getListAccount = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListAccountDetail = createAsyncThunk(
@@ -360,7 +363,7 @@ export const getListAccountDetail = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListType = createAsyncThunk(
@@ -386,7 +389,7 @@ export const getListType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListDetailType = createAsyncThunk(
@@ -412,7 +415,7 @@ export const getListDetailType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListBillingCycle = createAsyncThunk(
@@ -438,7 +441,7 @@ export const getListBillingCycle = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListBillingPeriod = createAsyncThunk(
@@ -464,7 +467,33 @@ export const getListBillingPeriod = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
+);
+
+export const getCurrentBillingPeriod = createAsyncThunk(
+  "GET_CURRENT_BILLING_PERIOD",
+  async ({ cycleId } = {}, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/adjustment/get-current-period?cycleId=${cycleId}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  },
 );
 
 export const getListInvoice = createAsyncThunk(
@@ -490,7 +519,7 @@ export const getListInvoice = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListInvoiceInformation = createAsyncThunk(
@@ -516,7 +545,7 @@ export const getListInvoiceInformation = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListAdjustmentReason = createAsyncThunk(
@@ -542,7 +571,7 @@ export const getListAdjustmentReason = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListCurrency = createAsyncThunk(
@@ -568,7 +597,7 @@ export const getListCurrency = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListRateType = createAsyncThunk(
@@ -594,7 +623,38 @@ export const getListRateType = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
+);
+
+export const getRateAdjustment = createAsyncThunk(
+  "GET_RATE_ADJUSTMENT",
+  async ({ rateDate, rateType }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/adjustment/rate-adjustment";
+      const response = await ratingBillingHttpService.createData(url, {
+        rateDate,
+        rateType,
+      });
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+
+      return thunkAPI.rejectWithValue(error?.response?.data || message);
+    }
+  },
 );
 
 export const getListTermsOfPayment = createAsyncThunk(
@@ -620,7 +680,7 @@ export const getListTermsOfPayment = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getInvoiceInformation = createAsyncThunk(
@@ -646,7 +706,7 @@ export const getInvoiceInformation = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getInvoiceBillingItemList = createAsyncThunk(
@@ -672,7 +732,33 @@ export const getInvoiceBillingItemList = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
+);
+
+export const getTransactionMappingInformation = createAsyncThunk(
+  "GET_TRANSACTION_MAPPING_INFORMATION",
+  async (billingNumber, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/adjustment/get-transaction-mapping-information/${billingNumber}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  },
 );
 
 export const getSelectTOP = createAsyncThunk(
@@ -698,7 +784,7 @@ export const getSelectTOP = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListClassification = createAsyncThunk(
@@ -724,7 +810,33 @@ export const getListClassification = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
+);
+
+export const getListCalculationType = createAsyncThunk(
+  "GET_LIST_CALCULATION_TYPE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/adjustment/get-calculation-type";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  },
 );
 
 export const getListPostInvoice = createAsyncThunk(
@@ -750,7 +862,7 @@ export const getListPostInvoice = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListOnDemand = createAsyncThunk(
@@ -776,7 +888,7 @@ export const getListOnDemand = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getListItem = createAsyncThunk(
@@ -802,7 +914,7 @@ export const getListItem = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
 );
 
 export const getDetailAdjustmentBilling = createAsyncThunk(
@@ -828,7 +940,72 @@ export const getDetailAdjustmentBilling = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
     }
-  }
+  },
+);
+
+export const recalculateAdjustmentBilling = createAsyncThunk(
+  "RECALCULATE_ADJUSTMENT_BILLING",
+  async ({ body, id }, thunkAPI) => {
+    try {
+      const url = id
+        ? `/v1/dbs/api/rbi/adjustment/recalculate/${id}`
+        : "/v1/dbs/api/rbi/adjustment/recalculate";
+      const response = await ratingBillingHttpService.createData(url, body);
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error?.response?.data?.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not recalculated. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
+);
+
+export const getRecalculateAdjustmentBillingDetail = createAsyncThunk(
+  "GET_RECALCULATE_ADJUSTMENT_BILLING_DETAIL",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/adjustment/recalculate/${id}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return Array.isArray(response.data) ? null : response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
 );
 
 export const approveOrRejectAdjustmentBilling = createAsyncThunk(
@@ -838,7 +1015,7 @@ export const approveOrRejectAdjustmentBilling = createAsyncThunk(
       const url = "/v1/dbs/api/rbi/adjustment/approval-adjustment";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       const successApprove = {
         title: `Successful`,
@@ -870,7 +1047,7 @@ export const approveOrRejectAdjustmentBilling = createAsyncThunk(
         return thunkAPI.rejectWithValue(error);
       }
     }
-  }
+  },
 );
 
 const adjustmentBillingSlice = createSlice({
@@ -913,10 +1090,10 @@ const adjustmentBillingSlice = createSlice({
 
       if (isLoadMore) {
         const existingIds = new Set(
-          (state.data?.result || []).map((item) => item.id)
+          (state.data?.result || []).map((item) => item.id),
         );
         const uniqueNewData = newResult.filter(
-          (item) => !existingIds.has(item.id)
+          (item) => !existingIds.has(item.id),
         );
         state.data = {
           ...action.payload,
@@ -1096,6 +1273,20 @@ const adjustmentBillingSlice = createSlice({
       state.loading = false;
     },
 
+    /* Get Current Billing Period */
+    [getCurrentBillingPeriod.pending]: (state, action) => {
+      state.loading = true;
+      state.dataCurrentBillingPeriod = action.payload;
+    },
+    [getCurrentBillingPeriod.fulfilled]: (state, action) => {
+      state.dataCurrentBillingPeriod = action.payload;
+      state.loading = false;
+    },
+    [getCurrentBillingPeriod.rejected]: (state, action) => {
+      state.dataCurrentBillingPeriod = action.payload;
+      state.loading = false;
+    },
+
     /* Get List Invoice */
     [getListInvoice.pending]: (state, action) => {
       state.loading = true;
@@ -1207,6 +1398,19 @@ const adjustmentBillingSlice = createSlice({
       state.loading = false;
     },
 
+    /* Get List Calculation Type */
+    [getListCalculationType.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListCalculationType.fulfilled]: (state, action) => {
+      state.dataListCalculationType = action.payload;
+      state.loading = false;
+    },
+    [getListCalculationType.rejected]: (state) => {
+      state.dataListCalculationType = [];
+      state.loading = false;
+    },
+
     /* Get List Post Invoice */
     [getListPostInvoice.pending]: (state) => {
       state.loading = true;
@@ -1298,6 +1502,22 @@ const adjustmentBillingSlice = createSlice({
     },
     [getInvoiceBillingItemList.rejected]: (state) => {
       state.dataBillingItemList = [];
+      state.loading = false;
+    },
+
+    // Get Transaction Mapping Information
+    [getTransactionMappingInformation.pending]: (state) => {
+      state.loading = true;
+      state.dataTransactionMappingInformation = [];
+    },
+    [getTransactionMappingInformation.fulfilled]: (state, action) => {
+      state.dataTransactionMappingInformation = Array.isArray(action.payload)
+        ? action.payload
+        : [];
+      state.loading = false;
+    },
+    [getTransactionMappingInformation.rejected]: (state) => {
+      state.dataTransactionMappingInformation = [];
       state.loading = false;
     },
   },
