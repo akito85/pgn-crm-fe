@@ -70,14 +70,16 @@ const ServiceAgreementTable = ({
             fixed: "right",
             width: 150,
             align: "center",
-            render: (text, record, index) => RenderContentActions(
-                text,
-                record,
-                index,
-                availableActions,
-                permittedActions.length,
-                permittedActions,
-                "View"
+            render: (text, record, index) => (
+                <RenderContentActions
+                    text={text}
+                    record={record}
+                    index={index}
+                    itemRender={availableActions}
+                    totalLength={permittedActions.length}
+                    permissions={permittedActions}
+                    sliceColumn="View"
+                />
             ),
         }];
     }, [filteredArray, itemActions]);
