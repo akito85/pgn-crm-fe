@@ -196,7 +196,7 @@ const MultiDestinationTable = ({
         }
       }
     ),
-    handleUpdate: ({ id }) => navigate(
+    handleUpdate: ({ id, status, statusApproval }) => navigate(
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION :
       isOneTime ?
@@ -207,6 +207,8 @@ const MultiDestinationTable = ({
           idAccount: accountId,
           idCustomer: customerId,
           id,
+          status,
+          statusApproval,
         }
       }
     ),
