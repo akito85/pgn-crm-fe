@@ -1,4 +1,3 @@
-import BaseContainer from "../../../../../../components/BaseContainer";
 import TaxCodeInfo from "./TaxCodeInfo";
 import DetailText from "../../../../../../components/DetailText";
 import ConditionForm from "../Form/ConditionForm";
@@ -7,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import FunctionalCriteriaTaxCode from "../Form/FunctionalCriteriaTaxCode";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DetailSectionTaxCode = ({
   dataHistory = {},
@@ -38,15 +38,15 @@ const DetailSectionTaxCode = ({
 
   return (
     <div>
-      <BaseContainer header={"tax information"}>
+      <CardContainer header={"tax information"}>
         <TaxCodeInfo
           preview="detail"
           data={dataInvoice}
           dataCategory={dataCategory}
         />
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer
+      <CardContainer
         header={"Criteria Information"}
         type={"tabs"}
         element={
@@ -71,9 +71,9 @@ const DetailSectionTaxCode = ({
             showAction={"show"}
           />
         )}
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"history log information"}>
+      <CardContainer header={"history log information"}>
         <div className="w-full grid grid-cols-5 gap-3">
           <DetailText label="Record ID">{dataHistory?.recordId}</DetailText>
           <DetailText label="Created Date">
@@ -85,7 +85,7 @@ const DetailSectionTaxCode = ({
           </DetailText>
           <DetailText label="Updated By">{dataHistory?.updatedBy}</DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

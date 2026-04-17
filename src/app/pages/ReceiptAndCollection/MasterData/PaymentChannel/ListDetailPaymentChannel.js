@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import {
   approveOrRejectPaymentChannel,
@@ -11,7 +10,7 @@ import {
   getDetailPaymentChannel,
 } from "../../../../../redux/slices/receipt_collection/paymentChannel";
 import FooterDetail from "../../../../../components/FooterDetail";
-import { Tabs } from "antd";
+import { Tabs, Spin, message } from "antd";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailPaymentChannel from "./DetailPaymentChannel";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -24,6 +23,7 @@ const ListDetailPaymentChannel = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [modalApprove, setModalApprove] = useState(false);
+  const [loadingConfirm, setLoadingConfirm] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
   const id = location?.state?.id;
   const [dataHeader, setDataHeader] = useState({});
@@ -101,37 +101,37 @@ const ListDetailPaymentChannel = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_PAYMENT_CHANNEL") {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectInactivePaymentChannel({ body: data }))
-        .unwrap()
-        .then(() => {
-          handleClear();
-          setModalApprove(false);
-        });
-    } else {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectPaymentChannel({ body: data }))
-        .unwrap()
-        .then(() => {
-          handleClear();
-          setModalApprove(false);
-        });
-    }
+    setLoadingConfirm(true);
+    const data = {
+      id: id,
+      remark: res.remark,
+      approvalId: data_detail?.tApprovalDto?.tAppId,
+      action: approveOrReject.toUpperCase(),
+    };
+
+    const actionCreator =
+      data_detail?.tApprovalDto?.approvalType === "INACTIVE_PAYMENT_CHANNEL"
+        ? approveOrRejectInactivePaymentChannel
+        : approveOrRejectPaymentChannel;
+
+    dispatch(actionCreator({ body: data }))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        setModalApprove(false);
+      })
+      .catch((error) => {
+        message.error(
+          error?.response?.data?.message ||
+            error?.data?.message ||
+            error?.message ||
+            "Gagal memproses permintaan. Silakan coba lagi."
+        );
+      })
+      .finally(() => setLoadingConfirm(false));
   };
 
   const handleCancel = () => {
-    // setRemark("");
     setModalApprove(false);
   };
 
@@ -139,9 +139,10 @@ const ListDetailPaymentChannel = () => {
   return (
     <>
       <BreadCrumb routes={routes} />
-      <div>
-        <Tabs
-          activeKey={segmentedPage}
+      <Spin spinning={loading}>
+        <div>
+          <Tabs
+            activeKey={segmentedPage}
           onChange={setSegmentedPage}
           items={[
             {
@@ -173,7 +174,8 @@ const ListDetailPaymentChannel = () => {
             },
           ]}
         />
-      </div>
+        </div>
+      </Spin>
 
       <ModalApproveOrReject
         isOpen={modalApprove}
@@ -182,8 +184,8 @@ const ListDetailPaymentChannel = () => {
         header={approveOrReject}
         approveOrReject={approveOrReject}
         menu={"Delivery Channel"}
-        named={data_detail?.peOpCi?.name
-        }
+        named={data_detail?.peOpCi?.name}
+        loading={loadingConfirm}
       />
 
       <FooterDetail

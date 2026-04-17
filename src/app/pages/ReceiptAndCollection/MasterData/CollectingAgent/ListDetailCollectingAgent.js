@@ -11,7 +11,7 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
-import { Tabs } from "antd";
+import { Tabs, Spin } from "antd";
 import {
     approveOrRejectCollectingAgent,
     approveOrRejectInactiveCollectingAgent,
@@ -161,9 +161,10 @@ const ListDetailCollectingAgent = () => {
     return (
         <>
             <BreadCrumb routes={routes} />
-            <div>
-                <Tabs
-                    activeKey={segmentedPage}
+            <Spin spinning={loading}>
+                <div>
+                    <Tabs
+                        activeKey={segmentedPage}
                     onChange={setSegmentedPage}
                     items={[
                         {
@@ -196,6 +197,7 @@ const ListDetailCollectingAgent = () => {
                     ]}
                 />
             </div>
+            </Spin>
 
             <ModalApproveOrReject
                 isOpen={modalApprove}

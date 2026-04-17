@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { WarningOutlined } from "@ant-design/icons";
 import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
@@ -34,6 +33,13 @@ import {
   ModalError,
 } from "../../../../../components/Modal/ModalPopUp";
 import ConfirmationBillingItemCategory from "./Modal/ConfirmationBillingItemCategory";
+import CardContainer from "../../../../../components/CardContainer";
+
+const steps = [
+  { title: "TRANSACTION MAPPING CATEGORY", value: "Billing Item Category" },
+  { title: "APPROVAL", value: "Approval" },
+  { title: "ATTACHMENT", value: "Attachment" },
+];
 
 const BillingItemCategoryForm = ({ type }) => {
   // Selector
@@ -60,6 +66,7 @@ const BillingItemCategoryForm = ({ type }) => {
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
+  const [initialAttachmentIds, setInitialAttachmentIds] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
@@ -80,13 +87,6 @@ const BillingItemCategoryForm = ({ type }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
-
-  // Steps configuration
-  const steps = [
-    { title: "TRANSACTION MAPPING CATEGORY", value: "Billing Item Category" },
-    { title: "APPROVAL", value: "Approval" },
-    { title: "ATTACHMENT", value: "Attachment" },
-  ];
 
   const [valuePage, setValuePage] = useState(steps[0].value);
 
@@ -128,13 +128,18 @@ const BillingItemCategoryForm = ({ type }) => {
       const newState =
         typeof updater === "function" ? updater(prevState) : updater;
       const removedItems = prevState.filter(
-        (item) => !newState.some((newItem) => newItem.key === item.key),
+        (item) =>
+          !newState.some(
+            (newItem) => (newItem.key ?? newItem.id) === (item.key ?? item.id),
+          ),
       );
       const removedExistingIds = removedItems
         .filter((item) => item.dataType === "exist" && item.id)
         .map((item) => item.id);
       if (removedExistingIds.length > 0) {
-        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+        setDeletedAttachmentIds((prev) => [
+          ...new Set([...prev, ...removedExistingIds]),
+        ]);
       }
       return newState;
     });
@@ -173,28 +178,8 @@ const BillingItemCategoryForm = ({ type }) => {
     ) {
       const draftCategory = data_detail_draft?.billingCategory;
 
-      // Data Draft Attachment Information
-      const dataDraftAttachment = (data_detail?.attachments || []).map(
-        (item) => {
-          return {
-            id: item.id,
-            size: item.size,
-            fileName: item.fileName,
-            fileSize: item.fileSize,
-            fileType: item.type,
-            fileCategoryId: item.fileCategoryId,
-            fileCategoryName: item.fileCategoryName,
-            pathFile: item.pathFile,
-            urlFile1: item.urlFile1,
-            urlFile2: item.urlFile2,
-            uploadBy: item.createdBy,
-            uploadDate: item.createdDate
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        },
-      );
+      const draftApprovalId =
+        draftCategory?.appHierId ?? draftCategory?.apphierId ?? undefined;
 
       form.setFieldsValue({
         code: draftCategory?.code,
@@ -206,37 +191,17 @@ const BillingItemCategoryForm = ({ type }) => {
           ? moment(draftCategory.endDate)
           : undefined,
         description: draftCategory?.description,
-        apphierId: draftCategory?.apphierId,
+        apphierId: draftApprovalId,
       });
 
       setStartDate(
         draftCategory?.startDate ? moment(draftCategory.startDate) : undefined,
       );
-      setSelectedHierarchy(draftCategory?.apphierId);
-      setListDataAttachment(dataDraftAttachment);
+      setSelectedHierarchy(draftApprovalId);
     } else if (id && data_detail?.billingCategory?.id === id) {
       const billingCategory = data_detail?.billingCategory;
-
-      // Data Attachment Information
-      const dataAttachment = (data_detail?.attachments || []).map((item) => {
-        return {
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.type,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          uploadBy: item.createdBy,
-          uploadDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        };
-      });
+      const billingApprovalId =
+        billingCategory?.appHierId ?? billingCategory?.apphierId ?? undefined;
 
       form.setFieldsValue({
         code: billingCategory?.code,
@@ -248,7 +213,7 @@ const BillingItemCategoryForm = ({ type }) => {
           ? moment(billingCategory.endDate)
           : undefined,
         description: billingCategory?.description,
-        apphierId: billingCategory?.apphierId,
+        apphierId: billingApprovalId,
       });
 
       setStartDate(
@@ -256,16 +221,77 @@ const BillingItemCategoryForm = ({ type }) => {
           ? moment(billingCategory.startDate)
           : undefined,
       );
-      setSelectedHierarchy(billingCategory?.apphierId);
-      setListDataAttachment(dataAttachment);
+      setSelectedHierarchy(billingApprovalId);
     }
   }, [id, type, form, data_detail, data_detail_draft]);
+
+  // Fetch attachments from endpoint
+  useEffect(() => {
+    if (id && type === "update") {
+      ratingBillingHttpService
+        .getPagination(
+          `/v1/dbs/api/billing-item-category/list-attachment/${id}`,
+        )
+        .then((response) => {
+          const dataAttachment = (
+            response?.data?.result ||
+            response?.data ||
+            []
+          ).map((item, index) => {
+            return {
+              key: item.id || index + 1,
+              id: item.id,
+              size: item.size,
+              fileName: item.fileName,
+              fileSize: item.fileSize,
+              fileType: item.type,
+              fileCategoryId: item.fileCategoryId,
+              fileCategoryName: item.fileCategoryName,
+              pathFile: item.pathFile,
+              urlFile1: item.urlFile1,
+              urlFile2: item.urlFile2,
+              uploadBy: item.createdBy,
+              uploadDate: item.createdDate
+                ? moment(item.createdDate).format("DD MMM YYYY")
+                : "",
+              dataType: "exist",
+            };
+          });
+          setListDataAttachment(dataAttachment);
+          setInitialAttachmentIds(
+            dataAttachment
+              .filter((item) => item.dataType === "exist" && item.id)
+              .map((item) => item.id),
+          );
+        })
+        .catch((error) => {
+          console.log("Error fetching attachments:", error);
+        });
+    }
+  }, [id, type]);
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getSelectedApproval({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
+
+  useEffect(() => {
+    if (
+      type === "update" &&
+      data_detail &&
+      Object.keys(data_detail).length > 0 &&
+      (data_detail?.billingCategory?.appHierId ||
+        data_detail?.billingCategory?.apphierId)
+    ) {
+      const approvalId =
+        data_detail?.billingCategory?.appHierId ??
+        data_detail?.billingCategory?.apphierId;
+
+      setSelectedHierarchy(approvalId);
+      form.setFieldsValue({ apphierId: approvalId });
+    }
+  }, [type, data_detail, form]);
 
   useEffect(() => {
     if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
@@ -319,7 +345,14 @@ const BillingItemCategoryForm = ({ type }) => {
     },
   ];
 
-  const processData = ({ bodyData, id, type, dateFormatting, flag }) => {
+  const processData = ({
+    bodyData,
+    id,
+    type,
+    dateFormatting,
+    flag,
+    selectedHierarchy,
+  }) => {
     const body = {
       id: type === "create" ? undefined : id,
       code: bodyData.code,
@@ -331,7 +364,7 @@ const BillingItemCategoryForm = ({ type }) => {
         ? moment(bodyData?.endDate).format(dateFormatting.dateFormal)
         : null,
       description: bodyData.description ? bodyData.description : null,
-      apphierId: bodyData.apphierId,
+      apphierId: selectedHierarchy ?? bodyData.apphierId ?? null,
       isSubmit: flag,
       remark: bodyData.remark || null,
     };
@@ -352,6 +385,7 @@ const BillingItemCategoryForm = ({ type }) => {
       type,
       dateFormatting,
       flag,
+      selectedHierarchy,
     });
 
     try {
@@ -385,7 +419,6 @@ const BillingItemCategoryForm = ({ type }) => {
 
   // Handle Save Form
   const handleSave = async (formValue) => {
-    let errorBody = {};
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
     } else {
@@ -420,7 +453,20 @@ const BillingItemCategoryForm = ({ type }) => {
       type,
       dateFormatting,
       flag,
+      selectedHierarchy,
     });
+
+    // Compute deleted IDs from initial existing attachments vs current existing attachments.
+    // This guarantees delete API still runs even if incremental deletedAttachmentIds misses.
+    const currentExistingIds = listDataAttachment
+      .filter((item) => item.dataType === "exist" && item.id)
+      .map((item) => item.id);
+    const calculatedDeletedIds = initialAttachmentIds.filter(
+      (idAttachment) => !currentExistingIds.includes(idAttachment),
+    );
+    const fileIdsToDelete = [
+      ...new Set([...deletedAttachmentIds, ...calculatedDeletedIds]),
+    ];
 
     if (type === "create") {
       dispatch(createBillingItemCategory(body))
@@ -428,10 +474,10 @@ const BillingItemCategoryForm = ({ type }) => {
         .then(async (dataForm) => {
           const billingItemCategoryId = dataForm?.id;
           setLoadingForm(true);
-          if (deletedAttachmentIds.length > 0) {
+          if (fileIdsToDelete.length > 0) {
             await ratingBillingHttpService.deleteDataWithBody(
               `/v1/dbs/api/attachment/delete-attachment`,
-              { fileId: deletedAttachmentIds },
+              { fileId: fileIdsToDelete },
             );
           }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
@@ -472,10 +518,10 @@ const BillingItemCategoryForm = ({ type }) => {
             (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
-          if (deletedAttachmentIds.length > 0) {
+          if (fileIdsToDelete.length > 0) {
             await ratingBillingHttpService.deleteDataWithBody(
               `/v1/dbs/api/attachment/delete-attachment`,
-              { fileId: deletedAttachmentIds },
+              { fileId: fileIdsToDelete },
             );
           }
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
@@ -544,12 +590,14 @@ const BillingItemCategoryForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
       setDeletedAttachmentIds([]);
+      setInitialAttachmentIds([]);
       setBodyData({});
       setListSectionInfo([
         {
@@ -631,13 +679,8 @@ const BillingItemCategoryForm = ({ type }) => {
             />
           </div>
 
-          <div
-            style={{
-              display:
-                valuePage !== listSectionInfo[1].value ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"Approval Information"}>
+          {valuePage === listSectionInfo[1].value && (
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -645,8 +688,8 @@ const BillingItemCategoryForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
-          </div>
+            </CardContainer>
+          )}
 
           <div
             style={{
@@ -654,7 +697,7 @@ const BillingItemCategoryForm = ({ type }) => {
                 valuePage !== listSectionInfo[2].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"Attachment Information"}>
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -668,7 +711,7 @@ const BillingItemCategoryForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           {/* FormFooter menggantikan manual footer buttons */}

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Spin, Tooltip, Dropdown } from "antd";
+import { Tooltip, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import { MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -47,6 +47,7 @@ const PosPage = () => {
 
   // Declaration
   const searchInput = useRef(null);
+  const detailContainerRef = useRef(null);
   const dispatch = useDispatch();
   const dataSource = data_view?.result;
 
@@ -122,6 +123,7 @@ const PosPage = () => {
     try {
       await dispatch(generateProformaInvoice(record.posNumber)).unwrap();
       // Refresh data setelah generate
+      setTableLoading(true);
       dispatch(
         getListPointOfSales({
           page: 0,
@@ -130,7 +132,9 @@ const PosPage = () => {
           search: encodeURIComponent(JSON.stringify(search)),
           isLoadMore: false,
         }),
-      );
+      ).finally(() => {
+        setTableLoading(false);
+      });
       setPage(0);
     } catch (error) {
       console.error("Error generating proforma invoice:", error);
@@ -161,6 +165,7 @@ const PosPage = () => {
 
   // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
+    setTableLoading(true);
     dispatch(
       getListPointOfSales({
         page: 0,
@@ -169,7 +174,9 @@ const PosPage = () => {
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false, // Flag untuk initial load
       }),
-    );
+    ).finally(() => {
+      setTableLoading(false);
+    });
     setPage(0);
   }, [dispatch, sort, search]);
 
@@ -247,6 +254,7 @@ const PosPage = () => {
       .then(() => {
         setModalDelete(false);
         setDataDelete(undefined);
+        setTableLoading(true);
         dispatch(
           getListPointOfSales({
             page: 0,
@@ -255,7 +263,9 @@ const PosPage = () => {
             search: encodeURIComponent(JSON.stringify(search)),
             isLoadMore: false,
           }),
-        );
+        ).finally(() => {
+          setTableLoading(false);
+        });
         setPage(0);
       })
       .catch((error) => {
@@ -323,6 +333,7 @@ const PosPage = () => {
   ];
 
   const handleApproveReject = () => {
+    setTableLoading(true);
     dispatch(
       getListPointOfSales({
         page: 0,
@@ -331,7 +342,9 @@ const PosPage = () => {
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false,
       }),
-    );
+    ).finally(() => {
+      setTableLoading(false);
+    });
     setPage(0);
   };
 
@@ -399,15 +412,24 @@ const PosPage = () => {
       type: "table",
       width: 40,
       render: (record) => {
-        const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+        const isMeterai =
+          record?.isMeterai === true ||
+          record?.isMeterai === "true" ||
+          record?.is_meterai === true ||
+          record?.is_meterai === "true";
 
-        const isApproved = record.statusApproval === "APPROVED";
+        const isEditable =
+          !isMeterai &&
+          (record.statusApproval === "DRAFT" ||
+            record.statusApproval === "REJECTED");
+
+        const isApproved =
+          !isMeterai && record.statusApproval === "APPROVED";
 
         const isDelete =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+          !isMeterai &&
+          (record.statusApproval === "DRAFT" ||
+            record.statusApproval === "REJECTED");
 
         const customerTypeForNav =
           record.customerType === 2 ? "prospective" : "customer";
@@ -494,14 +516,15 @@ const PosPage = () => {
         ];
 
         return (
-          <Tooltip title="Aksi Lainnya">
+          <Tooltip title={isMeterai ? "This is a Meterai item" : "More Actions"}>
             <Dropdown
               menu={{ items: menuItems }}
               trigger={["click"]}
               placement="bottomRight"
+              disabled={isMeterai}
             >
-              <div className="cursor-pointer">
-                <MoreOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+              <div className={isMeterai ? "cursor-not-allowed" : "cursor-pointer"}>
+                <MoreOutlined style={{ fontSize: 20, color: isMeterai ? "#8D91A0" : "#0075BF" }} />
               </div>
             </Dropdown>
           </Tooltip>
@@ -513,13 +536,21 @@ const PosPage = () => {
       type: "table",
       width: 40,
       render: (record) => {
+        const isMeterai =
+          record?.isMeterai === true ||
+          record?.isMeterai === "true" ||
+          record?.is_meterai === true ||
+          record?.is_meterai === "true";
+
         return (
-          <Tooltip title="Detail">
+          <Tooltip title={isMeterai ? "This is a Meterai item" : "Detail"}>
             <div
-              className="pt-0 cursor-pointer"
-              onClick={() => handleOpenDetail(record)}
+              className={isMeterai ? "cursor-not-allowed" : "pt-0 cursor-pointer"}
+              onClick={() => {
+                if (!isMeterai) handleOpenDetail(record);
+              }}
             >
-              <SVGIcon name="IconDetail" color="#0075BF" width={20} />
+              <SVGIcon name="IconDetail" color={isMeterai ? "#8D91A0" : "#0075BF"} width={20} />
             </div>
           </Tooltip>
         );
@@ -529,8 +560,7 @@ const PosPage = () => {
 
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
@@ -547,6 +577,7 @@ const PosPage = () => {
               idTable="pos-table"
               dataSource={dataSource}
               showExport={false}
+              loading={loading || tableLoading}
               columns={[
                 ...PosTableView(
                   searchInput,
@@ -574,7 +605,7 @@ const PosPage = () => {
         </CardContainer>
 
         {openDetail === true ? (
-          <div className="mb-5">
+          <div ref={detailContainerRef} className="mb-5">
             <PosDetail id={dataDetail} dispatch={dispatch} />
           </div>
         ) : null}
@@ -637,7 +668,6 @@ const PosPage = () => {
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
-      </Spin>
     </>
   );
 };

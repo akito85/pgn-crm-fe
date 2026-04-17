@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import PosDetailTableView from "../Table/PosDetailTableView";
 import { getDetailListPointOfSales } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 
-const PointOfSales = ({ id = 0, dispatch = () => {} }) => {
+const PointOfSales = ({ id = 0, customerType = 1, dispatch = () => {} }) => {
   // Selector
   const { data_viewDetail } = useSelector((state) => state.pointOfSales);
 
@@ -38,11 +38,12 @@ const PointOfSales = ({ id = 0, dispatch = () => {} }) => {
           page,
           pageSize,
           sort,
+          customerType,
           search: encodeURIComponent(JSON.stringify(search)),
         })
       );
     }
-  }, [dispatch, id, page, pageSize, sort, search]);
+  }, [dispatch, id, page, pageSize, sort, search, customerType]);
 
   useEffect(() => {
     setPage(1);
