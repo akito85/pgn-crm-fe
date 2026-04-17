@@ -66,16 +66,16 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const [form] = Form.useForm();
   const accountId = location?.state?.idAccount;
   const customerId = location?.state?.idCustomer;
-  const idPr = location?.state?.id;
+  const id = location?.state?.id;
 
-  const status = detail_paymentRelation.status || "DRAFT";
-  const statusApproval = detail_paymentRelation.statusApproval || "DRAFT";
+  const status = location.state?.status || detail_paymentRelation.status || "DRAFT";
+  const statusApproval = location.state?.statusApproval || detail_paymentRelation.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
 
   const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectApproval = statusApproval === "REJECT";
+  const isRejectedApproval = statusApproval === "REJECTED";
 
   //state
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
@@ -86,7 +86,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
 
   const attachmentIsRequired = true;
 
-  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
+  const detail = (isActive && (isDraftApproval || isRejectedApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
   const attachments = detail.attachments;
 
   const formFields = [
@@ -103,11 +103,13 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   ];
 
   useEffect(() => {
-    if (isUpdate && idPr) {
-      dispatch(getPaymentRelation(idPr));
-      dispatch(getPaymentRelationDraft(idPr));
+    if (isUpdate && id) {
+      if (isActive && (isDraftApproval || isRejectedApproval))
+        dispatch(getPaymentRelationDraft(id));
+      else
+        dispatch(getPaymentRelation(id));
     }
-  }, [formType, idPr]);
+  }, [formType, id]);
 
   useEffect(() => {
     if (isUpdate && list_prApprovalHierarchy.length) {
@@ -219,7 +221,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             const body = {
               stepNumber: current + 1,
               type: formType.toUpperCase(),
-              id: isUpdate ? idPr : undefined,
+              id,
               data: {
                 accountId,
                 relatedAccountId,
@@ -252,7 +254,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         form.getFieldsValue(true);
 
       const body = {
-        id: isUpdate ? idPr : undefined,
+        id,
         accountId,
         relatedAccountId,
         priority: Number.parseInt(priority),
@@ -385,7 +387,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         const body = {
           stepNumber: current + 1,
           type: formType.toUpperCase(),
-          id: isUpdate ? idPr : undefined,
+          id: isUpdate ? id : undefined,
           data: {
             accountId,
             relatedAccountId,
@@ -444,7 +446,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           const body = {
             stepNumber: i + 1,
             type: formType.toUpperCase(),
-            id: isUpdate ? idPr : undefined,
+            id,
             data: {
               accountId,
               relatedAccountId,
@@ -509,7 +511,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     ]);
 
     const body = {
-      id: idPr,
+      id,
       accountId,
       relatedAccountId,
       priority: Number.parseInt(priority),
@@ -548,7 +550,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     else if (isUpdate)
       dispatch(
         updatePaymentRelation({
-          id: idPr,
+          id,
           body,
           attachments: newAttachments,
           action: confirmationType.toUpperCase()
