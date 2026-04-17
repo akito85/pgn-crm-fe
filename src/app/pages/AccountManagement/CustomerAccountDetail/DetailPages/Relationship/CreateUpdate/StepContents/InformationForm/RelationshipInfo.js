@@ -1,8 +1,7 @@
-import { Form, Select, Input, Button } from "antd";
-import React, { useEffect, useState } from "react";
+import { Form, Select, Button } from "antd";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import DateComponent from "../../../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
 import {
@@ -83,7 +82,6 @@ const RelationshipInfo = ({
               onChange={(_, option) => {
                 form.setFieldValue("relationshipTypeName", option.children)
                 setRelatedDetails([]);
-                // Also clear related name/number fields
                 form.resetFields(["relatedName", "relatedNumber", "formAccountId", "relatedId"]);
               }}
             >
@@ -109,7 +107,11 @@ const RelationshipInfo = ({
           >
             <SelectComponent
               disabled={!isDraft && isUpdate}
-              onChange={(_, option) => form.setFieldValue("relationshipCategoryName", option.children)}
+              onChange={(_, option) => {
+                form.setFieldValue("relationshipCategoryName", option.children);
+                setRelatedDetails([]);
+                form.resetFields(["relatedName", "relatedNumber", "formAccountId", "relatedId"]);
+              }}
               loading={loading_listRelationshipCategory}
             >
               {list_relationshipCategory?.map((item) => (
