@@ -79,20 +79,20 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
 
   const accountId = location?.state?.idAccount;
   const customerId = location?.state?.idCustomer;
-  const idIr = location?.state?.id;
+  const id = location?.state?.id;
 
-  const status = detail_invoiceRelation.status || "DRAFT";
-  const statusApproval = detail_invoiceRelation.statusApproval || "DRAFT";
+  const status = location.state?.status || detail_invoiceRelation.status || "DRAFT";
+  const statusApproval = location.state?.statusApproval || detail_invoiceRelation.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
 
   const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectApproval = statusApproval === "REJECT";
+  const isRejectedApproval = statusApproval === "REJECT";
 
   const attachmentIsRequired = true;
 
-  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_invoiceRelation : detail_invoiceRelation;
+  const detail = (isActive && (isDraftApproval || isRejectedApproval)) ? detailDraft_invoiceRelation : detail_invoiceRelation;
   const attachments = detail.attachments;
 
   const formFields = [
@@ -104,11 +104,13 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   // --- Effects ---
   // Fetch invoice relation record and draft on update
   useEffect(() => {
-    if (isUpdate && idIr) {
-      dispatch(getInvoiceRelation(idIr));
-      dispatch(getInvoiceRelationDraft(idIr));
+    if (isUpdate && id) {
+      if (isActive && (isDraftApproval || isRejectedApproval))
+        dispatch(getInvoiceRelationDraft(id));
+      else
+        dispatch(getInvoiceRelation(id));
     }
-  }, [formType, idIr]);
+  }, [isUpdate, id, accountId, isActive, isDraftApproval, isRejectedApproval]);
 
   // Pre-fill form fields when record and hierarchy are loaded
   useEffect(() => {
@@ -218,7 +220,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
             const body = {
               stepNumber: current + 1,
               type: formType.toUpperCase(),
-              id: idIr,
+              id,
               data : {
                 accountId,
                 relatedAccountId,
@@ -250,7 +252,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         form.getFieldsValue(true);
 
       const body = {
-        id: idIr,
+        id,
         accountId,
         relatedAccountId,
         description,
@@ -310,7 +312,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
         const body = {
           stepNumber: current + 1,
           type: formType.toUpperCase(),
-          id: idIr,
+          id,
           data : {
             accountId,
             relatedAccountId,
@@ -375,7 +377,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
           const body = {
             stepNumber: current + 1,
             type: formType.toUpperCase(),
-            id: idIr,
+            id,
             data : {
               accountId,
               relatedAccountId,
@@ -483,7 +485,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
     else if (isUpdate)
       dispatch(
         updateInvoiceRelation({
-          id: idIr,
+          id,
           body,
           attachments: attachmentDataSource.filter(
             (attachment) => attachment.dataType === "new"

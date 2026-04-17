@@ -550,7 +550,7 @@ const CreateUpdateRelationship = ({
     dispatch(getRelationshipApprovalHierarchies());
   }, []);
 
-  // Fetch relationship record and draft
+  // Fetch relationship record or draft
   useEffect(() => {
     if (isUpdate && id && accountId) {
       if (isActive && (isDraftApproval || isRejectedApproval))
