@@ -88,7 +88,7 @@ const CreateUpdateInvoiceRelation = ({ formType = "create", accountType = "stand
   const isActive = status === "ACTIVE";
 
   const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectedApproval = statusApproval === "REJECT";
+  const isRejectedApproval = statusApproval === "REJECTED";
 
   const attachmentIsRequired = true;
 
