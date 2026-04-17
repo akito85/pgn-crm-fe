@@ -28,17 +28,18 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
+      "select",
+      [
+        { value: "1", label: "Customer" },
+        { value: "2", label: "Prospective Customer" },
+      ]
     ),
-    render: (type) => {
+    render: (text) => {
       const typeConfig = {
-        1: { text: "Customer", color: "#1890ff" },
-        2: { text: "Prospective Customer", color: "#1890ff" },
+        1: "Customer",
+        2: "Prospective Customer",
       };
-      const config = typeConfig[type] || {
-        text: "UNKNOWN",
-        color: "#d9d9d9",
-      };
-      const displayText = config.text;
+      const displayText = typeConfig[text] || text || "-";
       return renderColumn(
         "customerType",
         hasValue(search["customerType"]),
@@ -49,21 +50,6 @@ export const PosTableView = (
         search,
       );
     },
-    // render: (index) => (
-    //   <div className={" flex justify-center"}>
-    //     <StatusComponent colour={index}>{index}</StatusComponent>
-    //   </div>
-    // ),
-    // render: (text) =>
-    //   renderColumn(
-    //     "customerType",
-    //     hasValue(search["customerType"]),
-    //     searchText,
-    //     text,
-    //     false,
-    //     "status",
-    //     search
-    //   ),
   },
   {
     title: "POS NUMBER",
@@ -107,7 +93,7 @@ export const PosTableView = (
     render: (text) =>
       renderColumn(
         "proformaInvoiceNumber",
-        hasValue(search["proformaInvoice"]),
+        hasValue(search["proformaInvoiceNumber"]),
         searchText,
         text,
         false,

@@ -188,7 +188,7 @@ const ListCreateForm = ({ type }) => {
       breadcrumbName: "Terms of Payment",
     },
     {
-      path: RBI_ROUTES.TERMS_OF_PAYMENT_CREATE,
+      path: "",
       breadcrumbName: `${type === "create" ? "Create Terms of Payment" : "Update Terms of Payment"}`,
     },
   ];
