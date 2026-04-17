@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState } from "react";
 import { Tabs } from "antd";
 import DetailText from "../../../../../../components/DetailText";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 import columnsDetail from "../Table/TableDetailMappingInformation";
 import columnsMapping from "../Table/TableMappingInformation";
 import { renderDateTime } from "../../GeneralTemplate/Utils/Utils";
@@ -19,6 +19,7 @@ const buildCriteriaColumns = () => [
   {
     title: "NO",
     dataIndex: "no",
+    key: "no",
     width: 60,
     align: "center",
     render: (_, __, index) => index + 1,
@@ -26,36 +27,42 @@ const buildCriteriaColumns = () => [
   {
     title: "CRITERIA VALUE",
     dataIndex: "criteriaValue",
+    key: "criteriaValue",
     width: 180,
     render: (val) => val || "-",
   },
   {
     title: "GL ACCOUNT",
     dataIndex: "glAccount",
+    key: "glAccount",
     width: 280,
     render: (val) => val || "-",
   },
   {
     title: "DESCRIPTION ACCOUNT",
     dataIndex: "descriptionAccount",
+    key: "descriptionAccount",
     width: 220,
     render: (val) => val || "-",
   },
   {
     title: "SPECIAL GL",
     dataIndex: "specialGl",
+    key: "specialGl",
     width: 140,
     render: (val) => val || "-",
   },
   {
     title: "START DATE",
     dataIndex: "startDate",
+    key: "startDate",
     width: 150,
     render: (val) => (val ? moment(val).format(dateFormatting.date) : "-"),
   },
   {
     title: "END DATE",
     dataIndex: "endDate",
+    key: "endDate",
     width: 150,
     render: (val) => (val ? moment(val).format(dateFormatting.date) : "-"),
   },
@@ -120,6 +127,10 @@ const BillingItemDetailInformation = ({
   const [subHeader, setSubHeader] = useState("");
   const [modalHistory, setModalHistory] = useState(false);
   const [isDetailMapShown, setIsDetailMapShown] = useState(false);
+
+  const [fixedMapping, setFixedMapping] = useState({ left: [], right: [] });
+  const [fixedDetail, setFixedDetail] = useState({ left: [], right: [] });
+  const [fixedCriteria, setFixedCriteria] = useState({ left: [], right: [] });
 
   const [mappingTab, setMappingTab] = useState("mapping");
   const handleChange = (pageChange, pageSizeChange) => {
@@ -322,7 +333,9 @@ const BillingItemDetailInformation = ({
       >
         {mappingTab === "mapping" && (
           <>
-            <TablePaginationNew
+            <TableRBI
+              fixedColumns={fixedMapping}
+              setFixedColumns={setFixedMapping}
               dataSource={dataMapping}
               type="FE"
               totalData={dataMapping.length || 0}
@@ -355,7 +368,9 @@ const BillingItemDetailInformation = ({
                       <span className="text-primary">{subHeader}</span>
                     </div>
                   )}
-                  <TablePaginationNew
+                  <TableRBI
+                    fixedColumns={fixedDetail}
+                    setFixedColumns={setFixedDetail}
                     dataSource={dataDetailTable || []}
                     type="FE"
                     totalData={dataDetailTable?.length || 0}
@@ -387,7 +402,9 @@ const BillingItemDetailInformation = ({
 
         {/* ── Tab: Criteria Detail ── */}
         {mappingTab === "criteria" && (
-          <TablePaginationNew
+          <TableRBI
+            fixedColumns={fixedCriteria}
+            setFixedColumns={setFixedCriteria}
             dataSource={criteriaTableData}
             type="FE"
             totalData={criteriaTableData.length || 0}

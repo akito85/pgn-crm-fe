@@ -70,50 +70,6 @@ const PosPage = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
-  const handlePreviewInvoice = async (record) => {
-    try {
-      const response = await axios.get(
-        configApp.RATING_BILLING_SERVICE +
-          `/v1/dbs/api/pos/download-latest/${record.posNumber}`,
-        {
-          headers: tokenHeader(),
-          responseType: "arraybuffer",
-        },
-      );
-
-      const responseBlob = await response.data;
-      const blobText =
-        responseBlob instanceof Blob ? await responseBlob.text() : responseBlob;
-      const contentType = response.headers["content-type"];
-
-      const blob = new Blob([blobText], {
-        type: contentType ? "application/pdf" : "application/rtf",
-      });
-
-      const blobUrl = URL.createObjectURL(blob);
-      const newTab = window.open(blobUrl, "_blank");
-
-      if (newTab) {
-        newTab.document.title = `Invoice Preview - ${record.posNumber}`;
-        const viewerContainer = document.createElement("div");
-        newTab.document.body.appendChild(viewerContainer);
-
-        ReactDOM.render(
-          <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer,
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching invoice:", error);
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to preview invoice";
-
-      setBodyError({ message });
-      setModalError(true);
-    }
-  };
 
   const handleProformaInvoice = async (record) => {
     try {
@@ -495,21 +451,6 @@ const PosPage = () => {
             disabled: !isDelete,
             onClick: () => {
               if (isDelete) handleDelete(record);
-            },
-          },
-          {
-            key: "preview-invoice",
-            label: "Preview Invoice",
-            icon: (
-              <SVGIcon
-                name="IconDownload"
-                width={16}
-                color={isApproved ? "#0075BF" : "#8D91A0"}
-              />
-            ),
-            disabled: !isApproved,
-            onClick: () => {
-              if (isApproved) handlePreviewInvoice(record);
             },
           },
           {
