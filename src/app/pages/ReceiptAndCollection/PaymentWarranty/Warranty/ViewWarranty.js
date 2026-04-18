@@ -182,10 +182,27 @@ const ViewWarranty = () => {
   }, [handleGlobalSearch]);
 
   const handleAdvanceSearch = (searchData) => {
-    setSearch((prevState) => ({
-        ...prevState,
-        advanceSearch: searchData,
-    }));
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    if (searchData?.filterRules && Array.isArray(searchData.filterRules)) {
+      searchData.filterRules.forEach((ruleGroup) => {
+        if (Array.isArray(ruleGroup)) {
+          ruleGroup.forEach((rule) => {
+            if (rule?.column && rule?.value !== undefined && rule?.value !== null && rule?.value !== "" && rule?.condition) {
+              const conditionKey = rule.condition === "Equal to" ? "" : rule.condition;
+              simpleSearch[`${rule.column}${conditionKey}`] = rule.value;
+            }
+          });
+        }
+      });
+    }
+    setSearch(simpleSearch);
     setPage(1);
   };
   

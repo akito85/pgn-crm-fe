@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Table, Spin } from "antd";
+import { Spin } from "antd";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
+import TableRBI from "../../../../../components/TableRBI";
 
 const MutationDetailTable = ({ details = [] }) => {
   const columns = [
     { title: "NO", key: "no", width: 60, align: "left", render: (_, __, i) => i + 1 },
-    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150, align: "center" },
+    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150 },
     {
       title: "TRANSACTION DATE",
       dataIndex: "transactionDate",
@@ -27,17 +28,18 @@ const MutationDetailTable = ({ details = [] }) => {
 
   return (
     <div>
-      <div className="bg-[#0075BF] text-white text-center text-xs font-bold py-1 mb-1 uppercase tracking-wider">
+      <div className="bg-[#0075BF] text-white text-center px-3 text-xs py-1 mb-1 uppercase tracking-wider">
         Mutation Detail
       </div>
-      <Table
-        size="small"
-        bordered
-        rowKey={(r, i) => `detail-${r.id ?? i}`}
-        columns={columns}
+      <TableRBI
+        idTable="mutation-detail-table"
         dataSource={details.map((d, i) => ({ ...d, key: i }))}
-        pagination={false}
-        tableLayout="fixed"
+        columns={columns}
+        useSelect={false}
+        usePagination={false}
+        showSearchBar={false}
+        showAdvanceSearch={false}
+        tableScrolled={{ x: "max-content" }}
       />
     </div>
   );
@@ -45,10 +47,12 @@ const MutationDetailTable = ({ details = [] }) => {
 
 const SummaryWarrantyTable = ({ data = [], loading = false }) => {
   const [expandedMutations, setExpandedMutations] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const mutationColumns = [
     { title: "NO", key: "no", width: 60, align: "left", render: (_, __, i) => i + 1 },
-    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150, align: "center" },
+    { title: "DOC NUMBER", dataIndex: "docNumber", key: "docNumber", width: 150 },
     {
       title: "DOC DATE",
       dataIndex: "docDate",
@@ -56,7 +60,7 @@ const SummaryWarrantyTable = ({ data = [], loading = false }) => {
       width: 130,
       render: (v) => (v ? moment(v).format(dateFormatting.dateCapital) : "-"),
     },
-    { title: "TYPE", dataIndex: "type", key: "type", width: 120, align: "center" },
+    { title: "TYPE", dataIndex: "type", key: "type", width: 120 },
     { title: "CURRENCY", dataIndex: "currency", key: "currency", width: 100 },
     { title: "ACCOUNT GROUP DATE", dataIndex: "accountGroupDate", key: "accountGroupDate", width: 160 },
     {
@@ -70,43 +74,57 @@ const SummaryWarrantyTable = ({ data = [], loading = false }) => {
   ];
 
   const accountColumns = [
-    { title: "NO", key: "no", width: 60, align: "left", render: (_, __, i) => i + 1 },
-    { title: "ACCOUNT NUMBER", dataIndex: "accountNumber", key: "accountNumber", width: 160, align: "center" },
+    { title: "NO", key: "no", width: 60, align: "left", render: (_, __, i) => (page - 1) * pageSize + i + 1 },
+    { title: "ACCOUNT NUMBER", dataIndex: "accountNumber", key: "accountNumber", width: 160 },
     { title: "ACCOUNT NAME", dataIndex: "accountName", key: "accountName", width: 200 },
-    { title: "ACCOUNT SEGMENT", dataIndex: "accountSegment", key: "accountSegment", width: 160, align: "center" },
+    { title: "ACCOUNT SEGMENT", dataIndex: "accountSegment", key: "accountSegment", width: 160 },
     { title: "ACCOUNT GROUP DATE", dataIndex: "accountGroupDate", key: "accountGroupDate", width: 180 },
     { title: "CURRENCY", dataIndex: "currency", key: "currency", width: 100 },
   ];
 
   return (
     <Spin spinning={loading}>
-      <Table
-        size="small"
-        bordered
-        rowKey={(r, i) => `account-${r.id ?? i}`}
-        columns={accountColumns}
+      <TableRBI
+        idTable="summary-warranty-account-table"
         dataSource={data.map((d, i) => ({ ...d, key: i }))}
-        pagination={{ pageSize: 10, showSizeChanger: true }}
-        scroll={{ x: "max-content" }}
+        columns={accountColumns}
+        current={page}
+        pageSize={pageSize}
+        totalData={data.length}
+        onChange={(p, ps) => {
+          setPage(p);
+          setPageSize(ps);
+        }}
+        onSizeChanger={(p, ps) => {
+          setPage(p);
+          setPageSize(ps);
+        }}
+        tableScrolled={{ x: "max-content" }}
+        useSelect={false}
+        showSearchBar={false}
+        showAdvanceSearch={false}
         expandable={{
           expandedRowRender: (record) => (
-            <div className="p-2 bg-gray-50">
-              <div className="bg-[#0075BF] text-white text-center text-xs font-bold py-1 mb-2 uppercase tracking-wider">
+            <div style={{ marginLeft: 75, backgroundColor: "red" }}>
+              <div className="bg-[#0075BF] text-white text-center px-3 text-xs py-1 mb-1 uppercase tracking-wider">
                 Mutation Header
               </div>
-              <Table
-                size="small"
-                bordered
-                rowKey={(r, i) => `mutation-${r.id ?? i}`}
-                columns={mutationColumns}
+              <TableRBI
+                idTable={`mutation-header-table-${record.key}`}
                 dataSource={(record.mutations || []).map((m, i) => ({ ...m, key: i }))}
-                pagination={false}
-                scroll={{ x: "max-content" }}
+                columns={mutationColumns}
+                useSelect={false}
+                usePagination={false}
+                showSearchBar={false}
+                showAdvanceSearch={false}
+                tableScrolled={{ x: "max-content" }}
                 expandedRowKeys={expandedMutations}
                 onExpandedRowsChange={setExpandedMutations}
                 expandable={{
                   expandedRowRender: (mutationRecord) => (
-                    <MutationDetailTable details={mutationRecord.details || []} />
+                    <div style={{ marginLeft: 75, backgroundColor: "#000000" }}>
+                      <MutationDetailTable details={mutationRecord.details || []} />
+                    </div>
                   ),
                   rowExpandable: (mutationRecord) =>
                     mutationRecord.details && mutationRecord.details.length > 0,
