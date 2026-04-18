@@ -135,8 +135,8 @@ const ContentModalConfirmWarranty = ({
               <DetailText label="Eff Start Date">{(data?.effStartDate || data?.effectiveStartDate) ? moment(data?.effStartDate || data?.effectiveStartDate).format("DD MMM YYYY") : "-"}</DetailText>
               <DetailText label="Eff End Date">{(data?.effEndDate || data?.effectiveEndDate) ? moment(data?.effEndDate || data?.effectiveEndDate).format("DD MMM YYYY") : "-"}</DetailText>
               <DetailText label="Term Of Claim Period">
-                {data?.claimPeriodTermValue 
-                  ? `${data?.claimPeriodTermType || "DATE"}: ${moment(data.claimPeriodTermValue).format("DD MMM YYYY")}` 
+                {data?.claimPeriodTermValue || data?.claimPeriodTermDate
+                  ? `${data?.claimPeriodTermType || "DATE"}: ${moment(data.claimPeriodTermValue || data.claimPeriodTermDate).format("DD MMM YYYY")}` 
                   : "-"}
               </DetailText>
 

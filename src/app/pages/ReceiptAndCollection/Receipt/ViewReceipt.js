@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -282,9 +283,42 @@ const ViewReceipt = () => {
   };
 
   // handle change page
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => ({
+      ...prevState,
+      advanceSearch: searchData,
+    }));
+    setPage(1);
   };
 
   // handle sort
@@ -615,8 +649,8 @@ const ViewReceipt = () => {
               ]}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={data?.page?.totalElements}
               onSort={onSort}
               tableScrolled={{
@@ -625,6 +659,9 @@ const ViewReceipt = () => {
               }}
               handleDownload={handleDownload} // For Export button in TableRBI
               showExport={true}
+              showSearchBar={true}
+              onAdvanceSearch={handleAdvanceSearch}
+              onSearch={(e) => handleGlobalSearch(e.target.value)}
             />
           </div>
         </CardContainer>
