@@ -72,7 +72,7 @@ const ViewTransferToReceipt = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT,
@@ -337,7 +337,7 @@ const ViewTransferToReceipt = () => {
         <BreadCrumb routes={routes} />
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">TRANSFER TO RECIPT</p>
+            <p className="mt-[15px] font-bold">TRANSFER TO RECIPT LIST</p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
             </div>

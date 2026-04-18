@@ -50,7 +50,7 @@ const ListHistoryPaymentWarranty = () => {
         },
         {
             path: "",
-            breadcrumbName: "Payment Warranty",
+            breadcrumbName: "Payment  Guarantee",
         },
         {
             path: "",

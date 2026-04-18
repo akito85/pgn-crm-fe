@@ -78,7 +78,6 @@ const ModalMutation = ({
   useEffect(() => {
     if (isOpen) {
       dispatch(getAllApprovalList());
-      dispatch(getMutationCategoryOptions());
       dispatch(getCurrencyDDL());
       
       if (modalType !== "create") {
@@ -288,7 +287,7 @@ const ModalMutation = ({
         <div style={{ display: valuePage !== "Mutation Details" ? "none" : undefined }}>
           <SubSectionCard title="MUTATION INFORMATION">
             <div className="grid grid-cols-5 gap-y-4 gap-x-4">
-              <DetailText label="Source"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.source || '-') }} /></DetailText>
+              <DetailText label="Source"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((mutationData.source || '-').toUpperCase()) }} /></DetailText>
               <DetailText label="Mutation Number"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.mutationNumber || '-') }} /></DetailText>
               <DetailText label="Type"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.type || '-') }} /></DetailText>
               <DetailText label="Category"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.category || '-') }} /></DetailText>
