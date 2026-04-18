@@ -3,6 +3,7 @@ import {
 } from "@ant-design/icons";
 import { Tooltip, Spin } from "antd";
 import moment from "moment";
+import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,6 +11,10 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
+import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
+import Toolbar from "../../../../components/Toolbar";
+import TableRBI from "../../../../components/TableRBI";
+import CardContainer from "../../../../components/CardContainer";
 import TablePagination from "../../../../components/TablePagination";
 import {
   downloadReceiptHistories,
@@ -21,8 +26,6 @@ import StatusComponent from "../../../../components/StatusComponent";
 import { NumericFormat } from "react-number-format";
 import { sorterFunction } from "../../../../utils/sorterFunction";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
-import Toolbar from "../../../../components/Toolbar";
 
 export const columns = (
   page = 1,
@@ -1329,10 +1332,44 @@ const ViewReceiptHistories = () => {
     setSort(dataSort);
   };
 
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => ({
+      ...prevState,
+      advanceSearch: searchData,
+    }));
+    setPage(1);
   };
+
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
   // Breadcrumbs
   const routes = [
     {
@@ -1791,11 +1828,22 @@ const ViewReceiptHistories = () => {
 
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        <Toolbar actionList={access?.actions} items={itemActions} />
-        <BaseContainer header={"RECEIPT HISTORIES LIST"}>
-          <TablePagination
+      <BreadCrumb routes={routes} />
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold uppercase text-[#0075BF]">
+              RECEIPT HISTORIES LIST
+            </p>
+            <div className="flex gap-2">
+              <Toolbar actionList={access?.actions} items={itemActions} />
+            </div>
+          </div>
+        }
+      >
+        <div className="my-5">
+          <TableRBI
+            loading={loading}
             dataSource={dataFinal}
             columns={columns(
               page,
@@ -1809,14 +1857,19 @@ const ViewReceiptHistories = () => {
             current={page}
             expandable={{ expandedRowRender }}
             idTable="table-expand"
-            tableScrolled={{ x: 11000, y: 525 }}
+            tableScrolled={{ x: "max-content", y: 525 }}
             totalData={data?.page?.totalElements}
             onSort={onSort}
-            onChange={handleChange}
-            onShowSizeChange={handleChange}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            showExport={true}
+            handleDownload={handleDownload}
+            showSearchBar={true}
+            onAdvanceSearch={handleAdvanceSearch}
+            onSearch={(e) => handleGlobalSearch(e.target.value)}
           />
-        </BaseContainer>
-      </Spin>
+        </div>
+      </CardContainer>
       {renderModal()}
     </>
   );

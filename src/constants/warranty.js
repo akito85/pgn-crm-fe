@@ -9,8 +9,8 @@ export const MUTATION_TYPES = [
 ];
 
 export const MUTATION_SOURCES = [
-    { name: 'Manual', value: 'Manual' },
-    { name: 'Automated', value: 'Automated' },
+    { name: 'MANUAL', value: 'MANUAL' },
+    { name: 'AUTOMATED', value: 'AUTOMATED' },
 ];
 
 export const WARRANTY_STATUS = {

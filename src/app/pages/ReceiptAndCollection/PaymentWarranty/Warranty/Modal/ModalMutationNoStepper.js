@@ -27,8 +27,6 @@ const ModalMutationNoStepper = ({
 
   useEffect(() => {
     if (isOpen) {
-      dispatch(getMutationCategoryOptions());
-      
       if (modalType === "update" && selectedRecord) {
         if (selectedRecord.id) {
           // Fetch specific mutation data from API if it already exists (has ID)

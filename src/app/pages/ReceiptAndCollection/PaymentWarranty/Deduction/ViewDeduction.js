@@ -48,7 +48,7 @@ const ViewDeduction = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
