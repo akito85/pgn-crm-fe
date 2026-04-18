@@ -24,7 +24,7 @@ export const columnWarranty = (
   },
   {
     key: "warrantyCode",
-    title: "PAYMENT GUARANTEE",
+    title: "PAYMENT GUARANTEE CODE",
     dataIndex: "warrantyCode",
     align: "center",
     sorter: true,
@@ -85,7 +85,7 @@ export const columnWarranty = (
     key: "customerSegment",
     title: "CUSTOMER SEGMENT",
     dataIndex: "customerSegment",
-    align: "left",
+    align: "center",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(search, "customerSegment", searchInput, searchedColumn, searchText, handleSearch),
   },
@@ -158,7 +158,7 @@ export const columnWarranty = (
   },
   {
     key: "currencyBalance",
-    title: "BALANCE",
+    title: "BALANCE AMOUNT",
     dataIndex: "currencyBalance",
     align: "right",
     sorter: true,
@@ -188,24 +188,25 @@ export const columnWarranty = (
   },
   {
     key: "equivalent",
-    title: "EQV. BALANCE",
+    title: "EQV BALANCE AMOUNT",
     dataIndex: "equivalent",
     align: "right",
     sorter: true,
     render: (text) => text?.toLocaleString(),
   },
-  {
-    key: "mutationDate",
-    title: "MUTATION DATE",
-    dataIndex: "mutationDate",
-    sorter: true,
-    render: (text) => (text ? moment(text).format(dateFormatting.dateCapital) : ""),
-  },
+  // {
+  //   key: "mutationDate",
+  //   title: "MUTATION DATE",
+  //   dataIndex: "mutationDate",
+  //   sorter: true,
+  //   render: (text) => (text ? moment(text).format(dateFormatting.dateCapital) : ""),
+  // },
   {
     key: "effectiveStartDate",
     title: "EFF. START DATE",
     dataIndex: "effectiveDate",
     sorter: true,
+    align: "center",
     render: (text) => (text ? moment(text).format(dateFormatting.dateCapital) : ""),
   },
   {
@@ -213,6 +214,7 @@ export const columnWarranty = (
     title: "EFF. END DATE",
     dataIndex: "endClaimDate",
     sorter: true,
+    align: "center",
     render: (text) => (text ? moment(text).format(dateFormatting.dateCapital) : ""),
   },
   {

@@ -120,10 +120,8 @@ export const getAllWarrantyListPaginate = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       // Default sort
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
-      const [orderBy, order] = sortValue.split("~");
 
-
-      const url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
 
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
@@ -225,9 +223,8 @@ export const getDetailWarrantyMutation = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
-      const [orderBy, order] = sortValue.split("~");
 
-      const url = `/v1/dbs/api/payment-warranty/mutation/get-list/${id}?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/payment-warranty/mutation/get-list/${id}?page=${page}&size=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
 
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
@@ -252,9 +249,8 @@ export const getAllWarrantyInfoPaginate = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
-      const [orderBy, order] = sortValue.split("~");
 
-      let url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+      let url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
 
       if (transTypeName) {
         url += `&transTypeName=${transTypeName}`;
