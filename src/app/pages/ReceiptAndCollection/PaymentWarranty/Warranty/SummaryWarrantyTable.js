@@ -105,7 +105,7 @@ const SummaryWarrantyTable = ({ data = [], loading = false }) => {
         showAdvanceSearch={false}
         expandable={{
           expandedRowRender: (record) => (
-            <div style={{ marginLeft: 75, backgroundColor: "red" }}>
+            <div style={{ marginLeft: 75 }}>
               <div className="bg-[#0075BF] text-white text-center px-3 text-xs py-1 mb-1 uppercase tracking-wider">
                 Mutation Header
               </div>
@@ -122,7 +122,7 @@ const SummaryWarrantyTable = ({ data = [], loading = false }) => {
                 onExpandedRowsChange={setExpandedMutations}
                 expandable={{
                   expandedRowRender: (mutationRecord) => (
-                    <div style={{ marginLeft: 75, backgroundColor: "#000000" }}>
+                    <div style={{ marginLeft: 75 }}>
                       <MutationDetailTable details={mutationRecord.details || []} />
                     </div>
                   ),
