@@ -318,7 +318,7 @@ const ListFormTransferToReceipt = () => {
 
     const routes = [
         { path: "", breadcrumbName: "Receipt & Collection" },
-        { path: "", breadcrumbName: "Payment Warranty" },
+        { path: "", breadcrumbName: "Payment  Guarantee" },
         { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT, breadcrumbName: "Transfer to Receipt" },
         { path: "", breadcrumbName: isEdit ? "Edit" : "Create" }
     ];

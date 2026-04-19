@@ -72,7 +72,7 @@ const ViewTransferToReceipt = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT,
@@ -120,13 +120,16 @@ const ViewTransferToReceipt = () => {
   }, [handleGlobalSearch]);
 
   const handleAdvanceSearch = (searchData) => {
-    setSearch((prevState) => {
-      setPage(1);
-      return {
-        ...prevState,
-        advanceSearch: searchData
-      };
-    });
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    setSearch(simpleSearch);
+    setPage(1);
   };
 
   const handleChangePage = (pageChange, pageSizeChange) => {
@@ -334,7 +337,7 @@ const ViewTransferToReceipt = () => {
         <BreadCrumb routes={routes} />
         <CardContainer header={
           <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">TRANSFER TO RECIPT</p>
+            <p className="mt-[15px] font-bold">TRANSFER TO RECIPT LIST</p>
             <div className="flex gap-2">
               <Toolbar items={itemActions} />
             </div>

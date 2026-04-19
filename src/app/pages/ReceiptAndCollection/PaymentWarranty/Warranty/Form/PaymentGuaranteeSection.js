@@ -113,7 +113,7 @@ const PaymentGuaranteeSection = ({
                     rules={[{ required: true }]}
                     // API: rateType
                   >
-                    <Select placeholder="Select Rate Type" allowClear>
+                    <Select placeholder="Select Rate Type" allowClear disabled={isPartialEdit}>
                       {rateTypeDDL?.data?.filter(item => item.name || item.description).map((item) => (
                         <Option key={item.id} value={item.id}>
                           {item.name ? `${item.name}${item.description ? ` - ${item.description}` : ''}` : item.description}
@@ -129,7 +129,7 @@ const PaymentGuaranteeSection = ({
                     rules={[{ required: true }]}
                     // API: rateDate
                   >
-                    <DatePicker placeholder="Select Rate Date" className="w-full" style={{ borderRadius: '8px' }} />
+                    <DatePicker placeholder="Select Rate Date" className="w-full" style={{ borderRadius: '8px' }} disabled={isPartialEdit} />
                   </Form.Item>
                 </Col>
 
@@ -190,6 +190,7 @@ const PaymentGuaranteeSection = ({
                     placeholder="Select Eff End Date" 
                     className="w-full" 
                     style={{ borderRadius: '8px' }} 
+                    disabled={false}
                     disabledDate={(current) => {
                       const today = moment().startOf('day');
                       const maxDate = moment().add(10, 'years').endOf('year');
@@ -226,13 +227,14 @@ const PaymentGuaranteeSection = ({
               <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.claimPeriodTermType !== currentValues.claimPeriodTermType}>
                 {({ getFieldValue }) => {
                   const termType = getFieldValue('claimPeriodTermType') || CLAIM_PERIOD_TERM_TYPES.DATE;
-                  return termType === CLAIM_PERIOD_TERM_TYPES.DATE || termType === 'Date' ? (
-                    <Form.Item name="claimPeriodTermDate" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
-                      <DatePicker disabled={isPartialEdit} placeholder="Select Date" className="w-full" style={{ borderRadius: '8px', minWidth: 0 }} />
-                    </Form.Item>
-                  ) : (
+                  return (
                     <Form.Item name="claimPeriodTermValue" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
-                      <Input disabled={isPartialEdit} maxLength={2} placeholder="Input Value" onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} className="w-full" style={{ borderRadius: '8px', padding: '8px 12px', minWidth: 0 }} />
+                      <DatePicker 
+                        disabled={isPartialEdit} 
+                        placeholder="Select Date" 
+                        className="w-full" 
+                        style={{ borderRadius: '8px', minWidth: 0 }} 
+                      />
                     </Form.Item>
                   );
                 }}
@@ -248,7 +250,7 @@ const PaymentGuaranteeSection = ({
             rules={[{ required: true }]}
             // API: description
           >
-            <InputComponent type="textarea" rows={4} placeholder="Description" />
+            <InputComponent type="textarea" rows={4} placeholder="Description" disabled={false} />
           </Form.Item>
         </Col>
       </Row>

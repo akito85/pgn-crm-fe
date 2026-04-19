@@ -510,7 +510,7 @@ const ListFormTransferToCustomer = (props) => {
 
     const routesBread = [
         { path: "", breadcrumbName: "Payment & Collection" },
-        { path: "", breadcrumbName: "Payment Warranty" },
+        { path: "", breadcrumbName: "Payment  Guarantee" },
         { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER, breadcrumbName: "Transfer to Customer" },
         { path: "", breadcrumbName: type === "update" ? "Update" : "Create" }
     ];

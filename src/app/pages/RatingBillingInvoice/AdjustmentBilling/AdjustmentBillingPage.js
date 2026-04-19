@@ -273,9 +273,13 @@ const AdjustmentBillingPage = () => {
       action: "Update",
       type: "table",
       render: (record, data) => {
+        const normalizedStatus = (record?.status || "").toUpperCase();
+        const normalizedStatusApproval = (
+          record?.statusApproval || ""
+        ).toUpperCase();
         const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+          normalizedStatus === "DRAFT" ||
+          normalizedStatusApproval === "REJECTED";
 
         const content =
           data > 3 ? (
@@ -287,12 +291,13 @@ const AdjustmentBillingPage = () => {
                   width={20}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
                 className={
-                  isEditable ? "text-black ml-3" : "text-gray-400 ml-3"
+                  isEditable ? "text-black ml-0" : "text-gray-400 ml-0"
                 }
               >
                 Update
@@ -348,12 +353,13 @@ const AdjustmentBillingPage = () => {
                   width={20}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isDelete}
               onClick={isDelete ? () => handleDelete(record.id) : undefined}
             >
               <span
-                className={isDelete ? "text-black ml-3" : "text-gray-400 ml-3"}
+                className={isDelete ? "text-black ml-0" : "text-gray-400 ml-0"}
               >
                 Delete
               </span>
@@ -391,10 +397,11 @@ const AdjustmentBillingPage = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
