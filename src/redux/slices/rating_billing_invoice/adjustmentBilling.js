@@ -45,7 +45,7 @@ export const createAdjustmentBilling = createAsyncThunk(
   "CREATE_ADJUSTMENT_BILLING",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/rbi/adjustment/create-adjustment";
+      const url = "/v1/dbs/api/rbi/adjustment/update-adjusment";
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
