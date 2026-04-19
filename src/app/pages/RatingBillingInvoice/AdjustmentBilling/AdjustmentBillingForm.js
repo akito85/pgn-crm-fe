@@ -39,11 +39,7 @@ const normalizeSelectionText = (value) =>
 
 const isCalculationInProgress = (value) => {
   const normalizedValue = normalizeSelectionText(value);
-  return (
-    normalizedValue === "inprogress" ||
-    normalizedValue === "in progress" ||
-    normalizedValue === "processing"
-  );
+  return normalizedValue === "open" || normalizedValue === "in progress";
 };
 
 const isCarryForwardOrOffCycleSelection = ({
@@ -74,6 +70,7 @@ const AdjustmentBillingForm = ({ type }) => {
     dataListAppHierId,
     dataListCalculationType,
     dataListSelectTOP,
+    dataTermsOfPayment,
     dataDetail,
     dataListClassification,
   } = useSelector((state) => state.adjustmentBilling);
@@ -346,6 +343,8 @@ const AdjustmentBillingForm = ({ type }) => {
       const {
         accountNumberWithName,
         classificationAdjustment: _classificationAdjustment,
+        termsOfPayment: _termsOfPayment,
+        termType,
         currentBillingPeriod,
         correctionBillingPeriod,
         postInvoice: calculationTypeFormValue,
@@ -370,6 +369,39 @@ const AdjustmentBillingForm = ({ type }) => {
 
           return candidates.includes(String(calculationTypeFormValue));
         })?.id ?? calculationTypeFormValue;
+
+      const termsOfPaymentValue = (() => {
+        if (moment.isMoment(termType?.termValue)) {
+          return moment(termType.termValue).format("YYYY-MM-DD");
+        }
+
+        if (
+          termType?.termValue !== null &&
+          typeof termType?.termValue !== "undefined"
+        ) {
+          const matchedTop = (dataTermsOfPayment || []).find((item) => {
+            const candidates = [
+              item?.Id,
+              item?.id,
+              item?.value,
+              item?.text,
+              item?.name,
+            ]
+              .filter(
+                (candidate) => candidate !== null && candidate !== undefined,
+              )
+              .map((candidate) => String(candidate));
+
+            return candidates.includes(String(termType?.termValue));
+          });
+
+          return (
+            matchedTop?.text || matchedTop?.name || termType?.termValue || null
+          );
+        }
+
+        return formValue?.termsOfPayment || null;
+      })();
 
       const body = {
         ...restFormValue,
@@ -398,6 +430,7 @@ const AdjustmentBillingForm = ({ type }) => {
         totalAdjustmentAmountUsd: sumUSD || null,
         classification: classificationAdjustment || null,
         billingCode: dataInvoice?.billingCode || null,
+        termsOfPayment: termsOfPaymentValue,
         calculationType: calculationTypeValue || null,
         postInvoice: calculationTypeFormValue || null,
         onDemand: onDemandFormValue || null,
@@ -416,6 +449,7 @@ const AdjustmentBillingForm = ({ type }) => {
       adjustmentNumber,
       dataInvoice,
       dataListCalculationType,
+      dataTermsOfPayment,
       id,
       idAccount,
       listDataABI,
@@ -516,22 +550,6 @@ const AdjustmentBillingForm = ({ type }) => {
 
   const handleRecalculate = async () => {
     const formValue = form.getFieldsValue(true);
-    const requiresGeneratedAdjustmentItems = isCarryForwardOrOffCycleSelection({
-      classificationAdjustment:
-        formValue?.classificationAdjustment || selectedClassification,
-      postInvoice: formValue?.postInvoice || selectedPostInvoice,
-      onDemand: formValue?.onDemand,
-    });
-
-    if (listDataABI.length === 0 && !requiresGeneratedAdjustmentItems) {
-      dispatch(
-        showModalError({
-          title: "Failed",
-          description: "Adjustment Billing Item Mandatory. Please insert data.",
-        }),
-      );
-      return;
-    }
 
     try {
       setLoadingRecalculate(true);
@@ -539,7 +557,8 @@ const AdjustmentBillingForm = ({ type }) => {
       const recalculateResult = await dispatch(
         recalculateAdjustmentBilling({
           body,
-          id: hasSuccessfulRecalculate ? recalculateId : undefined,
+          // If detail has provided recalculateId, always continue via /recalculate/{id}
+          id: recalculateId || undefined,
         }),
       ).unwrap();
 
@@ -580,6 +599,18 @@ const AdjustmentBillingForm = ({ type }) => {
   // Handle Save Form
   const handleSave = (formValue) => {
     let errorBody = {};
+
+    if (type === "create" && flag === 2 && !hasSuccessfulRecalculate) {
+      setCurrentStep(0);
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "You must recalculate before submitting.",
+        }),
+      );
+      return;
+    }
+
     if (listDataAttachment.length === 0) {
       setCurrentStep(2); // Go to Attachment step
       return;
@@ -788,6 +819,7 @@ const AdjustmentBillingForm = ({ type }) => {
               onRecalculate={handleRecalculate}
               loadingRecalculate={loadingRecalculate}
               disableRecalculate={isCalculationInProgress(calculationStatus)}
+              hasSuccessfulRecalculate={hasSuccessfulRecalculate}
               canCreateBillingAdjustmentItem={canCreateBillingAdjustmentItem()}
             />
           </div>
