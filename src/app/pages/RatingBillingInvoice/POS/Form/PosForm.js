@@ -1222,6 +1222,15 @@ const PosForm = ({ type }) => {
       return e?.accountType || "";
     };
 
+    const getProductType = (detailItem) => {
+      const detailTypeText =
+        detailItem?.type ||
+        data_globalType?.find((typeData) => typeData?.Id === detailItem?.typeId)?.text ||
+        null;
+
+      return detailTypeText ? detailTypeText.toUpperCase() : null;
+    };
+
     let body = {
       id: type === "create" ? undefined : idUpdate,
       posNumber: type === "create" ? undefined : idPos,
@@ -1255,9 +1264,6 @@ const PosForm = ({ type }) => {
       clasificationType: getClassificationTypeName(),
       accountType: getAccountTypeName(),
       billingCycleId: billingCycleId,
-      billingCycle:
-        data_globalBillingCycle?.find((item) => item.id === e?.billingCycle)
-          ?.name || e?.billingCycle,
       billingPeriod:
         data_globalBillingPeriod?.find(
           (item) => item.id === e?.billingPeriod,
@@ -1319,8 +1325,9 @@ const PosForm = ({ type }) => {
         posDetailId: item?.posDetailId,
         posNumber: item?.posNumber,
         lineNumber: item?.lineNumber || 0,
+        productType: getProductType(item),
         type: item?.typeId,
-        item: String(item?.itemId),
+        item: item?.item || String(item?.itemId || ""),
         price: item?.price || 0,
         reference: item?.reference || null,
         quantity: item?.quantity,
