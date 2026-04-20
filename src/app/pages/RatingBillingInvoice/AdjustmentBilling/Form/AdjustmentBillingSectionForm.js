@@ -157,15 +157,29 @@ const AdjustmentBillingSectionForm = ({
 
       const normalizedValue = String(value).trim().toLowerCase();
       const match = (dataTermsOfPayment || []).find((item) => {
-        const itemText = String(item?.text || "")
-          .trim()
-          .toLowerCase();
-        return (
-          itemText === normalizedValue || String(item?.Id) === String(value)
-        );
+        const candidates = [
+          item?.Id,
+          item?.id,
+          item?.code,
+          item?.value,
+          item?.text,
+          item?.name,
+        ]
+          .filter((candidate) => candidate !== null && candidate !== undefined)
+          .map((candidate) => String(candidate).trim().toLowerCase());
+
+        return candidates.includes(normalizedValue);
       });
 
-      return match?.Id;
+      return (
+        match?.Id ??
+        match?.id ??
+        match?.code ??
+        match?.value ??
+        match?.text ??
+        match?.name ??
+        value
+      );
     },
     [dataTermsOfPayment],
   );
@@ -375,7 +389,12 @@ const AdjustmentBillingSectionForm = ({
         (item) => item.invoiceNumber === idInvoice,
       );
 
-      const termOfPaymentValue = dataTOP?.termOfPayment;
+      const existingTermsOfPayment = form.getFieldValue("termsOfPayment");
+      const termOfPaymentValue =
+        dataListInvoiceInformation?.termsOfPayment ??
+        dataTOP?.termOfPayment ??
+        existingTermsOfPayment;
+
       const termTypeValue = resolveTermType(termOfPaymentValue);
       const termOptionValue =
         termTypeValue === "TOP"
@@ -395,7 +414,7 @@ const AdjustmentBillingSectionForm = ({
         },
         rate: dataListInvoiceInformation?.rate,
       });
-    } else {
+    } else if (!idInvoice) {
       setDataInvoice({});
       setValueDdl({ action: "clear", value: null });
       form.resetFields(["termsOfPayment", "termType", "rate"]);
@@ -1151,10 +1170,10 @@ const AdjustmentBillingSectionForm = ({
                   if (!value || !txnDate) {
                     return Promise.resolve();
                   }
-                  if (moment(value).isAfter(moment(txnDate), "day")) {
+                  if (moment(value).isBefore(moment(txnDate), "day")) {
                     return Promise.reject(
                       new Error(
-                        "Accounting Date cannot be later than Transaction Date!",
+                        "Accounting Date cannot be earlier than Transaction Date!",
                       ),
                     );
                   }
@@ -1224,7 +1243,17 @@ const AdjustmentBillingSectionForm = ({
                       }}
                     >
                       {(dataTermsOfPayment || []).map((item, index) => (
-                        <Select.Option key={index} value={item?.Id}>
+                        <Select.Option
+                          key={index}
+                          value={
+                            item?.Id ||
+                            item?.id ||
+                            item?.code ||
+                            item?.value ||
+                            item?.text ||
+                            item?.name
+                          }
+                        >
                           {item?.text}
                         </Select.Option>
                       ))}

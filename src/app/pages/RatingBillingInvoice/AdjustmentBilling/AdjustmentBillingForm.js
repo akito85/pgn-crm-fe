@@ -69,6 +69,8 @@ const AdjustmentBillingForm = ({ type }) => {
     loading,
     dataListAppHierDetail,
     dataListAppHierId,
+    dataCurrentBillingPeriod,
+    dataListBillingPeriod,
     dataListCalculationType,
     dataListSelectTOP,
     dataTermsOfPayment,
@@ -81,7 +83,20 @@ const AdjustmentBillingForm = ({ type }) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const location = useLocation();
-  const { id, adjustmentNumber } = location?.state || {};
+  const idFromState = location?.state?.id;
+  const adjustmentNumberFromState = location?.state?.adjustmentNumber;
+  const searchParams = new URLSearchParams(location?.search || "");
+  const idFromQuery = searchParams.get("id");
+  const parsedIdFromQuery =
+    idFromQuery !== null && idFromQuery !== "" ? Number(idFromQuery) : null;
+  const id =
+    typeof idFromState !== "undefined"
+      ? idFromState
+      : Number.isNaN(parsedIdFromQuery)
+        ? idFromQuery
+        : parsedIdFromQuery;
+  const adjustmentNumber =
+    adjustmentNumberFromState || searchParams.get("adjustmentNumber") || null;
 
   // State
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -359,6 +374,50 @@ const AdjustmentBillingForm = ({ type }) => {
     [form, dataListCalculationType, dataListClassification, dispatch],
   );
 
+  const resolveBillingPeriodId = useCallback(
+    (value, fallbackId) => {
+      if (value !== null && typeof value !== "undefined" && value !== "") {
+        const normalizedValue = String(value).trim().toLowerCase();
+        const matchedBillingPeriod = (dataListBillingPeriod || []).find(
+          (item) => {
+            const candidates = [
+              item?.id,
+              item?.value,
+              item?.period,
+              item?.name,
+              item?.text,
+            ]
+              .filter(
+                (candidate) => candidate !== null && candidate !== undefined,
+              )
+              .map((candidate) => String(candidate).trim().toLowerCase());
+
+            return candidates.includes(normalizedValue);
+          },
+        );
+
+        if (matchedBillingPeriod?.id) {
+          return matchedBillingPeriod.id;
+        }
+
+        if (/^\d+$/.test(String(value).trim())) {
+          return Number(value);
+        }
+      }
+
+      if (
+        fallbackId !== null &&
+        typeof fallbackId !== "undefined" &&
+        fallbackId !== ""
+      ) {
+        return fallbackId;
+      }
+
+      return null;
+    },
+    [dataListBillingPeriod],
+  );
+
   const buildAdjustmentRequestBody = useCallback(
     (formValue, { submit = false } = {}) => {
       const modifiedArray = listDataABI?.map((obj) => {
@@ -395,8 +454,18 @@ const AdjustmentBillingForm = ({ type }) => {
       } = formValue;
 
       const classificationAdjustment = formValue?.classificationAdjustment;
-      const resolvedBillingPeriodId =
-        correctionBillingPeriod ?? billingPeriodId ?? null;
+      const resolvedCurrentBillingPeriodId = resolveBillingPeriodId(
+        currentBillingPeriod,
+        dataCurrentBillingPeriod?.id ??
+          dataCurrentBillingPeriod?.[0]?.id ??
+          dataDetail?.billingPeriod,
+      );
+      const resolvedCorrectionBillingPeriodId = resolveBillingPeriodId(
+        correctionBillingPeriod,
+        billingPeriodId ??
+          dataDetail?.correctionBillPeriod ??
+          dataDetail?.correctionBillingPeriod,
+      );
 
       const calculationTypeValue =
         dataListCalculationType?.find((item) => {
@@ -448,7 +517,16 @@ const AdjustmentBillingForm = ({ type }) => {
         return formValue?.termsOfPayment || null;
       })();
 
+      const {
+        tAdjustmentBillingDetail: _tAdjustmentBillingDetail,
+        correctionBillingPeriod: _correctionBillingPeriod,
+        correctionBillingPeriodId: _correctionBillingPeriodId,
+        adjustmentBillingDetails: _existingAdjustmentBillingDetails,
+        ...updateBasePayload
+      } = type === "update" ? dataDetail || {} : {};
+
       const body = {
+        ...updateBasePayload,
         ...restFormValue,
         id: type === "update" ? id : undefined,
         adjustmentNumber: type === "update" ? adjustmentNumber : null,
@@ -468,8 +546,8 @@ const AdjustmentBillingForm = ({ type }) => {
         rateDate: formValue?.rateDate
           ? moment(formValue?.rateDate).format("YYYY-MM-DDTHH:mm:ss")
           : dataInvoice?.rateDate,
-        billingPeriod: resolvedBillingPeriodId,
-        correctionBillPeriod: resolvedBillingPeriodId,
+        billingPeriod: resolvedCurrentBillingPeriodId,
+        correctionBillPeriod: resolvedCorrectionBillingPeriodId,
         accountId: idAccount,
         totalAdjustmentAmountIdr: sumIDR || null,
         totalAdjustmentAmountUsd: sumUSD || null,
@@ -493,12 +571,15 @@ const AdjustmentBillingForm = ({ type }) => {
     [
       adjustmentNumber,
       billingPeriodId,
+      dataCurrentBillingPeriod,
+      dataDetail,
       dataInvoice,
       dataListCalculationType,
       dataTermsOfPayment,
       id,
       idAccount,
       listDataABI,
+      resolveBillingPeriodId,
       type,
     ],
   );
