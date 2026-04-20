@@ -753,7 +753,7 @@ const PointOfSalesPageDetailPOS = ({
   }, [formCreate]);
 
   const handleUpdate = (e, index) => {
-    ignoreCalculate.current = false;
+    ignoreCalculate.current = true;
 
     formCreate.resetFields();
     setType(null);
@@ -772,21 +772,43 @@ const PointOfSalesPageDetailPOS = ({
 
     setPosDetailId(e?.posDetailId);
     setPosNumber(e?.posNumber);
+
+    const resolvedItem =
+      e?.typeId === 2144
+        ? dataItemProduct?.find(
+            (productData) =>
+              productData?.id === parseInt(e?.itemId) ||
+              productData?.id === e?.itemId ||
+              productData?.id === e?.item,
+          )?.id
+        : dataItemBilling?.find(
+            (billingData) =>
+              billingData?.id === e?.itemId || billingData?.id === e?.item,
+          )?.id;
+
+    const resolvedCurrencyId =
+      e?.typeId === 2144
+        ? data_globalCurrency?.find(
+            (c) => c.Id === e?.currency || c.text === e?.currency,
+          )?.Id ?? e?.currency
+        : null; // Billing Item: kosongkan agar user memilih ulang
+
     formCreate.setFieldsValue({
       ...e,
       type: e?.typeId,
       eqvIdrTaxPurpose: e?.eqvIdr,
-      item: isNaN(e?.itemId) ? e?.itemId : parseInt(e?.itemId),
+      item: resolvedItem,
+      currency: resolvedCurrencyId,
     });
     setQuantity(e?.quantity);
-    setItem(
-      e?.typeId === 2144
-        ? dataItemProduct?.find(
-            (productData) => productData?.id === parseInt(e?.itemId),
-          )?.id
-        : dataItemBilling?.find((billingData) => billingData?.id === e?.itemId)
-            ?.id,
-    );
+
+    setItem(resolvedItem);
+
+    if (e?.typeId === 2145) {
+      setAmount(e?.amount);
+      setBillingCurrency(null);
+    }
+
     setType(e?.typeId);
 
     const tempTax = data.filter((dataItem) => dataItem.reference === e?.itemId);

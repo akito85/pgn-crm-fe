@@ -153,6 +153,39 @@ const PosForm = ({ type }) => {
 
   const isUpdatingFromMaterai = useRef(false);
 
+  const isMeteraiItem = useCallback(
+    (item) =>
+      item?.item === "Meterai" ||
+      item?.itemName === "Meterai" ||
+      parseInt(item?.itemId) === 297,
+    [],
+  );
+
+  const normalizePosDetailItem = useCallback(
+    (item) => ({
+      ...item,
+      typeId: item?.typeId ?? item?.type,
+      itemId: item?.itemId ?? (item?.item && !isNaN(item.item) ? parseInt(item.item) : item?.item),
+      // API response: itemId = item code (e.g. "B005"), item = item display name
+      // Table: item column = ITEM CODE, itemName column = ITEM (display name)
+      item: item?.itemId || item?.item || null,
+      itemName: item?.item || item?.itemName || item?.itemDescription || null,
+      witholdingTax: item?.witholdingTax ?? item?.withholdingTax ?? null,
+      price: item?.price || 0,
+      amount: item?.amount || 0,
+      totalAmountEqv: item?.totalAmountEqv || 0,
+      convertedCurrency: item?.convertedCurrency || null,
+      amountEqvUsd:
+        item?.amountEqvUsd != null ? Number(item.amountEqvUsd.toFixed(2)) : 0,
+      amountEqvIdr: item?.amountEqvIdr || 0,
+      eqvIdr: item?.eqvIdr || 0,
+      totalEqvIdr: item?.totalEqvIdr || 0,
+      totalEqvUsd:
+        item?.totalEqvUsd != null ? Number(item.totalEqvUsd.toFixed(2)) : 0,
+    }),
+    [],
+  );
+
   const getCustomerTypeNumber = (type) => {
     return type === "prospective" ? 2 : 1;
   };
@@ -617,6 +650,7 @@ const PosForm = ({ type }) => {
           invoiceDate: moment(data_detailPos?.invoiceDate),
           email: data_detailPos?.email,
           address: data_detailPos?.address,
+          phoneNumber: data_detailPos?.phoneNumber,
           billingCycle: data_globalBillingCycle?.find(
             (item) =>
               String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
@@ -675,25 +709,9 @@ const PosForm = ({ type }) => {
       });
 
       setData(
-        data_detailPos?.mrbiPosDetails?.map((item) => ({
-          ...item,
-          price: item?.price || 0,
-          amount: item?.amount || 0,
-          totalAmountEqv: item?.totalAmountEqv || 0,
-          convertedCurrency: item?.convertedCurrency || null,
-          amountEqvUsd:
-            item?.amountEqvUsd != null
-              ? Number(item.amountEqvUsd.toFixed(2))
-              : 0,
-          amountEqvIdr: item?.amountEqvIdr || 0,
-          eqvIdr: item?.eqvIdr || 0,
-          totalEqvIdr: item?.totalEqvIdr || 0,
-          totalEqvUsd:
-            item?.totalEqvUsd != null
-              ? Number(item.totalEqvUsd.toFixed(2))
-              : 0,
-        })),
+        data_detailPos?.mrbiPosDetails?.map((item) => normalizePosDetailItem(item)),
       );
+      prevNonMateraiRef.current = [];
 
       setDataAttachment(
         (data_detailPos?.mattachments || []).map((item) => ({
@@ -743,7 +761,7 @@ const PosForm = ({ type }) => {
   useEffect(() => {
     if (!data) return;
     const filteredData = data.filter(
-      (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+      (item) => !isMeteraiItem(item),
     );
     const newDataDynamic = filteredData.reduce(
       (sums, item) => {
@@ -809,13 +827,11 @@ const PosForm = ({ type }) => {
 
     if (filteredData.length === 0) {
       setData((prev) => {
-        const hasMaterai = prev.some(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
-        );
+        const hasMaterai = prev.some((item) => isMeteraiItem(item));
         if (hasMaterai) {
           isUpdatingFromMaterai.current = true;
           return prev
-            .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+            .filter((item) => !isMeteraiItem(item))
             .map((items, index) => ({ ...items, lineNumber: index + 1 }));
         }
         return prev;
@@ -863,12 +879,10 @@ const PosForm = ({ type }) => {
           if (!dataRes || !dataRes?.item) {
             isUpdatingFromMaterai.current = true;
             setData((prev) => {
-              const hasMaterai = prev.some(
-                (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
-              );
+              const hasMaterai = prev.some((item) => isMeteraiItem(item));
               if (!hasMaterai) return prev;
               return prev
-                .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+                .filter((item) => !isMeteraiItem(item))
                 .map((items, index) => ({ ...items, lineNumber: index + 1 }));
             });
             return;
@@ -878,17 +892,34 @@ const PosForm = ({ type }) => {
             typeId: dataRes?.type,
             type: dataRes?.typeName,
             typeValueName: dataRes?.typeValueName || null,
-            itemId: parseInt(dataRes?.item),
-            item: dataRes?.itemName,
+            // API: item = item code (e.g. "C001"), itemName = display name ("Meterai")
+            itemId: dataRes?.item,
+            item: dataRes?.item,
+            itemName: dataRes?.itemName || null,
+            source: dataRes?.source || null,
+            priceCode: dataRes?.priceCode || null,
             price: dataRes?.price,
             quantity: dataRes?.quantity,
             uom: dataRes?.uom,
             currency: dataRes?.currency,
             amount: dataRes?.amount,
             discount: dataRes?.discount || 0,
+            total: dataRes?.total,
+            totalAmount: dataRes?.totalAmount ?? dataRes?.total ?? null,
             totalAmountEqv: dataRes?.totalAmountEqv || 0,
             convertedCurrency: dataRes?.convertedCurrency || null,
-            total: dataRes?.total,
+            vatBasis: dataRes?.vatBasis ?? null,
+            vatBasisEqv: dataRes?.vatBasisEqv ?? null,
+            vatRate: dataRes?.vatRate ?? null,
+            vatCode: dataRes?.vatCode ?? null,
+            vat: dataRes?.vat ?? null,
+            vatEqv: dataRes?.vatEqv ?? null,
+            witholdingTax: dataRes?.witholdingTax ?? null,
+            vatExchangeRateType: dataRes?.vatExchangeRateType || null,
+            vatExchangeRate: dataRes?.vatExchangeRate ?? null,
+            rateType: dataRes?.rateType || null,
+            rateDate: dataRes?.rateDate || null,
+            rate: dataRes?.rate ?? null,
             amountEqvIdr: dataRes?.amountEqvIdr || 0,
             amountEqvUsd:
               dataRes?.amountEqvUsd != null ? Number(dataRes.amountEqvUsd.toFixed(2)) : 0,
@@ -900,11 +931,9 @@ const PosForm = ({ type }) => {
           };
           isUpdatingFromMaterai.current = true;
           setData((prev) => {
-            const baseData = prev.some(
-              (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
-            )
+            const baseData = prev.some((item) => isMeteraiItem(item))
               ? prev.filter(
-                  (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+                  (item) => !isMeteraiItem(item),
                 )
               : prev;
             return [...baseData, newMaterai].map((items, index) => ({
@@ -922,7 +951,7 @@ const PosForm = ({ type }) => {
         clearTimeout(materaiDebounceTimer.current);
       }
     };
-  }, [data, dispatch, invoiceDate, accountNumber, customerType]);
+  }, [data, dispatch, invoiceDate, accountNumber, customerType, isMeteraiItem]);
 
 
 
@@ -1320,7 +1349,6 @@ const PosForm = ({ type }) => {
       withholdingTax: dataDynamic?.withholdingTax || 0,
       totalEqvIdr: dataDynamic?.totalEqvIdr || 0,
       totalEqvUsd: dataDynamic?.totalEqvUsd || 0,
-
       mrbiPosDetails: data?.map((item) => ({
         posDetailId: item?.posDetailId,
         posNumber: item?.posNumber,
@@ -1516,6 +1544,7 @@ const PosForm = ({ type }) => {
             invoiceDate: moment(data_detailPos?.invoiceDate),
             email: data_detailPos?.email,
             address: data_detailPos?.address,
+            phoneNumber: data_detailPos?.phoneNumber,
             billingCycle: data_globalBillingCycle?.find(
               (item) =>
                 String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
@@ -1539,25 +1568,9 @@ const PosForm = ({ type }) => {
         }
 
         setData(
-          data_detailPos?.mrbiPosDetails?.map((item) => ({
-            ...item,
-            price: item?.price || 0,
-            amount: item?.amount || 0,
-            totalAmountEqv: item?.totalAmountEqv || 0,
-            convertedCurrency: item?.convertedCurrency || null,
-            amountEqvUsd:
-              item?.amountEqvUsd != null
-                ? Number(item.amountEqvUsd.toFixed(2))
-                : 0,
-            amountEqvIdr: item?.amountEqvIdr || 0,
-            eqvIdr: item?.eqvIdr || 0,
-            totalEqvIdr: item?.totalEqvIdr || 0,
-            totalEqvUsd:
-              item?.totalEqvUsd != null
-                ? Number(item.totalEqvUsd.toFixed(2))
-                : 0,
-          })),
+          data_detailPos?.mrbiPosDetails?.map((item) => normalizePosDetailItem(item)),
         );
+        prevNonMateraiRef.current = [];
 
         setCurrency(
           data_globalCurrency?.find(
