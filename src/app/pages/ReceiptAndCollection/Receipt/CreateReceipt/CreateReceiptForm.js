@@ -349,7 +349,7 @@ const CreateReceiptForm = ({
               <Form.Item
                 label={"Customer Number"}
                 name={"cusNumber"}
-                rules={customerType === "Customer" ? formMessageRequired("Customer Number") : []}
+                rules={customerType === "Customer" && !form.getFieldValue("accNumber") && !accNumb?.id ? formMessageRequired("Customer Number") : []}
                 style={{ marginBottom: 0 }}
               >
                 <SelectComponent
