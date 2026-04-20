@@ -1021,10 +1021,10 @@ const AdjustmentBillingSectionForm = ({
               {dataListCalculationType &&
                 dataListCalculationType?.map((data, index) => (
                   <Select.Option
-                    value={data.name || data.text || data.value || data.id}
+                    value={data.id || data.value || data.name || data.text}
                     key={index}
                   >
-                    {data.name}
+                    {data.name || data.text}
                   </Select.Option>
                 ))}
             </SelectComponent>
