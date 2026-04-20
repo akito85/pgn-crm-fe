@@ -253,17 +253,17 @@ const ListRececiptForm = ({ type }) => {
         remark: receipt.remark || receipt.description,
         
         currency: receipt.currencyId,
-        amount: receipt.amount?.toLocaleString("id-ID") || "0",
+        amount: receipt.amountReal ? receipt.amountReal.toString() : (receipt.amount ? receipt.amount.replace(/,/g, "") : "0"),
         convertedCurrency: receipt.convertedCurrency ? currencyDDL?.data?.find(c => c.name === receipt.convertedCurrency)?.id : null,
         rateType: receipt.rateTypeId,
         rateDate: receipt.rateDate ? moment(receipt.rateDate, "DD MMM YYYY") : null,
-        rateAmount: receipt.rateAmount?.toLocaleString("id-ID", { minimumFractionDigits: 2 }) || "0",
-        eqAmount: receipt.equivalentAmount?.toLocaleString("id-ID", { minimumFractionDigits: 2 }) || "0",
+        rateAmount: receipt.rateAmountReal ? receipt.rateAmountReal.toString() : "0",
+        eqAmount: receipt.equivalentAmountReal ? receipt.equivalentAmountReal.toString() : "0",
         description: receipt.description,
       });
 
       // Set internal states
-      setAmount(receipt.amount);
+      setAmount(receipt.amountReal ? receipt.amountReal : (receipt.amount ? parseFloat(receipt.amount.replace(/,/g, "")) : 0));
       setAccNumb({ id: receipt.accountId, name: receipt.accountName });
       setCusNumb({ id: receipt.customerId, name: receipt.customerName });
       setSelectedHierarchy(receipt.appHierId);

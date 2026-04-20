@@ -62,9 +62,12 @@ const PartnerForm = (props) => {
           <Form.Item
             label={"Partner Name"}
             name={"partnerName"}
-            rules={formMessageRequired("Partner Name")}
+            rules={[
+              ...formMessageRequired("Partner Name"),
+              { max: 20, message: "partnerName maximum length is 20" },
+            ]}
           >
-            <InputComponent placeholder="Input Partner Name" />
+            <InputComponent maxLength={20} placeholder="Input Partner Name" />
           </Form.Item>
 
           <Form.Item
@@ -90,8 +93,6 @@ const PartnerForm = (props) => {
               }}
             />
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Start Date"}
             name={"effStartDate"}
@@ -108,6 +109,8 @@ const PartnerForm = (props) => {
               onChange={handleStartDate}
             />
           </Form.Item>
+        </div>
+        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"End Date"}
             name={"effEndDate"}

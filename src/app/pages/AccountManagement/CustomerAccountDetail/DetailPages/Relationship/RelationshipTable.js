@@ -222,7 +222,7 @@ const RelationshipTable = ({
         }
       }
     ),
-    handleUpdate: ({ id }) => navigate(
+    handleUpdate: ({ id, status, statusApproval }) => navigate(
       isStandard
         ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP
         : isOneTime
@@ -233,6 +233,8 @@ const RelationshipTable = ({
           idAccount: accountId,
           idCustomer: customerId,
           id,
+          status,
+          statusApproval,
         }
       }
     ),

@@ -202,7 +202,7 @@ const PaymentRelationTable = ({
           },
         }
       ),
-    handleUpdate: ({ id }) =>
+    handleUpdate: ({ id, status, statusApproval }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION
@@ -214,6 +214,8 @@ const PaymentRelationTable = ({
             idAccount,
             idCustomer,
             id,
+            status,
+            statusApproval,
           },
         }
       ),

@@ -682,7 +682,7 @@ export const createReceipt = createAsyncThunk(
       const response = await receiptCollectionHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: response?.message,
+        description: response?.message || "Receipt created successfully",
         // return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -749,7 +749,7 @@ export const createAllocation = createAsyncThunk(
       const response = await receiptCollectionHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: response?.message,
+        description: response?.message || "Allocation created successfully",
         // return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));

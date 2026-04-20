@@ -6,7 +6,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 
 const { Option } = Select;
 
-const ServiceAgreementSection = ({ form, dataServiceAgreement, disabled }) => {
+const ServiceAgreementSection = ({ form, dataServiceAgreement, disabled, loading }) => {
   const saNumber = Form.useWatch("saNumber", form);
 
   const handleUpdateSAFields = (val) => {
@@ -49,6 +49,7 @@ const ServiceAgreementSection = ({ form, dataServiceAgreement, disabled }) => {
               disabled={disabled} 
               placeholder="Select SA Number"
               onChange={handleUpdateSAFields}
+              loading={loading}
             >
               {dataServiceAgreement?.result?.map((item) => (
                 <Option key={item.id} value={item.saNumber}>{item.saNumber}</Option>

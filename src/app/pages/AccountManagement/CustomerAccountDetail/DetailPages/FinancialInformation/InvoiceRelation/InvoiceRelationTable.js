@@ -201,7 +201,7 @@ const InvoiceRelationTable = ({
           }
         }
       ),
-    handleUpdate: ({ id }) =>
+    handleUpdate: ({ id, status, statusApproval }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION
@@ -212,7 +212,9 @@ const InvoiceRelationTable = ({
           state: {
             idAccount: accountId,
             idCustomer: customerId,
-            id
+            id,
+            status,
+            statusApproval
           }
         }
       ),

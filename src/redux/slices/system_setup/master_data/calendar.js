@@ -269,7 +269,7 @@ export const updateCalendar = createAsyncThunk(
   "UPDATE_CALENDAR",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/calendar/save`;
+      const url = `/v1/dbs/api/calendar/update`;
       const response = await ratingBillingHttpService.updateData(url, body);
       const successMessage = {
         title: "Successful",

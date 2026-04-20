@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Checkbox, Spin, Tooltip } from "antd";
 import moment from "moment";
@@ -23,7 +23,7 @@ import {
   getRateTypePaginate,
   inactiveMasterRateType,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/rateType";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../../../components/CardContainer";
@@ -41,6 +41,7 @@ export const columnRateType = (
 ) => [
   {
     title: "NO",
+    key: "no",
     width: 60,
     align: "center",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -51,6 +52,7 @@ export const columnRateType = (
     key: "code",
     sorter: true,
     align: "left",
+    width: 160,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "code",
@@ -73,7 +75,9 @@ export const columnRateType = (
   {
     title: "DESCRIPTION",
     dataIndex: "description",
+    key: "description",
     align: "left",
+    width: 350,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "description",
@@ -101,8 +105,7 @@ export const columnRateType = (
     title: "STATUS",
     dataIndex: "status",
     key: "status",
-    fixed: "right",
-    width: 150,
+    width: 130,
     sorter: true,
     align: "left",
     ...getColumnSearchPropsUseFilteredValue(
@@ -163,6 +166,24 @@ const RateTypeView = () => {
   const [idModal, setIdModal] = useState("");
   const [modalInactive, setModalInactive] = useState(false);
   const [modalDetailRate, setModalDetailRate] = useState(false);
+
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("rateTypeFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["status"] };
+    } catch (e) {
+      return { left: ["no"], right: ["status"] };
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "rateTypeFixedColumns",
+        JSON.stringify(fixedColumns),
+      );
+    } catch (e) {}
+  }, [fixedColumns]);
 
   // Use Effect
   useEffect(() => {
@@ -346,6 +367,64 @@ const RateTypeView = () => {
     },
   ];
 
+  const actionColumns = useColumnActionPermission(
+    ["view", "activate", "update"],
+    itemGrantAccess,
+  ).map((col) => ({
+    ...col,
+    width: 60,
+    align: "center",
+  }));
+
+  const baseColumns = useMemo(() => {
+    return [
+      ...columnRateType(
+        search,
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleModalDetail,
+        handleModalInactive,
+      ),
+      ...actionColumns,
+    ].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key;
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push({ ...col, fixed: "left" });
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push({ ...col, fixed: "right" });
+      } else {
+        const c = { ...col };
+        delete c.fixed;
+        normal.push(c);
+      }
+    });
+
+    return [...leftFixed, ...normal, ...rightFixed];
+  }, [baseColumns, fixedColumns]);
+
   return (
     <div>
       <Spin spinning={loading}>
@@ -358,35 +437,23 @@ const RateTypeView = () => {
             </div>
           }
         >
-          <TablePaginationNew
+          <TableRBI
+            idTable="rateTypeTable"
             dataSource={data_list?.result}
-            pageSize={pageSize}
-            columns={[
-              ...columnRateType(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleModalDetail,
-                handleModalInactive,
-              ),
-              ...useColumnActionPermission(
-                ["view", "activate", "update", "history"],
-                itemGrantAccess,
-              ),
-            ]}
+            columns={columns}
             current={page}
+            pageSize={pageSize}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data_list?.page?.totalElements || 0}
             onSort={onSort}
-            tableScrolled={{
-              x: 1000,
-              y: 525,
-            }}
+            tableScrolled={{ x: "max-content", y: 525 }}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={true}
+            showExport={false}
           />
         </CardContainer>
 

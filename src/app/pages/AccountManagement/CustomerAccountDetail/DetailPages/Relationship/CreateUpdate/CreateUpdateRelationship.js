@@ -85,8 +85,8 @@ const CreateUpdateRelationship = ({
   const accountId = location?.state?.idAccount;
   const customerId = location?.state?.idCustomer;
 
-  const status = detail_relationship.status || "DRAFT";
-  const statusApproval = detail_relationship.statusApproval || "DRAFT";
+  const status = location.state?.status || detail_relationship.status || "DRAFT";
+  const statusApproval = location.state?.statusApproval || detail_relationship.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
@@ -139,12 +139,13 @@ const CreateUpdateRelationship = ({
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      if (detail_relationship && detail_relationship.id) {
+      if (detail.id) {
         form.setFieldsValue({
+          formAccountId: detail.accountId,
           relationshipType: detail.relationshipType,
           relationshipCategory: detail.relationshipCategory,
-          relatedName: detail.accountName,
-          relatedNumber: detail.accountNumber,
+          relatedName: detail.relatedAccountName,
+          relatedNumber: detail.relatedAccountNumber,
           startDate: detail.startDate,
           endDate: detail.endDate,
           description: detail.description || "",
@@ -549,13 +550,15 @@ const CreateUpdateRelationship = ({
     dispatch(getRelationshipApprovalHierarchies());
   }, []);
 
-  // Fetch relationship record and draft
+  // Fetch relationship record or draft
   useEffect(() => {
-    if (formType === "update" && id) {
-      dispatch(getRelationship({ accountId, idRelationship: id }));
-      dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
+    if (isUpdate && id && accountId) {
+      if (isActive && (isDraftApproval || isRejectedApproval))
+        dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
+      else
+        dispatch(getRelationship({ accountId, idRelationship: id }));
     }
-  }, [formType, id]);
+  }, [isUpdate, id, accountId, isActive, isDraftApproval, isRejectedApproval]);
 
   // Sync attachment list from loaded record
   useEffect(() => {

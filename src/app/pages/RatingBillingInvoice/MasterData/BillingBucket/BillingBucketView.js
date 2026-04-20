@@ -43,7 +43,8 @@ const BillingBucketView = () => {
 
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
@@ -83,24 +84,28 @@ const BillingBucketView = () => {
     dispatch(
       getAllBillingBucketPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
       }),
     );
-  }, [search, sort, page, pageSize, dispatch, refreshKey]);
+  }, [search, sort, dispatch, refreshKey]);
 
   // Accumulate data for infinite scroll
   useEffect(() => {
     if (data?.result) {
-      if (shouldResetRef.current) {
+      if (shouldResetRef.current || page === 1) {
         setAllData(data.result);
         shouldResetRef.current = false;
       } else {
-        setAllData((prev) => [...prev, ...data.result]);
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.id));
+          const newItems = data.result.filter((item) => !ids.has(item.id));
+          return [...prev, ...newItems];
+        });
       }
     }
-  }, [data]);
+  }, [data, page]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -156,10 +161,8 @@ const BillingBucketView = () => {
   };
 
   // Handle Change Page Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
   };
 
   const handleRetry = () => {
@@ -185,12 +188,26 @@ const BillingBucketView = () => {
   };
 
   // Handle Load More (infinite scroll)
-  const handleLoadMore = useCallback(() => {
-    return new Promise((resolve) => {
-      setPage((prev) => prev + 1);
-      resolve();
-    });
-  }, []);
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getAllBillingBucketPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      }),
+    );
+  }, [
+    allData.length,
+    data?.page?.totalElements,
+    search,
+    sort,
+    dispatch,
+    loadMoreSize,
+  ]);
 
   // Handle Refresh
   const handleRefresh = useCallback(() => {
@@ -234,8 +251,8 @@ const BillingBucketView = () => {
         dispatch(
           getAllBillingBucketPaginate({
             search: tempSearch,
-            page,
-            pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             sort,
           }),
         );
@@ -287,7 +304,7 @@ const BillingBucketView = () => {
     dispatch(
       downloadBillingBucket({
         page,
-        pageSize,
+        pageSize: initialPageSize,
         sort,
         search: tempSearch,
       }),
@@ -301,7 +318,9 @@ const BillingBucketView = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           onClick={() => handleDownload()}
         >
           Download List
@@ -313,7 +332,9 @@ const BillingBucketView = () => {
       render: (
         <NavLink to={RBI_ROUTES.BILLING_BUCKET_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Billing Bucket
@@ -342,8 +363,7 @@ const BillingBucketView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -496,7 +516,7 @@ const BillingBucketView = () => {
       ...columnsBillingBucket(
         search,
         page,
-        pageSize,
+        initialPageSize,
         searchInput,
         searchedColumn,
         searchText,
@@ -512,7 +532,7 @@ const BillingBucketView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, page, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -578,7 +598,7 @@ const BillingBucketView = () => {
               dataSource={allData}
               columns={columns}
               current={page}
-              pageSize={pageSize}
+              pageSize={initialPageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}

@@ -30,12 +30,16 @@ const onFilter = (dataIndex, value, record) => {
 };
 
 const extractSize = (fileSize) => {
-  if (fileSize.includes('KB')) {
-    return parseFloat(fileSize.replace(' KB', '')) * 1024;
-  } else if (fileSize.includes('MB')) {
-    return parseFloat(fileSize.replace(' MB', '')) * 1024 * 1024;
+  if (fileSize === null || fileSize === undefined) return 0;
+  // If already a number (raw bytes from API), return as-is
+  if (typeof fileSize === "number") return fileSize;
+  const str = String(fileSize);
+  if (str.includes("KB")) {
+    return parseFloat(str.replace(" KB", "")) * 1024;
+  } else if (str.includes("MB")) {
+    return parseFloat(str.replace(" MB", "")) * 1024 * 1024;
   }
-  return parseFloat(fileSize);
+  return parseFloat(str) || 0;
 };
 
 const sorter = (fieldSort, a, b) => {
@@ -67,16 +71,18 @@ const columnAttachmentData = (
   handleSearch = () => {},
   handleDelete = () => {},
   type,
-  handleShow
+  handleShow,
 ) => {
   const res = [
     {
+      key: "no",
       title: "NO",
       width: 30,
       align: "center",
       render: (text, object, index) => index + 1,
     },
     {
+      key: "fileCategoryName",
       title: "CATEGORY",
       width: 75,
       dataIndex: "fileCategoryName",
@@ -88,10 +94,11 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
+      key: "fileName",
       title: "FILE NAME",
       width: 200,
       dataIndex: "fileName",
@@ -105,7 +112,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (text) =>
         searchedColumn === "fileName" ? (
@@ -127,6 +134,7 @@ const columnAttachmentData = (
         ),
     },
     {
+      key: "createdBy",
       title: "UPLOADED BY",
       width: 100,
       dataIndex: "createdBy",
@@ -137,10 +145,11 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
+      key: "createdDate",
       title: "UPLOADED DATE",
       align: "center",
       width: 100,
@@ -152,10 +161,11 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
     },
     {
+      key: "fileSize",
       title: "FILE SIZE",
       align: "center",
       width: 100,
@@ -167,7 +177,7 @@ const columnAttachmentData = (
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       render: (fileSize, r, i) => (
         <span>
@@ -214,13 +224,14 @@ const columnAttachmentData = (
       (column) =>
         column.dataIndex !== "createdBy" &&
         column.dataIndex !== "createdDate" &&
-        column.title !== "ACTION"
+        column.title !== "ACTION",
     );
   }
   return type !== "detail"
     ? res.filter(
         (column) =>
-          column.dataIndex !== "createdBy" && column.dataIndex !== "createdDate"
+          column.dataIndex !== "createdBy" &&
+          column.dataIndex !== "createdDate",
       )
     : res;
 };
@@ -357,7 +368,9 @@ const AttachmentComponent = ({
                 Choose File
               </Button>
               {!data.length && (
-                <span className="text-sm text-dg-grey-dark">No file choosen</span>
+                <span className="text-sm text-dg-grey-dark">
+                  No file choosen
+                </span>
               )}
             </div>
           </div>
@@ -373,7 +386,7 @@ const AttachmentComponent = ({
             handleSearch,
             handleDelete,
             type,
-            handleShow
+            handleShow,
           )}
           usePagination={false}
         />

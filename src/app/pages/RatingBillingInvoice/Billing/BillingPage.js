@@ -60,10 +60,23 @@ const BillingPage = () => {
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedBillingData, setSelectedBillingData] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["statusApproval", "action"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("billingFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["statusApproval", "action"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("billingFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   // Simpan filters ke Redux
   useEffect(() => {

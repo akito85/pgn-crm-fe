@@ -30,10 +30,11 @@ const GLAccountSectionForm = ({ type, form }) => {
               >
                 <InputComponent
                   placeholder="GL Account Number.."
-                  maxLength={255}
+                  maxLength={50}
                   onKeyPress={(e) => {
                     if (!/[0-9]/.test(e.key)) e.preventDefault();
                   }}
+                  autoComplete="off"
                 />
               </Form.Item>
             </div>
@@ -58,18 +59,18 @@ const GLAccountSectionForm = ({ type, form }) => {
           </div>
 
           <Form.Item
-            label="Reference"
+            label="Description"
             name="remark"
             rules={[
               {
                 required: true,
-                message: "Please input Reference!",
+                message: "Please input Description!",
               },
             ]}
           >
             <InputComponent
               type="textarea"
-              placeholder="Reference.."
+              placeholder="Description.."
               maxLength={255}
             />
           </Form.Item>

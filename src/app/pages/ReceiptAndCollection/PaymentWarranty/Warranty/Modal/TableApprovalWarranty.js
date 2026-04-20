@@ -2,6 +2,7 @@ import { Tooltip } from "antd";
 import moment from "moment";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { dateFormatting, renderColumn } from "../../../../../../utils";
+import SVGIcon from "../../../../../../assets/Icon/index";
 
 export const tableApprovalWarranty = (
   search,
@@ -10,19 +11,22 @@ export const tableApprovalWarranty = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
+  handleSearch,
+  handleDetail
 ) => [
   {
     key: "no",
     title: "NO",
     width: 60,
+    align: "left",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
     key: "warrantyCode",
-    title: "PAYMENT GUARANTEE CODE",
+    title: "PAYMENT GUARANTEE",
     dataIndex: "warrantyCode",
     width: 200,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(search, "warrantyCode", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
@@ -37,6 +41,7 @@ export const tableApprovalWarranty = (
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
     width: 200,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(search, "accountNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
@@ -58,6 +63,7 @@ export const tableApprovalWarranty = (
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
     width: 150,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(search, "customerNumber", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
@@ -86,6 +92,7 @@ export const tableApprovalWarranty = (
     title: "TYPE",
     dataIndex: "type",
     width: 120,
+    align: "center",
     ...getColumnSearchPropsUseFilteredValue(search, "type", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
@@ -97,7 +104,7 @@ export const tableApprovalWarranty = (
   },
   {
     key: "issuerBank",
-    title: "ISSUER BANK",
+    title: "ISSUER",
     dataIndex: "issuerBank",
     width: 150,
     ...getColumnSearchPropsUseFilteredValue(search, "issuerBank", searchInput, searchedColumn, searchText, handleSearch),
@@ -125,7 +132,7 @@ export const tableApprovalWarranty = (
   },
   {
     key: "currencyBalance",
-    title: "CURRENCY BALANCE",
+    title: "BALANCE",
     dataIndex: "currencyBalance",
     width: 150,
     align: "right",
@@ -155,7 +162,7 @@ export const tableApprovalWarranty = (
   },
   {
     key: "equivalent",
-    title: "EQV. AMOUNT",
+    title: "EQV. BALANCE",
     dataIndex: "equivalent",
     width: 150,
     align: "right",

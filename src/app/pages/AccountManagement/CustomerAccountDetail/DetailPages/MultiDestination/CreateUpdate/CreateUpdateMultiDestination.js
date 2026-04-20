@@ -61,20 +61,20 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   const [form] = Form.useForm();
   const accountId = location?.state?.idAccount;
   const customerId = location?.state?.idCustomer;
-  const idMd = location?.state?.id;
+  const id = location?.state?.id;
 
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
-  const status = detail_multiDestination.status || "DRAFT";
-  const statusApproval = detail_multiDestination.statusApproval || "DRAFT";
+  const status = location.state?.status || detail_multiDestination.status || "DRAFT";
+  const statusApproval = location.state?.statusApproval || detail_multiDestination.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
   const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectApproval = statusApproval === "REJECT";
+  const isRejectedApproval = statusApproval === "REJECTED";
 
-  const detail = (isActive && (isDraftApproval || isRejectApproval))
+  const detail = (isActive && (isDraftApproval || isRejectedApproval))
     ? detailDraft_multiDestination
     : detail_multiDestination;
 
@@ -114,11 +114,13 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
   ];
 
   useEffect(() => {
-    if (isUpdate && idMd) {
-      dispatch(getMultiDestination(idMd));
-      dispatch(getMultiDestinationDraft(idMd));
+    if (isUpdate && id) {
+      if (isActive && (isDraftApproval || isRejectedApproval))
+        dispatch(getMultiDestinationDraft(id));
+      else
+        dispatch(getMultiDestination(id));
     }
-  }, [formType, idMd]);
+  }, [isUpdate, id, accountId, isActive, isDraftApproval, isRejectedApproval]);
 
   useEffect(() => {
     if (
@@ -262,7 +264,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
             const body = {
               stepNumber: current + 1,
               type: formType.toUpperCase(),
-              id: idMd,
+              id,
               data: {
                 accountId,
                 relatedAccountId,
@@ -299,7 +301,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       } = form.getFieldsValue(true);
 
       const body = {
-        id: idMd,
+        id,
         accountId,
         relatedAccountId,
         description,
@@ -458,7 +460,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
         const body = {
           stepNumber: current + 1,
           type: formType.toUpperCase(),
-          id: idMd,
+          id,
           data: {
             accountId,
             relatedAccountId,
@@ -516,7 +518,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
           const body = {
             stepNumber: current + 1,
             type: formType.toUpperCase(),
-            id: idMd,
+            id,
             data: {
               accountId,
               relatedAccountId,
@@ -611,7 +613,7 @@ const CreateUpdateMultiDestination = ({ accountType = "standard", formType = "cr
       })
       .catch((error) => {});
     else if (isUpdate)
-      dispatch(updateMultiDestination({ id: idMd, body, attachments: attachmentDataSource.filter((attachment) => attachment.dataType === "new"), action: confirmationType }))
+      dispatch(updateMultiDestination({ id, body, attachments: attachmentDataSource.filter((attachment) => attachment.dataType === "new"), action: confirmationType }))
       .unwrap()
         .then((data) => {
           setTimeout(() => {
