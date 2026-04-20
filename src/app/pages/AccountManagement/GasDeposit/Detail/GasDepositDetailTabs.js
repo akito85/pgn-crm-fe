@@ -1,8 +1,10 @@
-import GasDepositDetailAttch from "./GasDepositDetailAttch";
 import GasDepositDetailInfo from "./GasDepositDetailInfo";
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import { useState } from "react";
 import NxTabs from "../../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
+import { configApp } from "../../../../../constants/configApp";
+import accountManagementService from "../../../../../redux/services/account_management/accountManagementService";
 
 /**
  * Tabbed detail view for a gas deposit record.
@@ -24,7 +26,14 @@ const GasDepositDetailTabs = ({ detail = {} }) => {
     {
       key: "attch",
       label: "Attachment",
-      children: <GasDepositDetailAttch attachments={attachments} />
+      children: (
+        <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
+        />
+      )
     }
   ];
 
