@@ -259,7 +259,6 @@ const BillingItemDetail = () => {
     },
   ];
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
       <Spin spinning={loading || loadingDetail}>

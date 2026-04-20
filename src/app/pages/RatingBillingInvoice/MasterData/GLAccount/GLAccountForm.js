@@ -1,5 +1,5 @@
 import { Form, Spin } from "antd";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -50,6 +50,7 @@ const GLAccountForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
 
   const [flag, setFlag] = useState(false);
@@ -76,6 +77,23 @@ const GLAccountForm = ({ type }) => {
   const [bodyData, setBodyData] = useState({});
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   const steps = [
     { title: "GL ACCOUNT", value: "GL Account" },
@@ -325,6 +343,12 @@ const GLAccountForm = ({ type }) => {
           const glAccountId = dataForm?.glAccountId;
           const filterDataAttach = listDataAttachment.filter((item) => item.dataType !== "exist");
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let i = 0; i < filterDataAttach.length; i++) {
             const element = filterDataAttach[i];
             await dispatch(uploadAttachment({
@@ -375,6 +399,7 @@ const GLAccountForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setCurrent(0);
       setListSectionInfo([
@@ -451,7 +476,7 @@ const GLAccountForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_bucket"

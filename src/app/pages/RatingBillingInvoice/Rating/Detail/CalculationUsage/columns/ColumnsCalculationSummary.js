@@ -110,16 +110,16 @@ export const columnsCalculationSummary = (
       ),
   },
   {
-    title: "Calculated Total",
-    dataIndex: "calculatedTotal",
-    key: "calculatedTotal",
+    title: "AMOUNT",
+    dataIndex: "priceAmount",
+    key: "priceAmount",
     width: 150,
     align: "right",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "calculatedTotal",
+      "priceAmount",
       searchInput,
       searchedColumn,
       searchText,
@@ -128,49 +128,20 @@ export const columnsCalculationSummary = (
     ),
     render: (text) =>
       renderColumn(
-        "calculatedTotal",
-        hasValue(search["calculatedTotal"]),
+        "priceAmount",
+        hasValue(search["priceAmount"]),
         searchText,
         text,
         false,
         "input",
         search,
-        "usage",
-      ),
-  },
-  {
-    title: "Converted Calculated Total",
-    dataIndex: "convertedCalculatedTotal",
-    key: "convertedCalculatedTotal",
-    width: 180,
-    align: "right",
-    sorter: true,
-    isNumber: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convertedCalculatedTotal",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "convertedCalculatedTotal",
-        hasValue(search["convertedCalculatedTotal"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-        "usage",
+        "currency-idr",
       ),
   },
   {
     title: "TOTAL AMOUNT",
-    dataIndex: "amountPartitionTotal",
-    key: "amountPartitionTotal",
+    dataIndex: "priceTotalAmount",
+    key: "priceTotalAmount",
     width: 180,
     align: "right",
     sorter: true,
@@ -332,7 +303,8 @@ export const getExpandedColumns = () => [
 ];
 
 export const renderExpandedRow = (record, expandData, loadingExpand) => {
-  const rowKey = record.id; // Gunakan id sebagai key
+  // Gunakan logic rowKey yang sama dengan handleExpand
+  const rowKey = record.id || `${record.transactionDate}-${record.saType}`;
   const isLoading = loadingExpand[rowKey];
   const expandedData = expandData[rowKey]?.result || [];
 

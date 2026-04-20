@@ -30,7 +30,7 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 const InvoiceTemplateDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.invoice_template
+    (state) => state.invoice_template,
   );
 
   // Declaration
@@ -69,7 +69,9 @@ const InvoiceTemplateDetail = () => {
 
   // Determine which criteria data to show based on draft availability
   const displayCriteriaValues = hasDraft ? criteriaValuesDraft : criteriaValues;
-  const displayCriteriaData = hasDraft ? listDataCriteriaDraft : listDataCriteria;
+  const displayCriteriaData = hasDraft
+    ? listDataCriteriaDraft
+    : listDataCriteria;
 
   // Use Effect
   useEffect(() => {
@@ -111,7 +113,7 @@ const InvoiceTemplateDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -182,7 +184,7 @@ const InvoiceTemplateDetail = () => {
             id: item.id,
             criteria: item.criteria,
           };
-        }
+        },
       );
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
@@ -238,8 +240,8 @@ const InvoiceTemplateDetail = () => {
       breadcrumbName: "Invoice Template",
     },
     {
-      path: RBI_ROUTES.INVOICE_TEMPLATE_DETAIL,
-      breadcrumbName: "Detail",
+      path: "",
+      breadcrumbName: "Detail Invoice Template",
     },
   ];
 
@@ -428,7 +430,7 @@ const InvoiceTemplateDetail = () => {
             <DetailText label="Created Date">
               {dataLogInformation?.createdDate
                 ? moment(dataLogInformation.createdDate).format(
-                  dateFormatting.dateTime
+                  dateFormatting.dateTime,
                 )
                 : ""}
             </DetailText>
@@ -438,7 +440,7 @@ const InvoiceTemplateDetail = () => {
             <DetailText label="Updated Date">
               {dataLogInformation?.updatedDate
                 ? moment(dataLogInformation.updatedDate).format(
-                  dateFormatting.dateTime
+                  dateFormatting.dateTime,
                 )
                 : ""}
             </DetailText>

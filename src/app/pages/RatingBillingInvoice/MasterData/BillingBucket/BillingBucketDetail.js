@@ -309,7 +309,7 @@ const BillingBucketDetail = () => {
       breadcrumbName: "Billing Bucket",
     },
     {
-      path: RBI_ROUTES.BILLING_BUCKET_DETAIL,
+      path: "",
       breadcrumbName: "Detail Billing Bucket",
     },
   ];

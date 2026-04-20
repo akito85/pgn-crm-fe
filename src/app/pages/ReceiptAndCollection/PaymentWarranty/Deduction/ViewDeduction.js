@@ -48,7 +48,7 @@ const ViewDeduction = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
@@ -137,13 +137,16 @@ const ViewDeduction = () => {
   }, [handleGlobalSearch]);
 
   const handleAdvanceSearch = (searchData) => {
-    setSearch((prevState) => {
-      setPage(1);
-      return {
-        ...prevState,
-        advanceSearch: searchData
-      };
-    });
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    setSearch(simpleSearch);
+    setPage(1);
   };
 
   const handleConfirmDelete = () => {

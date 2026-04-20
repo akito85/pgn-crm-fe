@@ -13,6 +13,9 @@ const initialState = {
   data_criteriaList: [],
   data_specialGLList: [],
   data_glAccountList: [],
+  data_bankList: [],
+  data_bankAccountList: [],
+  data_glAccountBankList: [],
   data_classificationTypeList: [],
   data_accountTypeList: [],
   data_itemMappingCategory: [],
@@ -713,6 +716,124 @@ export const getGLAccountList = createAsyncThunk(
   },
 );
 
+export const getBankList = createAsyncThunk(
+  "GET_BANK_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const urls = [
+        "/v1/dbs/api/billingitem/bank-list",
+        "/bank-list",
+      ];
+
+      let response;
+      for (const url of urls) {
+        try {
+          response = await ratingBillingHttpService.getAll(url);
+          break;
+        } catch (error) {
+          response = null;
+        }
+      }
+
+      if (!response) {
+        throw new Error("Failed to get bank list");
+      }
+
+      return (response.data || []).map((item) => ({
+        bankId: item.bankId,
+        bankCode: item.bankCode,
+        bankName: item.bankName,
+        bankShortName: item.bankShortName,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(validateError({ error, action: "GET_BANK_LIST" }));
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.code === 419 ? null : error?.response?.data,
+      );
+    }
+  },
+);
+
+export const getBankAccountList = createAsyncThunk(
+  "GET_BANK_ACCOUNT_LIST",
+  async ({ bankId }, thunkAPI) => {
+    try {
+      const urls = [
+        `/v1/dbs/api/billingitem/bank-account-list/${bankId}`,
+        `/bank-account-list/${bankId}`,
+      ];
+
+      let response;
+      for (const url of urls) {
+        try {
+          response = await ratingBillingHttpService.getAll(url);
+          break;
+        } catch (error) {
+          response = null;
+        }
+      }
+
+      if (!response) {
+        throw new Error("Failed to get bank account list");
+      }
+
+      return (response.data || []).map((item) => ({
+        id: item.id,
+        bankId: item.bankId,
+        accountNumber: item.accountNumber,
+        accountName: item.accountName,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_BANK_ACCOUNT_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.code === 419 ? null : error?.response?.data,
+      );
+    }
+  },
+);
+
+export const getGlAccountBankById = createAsyncThunk(
+  "GET_GL_ACCOUNT_BANK_BY_ID",
+  async ({ id }, thunkAPI) => {
+    try {
+      const urls = [
+        `/v1/dbs/api/billingitem/get-gl-account-bank/${id}`,
+        `/get-gl-account-bank/${id}`,
+      ];
+
+      let response;
+      for (const url of urls) {
+        try {
+          response = await ratingBillingHttpService.getAll(url);
+          break;
+        } catch (error) {
+          response = null;
+        }
+      }
+
+      if (!response) {
+        throw new Error("Failed to get bank gl account");
+      }
+
+      return (response.data || []).map((item) => ({
+        id: item.id,
+        bankId: item.bankId,
+        glNumber: item.glNumber,
+        glDescription: item.glDescription,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_GL_ACCOUNT_BANK_BY_ID" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.code === 419 ? null : error?.response?.data,
+      );
+    }
+  },
+);
+
 export const getClassificationTypeList = createAsyncThunk(
   "GET_CLASSIFICATION_TYPE_LIST",
   async (_, thunkAPI) => {
@@ -1070,6 +1191,42 @@ const billingItemSlice = createSlice({
     },
     [getGLAccountList.rejected]: (state) => {
       state.loading = false;
+    },
+
+    [getBankList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBankList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_bankList = action.payload;
+    },
+    [getBankList.rejected]: (state) => {
+      state.loading = false;
+      state.data_bankList = [];
+    },
+
+    [getBankAccountList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBankAccountList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_bankAccountList = action.payload;
+    },
+    [getBankAccountList.rejected]: (state) => {
+      state.loading = false;
+      state.data_bankAccountList = [];
+    },
+
+    [getGlAccountBankById.pending]: (state) => {
+      state.loading = true;
+    },
+    [getGlAccountBankById.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_glAccountBankList = action.payload;
+    },
+    [getGlAccountBankById.rejected]: (state) => {
+      state.loading = false;
+      state.data_glAccountBankList = [];
     },
 
     [getClassificationTypeList.pending]: (state) => {

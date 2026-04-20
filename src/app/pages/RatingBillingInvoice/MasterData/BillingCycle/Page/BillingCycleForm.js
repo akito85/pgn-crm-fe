@@ -53,6 +53,7 @@ const BillingCycleForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [bodyData, setBodyData] = useState({});
   const [bodyError, setBodyError] = useState({});
@@ -70,6 +71,23 @@ const BillingCycleForm = ({ type }) => {
   const [startDate, setStartDate] = useState();
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = React.useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   const steps = [
     { title: "BILLING CYCLE", value: "Billing Cycle" },
@@ -431,6 +449,7 @@ const BillingCycleForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setCurrent(0);
       setTabData([
@@ -504,6 +523,12 @@ const BillingCycleForm = ({ type }) => {
             (item) => item.dataType !== "exist"
           );
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
@@ -636,7 +661,7 @@ const BillingCycleForm = ({ type }) => {
                 <AttachmentComponent
                   type={type}
                   data={listDataAttachment}
-                  updateData={setListDataAttachment}
+                  updateData={handleUpdateAttachment}
                   dispatch={dispatch}
                   typeSelector="billingCycle"
                   getAPICategory={getListCategoryFile}

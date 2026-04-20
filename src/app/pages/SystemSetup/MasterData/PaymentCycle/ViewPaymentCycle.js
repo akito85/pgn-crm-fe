@@ -7,7 +7,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import CardContainer from "../../../../../components/CardContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
@@ -122,7 +121,8 @@ const ViewPaymentCycle = () => {
                 setLoadingConfirm(false);
                 dispatch(showModalSuccess({
                     title: "Success",
-                    description: `Payment Cycle ${modalAction.type}d successfully`
+                    description: `Payment Cycle ${modalAction.type}d successfully`,
+                    return: false,
                 }));
                 navigate("/system-setup/payment-cycle");
             })

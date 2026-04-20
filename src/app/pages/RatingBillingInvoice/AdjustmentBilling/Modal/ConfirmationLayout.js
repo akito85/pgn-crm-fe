@@ -50,7 +50,7 @@ const ConfirmationLayout = ({
 
   // State
   const [valuePage, setValuePage] = useState("Adjustment Billing");
-  const [tabPages, setTabPages] = useState([
+  const [tabPages] = useState([
     { value: "Adjustment Billing" },
     { value: "Approval" },
     { value: "Attachment" },
@@ -61,10 +61,12 @@ const ConfirmationLayout = ({
     dispatch(getListAccount());
     dispatch(getListType());
     dispatch(getListBillingCycle());
-    dispatch(getListBillingPeriod());
+    if (data?.billingCycle) {
+      dispatch(getListBillingPeriod({ id: data.billingCycle }));
+    }
     dispatch(getListInvoice());
     dispatch(getListCurrency());
-  }, [dispatch]);
+  }, [dispatch, data?.billingCycle]);
 
   // rendering section
   const renderSection = (valuePage) => {
@@ -85,7 +87,7 @@ const ConfirmationLayout = ({
               data={dataInvoice}
               type={"detail"}
             />
-            
+
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
               {"ADJUSTMENT BILLING INFORMATION"}
             </p>
@@ -120,7 +122,7 @@ const ConfirmationLayout = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (data) => data.value === selectedHierarchy
+                  (data) => data.value === selectedHierarchy,
                 )?.[0].name || ""
               }
               dataTable={listDataAppHierDetail}
@@ -196,7 +198,7 @@ const ConfirmationLayout = ({
     .map((a) => a.adjustmentAmount);
   const sumIDR = dataIDR.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment USD
@@ -205,7 +207,7 @@ const ConfirmationLayout = ({
     .map((a) => a.adjustmentAmount);
   const sumUSD = dataUSD.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   return (

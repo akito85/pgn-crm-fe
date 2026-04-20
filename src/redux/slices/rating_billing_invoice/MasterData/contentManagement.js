@@ -54,6 +54,34 @@ const initialState = {
   loading: false,
 };
 
+// Get List Attachment Content Management
+export const getContentAttachmentList = createAsyncThunk(
+  "GET_CONTENT_ATTACHMENT_LIST",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/content/list-attachment/${id}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data?.result || response.data?.data || response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  },
+);
+
 // Get Detail Draft Content Management
 export const getDetailDraftContentManagement = createAsyncThunk(
   "GET_DETAIL_DRAFT_CONTENT_MANAGEMENT",
@@ -1482,6 +1510,18 @@ const contentManagementSlice = createSlice({
     },
     [getDetailDraftContentManagement.rejected]: (state) => {
       state.loading = false;
+    },
+    // get content attachment list
+    [getContentAttachmentList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getContentAttachmentList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_AttachmentTable = action.payload;
+    },
+    [getContentAttachmentList.rejected]: (state) => {
+      state.loading = false;
+      state.data_AttachmentTable = [];
     },
   },
 });

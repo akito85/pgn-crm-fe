@@ -598,7 +598,7 @@ const DailyRateView = ({ dispatch }) => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               type={"action"}
@@ -610,7 +610,6 @@ const DailyRateView = ({ dispatch }) => {
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
-                {" "}
                 Update
               </span>
             </ButtonComponent>

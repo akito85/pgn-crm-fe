@@ -55,6 +55,7 @@ const ViewTransferToCustomer = () => {
     const [openModalHistory, setOpenModalHistory] = useState(false);
     const [openModalDelete, setOpenModalDelete] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const navigate = useNavigate();
 
@@ -77,7 +78,7 @@ const ViewTransferToCustomer = () => {
         },
         {
             path: "",
-            breadcrumbName: "Payment Warranty",
+            breadcrumbName: "Payment  Guarantee",
         },
         {
             path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER,
@@ -125,13 +126,16 @@ const ViewTransferToCustomer = () => {
     }, [handleGlobalSearch]);
 
     const handleAdvanceSearch = (searchData) => {
-        setSearch((prevState) => {
-            setPage(1);
-            return {
-                ...prevState,
-                advanceSearch: searchData
-            };
-        });
+        const simpleSearch = {};
+        if (searchData?.filters && Array.isArray(searchData.filters)) {
+            searchData.filters.forEach((rule) => {
+                if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+                    simpleSearch[rule.column] = rule.value;
+                }
+            });
+        }
+        setSearch(simpleSearch);
+        setPage(1);
     };
 
     const handleChangePage = (pageChange, pageSizeChange) => {
@@ -148,15 +152,23 @@ const ViewTransferToCustomer = () => {
         setSort(dataSort);
     };
 
-    const handleDownload = () => {
-        dispatch(
-            exportTransferToCustomerToExcel({
-                search: encodeURIComponent(JSON.stringify(search)),
-                page,
-                pageSize,
-                sort,
-            })
-        );
+    const handleDownload = async () => {
+        if (isExporting) return;
+        setIsExporting(true);
+        try {
+            await dispatch(
+                exportTransferToCustomerToExcel({
+                    search: encodeURIComponent(JSON.stringify(search)),
+                    page,
+                    pageSize,
+                    sort,
+                })
+            ).unwrap();
+        } catch (error) {
+            // Error sudah di-handle di thunk
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     const handleHistory = (record) => {
@@ -171,18 +183,21 @@ const ViewTransferToCustomer = () => {
     };
 
     const handleConfirmDelete = () => {
-        dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap().then(() => {
-            setOpenModalDelete(false);
-            dispatch(
-                getAllTransferToCustomerListPaginate({
-                    search: encodeURIComponent(JSON.stringify(search)),
-                    page,
-                    pageSize,
-                    sort,
-                })
-            );
-        });
+        setOpenModalDelete(false);
+        setSelectedRecord(null);
+        dispatch(deleteTransferToCustomer(selectedRecord.id)).unwrap()
+            .then(() => {
+                dispatch(
+                    getAllTransferToCustomerListPaginate({
+                        search: encodeURIComponent(JSON.stringify(search)),
+                        page,
+                        pageSize,
+                        sort,
+                    })
+                );
+            });
     };
+
 
     const handleDetail = (record) => {
         navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSFER_TO_CUSTOMER, { state: { id: record?.id } });
@@ -215,6 +230,8 @@ const ViewTransferToCustomer = () => {
                 <ButtonComponent
                     type="submit"
                     onClick={handleDownload}
+                    loading={isExporting}
+                    disabled={isExporting}
                     icon={<SVGIcon name="IconButtonDownload" width={24} />}
                 >
                     Download List
@@ -330,7 +347,7 @@ const ViewTransferToCustomer = () => {
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
                     <div className="flex -my-4 justify-between items-center">
-                        <p className="mt-[15px] font-bold">TRANSFER TO CUSTOMER</p>
+                        <p className="mt-[15px] font-bold">TRANSFER TO CUSTOMER LIST</p>
                         <div className="flex gap-2">
                             <Toolbar items={itemActions} />
                         </div>

@@ -435,7 +435,7 @@ const PrabillingForm = ({ type }) => {
           error?.response?.data?.message ||
           error?.message ||
           error?.toString() ||
-          "Terjadi kesalahan. Silakan coba lagi.";
+          "An error occurred. Please try again.";
         setBodyError({ message });
         setModalError(true);
       });

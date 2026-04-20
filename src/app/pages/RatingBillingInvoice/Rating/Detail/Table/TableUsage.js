@@ -22,15 +22,15 @@ export const columnsUsage = (
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
-    key: "billingPeriod",
+    key: "period",
     title: "Billing Period",
     width: 150,
     sorter: true,
     isClassification: true,
-    dataIndex: "billingPeriod",
+    dataIndex: "period",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "billingPeriod",
+      "period",
       searchInput,
       searchedColumn,
       searchText,
@@ -40,8 +40,8 @@ export const columnsUsage = (
     ),
     render: (text) =>
       renderDateColumn(
-        "billingPeriod",
-        hasValue(search["billingPeriod"]),
+        "period",
+        hasValue(search["period"]),
         searchText,
         text,
         "datePeriod",
@@ -186,15 +186,15 @@ export const columnsUsage = (
       ),
   },
   {
-    key: "streamId",
+    key: "stream",
     title: "STREAM ID",
-    dataIndex: "streamId",
+    dataIndex: "stream",
     width: 120,
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "streamId",
+      "stream",
       searchInput,
       searchedColumn,
       searchText,
@@ -204,8 +204,8 @@ export const columnsUsage = (
     ),
     render: (text) =>
       renderColumn(
-        "streamId",
-        hasValue(search["streamId"]),
+        "stream",
+        hasValue(search["stream"]),
         searchText,
         text,
         false,
@@ -489,17 +489,17 @@ export const columnsUsage = (
       ),
   },
   {
-    key: "fileSource",
+    key: "sources",
     sorter: true,
     title: "SOURCE",
     isClassification: true,
-    dataIndex: "fileSource",
+    dataIndex: "sources",
     ellipsis: {
       showTitle: false,
     },
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "fileSource",
+      "sources",
       searchInput,
       searchedColumn,
       searchText,
@@ -508,8 +508,8 @@ export const columnsUsage = (
     ),
     render: (text) =>
       renderColumn(
-        "fileSource",
-        hasValue(search["fileSource"]),
+        "sources",
+        hasValue(search["sources"]),
         searchText,
         text,
         false,
@@ -675,13 +675,14 @@ export const columnsUsage = (
       ),
   },
   {
-    key: "source",
+    key: "fileSource",
     title: "SOURCE",
-    dataIndex: "source",
+    dataIndex: "fileSource",
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
-      "source",
+      search,
+      "fileSource",
       searchInput,
       searchedColumn,
       searchText,

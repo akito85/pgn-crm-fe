@@ -234,6 +234,18 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
         </DetailText>
         <div />
 
+        {(dataConfirm?.bank || !!dataConfirm?.bankValue) && (
+          <>
+            <DetailText label="Bank">
+              {dataConfirm?.bankValue || "-"}
+            </DetailText>
+            <DetailText label="Bank Account Number">
+              {dataConfirm?.bankAccountNumber || "-"}
+            </DetailText>
+            <div />
+          </>
+        )}
+
         <div className="col-span-3">
           <DetailText label="Description">
             {dataConfirm?.description || "-"}
@@ -248,6 +260,9 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
         </DetailText>
         <DetailText label="Installment / Restructure">
           {dataConfirm?.installment ? "Yes" : "No"}
+        </DetailText>
+        <DetailText label="Bank">
+          {(dataConfirm?.bank || !!dataConfirm?.bankValue) ? "Yes" : "No"}
         </DetailText>
       </div>
 

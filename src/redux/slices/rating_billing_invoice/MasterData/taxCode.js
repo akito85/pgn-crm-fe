@@ -24,6 +24,7 @@ const initialState = {
   data_condition_name: [],
   data_condition_operator: [],
   data_condition_type: [],
+  data_gl_account_list: [],
   dataForm: [],
   dataListCategory: [],
 };
@@ -220,6 +221,32 @@ export const getConditionType = createAsyncThunk(
       const url = "/v1/dbs/api/tax-code/get-conditon-type";
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  },
+);
+
+export const getGlAccountList = createAsyncThunk(
+  "GET_GL_ACCOUNT_LIST_TAX_CODE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/tax-code/list-gl-account";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.data || response.data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();

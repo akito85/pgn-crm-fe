@@ -25,25 +25,28 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import CardContainer from "../../../../../components/CardContainer";
 
 const TaxCodeView = () => {
-  const {
-    data,
-    loading,
-    data_approval_history,
-    tax_code_list,
-    tax_code_pagination,
-  } = useSelector((state) => state.tax_code);
+  const { data, loading, data_approval_history } = useSelector(
+    (state) => state.tax_code,
+  );
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
   //state
+  const initialPageSize = 100;
   const loadMoreSize = 20;
+  const [page, setPage] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
   const [chooseId, setChooseId] = useState();
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+
+  const hasMore = allData.length < (data?.page?.totalElements || 0);
 
   const [modalError, setModalError] = useState(false);
   const [modalInactive, setModalInactive] = useState(false);
@@ -95,12 +98,30 @@ const TaxCodeView = () => {
       getTaxCodePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
     );
-  }, [dispatch, search, sort]);
+  }, [dispatch, search, sort, refreshKey]);
+
+  // Accumulate data for infinite scroll
+  useEffect(() => {
+    if (data?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.taxCodeId));
+          const newItems = data.result.filter(
+            (item) => !ids.has(item.taxCodeId),
+          );
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data, page]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -130,6 +151,8 @@ const TaxCodeView = () => {
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
 
@@ -138,10 +161,16 @@ const TaxCodeView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => ({
-      ...prevState,
-      [dataIndex]: selectedKeys[0],
-    }));
+    shouldResetRef.current = true;
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
   };
 
   const handleInactive = (data) => {
@@ -158,8 +187,10 @@ const TaxCodeView = () => {
   );
 
   const handleLoadMore = useCallback(async () => {
-    const nextPage = Math.floor(tax_code_list.length / loadMoreSize) + 1;
-    dispatch(
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
       getTaxCodePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: nextPage,
@@ -168,19 +199,16 @@ const TaxCodeView = () => {
         isLoadMore: true,
       }),
     );
-  }, [dispatch, search, sort, tax_code_list.length]);
+  }, [allData.length, data?.page?.totalElements, dispatch, search, sort]);
 
   const handleRefresh = useCallback(() => {
-    dispatch(
-      getTaxCodePaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: loadMoreSize,
-        sort,
-        isLoadMore: false,
-      }),
-    );
-  }, [dispatch, search, sort]);
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
 
   const handleDownload = () => {
     dispatch(
@@ -235,11 +263,12 @@ const TaxCodeView = () => {
       .then(() => {
         handleClear();
         handleCancel();
+        shouldResetRef.current = true;
         dispatch(
           getTaxCodePaginate({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: loadMoreSize,
+            pageSize: initialPageSize,
             sort,
             isLoadMore: false,
           }),
@@ -469,8 +498,8 @@ const TaxCodeView = () => {
     const taxCodeCols = [
       ...columnsTaxCodeList(
         search,
-        1,
-        loadMoreSize,
+        page,
+        initialPageSize,
         searchInput,
         searchedColumn,
         searchText,
@@ -486,7 +515,7 @@ const TaxCodeView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, searchedColumn, searchText, actionColumns]);
+  }, [search, page, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -546,9 +575,11 @@ const TaxCodeView = () => {
           <div className="w-full">
             <TableRBI
               idTable="taxCodeTable"
-              dataSource={tax_code_list}
+              dataSource={allData}
               columns={columns}
-              totalData={tax_code_pagination?.totalElements || 0}
+              current={page}
+              pageSize={initialPageSize}
+              totalData={data?.page?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 2400 }}
               handleDownload={handleDownload}
@@ -559,9 +590,7 @@ const TaxCodeView = () => {
               usePagination={false}
               useInfiniteScroll={true}
               onLoadMore={handleLoadMore}
-              hasMore={
-                tax_code_list.length < (tax_code_pagination?.totalElements || 0)
-              }
+              hasMore={hasMore}
               showRefresh={true}
               onRefresh={handleRefresh}
               refreshLabel="Refresh"
@@ -575,8 +604,8 @@ const TaxCodeView = () => {
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
           alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
-              ? "activate"
-              : "inactivate"
+            ? "activate"
+            : "inactivate"
             } this Tax Code with name ${chooseId?.taxCodeName || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}

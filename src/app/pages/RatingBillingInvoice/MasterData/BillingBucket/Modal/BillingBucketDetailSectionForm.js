@@ -12,13 +12,16 @@ import {
   getListBillingItem,
   getListCurrency,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
-import { dateFormatting, hasValue, requiredMessage } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  requiredMessage,
+} from "../../../../../../utils";
 import { columnsDetail } from "../Table/TableDetail";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import DetailText from "../../../../../../components/DetailText";
 import CardComponent from "../../../../../../components/Card/CardComponent";
-
 
 const BillingBucketDetailSectionForm = ({
   listDataBI = [],
@@ -35,7 +38,7 @@ const BillingBucketDetailSectionForm = ({
 }) => {
   // Selector
   const { data_billing_item, data_currency } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -79,7 +82,6 @@ const BillingBucketDetailSectionForm = ({
     dispatch(getListCurrency());
   }, [dispatch]);
 
-
   console.log(validEndDate, validStartDate, startDate);
 
   const handleStartDate = (value) => {
@@ -94,9 +96,26 @@ const BillingBucketDetailSectionForm = ({
     return moment().add(-1, "days") >= current;
   };
 
+  const handleDisableEndDateModal = (current) => {
+    const currentDay = current.clone().startOf("day");
+    if (hasValue(startDate) && currentDay < moment(startDate).startOf("day")) {
+      return true;
+    }
+    if (
+      hasValue(validEndDate) &&
+      currentDay > moment(validEndDate).startOf("day")
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   const handleDisableDateBefore = (current) => {
-    if (hasValue(startDate) && hasValue(validEndDate)) { 
-      return current.isBefore(moment(startDate).startOf("day")) || current.isAfter(moment(validEndDate).endOf("day"));
+    if (hasValue(startDate) && hasValue(validEndDate)) {
+      return (
+        current.isBefore(moment(startDate).startOf("day")) ||
+        current.isAfter(moment(validEndDate).endOf("day"))
+      );
     } else if (hasValue(validStartDate) && hasValue(validEndDate) === false) {
       return current.isBefore(moment(validStartDate).startOf("day"));
     } else if (hasValue(validStartDate) && hasValue(validEndDate)) {
@@ -107,7 +126,6 @@ const BillingBucketDetailSectionForm = ({
       return true;
     }
   };
-
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -195,9 +213,7 @@ const BillingBucketDetailSectionForm = ({
 
         case "startDate":
         case "endDate":
-          return obj[fieldSort]
-            ? moment(obj[fieldSort])
-            : "";
+          return obj[fieldSort] ? moment(obj[fieldSort]) : "";
         // return date.toLowerCase();
 
         case "priority":
@@ -226,7 +242,7 @@ const BillingBucketDetailSectionForm = ({
         default:
           return a.localeCompare(b);
       }
-    }
+    };
 
     return handleCompare(fa, fb);
   };
@@ -249,7 +265,7 @@ const BillingBucketDetailSectionForm = ({
     (r) => {
       setListDataBI((prevState) => prevState.filter((e) => e.key !== r.key));
     },
-    [listDataBI]
+    [listDataBI],
   );
 
   const handleAdd = useCallback(
@@ -273,7 +289,7 @@ const BillingBucketDetailSectionForm = ({
         dataUpdate.sequence !== value.sequence
       ) {
         const isDuplicateSequence = listDataBI.some(
-          (item) => item.sequence === value.sequence
+          (item) => item.sequence === value.sequence,
         );
 
         if (isDuplicateSequence) {
@@ -299,16 +315,17 @@ const BillingBucketDetailSectionForm = ({
         const isBillingItemChosen = listDataBI.some(
           (item) =>
             item.billingItem === value.billingItem &&
-            item.currency === value.currency
+            item.currency === value.currency,
         );
 
         if (isBillingItemChosen) {
           const errorBody = {
             title: "Failed",
-            description: `Billing Item "${data_billing_item
-              ?.filter((a) => a.value === value.billingItem)
-              ?.find((v) => v.name)?.name
-              }" with the same currency is already chosen. Please select a different billing item or a different currency.`,
+            description: `Billing Item "${
+              data_billing_item
+                ?.filter((a) => a.value === value.billingItem)
+                ?.find((v) => v.name)?.name
+            }" with the same currency is already chosen. Please select a different billing item or a different currency.`,
           };
           dispatch(showModalError(errorBody));
           return;
@@ -328,16 +345,17 @@ const BillingBucketDetailSectionForm = ({
         const isBillingItemChosen = listDataBI.some(
           (item) =>
             item.billingItem === value.billingItem &&
-            item.currency === value.currency
+            item.currency === value.currency,
         );
 
         if (isBillingItemChosen) {
           const errorBody = {
             title: "Failed",
-            description: `Billing Item "${data_billing_item
-              ?.filter((a) => a.value === value.billingItem)
-              ?.find((v) => v.name)?.name
-              }" with the same currency is already chosen. Please select a different billing item or a different currency.`,
+            description: `Billing Item "${
+              data_billing_item
+                ?.filter((a) => a.value === value.billingItem)
+                ?.find((v) => v.name)?.name
+            }" with the same currency is already chosen. Please select a different billing item or a different currency.`,
           };
           dispatch(showModalError(errorBody));
           return;
@@ -349,7 +367,7 @@ const BillingBucketDetailSectionForm = ({
 
       // Check for duplicate sequence values if all fields are changed
       const isDuplicateSequence = listDataBI.some(
-        (item) => item.sequence === value.sequence
+        (item) => item.sequence === value.sequence,
       );
 
       if (isDuplicateSequence) {
@@ -365,16 +383,17 @@ const BillingBucketDetailSectionForm = ({
       const isBillingItemChosen = listDataBI.some(
         (item) =>
           item.billingItem === value.billingItem &&
-          item.currency === value.currency
+          item.currency === value.currency,
       );
 
       if (isBillingItemChosen) {
         const errorBody = {
           title: "Failed",
-          description: `Billing Item "${data_billing_item
-            ?.filter((a) => a.value === value.billingItem)
-            ?.find((v) => v.name)?.name
-            }" with the same currency is already chosen. Please select a different billing item or a different currency.`,
+          description: `Billing Item "${
+            data_billing_item
+              ?.filter((a) => a.value === value.billingItem)
+              ?.find((v) => v.name)?.name
+          }" with the same currency is already chosen. Please select a different billing item or a different currency.`,
         };
         dispatch(showModalError(errorBody));
         return;
@@ -394,7 +413,7 @@ const BillingBucketDetailSectionForm = ({
       setTypeModal,
       showModalError,
       formDetail,
-    ]
+    ],
   );
 
   const updateListData = (value) => {
@@ -430,7 +449,7 @@ const BillingBucketDetailSectionForm = ({
     } else {
       setListDataBI((prevState) => {
         const index = prevState.findIndex(
-          (detail) => detail.key === dataUpdate.key
+          (detail) => detail.key === dataUpdate.key,
         );
 
         let temp = [...prevState];
@@ -504,8 +523,9 @@ const BillingBucketDetailSectionForm = ({
               } else {
                 const error = {
                   title: "Failed",
-                  description: "Can't add detail data. Please select a start date.",
-                }
+                  description:
+                    "Can't add detail data. Please select a start date.",
+                };
                 dispatch(showModalError(error));
               }
             }}
@@ -542,8 +562,8 @@ const BillingBucketDetailSectionForm = ({
               status,
               statusApproval,
               handleDetail,
-              showAction
-            )
+              showAction,
+            ),
           )}
           tableScrolled={{
             x: 2000,
@@ -661,20 +681,32 @@ const BillingBucketDetailSectionForm = ({
               name={"endDate"}
               rules={[
                 {
-                  validator: (_, value) =>
-                    (value &&
-                      moment(startDate || dataStartDate) <= moment(value)) ||
-                      !value
-                      ? Promise.resolve()
-                      : Promise.reject(
-                        new Error("End date must before Start date")
-                      ),
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    if (moment(startDate || dataStartDate) > moment(value)) {
+                      return Promise.reject(
+                        new Error("End date must be after Start date"),
+                      );
+                    }
+                    if (
+                      hasValue(validEndDate) &&
+                      moment(value).startOf("day") >
+                        moment(validEndDate).startOf("day")
+                    ) {
+                      return Promise.reject(
+                        new Error(
+                          "End date cannot exceed the Billing Bucket end date",
+                        ),
+                      );
+                    }
+                    return Promise.resolve();
+                  },
                 },
               ]}
               label="End Date"
             >
               <DateComponent
-                dateDisable={handleDisableDateBefore}
+                dateDisable={handleDisableEndDateModal}
                 disabled={startDate === null}
               />
             </Form.Item>
@@ -739,9 +771,7 @@ const BillingBucketDetailSectionForm = ({
         }
       >
         <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">
-            {dataHistory.recordId}
-          </DetailText>
+          <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)
