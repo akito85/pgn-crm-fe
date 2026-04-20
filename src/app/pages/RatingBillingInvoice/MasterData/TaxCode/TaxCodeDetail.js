@@ -15,6 +15,7 @@ import {
   getDetailTaxCode,
   approvalRejectTaxCode,
   approvalInactiveTaxCode,
+  approvalActivatedTaxCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -204,7 +205,9 @@ const TaxCodeDetail = () => {
       data_detail_draft?.taxCodeId === data_detail?.taxCodeId &&
       data_detail &&
       (!data_detail?.approvalDto?.approvalType ||
-        data_detail?.approvalDto?.approvalType !== "INACTIVE_TAX_CODE")
+        !["INACTIVE_TAX_CODE", "ACTIVATED_TAX_CODE"].includes(
+          data_detail?.approvalDto?.approvalType,
+        ))
     ) {
       const criteriaSelect = (data_detail_draft?.taxCodeCriteriaDtos || []).map(
         (item) => {
@@ -369,9 +372,13 @@ const TaxCodeDetail = () => {
     dispatch(
       bodyApproval.approvalType === "INACTIVE_TAX_CODE"
         ? approvalInactiveTaxCode({
+          body: data,
+        })
+        : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+          ? approvalActivatedTaxCode({
             body: data,
           })
-        : approvalRejectTaxCode({
+          : approvalRejectTaxCode({
             body: data,
           }),
     )
@@ -478,9 +485,8 @@ const TaxCodeDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

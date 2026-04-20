@@ -37,9 +37,16 @@ const DetailTOP = ({
   return (
     <div>
       {data_req?.isApprover &&
-      data_req?.approvalType &&
-      data_req?.approvalType === "INACTIVE_TERMS_OF_PAYMENT" ? (
-        <CardContainer header={"INACTIVE REQUEST INFORMATION"}>
+        data_req?.approvalType &&
+        (data_req?.approvalType === "INACTIVE_TERMS_OF_PAYMENT" ||
+          data_req?.approvalType === "ACTIVATED_TERMS_OF_PAYMENT") ? (
+        <CardContainer
+          header={
+            data_req?.approvalType === "ACTIVATED_TERMS_OF_PAYMENT"
+              ? "ACTIVATE REQUEST INFORMATION"
+              : "INACTIVE REQUEST INFORMATION"
+          }
+        >
           <div className="grid grid-cols-4 w-full">
             <DetailText label={"Requested Date"}>
               {data_req?.requestedDate

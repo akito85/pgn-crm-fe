@@ -32,6 +32,7 @@ const ContactSection = ({
   const [criteriaData, setCriteriaData] = useState([]);
   const [editingKey, setEditingKey] = useState('');
   const [tempRow, setTempRow] = useState({});
+  const [valueError, setValueError] = useState('');
 
   // State Modal Choose Contact
   const [isChooseModalOpen, setIsChooseModalOpen] = useState(false);
@@ -129,6 +130,7 @@ const ContactSection = ({
   const handleCreateCriteria = () => {
     setEditingKey('new');
     setTempRow({ key: 'new', type: null, inputType: null, valuePrefix: null, valueText: '' });
+    setValueError('');
   };
 
   const autoFillMap = {
@@ -137,20 +139,40 @@ const ContactSection = ({
 
   const handleSaveCriteria = () => {
 
-    if (!tempRow.type || !tempRow.inputType || !tempRow.valueText || tempRow.valueText.trim() === '') {
-      message.error("Type, Input Type, dan Value Text wajib diisi!");
+    if (!tempRow.type || !tempRow.inputType) {
+      message.error("Type dan Input Type wajib diisi!");
       return;
     }
 
+    if (!tempRow.valueText || tempRow.valueText.trim() === '') {
+      setValueError("Value Text wajib diisi!");
+      return;
+    }
+
+    const inputTypeValidations = {
+      748: { regex: /^[0-9()\-+\s]{5,20}$/, label: "Phone", hint: "Contoh: 021-1234567" },
+      749: { regex: /^(\+62|62|0)[0-9]{8,13}$/, label: "Mobile Phone", hint: "Contoh: 08123456789 atau +6281234567" },
+      750: { regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, label: "Email", hint: "Contoh: nama@domain.com" },
+      751: { regex: /^[0-9()\-+\s]{5,20}$/, label: "Fax", hint: "Contoh: 021-1234567" },
+    };
+
+    const validation = inputTypeValidations[Number(tempRow.inputType)];
+    if (validation && !validation.regex.test(tempRow.valueText.trim())) {
+      setValueError(`Format ${validation.label} tidak valid! ${validation.hint}`);
+      return;
+    }
+
+    setValueError('');
     if (editingKey === 'new') {
       setCriteriaData([...criteriaData, { ...tempRow, key: Date.now() }]);
     } else {
       setCriteriaData(criteriaData.map(item => item.key === editingKey ? tempRow : item));
     }
     setEditingKey('');
+    setValueError('');
   };
 
-  const criteriaColumns = [
+  const criteriaColumns = [ 
     { title: "NO", width: 60, align: "center", render: (_, __, index) => index + 1 },
     {
       title: "TYPE",
@@ -162,7 +184,14 @@ const ContactSection = ({
             <SelectComponent
               placeholder="Select Type"
               value={tempRow.type}
-              onChange={(val) => setTempRow({ ...tempRow, type: val })}
+              onChange={(val) => {
+                const autoInputType = autoFillMap[String(val)];
+                setTempRow({
+                  ...tempRow,
+                  type: val,
+                  inputType: autoInputType !== undefined ? autoInputType : tempRow.inputType,
+                });
+              }}
               options={typeOptions}
             />
           );
@@ -182,6 +211,7 @@ const ContactSection = ({
               value={tempRow.inputType}
               onChange={(val) => setTempRow({ ...tempRow, inputType: val })}
               options={inputTypeOptions}
+              disabled={true}
             />
           );
         }
@@ -194,11 +224,15 @@ const ContactSection = ({
       render: (_, record) => {
         if (record.key === editingKey) {
           return (
-            <Input 
-              placeholder="Input Value" 
-              value={tempRow.valueText} 
-              onChange={(e) => setTempRow({ ...tempRow, valueText: e.target.value })} 
-            />
+            <div>
+              <Input
+                placeholder="Input Value"
+                value={tempRow.valueText}
+                status={valueError ? 'error' : ''}
+                onChange={(e) => { setTempRow({ ...tempRow, valueText: e.target.value }); setValueError(''); }}
+              />
+              {valueError && <p style={{ color: '#ff4d4f', fontSize: '12px', margin: '4px 0 0' }}>{valueError}</p>}
+            </div>
           );
         }
         return record.valueText;
@@ -212,14 +246,14 @@ const ContactSection = ({
         if (record.key === editingKey) {
           return (
             <div className="flex gap-2 justify-center">
-              <Button size="small" onClick={() => setEditingKey('')}>Cancel</Button>
+              <Button size="small" onClick={() => { setEditingKey(''); setValueError(''); }}>Cancel</Button>
               <Button size="small" type="primary" onClick={handleSaveCriteria}>Save</Button>
             </div>
           );
         }
         return (
           <div className="flex gap-3 justify-center text-primary cursor-pointer">
-            <EditOutlined style={{ fontSize: "16px" }} onClick={() => { setTempRow({ ...record }); setEditingKey(record.key); }} />
+            <EditOutlined style={{ fontSize: "16px" }} onClick={() => { setTempRow({ ...record }); setEditingKey(record.key); setValueError(''); }} />
             <DeleteOutlined style={{ fontSize: "16px", color: "#D90000" }} className="text-red-500" onClick={() => setCriteriaData(criteriaData.filter(i => i.key !== record.key))} />
           </div>
         );

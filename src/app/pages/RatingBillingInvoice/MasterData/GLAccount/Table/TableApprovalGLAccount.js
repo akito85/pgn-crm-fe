@@ -70,6 +70,7 @@ export const columnsApprovalGLAccount = (
         const categoryMap = {
           GL_ACCOUNT: "GL Account",
           INACTIVE_GL_ACCOUNT: "Inactive GL Account",
+          ACTIVATED_GL_ACCOUNT: "Activated GL Account",
         };
         return categoryMap[text] || text || "-";
       },
