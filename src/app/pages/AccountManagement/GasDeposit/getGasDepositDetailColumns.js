@@ -38,7 +38,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "period",
     width: 180,
     align: "center",
-    sorter: (a, b) => sorterFunction("period", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "period",
@@ -57,7 +56,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "balanceM3",
     width: 150,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceM3", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceM3",
@@ -74,7 +72,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "balanceMscf",
     width: 160,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceMscf", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceMscf",
@@ -91,7 +88,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "balanceMmbtu",
     width: 170,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceMmbtu", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceMmbtu",
@@ -108,7 +104,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "balanceAmount",
     width: 170,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceAmount", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceAmount",
@@ -125,7 +120,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "availableAmount",
     width: 180,
     align: "right",
-    sorter: (a, b) => sorterFunction("availableAmount", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "availableAmount",
@@ -141,7 +135,7 @@ const getGasDepositDetailColumns = ({
     title: "STATUS",
     dataIndex: "status",
     width: 120,
-    sorter: (a, b) => sorterFunction("status", a, b),
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "status",
