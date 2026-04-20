@@ -174,6 +174,14 @@ const buildPosDetailRow = ({
     vatCode: priceInformation?.vatCode ?? currentData?.vatCode ?? null,
     vat: priceInformation?.vat ?? currentData?.vat ?? null,
     vatEqv: priceInformation?.vatEqv ?? currentData?.vatEqv ?? null,
+    witholdingVatCode:
+      priceInformation?.witholdingVatCode ??
+      currentData?.witholdingVatCode ??
+      null,
+    witholdingVatRate:
+      priceInformation?.witholdingVatRate ??
+      currentData?.witholdingVatRate ??
+      null,
     witholdingTax:
       priceInformation?.witholdingTax ?? currentData?.witholdingTax ?? null,
     vatExchangeRateType:
@@ -196,6 +204,7 @@ const buildPosDetailRow = ({
       priceInformation?.totalAmountEqv ??
       currentData?.totalAmountEqv ??
       null,
+    productId: priceInformation?.productId ?? currentData?.productId ?? null,
     rateType: priceInformation?.rateType || currentData?.rateType || null,
     rateDate: priceInformation?.rateDate || currentData?.rateDate || null,
     rate: priceInformation?.rate ?? currentData?.rate ?? null,
@@ -452,10 +461,13 @@ const PointOfSalesPageDetailPOS = ({
               vatCode: taxData?.vatCode ?? null,
               vat: taxData?.vat ?? null,
               vatEqv: taxData?.vatEqv ?? null,
+              witholdingVatCode: taxData?.witholdingVatCode ?? null,
+              witholdingVatRate: taxData?.witholdingVatRate ?? null,
               witholdingTax: taxData?.witholdingTax ?? null,
               vatExchangeRateType: taxData?.vatExchangeRateType || null,
               vatExchangeRateDate: taxData?.vatExchangeRateDate || null,
               vatExchangeRate: taxData?.vatExchangeRate ?? null,
+              productId: taxData?.productId ?? null,
               rateType: taxData?.rateType || null,
               rateDate: taxData?.rateDate || null,
               rate: taxData?.rate ?? null,

@@ -818,12 +818,12 @@ const PosForm = ({ type }) => {
     if (filteredData.length === 0) {
       setData((prev) => {
         const hasMaterai = prev.some(
-          (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C001",
+          (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C006",
         );
         if (hasMaterai) {
           isUpdatingFromMaterai.current = true;
           return prev
-            .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C001")
+            .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C006")
             .map((items, index) => ({ ...items, lineNumber: index + 1 }));
         }
         return prev;
@@ -872,11 +872,11 @@ const PosForm = ({ type }) => {
             isUpdatingFromMaterai.current = true;
             setData((prev) => {
               const hasMaterai = prev.some(
-                (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C001",
+                (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C006",
               );
               if (!hasMaterai) return prev;
               return prev
-                .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C001")
+                .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C006")
                 .map((items, index) => ({ ...items, lineNumber: index + 1 }));
             });
             return;
@@ -912,10 +912,10 @@ const PosForm = ({ type }) => {
           isUpdatingFromMaterai.current = true;
           setData((prev) => {
             const baseData = prev.some(
-              (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C001",
+              (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C006",
             )
               ? prev.filter(
-                  (item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C001",
+                  (item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C006",
                 )
               : prev;
             return [...baseData, newMaterai].map((items, index) => ({
@@ -1331,15 +1331,36 @@ const PosForm = ({ type }) => {
         posNumber: item?.posNumber,
         lineNumber: item?.lineNumber || 0,
         type: item?.typeId,
-        item: String(item?.itemId),
+        typeValueName: item?.typeValueName || null,
+        item: String(item?.item ?? item?.itemId ?? ""),
+        itemName: item?.itemName || null,
+        source: item?.source || null,
+        priceCode: item?.priceCode || null,
         price: item?.price || 0,
         reference: item?.reference || null,
         quantity: item?.quantity,
         uom: item?.uom || null,
         currency: item?.currency || null,
         amount: item?.amount || 0,
+        totalAmount: item?.totalAmount || item?.total || 0,
         totalAmountEqv: item?.totalAmountEqv || 0,
+        productId: item?.productId ?? null,
         convertedCurrency: item?.convertedCurrency || null,
+        vatBasis: item?.vatBasis ?? 0,
+        vatBasisEqv: item?.vatBasisEqv ?? 0,
+        vatRate: item?.vatRate ?? null,
+        vatCode: item?.vatCode ?? null,
+        vat: item?.vat ?? 0,
+        vatEqv: item?.vatEqv ?? 0,
+        witholdingVatCode: item?.witholdingVatCode ?? null,
+        witholdingVatRate: item?.witholdingVatRate ?? null,
+        witholdingTax: item?.witholdingTax ?? 0,
+        vatExchangeRateType: item?.vatExchangeRateType ?? null,
+        vatExchangeRateDate: item?.vatExchangeRateDate ?? null,
+        vatExchangeRate: item?.vatExchangeRate ?? null,
+        rateType: item?.rateType ?? null,
+        rateDate: item?.rateDate ?? null,
+        rate: item?.rate ?? null,
         amountEqvIdr: item?.amountEqvIdr || 0,
         amountEqvUsd: item?.amountEqvUsd || 0,
         eqvIdr: item?.eqvIdr || 0,

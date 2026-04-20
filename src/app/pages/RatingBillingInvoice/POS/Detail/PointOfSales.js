@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
-import PosDetailTableView from "../Table/PosDetailTableView";
 import { getDetailListPointOfSales } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
+import TableRBI from "../../../../../components/TableRBI";
+import { columnsTablePOSDetailInfo } from "../Table/TablePOSDetailInfo";
 
 const PointOfSales = ({ id = 0, customerType = 1, dispatch = () => {} }) => {
   // Selector
@@ -84,20 +85,34 @@ const PointOfSales = ({ id = 0, customerType = 1, dispatch = () => {} }) => {
 // console.log(data_viewDetail)
   return (
     <div className="mt-5">
-      <PosDetailTableView
-        data={data_viewDetail || []}
-        handleChange={handleChange}
-        handleChangeSize={handleChange}
-        totalElement={data_viewDetail?.length || 0}
-        page={page}
+      <TableRBI
+        idTable="table-pos-detail-view"
+        dataSource={data_viewDetail || []}
+        totalData={data_viewDetail?.length || 0}
+        current={page}
         pageSize={pageSize}
-        searchInput={searchInput}
-        searchedColumn={searchedColumn}
-        searchText={searchText}
-        handleSearch={handleSearch}
+        onChange={handleChange}
+        onSizeChanger={handleChange}
         onSort={onSort}
-        type={"detail"}
-        search={search}
+        tableScrolled={{ x: 5000, y: 400 }}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        showRefresh={false}
+        columns={columnsTablePOSDetailInfo(
+          search,
+          page,
+          pageSize,
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          () => {},
+          () => {},
+          undefined,
+          undefined,
+          data_viewDetail || [],
+          "detail",
+        )}
       />
     </div>
   );
