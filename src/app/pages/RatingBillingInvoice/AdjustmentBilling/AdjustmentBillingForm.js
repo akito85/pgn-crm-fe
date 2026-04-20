@@ -17,6 +17,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   getListCategory,
+  getListCalculationType,
   getSelectTOP,
   recalculateAdjustmentBilling,
   updateAdjustmentBilling,
@@ -144,6 +145,7 @@ const AdjustmentBillingForm = ({ type }) => {
     dispatch(getSelectTOP());
     dispatch(getListApprovalHierarchy());
     dispatch(getListType());
+    dispatch(getListCalculationType());
   }, [dispatch]);
 
   useEffect(() => {
@@ -213,10 +215,49 @@ const AdjustmentBillingForm = ({ type }) => {
         }
 
         if (dataDetail?.postInvoice || dataDetail?.calculationType) {
-          postInvoiceValue = dataDetail?.postInvoice;
+          const matchedCalculationType = (dataListCalculationType || []).find(
+            (item) => {
+              const candidates = [
+                item?.id,
+                item?.value,
+                item?.name,
+                item?.text,
+                item?.label,
+              ]
+                .filter(
+                  (candidate) => candidate !== null && candidate !== undefined,
+                )
+                .map((candidate) => String(candidate));
+
+              return candidates.includes(String(dataDetail?.calculationType));
+            },
+          );
+
+          postInvoiceValue =
+            matchedCalculationType?.name ||
+            matchedCalculationType?.text ||
+            dataDetail?.postInvoice;
           onDemandValue = dataDetail?.onDemand;
         }
       }
+
+      const matchedCalculationTypeId = (dataListCalculationType || []).find(
+        (item) => {
+          const candidates = [
+            item?.id,
+            item?.value,
+            item?.name,
+            item?.text,
+            item?.label,
+          ]
+            .filter(
+              (candidate) => candidate !== null && candidate !== undefined,
+            )
+            .map((candidate) => String(candidate));
+
+          return candidates.includes(String(dataDetail?.calculationType));
+        },
+      )?.id;
 
       const obj = {
         accountNumberWithName:
@@ -256,7 +297,8 @@ const AdjustmentBillingForm = ({ type }) => {
         remark: dataDetail?.remark,
         apphierId: apphierId,
         classificationAdjustment: classificationAdjustmentValue,
-        postInvoice: dataDetail?.calculationType || null,
+        postInvoice:
+          matchedCalculationTypeId ?? dataDetail?.calculationType ?? null,
         onDemand: onDemandValue,
       };
 
@@ -314,7 +356,7 @@ const AdjustmentBillingForm = ({ type }) => {
         (dataDetail?.tAdjustmentBillingDetail || []).length > 0,
       );
     },
-    [form, dataListClassification, dispatch],
+    [form, dataListCalculationType, dataListClassification, dispatch],
   );
 
   const buildAdjustmentRequestBody = useCallback(
@@ -353,6 +395,9 @@ const AdjustmentBillingForm = ({ type }) => {
       } = formValue;
 
       const classificationAdjustment = formValue?.classificationAdjustment;
+      const resolvedBillingPeriodId =
+        correctionBillingPeriod ?? billingPeriodId ?? null;
+
       const calculationTypeValue =
         dataListCalculationType?.find((item) => {
           const candidates = [
@@ -423,8 +468,8 @@ const AdjustmentBillingForm = ({ type }) => {
         rateDate: formValue?.rateDate
           ? moment(formValue?.rateDate).format("YYYY-MM-DDTHH:mm:ss")
           : dataInvoice?.rateDate,
-        billingPeriod: correctionBillingPeriod,
-        correctionBillPeriod: correctionBillingPeriod,
+        billingPeriod: resolvedBillingPeriodId,
+        correctionBillPeriod: resolvedBillingPeriodId,
         accountId: idAccount,
         totalAdjustmentAmountIdr: sumIDR || null,
         totalAdjustmentAmountUsd: sumUSD || null,
@@ -447,6 +492,7 @@ const AdjustmentBillingForm = ({ type }) => {
     },
     [
       adjustmentNumber,
+      billingPeriodId,
       dataInvoice,
       dataListCalculationType,
       dataTermsOfPayment,
