@@ -12,7 +12,7 @@ const SVG = ({
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     {...otherProps}>
-    <path d="M8.75 10.5L5.25 7L8.75 3.5" stroke={color || "currentColor"} stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M8.75 10.5L5.25 7L8.75 3.5" stroke={color || "currentColor"} strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
