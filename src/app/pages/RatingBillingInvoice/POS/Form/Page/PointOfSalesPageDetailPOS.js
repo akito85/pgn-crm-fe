@@ -137,7 +137,7 @@ const buildPosDetailRow = ({
     typeValueName:
       priceInformation?.typeValueName || currentData?.typeValueName || null,
     source: priceInformation?.source || currentData?.source || null,
-    item: priceInformation?.item || currentData?.item || null,
+    item: priceInformation?.itemId || priceInformation?.item || currentData?.item || null,
     itemName:
       priceInformation?.itemName ||
       currentData?.itemName ||
