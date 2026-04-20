@@ -236,15 +236,20 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
               } = form.getFieldsValue(true);
 
               const body = {
-                appHierId,
-                gasDepositIds: isBulk ? selectedRowKeys : [id]
+                stepNumber: current + 1,
+                type: formType.toUpperCase(),
+                id,
+                data : {
+                  gasDepositIds: isBulk ? selectedRowKeys : [id],
+                  appHierId,
+                }
               }
 
               await dispatch(
                 validateCreateUpdate({
                   body,
                   services: accountManagementService,
-                  endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+                  endPoint: `/v1/dbs/api/gas-deposit/${formType}/validate-step`,
                   type: formType
                 })
               ).unwrap();
@@ -318,17 +323,22 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         const {
           appHierId
         } = form.getFieldsValue(true);
-
+        
         const body = {
-          appHierId,
-          gasDepositIds: isBulk ? selectedRowKeys : [id]
-        };
+          stepNumber: current + 1,
+          type: formType.toUpperCase(),
+          id,
+          data : {
+            gasDepositIds: isBulk ? selectedRowKeys : [id],
+            appHierId,
+          }
+        }
 
         await dispatch(
           validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+            endPoint: `/v1/dbs/api/gas-deposit/${formType}/validate-step`,
             type: formType
           })
         ).unwrap();
