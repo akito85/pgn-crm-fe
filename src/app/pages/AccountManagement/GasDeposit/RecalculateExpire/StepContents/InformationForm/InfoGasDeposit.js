@@ -1,5 +1,13 @@
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import StatusComponent from "../../../../../../../components/StatusComponent";
 
+/**
+ * Read-only summary of a single gas deposit record's key fields,
+ * displayed in the Gas Deposit Information card on step 0.
+ *
+ * @param {{ detail: object }} props
+ */
 const InfoGasDeposit = ({ detail }) => {
   const {
     earnPeriodStart,

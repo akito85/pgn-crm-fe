@@ -3,13 +3,10 @@ import accountManagementService from "../../../services/account_management/accou
 import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
 
 const initialState = {
-  // --- Shared ---
-  loading: false,
-
   // --- List ---
   loading_listMd: false,
   list_multiDestination: [],
-  pagination_multiDestination: {
+  pagination_listMd: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -19,7 +16,7 @@ const initialState = {
   // --- Approval List ---
   loading_listMdApproval: false,
   list_multiDestinationApproval: [],
-  pagination_multiDestinationApproval: {
+  pagination_listMdApproval: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -44,14 +41,15 @@ const initialState = {
   loading_inactivateMd: false,
 
   // --- Form Options (approval hierarchy, attachment categories, account standard) ---
-  loading_listMdApprovalOption: false,
-  list_mdApprovalOptions: [],
-  loading_listMdApprovalHierarchyDetail: false,
-  list_mdApprovalHierarchyDetail: [],
+  loading_listMdApprovalHierarchy: false,
+  list_mdApprovalHierarchy: [],
+  loading_detailMdApprovalHierarchy: false,
+  detail_mdApprovalHierarchy: [],
+  loading_listMdAttachmentCategory: false,
   list_mdAttachmentCategory: [],
-  loading_listMdAccountStandard: false,
-  list_mdAccountStandard: [],
-  pagination_mdAccountStandard: {
+  loading_listMdAccount: false,
+  list_mdAccount: [],
+  pagination_listMdAccount: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -59,12 +57,8 @@ const initialState = {
   },
 
   // --- History ---
-  data_mdApprovalHistory: {},
-
-  // --- Dynamic Search ---
-  data_globalTypeCondition: [],
-  data_globalTypeOperator: [],
-  data_globalTypeColumn: [],
+  loading_mdApprovalHistory: false,
+  detail_mdApprovalHistory: {},
 };
 
 /**
@@ -76,8 +70,8 @@ const initialState = {
  * @param {object}  arg.body        - Pagination / search / sort body.
  * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
  */
-export const getMultiDestination = createAsyncThunk(
-  "GET_MULTI_DESTINATION",
+export const getMultiDestinations = createAsyncThunk(
+  "GET_MULTI_DESTINATIONS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/list/${id}`;
@@ -104,7 +98,7 @@ export const getMultiDestination = createAsyncThunk(
  * @param {object}  arg.body        - Pagination / search / sort body.
  * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
  */
-export const getMultiDestinationApproval = createAsyncThunk(
+export const getMultiDestinationApprovals = createAsyncThunk(
   "GET_MULTI_DESTINATION_APPROVAL",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
@@ -121,6 +115,43 @@ export const getMultiDestinationApproval = createAsyncThunk(
         ...response.data,
         isLoadMore,
       };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+
+/**
+ * Fetches the current (non-draft) detail of a multi destination record.
+ *
+ * @param {number} id - Multi destination ID.
+ */
+export const getMultiDestination = createAsyncThunk(
+  "GET_MULTI_DESTINATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/multi-destination/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+/**
+ * Fetches the draft detail of a multi destination record.
+ *
+ * @param {number} id - Multi destination ID.
+ */
+export const getMultiDestinationDraft = createAsyncThunk(
+  "GET_MULTI_DESTINATION_DRAFT",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -245,46 +276,10 @@ export const updateMultiDestination = createAsyncThunk(
 );
 
 /**
- * Fetches the current (non-draft) detail of a multi destination record.
- *
- * @param {number} id - Multi destination ID.
- */
-export const getDetailMultiDestination = createAsyncThunk(
-  "GET_DETAIL_MULTI_DESTINATION",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/multi-destination/${id}`;
-      const response = await accountManagementService.getDetail(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-/**
- * Fetches the draft detail of a multi destination record.
- *
- * @param {number} id - Multi destination ID.
- */
-export const getDetailDraftMultiDestination = createAsyncThunk(
-  "GET_DETAIL_DRAFT_MULTI_DESTINATION",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
-      const response = await accountManagementService.getDetail(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-/**
  * Fetches the list of approval hierarchy options for multi destinations.
  */
-export const getMdApprovalHierarchy = createAsyncThunk(
-  "GET_MD_APPROVAL_HIERARCHY",
+export const getMdApprovalHierarchies = createAsyncThunk(
+  "GET_MD_APPROVAL_HIERARCHIES",
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
@@ -301,7 +296,7 @@ export const getMdApprovalHierarchy = createAsyncThunk(
  *
  * @param {number} id - Approval hierarchy ID.
  */
-export const getDetailMdApprovalHierarchy = createAsyncThunk(
+export const getMdApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_MD_APPROVAL_HIERARCHY",
   async (id, thunkAPI) => {
     try {
@@ -317,8 +312,8 @@ export const getDetailMdApprovalHierarchy = createAsyncThunk(
 /**
  * Fetches the list of attachment categories for multi destinations.
  */
-export const getMdAttachmentCategory = createAsyncThunk(
-  "GET_MD_ATTACHMENT_CATEGORY",
+export const getMdAttachmentCategories = createAsyncThunk(
+  "GET_MD_ATTACHMENT_CATEGORIES",
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/attachment-category`;
@@ -339,8 +334,8 @@ export const getMdAttachmentCategory = createAsyncThunk(
  * @param {object}  arg.body        - Pagination / search body.
  * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
  */
-export const getMdAccountStandard = createAsyncThunk(
-  "GET_MD_ACCOUNT_STANDARD",
+export const getMdAccounts = createAsyncThunk(
+  "GET_MD_ACCOUNT",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/list-account/${id}`;
@@ -576,65 +571,17 @@ export const getMdApprovalHistory = createAsyncThunk(
   }
 );
 
-/**
- * Fetches the list of searchable columns for the multi destination dynamic search.
- */
-export const getMdColumnApi = createAsyncThunk(
-  "GET_MD_COLUMN_API",
-  async (_, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/multi-destination/list-search-column";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
-
-/**
- * Fetches the list of search condition types for the multi destination dynamic search.
- */
-export const getMdConditionApi = createAsyncThunk(
-  "GET_MD_CONDITION_API",
-  async (_, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/multi-destination/list-search-condition";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
-
-/**
- * Fetches the list of search operator types for the multi destination dynamic search.
- */
-export const getMdOperatorApi = createAsyncThunk(
-  "GET_MD_OPERATOR_API",
-  async (_, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/multi-destination/list-search-operator";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
-
 const multiDestinationSlice = createSlice({
   name: "multiDestination",
   initialState,
   extraReducers: {
     /** Get Multi Destination */
-    [getMultiDestination.pending]: (state, action) => {
+    [getMultiDestinations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listMd = true;
       }
     },
-    [getMultiDestination.fulfilled]: (state, action) => {
+    [getMultiDestinations.fulfilled]: (state, action) => {
       state.loading_listMd = false;
       const { result, page, isLoadMore } = action.payload;
 
@@ -652,19 +599,19 @@ const multiDestinationSlice = createSlice({
           state.list_multiDestination = result;
       }
 
-      state.pagination_multiDestination = {
+      state.pagination_listMd = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getMultiDestination.rejected]: (state, action) => {
+    [getMultiDestinations.rejected]: (state, action) => {
       state.loading_listMd = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestination = [];
-        state.pagination_multiDestination = {
+        state.pagination_listMd = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -674,12 +621,12 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Multi Destination Approval */
-    [getMultiDestinationApproval.pending]: (state, action) => {
+    [getMultiDestinationApprovals.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listMdApproval = true;
       }
     },
-    [getMultiDestinationApproval.fulfilled]: (state, action) => {
+    [getMultiDestinationApprovals.fulfilled]: (state, action) => {
       state.loading_listMdApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
@@ -697,19 +644,19 @@ const multiDestinationSlice = createSlice({
           state.list_multiDestinationApproval = result;
       }
 
-      state.pagination_multiDestinationApproval = {
+      state.pagination_listMdApproval = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getMultiDestinationApproval.rejected]: (state, action) => {
+    [getMultiDestinationApprovals.rejected]: (state, action) => {
       state.loading_listMdApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestinationApproval = [];
-        state.pagination_multiDestinationApproval = {
+        state.pagination_listMdApproval = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -719,27 +666,27 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Detail Multi Destination */
-    [getDetailMultiDestination.pending]: (state) => {
+    [getMultiDestination.pending]: (state) => {
       state.loading_detailMd = true;
     },
-    [getDetailMultiDestination.fulfilled]: (state, action) => {
+    [getMultiDestination.fulfilled]: (state, action) => {
       state.detail_multiDestination = action.payload?.result || {};
       state.loading_detailMd = false;
     },
-    [getDetailMultiDestination.rejected]: (state) => {
+    [getMultiDestination.rejected]: (state) => {
       state.detail_multiDestination = {};
       state.loading_detailMd = false;
     },
 
     /** Get Detail Draft Multi Destination */
-    [getDetailDraftMultiDestination.pending]: (state) => {
+    [getMultiDestinationDraft.pending]: (state) => {
       state.loading_detailDraftMd = true;
     },
-    [getDetailDraftMultiDestination.fulfilled]: (state, action) => {
+    [getMultiDestinationDraft.fulfilled]: (state, action) => {
       state.detailDraft_multiDestination = action.payload?.result || {};
       state.loading_detailDraftMd = false;
     },
-    [getDetailDraftMultiDestination.rejected]: (state) => {
+    [getMultiDestinationDraft.rejected]: (state) => {
       state.detailDraft_multiDestination = {};
       state.loading_detailDraftMd = false;
     },
@@ -767,52 +714,52 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Multi Destination Approval Hierarchy */
-    [getMdApprovalHierarchy.pending]: (state) => {
-      state.loading_listMdApprovalOption = true;
+    [getMdApprovalHierarchies.pending]: (state) => {
+      state.loading_listMdApprovalHierarchy = true;
     },
-    [getMdApprovalHierarchy.fulfilled]: (state, action) => {
-      state.list_mdApprovalOptions = action.payload;
-      state.loading_listMdApprovalOption = false;
+    [getMdApprovalHierarchies.fulfilled]: (state, action) => {
+      state.list_mdApprovalHierarchy = action.payload;
+      state.loading_listMdApprovalHierarchy = false;
     },
-    [getMdApprovalHierarchy.rejected]: (state) => {
-      state.list_mdApprovalOptions = [];
-      state.loading_listMdApprovalOption = false;
+    [getMdApprovalHierarchies.rejected]: (state) => {
+      state.list_mdApprovalHierarchy = [];
+      state.loading_listMdApprovalHierarchy = false;
     },
 
     /** Get Multi Destination Detail Approval Hierarchy */
-    [getDetailMdApprovalHierarchy.pending]: (state) => {
-      state.loading_listMdApprovalHierarchyDetail = true;
+    [getMdApprovalHierarchy.pending]: (state) => {
+      state.loading_detailMdApprovalHierarchy = true;
     },
-    [getDetailMdApprovalHierarchy.fulfilled]: (state, action) => {
-      state.list_mdApprovalHierarchyDetail = action.payload;
-      state.loading_listMdApprovalHierarchyDetail = false;
+    [getMdApprovalHierarchy.fulfilled]: (state, action) => {
+      state.detail_mdApprovalHierarchy = action.payload;
+      state.loading_detailMdApprovalHierarchy = false;
     },
-    [getDetailMdApprovalHierarchy.rejected]: (state) => {
-      state.list_mdApprovalHierarchyDetail = [];
-      state.loading_listMdApprovalHierarchyDetail = false;
+    [getMdApprovalHierarchy.rejected]: (state) => {
+      state.detail_mdApprovalHierarchy = [];
+      state.loading_detailMdApprovalHierarchy = false;
     },
 
     /** Get Multi Destination Attachment Category */
-    [getMdAttachmentCategory.pending]: (state) => {
-      state.loading = true;
+    [getMdAttachmentCategories.pending]: (state) => {
+      state.loading_listMdAttachmentCategory = true;
     },
-    [getMdAttachmentCategory.fulfilled]: (state, action) => {
+    [getMdAttachmentCategories.fulfilled]: (state, action) => {
       state.list_mdAttachmentCategory = action.payload;
-      state.loading = false;
+      state.loading_listMdAttachmentCategory = false;
     },
-    [getMdAttachmentCategory.rejected]: (state) => {
+    [getMdAttachmentCategories.rejected]: (state) => {
       state.list_mdAttachmentCategory = [];
-      state.loading = false;
+      state.loading_listMdAttachmentCategory = false;
     },
 
     /** Get Multi Destination Account Standard */
-    [getMdAccountStandard.pending]: (state, action) => {
+    [getMdAccounts.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listMdAccountStandard = true;
+        state.loading_listMdAccount = true;
       }
     },
-    [getMdAccountStandard.fulfilled]: (state, action) => {
-      state.loading_listMdAccountStandard = false;
+    [getMdAccounts.fulfilled]: (state, action) => {
+      state.loading_listMdAccount = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -822,31 +769,31 @@ const multiDestinationSlice = createSlice({
         }));
 
         if (isLoadMore) {
-          const currentIds = new Set(state.list_mdAccountStandard.map((item) => item.accountId));
+          const currentIds = new Set(state.list_mdAccount.map((item) => item.accountId));
           const filteredResult = resultWithIds.filter((resultItem) => !currentIds.has(resultItem.accountId));
 
-          state.list_mdAccountStandard = [
-            ...state.list_mdAccountStandard,
+          state.list_mdAccount = [
+            ...state.list_mdAccount,
             ...filteredResult,
           ];
         }
         else
-          state.list_mdAccountStandard = resultWithIds;
+          state.list_mdAccount = resultWithIds;
       }
 
-      state.pagination_mdAccountStandard = {
+      state.pagination_listMdAccount = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getMdAccountStandard.rejected]: (state, action) => {
-      state.loading_listMdAccountStandard = false;
+    [getMdAccounts.rejected]: (state, action) => {
+      state.loading_listMdAccount = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_mdAccountStandard = [];
-        state.pagination_mdAccountStandard = {
+        state.list_mdAccount = [];
+        state.pagination_listMdAccount = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -910,50 +857,14 @@ const multiDestinationSlice = createSlice({
 
     /** Get Multi Destination Approval History */
     [getMdApprovalHistory.pending]: (state) => {
-      state.loading = true;
+      state.loading_mdApprovalHistory = true;
     },
     [getMdApprovalHistory.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_mdApprovalHistory = action.payload;
+      state.loading_mdApprovalHistory = false;
+      state.detail_mdApprovalHistory = action.payload;
     },
     [getMdApprovalHistory.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Multi Destination Column API  */
-    [getMdColumnApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getMdColumnApi.fulfilled]: (state, action) => {
-      state.data_globalTypeColumn = action.payload;
-      state.loading = false;
-    },
-    [getMdColumnApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Multi Destination Condition API  */
-    [getMdConditionApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getMdConditionApi.fulfilled]: (state, action) => {
-      state.data_globalTypeCondition = action.payload;
-      state.loading = false;
-    },
-    [getMdConditionApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Multi Destination Operator API  */
-    [getMdOperatorApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getMdOperatorApi.fulfilled]: (state, action) => {
-      state.data_globalTypeOperator = action.payload;
-      state.loading = false;
-    },
-    [getMdOperatorApi.rejected]: (state) => {
-      state.loading = false
+      state.loading_mdApprovalHistory = false;
     },
   },
 });

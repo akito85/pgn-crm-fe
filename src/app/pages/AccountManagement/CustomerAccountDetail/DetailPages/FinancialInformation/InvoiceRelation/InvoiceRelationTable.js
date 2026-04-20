@@ -6,10 +6,9 @@ import NxTable from "../../../../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getInvoiceRelation,
+  getInvoiceRelations,
   downloadInvoiceRelation
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 
@@ -40,7 +39,7 @@ const InvoiceRelationTable = ({
   const dispatch = useDispatch();
   const {
     list_invoiceRelation: dataSource,
-    pagination_invoiceRelation: pagination,
+    pagination_listIr: pagination,
     loading_listIr: loading
   } = useSelector((state) => state.invoiceRelation);
 
@@ -62,11 +61,6 @@ const InvoiceRelationTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: []
-  }));
-
   // --- Handlers ---
   /**
    * Resets pagination to page 0 and re-fetches the invoice relation list with current search/sort/filter state.
@@ -81,7 +75,7 @@ const InvoiceRelationTable = ({
       filterRules
     };
 
-    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
+    dispatch(getInvoiceRelations({ id: accountId, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -135,7 +129,7 @@ const InvoiceRelationTable = ({
       };
 
       await dispatch(
-        getInvoiceRelation({ id: accountId, body, isLoadMore: true })
+        getInvoiceRelations({ id: accountId, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -168,7 +162,7 @@ const InvoiceRelationTable = ({
     };
 
     setPage(0);
-    dispatch(getInvoiceRelation({ id: accountId, body, isLoadMore: false }));
+    dispatch(getInvoiceRelations({ id: accountId, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
@@ -207,7 +201,7 @@ const InvoiceRelationTable = ({
           }
         }
       ),
-    handleUpdate: ({ id }) =>
+    handleUpdate: ({ id, status, statusApproval }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_INVOICE_RELATION
@@ -218,7 +212,9 @@ const InvoiceRelationTable = ({
           state: {
             idAccount: accountId,
             idCustomer: customerId,
-            id
+            id,
+            status,
+            statusApproval
           }
         }
       ),
@@ -236,29 +232,26 @@ const InvoiceRelationTable = ({
   ).map((col) => ({
     ...col,
     width: 70,
-    align: "center"
+    align: "center",
+    fixed: "right",
   }));
 
   const baseColumns = useMemo(
     () =>
-      getInvoiceRelationColumns(
+      getInvoiceRelationColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
-      ),
+      }),
     [search, searchInput, searchText, searchedColumn]
   );
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () => [...baseColumns, ...actionCols],
     [baseColumns, actionCols]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -276,9 +269,6 @@ const InvoiceRelationTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
       />
     </div>

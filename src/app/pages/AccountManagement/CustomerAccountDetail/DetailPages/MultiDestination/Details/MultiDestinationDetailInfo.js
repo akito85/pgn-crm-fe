@@ -32,6 +32,7 @@ const MultiDestinationDetailInfo = ({ detail = {} }) => {
     startDate,
     endDate,
     status,
+    statusApproval,
     description
   } = detail;
 
@@ -42,11 +43,11 @@ const MultiDestinationDetailInfo = ({ detail = {} }) => {
           {/* Multi Destination Information */}
           <NxDetailText label="Account">{`${accountNumber}-${accountName}`}</NxDetailText>
           <NxDetailText label="Account SOR">{sor}</NxDetailText>
-          <NxDetailText label="Account Cost Center">{costCenter}</NxDetailText>
+          <NxDetailText label="Cost Center">{costCenter}</NxDetailText>
           <NxDetailText label="Metering Reading Code">
             {meterReadingCodes}
           </NxDetailText>
-          <NxDetailText label="Account Segment">{segment}</NxDetailText>
+          <NxDetailText label="Segment">{segment}</NxDetailText>
           <NxDetailText label="Account Group Type">
             {accountGroupType}
           </NxDetailText>
@@ -67,6 +68,9 @@ const MultiDestinationDetailInfo = ({ detail = {} }) => {
           </NxDetailText>
           <NxDetailText label="Status">
             <StatusComponent colour={status}>{status}</StatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <StatusComponent colour={statusApproval}>{statusApproval}</StatusComponent>
           </NxDetailText>
         </div>
         <div className="w-full">

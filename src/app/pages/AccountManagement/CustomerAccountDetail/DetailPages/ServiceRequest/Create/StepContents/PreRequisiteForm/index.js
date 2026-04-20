@@ -6,8 +6,8 @@ import { Button, Popconfirm, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import {
-  getPrerequisitesByServiceRequest,
-  deletePrerequisiteForServiceRequest,
+  getSrPrerequisites,
+  deleteSrPrerequisite,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -82,7 +82,7 @@ export default function PreRequisiteForm({
     async (page) => {
       if (!accountId || !srId) return;
       const result = await dispatch(
-        getPrerequisitesByServiceRequest({ accountId, srId, page, size: PAGE_SIZE }),
+        getSrPrerequisites({ accountId, srId, page, size: PAGE_SIZE }),
       ).unwrap();
 
       const payload = result?.data ?? result;
@@ -175,7 +175,7 @@ export default function PreRequisiteForm({
         return;
       }
       await dispatch(
-        deletePrerequisiteForServiceRequest({ accountId, srId, id: record.id }),
+        deleteSrPrerequisite({ accountId, srId, id: record.id }),
       );
       loadFirst();
     },

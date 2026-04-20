@@ -7,7 +7,7 @@ import InvoiceRelationDetailTabs from "./InvoiceRelationDetailTabs";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { getDetailInvoiceRelation, getDetailDraftInvoiceRelation, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
+import { getInvoiceRelation, getInvoiceRelationDraft, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
@@ -191,12 +191,12 @@ const InvoiceRelationDetail = ({
 
   useEffect(() => {
     if (idIr)
-      dispatch(getDetailInvoiceRelation(idIr));
+      dispatch(getInvoiceRelation(idIr));
   }, [idIr]);
   
   useEffect(() => {
     if (idIr && draftExist)
-      dispatch(getDetailDraftInvoiceRelation(idIr));
+      dispatch(getInvoiceRelationDraft(idIr));
   }, [idIr, draftExist])
 
   return (

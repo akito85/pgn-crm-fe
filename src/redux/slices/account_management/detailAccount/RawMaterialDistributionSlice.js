@@ -150,6 +150,11 @@ export const deleteRMS = createAsyncThunk(
       const url = `/v1/dbs/api/account-detail/source-distribution/soft-delete/raw-material/${id}`;
       if (hasValue(id)) {
         const response = await accountManagementService.deleteData(url);
+        thunkAPI.dispatch(showModalSuccess({
+          return: false,
+          title: "Successfully",
+          description: `Your data has been deleted`,
+        }));
         return response.data;
       }
     } catch (error) {

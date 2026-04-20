@@ -1,9 +1,37 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
-import NxModal from "../../../../../components/Nx/NxModal";
+import NxModal from "../../../../../../components/Nx/NxModal";
 import { Button } from "antd";
 
+/**
+ * Confirmation modal for recalculate/expire gas deposit submissions.
+ * Displays a tabbed recap (Gas Deposit → Approval → Attachment → Remark)
+ * and exposes Previous/Next/Confirm navigation. Supports both single and
+ * bulk modes.
+ *
+ * @param {{
+ *   form: import("antd").FormInstance;
+ *   formId: string;
+ *   isOpen: boolean;
+ *   handleCancel: () => void;
+ *   approvalData: object;
+ *   attachmentDataSource: object[];
+ *   type?: "draft" | "submit";
+ *   service: object;
+ *   accountId: number;
+ *   configApplication: string;
+ *   loading?: boolean;
+ *   detail: object;
+ *   id: number;
+ *   parentKey: string;
+ *   handleSubmitForm?: () => void;
+ *   isBulk?: boolean;
+ *   selectedRowKeys?: (string|number)[];
+ *   openedMemo: Record<string|number, true>;
+ *   onExpand: (expanded: boolean, record: object) => void;
+ * }} props
+ */
 const ConfirmationModal = ({
   form,
   formId,
@@ -13,22 +41,33 @@ const ConfirmationModal = ({
   attachmentDataSource,
   type = "",
   service,
+  accountId,
   configApplication,
   loading = false,
   detail,
-  details,
+  id,
+  parentKey,
   handleSubmitForm = () => {},
+  isBulk = false,
+  selectedRowKeys = [],
+  openedMemo,
+  onExpand,
 }) => {
-  const tabLength = type === "submit" ? 4 : 3;
-
-  const [activeTab, setActiveTab] = useState(0);
-
+  // --- Hooks ---
   const { loading_recalculateExpireGd } = useSelector((state) => state.gasDeposit);
 
+  // --- State ---
+  const [activeTab, setActiveTab] = useState(0);
+
+  // --- Derived values ---
+  const tabLength = type === "submit" ? 4 : 3;
   const isSubmit = type === "submit";
   const isDraft = type === "draft";
 
+  // --- Functions / handlers ---
   /**
+   * Advances or retreats the active tab within the allowed range.
+   *
    * @param {"next" | "prev"} direction
    */
   const handleChangeTab = (direction) => {
@@ -40,6 +79,8 @@ const ConfirmationModal = ({
     }
   }
 
+  // --- Effects ---
+  // Reset to the first tab whenever the modal is closed
   useEffect(() => {
     if (!isOpen) {
       setActiveTab(0);
@@ -82,15 +123,21 @@ const ConfirmationModal = ({
       <ConfirmationModalTabs
         form={form}
         detail={detail}
-        details={details}
+        id={id}
+        parentKey={parentKey}
         approvalData={approvalData}
         attachmentDataSource={attachmentDataSource}
         service={service}
+        accountId={accountId}
         type={type}
         configApplication={configApplication}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         disabled={loading}
+        isBulk={isBulk}
+        selectedRowKeys={selectedRowKeys}
+        openedMemo={openedMemo}
+        onExpand={onExpand}
       />
     </NxModal>
   )

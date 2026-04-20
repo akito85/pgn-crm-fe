@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getServiceAgreementColumns } from "./getServiceAgreementColumns";
-import { useColumnActionPermissionAccount } from "../../../ComponentAccount/ColumnActionPermissionAccount";
+import { RenderContentActions } from "../../../../../../components/ColumnActionPermission";
 import {
     SERVICE_AGREEMENT_PERMISSION_LIST,
     SERVICE_AGREEMENT_PERMISSION_MAPPING,
@@ -30,17 +30,59 @@ const ServiceAgreementTable = ({
         left: [],
     }));
 
-    const actionCols = useColumnActionPermissionAccount(
-        SERVICE_AGREEMENT_PERMISSION_LIST,
-        itemActions,
-        filteredArray,
-        "View",
-        SERVICE_AGREEMENT_PERMISSION_MAPPING
-    ).map((col) => ({
-        ...col,
-        width: 70,
-        align: "center",
-    }));
+    const actionCols = useMemo(() => {
+        const lowerCasePermissionList = SERVICE_AGREEMENT_PERMISSION_LIST.map((permission) =>
+            permission.toLowerCase()
+        );
+        const lowerCasePermissionMapping = Object.entries(
+            SERVICE_AGREEMENT_PERMISSION_MAPPING
+        ).reduce((acc, [action, permission]) => {
+            acc[action.toLowerCase()] = permission.toLowerCase();
+
+            return acc;
+        }, {});
+        const grantedPermissions = (filteredArray?.actionList || [])
+            .map((action) => action?.name?.toLowerCase())
+            .filter((action) => lowerCasePermissionList.includes(action));
+
+        const availableActions = (itemActions || [])
+            .map((item) => ({
+                ...item,
+                action: item?.action?.toLowerCase(),
+            }))
+            .filter((item) => item?.type === "table")
+            .filter((item) => {
+                const requiredPermission = lowerCasePermissionMapping[item.action] || item.action;
+
+                return grantedPermissions.includes(requiredPermission);
+            });
+
+        const permittedActions = availableActions.map((item) => item.action);
+
+        if (permittedActions.length === 0) {
+            return [];
+        }
+
+        return [{
+            key: "action",
+            title: "ACTION",
+            dataIndex: "action",
+            fixed: "right",
+            width: 150,
+            align: "center",
+            render: (text, record, index) => (
+                <RenderContentActions
+                    text={text}
+                    record={record}
+                    index={index}
+                    itemRender={availableActions}
+                    totalLength={permittedActions.length}
+                    permissions={permittedActions}
+                    sliceColumn="View"
+                />
+            ),
+        }];
+    }, [filteredArray, itemActions]);
 
     const baseColumns = useMemo(
         () =>
