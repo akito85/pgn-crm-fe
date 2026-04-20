@@ -212,17 +212,34 @@ const MultiDestinationDetail = ({
             </NxBaseContainer>
           </NxCardContainer>
 
-          {isApproval && (
-            <NxBaseContainer border>
-              <div className="flex justify-between">
-                <Button type={"menu"} onClick={() => navigate(-1)}>Cancel</Button>
-                <div className={"w-full flex justify-end gap-x-2"}>
-                  <Button type="reject" icon={<SVGIcon width={14} height={14} name="IconSquareX" />} className="flex-row-reverse" onClick={() => handleApprovalModal(true, "reject")}>Reject</Button>
-                  <Button type="approve" icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />} className="flex-row-reverse" onClick={() => handleApprovalModal(true, "approve")}>Approve</Button>
-                </div>
-              </div>
-            </NxBaseContainer>
-          )}
+          <NxBaseContainer border>
+            <div className="flex justify-between">
+              {isApproval ? (
+                <>
+                  <Button type={"menu"} onClick={() => navigate(-1)}>
+                    Cancel
+                  </Button>
+                  <div className={"w-full flex justify-end gap-x-2"}>
+                    <Button
+                      type="reject"
+                      onClick={() => handleApprovalModal(true, "reject")}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      type="approve"
+                      onClick={() => handleApprovalModal(true, "approve")}
+                    >
+                      Approve
+                    </Button>
+                  </div>
+                </>
+              ) :
+              <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                Back      
+              </Button>}
+            </div>
+          </NxBaseContainer>
         </div>
       </Spin>
       <NxApproveOrRejectModal
