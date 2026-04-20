@@ -329,8 +329,8 @@ const AdjustmentBillingForm = ({ type }) => {
       setIdInvoice(dataDetail.referenceInvoiceNumber);
       setBillingPeriodId(
         dataDetail?.correctionBillPeriod ??
-          dataDetail?.correctionBillingPeriod ??
-          dataDetail?.billingPeriod,
+        dataDetail?.correctionBillingPeriod ??
+        dataDetail?.billingPeriod,
       );
       setDataInvoice(dataDetail?.invoiceInformation || null);
 
@@ -422,7 +422,13 @@ const AdjustmentBillingForm = ({ type }) => {
     (formValue, { submit = false } = {}) => {
       const modifiedArray = listDataABI?.map((obj) => {
         const { key, ...rest } = obj;
-        return rest;
+        return {
+          ...rest,
+          adjustmentAmount:
+            typeof rest.adjustmentAmount === "string"
+              ? parseFloat(rest.adjustmentAmount.replace(/,/g, "")) || 0
+              : rest.adjustmentAmount,
+        };
       });
 
       const dataIDR = modifiedArray
@@ -457,14 +463,14 @@ const AdjustmentBillingForm = ({ type }) => {
       const resolvedCurrentBillingPeriodId = resolveBillingPeriodId(
         currentBillingPeriod,
         dataCurrentBillingPeriod?.id ??
-          dataCurrentBillingPeriod?.[0]?.id ??
-          dataDetail?.billingPeriod,
+        dataCurrentBillingPeriod?.[0]?.id ??
+        dataDetail?.billingPeriod,
       );
       const resolvedCorrectionBillingPeriodId = resolveBillingPeriodId(
         correctionBillingPeriod,
         billingPeriodId ??
-          dataDetail?.correctionBillPeriod ??
-          dataDetail?.correctionBillingPeriod,
+        dataDetail?.correctionBillingPeriodId ??
+        dataDetail?.correctionBillingPeriodId,
       );
 
       const calculationTypeValue =
@@ -542,7 +548,7 @@ const AdjustmentBillingForm = ({ type }) => {
           ? moment(formValue?.transactionDate).format("YYYY-MM-DDTHH:mm:ss")
           : null,
         rateType: formValue?.rateType || dataInvoice?.rateType,
-        rate: formValue?.rate ?? dataInvoice?.rate,
+        rate: formValue?.rateReal ?? dataInvoice?.rateReal,
         rateDate: formValue?.rateDate
           ? moment(formValue?.rateDate).format("YYYY-MM-DDTHH:mm:ss")
           : dataInvoice?.rateDate,
@@ -1035,9 +1041,8 @@ const AdjustmentBillingForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${flag === 1 ? "created" : "submitted"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
