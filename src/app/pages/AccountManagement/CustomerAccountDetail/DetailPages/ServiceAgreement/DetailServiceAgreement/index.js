@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import moment from 'moment'
@@ -22,6 +22,7 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import Attachment from "./Attachment";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import ServiceAgreementHistoryLogInformation from "../shared/HistoryLogInformation";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 const DetailServiceAgreement = () => {
   const { path } = usePrevLocContext();
@@ -121,8 +122,6 @@ const DetailServiceAgreement = () => {
 
     dispatch(getDetailServiceAgreementDraft(idSA))
       .unwrap()
-      .then((res) => {
-      })
       .catch((error) => {
         console.log(error)
       });
@@ -432,22 +431,26 @@ const DetailServiceAgreement = () => {
                       Back
                     </ButtonComponent>
                     <div className="flex justify-end gap-4">
-                      <ButtonComponent
-                        type="reject"
-                        onClick={() => {
-                          setModalApproveOrReject(true);
-                          setApproveOrReject("Reject");
-                        }}
-                      >
+                       <ButtonComponent
+                         type="reject"
+                         icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                         className="!w-fit !flex-row-reverse"
+                         onClick={() => {
+                           setModalApproveOrReject(true);
+                           setApproveOrReject("Reject");
+                         }}
+                       >
                         Reject
                       </ButtonComponent>
-                      <ButtonComponent
-                        type="approve"
-                        onClick={() => {
-                          setModalApproveOrReject(true);
-                          setApproveOrReject("Approve");
-                        }}
-                      >
+                       <ButtonComponent
+                         type="approve"
+                         icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                         className="!w-fit !flex-row-reverse"
+                         onClick={() => {
+                           setModalApproveOrReject(true);
+                           setApproveOrReject("Approve");
+                         }}
+                       >
                         Approve
                       </ButtonComponent>
                     </div>

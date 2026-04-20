@@ -93,6 +93,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const [isReset, setIsReset] = useState(false);
 
 	const [typeSubmit, setTypeSubmit] = useState("");
+	const [confirmationRemark, setConfirmationRemark] = useState("");
 
 	const [dataTableDetailProduct, setDataTableDetailProduct] = useState({});
 	const [modalValidateSa, setModalValidateSa] = useState(false)
@@ -1369,6 +1370,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const handleSaveAsDraft = async () => {
 		setLoadingNext(true);
 		setTypeSubmit("draft");
+		setConfirmationRemark("");
 
 		try {
 			await form.validateFields(["serviceType", "serviceAgreementNumber"]);
@@ -1605,6 +1607,9 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 	// Save/show to confirmation modal
 	const handleSubmitForm = (formValue, submitType = typeSubmit) => {
+		if (submitType === "draft") {
+			setConfirmationRemark("");
+		}
 
 		const objPaymentType = {
 			name: {
@@ -1748,6 +1753,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 		// };
 		const bodyIsActive = {
 			isSubmit: typeSubmit !== "draft" && true,
+			...(typeSubmit !== "draft" ? { remark: confirmationRemark || null } : {}),
 			saInfo: {
 				description: saInfoObj.description,
 				endDate: moment(saInfoObj.endDate).format(dateFormatting.dateFormal),
@@ -1779,6 +1785,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 		if (saRecordData.status !== "ACTIVE") {
 			var body = {
 				...dataFinal,
+				...(typeSubmit !== "draft" ? { remark: confirmationRemark || null } : {}),
 				saDetail: {
 					...dataFinal?.saDetail,
 					productPricing: {
@@ -1811,7 +1818,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					);
 				}
 				setLoadingForm(false);
-				setModalConfirm(false);
+				handleCloseConfirmationModal();
 			})
 			.catch((error) => {
 				if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1825,9 +1832,14 @@ const UpdateServiceAgreement = ({ saType }) => {
 					setModalError(true);
 				}
 				setLoadingForm(false);
-				setModalConfirm(false);
+				handleCloseConfirmationModal();
 			});
 		dispatch(resetDataDetail());
+	};
+
+	const handleCloseConfirmationModal = () => {
+		setModalConfirm(false);
+		setConfirmationRemark("");
 	};
 
 	const handleCloseModalError = () => {
@@ -1986,9 +1998,12 @@ const UpdateServiceAgreement = ({ saType }) => {
 			{/* Modal COnfirmation SA */}
 			<ConfirmationSa
 				isOpen={modalConfirm}
-				setModalConfirm={setModalConfirm}
+				setModalConfirm={handleCloseConfirmationModal}
 				dataFinal={dataFinal}
 				handleConfirm={handleConfirm}
+				typeSubmit={typeSubmit}
+				remark={confirmationRemark}
+				setRemark={setConfirmationRemark}
 				loadingSubmit={loadingForm}
 				listDataAttachment={listDataAttachment}
 				saInfoObj={saInfoObj}
