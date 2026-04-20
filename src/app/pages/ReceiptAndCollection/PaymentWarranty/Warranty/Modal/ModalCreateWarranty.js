@@ -233,9 +233,12 @@ const ModalCreateWarranty = ({
             const values = await form.validateFields();
 
             // Format Term of Claim Period
-            let claimValue = values.claimPeriodTermValue;
-            if (claimValue) {
-                claimValue = parseInt(claimValue, 10);
+            let claimValue = null;
+            let claimDate = null;
+            if (values.claimPeriodTermType === CLAIM_PERIOD_TERM_TYPES.DATE || values.claimPeriodTermType === 'Date') {
+                if (values.claimPeriodTermDate) claimDate = moment(values.claimPeriodTermDate).format("YYYY-MM-DD");
+            } else {
+                if (values.claimPeriodTermValue) claimValue = parseInt(values.claimPeriodTermValue, 10);
             }
 
             // Format Amount Rate
@@ -258,6 +261,7 @@ const ModalCreateWarranty = ({
                 effectiveEndDate: moment(values.effEndDate).format("YYYY-MM-DD"),
                 claimPeriodTermType: values.claimPeriodTermType || CLAIM_PERIOD_TERM_TYPES.DATE,
                 claimPeriodTermValue: claimValue,
+                claimPeriodTermDate: claimDate,
                 description: values.description,
                 isDraft: isDraft,
                 partners: [
@@ -496,19 +500,30 @@ const ModalCreateWarranty = ({
                                 </Form.Item>
                             </Col>
 
-                            <Col span={8}>
+                            <Col span={10}>
                                 <Form.Item label="Term Of Claim Period" style={{ marginBottom: 0 }}>
-                                    <Input.Group compact className="flex gap-2">
-                                        <Form.Item name="claimPeriodTermType" style={{ width: '40%', marginBottom: 0 }}>
+                                    <div className="flex gap-2 w-full">
+                                        <Form.Item name="claimPeriodTermType" style={{ flex: '0 0 75px', marginBottom: 0 }}>
                                             <Select placeholder="Type" defaultValue={CLAIM_PERIOD_TERM_TYPES.DATE}>
                                                 <Option value={CLAIM_PERIOD_TERM_TYPES.DATE}>Date</Option>
                                                 <Option value={CLAIM_PERIOD_TERM_TYPES.AFTER}>After</Option>
                                             </Select>
                                         </Form.Item>
-                                        <Form.Item name="claimPeriodTermValue" style={{ width: '60%', marginBottom: 0 }}>
-                                            <Input maxLength={2} placeholder="Input Value" onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} className="w-full" style={{ borderRadius: '8px', padding: '8px 12px' }} />
+                                        <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.claimPeriodTermType !== currentValues.claimPeriodTermType}>
+                                            {({ getFieldValue }) => {
+                                                const termType = getFieldValue('claimPeriodTermType') || CLAIM_PERIOD_TERM_TYPES.DATE;
+                                                return termType === CLAIM_PERIOD_TERM_TYPES.DATE || termType === 'Date' ? (
+                                                    <Form.Item name="claimPeriodTermDate" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
+                                                      <DatePicker placeholder="Select Date" className="w-full" style={{ borderRadius: '8px', minWidth: 0 }} />
+                                                    </Form.Item>
+                                                ) : (
+                                                    <Form.Item name="claimPeriodTermValue" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
+                                                      <Input maxLength={2} placeholder="Input Value" onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} className="w-full" style={{ borderRadius: '8px', padding: '8px 12px', minWidth: 0 }} />
+                                                    </Form.Item>
+                                                );
+                                            }}
                                         </Form.Item>
-                                    </Input.Group>
+                                    </div>
                                 </Form.Item>
                             </Col>
                             <Col span={24}>

@@ -22,6 +22,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   getListCategory,
+  getGlAccountList,
   updateTaxCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
@@ -48,6 +49,7 @@ const TaxCodeForm = ({ type }) => {
     data_detail,
     data_detail_draft,
     data_criteria,
+    data_gl_account_list,
   } = useSelector((state) => state.tax_code);
 
   // Declaration
@@ -63,6 +65,7 @@ const TaxCodeForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -78,6 +81,11 @@ const TaxCodeForm = ({ type }) => {
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
   const [current, setCurrent] = useState(0);
   const [tabPages, setTabPages] = useState([
     {
@@ -112,19 +120,66 @@ const TaxCodeForm = ({ type }) => {
       form
         .validateFields(fieldsToValidate)
         .then(() => {
-          if (current < steps.length - 1) setCurrent(current + 1);
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (listDataCriteria.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+            if (listDataDetail.length === 0) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Condition Mandatory. Please insert data.",
+                })
+              );
+              return;
+            }
+          }
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+            window.scrollTo(0, 0);
+          }
         })
         .catch(() => {});
     } else {
-      if (current < steps.length - 1) setCurrent(current + 1);
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+        window.scrollTo(0, 0);
+      }
     }
   };
 
   const prev = () => {
-    if (current > 0) setCurrent(current - 1);
+    if (current > 0) {
+      setCurrent(current - 1);
+      window.scrollTo(0, 0);
+    }
   };
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // Use Effect
   useEffect(() => {
@@ -135,6 +190,7 @@ const TaxCodeForm = ({ type }) => {
     dispatch(getConditionName());
     dispatch(getConditionOperator());
     dispatch(getConditionType());
+    dispatch(getGlAccountList());
   }, [dispatch]);
 
   useEffect(() => {
@@ -197,8 +253,9 @@ const TaxCodeForm = ({ type }) => {
 
       // Data Attachment Draft Information
       const dataAttachmentDraft = (data_detail?.taxCodeAttDtos || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -255,7 +312,9 @@ const TaxCodeForm = ({ type }) => {
         taxCodeName: data_detail_draft?.taxCodeName,
         taxRate: data_detail_draft?.taxRate,
         category: data_detail_draft?.category,
-        glAccount: data_detail_draft?.glAccount,
+        glAccount: data_detail_draft?.glAccount
+          ? (data_gl_account_list?.find((g) => g.glAccount === data_detail_draft.glAccount || g.id === data_detail_draft.glAccount)?.id ?? data_detail_draft?.glAccount)
+          : undefined,
         startDate: moment(data_detail_draft?.startDate),
         endDate: data_detail_draft?.endDate
           ? moment(data_detail_draft?.endDate)
@@ -266,6 +325,7 @@ const TaxCodeForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.startDate));
+      setEndDate(data_detail_draft?.endDate ? moment(data_detail_draft?.endDate) : undefined);
       setSelectedHierarchy(data_detail_draft?.appHierId);
       setListDataAttachment(dataAttachmentDraft);
       setCriteriaValues(mappingCriteria);
@@ -310,8 +370,9 @@ const TaxCodeForm = ({ type }) => {
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
 
       // Data Attachment Information
-      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item) => {
+      const dataAttachment = (data_detail?.taxCodeAttDtos || []).map((item, index) => {
         return {
+          key: index + 1,
           id: item.id,
           size: item.size,
           fileName: item.fileName,
@@ -365,7 +426,9 @@ const TaxCodeForm = ({ type }) => {
         taxCodeName: data_detail?.taxCodeName,
         taxRate: data_detail?.taxRate,
         category: data_detail?.category,
-        glAccount: data_detail?.glAccount,
+        glAccount: data_detail?.glAccount
+          ? (data_gl_account_list?.find((g) => g.glAccount === data_detail.glAccount || g.id === data_detail.glAccount)?.id ?? data_detail?.glAccount)
+          : undefined,
         startDate: moment(data_detail?.startDate),
         endDate: data_detail?.endDate
           ? moment(data_detail?.endDate)
@@ -376,6 +439,7 @@ const TaxCodeForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.startDate));
+      setEndDate(data_detail?.endDate ? moment(data_detail?.endDate) : undefined);
       setSelectedHierarchy(data_detail?.appHierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
@@ -439,8 +503,8 @@ const TaxCodeForm = ({ type }) => {
     {
       path:
         type === "create"
-          ? RBI_ROUTES.INVOICE_TEMPLATE_CREATE
-          : RBI_ROUTES.INVOICE_TEMPLATE_UPDATE,
+          ? RBI_ROUTES.TAX_CODE_CREATE
+          : RBI_ROUTES.TAX_CODE_UPDATE,
       breadcrumbName: type === "create" ? "Create Tax Code" : "Update Tax Code",
     },
   ];
@@ -720,12 +784,15 @@ const TaxCodeForm = ({ type }) => {
   // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
     dataTable?.forEach((item) => {
-      if (
-        moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
-      ) {
+      const itemStart = moment(item?.startDate).startOf("day");
+      const headerStart = moment(formHeader?.startDate).startOf("day");
+      const startOutOfRange = itemStart < headerStart;
+      const endOutOfRange =
+        hasValue(formHeader?.endDate) &&
+        hasValue(item?.endDate) &&
+        moment(item?.endDate).startOf("day") > moment(formHeader?.endDate).startOf("day");
+      if (startOutOfRange || endOutOfRange) {
         dataOverlap?.push(item);
       }
     });
@@ -735,7 +802,6 @@ const TaxCodeForm = ({ type }) => {
     } else {
       return false;
     }
-    // }
   }, []);
   const handleSave = async (formValue) => {
     let errorBody = {};
@@ -749,15 +815,29 @@ const TaxCodeForm = ({ type }) => {
     );
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabPages, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: "ATTACHMENT",
+        stepIndex: 2,
+      });
     } else {
       handleMandatory(setTabPages, listDataAttachment);
       if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
+      } else if (listDataDetail.length === 0) {
+        setCurrent(0);
+        errorBody = {
+          title: "Failed",
+          description: "Condition Mandatory. Please insert data.",
+        };
+        dispatch(showModalError(errorBody));
       } else if (storedDataInline) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: `Please save data table inline before submit. Please try again.`,
@@ -772,18 +852,21 @@ const TaxCodeForm = ({ type }) => {
           0
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlapping) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
       } else if (hasOverlappingCondition) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Condition. Start date and end date can't be overlap`,
@@ -877,6 +960,12 @@ const TaxCodeForm = ({ type }) => {
             (item) => item.dataType !== "exist"
           );
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds }
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
@@ -939,6 +1028,21 @@ const TaxCodeForm = ({ type }) => {
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setTabPages, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabPages.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleSubmit = () => {
@@ -958,6 +1062,7 @@ const TaxCodeForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListDataCriteria([]);
       setCriteriaValues([]);
@@ -982,6 +1087,7 @@ const TaxCodeForm = ({ type }) => {
     } else {
       dispatch(getDetailTaxCode(id));
       dispatch(getDetailDraftTaxCode(id));
+      setCurrent(0);
     }
   };
 
@@ -1038,6 +1144,7 @@ const TaxCodeForm = ({ type }) => {
           form={form}
           onFinish={handleSave}
           onFinishFailed={handleError}
+          scrollToFirstError={true}
         >
           <div style={{ display: valuePage !== "Tax Code" ? "none" : undefined }}>
             <TaxCodeSectionForm
@@ -1058,6 +1165,7 @@ const TaxCodeForm = ({ type }) => {
               handleStartDate={handleStartDate}
               handleEndDate={handleEndDate}
               disabledDate={isDisabledDate}
+              data_gl_account_list={data_gl_account_list}
             />
           </div>
 
@@ -1078,7 +1186,7 @@ const TaxCodeForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 typeSelector="tax_code"
@@ -1140,12 +1248,31 @@ const TaxCodeForm = ({ type }) => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+              <p className="text-[18px]">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
               flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px]">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
           </div>
         </ModalError>
       </Spin>

@@ -1,0 +1,49 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Detail",
+    "data": {
+        "transferToCustomer": {
+            "deductionPeriod": "Jan 2025",
+            "type": "Gas",
+            "deductionDate": "2025-01-01",
+            "appHierId": 502,
+            "id": 1,
+            "status": "DRAFT",
+            "statusApproval": "Draft",
+            "createdBy": "admin",
+            "createdDate": "2025-01-01T00:00:00.000+00:00",
+            "updatedBy": "admin",
+            "updatedDate": "2025-01-01T00:00:00.000+00:00",
+
+            "fromCustomerId": "12345678",
+            "fromCustomerName": "PT. SUMBER REJEKI",
+            "areaCode": "01",
+
+            "paymentWarrantyCode": "PW-2025-001",
+            "warrantyAreaCode": "01",
+            "areaName": "Medan",
+            "customerId": "87654321",
+            "customerName": "PT. GAS NEGARA",
+            "customerSegment": "Industrial",
+            "customerGroup": "Gold",
+            "publisher": "Bank Mandiri",
+            "currency": "IDR",
+            "balance": 150000000,
+            "rate": 1,
+            "rateDate": "2025-01-01",
+            "equivalent": 150000000,
+            "documentNumber": "DOC-001/2025",
+            "mutationDate": "2025-01-15",
+            "effectiveDate": "2025-01-01",
+            "expiringDate": "2026-01-01",
+            "endDateClaim": "2026-02-01"
+        },
+        "attachmentDtoList": [],
+        "tApprovalDto": {
+            "approvalType": "TRANSFER_TO_CUSTOMER",
+            "status": "DRAFT",
+            "isApprover": true
+        }
+    }
+}

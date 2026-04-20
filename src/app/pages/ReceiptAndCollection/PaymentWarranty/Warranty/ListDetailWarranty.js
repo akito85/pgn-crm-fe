@@ -80,7 +80,6 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
           
           // Fetch secondary details in parallel once primary is fetched
           await Promise.all([
-            dispatch(getDetailWarrantyMutation({ id, page: 1, pageSize: 999 })),
             isHold ? dispatch(getHoldDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
             isRelease ? dispatch(getReleaseDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
             isRefund ? dispatch(getRefundDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),

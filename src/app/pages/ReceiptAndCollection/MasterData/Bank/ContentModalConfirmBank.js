@@ -26,12 +26,21 @@ const dummyTypes = [
   { label: "Phone", value: 2 },
   { label: "PGN Mobile", value: 3 },
   { label: "Whatsapp", value: 4 },
+  { label: "Phone", value: 741 },
+  { label: "PGN Mobile Email", value: 742 },
+  { label: "Email", value: 743 },
+  { label: "URL", value: 744 },
+  { label: "Fax", value: 745 },
+  { label: "Whatsapp", value: 746 },
+  { label: "PGN Mobile Phone", value: 747 },
 ];
 
 const dummyInputTypes = [
+  { label: "Phone", value: 748 },
+  { label: "Mobile Phone", value: 749 },
   { label: "Email", value: 750 },
-  { label: "Phone", value: 751 },
-  { label: "Mobile Phone", value: 752 },
+  { label: "Fax", value: 751 },
+  { label: "Free Text", value: 752 },
 ];
 
 const dummyPrefixes = [
@@ -56,6 +65,10 @@ const ContentModalConfirmBank = ({
   dataBank,
   dataOption,
   selectedHierarchy,
+  glTypeOptions = [],
+  jobOptions = [],
+  positionOptions = [],
+  addressOptions = [],
 }) => {
   const [valuePage, setValuePage] = useState(defaultTabs[0].value);
 
@@ -70,9 +83,9 @@ const ContentModalConfirmBank = ({
 
   const glColumns = [
     { title: "NO", width: 60, align: "center", render: (_, __, index) => index + 1 },
-    { title: "TYPE", dataIndex: "type", width: 150 },
+    { title: "TYPE", dataIndex: "glType", width: 150, render: (val) => glTypeOptions.find(item => String(item.value) === String(val))?.label || val },
     { title: "GL ACCOUNT NUMBER", dataIndex: "accountNumber", width: 250 },
-    { title: "GL ACCOUNT DESCRIPTION", dataIndex: "accountName" },
+    { title: "GL ACCOUNT DESCRIPTION", dataIndex: "accountDes" },
   ];
 
   const contactColumns = [
@@ -83,15 +96,15 @@ const ContentModalConfirmBank = ({
       title: "JOB", 
       dataIndex: "jobId", 
       width: 150,
-      render: (val) => dummyJobs.find(item => item.value === val)?.label || val
+      render: (val) => jobOptions.find(item => String(item.value) === String(val))?.label || val
     },
     { 
       title: "POSITION", 
       dataIndex: "positionId", 
       width: 150,
-      render: (val) => dummyPositions.find(item => item.value === val)?.label || val
+      render: (val) => positionOptions.find(item => String(item.value) === String(val))?.label || val
     }, 
-    { title: "ADDRESS", dataIndex: "address", width: 250 },
+    { title: "ADDRESS", dataIndex: "address", width: 250, render: (val) => addressOptions.find(item => String(item.value) === String(val))?.label || val },
     { title: "ADDITIONAL NOTE", dataIndex: "additionalNote", width: 200 },
     { title: "DESCRIPTION", dataIndex: "description", width: 250 },
   ];

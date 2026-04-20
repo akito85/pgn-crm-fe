@@ -31,6 +31,8 @@ const AdjustmentBISectionForm = ({
   showAction,
   showCreateButtonInHeader = false,
   onCreateClick,
+  canCreate = true,
+  createBlockedMessage = "",
 }) => {
   // Selector
   const { dataDetailType, dataInvoiceInfo, dataBillingItemList } = useSelector(
@@ -402,6 +404,11 @@ const AdjustmentBISectionForm = ({
   };
 
   const handleCreateClick = useCallback(() => {
+    if (!canCreate) {
+      setModalValidation(true);
+      return;
+    }
+
     // Check if invoice number is selected and has a value
     if (
       !invoiceNumber ||
@@ -415,7 +422,7 @@ const AdjustmentBISectionForm = ({
     // Open modal for creating new billing item
     setTypeModal("create");
     setOpenModal(true);
-  }, [invoiceNumber]);
+  }, [canCreate, invoiceNumber]);
 
   // Expose handleCreateClick to parent via onCreateClick callback
   useEffect(() => {
@@ -426,7 +433,10 @@ const AdjustmentBISectionForm = ({
 
   return (
     <div>
-      {!showCreateButtonInHeader && type !== "detail" && type !== "show" ? (
+      {!showCreateButtonInHeader &&
+      type !== "detail" &&
+      type !== "show" &&
+      canCreate ? (
         <div className="w-full flex justify-end mb-3">
           <ButtonComponent
             type={"submit"}
@@ -435,6 +445,16 @@ const AdjustmentBISectionForm = ({
           >
             Create
           </ButtonComponent>
+        </div>
+      ) : null}
+
+      {!showCreateButtonInHeader &&
+      type !== "detail" &&
+      type !== "show" &&
+      !canCreate &&
+      createBlockedMessage ? (
+        <div className="w-full flex justify-end mb-3">
+          <p className="text-xs text-[#6B7280]">{createBlockedMessage}</p>
         </div>
       ) : null}
 
@@ -735,11 +755,13 @@ const AdjustmentBISectionForm = ({
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">
-            {!invoiceNumber ||
-            invoiceNumber === undefined ||
-            invoiceNumber === null
-              ? `You can't create Adjustment Billing Item. Please fill out the Invoice Number.`
-              : `You can't create Adjustment Billing Item. Billing item data is not available. Please wait or select a different invoice.`}
+            {!canCreate
+              ? createBlockedMessage
+              : !invoiceNumber ||
+                  invoiceNumber === undefined ||
+                  invoiceNumber === null
+                ? `You can't create Adjustment Billing Item. Please fill out the Invoice Number.`
+                : `You can't create Adjustment Billing Item. Billing item data is not available. Please wait or select a different invoice.`}
           </p>
         </div>
       </ModalError>

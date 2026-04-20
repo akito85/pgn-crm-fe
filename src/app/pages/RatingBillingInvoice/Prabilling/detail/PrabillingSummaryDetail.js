@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Tabs } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 import CardContainer from "../../../../../components/CardContainer";
 import ServiceAgreementSection from "./ServiceAgreementSection";
 import UsageSection from "./UsageSection";
@@ -89,7 +90,7 @@ const PrabillingSummaryDetail = ({
             className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
             title="Close Detail"
           >
-            ✕
+            <CloseOutlined />
           </button>
         </div>
       }

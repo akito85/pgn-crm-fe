@@ -7,6 +7,7 @@ import SelectComponent from "../../../../../../components/SelectComponent";
 import { formMessageRequired, requiredMessage } from "../../../../../../utils";
 import FunctionalTableCriteriaTOP from "../TableCriteria/FunctionalTableCriteriaTOP";
 import DateComponent from "../../../../../../components/DateComponent";
+import CardContainer from "../../../../../../components/CardContainer";
 // import FunctionalTableCriteriaTOP from "../TableCriteria/FunctionalTableCriteriaTOP";
 
 const CreateTOP = ({
@@ -32,8 +33,8 @@ const CreateTOP = ({
   startDate,
   endDate,
   handleStartDate = () => {},
-  handleEndDate = () => { },
-  disbaledDate
+  handleEndDate = () => {},
+  disbaledDate,
 }) => {
   // Dependency Data Criteria
   const handleSelectCriteria = (value) => {
@@ -107,14 +108,18 @@ const CreateTOP = ({
   };
   return (
     <div>
-      <BaseContainer header={"TERMS OF PAYMENT INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-2">
+      <CardContainer header={"TERMS OF PAYMENT INFORMATION"}>
+        <div className="w-full grid grid-cols-3 gap-1">
           <Form.Item
             label={"Name"}
             name={"name"}
             rules={formMessageRequired("Name")}
           >
-            <InputComponent disabled={status === "Active" ? true : false} maxLength={100}/>
+            <InputComponent
+              disabled={status === "Active" ? true : false}
+              maxLength={100}
+              placeholder={"Input Name"}
+            />
           </Form.Item>
 
           <Form.Item
@@ -138,7 +143,7 @@ const CreateTOP = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                        new Error("End date must before Start date")
+                        new Error("End date must before Start date"),
                       ),
               },
             ]}
@@ -155,7 +160,7 @@ const CreateTOP = ({
             name={"type"}
             rules={formMessageRequired("Type")}
           >
-            <SelectComponent>
+            <SelectComponent placeholder={"Choose Type"}>
               {dataType?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
                   {data.name}
@@ -173,12 +178,13 @@ const CreateTOP = ({
               onInput={(e) =>
                 (e.target.value = e.target.value.replace(/\D/g, ""))
               }
+              placeholder={"Input Terms"}
               maxLength={2}
             />
           </Form.Item>
           <div>
             <label>Exclude</label>
-            <div className="w-full grid grid-cols-3 gap-2 pt-4">
+            <div className="w-full grid grid-cols-3 gap-2 pt-2">
               <Form name={"calendar"} valuePropName="checked">
                 <div>
                   <Checkbox
@@ -214,6 +220,7 @@ const CreateTOP = ({
               rules={[{ message: requiredMessage("Criteria"), required: true }]}
             >
               <SelectComponent
+                placeholder={"Input Criteria"}
                 disabled={storedData}
                 mode="multiple"
                 onSelect={handleSelectCriteria}
@@ -230,14 +237,18 @@ const CreateTOP = ({
             </Form.Item>
           </div>
         </div>
-        <div className="w-full grid grid-cols-1 gap-2 pt-[24px]">
+        <div className="w-full grid grid-cols-1 gap-2">
           <Form.Item label={"Description"} name={"description"}>
-            <InputComponent type="textarea" cols={4} />
+            <InputComponent
+              placeholder={"Input Description"}
+              type="textarea"
+              cols={4}
+            />
           </Form.Item>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"CRITERIA INFORMATION"}>
+      <CardContainer header={"CRITERIA INFORMATION"}>
         <FunctionalTableCriteriaTOP
           type={type}
           data={listDataCriteria}
@@ -252,7 +263,7 @@ const CreateTOP = ({
           validStartDate={startDate}
           validEndDate={endDate}
         />
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

@@ -457,7 +457,7 @@ const CreateAccounting = () => {
                     updateData={setAttachments}
                     dispatch={dispatch}
                     getAPICategory={getListCategoryReceipt}
-                    typeSelector="accounting"
+                    typeSelector="receipt"
                     service={receiptCollectionHttpService}
                     configApplication={configApp.PAYMENT_SERVICE}
                     typeRBI={"data"}

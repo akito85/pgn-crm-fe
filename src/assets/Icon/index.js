@@ -15,6 +15,8 @@ import IconDetail from "./IconDetail";
 import IconDownload from "./IconDownload";
 import IconDropdown from "./IconDropdown";
 import IconEdit from "./IconEdit";
+import IconEditTable from "./IconEditTable";
+import IconEraserTable from "./IconEraserTable";
 import IconEye from "./IconEye";
 import IconEyeOff from "./IconEyeOff";
 import IconFilter from "./IconFilter";
@@ -71,6 +73,7 @@ import IconSquareX from "./IconSquareX";
 import IconSquareCheck from "./IconSquareCheck";
 import IconTripleDot from "./IconTripleDot";
 import IconChevronLeft from "./IconChevronLeft";
+import IconAddTable from "./IconAddTable";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
@@ -112,6 +115,10 @@ const Icon = (props) => {
       return <IconDropdown {...props} />;
     case "IconEdit":
       return <IconEdit {...props} />;
+    case "IconEditTable":
+      return <IconEditTable {...props} />;
+    case "IconEraserTable":
+      return <IconEraserTable {...props} />;
     case "IconEye":
       return <IconEye {...props} />;
     case "IconEyeOff":
@@ -226,6 +233,8 @@ const Icon = (props) => {
       return <IconTripleDot {...props} />;
     case "IconChevronLeft":
       return <IconChevronLeft {...props} />;
+    case "IconAddTable":
+      return <IconAddTable {...props} />;
     default:
       return;
   }

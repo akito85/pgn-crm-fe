@@ -22,7 +22,7 @@ export const columnsWarrantyInfo = (
   },
   {
     key: "warrantyCode",
-    title: "PAYMENT GUARANTEE CODE",
+    title: "PAYMENT GUARANTEE",
     dataIndex: "warrantyCode",
     width: 200,
     sorter: true,
@@ -94,7 +94,7 @@ export const columnsWarrantyInfo = (
   },
   {
     key: "issuerBank",
-    title: "PENERBIT",
+    title: "ISSUER",
     dataIndex: "issuerBank",
     width: 150,
     sorter: true,
@@ -102,7 +102,7 @@ export const columnsWarrantyInfo = (
   },
   {
     key: "issuerBranch",
-    title: "CABANG PENERBIT",
+    title: "ISSUER BRANCH",
     dataIndex: "issuerBranch",
     width: 150,
     sorter: true,
@@ -118,7 +118,7 @@ export const columnsWarrantyInfo = (
   },
   {
     key: "currencyBalance",
-    title: "CURRENCY BALANCE",
+    title: "BALANCE",
     dataIndex: "currencyBalance",
     width: 150,
     align: "right",
@@ -144,7 +144,7 @@ export const columnsWarrantyInfo = (
   },
   {
     key: "equivalent",
-    title: "EQV. AMOUNT",
+    title: "EQV. BALANCE",
     dataIndex: "equivalent",
     width: 150,
     align: "right",

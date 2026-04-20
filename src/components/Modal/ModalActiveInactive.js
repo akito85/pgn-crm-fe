@@ -37,7 +37,7 @@ const ModalActiveInactive = ({
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
 
-  const { dataListAppHierId = [], dataListAppHierDetail = [] } = useSelector(
+  const { dataListAppHierId = [], dataListAppHierDetail = [], loading } = useSelector(
     (state) => state[selector]
   );
 
@@ -137,7 +137,7 @@ const ModalActiveInactive = ({
           <ButtonComponent onClick={handleCancelModal} type="default">
             Cancel
           </ButtonComponent>
-          <ButtonComponent form="inactivateForm" type="submit" htmlType="submit">
+          <ButtonComponent form="inactivateForm" type="submit" htmlType="submit" loading={loading}>
             Confirm
           </ButtonComponent>
         </div>

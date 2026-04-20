@@ -1,8 +1,9 @@
 // VERIFICATION_TAG: 2026-02-17-001
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 // Utils
@@ -108,13 +109,47 @@ const ModalHold = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
+      const nextState = { ...prevState };
+      nextState[dataIndex] = selectedKeys[0];
+      return nextState;
+    });
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  };
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        advanceSearch: searchData
       };
     });
   };
@@ -218,6 +253,7 @@ const ModalHold = ({
   };
 
   const clearAllState = (preSelectedRow) => {
+    handleGlobalSearch.cancel();
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
     
@@ -352,12 +388,7 @@ const ModalHold = ({
   // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
-      const finalSearch = Object.keys(search).length > 0 
-        ? Object.entries(search)
-            .filter(([_, value]) => value !== undefined && value !== "")
-            .map(([key, value]) => `${key}~${value}`)
-            .join("|") 
-        : "";
+      const finalSearch = encodeURIComponent(JSON.stringify(search));
 
       dispatch(
         getHoldListPaginate({
@@ -705,6 +736,10 @@ const ModalHold = ({
                 totalData={selectedRow ? 1 : (dataHoldList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}

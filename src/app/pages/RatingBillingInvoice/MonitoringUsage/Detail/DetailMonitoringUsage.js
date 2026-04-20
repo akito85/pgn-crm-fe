@@ -15,6 +15,7 @@ import {
   getListApprovalById,
   updateSingleUsage,
   deleteSingleUsage,
+  clearDetailData,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../components/CardContainer";
@@ -105,6 +106,10 @@ const DetailMonitoringUsage = () => {
       dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
       setPage(1);
     }
+    
+    return () => {
+      dispatch(clearDetailData());
+    };
   }, [location, dispatch]);
 
   useEffect(() => {

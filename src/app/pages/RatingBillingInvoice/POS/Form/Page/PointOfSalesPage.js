@@ -350,8 +350,8 @@ const PointOfSalesPage = ({
             >
               <SelectComponent
                 onChange={onMeterReadingCodeChange}
-                disabled={!mergedArrayMrc || mergedArrayMrc.length === 0}
                 placeholder="Select Meter Reading Code"
+                notFoundContent="No data"
                 options={(mergedArrayMrc || []).map((item) => ({
                   label: item?.name,
                   value: item?.id,
@@ -610,11 +610,13 @@ const PointOfSalesPage = ({
             style={{ marginBottom: 0 }}
           >
             <SelectComponent onChange={(e) => setDataBillingCycle(e)}>
-              {(data_globalBillingCycle || [])?.map((item) => (
+              {(data_globalBillingCycle || [])?.map((item) => {
+                console.log("label: ", item)
+                return (
                 <Select.Option key={item.id} value={item.id}>
                   {item.name}
                 </Select.Option>
-              ))}
+              )})}
             </SelectComponent>
           </Form.Item>
           <Form.Item
