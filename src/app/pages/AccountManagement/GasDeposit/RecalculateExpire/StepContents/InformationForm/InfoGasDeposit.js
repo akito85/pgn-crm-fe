@@ -21,6 +21,7 @@ const InfoGasDeposit = ({ detail }) => {
     balanceAmount,
     availableAmount,
     status,
+    statusApproval,
     remark,
   } = detail;
 
@@ -42,6 +43,11 @@ const InfoGasDeposit = ({ detail }) => {
           <NxDetailText label="Status">
             <StatusComponent colour={status} margin={false}>
               {status}
+            </StatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <StatusComponent colour={statusApproval} margin={false}>
+              {statusApproval}
             </StatusComponent>
           </NxDetailText>
         </div>

@@ -236,13 +236,8 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
               } = form.getFieldsValue(true);
 
               const body = {
-                stepNumber: current + 1,
-                type: formType.toUpperCase(),
-                id,
-                data : {
-                  accountId,
-                  appHierId,
-                }
+                appHierId,
+                gasDepositIds: isBulk ? selectedRowKeys : [id]
               }
 
               await dispatch(
@@ -325,14 +320,9 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         } = form.getFieldsValue(true);
 
         const body = {
-          stepNumber: current + 1,
-          type: formType.toUpperCase(),
-          id,
-          data : {
-            accountId,
-            appHierId,
-          }
-        }
+          appHierId,
+          gasDepositIds: isBulk ? selectedRowKeys : [id]
+        };
 
         await dispatch(
           validateCreateUpdate({
