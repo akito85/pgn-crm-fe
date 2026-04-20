@@ -134,8 +134,8 @@ const BillingItemCategoryDetail = () => {
       breadcrumbName: "Transaction Mapping Category",
     },
     {
-      path: SYSTEM_SETUP_ROUTES.DETAIL_BILLING_ITEM_CATEGORY,
-      breadcrumbName: "Transaction Mapping Category",
+      path: "",
+      breadcrumbName: "Detail Transaction Mapping Category",
     },
   ];
 

@@ -61,20 +61,22 @@ const GLAccountView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("glAccountFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["no"],
-          right: ["action"],
-        };
+    try {
+      const saved = localStorage.getItem("glAccountFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
   });
 
-  // Save to localStorage when fixedColumns change
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem("glAccountFixedColumns", JSON.stringify(fixedColumns));
+    try {
+      localStorage.setItem("glAccountFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   // Use Effect - Fetch data
@@ -339,8 +341,7 @@ const GLAccountView = () => {
       render: (record, data) => {
         const isEditable =
           record.approvalStatus === "DRAFT" ||
-          record.approvalStatus === "REJECTED" ||
-          (record.status === "ACTIVE" && record.approvalStatus === "APPROVED");
+          record.approvalStatus === "REJECTED";
         const linkContent =
           data > 3 ? (
             <ButtonComponent

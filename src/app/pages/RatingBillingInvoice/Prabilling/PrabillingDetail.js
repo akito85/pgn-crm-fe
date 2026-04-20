@@ -56,10 +56,12 @@ const PrabillingDetail = () => {
 
   // Fetch init detail
   useEffect(() => {
-    if (initId) {
-      dispatch(getDetailPrabillingInit(initId));
+    if (!initId) {
+      navigate(RBI_ROUTES.PRABILLING_VIEW, { replace: true });
+      return;
     }
-  }, [dispatch, initId]);
+    dispatch(getDetailPrabillingInit(initId));
+  }, [dispatch, initId, navigate]);
 
   // Fetch prabilling result whenever initCode tersedia
   useEffect(() => {

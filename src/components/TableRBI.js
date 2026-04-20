@@ -145,6 +145,7 @@ const TableRBI = ({
   enableRowClick = false,
   selectedRowKey = null,
   onRowClick = () => {},
+  onSearch = () => {},
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -794,7 +795,10 @@ const TableRBI = ({
 
               {showSearchBar && (
                 <div style={{ width: "250px" }}>
-                  <SearchBar placeholder="Search Content" />
+                  <SearchBar 
+                    placeholder="Search Content" 
+                    onChange={onSearch}
+                  />
                 </div>
               )}
             </div>

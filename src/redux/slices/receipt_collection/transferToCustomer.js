@@ -2,33 +2,35 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import {
     showModalError,
+    showModalSuccess,
     setBodyError,
+    validateError,
 } from "../general_slice";
 
-// Hard Code
-import hc_transfer_to_customer_list from "./temp_hardcoded_json/transferToCustomer/get-list-transferToCustomer.json"
-// Reusing some dropdowns from transferToReceipt or generic if possible, or create new if needed
-import hc_ddl_deduction_period from "./temp_hardcoded_json/transferToReceipt/get-ddl-deduction-period.json";
-import hc_ddl_type from "./temp_hardcoded_json/transferToReceipt/get-ddl-type.json";
-import hc_list_warranty from "./temp_hardcoded_json/transferToCustomer/get-list-warranty.json";
-import hc_list_from_customer from "./temp_hardcoded_json/transferToCustomer/get-list-from-customer.json";
 
 
 export const submitTransferToCustomer = createAsyncThunk(
     "SUBMIT_TRANSFER_TO_CUSTOMER",
     async (body, thunkAPI) => {
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            return { status: 200, message: "Success Submit Data" };
+            const url = "/v1/dbs/api/payment-warranty/transfer-to-customer";
+            const response = await receiptCollectionHttpService.createData(url, body);
+            return response.data;
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = {
-                title: "Failed",
-                description: `${message}`,
-            };
-            thunkAPI.dispatch(showModalError(errorBody));
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
             return thunkAPI.rejectWithValue(error?.response?.data);
         }
     }
@@ -44,11 +46,18 @@ export const getAllApprovalList = createAsyncThunk(
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = {
-                title: "Failed",
-                description: `${message}`,
-            };
-            thunkAPI.dispatch(showModalError(errorBody));
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
             return thunkAPI.rejectWithValue(error.response);
         }
     }
@@ -58,68 +67,24 @@ export const getDetailTransferToCustomer = createAsyncThunk(
     "GET_DETAIL_TRANSFER_CUSTOMER",
     async (id, thunkAPI) => {
         try {
-            // Simulator Detail Transfer To Customer
-            const response = {
-                data: {
-                    transferToCustomer: {
-                        deductionPeriod: "Jan 2025",
-                        type: "Gas",
-                        deductionDate: "2025-01-01",
-                        appHierId: 502,
-                        customerList: hc_transfer_to_customer_list.data.result.slice(0, 1),
-                        id: id,
-                        status: "DRAFT",
-                        statusApproval: "Draft",
-                        createdBy: "admin",
-                        createdDate: "2025-01-01T00:00:00.000+00:00",
-                        updatedBy: "admin",
-                        updatedDate: "2025-01-01T00:00:00.000+00:00",
-
-                        // Transfer Info
-                        fromCustomerId: "12345678",
-                        fromCustomerName: "PT. SUMBER REJEKI",
-                        areaCode: "01",
-
-                        // Warranty Info
-                        paymentWarrantyCode: "PW-2025-001",
-                        warrantyAreaCode: "01",
-                        areaName: "Medan",
-                        customerId: "87654321",
-                        customerName: "PT. GAS NEGARA",
-                        customerSegment: "Industrial",
-                        customerGroup: "Gold",
-                        publisher: "Bank Mandiri",
-                        currency: "IDR",
-                        balance: 150000000,
-                        rate: 1,
-                        rateDate: "2025-01-01",
-                        equivalent: 150000000,
-                        documentNumber: "DOC-001/2025",
-                        mutationDate: "2025-01-15",
-                        effectiveDate: "2025-01-01",
-                        expiringDate: "2026-01-01",
-                        endDateClaim: "2026-02-01",
-                    },
-                    attachmentDtoList: [],
-                    tApprovalDto: {
-                        approvalType: "TRANSFER_TO_CUSTOMER",
-                        status: "DRAFT",
-                        isApprover: true
-                    },
-                }
-            };
-
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            const url = `/v1/dbs/api/payment-warranty/transfer-to-customer/get-detail/${id}`;
+            const response = await receiptCollectionHttpService.getAll(url);
             return response.data;
-
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = {
-                title: "Failed",
-                description: `${message}`,
-            };
-            thunkAPI.dispatch(showModalError(errorBody));
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
             return thunkAPI.rejectWithValue(error.response);
         }
     }
@@ -129,18 +94,24 @@ export const approveOrRejectTransferToCustomer = createAsyncThunk(
     "APPROVE_OR_REJECT_TRANSFER_CUSTOMER",
     async ({ body }, thunkAPI) => {
         try {
-            // Customize endpoint if needed
-            const url = `/v1/dbs/api/approval/approve-reject`;
-            const response = await receiptCollectionHttpService.post(url, body);
+            const url = "/v1/dbs/api/payment-warranty/transfer-customer/approve-reject";
+            const response = await receiptCollectionHttpService.createData(url, body);
             return response.data;
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = {
-                title: "Failed",
-                description: `${message}`,
-            };
-            thunkAPI.dispatch(showModalError(errorBody));
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
             return thunkAPI.rejectWithValue(error.response);
         }
     }
@@ -151,33 +122,110 @@ export const getListApprovalById = createAsyncThunk(
     async ({ id }, thunkAPI) => {
         try {
             const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
-            const response = await receiptCollectionHttpService.getDetail(url);
+            const response = await receiptCollectionHttpService.getAll(url);
             return response.data;
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = {
-                title: "Failed",
-                description: `${message}`,
-            };
-            thunkAPI.dispatch(showModalError(errorBody));
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getApprovalHistoryTransferToCustomer = createAsyncThunk(
+    "GET_APPROVAL_HISTORY_TRANSFER_CUSTOMER",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/payment-warranty/transfer-to-customer/approval-history/${id}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const deleteTransferToCustomer = createAsyncThunk(
+    "DELETE_TRANSFER_TO_CUSTOMER",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/payment-warranty/transfer-to-customer/delete/${id}`;
+            const response = await receiptCollectionHttpService.deleteData(url);
+            thunkAPI.dispatch(showModalSuccess({
+                title: "Success",
+                description: response?.message || "Success Delete Transfer To Customer",
+                return: false,
+            }));
+            return id;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                    return: false,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
             return thunkAPI.rejectWithValue(error.response);
         }
     }
 );
 
 
+
 export const getListWarranty = createAsyncThunk(
     "GET_LIST_WARRANTY_CUSTOMER",
-    async (_, thunkAPI) => {
+    async (customerId, thunkAPI) => {
         try {
-            const response = hc_list_warranty;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data.result;
+            const url = `/v1/dbs/api/payment-warranty/warranties${customerId ? `?customerId=${customerId}` : ""}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response.data.customers;
         } catch (error) {
-            const message = error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = { title: "Failed", description: `${message}` };
-            thunkAPI.dispatch(showModalError(errorBody));
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                thunkAPI.dispatch(
+                    validateError({ error: error, action: "GET_LIST_WARRANTY_CUSTOMER" })
+                );
+            }
             return thunkAPI.rejectWithValue(error);
         }
     }
@@ -187,13 +235,47 @@ export const getListFromCustomer = createAsyncThunk(
     "GET_LIST_FROM_CUSTOMER_CUSTOMER",
     async (_, thunkAPI) => {
         try {
-            const response = hc_list_from_customer;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data.result;
+            const url = `/v1/dbs/api/payment-warranty/warranties`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response.data;
         } catch (error) {
-            const message = error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = { title: "Failed", description: `${message}` };
-            thunkAPI.dispatch(showModalError(errorBody));
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                thunkAPI.dispatch(
+                    validateError({ error: error, action: "GET_LIST_FROM_CUSTOMER_CUSTOMER" })
+                );
+            }
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getCurrencyDDL = createAsyncThunk(
+    "GET_LIST_CURRENCY_TRANSFER_CUSTOMER",
+    async (_, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/receipt/list-payment-currency`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                thunkAPI.dispatch(
+                    validateError({ error: error, action: "GET_LIST_CURRENCY_TRANSFER_CUSTOMER" })
+                );
+            }
             return thunkAPI.rejectWithValue(error);
         }
     }
@@ -213,11 +295,18 @@ export const getListCategory = createAsyncThunk(
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = {
-                title: "Failed",
-                description: `${message}`,
-            };
-            thunkAPI.dispatch(showModalError(errorBody));
+            if (
+                error?.response?.data?.code === 500 ||
+                error?.response?.data?.code === 419
+            ) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                const errorBody = {
+                    title: "Failed",
+                    description: `${message}`,
+                };
+                thunkAPI.dispatch(showModalError(errorBody));
+            }
             return thunkAPI.rejectWithValue(error.response);
         }
     }
@@ -225,30 +314,14 @@ export const getListCategory = createAsyncThunk(
 
 
 
-const initialState = {
-    data: [],
-    listCustomer: [], // Store customer list from modal search
-    ddlDeductionPeriod: [],
-    ddlType: [],
-    dataListAppHierId: [],
-    data_detail: null,
-    dataListAppHierDetail: [],
-    dataListCategory: [],
-    loading: false,
-    isFailed: false,
-    isSuccess: false,
-    message: "",
-    listWarranty: [],
-    listFromCustomer: [],
-};
-
 export const getAllTransferToCustomerListPaginate = createAsyncThunk(
     "GET_ALL_TRANSFER_TO_CUSTOMER_LIST_PAGINATE",
     async ({ page, pageSize, search, sort }, thunkAPI) => {
         try {
-            // Simulate fetch
-            const response = hc_transfer_to_customer_list;
-            await new Promise(resolve => setTimeout(resolve, 500));
+            const searchParams = search === undefined ? "" : search;
+            const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+            const url = `/v1/dbs/api/payment-warranty/transfer-to-customer/get-list?page=${page || 1}&size=${pageSize || 10}&sort=${sortParams}&searchs=${searchParams}`;
+            const response = await receiptCollectionHttpService.getAll(url);
             return response.data;
         } catch (error) {
             const message =
@@ -265,63 +338,79 @@ export const getAllTransferToCustomerListPaginate = createAsyncThunk(
                 };
                 thunkAPI.dispatch(showModalError(errorBody));
             }
-            return error;
+            return thunkAPI.rejectWithValue(error.response);
         }
     }
 );
+
+export const exportTransferToCustomerToExcel = createAsyncThunk(
+    "EXPORT_TRANSFER_TO_CUSTOMER_LIST_EXCEL",
+    async ({ search, page, pageSize, sort }, thunkAPI) => {
+        try {
+            const searchParams = search === undefined ? "" : search;
+            const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+            const url = `/v1/dbs/api/payment-warranty/transfer-to-customer/export-to-excel?page=${page || 1}&size=${pageSize || 10}&sort=${sortParams}&searchs=${searchParams}`;
+            const response = await receiptCollectionHttpService.downloadData(url);
+            return response;
+        } catch (error) {
+            thunkAPI.dispatch(
+                validateError({ error: error, action: "EXPORT_TRANSFER_TO_CUSTOMER_LIST_EXCEL" })
+            );
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+const initialState = {
+    data: [],
+    listCustomer: [], // Store customer list from modal search
+    dataListAppHierId: [],
+    data_detail: null,
+    dataListAppHierDetail: [],
+    dataApprovalHistory: null,
+    dataListCategory: [],
+    loading: false,
+    loadingApproval: false,
+    isFailed: false,
+    isSuccess: false,
+    message: "",
+    listWarranty: [],
+    listFromCustomer: [],
+    currencyDDL: [],
+};
+
 
 export const getListCustomer = createAsyncThunk(
     "GET_LIST_CUSTOMER",
-    async (_, thunkAPI) => {
+    async ({ search, page, pageSize, sort } = {}, thunkAPI) => {
         try {
-            // Using the same list as sample for customers available to add
-            const response = hc_transfer_to_customer_list;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data.result;
+            const searchParams = search === undefined ? "" : search;
+            const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+            const url = `/v1/dbs/api/payment-warranty/customer/get-list?page=${page || 1}&size=${pageSize || 10}&sort=${sortParams}&searchs=${searchParams}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response.data;
         } catch (error) {
-            const message = error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = { title: "Failed", description: `${message}` };
-            thunkAPI.dispatch(showModalError(errorBody));
+            thunkAPI.dispatch(
+                validateError({ error: error, action: "GET_LIST_CUSTOMER" })
+            );
             return thunkAPI.rejectWithValue(error);
         }
     }
 );
 
-export const getDDLDeductionPeriod = createAsyncThunk(
-    "GET_DDL_DEDUCTION_PERIOD_CUSTOMER",
-    async (_, thunkAPI) => {
-        try {
-            const response = hc_ddl_deduction_period;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data;
-        } catch (error) {
-            const message = error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = { title: "Failed", description: `${message}` };
-            thunkAPI.dispatch(showModalError(errorBody));
-            return thunkAPI.rejectWithValue(error);
-        }
-    }
-);
-
-export const getDDLType = createAsyncThunk(
-    "GET_DDL_TYPE_CUSTOMER",
-    async (_, thunkAPI) => {
-        try {
-            const response = hc_ddl_type;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data;
-        } catch (error) {
-            const message = error?.response?.data?.message || error?.message || error?.toString();
-            const errorBody = { title: "Failed", description: `${message}` };
-            thunkAPI.dispatch(showModalError(errorBody));
-            return thunkAPI.rejectWithValue(error);
-        }
-    }
-);
 
 const transferToCustomerSlice = createSlice({
     name: "transferToCustomer",
     initialState,
+    reducers: {
+        clearApprovalHistory: (state) => {
+            state.dataApprovalHistory = null;
+        },
+        resetDetailState: (state) => {
+            state.data_detail = null;
+            state.dataListAppHierDetail = [];
+        },
+    },
     extraReducers: {
         // Get List Warranty
         [getListWarranty.fulfilled]: (state, action) => {
@@ -329,8 +418,21 @@ const transferToCustomerSlice = createSlice({
         },
         // Get List From Customer
         [getListFromCustomer.fulfilled]: (state, action) => {
-            state.listFromCustomer = action.payload;
+            const allCustomers = action.payload?.customers || action.payload?.result || action.payload || [];
+            const uniqueMap = new Map();
+            allCustomers.forEach(item => {
+                if (!uniqueMap.has(item.customerNumber)) {
+                    uniqueMap.set(item.customerNumber, item);
+                }
+            });
+            state.listFromCustomer = Array.from(uniqueMap.values());
         },
+
+        // Get Currency DDL
+        [getCurrencyDDL.fulfilled]: (state, action) => {
+            state.currencyDDL = action.payload;
+        },
+
 
         // Get All Pagination
         [getAllTransferToCustomerListPaginate.pending]: (state) => {
@@ -356,15 +458,18 @@ const transferToCustomerSlice = createSlice({
             // state.loading = false;
         },
 
-        // Get DDL Deduction Period
-        [getDDLDeductionPeriod.fulfilled]: (state, action) => {
-            state.ddlDeductionPeriod = action.payload;
+        // Get List Warranty
+        [getListWarranty.pending]: (state) => {
+            state.loading = true;
+        },
+        [getListWarranty.fulfilled]: (state, action) => {
+            state.listWarranty = action.payload;
+            state.loading = false;
+        },
+        [getListWarranty.rejected]: (state) => {
+            state.loading = false;
         },
 
-        // Get DDL Type
-        [getDDLType.fulfilled]: (state, action) => {
-            state.ddlType = action.payload;
-        },
 
         // Submit
         [submitTransferToCustomer.pending]: (state) => {
@@ -411,15 +516,28 @@ const transferToCustomerSlice = createSlice({
             state.loading = false;
         },
 
-        // Get List Approval By Id
+        // Get List Approval By Id (appHierId → array of approval levels)
         [getListApprovalById.pending]: (state) => {
-            // state.loading = true;
+            state.loadingApproval = true;
         },
         [getListApprovalById.fulfilled]: (state, action) => {
             state.dataListAppHierDetail = action.payload;
+            state.loadingApproval = false;
         },
         [getListApprovalById.rejected]: (state) => {
-            // state.loading = false;
+            state.loadingApproval = false;
+        },
+
+        // Get Approval History (transfer HDR id → {dataApprover, dataHistory})
+        [getApprovalHistoryTransferToCustomer.pending]: (state) => {
+            state.loadingApproval = true;
+        },
+        [getApprovalHistoryTransferToCustomer.fulfilled]: (state, action) => {
+            state.dataApprovalHistory = action.payload;
+            state.loadingApproval = false;
+        },
+        [getApprovalHistoryTransferToCustomer.rejected]: (state) => {
+            state.loadingApproval = false;
         },
 
         // Get List Category
@@ -432,8 +550,21 @@ const transferToCustomerSlice = createSlice({
         [getListCategory.rejected]: (state) => {
             // state.loading = false;
         },
+
+        // Delete
+        [deleteTransferToCustomer.pending]: (state) => {
+            state.loading = true;
+        },
+        [deleteTransferToCustomer.fulfilled]: (state) => {
+            state.loading = false;
+        },
+        [deleteTransferToCustomer.rejected]: (state) => {
+            state.loading = false;
+        },
     },
 });
 
-const { reducer } = transferToCustomerSlice;
+
+const { reducer, actions } = transferToCustomerSlice;
+export const { clearApprovalHistory, resetDetailState } = actions;
 export default reducer;

@@ -82,7 +82,10 @@ const getColumnSearchProps = (
           />
         );
       } else {
-        return label || "";
+        if (!label) {
+          return <span className="text-red-500 italic text-[12px]">Missing Value</span>;
+        }
+        return label;
       }
     },
   };

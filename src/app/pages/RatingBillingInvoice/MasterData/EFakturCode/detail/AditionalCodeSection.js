@@ -5,6 +5,7 @@ import { dateFormatting } from "../../../../../../utils";
 import TablePagination from "../../../../../../components/TablePagination";
 import DetailText from "../../../../../../components/DetailText";
 import StatusComponent from "../../../../../../components/StatusComponent";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const AdditionalCodeSection = ({
   additionalCodeList = [],
@@ -53,16 +54,16 @@ const AdditionalCodeSection = ({
 
   return (
     <>
-      <BaseContainer header={"Additional Code Information"}>
+      <CardContainer header={"Additional Code Information"}>
         <TablePagination
           columns={columns}
           dataSource={additionalCodeList}
           usePagination={false}
           rowKey={(record) => record.id || record.key}
         />
-      </BaseContainer>
+      </CardContainer>
       {/* History Log Information */}
-      <BaseContainer header={"History Log Information"}>
+      <CardContainer header={"History Log Information"}>
         <div className="w-full grid grid-cols-5 gap-3">
           <DetailText label={"Record ID"}>
             {dataHistory?.recordId || "-"}
@@ -84,7 +85,7 @@ const AdditionalCodeSection = ({
             {dataHistory?.updatedBy || "-"}
           </DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </>
   );
 };

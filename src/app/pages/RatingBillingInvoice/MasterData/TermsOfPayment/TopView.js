@@ -625,7 +625,7 @@ const TopView = () => {
           >
             <Tooltip title="Detail">
               <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -638,8 +638,7 @@ const TopView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "Draft" ||
-          record.statusApproval === "Rejected" ||
-          (record.status === "ACTIVE" && record.statusApproval === "Approved");
+          record.statusApproval === "Rejected";
 
         const linkContent =
           data > 3 ? (

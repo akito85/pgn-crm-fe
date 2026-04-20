@@ -17,6 +17,7 @@ export const columnsContentManagement = (
   return [
     {
       title: "NO",
+      key: "no",
       align: "center",
       width: 60,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,

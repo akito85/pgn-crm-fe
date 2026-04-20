@@ -112,7 +112,7 @@ export const getApprovalHierarchyList = createAsyncThunk(
 
 export const getApprovalHierarchyDetail = createAsyncThunk(
   "GET_APPROVAL_HIERARCHY_DETAIL_GL_ACCOUNT",
-  async (id, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gl-account/apphier-detail/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);

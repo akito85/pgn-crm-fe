@@ -11,7 +11,7 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
-import { Tabs } from "antd";
+import { Tabs, Spin } from "antd";
 import {
     approveOrRejectCollectingAgent,
     approveOrRejectInactiveCollectingAgent,
@@ -106,7 +106,10 @@ const ListDetailCollectingAgent = () => {
     // handle Confirm
     const handleConfirm = (res, handleClear) => {
         setLoadingConfirm(true);
-        if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_COLLECTING_AGENT") {
+        if (
+            data_detail?.tApprovalDto?.approvalType === "INACTIVE_COLLECTING_AGENT" ||
+            data_detail?.tApprovalDto?.approvalType === "ACTIVE_COLLECTING_AGENT"
+        ) {
             const data = {
                 id: id,
                 remark: res.remark,
@@ -147,12 +150,21 @@ const ListDetailCollectingAgent = () => {
         setModalApprove(false);
     };
 
+    const approvalType = data_detail?.tApprovalDto?.approvalType;
+    let approvalMenu = "Collecting Agent";
+    if (approvalType === "INACTIVE_COLLECTING_AGENT") {
+        approvalMenu = "Inactive Collecting Agent";
+    } else if (approvalType === "ACTIVE_COLLECTING_AGENT") {
+        approvalMenu = "Active Collecting Agent";
+    }
+
     return (
         <>
             <BreadCrumb routes={routes} />
-            <div>
-                <Tabs
-                    activeKey={segmentedPage}
+            <Spin spinning={loading}>
+                <div>
+                    <Tabs
+                        activeKey={segmentedPage}
                     onChange={setSegmentedPage}
                     items={[
                         {
@@ -185,6 +197,7 @@ const ListDetailCollectingAgent = () => {
                     ]}
                 />
             </div>
+            </Spin>
 
             <ModalApproveOrReject
                 isOpen={modalApprove}
@@ -192,7 +205,7 @@ const ListDetailCollectingAgent = () => {
                 onFinish={handleConfirm}
                 header={approveOrReject}
                 approveOrReject={approveOrReject}
-                menu={"Collecting Agent"}
+                menu={approvalMenu}
                 named={data_detail?.collectingAgent?.name}
                 loading={loadingConfirm}
             />

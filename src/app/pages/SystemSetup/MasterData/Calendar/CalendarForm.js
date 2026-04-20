@@ -25,7 +25,6 @@ import {
   getHolidayType,
   getAttachmentCategoryCalendar,
   getDetailCalendar,
-  getDetailDraftCalendar,
   createCalendar,
   updateCalendar,
 } from "../../../../../redux/slices/system_setup/master_data/calendar";
@@ -52,7 +51,6 @@ const STEPS = [
 const CalendarForm = ({ type }) => {
   // Selector
   const {
-    data_detail_draft,
     data_detail,
     data_holiday_type,
     dataListAppHierId,
@@ -160,7 +158,6 @@ const CalendarForm = ({ type }) => {
   useEffect(() => {
     if (id && type === "update") {
       dispatch(getDetailCalendar(id));
-      dispatch(getDetailDraftCalendar(id));
     }
   }, [dispatch, id, type]);
 
@@ -175,150 +172,102 @@ const CalendarForm = ({ type }) => {
   }, [data_criteria]);
 
   useEffect(() => {
-    if (
-      id &&
-      data_detail_draft?.information?.id === id &&
-      data_detail?.information?.id === id
-    ) {
-      const criteriaSelect = data_detail_draft?.criteria?.map(
-        (item) => item.criteria,
-      );
+    if (!id) return;
 
-      const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item, index) => ({
-          key: index + 1,
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          uploadBy: item.createdBy,
-          uploadDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        }),
-      );
+    const CRITERIA_FIELD_TO_ID = {
+      costCenter: 16,
+      subDistrict: 13,
+      district: 14,
+      city: 39,
+      province: 15,
+      sor: 11,
+      customer: 12,
+      industrialSector: 18,
+      budget: 17,
+      customerSegment: 19,
+      accountGroup: 20,
+      serviceType: 21,
+      accountCategory: 22,
+      gsizes: 23,
+    };
 
-      const dataDraftCriteriaList = (data_detail_draft?.criteriaData || [])
-        .filter((data) => data?.allCriteria !== true)
-        .map((item, index) => ({
-          id: item.id,
-          budget: item.budget,
-          subDistrict: item.subDistrict,
-          district: item.district,
-          city: item.city,
-          province: item.province,
-          area: item.area,
-          sor: item.sor,
-          industrialSector: item.industrialSector,
-          gsizes: item.gSizes,
-          customerSegment: item.customerSegment,
-          accountGroup: item.accountGroupType,
-          accountCategory: item.accountCategory,
-          serviceType: item.serviceType,
-          customer: item.customer,
-          startDate: item.startDate,
-          endDate: item.endDate,
-          key: index + 1,
-          type: "exist",
-        }));
+    const mapAttachments = (list) =>
+      (list || []).map((item, index) => ({
+        key: index + 1,
+        id: item.id,
+        size: item.fileSize,
+        fileName: item.fileName,
+        fileSize: item.fileSize,
+        fileType: item.fileType,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
+        pathFile: item.pathFile,
+        urlFile1: item.urlFile1,
+        urlFile2: item.urlFile2,
+        uploadBy: item.createdBy,
+        uploadDate: item.createdDate
+          ? moment(item.createdDate).format("DD MMM YYYY")
+          : "",
+        dataType: "exist",
+      }));
 
-      form.setFieldsValue({
-        name: data_detail_draft?.information?.name,
-        startDate: moment(data_detail_draft?.information?.startDate),
-        endDate: data_detail_draft?.information?.endDate
-          ? moment(data_detail_draft?.information?.endDate)
-          : undefined,
-        holidayType: data_detail_draft?.information?.holidayType,
-        criteria: criteriaSelect,
-        description: data_detail_draft?.information?.description,
-        apphierId: data_detail_draft?.information?.apphierId,
-      });
+    const callendar = data_detail?.callendar || {};
+    if (!callendar.calendarId) return;
 
-      setStartDate(moment(data_detail_draft?.information?.startDate));
-      setSelectedHierarchy(data_detail_draft?.information?.apphierId);
-      setListDataAttachment(dataDraftAttachment);
-      setCriteriaValues(criteriaSelect || []);
-      setListDataCriteria(dataDraftCriteriaList);
-    } else if (
-      id &&
-      !data_detail_draft?.information?.id &&
-      data_detail?.information?.id === id
-    ) {
-      const criteriaSelect = data_detail?.criteria?.map(
-        (item) => item.criteria,
-      );
+    const criterias = Array.isArray(data_detail?.criterias)
+      ? data_detail.criterias
+      : [];
 
-      const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item, index) => ({
-          key: index + 1,
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          uploadBy: item.createdBy,
-          uploadDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        }),
-      );
+    const allCriteria = criterias.some((c) => c.allCriteria);
+    const criteriaSelect = allCriteria
+      ? [24]
+      : Object.entries(CRITERIA_FIELD_TO_ID)
+          .filter(([field]) =>
+            criterias.some((row) => row[field]?.label != null),
+          )
+          .map(([, criteriaId]) => criteriaId);
 
-      const dataCriteriaList = (data_detail?.criteriaData || [])
-        .filter((data) => data?.allCriteria !== true)
-        .map((item, index) => ({
-          id: item.id,
-          budget: item.budget,
-          subDistrict: item.subDistrict,
-          district: item.district,
-          city: item.city,
-          province: item.province,
-          area: item.area,
-          sor: item.sor,
-          industrialSector: item.industrialSector,
-          gsizes: item.gSizes,
-          customerSegment: item.customerSegment,
-          accountGroup: item.accountGroupType,
-          accountCategory: item.accountCategory,
-          serviceType: item.serviceType,
-          customer: item.customer,
-          startDate: item.startDate,
-          endDate: item.endDate,
-          key: index + 1,
-          type: "exist",
-        }));
+    const dataCriteriaList = criterias
+      .filter((item) => !item.allCriteria)
+      .map((item, index) => ({
+        id: item.id,
+        budget: item.budget,
+        subDistrict: item.subDistrict,
+        district: item.district,
+        city: item.city,
+        province: item.province,
+        area: item.costCenter,
+        sor: item.sor,
+        industrialSector: item.industrialSector,
+        gsizes: item.gsizes,
+        customerSegment: item.customerSegment,
+        accountGroup: item.accountGroup,
+        accountCategory: item.accountCategory,
+        serviceType: item.serviceType,
+        customer: item.customer,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        key: index + 1,
+        type: "exist",
+      }));
 
-      form.setFieldsValue({
-        name: data_detail?.information?.name,
-        startDate: moment(data_detail?.information?.startDate),
-        endDate: data_detail?.information?.endDate
-          ? moment(data_detail?.information?.endDate)
-          : undefined,
-        holidayType: data_detail?.information?.holidayType,
-        criteria: criteriaSelect,
-        description: data_detail?.information?.description,
-        apphierId: data_detail?.information?.apphierId,
-      });
+    form.setFieldsValue({
+      name: callendar.calendarName,
+      startDate: callendar.startDate ? moment(callendar.startDate) : undefined,
+      endDate: callendar.endDate ? moment(callendar.endDate) : undefined,
+      holidayType: callendar.holidayType,
+      criteria: criteriaSelect,
+      description: callendar.description,
+      apphierId: callendar.apphierId,
+    });
 
-      setStartDate(moment(data_detail?.information?.startDate));
-      setSelectedHierarchy(data_detail?.information?.apphierId);
-      setListDataAttachment(dataAttachment);
-      setCriteriaValues(criteriaSelect || []);
-      setListDataCriteria(dataCriteriaList);
-    }
-  }, [id, type, form, data_detail, data_detail_draft]);
+    setStartDate(callendar.startDate ? moment(callendar.startDate) : undefined);
+    setEndDate(callendar.endDate ? moment(callendar.endDate) : undefined);
+    setSelectedHierarchy(callendar.apphierId);
+    setListDataAttachment(mapAttachments(data_detail?.attachments));
+    setCriteriaValues(criteriaSelect || []);
+    setListDataCriteria(dataCriteriaList);
+  }, [id, type, form, data_detail]);
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
@@ -772,6 +721,8 @@ const CalendarForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
@@ -791,7 +742,6 @@ const CalendarForm = ({ type }) => {
       ]);
     } else {
       dispatch(getDetailCalendar(id));
-      dispatch(getDetailDraftCalendar(id));
     }
   };
 
@@ -863,13 +813,7 @@ const CalendarForm = ({ type }) => {
                     },
                   ]}
                 >
-                  <DateComponent
-                    onChange={(e) => handleStartDate(e)}
-                    disabled={
-                      (status !== "DRAFT" && type === "update") ||
-                      isDisabledDate
-                    }
-                  />
+                  <DateComponent onChange={(e) => handleStartDate(e)} />
                 </Form.Item>
 
                 <Form.Item
@@ -889,7 +833,6 @@ const CalendarForm = ({ type }) => {
                   <DateComponent
                     onChange={(e) => handleEndDate(e)}
                     dateDisable={handleDisableEndDate}
-                    disabled={isDisabledDate}
                   />
                 </Form.Item>
 

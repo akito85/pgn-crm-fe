@@ -13,6 +13,7 @@ import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../utils/sorterFunction";
 import { tokenHeader } from "../../../../utils/tokenHeader";
+import { configApp } from "../../../../constants/configApp";
 
 export const columns = (
   search,
@@ -200,13 +201,13 @@ export const columns = (
     render: (_, record) => {
       const isSuccess = record.status === "SUCCESS" && !!record.invoiceFile;
       return (
-        <Tooltip title={isSuccess ? "Download" : "File not available"}>
+        <Tooltip title={isSuccess ? "View" : "File not available"}>
           <ButtonComponent
             type="text"
             border={false}
             icon={
               <SVGIcon
-                name="IconDownload"
+                name="IconEye"
                 width={20}
                 color={isSuccess ? undefined : "#d9d9d9"}
               />
@@ -274,10 +275,13 @@ const DetailInvoice = ({ isOpen, onClose, detail, loading = false }) => {
 
   const handlePreview = async (record) => {
     try {
-      const res = await axios.get(record.invoiceFile, {
-        headers: tokenHeader(),
-        responseType: "arraybuffer",
-      });
+      const res = await axios.get(
+        configApp.RATING_BILLING_SERVICE + `/v1/dbs/api/rbi/invoice/${record.id}/preview-log`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        }
+      );
       const blob = new Blob([res.data], {
         type: res.headers["content-type"],
       });

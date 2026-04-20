@@ -437,7 +437,15 @@ export const getDetailRatingGas = createAsyncThunk(
 export const getAllCalculationSummaryPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_PAGINATE",
   async (
-    { ratingCode, page, pageSize, search, sort, isLoadMore = false },
+    {
+      ratingCode,
+      calculationCode,
+      page,
+      pageSize,
+      search,
+      sort,
+      isLoadMore = false,
+    },
     thunkAPI,
   ) => {
     try {
@@ -445,7 +453,7 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "transactionDate~desc" : sort;
 
-      const url = `/v1/dbs/api/rating/summary-rating?ratingCode=${ratingCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/rating/summary-rating?ratingCode=${ratingCode}&calculationCode=${calculationCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
 
@@ -476,13 +484,16 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
 // Calculation Summary Expand - Tabel yang di-expand
 export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_EXPAND_PAGINATE",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async (
+    { id, ratingCode, calculationCode, saType, page, pageSize, search, sort },
+    thunkAPI,
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "ratingLineId~asc" : sort;
 
-      const url = `/v1/dbs/api/rating/summary-rating-expand/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/rating/summary-rating-expand?ratingCode=${ratingCode}&calculationCode=${calculationCode}&saType=${saType}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
       return {
