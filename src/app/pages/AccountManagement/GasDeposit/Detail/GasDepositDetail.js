@@ -267,17 +267,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
               />
             </NxBaseContainer>
           )}
-          <GasDepositDetailTabs detail={detail} />
-
-          <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
-            <NxBaseContainer border>
-              {activeKey === originalKey ? (
-                <GasDepositDetailTable id={id} parentKey="detail_gasDeposit" />
-              ) : (
-                <GasDepositDetailTable id={id} parentKey="detailDraft_gasDeposit" />
-              )}
-            </NxBaseContainer>
-          </NxCardContainer>
+          
+          <GasDepositDetailTabs id={id} detail={detail} versionActiveKey={activeKey} versionOriginalKey={originalKey} />
 
           {/* Detail mutation table — rendered only when a row is selected */}
 
