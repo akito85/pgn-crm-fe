@@ -179,27 +179,25 @@ const GasDepositDetailTable = ({
   );
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <NxTable
-        idTable="gas-deposit-detail-table"
-        dataSource={dataSource}
-        totalData={totalElement}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 1500 }}
-        onSort={onSort}
-        columns={columns}
-        usePagination={false}
-        useInfiniteScroll
-        hasMore={hasMore}
-        loadMoreThreshold={20}
-        onLoadMore={handleLoadMore}
-        loading={loading}
-        expandable={{ expandedRowRender }}
-        onRefresh={handleRefresh}
-        showAdvanceSearch={false}
-        showSearchBar={false}
-        useSelect={false}
-      />
-    </div>
+    <NxTable
+      idTable="gas-deposit-detail-table"
+      dataSource={dataSource}
+      totalData={totalElement}
+      tableScrolled={{ x: dataSource.length ? "max-content" : 1500 }}
+      onSort={onSort}
+      columns={columns}
+      usePagination={false}
+      useInfiniteScroll
+      hasMore={hasMore}
+      loadMoreThreshold={20}
+      onLoadMore={handleLoadMore}
+      loading={loading}
+      expandable={{ expandedRowRender }}
+      onRefresh={handleRefresh}
+      showAdvanceSearch={false}
+      showSearchBar={false}
+      useSelect={false}
+    />
   );
 };
 
