@@ -20,7 +20,7 @@ import {
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../../utils/Icon";
 import { columnsTablePOSDetailInfo } from "../../Table/TablePOSDetailInfo";
-import TablePaginationNewTablePOS from "../../Table/TablePaginationNewTablePOS";
+import TableRBI from "../../../../../../components/TableRBI";
 
 // Filter Table
 const onFilter = (dataIndex, value, record) => {
@@ -58,48 +58,154 @@ const onFilter = (dataIndex, value, record) => {
 
 // Sorting Table
 const sorter = (fieldSort, a, b) => {
+  const numberFields = [
+    "price",
+    "quantity",
+    "amount",
+    "amountEqvIdr",
+    "amountEqvUsd",
+    "eqvIdr",
+    "discount",
+    "total",
+    "totalEqvIdr",
+    "totalEqvUsd",
+    "totalAmount",
+    "totalAmountEqv",
+    "vatBasis",
+    "vatBasisEqv",
+    "vat",
+    "vatEqv",
+    "witholdingTax",
+    "vatExchangeRate",
+    "rate",
+  ];
+
   const handleDataSort = (obj) => {
-    switch (fieldSort) {
-      case "price":
-      case "quantity":
-      case "amount":
-      case "amountEqvIdr":
-      case "amountEqvUsd":
-      case "eqvIdr":
-      case "discount":
-      case "total":
-      case "totalEqvIdr":
-      case "totalEqvUsd":
-        return obj[fieldSort]
-          ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
-          : "0";
-      default:
-        return obj[fieldSort]?.toLowerCase();
+    if (numberFields.includes(fieldSort)) {
+      return Number(obj?.[fieldSort] || 0);
     }
+
+    return (obj?.[fieldSort] || "")?.toString()?.toLowerCase();
   };
 
   let fa = handleDataSort(a);
   let fb = handleDataSort(b);
 
   const handleCompare = (a, b) => {
-    switch (fieldSort) {
-      case "price":
-      case "quantity":
-      case "amount":
-      case "amountEqvIdr":
-      case "amountEqvUsd":
-      case "eqvIdr":
-      case "discount":
-      case "total":
-      case "totalEqvIdr":
-      case "totalEqvUsd":
-        return Math.sign(parseInt(a) - parseInt(b));
-      default:
-        return a.localeCompare(b);
+    if (numberFields.includes(fieldSort)) {
+      return Math.sign(a - b);
     }
+
+    return a.localeCompare(b);
   };
 
   return handleCompare(fa, fb);
+};
+
+const getNormalizedId = (value) =>
+  value === undefined || value === null || value === "" || isNaN(value)
+    ? value
+    : parseInt(value);
+
+const buildPosDetailRow = ({
+  formValue,
+  priceInformation,
+  currentData,
+  posNumber,
+  posDetailId,
+  dataType,
+  dataItemBilling,
+  dataItemProduct,
+}) => {
+  const selectedItemName =
+    formValue?.type === 2145
+      ? dataItemBilling?.find((billingData) => billingData?.id === formValue?.item)
+          ?.name
+      : dataItemProduct?.find((productData) => productData?.id === formValue?.item)
+          ?.name;
+
+  return {
+    posNumber: posNumber === undefined ? currentData?.posNumber ?? null : posNumber,
+    posDetailId:
+      posDetailId === undefined ? currentData?.posDetailId ?? null : posDetailId,
+    typeId: formValue?.type,
+    type:
+      dataType?.find((typeData) => typeData?.Id === formValue?.type)?.text ||
+      currentData?.type ||
+      priceInformation?.typeName ||
+      null,
+    typeValueName:
+      priceInformation?.typeValueName || currentData?.typeValueName || null,
+    source: priceInformation?.source || currentData?.source || null,
+    item: priceInformation?.itemId || priceInformation?.item || currentData?.item || null,
+    itemName:
+      priceInformation?.itemName ||
+      currentData?.itemName ||
+      selectedItemName ||
+      null,
+    itemId: formValue?.item ?? currentData?.itemId ?? null,
+    priceCode: priceInformation?.priceCode || currentData?.priceCode || null,
+    price: formValue?.price ?? priceInformation?.price ?? currentData?.price ?? null,
+    reference:
+      priceInformation?.reference ?? currentData?.reference ?? formValue?.reference ?? null,
+    referenceName:
+      priceInformation?.referenceName || currentData?.referenceName || null,
+    quantity:
+      formValue?.quantity ?? priceInformation?.quantity ?? currentData?.quantity ?? null,
+    uom: formValue?.uom ?? priceInformation?.uom ?? currentData?.uom ?? null,
+    currency:
+      formValue?.currency ?? priceInformation?.currency ?? currentData?.currency ?? null,
+    amount:
+      formValue?.amount ?? priceInformation?.amount ?? currentData?.amount ?? null,
+    discount:
+      formValue?.discount ?? priceInformation?.discount ?? currentData?.discount ?? 0,
+    total:
+      formValue?.total ?? priceInformation?.total ?? currentData?.total ?? null,
+    totalAmount:
+      priceInformation?.totalAmount ??
+      formValue?.total ??
+      currentData?.totalAmount ??
+      currentData?.total ??
+      null,
+    vatBasis: priceInformation?.vatBasis ?? currentData?.vatBasis ?? null,
+    vatBasisEqv:
+      priceInformation?.vatBasisEqv ?? currentData?.vatBasisEqv ?? null,
+    vatRate: priceInformation?.vatRate ?? currentData?.vatRate ?? null,
+    vatCode: priceInformation?.vatCode ?? currentData?.vatCode ?? null,
+    vat: priceInformation?.vat ?? currentData?.vat ?? null,
+    vatEqv: priceInformation?.vatEqv ?? currentData?.vatEqv ?? null,
+    witholdingTax:
+      priceInformation?.witholdingTax ?? currentData?.witholdingTax ?? null,
+    vatExchangeRateType:
+      priceInformation?.vatExchangeRateType ||
+      currentData?.vatExchangeRateType ||
+      null,
+    vatExchangeRateDate:
+      priceInformation?.vatExchangeRateDate ||
+      currentData?.vatExchangeRateDate ||
+      null,
+    vatExchangeRate:
+      priceInformation?.vatExchangeRate ?? currentData?.vatExchangeRate ?? null,
+    convertedCurrency:
+      formValue?.convertedCurrency ||
+      priceInformation?.convertedCurrency ||
+      currentData?.convertedCurrency ||
+      null,
+    totalAmountEqv:
+      formValue?.totalAmountEqv ??
+      priceInformation?.totalAmountEqv ??
+      currentData?.totalAmountEqv ??
+      null,
+    rateType: priceInformation?.rateType || currentData?.rateType || null,
+    rateDate: priceInformation?.rateDate || currentData?.rateDate || null,
+    rate: priceInformation?.rate ?? currentData?.rate ?? null,
+    amountEqvIdr: formValue?.amountEqvIdr ?? currentData?.amountEqvIdr ?? 0,
+    amountEqvUsd: formValue?.amountEqvUsd ?? currentData?.amountEqvUsd ?? 0,
+    eqvIdr: formValue?.eqvIdrTaxPurpose ?? currentData?.eqvIdr ?? 0,
+    totalEqvUsd: formValue?.totalEqvUsd ?? currentData?.totalEqvUsd ?? 0,
+    totalEqvIdr: formValue?.totalEqvIdr ?? currentData?.totalEqvIdr ?? 0,
+    remark: formValue?.remark ?? currentData?.remark ?? null,
+  };
 };
 
 const PointOfSalesPageDetailPOS = ({
@@ -319,8 +425,15 @@ const PointOfSalesPageDetailPOS = ({
                 taxData?.totalAmountEqv != null
                   ? Number(taxData.totalAmountEqv.toFixed(4))
                   : 0,
+              totalAmount:
+                taxData?.totalAmount != null
+                  ? Number(taxData.totalAmount.toFixed(2))
+                  : taxData?.total != null
+                    ? Number(taxData.total.toFixed(2))
+                    : 0,
               typeId: taxData?.type,
               type: taxData?.typeName,
+              source: taxData?.source || null,
               convertedCurrency: taxData?.convertedCurrency || null,
               reference: taxData?.reference ?? null,
               referenceName: taxData?.referenceName || null,
@@ -328,8 +441,24 @@ const PointOfSalesPageDetailPOS = ({
               uom: taxData?.uom || null,
               currency: taxData?.currency || null,
               discount: taxData?.discount ?? 0,
-              item: taxData?.itemName,
-              itemId: taxData?.item,
+              item: taxData?.item || null,
+              itemName: taxData?.itemName || null,
+              itemId:
+                taxData?.itemId ?? taxData?.productId ?? getNormalizedId(taxData?.item),
+              priceCode: taxData?.priceCode || null,
+              vatBasis: taxData?.vatBasis ?? null,
+              vatBasisEqv: taxData?.vatBasisEqv ?? null,
+              vatRate: taxData?.vatRate ?? null,
+              vatCode: taxData?.vatCode ?? null,
+              vat: taxData?.vat ?? null,
+              vatEqv: taxData?.vatEqv ?? null,
+              witholdingTax: taxData?.witholdingTax ?? null,
+              vatExchangeRateType: taxData?.vatExchangeRateType || null,
+              vatExchangeRateDate: taxData?.vatExchangeRateDate || null,
+              vatExchangeRate: taxData?.vatExchangeRate ?? null,
+              rateType: taxData?.rateType || null,
+              rateDate: taxData?.rateDate || null,
+              rate: taxData?.rate ?? null,
               dataType: "exist",
               totalEqvUsd: 0,
               amountEqvUsd: 0,
@@ -337,7 +466,6 @@ const PointOfSalesPageDetailPOS = ({
               totalEqvIdr: 0,
               amountEqvIdr: 0,
             };
-            delete temp?.itemName;
             return temp;
           }),
         ]);
@@ -456,40 +584,31 @@ const PointOfSalesPageDetailPOS = ({
     setPageSize(pageSizeChange);
   };
 
+  const handleTableChange = (_, __, ___, extra) => {
+    setDataTemp(extra?.currentDataSource || []);
+  };
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil((dataTemp?.length || 0) / pageSize));
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [dataTemp, page, pageSize]);
+
+  const paginatedData = dataTemp.slice((page - 1) * pageSize, page * pageSize);
+
   const onFinish = (e, typeAction = "") => {
     if (isUpdate.type || typeAction === "priorityChanges") {
-      const updatedData = {
-        posNumber: posNumber === undefined ? null : posNumber,
-        posDetailId: posDetailId === undefined ? null : posDetailId,
-        typeId: e?.type,
-        typeValueName: data_calculate?.priceInformation?.typeValueName || null,
-        type: dataType?.find((typeData) => typeData?.Id === e?.type)?.text,
-        item:
-          e?.type === 2145
-            ? dataItemBilling?.find(
-                (billingData) => billingData?.id === e?.item,
-              )?.name
-            : dataItemProduct?.find(
-                (productData) => productData?.id === e?.item,
-              )?.name,
-        itemId: e?.item,
-        price: e?.price,
-        reference: e?.reference,
-        quantity: e?.quantity,
-        uom: e?.uom,
-        currency: e?.currency,
-        amount: e?.amount,
-        discount: e?.discount || 0,
-        total: e?.total,
-        convertedCurrency: e?.convertedCurrency || null,
-        totalAmountEqv: e?.totalAmountEqv || null,
-        amountEqvIdr: e?.amountEqvIdr || 0,
-        amountEqvUsd: e?.amountEqvUsd || 0,
-        eqvIdr: e?.eqvIdrTaxPurpose || 0,
-        totalEqvUsd: e?.totalEqvUsd || 0,
-        totalEqvIdr: e?.totalEqvIdr || 0,
-        remark: e?.remark,
-      };
+      const updatedData = buildPosDetailRow({
+        formValue: e,
+        priceInformation: data_calculate?.priceInformation,
+        currentData: data?.[isUpdate.index],
+        posNumber,
+        posDetailId,
+        dataType,
+        dataItemBilling,
+        dataItemProduct,
+      });
       setData((prevData) => {
         const newData = [...(prevData || [])];
         newData[isUpdate.index] = updatedData;
@@ -526,34 +645,16 @@ const PointOfSalesPageDetailPOS = ({
         }
       });
     } else {
-      const newData = {
-        typeId: e?.type,
-        type: dataType?.find((typeData) => typeData?.Id === e?.type)?.text,
-        typeValueName: data_calculate?.priceInformation?.typeValueName || null,
-        itemId: e?.item,
-        item:
-          e?.type === 2145
-            ? dataItemBilling?.find(
-                (billingData) => billingData?.id === e?.item,
-              )?.name
-            : dataItemProduct?.find(
-                (productData) => productData?.id === e?.item,
-              )?.name,
-        price: e?.price,
-        reference: e?.reference,
-        quantity: e?.quantity,
-        uom: e?.uom,
-        currency: e?.currency,
-        amount: e?.amount,
-        discount: e?.discount || 0,
-        amountEqvIdr: e?.amountEqvIdr,
-        amountEqvUsd: e?.amountEqvUsd,
-        total: e?.total,
-        eqvIdr: e?.eqvIdrTaxPurpose || 0,
-        totalEqvUsd: e?.totalEqvUsd,
-        totalEqvIdr: e?.totalEqvIdr,
-        remark: e?.remark,
-      };
+      const newData = buildPosDetailRow({
+        formValue: e,
+        priceInformation: data_calculate?.priceInformation,
+        currentData: null,
+        posNumber,
+        posDetailId,
+        dataType,
+        dataItemBilling,
+        dataItemProduct,
+      });
       setData((prevData) => {
         const temp = [
           ...(prevData || []),
@@ -571,9 +672,11 @@ const PointOfSalesPageDetailPOS = ({
   };
 
   const handleDelete = (r) => {
+    const currentItemId = getNormalizedId(r?.itemId);
     const temp = data.filter(
       (dataItem) =>
-        dataItem.item !== r?.item && dataItem.reference !== parseInt(r?.itemId),
+        getNormalizedId(dataItem.itemId) !== currentItemId &&
+        getNormalizedId(dataItem.reference) !== currentItemId,
     );
     setData(temp);
   };
@@ -650,7 +753,7 @@ const PointOfSalesPageDetailPOS = ({
   }, [formCreate]);
 
   const handleUpdate = (e, index) => {
-    ignoreCalculate.current = false;
+    ignoreCalculate.current = true;
 
     formCreate.resetFields();
     setType(null);
@@ -669,21 +772,43 @@ const PointOfSalesPageDetailPOS = ({
 
     setPosDetailId(e?.posDetailId);
     setPosNumber(e?.posNumber);
+
+    const resolvedItem =
+      e?.typeId === 2144
+        ? dataItemProduct?.find(
+            (productData) =>
+              productData?.id === parseInt(e?.itemId) ||
+              productData?.id === e?.itemId ||
+              productData?.id === e?.item,
+          )?.id
+        : dataItemBilling?.find(
+            (billingData) =>
+              billingData?.id === e?.itemId || billingData?.id === e?.item,
+          )?.id;
+
+    const resolvedCurrencyId =
+      e?.typeId === 2144
+        ? data_globalCurrency?.find(
+            (c) => c.Id === e?.currency || c.text === e?.currency,
+          )?.Id ?? e?.currency
+        : null; // Billing Item: kosongkan agar user memilih ulang
+
     formCreate.setFieldsValue({
       ...e,
       type: e?.typeId,
       eqvIdrTaxPurpose: e?.eqvIdr,
-      item: isNaN(e?.itemId) ? e?.itemId : parseInt(e?.itemId),
+      item: resolvedItem,
+      currency: resolvedCurrencyId,
     });
     setQuantity(e?.quantity);
-    setItem(
-      e?.typeId === 2144
-        ? dataItemProduct?.find(
-            (productData) => productData?.id === parseInt(e?.itemId),
-          )?.id
-        : dataItemBilling?.find((billingData) => billingData?.id === e?.itemId)
-            ?.id,
-    );
+
+    setItem(resolvedItem);
+
+    if (e?.typeId === 2145) {
+      setAmount(e?.amount);
+      setBillingCurrency(null);
+    }
+
     setType(e?.typeId);
 
     const tempTax = data.filter((dataItem) => dataItem.reference === e?.itemId);
@@ -719,18 +844,22 @@ const PointOfSalesPageDetailPOS = ({
       </div>
 
       <div className={"w-full mt-5"}>
-        <TablePaginationNewTablePOS
-          type="FE"
-          dataSource={data}
-          totalData={data.length}
+        <TableRBI
+          idTable="table-pos-detail-info"
+          dataSource={paginatedData}
+          totalData={dataTemp.length}
           current={page}
           pageSize={pageSize}
           onChange={handleChange}
+          onSizeChanger={handleChange}
           tableScrolled={{
             x: 5000,
             y: 300,
           }}
-          setData={setDataTemp}
+          onSort={handleTableChange}
+          showAdvanceSearch={false}
+          showSearchBar={false}
+          showRefresh={false}
           columns={columnsTablePOSDetailInfo(
             search,
             page,
@@ -743,7 +872,7 @@ const PointOfSalesPageDetailPOS = ({
             handleDelete,
             onFilter,
             sorter,
-            dataTemp,
+            paginatedData,
             "editable",
           )}
         />

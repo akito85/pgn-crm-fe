@@ -675,22 +675,26 @@ const PosForm = ({ type }) => {
       });
 
       setData(
-        data_detailPos?.mrbiPosDetails?.map((item) => ({
-          ...item,
-          price: item?.price || 0,
-          amount: item?.amount || 0,
-          totalAmountEqv: item?.totalAmountEqv || 0,
-          convertedCurrency: item?.convertedCurrency || null,
+        data_detailPos?.mrbiPosDetails?.map((detail) => ({
+          ...detail,
+          typeId: detail?.typeId ?? detail?.type,
+          itemId: detail?.itemId || detail?.item || null,
+          item: detail?.itemId || detail?.item || null,
+          itemName: detail?.item || detail?.itemName || null,
+          price: detail?.price || 0,
+          amount: detail?.amount || 0,
+          totalAmountEqv: detail?.totalAmountEqv || 0,
+          convertedCurrency: detail?.convertedCurrency || null,
           amountEqvUsd:
-            item?.amountEqvUsd != null
-              ? Number(item.amountEqvUsd.toFixed(2))
+            detail?.amountEqvUsd != null
+              ? Number(detail.amountEqvUsd.toFixed(2))
               : 0,
-          amountEqvIdr: item?.amountEqvIdr || 0,
-          eqvIdr: item?.eqvIdr || 0,
-          totalEqvIdr: item?.totalEqvIdr || 0,
+          amountEqvIdr: detail?.amountEqvIdr || 0,
+          eqvIdr: detail?.eqvIdr || 0,
+          totalEqvIdr: detail?.totalEqvIdr || 0,
           totalEqvUsd:
-            item?.totalEqvUsd != null
-              ? Number(item.totalEqvUsd.toFixed(2))
+            detail?.totalEqvUsd != null
+              ? Number(detail.totalEqvUsd.toFixed(2))
               : 0,
         })),
       );
@@ -742,8 +746,12 @@ const PosForm = ({ type }) => {
 
   useEffect(() => {
     if (!data) return;
+    if (isUpdatingFromMaterai.current) {
+      isUpdatingFromMaterai.current = false;
+      return;
+    }
     const filteredData = data.filter(
-      (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+      (item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== 297,
     );
     const newDataDynamic = filteredData.reduce(
       (sums, item) => {
@@ -810,12 +818,12 @@ const PosForm = ({ type }) => {
     if (filteredData.length === 0) {
       setData((prev) => {
         const hasMaterai = prev.some(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+          (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C001",
         );
         if (hasMaterai) {
           isUpdatingFromMaterai.current = true;
           return prev
-            .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+            .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C001")
             .map((items, index) => ({ ...items, lineNumber: index + 1 }));
         }
         return prev;
@@ -864,11 +872,11 @@ const PosForm = ({ type }) => {
             isUpdatingFromMaterai.current = true;
             setData((prev) => {
               const hasMaterai = prev.some(
-                (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+                (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C001",
               );
               if (!hasMaterai) return prev;
               return prev
-                .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+                .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C001")
                 .map((items, index) => ({ ...items, lineNumber: index + 1 }));
             });
             return;
@@ -878,8 +886,11 @@ const PosForm = ({ type }) => {
             typeId: dataRes?.type,
             type: dataRes?.typeName,
             typeValueName: dataRes?.typeValueName || null,
-            itemId: parseInt(dataRes?.item),
-            item: dataRes?.itemName,
+            itemId: dataRes?.item || null,
+            item: dataRes?.item || null,
+            itemName: dataRes?.itemName || null,
+            source: dataRes?.source || null,
+            priceCode: dataRes?.priceCode || null,
             price: dataRes?.price,
             quantity: dataRes?.quantity,
             uom: dataRes?.uom,
@@ -901,10 +912,10 @@ const PosForm = ({ type }) => {
           isUpdatingFromMaterai.current = true;
           setData((prev) => {
             const baseData = prev.some(
-              (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+              (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C001",
             )
               ? prev.filter(
-                  (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+                  (item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C001",
                 )
               : prev;
             return [...baseData, newMaterai].map((items, index) => ({
@@ -1532,22 +1543,26 @@ const PosForm = ({ type }) => {
         }
 
         setData(
-          data_detailPos?.mrbiPosDetails?.map((item) => ({
-            ...item,
-            price: item?.price || 0,
-            amount: item?.amount || 0,
-            totalAmountEqv: item?.totalAmountEqv || 0,
-            convertedCurrency: item?.convertedCurrency || null,
+          data_detailPos?.mrbiPosDetails?.map((detail) => ({
+            ...detail,
+            typeId: detail?.typeId ?? detail?.type,
+            itemId: detail?.itemId || detail?.item || null,
+            item: detail?.itemId || detail?.item || null,
+            itemName: detail?.item || detail?.itemName || null,
+            price: detail?.price || 0,
+            amount: detail?.amount || 0,
+            totalAmountEqv: detail?.totalAmountEqv || 0,
+            convertedCurrency: detail?.convertedCurrency || null,
             amountEqvUsd:
-              item?.amountEqvUsd != null
-                ? Number(item.amountEqvUsd.toFixed(2))
+              detail?.amountEqvUsd != null
+                ? Number(detail.amountEqvUsd.toFixed(2))
                 : 0,
-            amountEqvIdr: item?.amountEqvIdr || 0,
-            eqvIdr: item?.eqvIdr || 0,
-            totalEqvIdr: item?.totalEqvIdr || 0,
+            amountEqvIdr: detail?.amountEqvIdr || 0,
+            eqvIdr: detail?.eqvIdr || 0,
+            totalEqvIdr: detail?.totalEqvIdr || 0,
             totalEqvUsd:
-              item?.totalEqvUsd != null
-                ? Number(item.totalEqvUsd.toFixed(2))
+              detail?.totalEqvUsd != null
+                ? Number(detail.totalEqvUsd.toFixed(2))
                 : 0,
           })),
         );
