@@ -83,6 +83,10 @@ const SaInformation = ({
 
   // For validation all date
   const handleDateValidation = (value, type) => {
+    const shouldKeepGasInPlanDate =
+      saRecordData?.status === "ACTIVE" &&
+      saRecordData?.approvalStatus === "APPROVED";
+
     if (type === "serviceAgreementDate") {
       form.resetFields(["startDate", "endDate", "gasInPlanDate", "commitmentDate"])
       setServiceAgreementDate(value);
@@ -92,7 +96,9 @@ const SaInformation = ({
       setStartDate(value);
       return value;
     } else if (type === "endDate") {
-      form.resetFields(["gasInPlanDate"])
+      if (!shouldKeepGasInPlanDate) {
+        form.resetFields(["gasInPlanDate"])
+      }
       setEndDate(value);
       return value;
     } else if (type === "gasInPlanDate") {
