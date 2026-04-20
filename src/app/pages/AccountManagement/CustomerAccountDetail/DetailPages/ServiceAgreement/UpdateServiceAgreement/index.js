@@ -1285,6 +1285,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					type={"create"}
 					data={listDataAttachment}
 					updateData={setListDataAttachment}
+					saStatus={saRecordData.status}
 				/>
 			),
 			disabled: false,
@@ -1926,24 +1927,16 @@ const UpdateServiceAgreement = ({ saType }) => {
 									Cancel
 								</ButtonComponent>
 								<div className="flex w-full justify-end gap-x-2">
+									
 									<ButtonComponent
-										icon={<SVGIcon name={`IconButtonReset`} width={16} />}
+										icon={<SVGIcon name={`IconButtonClear`} width={16} />}
 										type="reject"
 										onClick={() => handleReset()}
 									>
-										Reset
+										Clear Data
 									</ButtonComponent>
-									{current > 0 && (
-										<ButtonComponent
-											onClick={() => {
-												prev();
-												scrollLeftHandler();
-											}}
-											type={"menu"}
-										>
-											Previous
-										</ButtonComponent>
-									)}
+									
+									
 									<ButtonComponent
 										type="secondary"
 										onClick={handleSaveAsDraft}
@@ -1951,6 +1944,19 @@ const UpdateServiceAgreement = ({ saType }) => {
 									>
 										Save as Draft
 									</ButtonComponent>
+									{/* )} */}
+									{current > 0 && (
+										<ButtonComponent
+										onClick={() => {
+											prev();
+											scrollLeftHandler();
+										}}
+										type={"menu"}
+										loading={loadingNext}
+										>
+										Previous
+										</ButtonComponent>
+									)}
 									{current < filteredItems.length - 1 && (
 										<ButtonComponent
 											onClick={handleButtonNext}
