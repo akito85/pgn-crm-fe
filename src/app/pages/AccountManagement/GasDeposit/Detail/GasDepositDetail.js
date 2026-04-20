@@ -270,8 +270,6 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           
           <GasDepositDetailTabs id={id} detail={detail} versionActiveKey={activeKey} versionOriginalKey={originalKey} />
 
-          {/* Detail mutation table — rendered only when a row is selected */}
-
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
             <NxBaseContainer border>
               <div className="w-full grid grid-cols-5 gap-4">
