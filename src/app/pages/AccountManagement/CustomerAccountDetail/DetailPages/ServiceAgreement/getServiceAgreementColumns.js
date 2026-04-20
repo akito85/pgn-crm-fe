@@ -310,7 +310,7 @@ const getServiceAgreementColumns = (
             };
             return (
                 <div className="flex justify-center">
-                    <StatusComponent colour={status?.toLowerCase()}>
+                    <StatusComponent colour={status?.toLowerCase()} size="small">
                         {displayText[status] || toTitleCase(String(status || "")) || "-"}
                     </StatusComponent>
                 </div>
@@ -342,7 +342,7 @@ const getServiceAgreementColumns = (
             };
             return (
                 <div className="flex justify-center">
-                    <StatusComponent colour={status?.toLowerCase()}>
+                    <StatusComponent colour={status?.toLowerCase()} size="small">
                         {displayText[status] || toTitleCase(String(status || "")) || "-"}
                     </StatusComponent>
                 </div>

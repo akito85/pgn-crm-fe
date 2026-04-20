@@ -120,11 +120,11 @@ const columnAttachment = (
     {
       title: "ACTION",
       align: "center",
-      width: 120,
+      width: 100,
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex w-full justify-center gap-6">
+          <div className="flex w-full justify-center gap-2">
             <Tooltip title="Preview">
               <EyeOutlined
                 // onClick={
@@ -141,6 +141,7 @@ const columnAttachment = (
               <SVGIcon
                 name="IconDelete"
                 width={24}
+                color="#1976D2"
                 className={
                   r.type === "exist" ? "disabled cursor-not-allowed" : undefined
                 }
