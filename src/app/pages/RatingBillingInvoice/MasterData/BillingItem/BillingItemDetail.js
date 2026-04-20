@@ -7,6 +7,7 @@ import CardContainer from "../../../../../components/CardContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  approvalActivatedBillingItem,
   approvalInactiveBillingItem,
   approvalRejectBillingItem,
   getBillingItemDetail,
@@ -71,7 +72,7 @@ const BillingItemDetail = () => {
       setShowButtonApproval(
         (data_BillingItemDetail.statusApproval === "WAITING APPROVAL" ||
           data_BillingItemDetail.statusApproval === "WAITING_APPROVAL") &&
-          data_BillingItemDetail?.approvalDto?.isApprover,
+        data_BillingItemDetail?.approvalDto?.isApprover,
       );
 
       // Mapping Information
@@ -99,7 +100,7 @@ const BillingItemDetail = () => {
       if (
         data_detailDraft &&
         data_detailDraft?.billingItemCode ===
-          data_BillingItemDetail?.billingItemCode &&
+        data_BillingItemDetail?.billingItemCode &&
         data_detailDraft?.billingItemCode === dataRecord &&
         data_BillingItemDetail?.statusApproval !== "APPROVED"
       ) {
@@ -167,7 +168,7 @@ const BillingItemDetail = () => {
     setModalConfirm(false);
   };
 
-  const handleConfirm = (e, handleClear = () => {}) => {
+  const handleConfirm = (e, handleClear = () => { }) => {
     const body = {
       id: data_BillingItemDetail?.id,
       remark: e?.remark,
@@ -175,11 +176,15 @@ const BillingItemDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
-      data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE")
-        ? approvalInactiveBillingItem(body)
-        : approvalRejectBillingItem(body),
-    )
+    const approvalType =
+      data_BillingItemDetail?.approvalDto?.approvalType?.toUpperCase() || "";
+    const approvalAction = approvalType.includes("INACTIVE")
+      ? approvalInactiveBillingItem(body)
+      : approvalType.includes("ACTIVATED")
+        ? approvalActivatedBillingItem(body)
+        : approvalRejectBillingItem(body);
+
+    dispatch(approvalAction)
       .unwrap()
       .then(() => {
         handleClear();
@@ -218,21 +223,21 @@ const BillingItemDetail = () => {
     },
     ...(showDraftTab
       ? [
-          {
-            key: "Draft",
-            label: "Draft",
-            children: (
-              <div className="my-0">
-                <BillingItemDetailInformation
-                  dataBillingItem={dataDraft}
-                  dataMapping={dataMappingDraft}
-                  data_typeList={data_typeList || []}
-                  data_criteriaList={data_criteriaList || []}
-                />
-              </div>
-            ),
-          },
-        ]
+        {
+          key: "Draft",
+          label: "Draft",
+          children: (
+            <div className="my-0">
+              <BillingItemDetailInformation
+                dataBillingItem={dataDraft}
+                dataMapping={dataMappingDraft}
+                data_typeList={data_typeList || []}
+                data_criteriaList={data_criteriaList || []}
+              />
+            </div>
+          ),
+        },
+      ]
       : []),
     {
       key: "Attachment",
@@ -258,10 +263,23 @@ const BillingItemDetail = () => {
     <>
       <Spin spinning={loading || loadingDetail}>
         <BreadCrumb routes={routes} />
-        {data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE") &&
+        {(data_BillingItemDetail?.approvalDto?.approvalType?.includes(
+          "INACTIVE",
+        ) ||
+          data_BillingItemDetail?.approvalDto?.approvalType?.includes(
+            "ACTIVATED",
+          )) &&
           data_BillingItemDetail?.approvalDto?.isApprover && (
             <div className="mt-5">
-              <CardContainer header="Inactive Request Information">
+              <CardContainer
+                header={
+                  data_BillingItemDetail?.approvalDto?.approvalType?.includes(
+                    "ACTIVATED",
+                  )
+                    ? "Activate Request Information"
+                    : "Inactive Request Information"
+                }
+              >
                 <div className="w-full grid grid-cols-4 gap-5">
                   <DetailText label="Requested Date">
                     {renderDateTime(
@@ -346,9 +364,8 @@ const BillingItemDetail = () => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            approveOrReject === "Approve" ? "Approved" : "Rejected"
-          }. ${bodyError.message || ""}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+            }. ${bodyError.message || ""}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

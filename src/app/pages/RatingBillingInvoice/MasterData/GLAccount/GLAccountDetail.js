@@ -18,6 +18,7 @@ import { configApp } from "../../../../../constants/configApp";
 import {
   approveRejectGLAccount,
   approveRejectInactiveGLAccount,
+  approveRejectActivatedGLAccount,
   resetGLAccountState,
   getDetailGLAccount,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
@@ -47,6 +48,10 @@ const GLAccountDetail = () => {
 
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
+  const isInactiveApproval =
+    bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT";
+  const isActivatedApproval =
+    bodyApproval.approvalType === "ACTIVATED_GL_ACCOUNT";
 
   useEffect(() => {
     if (id) {
@@ -138,10 +143,13 @@ const GLAccountDetail = () => {
       action: approveOrReject.toUpperCase(),
       approvalId: bodyApproval.tAppId,
     };
+    const approvalAction = isInactiveApproval
+      ? approveRejectInactiveGLAccount({ id, body: data })
+      : isActivatedApproval
+        ? approveRejectActivatedGLAccount({ id, body: data })
+        : approveRejectGLAccount({ id, body: data });
     dispatch(
-      bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT"
-        ? approveRejectInactiveGLAccount({ id, body: data })
-        : approveRejectGLAccount({ id, body: data }),
+      approvalAction,
     )
       .unwrap()
       .then(() => {
@@ -182,11 +190,13 @@ const GLAccountDetail = () => {
                 children: (
                   <div className="flex flex-col gap-3">
                     {bodyApproval.isApprover &&
-                      bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT" && (
+                      (isInactiveApproval || isActivatedApproval) && (
                         <div className="border border-[#D6E1F0] rounded-lg">
                           <div className="px-4 py-3 border-b border-[#D6E1F0]">
                             <p className="font-semibold text-primary">
-                              INACTIVE REQUEST INFORMATION
+                              {isActivatedApproval
+                                ? "ACTIVATE REQUEST INFORMATION"
+                                : "INACTIVE REQUEST INFORMATION"}
                             </p>
                           </div>
                           <div className="p-4">
@@ -194,8 +204,8 @@ const GLAccountDetail = () => {
                               <DetailText label={"Requested Date"}>
                                 {bodyApproval.approvalDetail?.requestedDate
                                   ? moment(
-                                      bodyApproval.approvalDetail.requestedDate,
-                                    ).format(dateFormatting.date)
+                                    bodyApproval.approvalDetail.requestedDate,
+                                  ).format(dateFormatting.date)
                                   : "-"}
                               </DetailText>
                               <DetailText label={"Requested By"}>
@@ -276,8 +286,8 @@ const GLAccountDetail = () => {
               <DetailText label={"Created Date"}>
                 {dataLogInformation?.createdDate
                   ? moment(dataLogInformation.createdDate).format(
-                      dateFormatting.dateTime,
-                    )
+                    dateFormatting.dateTime,
+                  )
                   : "-"}
               </DetailText>
               <DetailText label={"Created By"}>
@@ -286,8 +296,8 @@ const GLAccountDetail = () => {
               <DetailText label={"Updated Date"}>
                 {dataLogInformation?.updatedDate
                   ? moment(dataLogInformation.updatedDate).format(
-                      dateFormatting.dateTime,
-                    )
+                    dateFormatting.dateTime,
+                  )
                   : "-"}
               </DetailText>
               <DetailText label={"Updated By"}>
@@ -364,9 +374,8 @@ const GLAccountDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

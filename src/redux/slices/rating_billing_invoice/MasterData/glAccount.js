@@ -280,9 +280,8 @@ export const createGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "created" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "created" : "submitted"
+              }. ${message}.`,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -314,9 +313,8 @@ export const updateGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "updated" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "updated" : "submitted"
+              }. ${message}.`,
           };
           thunkApi.dispatch(showModalError(errorBody));
         }
@@ -364,6 +362,43 @@ export const inactiveGLAccount = createAsyncThunk(
   },
 );
 
+export const requestActivateGLAccount = createAsyncThunk(
+  "REQUEST_ACTIVATE_GL_ACCOUNT",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gl-account/request-activate`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successBody = {
+        title: "Successful",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not submitted. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+
 export const approveRejectGLAccount = createAsyncThunk(
   "APPROVE_REJECT_GL_ACCOUNT",
   async ({ id, body }, thunkAPI) => {
@@ -372,9 +407,8 @@ export const approveRejectGLAccount = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -391,9 +425,8 @@ export const approveRejectGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -413,9 +446,8 @@ export const approveRejectInactiveGLAccount = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -432,9 +464,47 @@ export const approveRejectInactiveGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+
+export const approveRejectActivatedGLAccount = createAsyncThunk(
+  "APPROVE_REJECT_ACTIVATED_GL_ACCOUNT",
+  async ({ id, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gl-account/${id}/approval-activated`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successApprove = {
+        title: `Successful`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successApprove));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -677,6 +747,19 @@ const glAccountSlice = createSlice({
         state.loading = false;
         state.message = action.payload;
       })
+      // request activate
+      .addCase(requestActivateGLAccount.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(requestActivateGLAccount.fulfilled, (state) => {
+        state.isSuccess = true;
+        state.loading = false;
+      })
+      .addCase(requestActivateGLAccount.rejected, (state, action) => {
+        state.isFailed = true;
+        state.loading = false;
+        state.message = action.payload;
+      })
       // approve reject
       .addCase(approveRejectGLAccount.pending, (state) => {
         state.loading = true;
@@ -699,6 +782,19 @@ const glAccountSlice = createSlice({
         state.loading = false;
       })
       .addCase(approveRejectInactiveGLAccount.rejected, (state, action) => {
+        state.isFailed = true;
+        state.loading = false;
+        state.message = action.payload;
+      })
+      // approve reject activated
+      .addCase(approveRejectActivatedGLAccount.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(approveRejectActivatedGLAccount.fulfilled, (state) => {
+        state.isSuccess = true;
+        state.loading = false;
+      })
+      .addCase(approveRejectActivatedGLAccount.rejected, (state, action) => {
         state.isFailed = true;
         state.loading = false;
         state.message = action.payload;
