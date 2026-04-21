@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Spin, Tooltip } from "antd";
+import { Spin, Tooltip, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -43,7 +43,7 @@ const DetailPendingApprovalsTop = () => {
   }, [period, accountNumber, page, dispatch]);
 
   const handleDownload = () => {
-    // Download handler — wire up when backend endpoint is ready
+    message.info("Fitur download sedang dalam pengembangan.");
   };
 
   const handleApprovalHistory = (record) => {

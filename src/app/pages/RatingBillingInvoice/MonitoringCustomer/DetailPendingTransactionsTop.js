@@ -10,7 +10,7 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
-import { getPendingTransactions } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
+import { getPendingTransactions, downloadPendingTransactions } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 
 const DetailPendingTransactionsTop = () => {
   const location = useLocation();
@@ -29,7 +29,7 @@ const DetailPendingTransactionsTop = () => {
       dispatch(
         getPendingTransactions({
           period,
-          page: page - 1,
+          page,
           pageSize,
           accountNumber,
         })
@@ -53,7 +53,7 @@ const DetailPendingTransactionsTop = () => {
   ];
 
   const handleDownload = () => {
-    // Download handler — wire up when backend endpoint is ready
+    dispatch(downloadPendingTransactions({ period, accountNumber }));
   };
 
   const handleInvestigate = (record) => {

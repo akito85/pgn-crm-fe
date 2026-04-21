@@ -41,7 +41,7 @@ const DetailPraBillingVsRating = () => {
       dispatch(
         getGapRatBill({
           period: filterPeriod,
-          page: page - 1,
+          page,
           pageSize,
         })
       );

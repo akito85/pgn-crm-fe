@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
@@ -12,7 +12,6 @@ import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { getGapRatingBilling, downloadGapRatingBilling } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 
 const DetailRatingVsBilling = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const period = location.state?.period;
   const accountNumber = location.state?.accountNumber;
@@ -29,7 +28,7 @@ const DetailRatingVsBilling = () => {
       dispatch(
         getGapRatingBilling({
           period,
-          page: page - 1,
+          page,
           pageSize,
           accountNumber,
         })

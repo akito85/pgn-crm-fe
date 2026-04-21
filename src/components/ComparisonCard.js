@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 
 const ComparisonCard = ({ title, leftColumn, rightColumn, onSeeDetails }) => {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <div
       className="bg-white rounded-lg overflow-hidden"
@@ -16,21 +14,7 @@ const ComparisonCard = ({ title, leftColumn, rightColumn, onSeeDetails }) => {
         {onSeeDetails && (
           <button
             onClick={onSeeDetails}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: hovered ? "#0175bf" : "#595959",
-              background: "white",
-              border: `1px solid ${hovered ? "#0175bf" : "#BDBDBD"}`,
-              borderRadius: 6,
-              padding: "2px 10px",
-              cursor: "pointer",
-              lineHeight: 1.8,
-              whiteSpace: "nowrap",
-              transition: "color 0.2s, border-color 0.2s",
-            }}
+            className="text-[#595959] border border-[#BDBDBD] rounded-md px-[10px] py-[2px] text-[11px] font-medium leading-relaxed whitespace-nowrap cursor-pointer bg-white transition-colors duration-200 hover:text-[#0175bf] hover:border-[#0175bf]"
           >
             See Details
           </button>

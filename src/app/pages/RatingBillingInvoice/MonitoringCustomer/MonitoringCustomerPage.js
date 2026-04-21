@@ -32,7 +32,8 @@ const MonitoringCustomerPage = () => {
   const navigate = useNavigate();
 
   const [filterPeriod, setFilterPeriod] = useState(null);
-  const [failedPage, setFailedPage] = useState(1);
+  const [failedRatingPage, setFailedRatingPage] = useState(1);
+  const [failedBillingPage, setFailedBillingPage] = useState(1);
   const [priorityPage, setPriorityPage] = useState({
     pendingTx: 1,
     pendingApproval: 1,
@@ -48,7 +49,7 @@ const MonitoringCustomerPage = () => {
       width: 60,
       align: "center",
       fixed: "left",
-      render: (_, __, index) => (failedPage - 1) * 10 + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "ACCOUNT NUMBER",
@@ -211,9 +212,10 @@ const MonitoringCustomerPage = () => {
   useEffect(() => {
     if (filterPeriod) {
       dispatch(getDashboardSummary(filterPeriod));
-      dispatch(getFailedCustomers({ period: filterPeriod, page: 0, size: 10 }));
+      dispatch(getFailedCustomers({ period: filterPeriod, page: 0, size: 200 }));
       dispatch(getPriorityList(filterPeriod));
-      setFailedPage(1);
+      setFailedRatingPage(1);
+      setFailedBillingPage(1);
       setPriorityPage({ pendingTx: 1, pendingApproval: 1, gapRating: 1, gapPrabilling: 1 });
     }
   }, [filterPeriod, dispatch]);
@@ -442,23 +444,21 @@ const MonitoringCustomerPage = () => {
                         <div className="pb-3">
                           <TableRBI
                             idTable="table-rating-failed"
-                            dataSource={failedCustomers.result.filter(
-                              (r) => r.failPhase && r.failPhase.toLowerCase().includes("rating")
-                            )}
+                            dataSource={failedCustomers.result
+                              .filter((r) => r.failPhase && r.failPhase.toLowerCase().includes("rating"))
+                              .slice((failedRatingPage - 1) * 10, failedRatingPage * 10)
+                            }
                             columns={tableColumns}
                             pageSize={10}
-                            current={failedPage}
+                            current={failedRatingPage}
                             loading={loadingKpi}
-                            totalData={failedCustomers.page.totalElements}
+                            totalData={failedCustomers.result.filter((r) => r.failPhase && r.failPhase.toLowerCase().includes("rating")).length}
                             tableScrolled={{ x: "max-content" }}
                             usePagination={true}
                             useSelect={true}
                             showAdvanceSearch={true}
                             showSearchBar={true}
-                            onChange={(p) => {
-                              setFailedPage(p);
-                              dispatch(getFailedCustomers({ period: filterPeriod, page: p - 1, size: 10 }));
-                            }}
+                            onChange={(p) => setFailedRatingPage(p)}
                           />
                         </div>
                       ),
@@ -470,23 +470,21 @@ const MonitoringCustomerPage = () => {
                         <div className="pb-3">
                           <TableRBI
                             idTable="table-billing-failed"
-                            dataSource={failedCustomers.result.filter(
-                              (r) => r.failPhase && r.failPhase.toLowerCase().includes("billing")
-                            )}
+                            dataSource={failedCustomers.result
+                              .filter((r) => r.failPhase && r.failPhase.toLowerCase().includes("billing"))
+                              .slice((failedBillingPage - 1) * 10, failedBillingPage * 10)
+                            }
                             columns={tableColumns}
                             pageSize={10}
-                            current={failedPage}
+                            current={failedBillingPage}
                             loading={loadingKpi}
-                            totalData={failedCustomers.page.totalElements}
+                            totalData={failedCustomers.result.filter((r) => r.failPhase && r.failPhase.toLowerCase().includes("billing")).length}
                             tableScrolled={{ x: "max-content" }}
                             usePagination={true}
                             useSelect={true}
                             showAdvanceSearch={true}
                             showSearchBar={true}
-                            onChange={(p) => {
-                              setFailedPage(p);
-                              dispatch(getFailedCustomers({ period: filterPeriod, page: p - 1, size: 10 }));
-                            }}
+                            onChange={(p) => setFailedBillingPage(p)}
                           />
                         </div>
                       ),

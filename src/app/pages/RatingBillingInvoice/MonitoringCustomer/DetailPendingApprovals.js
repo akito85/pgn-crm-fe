@@ -11,6 +11,7 @@ import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   getPendingApprovals,
   downloadPendingApprovals,
+  getApprovalHistoryDetail,
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 import { getColumnsPendingApprovals } from "./Table/TablePendingApprovals";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
@@ -19,7 +20,7 @@ import ModalHistory from "../../../../components/Modal/ModalHistory";
 const { Option } = Select;
 
 const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
-  const { loading, pendingApprovalsData } = useSelector(
+  const { loading, pendingApprovalsData, approvalHistoryDetailData } = useSelector(
     (state) => state.monitoring
   );
 
@@ -105,60 +106,28 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
 
   const handleApprovalDetail = (record) => {
     setSelectedRecord(record);
-    setIsApprovalHistoryOpen(true);
+    dispatch(getApprovalHistoryDetail({ appId: record.batchId }))
+      .unwrap()
+      .then(() => setIsApprovalHistoryOpen(true))
+      .catch(() => {});
   };
 
-  const getMockApprovalHistoryData = (record) => {
-    const approvers = [
-      { name: record?.createdBy || "-", role: "Divisi Name", status: "SUBMITTED" },
-      { name: "Abi Satya Mancanegara Abinawa", role: "Divisi Name", status: "APPROVED" },
-      { name: "Maulana Malik Ibrahim", role: "Divisi Name", status: "REJECTED" },
-      { name: record?.createdBy || "-", role: "Divisi Name", status: "RE-SUBMITTED" },
-    ];
-    const history = [
-      {
-        id: 4,
-        status: "RE-SUBMITTED",
-        hierarchy: "SUBMITTER",
-        name: record?.createdBy || "-",
-        role: "UI/UX Designer",
-        taskDate: record?.createdAt,
-        actionDate: record?.createdAt,
-        description: "Request Ulang",
-      },
-      {
-        id: 3,
-        status: "REJECTED",
-        hierarchy: "APPROVAL_BILLING",
-        name: "Maulana Malik Ibrahim",
-        role: "General Manager, Sales and Operation Region II",
-        taskDate: record?.createdAt,
-        actionDate: record?.createdAt,
-        description: "Ditolak",
-      },
-      {
-        id: 2,
-        status: "APPROVED",
-        hierarchy: "APPROVAL_BILLING",
-        name: "Abi Satya Mancanegara Abinawa",
-        role: "General Manager, Sales and Operation Region I",
-        taskDate: record?.createdAt,
-        actionDate: record?.createdAt,
-        description: "Disetujui",
-      },
-      {
-        id: 1,
-        status: "SUBMITTED",
-        hierarchy: "SUBMITTER",
-        name: record?.createdBy || "-",
-        role: "UI/UX Designer",
-        taskDate: record?.createdAt,
-        actionDate: record?.createdAt,
-        description: "Pengajuan Persetujuan",
-      },
-    ];
-    return { approvers, history };
-  };
+  const dataHistory = (approvalHistoryDetailData ?? []).map((d) => ({
+    id: d.ids,
+    status: d.actionStatus,
+    hierarchy: d.hierarchy,
+    name: d.actionBy,
+    role: d.positionName,
+    taskDate: d.rawActionDate,
+    actionDate: d.rawActionDate,
+    description: d.notes,
+  }));
+
+  const dataApprover = (approvalHistoryDetailData ?? []).map((d) => ({
+    name: d.actionBy,
+    role: d.positionName,
+    status: d.actionStatus,
+  }));
 
   // Get columns from separated file
   const baseColumns = useMemo(
@@ -294,8 +263,8 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
           header="APPROVAL HISTORY"
           width={700}
           cancelText="Cancel"
-          dataApprover={getMockApprovalHistoryData(selectedRecord).approvers}
-          dataHistory={getMockApprovalHistoryData(selectedRecord).history}
+          dataApprover={dataApprover}
+          dataHistory={dataHistory}
         />
       </Spin>
     </LayoutMenu>

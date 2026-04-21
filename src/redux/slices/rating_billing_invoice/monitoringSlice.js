@@ -315,8 +315,9 @@ export const getPendingTransactions = createAsyncThunk(
   "GET_PENDING_TRANSACTIONS",
   async ({ period, search, page, pageSize, sort, accountNumber }, thunkAPI) => {
     try {
+      const apiPage = page - 1;
       const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
-      const url = `/v1/dbs/api/monitoringcustomer/mv-pending-transactions?period=${period}&size=${pageSize}&page=${page}${acctParam}`;
+      const url = `/v1/dbs/api/monitoringcustomer/mv-pending-transactions?period=${period}&size=${pageSize}&page=${apiPage}${acctParam}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const pageData = response?.data ?? {};
       const content = pageData.content ?? [];
@@ -446,8 +447,9 @@ export const getGapRatingBilling = createAsyncThunk(
   "GET_GAP_RATING_BILLING",
   async ({ period, page, pageSize, accountNumber }, thunkAPI) => {
     try {
+      const apiPage = page - 1;
       const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
-      const url = `/v1/dbs/api/monitoringcustomer/mv-gap-rating-billing?period=${period}&size=${pageSize}&page=${page}${acctParam}`;
+      const url = `/v1/dbs/api/monitoringcustomer/mv-gap-rating-billing?period=${period}&size=${pageSize}&page=${apiPage}${acctParam}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const pageData = response?.data ?? {};
       const content = pageData.content ?? [];
@@ -497,8 +499,9 @@ export const getGapPraBillingMaster = createAsyncThunk(
   "GET_GAP_PRABIL_MASTER",
   async ({ period, page, pageSize, accountNumber }, thunkAPI) => {
     try {
+      const apiPage = page - 1;
       const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
-      const url = `/v1/dbs/api/monitoringcustomer/mv-gap-prabilling-master?period=${period}&size=${pageSize}&page=${page}${acctParam}`;
+      const url = `/v1/dbs/api/monitoringcustomer/mv-gap-prabilling-master?period=${period}&size=${pageSize}&page=${apiPage}${acctParam}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const pageData = response?.data ?? {};
       const content = pageData.content ?? [];
@@ -511,7 +514,7 @@ export const getGapPraBillingMaster = createAsyncThunk(
           billingPeriod: item.rawPeriod,
           fieldMismatch: item.fieldMismatch || "-",
           praBillingValue: item.praBillingValue || "-",
-          masterValue: "-",
+          masterValue: item.masterValue || "-",
         })),
         page: {
           totalElements: pageData.totalElements ?? content.length,
@@ -635,10 +638,10 @@ export const downloadGapRatBill = createAsyncThunk(
 
 export const syncGapPraBillingMaster = createAsyncThunk(
   "SYNC_GAP_PRABIL_MASTER",
-  async (_, thunkAPI) => {
+  async ({ logId, period } = {}, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/refresh-gap-prabilling-master`;
-      const response = await ratingBillingHttpService.createData(url, {});
+      const response = await ratingBillingHttpService.createData(url, { logId, period });
       return response.data;
     } catch (error) {
       const message =
@@ -874,8 +877,9 @@ export const getGapRatBill = createAsyncThunk(
   "GET_GAP_RAT_BILL",
   async ({ period, page, pageSize, accountNumber }, thunkAPI) => {
     try {
+      const apiPage = page - 1;
       const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
-      const url = `/v1/dbs/api/monitoringcustomer/mv-gap-rat-bill?period=${period}&size=${pageSize}&page=${page}${acctParam}`;
+      const url = `/v1/dbs/api/monitoringcustomer/mv-gap-rat-bill?period=${period}&size=${pageSize}&page=${apiPage}${acctParam}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const pageData = response?.data ?? {};
       const content = pageData.content ?? [];
