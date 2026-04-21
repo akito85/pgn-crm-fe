@@ -8,7 +8,7 @@ import React, {
 import { Form } from "antd";
 import moment from "moment";
 import { useSelector } from "react-redux";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { dateFormatting, hasValue } from "../../../../../../utils";
@@ -254,6 +254,7 @@ const PointOfSalesPageDetailPOS = ({
   const [posDetailId, setPosDetailId] = useState();
 
   const [modalValidate, setModalValidate] = useState(false);
+  const [modalWarning, setModalWarning] = useState({ isOpen: false, text: "" });
   const [dataTableTax, setDataTableTax] = useState([]);
   const [type, setType] = useState(false);
   const [quantity, setQuantity] = useState(null);
@@ -355,6 +356,12 @@ const PointOfSalesPageDetailPOS = ({
       ]);
     }
   }, [dispatch, amount, item, billingCurrency, dataPriority, formCreate, type]);
+
+  useEffect(() => {
+    if (data_calculate?.priceInformation?.warning && !ignoreCalculate.current) {
+      setModalWarning({ isOpen: true, text: data_calculate.priceInformation.warning });
+    }
+  }, [data_calculate]);
 
   useEffect(() => {
     if (ignoreCalculate.current) {
@@ -968,6 +975,23 @@ const PointOfSalesPageDetailPOS = ({
               dataMissing?.map((missingData) => missingData?.name).join(", ") ||
               ""
             } field first.`}
+          </p>
+        </div>
+      </ModalError>
+
+      <ModalError
+        isOpen={modalWarning.isOpen}
+        handleOk={() => setModalWarning({ isOpen: false, text: "" })}
+        handleCancel={() => setModalWarning({ isOpen: false, text: "" })}
+        customText={"OK"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px] items-center">
+            <WarningOutlined style={{ fontSize: "48px", color: "#faad14" }} />
+            <p className="text-[18px] font-bold">{"Warning"}</p>
+          </div>
+          <p className="pl-[70px]">
+            {modalWarning.text}
           </p>
         </div>
       </ModalError>
