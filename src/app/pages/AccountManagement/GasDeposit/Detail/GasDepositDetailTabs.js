@@ -40,18 +40,26 @@ const GasDepositDetailTabs = ({ id, detail, versionActiveKey, versionOriginalKey
 
   const tabCards = useMemo(() => [
     [
-      <GasDepositDetailInfo detail={detail} />,
-      versionActiveKey === versionOriginalKey ?
-        <GasDepositDetailTable id={id} parentKey="detail_gasDeposit" /> :
-        <GasDepositDetailTable id={id} parentKey="detailDraft_gasDeposit" />,
+      {
+        title: "Gas Deposit Information",
+        content: <GasDepositDetailInfo detail={detail} /> 
+      },
+      {
+        title: "Gas Deposit Detail",
+        content: versionActiveKey === versionOriginalKey ?
+          <GasDepositDetailTable id={id} parentKey="detail_gasDeposit" /> :
+          <GasDepositDetailTable id={id} parentKey="detailDraft_gasDeposit" />
+      },
     ],
     [
-      <NxAttachmentInput
-        data={attachments}
-        type="detail"
-        configApplication={configApp.ACCOUNT_SERVICE}
-        service={accountManagementService}
-      />
+      {
+        content: <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
+        />
+      }
     ]
   ], [detail, id, versionActiveKey, versionOriginalKey]);
 
@@ -68,8 +76,8 @@ const GasDepositDetailTabs = ({ id, detail, versionActiveKey, versionOriginalKey
       />
       <div className="flex flex-col gap-y-4 p-4">
         {tabCards[activeKey].map((card, index) => (
-          <NxBaseContainer border key={`${activeKey}-${index}`}>
-            {card}
+          <NxBaseContainer border header={card.title} key={`${activeKey}-${index}`}>
+            {card.content}
           </NxBaseContainer>
         ))}
       </div>
