@@ -3,6 +3,7 @@ import { useState } from "react";
 import GasDepositTable from "./GasDepositTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getGasDepositHistory,
   getGdApprovalHistory,
 } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import GasDepositApprovalModal from "./GasDepositApprovalModal";
@@ -88,7 +89,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const handleHistoryDetailModal = ({ show, historyId }) => {
     if (show) {
       if (historyId) {
-        dispatch(getGdApprovalHistory(historyId));
+        dispatch(getGasDepositHistory(historyId));
         setShowHistoryDetailModal(true);
       }
     } else {
