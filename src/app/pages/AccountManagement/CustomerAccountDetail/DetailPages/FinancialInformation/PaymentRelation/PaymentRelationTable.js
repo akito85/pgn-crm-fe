@@ -6,10 +6,9 @@ import NxTable from "../../../../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getPaymentRelation,
+  getPaymentRelations,
   downloadPaymentRelation,
 } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 
@@ -41,7 +40,7 @@ const PaymentRelationTable = ({
 
   const {
     list_paymentRelation: dataSource,
-    pagination_paymentRelation: pagination,
+    pagination_listPr: pagination,
     loading_listPr: loading,
   } = useSelector((state) => state.paymentRelation);
 
@@ -63,11 +62,6 @@ const PaymentRelationTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: [],
-  }));
-
   // --- Handlers ---
   /**
    * Resets pagination to page 0 and re-fetches the payment relation list with current search/sort/filter state.
@@ -82,7 +76,7 @@ const PaymentRelationTable = ({
       filterRules,
     };
 
-    dispatch(getPaymentRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getPaymentRelations({ id: idAccount, body, isLoadMore: false }));
     setPage(0);
   };
 
@@ -136,7 +130,7 @@ const PaymentRelationTable = ({
       };
 
       await dispatch(
-        getPaymentRelation({ id: idAccount, body, isLoadMore: true })
+        getPaymentRelations({ id: idAccount, body, isLoadMore: true })
       ).unwrap();
     }
     setPage(nextPage);
@@ -169,7 +163,7 @@ const PaymentRelationTable = ({
     };
 
     setPage(0);
-    dispatch(getPaymentRelation({ id: idAccount, body, isLoadMore: false }));
+    dispatch(getPaymentRelations({ id: idAccount, body, isLoadMore: false }));
   }, [sort, search, filters, filterRules]);
 
   // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
@@ -208,7 +202,7 @@ const PaymentRelationTable = ({
           },
         }
       ),
-    handleUpdate: ({ id }) =>
+    handleUpdate: ({ id, status, statusApproval }) =>
       navigate(
         isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PAYMENT_RELATION
@@ -220,6 +214,8 @@ const PaymentRelationTable = ({
             idAccount,
             idCustomer,
             id,
+            status,
+            statusApproval,
           },
         }
       ),
@@ -238,28 +234,25 @@ const PaymentRelationTable = ({
     ...col,
     width: 70,
     align: "center",
+    fixed: "right",
   }));
 
   const baseColumns = useMemo(
     () =>
-      getPaymentRelationColumns(
+      getPaymentRelationColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
-      ),
+      }),
     [search, searchInput, searchText, searchedColumn]
   );
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () => [...baseColumns, ...actionCols],
     [baseColumns, actionCols]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -277,9 +270,6 @@ const PaymentRelationTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
       />
     </div>

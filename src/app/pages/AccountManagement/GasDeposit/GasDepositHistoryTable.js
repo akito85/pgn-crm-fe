@@ -3,7 +3,6 @@ import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadGasDeposit, getGasDepositHistories } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { getGasDepositHistoryColumns } from "./getGasDepositHistoryColumns";
@@ -39,11 +38,6 @@ const GasDepositHistoryTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status"],
-    left: [],
-  }));
 
   // --- Handlers ---
   /**
@@ -171,14 +165,14 @@ const GasDepositHistoryTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => handleDetailModal({ show: true, id }),
-    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal({ show: true, id }),
+    handleView: ({ id }) => handleDetailModal({ show: true, historyId: id }),
+    handleApprovalHistory: ({ gasDepositId }) => handleApprovalHistoryModal({ show: true, historyId: gasDepositId }),
     handleDownload,
   });
 
   const toolbarItemActions = itemActions.filter(item => item.action === "Download");
 
-  const actionCols = useColumnActionPermission(["History"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View", "History"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
@@ -196,17 +190,13 @@ const GasDepositHistoryTable = ({
     }),
   [search, searchInput, searchText, searchedColumn]);
 
-  const columnDefinitions = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
+  const columns = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
 
   return (
     <div className="flex flex-col gap-y-4">
       <Toolbar items={toolbarItemActions} type="detail" />
       <NxTable
-        idTable="gas-deposit-table"
+        idTable="gas-deposit-history-table"
         dataSource={dataSource}
         totalData={totalElement}
         current={page}
@@ -218,9 +208,6 @@ const GasDepositHistoryTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
       />
     </div>

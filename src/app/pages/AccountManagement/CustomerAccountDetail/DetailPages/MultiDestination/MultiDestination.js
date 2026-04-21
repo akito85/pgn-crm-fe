@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getMdApprovalHistory,
   inactivateMultiDestination,
-  getMdApprovalHierarchy,
-  getDetailMdApprovalHierarchy
+  getMdApprovalHierarchies,
+  getMdApprovalHierarchy
 } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import MultiDestinationApprovalModal from "./MultiDestinationApprovalModal";
 import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
@@ -29,7 +29,7 @@ const MultiDestination = ({ accountId, customerId }) => {
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
-  const { data_mdApprovalHistory } = useSelector((state) => state.multiDestination);
+  const { detail_mdApprovalHistory } = useSelector((state) => state.multiDestination);
 
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -121,18 +121,18 @@ const MultiDestination = ({ accountId, customerId }) => {
 
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_mdApprovalHistory && data_mdApprovalHistory?.dataApprover) {
+    if (detail_mdApprovalHistory && detail_mdApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_mdApprovalHistory?.dataApprover?.MULTI_DESTINATION || [],
+          create: detail_mdApprovalHistory?.dataApprover?.MULTI_DESTINATION || [],
           inactive:
-            data_mdApprovalHistory?.dataApprover?.INACTIVE_MULTI_DESTINATION ||
+            detail_mdApprovalHistory?.dataApprover?.INACTIVE_MULTI_DESTINATION ||
             []
         },
         dataHistory: {
-          create: data_mdApprovalHistory?.dataHistory?.MULTI_DESTINATION || [],
+          create: detail_mdApprovalHistory?.dataHistory?.MULTI_DESTINATION || [],
           inactive:
-            data_mdApprovalHistory?.dataHistory?.INACTIVE_MULTI_DESTINATION ||
+            detail_mdApprovalHistory?.dataHistory?.INACTIVE_MULTI_DESTINATION ||
             []
         }
       };
@@ -141,7 +141,7 @@ const MultiDestination = ({ accountId, customerId }) => {
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_mdApprovalHistory]);
+  }, [detail_mdApprovalHistory]);
 
   return (
     <NxCardContainer header={"MULTI DESTINATION"}>
@@ -174,13 +174,13 @@ const MultiDestination = ({ accountId, customerId }) => {
           named={inactivateMdAccountNumber}
           menu="multi destination"
           sliceName="multiDestination"
-          approvalOptionsName="list_mdApprovalOptions"
-          approvalHierarchtDetailsName="list_mdApprovalHierarchyDetail"
-          loadingListApprovalOptionsName="loading_listMdApprovalOption"
-          loadingListHierarchyDetailName="loading_listMdApprovalHierarchyDetail"
+          approvalOptionsName="list_mdApprovalHierarchy"
+          approvalHierarchtDetailsName="detail_mdApprovalHierarchy"
+          loadingListApprovalOptionsName="loading_listMdApprovalHierarchy"
+          loadingListHierarchyDetailName="loading_detailMdApprovalHierarchy"
           loadingInactivateName="loading_inactivateMd"
-          getApprovalOptions={getMdApprovalHierarchy}
-          getApprovalHierarchyDetails={getDetailMdApprovalHierarchy}
+          getApprovalOptions={getMdApprovalHierarchies}
+          getApprovalHierarchyDetails={getMdApprovalHierarchy}
         />
 
         {/* Approval History Modal */}

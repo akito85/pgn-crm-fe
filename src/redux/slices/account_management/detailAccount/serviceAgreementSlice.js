@@ -31,6 +31,7 @@ const initialState = {
   list_saApproval: [],
   pagination_saApproval: {},
   loading: false,
+  loading_approveRejectSa: false,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -1262,6 +1263,24 @@ const accountServiceAgreementSlice = createSlice({
     },
     [approveOrRejectAllServiceAgreement.rejected]: (state) => {
       state.loading = false;
+    },
+    [approveOrRejectServiceAgreement.pending]: (state) => {
+      state.loading_approveRejectSa = true;
+    },
+    [approveOrRejectServiceAgreement.fulfilled]: (state) => {
+      state.loading_approveRejectSa = false;
+    },
+    [approveOrRejectServiceAgreement.rejected]: (state) => {
+      state.loading_approveRejectSa = false;
+    },
+    [approveOrRejectInactiveServiceAgreement.pending]: (state) => {
+      state.loading_approveRejectSa = true;
+    },
+    [approveOrRejectInactiveServiceAgreement.fulfilled]: (state) => {
+      state.loading_approveRejectSa = false;
+    },
+    [approveOrRejectInactiveServiceAgreement.rejected]: (state) => {
+      state.loading_approveRejectSa = false;
     },
   },
 });

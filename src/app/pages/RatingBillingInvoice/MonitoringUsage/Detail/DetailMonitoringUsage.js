@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
+import { Alert, Button, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { WarningOutlined } from "@ant-design/icons";
@@ -613,21 +613,68 @@ const DetailMonitoringUsage = () => {
                 </CardContainer>
 
           {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
-            <FormFooter
-              onCancel={handleBack}
-              onClear={handleClear}
-              onSaveDraft={() => {
-                setFlag(2);
-                form.submit();
-              }}
-              saveDraftLabel="Save & Submit"
-              saveDraftStyle={{
-                backgroundColor: "#388E3C",
-                borderColor: "#388E3C",
-                color: "#fff",
-              }}
-              useNavigation={false}
-            />
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+              <div className="flex w-full justify-between items-center">
+                <Button
+                  onClick={handleBack}
+                  className="!border-[#0075BF] !text-[#0075BF]"
+                >
+                  Cancel
+                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    icon={<SVGIcon name="IconButtonClear" width={18} />}
+                    onClick={handleClear}
+                    style={{
+                      backgroundColor: "#BE3036",
+                      borderColor: "#BE3036",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      height: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Clear Data
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setFlag(1);
+                      form.submit();
+                    }}
+                    style={{
+                      backgroundColor: "#E6F1F9",
+                      borderColor: "#E6F1F9",
+                      color: "#0075BF",
+                      borderRadius: "6px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setFlag(2);
+                      form.submit();
+                    }}
+                    loading={loading}
+                    disabled={loading}
+                    style={{
+                      backgroundColor: "#388E3C",
+                      borderColor: "#388E3C",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <FormFooter
               onCancel={handleBack}

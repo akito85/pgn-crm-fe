@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PaymentRelationDetailTabs from "./PaymentRelationDetailTabs";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { getDetailPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation, getDetailDraftPaymentRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { getPaymentRelation, approveOrRejectPaymentRelation, approveOrRejectInactivePaymentRelation, getPaymentRelationDraft } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
@@ -196,12 +196,12 @@ const PaymentRelationDetail = ({
 
   useEffect(() => {
     if (idPr)
-      dispatch(getDetailPaymentRelation(idPr));
+      dispatch(getPaymentRelation(idPr));
   }, [idPr]);
 
   useEffect(() => {
     if (idPr && draftExist)
-      dispatch(getDetailDraftPaymentRelation(idPr));
+      dispatch(getPaymentRelationDraft(idPr));
   }, [idPr, draftExist]);
 
   return (

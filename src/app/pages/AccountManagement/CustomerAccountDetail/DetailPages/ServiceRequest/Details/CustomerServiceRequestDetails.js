@@ -21,8 +21,8 @@ import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import {
-  getServiceRequestDetailByAccount,
-  updateServiceRequestStatus,
+  getServiceRequest,
+  updateSrStatus,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 import HeaderDetail from "../../../HeaderDetail";
@@ -50,16 +50,16 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   const { data_accountDetail, loading: loadingAccountDetail } = useSelector(
     (state) => state.accountManagement
   );
-  const { data_detail, loading_detail, loading_status_update } = useSelector(
+  const { detail_serviceRequest, loading_detailSr, loading_statusUpdateSr } = useSelector(
     (state) => state.serviceRequest
   );
 
-  const isLoading = loadingAccountDetail || loading_detail;
-  const srStatus = (data_detail?.status || "").toUpperCase();
+  const isLoading = loadingAccountDetail || loading_detailSr;
+  const srStatus = (detail_serviceRequest?.status || "").toUpperCase();
 
   useEffect(() => {
     if (id && idAccount) {
-      dispatch(getServiceRequestDetailByAccount({ accountId: idAccount, id }));
+      dispatch(getServiceRequest({ accountId: idAccount, id }));
     }
   }, [dispatch, id, idAccount]);
 
@@ -67,9 +67,9 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
     async (status) => {
       try {
         await dispatch(
-          updateServiceRequestStatus({ accountId: idAccount, id, status })
+          updateSrStatus({ accountId: idAccount, id, status })
         ).unwrap();
-        dispatch(getServiceRequestDetailByAccount({ accountId: idAccount, id }));
+        dispatch(getServiceRequest({ accountId: idAccount, id }));
       } catch (_) {}
     },
     [dispatch, idAccount, id]
@@ -140,14 +140,14 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
             idCustomer={idCustomer}
             accountType={accountType}
             data_accountDetail={data_accountDetail}
-            data_detail={data_detail}
+            detail_serviceRequest={detail_serviceRequest}
           />
 
           {/* Action Log */}
           <NxCardContainer header="ACTION LOG">
             <NxTable
               idTable="action-log-table"
-              dataSource={(Array.isArray(data_detail?.actionLog) ? data_detail.actionLog : [])
+              dataSource={(Array.isArray(detail_serviceRequest?.actionLog) ? detail_serviceRequest.actionLog : [])
                 .map((item, i) => ({ ...item, key: item.id || i }))}
               columns={LOG_COLUMNS}
               usePagination={false}
@@ -165,19 +165,19 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
           <NxCardContainer header="HISTORY LOG INFORMATION">
             <div className="w-full grid grid-cols-5 gap-4">
               <NxDetailText label="Record ID">
-                {data_detail?.historyLog?.recordId || data_detail?.id || "-"}
+                {detail_serviceRequest?.historyLog?.recordId || detail_serviceRequest?.id || "-"}
               </NxDetailText>
               <NxDetailText label="Created Date">
-                {NxDate.formatDate(data_detail?.historyLog?.createdDate || data_detail?.createdDate, "DD MMM YYYY HH:mm:ss")}
+                {NxDate.formatDate(detail_serviceRequest?.historyLog?.createdDate || detail_serviceRequest?.createdDate, "DD MMM YYYY HH:mm:ss")}
               </NxDetailText>
               <NxDetailText label="Created By">
-                {data_detail?.historyLog?.createdBy || data_detail?.createdBy || "-"}
+                {detail_serviceRequest?.historyLog?.createdBy || detail_serviceRequest?.createdBy || "-"}
               </NxDetailText>
               <NxDetailText label="Updated Date">
-                {NxDate.formatDate(data_detail?.historyLog?.updatedDate || data_detail?.updatedDate, "DD MMM YYYY HH:mm:ss")}
+                {NxDate.formatDate(detail_serviceRequest?.historyLog?.updatedDate || detail_serviceRequest?.updatedDate, "DD MMM YYYY HH:mm:ss")}
               </NxDetailText>
               <NxDetailText label="Updated By">
-                {data_detail?.historyLog?.updatedBy || data_detail?.updatedBy || "-"}
+                {detail_serviceRequest?.historyLog?.updatedBy || detail_serviceRequest?.updatedBy || "-"}
               </NxDetailText>
             </div>
           </NxCardContainer>
@@ -201,7 +201,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
                   return (
                     <ButtonComponent
                       key={key}
-                      loading={loading_status_update}
+                      loading={loading_statusUpdateSr}
                       onClick={() => handleStatusUpdate(key)}
                       icon={def.icon}
                       isPrimary={isPrimary}

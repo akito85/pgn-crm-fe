@@ -125,6 +125,14 @@ const PointOfSalesPage = ({
     setDetailPage(e.target.value);
   };
 
+  const handlePhoneNumberChange = (e) => {
+    const sanitizedValue = (e?.target?.value || "")
+      .replace(/\D/g, "")
+      .slice(0, 15);
+
+    form.setFieldsValue({ phoneNumber: sanitizedValue });
+  };
+
   // Render Customer Information berdasarkan customerType
   const renderCustomerInformation = () => {
     if (customerType === "prospective") {
@@ -376,10 +384,19 @@ const PointOfSalesPage = ({
               label="Phone Number"
               rules={[
                 { message: requiredMessage("Phone Number"), required: true },
+                {
+                  pattern: /^\d{1,15}$/,
+                  message: "Phone Number must be numeric and maximum 15 digits",
+                },
               ]}
               style={{ marginBottom: 0 }}
             >
-              <InputComponent placeholder="Enter Phone Number" maxLength={15} />
+              <InputComponent
+                placeholder="Enter Phone Number"
+                maxLength={15}
+                inputMode="numeric"
+                onChange={handlePhoneNumberChange}
+              />
             </Form.Item>
           </div>
         </CardContainer>
@@ -414,16 +431,13 @@ const PointOfSalesPage = ({
               ]}
               style={{ marginBottom: 0 }}
             >
-              <SelectComponent onChange={(e) => setAccountNumber(e)}>
-                {(data_accountNumber || [])?.map((item) => (
-                  <Select.Option
-                    key={item.accountNumber}
-                    value={item.accountNumber}
-                  >
-                    {item.accountNumberWithName}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
+              <SelectComponent 
+                onChange={(e) => setAccountNumber(e)}
+                options={(data_accountNumber || [])?.map((item) => ({
+                  label: item.accountNumberWithName,
+                  value: item.accountNumber,
+                }))}
+              />
             </Form.Item>
             <Form.Item
               name={"customerNumber"}
@@ -541,13 +555,13 @@ const PointOfSalesPage = ({
     switch (e) {
       case "TOP":
         return (
-          <SelectComponent width={"100%"}>
-            {(data_globalTermsOfPaymentValue || [])?.map((item) => (
-              <Select.Option key={item.Id} value={item.Id}>
-                {item.text}
-              </Select.Option>
-            ))}
-          </SelectComponent>
+          <SelectComponent 
+            width={"100%"} 
+            options={(data_globalTermsOfPaymentValue || [])?.map((item) => ({
+              label: item.text,
+              value: item.Id,
+            }))}
+          />
         );
       case "DATE":
         return (
@@ -559,13 +573,11 @@ const PointOfSalesPage = ({
         );
       default:
         return (
-          <SelectComponent width={"100%"} disabled>
-            {[]?.map((item) => (
-              <Select.Option key={item.Id} value={item.Id}>
-                {item.text}
-              </Select.Option>
-            ))}
-          </SelectComponent>
+          <SelectComponent 
+            width={"100%"} 
+            disabled 
+            options={[]}
+          />
         );
     }
   };
@@ -609,6 +621,7 @@ const PointOfSalesPage = ({
             ]}
             style={{ marginBottom: 0 }}
           >
+<<<<<<< HEAD
             <SelectComponent onChange={(e) => setDataBillingCycle(e)}>
               {(data_globalBillingCycle || [])?.map((item) => {
                 console.log("label: ", item)
@@ -618,6 +631,15 @@ const PointOfSalesPage = ({
                 </Select.Option>
               )})}
             </SelectComponent>
+=======
+            <SelectComponent 
+              onChange={(e) => setDataBillingCycle(e)}
+              options={(data_globalBillingCycle || [])?.map((item) => ({
+                label: item.name,
+                value: item.id,
+              }))}
+            />
+>>>>>>> testing-rbip
           </Form.Item>
           <Form.Item
             name={"billingPeriod"}
@@ -630,13 +652,11 @@ const PointOfSalesPage = ({
             <SelectComponent
               disabled={data_billingCycle ? false : true}
               onChange={(e) => setSelectedBillingPeriod(e)}
-            >
-              {(data_globalBillingPeriod || [])?.map((item) => (
-                <Select.Option key={item.id} value={item.id}>
-                  {item.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
+              options={(data_globalBillingPeriod || [])?.map((item) => ({
+                label: item.name,
+                value: item.id,
+              }))}
+            />
           </Form.Item>
           <Form.Item
             name={"currency"}
@@ -647,13 +667,11 @@ const PointOfSalesPage = ({
             <SelectComponent
               onChange={(e) => setCurrency(e)}
               disabled={data.length > 0}
-            >
-              {(data_globalCurrency || [])?.map((item) => (
-                <Select.Option key={item.Id} value={item.Id}>
-                  {item.text}
-                </Select.Option>
-              ))}
-            </SelectComponent>
+              options={(data_globalCurrency || [])?.map((item) => ({
+                label: item.text,
+                value: item.Id,
+              }))}
+            />
           </Form.Item>
           <Form.Item
             name={"transactionDate"}
@@ -744,13 +762,13 @@ const PointOfSalesPage = ({
                       },
                     ]}
                   >
-                    <SelectComponent onChange={(e) => onChangeSelect(e)}>
-                      {(data_termsOfPayment || [])?.map((item, index) => (
-                        <Select.Option key={index} value={item.code}>
-                          {item.text}
-                        </Select.Option>
-                      ))}
-                    </SelectComponent>
+                    <SelectComponent 
+                      onChange={(e) => onChangeSelect(e)}
+                      options={(data_termsOfPayment || [])?.map((item, index) => ({
+                        label: item.text,
+                        value: item.code,
+                      }))}
+                    />
                   </Form.Item>
                 </div>
                 <div className="w-full">

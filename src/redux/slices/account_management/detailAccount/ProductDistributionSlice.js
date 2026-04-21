@@ -148,6 +148,11 @@ export const deletePD = createAsyncThunk("DELETE_PD", async (id, thunkAPI) => {
     const url = `/v1/dbs/api/account-detail/source-distribution/soft-delete/product-distribution/${id}`;
     if (hasValue(id)) {
       const response = await accountManagementService.deleteData(url);
+      thunkAPI.dispatch(showModalSuccess({
+        return: false,
+        title: "Successfully",
+        description: `Your data has been deleted`,
+      }));
       return response.data;
     }
   } catch (error) {

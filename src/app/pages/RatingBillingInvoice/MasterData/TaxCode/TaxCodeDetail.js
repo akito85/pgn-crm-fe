@@ -372,8 +372,13 @@ const TaxCodeDetail = () => {
     dispatch(
       bodyApproval.approvalType === "INACTIVE_TAX_CODE"
         ? approvalInactiveTaxCode({
+          body: data,
+        })
+        : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+          ? approvalActivatedTaxCode({
             body: data,
           })
+<<<<<<< HEAD
         : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
           ? approvalActivatedTaxCode({
               body: data,
@@ -381,6 +386,11 @@ const TaxCodeDetail = () => {
           : approvalRejectTaxCode({
               body: data,
             }),
+=======
+          : approvalRejectTaxCode({
+            body: data,
+          }),
+>>>>>>> testing-rbip
     )
       .unwrap()
       .then(() => {
@@ -493,9 +503,8 @@ const TaxCodeDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

@@ -2,13 +2,24 @@ import { hasValue, renderColumn, renderDateColumn } from "../../../../../../util
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 
-const getRelatedDetailColumns = (
+/**
+ * Returns the column definitions for the Related Detail list table.
+ *
+ * @param {Object}          params                - Column configuration options.
+ * @param {Object}          params.search         - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput    - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText     - The current search text value.
+ * @param {Function}        params.handleSearch   - Callback invoked when a search/filter is confirmed.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getRelatedDetailColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch
-) => [
+}) => [
   {
     key: "no",
     title: "NO",

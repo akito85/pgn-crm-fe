@@ -214,13 +214,14 @@ const CreateAndUpdatePOSDetail = ({
             label={"Type"}
             rules={[{ message: requiredMessage("Type"), required: true }]}
           >
-            <SelectComponent onChange={(e) => setType(e)} disabled={loading}>
-              {(dataType || [])?.map((data) => (
-                <Select.Option key={data.Id} value={data?.Id}>
-                  {data?.text}
-                </Select.Option>
-              ))}
-            </SelectComponent>
+            <SelectComponent 
+              onChange={(e) => setType(e)} 
+              disabled={loading}
+              options={(dataType || [])?.map((data) => ({
+                label: data?.text,
+                value: data?.Id,
+              }))}
+            />
           </Form.Item>
 
           <Form.Item
@@ -228,13 +229,16 @@ const CreateAndUpdatePOSDetail = ({
             label={"Item"}
             rules={[{ message: requiredMessage("Item"), required: true }]}
           >
-            <SelectComponent onChange={(e) => setItem(e)} disabled={loading}>
-              {(dataItem || [])?.map((data) => (
-                <Select.Option key={data?.id} value={data?.id}>
-                  {data?.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
+            <SelectComponent 
+              onChange={(e) => setItem(e)} 
+              disabled={loading}
+              options={(dataItem || [])
+                ?.filter((v, i, a) => a.findIndex((v2) => v2?.id === v?.id) === i)
+                ?.map((data) => ({
+                  label: data?.name,
+                  value: data?.id,
+                }))}
+            />
           </Form.Item>
         </div>
       </BaseContainer>

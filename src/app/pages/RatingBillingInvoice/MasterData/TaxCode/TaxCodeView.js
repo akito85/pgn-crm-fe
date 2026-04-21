@@ -136,8 +136,12 @@ const TaxCodeView = () => {
         dataHistory: {
           create: data_approval_history?.dataHistory?.TAX_CODE || [],
           inactive: data_approval_history?.dataHistory?.INACTIVE_TAX_CODE || [],
+<<<<<<< HEAD
           activate:
             data_approval_history?.dataHistory?.ACTIVATED_TAX_CODE || [],
+=======
+          activate: data_approval_history?.dataHistory?.ACTIVATED_TAX_CODE || [],
+>>>>>>> testing-rbip
         },
       };
       setDataApprovalHistory(temp);
@@ -365,9 +369,8 @@ const TaxCodeView = () => {
               disabled={!isEditable}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -438,7 +441,13 @@ const TaxCodeView = () => {
               </span>
             </ButtonComponent>
           ) : (
+<<<<<<< HEAD
             <Tooltip title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}>
+=======
+            <Tooltip
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
+            >
+>>>>>>> testing-rbip
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
@@ -603,11 +612,18 @@ const TaxCodeView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
+<<<<<<< HEAD
           alertMessage={`Are you sure you want to ${
             normalizeStatus(chooseId?.status) === "INACTIVE"
               ? "activate"
               : "inactivate"
           } this Tax Code with name ${chooseId?.taxCodeName || ""}?`}
+=======
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+            ? "activate"
+            : "inactivate"
+            } this Tax Code with name ${chooseId?.taxCodeName || ""}?`}
+>>>>>>> testing-rbip
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -635,9 +651,14 @@ const TaxCodeView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px]">{"Failed"}</p>
             </div>
+<<<<<<< HEAD
             <p className="pl-[70px]">{`Your data was not ${
               bodyError?.actionType || "inactivate"
             }. ${bodyError.message}.`}</p>
+=======
+            <p className="pl-[70px]">{`Your data was not ${bodyError?.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
+>>>>>>> testing-rbip
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
