@@ -29,7 +29,6 @@ const initialState = {
   data_ApprovalHistory: [],
   downloadBillingItem: [],
   message: "",
-  data_detailDraft: [],
   getConfigFile: {},
   loading: false,
   loadingDetail: false,
@@ -558,21 +557,7 @@ export const approvalActivatedBillingItem = createAsyncThunk(
   },
 );
 
-export const getDetailDraft = createAsyncThunk(
-  "GET_DETAIL_DRAFT",
-  async ({ id }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/billingitem/draft/${id}`;
-      const response = await ratingBillingHttpService.getDetail(url);
-      return response.data;
-    } catch (error) {
-      thunkAPI.dispatch(validateError({ error, action: "GET_DETAIL_DRAFT" }));
-      return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data,
-      );
-    }
-  },
-);
+
 
 export const getConfigFileRBIBillingItem = createAsyncThunk(
   "GET_CONFIG_FILE_RBI_BILLING_ITEM",
@@ -1116,16 +1101,7 @@ const billingItemSlice = createSlice({
       state.loading = false;
     },
 
-    [getDetailDraft.pending]: (state) => {
-      state.loadingDetail = true;
-    },
-    [getDetailDraft.fulfilled]: (state, action) => {
-      state.loadingDetail = false;
-      state.data_detailDraft = action.payload;
-    },
-    [getDetailDraft.rejected]: (state) => {
-      state.loadingDetail = false;
-    },
+
 
     [getConfigFileRBIBillingItem.pending]: (state) => {
       state.loading = true;

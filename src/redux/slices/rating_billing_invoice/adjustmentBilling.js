@@ -45,7 +45,7 @@ export const createAdjustmentBilling = createAsyncThunk(
   "CREATE_ADJUSTMENT_BILLING",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/rbi/adjustment/update-adjusment";
+      const url = "/v1/dbs/api/rbi/adjustment/update-adjustment";
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
@@ -688,32 +688,6 @@ export const getInvoiceInformation = createAsyncThunk(
   async (invoiceNumber, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/adjustment/get-invoice-information/${invoiceNumber}`;
-      const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-    }
-  },
-);
-
-export const getInvoiceBillingItemList = createAsyncThunk(
-  "GET_INVOICE_BILLING_ITEM_LIST",
-  async (billingNumber, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/rbi/adjustment/get-invoice-billing-item-list/${billingNumber}`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -1491,33 +1465,22 @@ const adjustmentBillingSlice = createSlice({
       state.loading = false;
     },
 
-    // Get Invoice Billing Item List
-    [getInvoiceBillingItemList.pending]: (state) => {
-      state.loading = true;
-      state.dataBillingItemList = [];
-    },
-    [getInvoiceBillingItemList.fulfilled]: (state, action) => {
-      state.dataBillingItemList = action.payload;
-      state.loading = false;
-    },
-    [getInvoiceBillingItemList.rejected]: (state) => {
-      state.dataBillingItemList = [];
-      state.loading = false;
-    },
-
     // Get Transaction Mapping Information
     [getTransactionMappingInformation.pending]: (state) => {
       state.loading = true;
       state.dataTransactionMappingInformation = [];
+      state.dataBillingItemList = [];
     },
     [getTransactionMappingInformation.fulfilled]: (state, action) => {
       state.dataTransactionMappingInformation = Array.isArray(action.payload)
         ? action.payload
         : [];
+      state.dataBillingItemList = state.dataTransactionMappingInformation;
       state.loading = false;
     },
     [getTransactionMappingInformation.rejected]: (state) => {
       state.dataTransactionMappingInformation = [];
+      state.dataBillingItemList = [];
       state.loading = false;
     },
   },
