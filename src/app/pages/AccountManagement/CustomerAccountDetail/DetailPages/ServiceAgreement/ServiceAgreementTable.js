@@ -68,7 +68,7 @@ const ServiceAgreementTable = ({
             title: "ACTION",
             dataIndex: "action",
             fixed: "right",
-            width: 150,
+            width: 100,
             align: "center",
             render: (text, record, index) => (
                 <RenderContentActions

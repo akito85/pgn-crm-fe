@@ -196,14 +196,15 @@ export const getPricingColumns = ({
             key: "action",
             fixed: "right",
             align: "center",
-            width: 110,
+            width: 100,
             render: (v, r, i) => {
                 const children = (
-                    <div className="flex w-full justify-center gap-6">
+                    <div className="flex w-full justify-center gap-2">
                         <Tooltip title="Update">
                             <SVGIcon
                                 name="IconEdit"
                                 width={24}
+                                color="#1976D2"
                                 onClick={() => {
                                     handleUpdate(r);
                                 }}
@@ -213,6 +214,7 @@ export const getPricingColumns = ({
                             <SVGIcon
                                 name="IconDelete"
                                 width={24}
+                                color="#1976D2"
                                 className={
                                     r.type === "exist" ? "disabled cursor-not-allowed" : undefined
                                 }

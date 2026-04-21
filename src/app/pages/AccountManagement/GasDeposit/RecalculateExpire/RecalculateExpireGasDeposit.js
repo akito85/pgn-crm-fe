@@ -95,6 +95,8 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
   const isDraftApproval = location.state?.statusApproval === "DRAFT" || statusApproval === "DRAFT";
   const isRejectApproval = location.state?.statusApproval === "REJECT" || statusApproval === "REJECT";
 
+  const handleType = (isDraftApproval || isRejectApproval) ? "UPDATE" : "CREATE";
+
   const attachmentIsRequired = false;
 
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_gasDeposit : detail_gasDeposit;
@@ -237,10 +239,10 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
 
               const body = {
                 stepNumber: current + 1,
-                type: formType.toUpperCase(),
+                type: handleType,
                 id,
                 data : {
-                  accountId,
+                  gasDepositIds: isBulk ? selectedRowKeys : [id],
                   appHierId,
                 }
               }
@@ -249,7 +251,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
                 validateCreateUpdate({
                   body,
                   services: accountManagementService,
-                  endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+                  endPoint: `/v1/dbs/api/gas-deposit/${formType}/validate-step`,
                   type: formType
                 })
               ).unwrap();
@@ -323,13 +325,13 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         const {
           appHierId
         } = form.getFieldsValue(true);
-
+        
         const body = {
           stepNumber: current + 1,
-          type: formType.toUpperCase(),
+          type: handleType,
           id,
           data : {
-            accountId,
+            gasDepositIds: isBulk ? selectedRowKeys : [id],
             appHierId,
           }
         }
@@ -338,7 +340,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
           validateCreateUpdate({
             body,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
+            endPoint: `/v1/dbs/api/gas-deposit/${formType}/validate-step`,
             type: formType
           })
         ).unwrap();

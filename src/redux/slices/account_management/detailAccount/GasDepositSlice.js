@@ -248,9 +248,13 @@ export const getGasDepositHistories = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORIES",
   async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url =
-        "/v1/dbs/api/gas-deposit/request-history" +
-        (accountId ? `/${accountId}` : "");
+      const queryParams = new URLSearchParams();
+
+      if (accountId) queryParams.append("subjectId", accountId);
+
+      let url = "/v1/dbs/api/gas-deposit/request-history";
+      if (queryParams.toString().length) url += `?${queryParams.toString()}`;
+      
       const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,

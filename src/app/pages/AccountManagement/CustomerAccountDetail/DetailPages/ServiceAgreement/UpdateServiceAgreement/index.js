@@ -93,6 +93,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const [isReset, setIsReset] = useState(false);
 
 	const [typeSubmit, setTypeSubmit] = useState("");
+	const [confirmationRemark, setConfirmationRemark] = useState("");
 
 	const [dataTableDetailProduct, setDataTableDetailProduct] = useState({});
 	const [modalValidateSa, setModalValidateSa] = useState(false)
@@ -1284,6 +1285,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					type={"create"}
 					data={listDataAttachment}
 					updateData={setListDataAttachment}
+					saStatus={saRecordData.status}
 				/>
 			),
 			disabled: false,
@@ -1369,6 +1371,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const handleSaveAsDraft = async () => {
 		setLoadingNext(true);
 		setTypeSubmit("draft");
+		setConfirmationRemark("");
 
 		try {
 			await form.validateFields(["serviceType", "serviceAgreementNumber"]);
@@ -1605,6 +1608,9 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 	// Save/show to confirmation modal
 	const handleSubmitForm = (formValue, submitType = typeSubmit) => {
+		if (submitType === "draft") {
+			setConfirmationRemark("");
+		}
 
 		const objPaymentType = {
 			name: {
@@ -1748,6 +1754,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 		// };
 		const bodyIsActive = {
 			isSubmit: typeSubmit !== "draft" && true,
+			...(typeSubmit !== "draft" ? { remark: confirmationRemark || null } : {}),
 			saInfo: {
 				description: saInfoObj.description,
 				endDate: moment(saInfoObj.endDate).format(dateFormatting.dateFormal),
@@ -1779,6 +1786,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 		if (saRecordData.status !== "ACTIVE") {
 			var body = {
 				...dataFinal,
+				...(typeSubmit !== "draft" ? { remark: confirmationRemark || null } : {}),
 				saDetail: {
 					...dataFinal?.saDetail,
 					productPricing: {
@@ -1811,7 +1819,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					);
 				}
 				setLoadingForm(false);
-				setModalConfirm(false);
+				handleCloseConfirmationModal();
 			})
 			.catch((error) => {
 				if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1825,9 +1833,14 @@ const UpdateServiceAgreement = ({ saType }) => {
 					setModalError(true);
 				}
 				setLoadingForm(false);
-				setModalConfirm(false);
+				handleCloseConfirmationModal();
 			});
 		dispatch(resetDataDetail());
+	};
+
+	const handleCloseConfirmationModal = () => {
+		setModalConfirm(false);
+		setConfirmationRemark("");
 	};
 
 	const handleCloseModalError = () => {
@@ -1914,24 +1927,16 @@ const UpdateServiceAgreement = ({ saType }) => {
 									Cancel
 								</ButtonComponent>
 								<div className="flex w-full justify-end gap-x-2">
+									
 									<ButtonComponent
-										icon={<SVGIcon name={`IconButtonReset`} width={16} />}
+										icon={<SVGIcon name={`IconButtonClear`} width={16} />}
 										type="reject"
 										onClick={() => handleReset()}
 									>
-										Reset
+										Clear Data
 									</ButtonComponent>
-									{current > 0 && (
-										<ButtonComponent
-											onClick={() => {
-												prev();
-												scrollLeftHandler();
-											}}
-											type={"menu"}
-										>
-											Previous
-										</ButtonComponent>
-									)}
+									
+									
 									<ButtonComponent
 										type="secondary"
 										onClick={handleSaveAsDraft}
@@ -1939,6 +1944,19 @@ const UpdateServiceAgreement = ({ saType }) => {
 									>
 										Save as Draft
 									</ButtonComponent>
+									{/* )} */}
+									{current > 0 && (
+										<ButtonComponent
+										onClick={() => {
+											prev();
+											scrollLeftHandler();
+										}}
+										type={"menu"}
+										loading={loadingNext}
+										>
+										Previous
+										</ButtonComponent>
+									)}
 									{current < filteredItems.length - 1 && (
 										<ButtonComponent
 											onClick={handleButtonNext}
@@ -1986,9 +2004,12 @@ const UpdateServiceAgreement = ({ saType }) => {
 			{/* Modal COnfirmation SA */}
 			<ConfirmationSa
 				isOpen={modalConfirm}
-				setModalConfirm={setModalConfirm}
+				setModalConfirm={handleCloseConfirmationModal}
 				dataFinal={dataFinal}
 				handleConfirm={handleConfirm}
+				typeSubmit={typeSubmit}
+				remark={confirmationRemark}
+				setRemark={setConfirmationRemark}
 				loadingSubmit={loadingForm}
 				listDataAttachment={listDataAttachment}
 				saInfoObj={saInfoObj}
