@@ -338,19 +338,14 @@ const ModalHold = ({
       // 2. Dispatch the specific thunk
       const submitRes = await dispatch(submitHold(submitBody)).unwrap();
       // 3. Upload new attachments per transId
-      const transIds = Array.isArray(submitRes?.data?.transIds) ? submitRes.data.transIds : [];
-      if (transIds.length === 0) {
-        message.warning('Transaction ID tidak ditemukan, attachment tidak dapat diupload');
-        setLoadingSave(false);
-        return;
-      }
+      const transIds = Array.isArray(submitRes?.transIds) ? submitRes.transIds : [];
 
       const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-      if (newAttachments.length > 0) {
+      if (newAttachments.length > 0 && transIds.length > 0) {
         for (const transId of transIds) {
           for (const element of newAttachments) {
             const uploadBody = {
-              referensiId: transId, // Link attachment to the returned transaction ID
+              referensiId: transId,
               files: element.file,
               category: "PAYMENT_WARRANTY_TRANS",
               fileCategoryId: element.fileCategoryId,
