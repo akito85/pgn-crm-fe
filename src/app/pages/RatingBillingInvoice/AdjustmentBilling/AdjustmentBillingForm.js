@@ -18,11 +18,9 @@ import {
   getListApprovalHierarchyDetail,
   getListCategory,
   getListCalculationType,
-  getSelectTOP,
   recalculateAdjustmentBilling,
   updateAdjustmentBilling,
   getListType,
-  getTransactionMappingInformation,
 } from "../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import ModalBack from "../../../../components/Modal/ModalBack";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
@@ -153,11 +151,11 @@ const AdjustmentBillingForm = ({ type }) => {
   const [recalculateId, setRecalculateId] = useState();
   const [calculationStatus, setCalculationStatus] = useState();
 
-  const isLoading = loading || loadingForm;
+  const isLoading =
+    loadingForm || (type === "update" && loading && !dataDetail?.id);
 
   // Use Effect
   useEffect(() => {
-    dispatch(getSelectTOP());
     dispatch(getListApprovalHierarchy());
     dispatch(getListType());
     dispatch(getListCalculationType());
@@ -206,7 +204,8 @@ const AdjustmentBillingForm = ({ type }) => {
       dataDetail,
       { preserveAttachments = false, preserveHierarchy = false } = {},
     ) => {
-      const apphierId = dataDetail?.apphierId || 1;
+      const apphierId =
+        type === "update" ? dataDetail?.apphierId : dataDetail?.apphierId || 1;
 
       // Determine classificationAdjustment value from saved data
       let classificationAdjustmentValue = null;
@@ -296,8 +295,8 @@ const AdjustmentBillingForm = ({ type }) => {
           dataDetail?.billingPeriodName ??
           null,
         correctionBillingPeriod:
-          dataDetail?.correctionBillPeriod ??
-          dataDetail?.correctionBillingPeriod ??
+          dataDetail?.correctionBillingPeriodId ??
+          dataDetail?.correctionBillPeriodId ??
           dataDetail?.billingPeriod,
         referenceInvoiceNumber: dataDetail?.referenceInvoiceNumber,
         currency: dataDetail?.currency,
@@ -328,16 +327,11 @@ const AdjustmentBillingForm = ({ type }) => {
       //ADJUSTMENT ID INVOICE AND BILLING PERIOD IS EMPTY EVEN AFTER UPDATE
       setIdInvoice(dataDetail.referenceInvoiceNumber);
       setBillingPeriodId(
-        dataDetail?.correctionBillPeriod ??
-        dataDetail?.correctionBillingPeriod ??
-        dataDetail?.billingPeriod,
+        dataDetail?.correctionBillingPeriodId ??
+          dataDetail?.correctionBillPeriodId ??
+          dataDetail?.billingPeriod,
       );
       setDataInvoice(dataDetail?.invoiceInformation || null);
-
-      const detailBillingCode = dataDetail?.invoiceInformation?.billingCode;
-      if (detailBillingCode) {
-        dispatch(getTransactionMappingInformation(detailBillingCode));
-      }
 
       // Set classification states for conditional rendering (use label for compatibility)
       setSelectedClassification(classificationLabelValue);
@@ -371,7 +365,7 @@ const AdjustmentBillingForm = ({ type }) => {
         (dataDetail?.tAdjustmentBillingDetail || []).length > 0,
       );
     },
-    [form, dataListCalculationType, dataListClassification, dispatch],
+    [form, dataListCalculationType, dataListClassification, type],
   );
 
   const resolveBillingPeriodId = useCallback(
@@ -463,15 +457,18 @@ const AdjustmentBillingForm = ({ type }) => {
       const resolvedCurrentBillingPeriodId = resolveBillingPeriodId(
         currentBillingPeriod,
         dataCurrentBillingPeriod?.id ??
-        dataCurrentBillingPeriod?.[0]?.id ??
-        dataDetail?.billingPeriod,
+          dataCurrentBillingPeriod?.[0]?.id ??
+          dataDetail?.billingPeriod,
       );
-      const resolvedCorrectionBillingPeriodId = resolveBillingPeriodId(
-        correctionBillingPeriod,
-        billingPeriodId ??
-        dataDetail?.correctionBillingPeriodId ??
-        dataDetail?.correctionBillingPeriodId,
-      );
+      // For correction billing period: if form value is empty/unchanged, use detail ID directly
+      // Otherwise, resolve the selected value to ID via resolveBillingPeriodId
+      const resolvedCorrectionBillingPeriodId =
+        !correctionBillingPeriod && type === "update"
+          ? dataDetail?.correctionBillingPeriodId
+          : resolveBillingPeriodId(
+              correctionBillingPeriod,
+              billingPeriodId ?? dataDetail?.correctionBillingPeriodId,
+            );
 
       const calculationTypeValue =
         dataListCalculationType?.find((item) => {
@@ -528,6 +525,11 @@ const AdjustmentBillingForm = ({ type }) => {
         correctionBillingPeriod: _correctionBillingPeriod,
         correctionBillingPeriodId: _correctionBillingPeriodId,
         adjustmentBillingDetails: _existingAdjustmentBillingDetails,
+        totalAdjustmentAmount: _totalAdjustmentAmount,
+        totalAdjustmentAmountIdr: _totalAdjustmentAmountIdr,
+        totalAdjustmentAmountUsd: _totalAdjustmentAmountUsd,
+        totalAmountEqvIdr: _totalAmountEqvIdr,
+        totalAmountEqvUsd: _totalAmountEqvUsd,
         ...updateBasePayload
       } = type === "update" ? dataDetail || {} : {};
 
@@ -1041,8 +1043,9 @@ const AdjustmentBillingForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${flag === 1 ? "created" : "submitted"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              flag === 1 ? "created" : "submitted"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

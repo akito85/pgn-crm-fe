@@ -69,9 +69,6 @@ const PosPage = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
-  // State loading lokal untuk list POS
-  const [tableLoading, setTableLoading] = useState(false);
-
   // Auto-scroll ke detail saat dibuka
   useEffect(() => {
     if (openDetail && detailContainerRef.current) {
