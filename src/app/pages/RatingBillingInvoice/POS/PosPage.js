@@ -72,6 +72,26 @@ const PosPage = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
+  const resolveCustomerTypeForNav = (customerType) => {
+    if (customerType === 2) return "prospective";
+    if (customerType === 1) return "customer";
+
+    const normalizedCustomerType = (customerType || "")
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    if (normalizedCustomerType === "prospective customer") {
+      return "prospective";
+    }
+
+    if (normalizedCustomerType === "customers") {
+      return "customer";
+    }
+
+    return "customer";
+  };
+
 
   const handleProformaInvoice = async (record) => {
     try {
@@ -432,8 +452,9 @@ const PosPage = () => {
           (record.statusApproval === "DRAFT" ||
             record.statusApproval === "REJECTED");
 
-        const customerTypeForNav =
-          record.customerType === 2 ? "prospective" : "customer";
+        const customerTypeForNav = resolveCustomerTypeForNav(
+          record.customerType,
+        );
 
         const menuItems = [
           {
