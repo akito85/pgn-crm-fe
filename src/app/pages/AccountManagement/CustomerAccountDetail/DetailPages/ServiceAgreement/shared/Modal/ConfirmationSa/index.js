@@ -246,7 +246,7 @@ const ConfirmationSa = ({
                       <DetailText label="Service Agreement Date">{dataFinal?.saInfo?.saDate ? moment(dataFinal?.saInfo?.saDate).format(dateFormatting.date) : ''}</DetailText>
                       <DetailText label="Start Date">{dataFinal?.saInfo?.startDate ? moment(dataFinal?.saInfo?.startDate).format(dateFormatting.date) : ''}</DetailText>
                       <DetailText label="End Date">{dataFinal?.saInfo?.endDate ? moment(dataFinal?.saInfo?.endDate).format(dateFormatting.date) : ''}</DetailText>
-                      {dataFinal?.isMain && (
+                      {dataFinal?.saInfo?.isMain && (
                         <>
                           <DetailText label="Commitment Date">
                             {dataFinal?.saInfo?.commitmentDate ? moment(dataFinal?.saInfo?.commitmentDate).format(dateFormatting.date) : ''}

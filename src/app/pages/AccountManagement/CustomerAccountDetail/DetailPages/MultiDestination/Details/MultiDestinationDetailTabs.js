@@ -1,8 +1,10 @@
-import MultiDestinationDetailAttch from "./MultiDestinationDetailAttch";
 import MultiDestinationDetailInfo from "./MultiDestinationDetailInfo";
 import { useState } from "react";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
+import { configApp } from "../../../../../../../constants/configApp";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 
 /**
  * Tabbed detail view for a multi destination record.
@@ -30,8 +32,11 @@ const MultiDestinationDetailTabs = ({
       key: "attch",
       label: "Attachment",
       children: (
-        <MultiDestinationDetailAttch
-          attachments={attachments}
+        <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
         />
       )
     },

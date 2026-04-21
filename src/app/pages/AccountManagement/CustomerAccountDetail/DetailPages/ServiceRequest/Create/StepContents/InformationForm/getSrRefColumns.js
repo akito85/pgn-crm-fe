@@ -1,76 +1,54 @@
-import moment from "moment";
-import { toTitleCase } from "../../../../../../utils";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../components/StatusComponent";
+import { Tooltip } from "antd";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../utils/getColumnSearchProps";
+import SVGIcon from "../../../../../../../../../assets/Icon/index";
+import StatusComponent from "../../../../../../../../../components/StatusComponent";
+import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
+import { toTitleCase } from "../../../../../../../../../utils";
 
-/**
- * Returns the column definitions for the Service Request list table.
- *
- * @param {Object}          params                    - Column configuration options.
- * @param {Object}          params.search             - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} params.searchInput        - Ref to the search input element (used for focus).
- * @param {string}          params.searchedColumn     - The dataIndex of the column currently being searched.
- * @param {string}          params.searchText         - The current search text value.
- * @param {Function}        params.handleSearch       - Callback invoked when a search/filter is confirmed.
- * @param {boolean}         [params.isApproval=false] - When true, fixes the NO column left and shows the statusApproval column.
- * @returns {Array<Object>} Array of Ant Design column definition objects.
- */
-const getServiceRequestColumns = ({
+const getSrRefColumns = (
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-  isApproval = false
-}) => [
+  setServiceRequestRef = () => {},
+  setIsOpen = () => {}
+) => [
   {
-    key: "no",
     title: "NO",
+    width: 80,
     align: "center",
-    dataIndex: "no",
-    width: 50,
-    fixed: isApproval ? "left" : undefined,
-    render: (_, __, index) => index + 1,
+    render: (_, __, index) => index + 1
   },
   {
-    key: "serviceRequestNumber",
     title: "SERVICE REQUEST NUMBER",
-    dataIndex: "serviceRequestNumber",
+    dataIndex: "requestNumber",
+    width: 200,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "requestNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    )
+  },
+  {
+    title: "SERVICE REQUEST REFERENCE",
+    dataIndex: "reference",
     width: 220,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "serviceRequestNumber",
+      "reference",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
-    ),
+      handleSearch
+    )
   },
   {
-    key: "serviceRequestReference",
-    title: "SERVICE REQUEST REFERENCE",
-    dataIndex: "serviceRequestReference",
-    width: 230,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "serviceRequestReference",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (reference) => (
-      <span className="underline cursor-pointer text-blue-600">
-        {reference || "-"}
-      </span>
-    ),
-  },
-  {
-    key: "type",
     title: "TYPE",
     dataIndex: "type",
     width: 150,
@@ -81,12 +59,10 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
-    ),
+      handleSearch
+    )
   },
   {
-    key: "category",
     title: "CATEGORY",
     dataIndex: "category",
     width: 160,
@@ -97,12 +73,10 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
-    ),
+      handleSearch
+    )
   },
   {
-    key: "subCategory",
     title: "SUB CATEGORY",
     dataIndex: "subCategory",
     width: 160,
@@ -113,12 +87,10 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
-    ),
+      handleSearch
+    )
   },
   {
-    key: "channel",
     title: "CHANNEL",
     dataIndex: "channel",
     width: 140,
@@ -129,31 +101,27 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
-    ),
+      handleSearch
+    )
   },
   {
-    key: "requestSource",
     title: "REQUEST SOURCE",
-    dataIndex: "requestSource",
+    dataIndex: "source",
     width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "requestSource",
+      "source",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
-    ),
+      handleSearch
+    )
   },
   {
-    key: "requestDate",
     title: "REQUEST DATE",
     dataIndex: "requestDate",
-    width: 180,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -161,16 +129,14 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
-    render: (date) => (date ? moment(date).format("DD MMM YYYY HH:mm:ss") : "-"),
+    render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
-    key: "openDate",
     title: "OPEN DATE",
     dataIndex: "openDate",
-    width: 180,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -178,16 +144,14 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
-    render: (date) => (date ? moment(date).format("DD MMM YYYY HH:mm:ss") : "-"),
+    render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
-    key: "resolvedDate",
     title: "RESOLVED DATE",
     dataIndex: "resolvedDate",
-    width: 180,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -195,16 +159,14 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
-    render: (date) => (date ? moment(date).format("DD MMM YYYY HH:mm:ss") : "-"),
+    render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
-    key: "closedDate",
     title: "CLOSED DATE",
     dataIndex: "closedDate",
-    width: 180,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -212,13 +174,11 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
-    render: (date) => (date ? moment(date).format("DD MMM YYYY HH:mm:ss") : "-"),
+    render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
-    key: "age",
     title: "AGE (HOUR)",
     dataIndex: "age",
     width: 120,
@@ -230,16 +190,14 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
-    render: (age) => age || "0",
+    render: (age) => age || "0"
   },
   {
-    key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
-    width: 200,
+    width: 250,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -247,129 +205,143 @@ const getServiceRequestColumns = ({
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
-    ),
+      handleSearch
+    )
   },
-  isApproval && {
-    key: "statusApproval",
+  {
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 170,
+    width: 160,
     sorter: true,
     align: "center",
-    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
     render: (status) => {
+      const colorMap = {
+        approved: "green",
+        waitingApproval: "orange",
+        pending: "orange",
+        rejected: "red"
+      };
       const displayText = {
-        draft: "Draft",
-        DRAFT: "Draft",
         approved: "Approved",
-        APPROVED: "Approved",
         waitingApproval: "Waiting Approval",
-        WAITING_APPROVAL: "Waiting Approval",
-        rejected: "Rejected",
-        REJECTED: "Rejected",
         pending: "Pending",
-        PENDING: "Pending",
+        rejected: "Rejected"
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status} size="small">
+          <StatusComponent colour={colorMap[status] || "gray"}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
       );
-    },
+    }
   },
   {
-    key: "statusPrerequisite",
     title: "STATUS PRE-REQUISITE",
     dataIndex: "statusPrerequisite",
     width: 180,
     sorter: true,
     align: "center",
-    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusPrerequisite",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
     render: (status) => {
+      const colorMap = {
+        completed: "green",
+        pending: "red",
+        none: "blue"
+      };
       const displayText = {
         completed: "Completed",
-        COMPLETED: "Completed",
-        approve: "Approve",
-        APPROVE: "Approve",
-        approved: "Approve",
-        APPROVED: "Approve",
         pending: "Pending",
-        PENDING: "Pending",
-        none: "None",
-        NONE: "None",
+        none: "None"
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status} size="small">
+          <StatusComponent colour={colorMap[status] || "gray"}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
       );
-    },
+    }
   },
   {
-    key: "status",
     title: "STATUS",
     dataIndex: "status",
-    width: 130,
+    width: 140,
     sorter: true,
     align: "center",
-    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch,
-      true
+      handleSearch
     ),
     render: (status) => {
+      const colorMap = {
+        inProgress: "blue",
+        onHold: "orange",
+        closed: "red",
+        canceled: "gray",
+        open: "green",
+        active: "green",
+        pending: "orange"
+      };
       const displayText = {
         inProgress: "In Progress",
-        IN_PROGRESS: "In Progress",
         onHold: "On Hold",
-        ON_HOLD: "On Hold",
         closed: "Closed",
-        CLOSED: "Closed",
         canceled: "Canceled",
-        CANCELED: "Canceled",
-        open: "Open",
-        OPEN: "Open",
-        active: "Active",
-        ACTIVE: "Active",
+        open: "Open"
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status} size="small">
+          <StatusComponent colour={colorMap[status] || "gray"}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
       );
-    },
+    }
   },
-].filter(Boolean);
+  {
+    key: "action",
+    title: "ACTION",
+    align: "center",
+    width: 120,
+    fixed: "right",
+    render: (_, record) => (
+      <div className="flex w-full justify-center gap-4">
+        <Tooltip title="Select">
+          <div className="pt-1 cursor-pointer">
+            <SVGIcon
+              name="IconActionCreate"
+              color={"#0075bf"}
+              width={20}
+              onClick={() => {
+                setServiceRequestRef(record.requestNumber);
+                setIsOpen(false);
+              }}
+            />
+          </div>
+        </Tooltip>
+      </div>
+    )
+  }
+];
 
-export { getServiceRequestColumns };
+export { getSrRefColumns };

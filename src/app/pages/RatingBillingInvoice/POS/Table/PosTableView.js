@@ -38,6 +38,8 @@ export const PosTableView = (
       const typeConfig = {
         1: "Customer",
         2: "Prospective Customer",
+        Customers: "Customer",
+        "Prospective Customer": "Prospective Customer",
       };
       const displayText = typeConfig[text] || text || "-";
       return renderColumn(

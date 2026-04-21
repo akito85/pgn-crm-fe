@@ -156,7 +156,7 @@ const EditableCell = ({
             }}
           >
             {options.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
+              <Select.Option key={option.value} value={option.value} disabled={option.disabled}>
                 <span className="text-xs">{option.label}</span>
               </Select.Option>
             ))}
@@ -275,14 +275,13 @@ const GasUtilizationTableInline = ({
 
   // const [fulfilPercentage, setFulfilPercentage] = useState(0);
   const [validationError, setValidationError] = useState('');
-  const [filterDdlUtilName, setFilterDdlUtilName] = useState([]);
 
-  useEffect(() => {
-    const filteredListName = ddlUtilizationName?.filter(item => {
-      return !dataTableGasUtilization?.some(fix => fix?.name?.label === item?.label);
-    });
-    setFilterDdlUtilName(filteredListName)
-  }, [dataTableGasUtilization, ddlUtilizationName])
+  const filterDdlUtilName = (ddlUtilizationName || []).map((option) => {
+    const isSelected = dataTableGasUtilization
+      .filter((row) => String(row.key) !== String(editingKey))
+      .some((row) => String(row?.name?.value) === String(option.value));
+    return { ...option, disabled: isSelected };
+  });
 
   const itemActions = nxGetAccountActions({
     handleUpdate: (record) => edit(record.key),
@@ -340,7 +339,7 @@ const GasUtilizationTableInline = ({
   };
 
   const edit = (record, field) => {
-    const dataEdit = dataTableGasUtilization[record - 1];
+    const dataEdit = dataTableGasUtilization.find(item => String(item.key) === String(record));
     setStatusAction("edit");
     setIsEdit(true)
     formTable.setFieldsValue(dataEdit);

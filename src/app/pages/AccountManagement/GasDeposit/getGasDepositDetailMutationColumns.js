@@ -4,25 +4,21 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColum
 /**
  * Returns the column definitions for the Gas Deposit Detail Mutation table.
  *
- * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValue`
- * for server-side filtering, with `filteredValue` set per column. Sorting is handled
- * server-side via `sorter: true`. The mutationDate column is formatted as "DD MMM YYYY".
- * Numeric columns (m3, mscf, mmbtu, price, amount) use right-aligned text.
- *
- * @param {Object} search - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} searchInput - Ref to the search input element (used for focus).
- * @param {string} searchedColumn - The dataIndex of the column currently being searched.
- * @param {string} searchText - The current search text value.
- * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
+ * @param {Object}          params                - Column configuration options.
+ * @param {Object}          params.search         - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput    - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText     - The current search text value.
+ * @param {Function}        params.handleSearch   - Callback invoked when a search/filter is confirmed.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
-const getGasDepositDetailMutationColumns = (
+const getGasDepositDetailMutationColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-) => [
+}) => [
   {
     key: "no",
     title: "NO",
@@ -38,7 +34,6 @@ const getGasDepositDetailMutationColumns = (
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.period] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "period",
@@ -46,7 +41,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -55,7 +49,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "mutationDate",
     width: 200,
     align: "center",
-    filteredValue: [search?.mutationDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mutationDate",
@@ -73,7 +66,6 @@ const getGasDepositDetailMutationColumns = (
     title: "TYPE",
     dataIndex: "type",
     width: 100,
-    filteredValue: [search?.type] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "type",
@@ -81,7 +73,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
     ),
   },
   {
@@ -89,7 +80,6 @@ const getGasDepositDetailMutationColumns = (
     title: "SOURCE",
     dataIndex: "source",
     width: 200,
-    filteredValue: [search?.source] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "source",
@@ -97,7 +87,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
     ),
   },
   {
@@ -106,7 +95,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "m3",
     width: 150,
     align: "right",
-    filteredValue: [search?.m3] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "m3",
@@ -114,7 +102,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true,
     ),
   },
   {
@@ -123,7 +110,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "mscf",
     width: 150,
     align: "right",
-    filteredValue: [search?.mscf] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mscf",
@@ -131,7 +117,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -140,7 +125,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "mmbtu",
     width: 150,
     align: "right",
-    filteredValue: [search?.mmbtu] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "mmbtu",
@@ -148,7 +132,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -157,7 +140,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "price",
     width: 200,
     align: "right",
-    filteredValue: [search?.price] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "price",
@@ -165,7 +147,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -174,7 +155,6 @@ const getGasDepositDetailMutationColumns = (
     dataIndex: "amount",
     width: 200,
     align: "right",
-    filteredValue: [search?.amount] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "amount",
@@ -182,7 +162,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -190,7 +169,6 @@ const getGasDepositDetailMutationColumns = (
     title: "REMARK",
     dataIndex: "remark",
     width: 300,
-    filteredValue: [search?.remark] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "remark",
@@ -198,7 +176,6 @@ const getGasDepositDetailMutationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
 ];

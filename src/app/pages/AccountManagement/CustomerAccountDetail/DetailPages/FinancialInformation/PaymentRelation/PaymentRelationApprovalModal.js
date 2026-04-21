@@ -4,8 +4,7 @@ import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { approveOrRejectAllPaymentRelation, getPaymentRelationApproval } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
+import { approveOrRejectAllPaymentRelation, getPaymentRelationApprovals } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { getPaymentRelationColumns } from "./getPaymentRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
@@ -13,29 +12,36 @@ import NxModal from "../../../../../../../components/Nx/NxModal";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 
+/**
+ * Modal for approving or rejecting pending payment relation records.
+ * Displays a two-step wizard: select records + enter remark, then confirm.
+ * @param {{ id: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @returns
+ */
 const PaymentRelationApprovalModal = ({
   id = 0,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {},
 }) => {
-  // Selector
-  const { list_paymentRelationApproval, pagination_paymentRelationApproval, loading_listPrApproval, loading_approvePr, loading_rejectPr } = useSelector(
-    (state) => state.paymentRelation
-  );
+  // --- Hooks ---
+  const {
+    list_paymentRelationApproval: paymentRelationApprovals,
+    pagination_listPrApproval: pagination,
+    loading_listPrApproval,
+    loading_approvePr,
+    loading_rejectPr
+  } = useSelector((state) => state.paymentRelation);
 
   const loadingApproval = loading_approvePr || loading_rejectPr;
 
-  // Declaration
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSource = list_paymentRelationApproval;
 
-  // State
   const [current, setCurrent] = useState(0);
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); 
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -47,12 +53,9 @@ const PaymentRelationApprovalModal = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: [] 
-  });
-
-  // Initial fetch - Load data when modal opens
+  // --- Effects ---
+  // Fetches the first page of pending approvals whenever the modal opens or
+  // any filter/search/sort parameter changes. Resets the page counter to 1.
   useEffect(() => {
     if (isOpen) {
       const body = {
@@ -62,10 +65,10 @@ const PaymentRelationApprovalModal = ({
         searchs: search,
         filters,
         filterRules,
-      }
+      };
 
       dispatch(
-        getPaymentRelationApproval({
+        getPaymentRelationApprovals({
           id,
           body,
           isLoadMore: false,
@@ -75,7 +78,14 @@ const PaymentRelationApprovalModal = ({
     }
   }, [dispatch, isOpen, search, sort, filters, filterRules]);
 
-  // Function Search API
+  // --- Functions / handlers ---
+  /**
+   * Handles column search: confirms the search, updates search text/column state,
+   * and resets the page if the filter value has changed.
+   * @param {string[]} selectedKeys - The selected filter values.
+   * @param {Function} confirm - Ant Design confirm callback to apply the filter.
+   * @param {string} dataIndex - The column key being searched.
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -91,12 +101,15 @@ const PaymentRelationApprovalModal = ({
     });
   };
 
-  // Load more handler
+  /**
+   * Fetches the next page of payment relation approvals and appends it to the
+   * existing list. Does nothing if all pages have already been loaded.
+   * @returns {Promise<void>}
+   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_paymentRelationApproval?.totalPage || 0;
+    const totalPages = pagination.totalPage || 0;
 
-    // Check if there's more data to load
     if (nextPage <= totalPages) {
       const body = {
         page: nextPage,
@@ -105,10 +118,10 @@ const PaymentRelationApprovalModal = ({
         searchs: search,
         filters,
         filterRules,
-      }
+      };
 
       dispatch(
-        getPaymentRelationApproval({
+        getPaymentRelationApprovals({
           id,
           body,
           isLoadMore: true,
@@ -118,10 +131,16 @@ const PaymentRelationApprovalModal = ({
     }
   };
 
-  const hasMore =
-    dataSource.length < (pagination_paymentRelationApproval?.totalElement || 0);
+  // --- Derived values ---
+  const totalElement = pagination.totalElement;
+  const hasMore = paymentRelationApprovals.length < totalElement;
 
-  // Sort Table
+  /**
+   * Handles table sort changes and updates the sort query string.
+   * @param {object} _ - Pagination (unused).
+   * @param {object} __ - Filters (unused).
+   * @param {{ field: string; order: "ascend" | "descend" | undefined }} sorter
+   */
   const onSort = (_, __, sorter) => {
     const dataSort =
       sorter.order !== undefined
@@ -135,24 +154,25 @@ const PaymentRelationApprovalModal = ({
     selectedRowKeys,
     onChange: (newSelectedRowKeys, newSelectedRows) => {
       setSelectedRowKeys([...newSelectedRowKeys]);
-      setSelectedRows(newSelectedRows.map(newSelectedRow => ({...newSelectedRow})));
+      setSelectedRows(
+        newSelectedRows.map((newSelectedRow) => ({ ...newSelectedRow }))
+      );
     },
     preserveSelectedRowKeys: true,
   };
 
-  // Step
   const steps = [
     { key: "pr", title: "PAYMENT RELATION" },
     { key: "prc", title: "CONFIRMATION" },
   ];
 
-  const formFields = [
-    [
-      "remark",
-    ],
-  ];
+  const formFields = [["remark"]];
 
-  // Button Next
+  /**
+   * Advances the wizard to the next step after validating the current step.
+   * On step 0, requires at least one row to be selected before proceeding.
+   * @returns {Promise<void>}
+   */
   const next = async () => {
     try {
       if (current === 0) {
@@ -162,44 +182,36 @@ const PaymentRelationApprovalModal = ({
             description: `Please select at least one record`,
           };
           dispatch(showModalError(errorBody));
-          
+
           throw new Error("No record was selected");
         } else {
           await form.validateFields([formFields[current]]);
-          setCurrent(prev => prev + 1);
+          setCurrent((prev) => prev + 1);
         }
       } else {
-        form.validateFields([formFields[current]])
+        form.validateFields([formFields[current]]);
       }
-    } catch {
-      
-    }
+    } catch {}
   };
 
-  // Button Previous
+  /**
+   * Returns to the previous step.
+   */
   const prev = () => {
-    setCurrent(prev => prev - 1);
+    setCurrent((prev) => prev - 1);
   };
 
-  // Handle Next
+  /**
+   * Delegates to `next()` to advance the wizard step.
+   */
   const handleButtonNext = () => {
     next();
   };
 
-  // Handle Cancel Form
-  const handleCancelForm = () => {
-    handleCancel();
-    setSelectedRowKeys([]);
-    setSelectedRows([]);
-    setCurrent(0);
-    setSearch({});
-    setPage(1);
-    setSort("");
-    setSearchText("");
-    setSearchedColumn("");
-    form.resetFields();
-  };
-
+  /**
+   * Resets the entire wizard to its initial state: clears selection, search,
+   * pagination, form fields, and closes the modal. Also triggers `afterFinish`.
+   */
   const resetForm = () => {
     afterFinish();
     setCurrent(0);
@@ -214,57 +226,78 @@ const PaymentRelationApprovalModal = ({
     setSearchedColumn("");
   };
 
+  /**
+   * Cancels the modal without triggering `afterFinish`: closes the modal and
+   * resets all local state.
+   */
+  const handleCancelForm = () => {
+    handleCancel();
+    setSelectedRowKeys([]);
+    setSelectedRows([]);
+    setCurrent(0);
+    setSearch({});
+    setPage(1);
+    setSort("");
+    setSearchText("");
+    setSearchedColumn("");
+    form.resetFields();
+  };
+
+  /**
+   * Validates the form, dispatches the approve/reject action for the selected
+   * rows, and resets the modal on success.
+   * @param {"APPROVE" | "REJECT"} action - The action to perform on selected records.
+   * @returns {Promise<void>}
+   */
   const handleSave = async (action) => {
     try {
       const values = await form.validateFields();
 
-      const body = selectedRows.filter(row => row.approvalType === "PAYMENT_RELATION").map((row) => ({
-        id: row.id,
-        approvalId: row.tappId,
-        action,
-        description: values.remark,
-      }));
+      const body = selectedRows
+        .filter((row) => row.approvalType === "PAYMENT_RELATION")
+        .map((row) => ({
+          id: row.id,
+          approvalId: row.tappId,
+          action,
+          description: values.remark,
+        }));
 
-      const inactiveBody = selectedRows.filter(row => row.approvalType === "INACTIVE_PAYMENT_RELATION").map((row) => ({
-        id: row.id,
-        approvalId: row.tappId,
-        action,
-        description: values.remark,
-      }));
+      const inactiveBody = selectedRows
+        .filter((row) => row.approvalType === "INACTIVE_PAYMENT_RELATION")
+        .map((row) => ({
+          id: row.id,
+          approvalId: row.tappId,
+          action,
+          description: values.remark,
+        }));
 
       dispatch(
         approveOrRejectAllPaymentRelation({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected",
+          action,
         })
       )
-      .unwrap()
-      .then(() => {
-        resetForm();
-      })
-      .catch((error) => {});
-    } catch {
-
-    }
+        .unwrap()
+        .then(() => {
+          resetForm();
+        })
+        .catch((error) => {});
+    } catch {}
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
-      getPaymentRelationColumns(
+      getPaymentRelationColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false,
-      ),
+        isApproval: true,
+      }),
     [search, searchInput, searchedColumn, searchText]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   return (
     <>
@@ -355,14 +388,11 @@ const PaymentRelationApprovalModal = ({
                 >
                   <NxTable
                     className={"[&_.ant-checkbox]:scale-90"}
-                    dataSource={dataSource}
+                    dataSource={paymentRelationApprovals}
                     columns={columns}
-                    totalData={pagination_paymentRelationApproval?.totalElement || 0}
-                    tableScrolled={{ x: dataSource.length ? "max-content" : 1200 }}
+                    totalData={totalElement}
+                    tableScrolled={{ x: paymentRelationApprovals.length ? "max-content" : 1200 }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listPrApproval}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -401,15 +431,10 @@ const PaymentRelationApprovalModal = ({
               header={"Confirmation"}
             >
               <div className="flex flex-col gap-y-4">
-
                 <NxTable
                   dataSource={selectedRows}
                   columns={columns}
                   tableScrolled={{ x: "max-content" }}
-                  onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}

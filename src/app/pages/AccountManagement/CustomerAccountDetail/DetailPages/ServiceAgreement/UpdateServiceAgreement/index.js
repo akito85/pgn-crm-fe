@@ -1494,7 +1494,6 @@ const UpdateServiceAgreement = ({ saType }) => {
 	];
 
 	if (saRecordData?.typeSa === "addon") {
-
 		saInformationFields = [
 			...saInformationFields,
 			'saReferenceNumber'
@@ -1506,6 +1505,19 @@ const UpdateServiceAgreement = ({ saType }) => {
 			...saInformationFields,
 			'pjbgType'
 		];
+	}
+
+	let saDetailFields = [
+		'createFrom',
+		'chooseProduct',
+		'productVersionId',
+		'priceCode',
+		'pricingRule',
+		'calculationType',
+	];
+
+	if (saRecordData?.typeSa === 'addon') {
+		saDetailFields = [...saDetailFields, 'serviceAgreementChildType'];
 	}
 
 	if (isGasServiceType && saRecordData?.isMain === "Y" && !saInfoObj?.alreadyGasIn) {
@@ -1534,8 +1546,10 @@ const UpdateServiceAgreement = ({ saType }) => {
 			});
 	}
 
+	const approvalFields = ['appHierId'];
+
 	const functionCheckApproval = () => {
-		form.validateFields()
+		form.validateFields(approvalFields)
 			.then((values) => {
 				next();
 				scrollRightHandler();
@@ -1548,7 +1562,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 	const funtionCheckSaDetail = () => {
 		form
-			.validateFields()
+			.validateFields(saDetailFields)
 			.then((values) => {
 				handleMandatory(setTabPagesSaDetail, listDataAttachment);
 				if (dataPricing?.length < 2 && hasValue(saDetailObj?.pricingRule)) {

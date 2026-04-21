@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Spin, Tooltip, Button } from "antd";
 import SVGIcon from "../../assets/Icon/index";
 import NxAttachmentModal from "./NxAttachmentModal";
 import { useSelector, useDispatch } from "react-redux";
 import { previewFileAttachment } from "../../utils/previewFileAttachment";
-import { getColumnSearchPropsPaging } from "../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../utils/getColumnSearchProps";
 import productPromoHttpService from "../../redux/services/productPromoHttpService";
 import { getBase64 } from "../../utils/getBase64";
 import { tokenHeader } from "../../utils/tokenHeader";
@@ -12,55 +12,11 @@ import axios from "axios";
 import FileSaver from "file-saver";
 import { configApp } from "../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../redux/slices/product_promo/product";
+import { bytesConverter } from "../../utils/bytesConverter";
 import NxTable from "./NxTable";
-import NxDate from "./NxDatePicker";
-
-const onFilter = (dataIndex, value, record) => {
-  const search = value.toLowerCase();
-  switch (dataIndex) {
-    case "startDate":
-    case "endDate":
-      const date = NxDate.formatDate(record[dataIndex], "DD MMM YYYY") || "";
-      return date.toString().toLowerCase().includes(search);
-    case "fileSize":
-      return record.size.includes(search);
-    default:
-      return record[dataIndex]?.toLowerCase().includes(search);
-  }
-};
-
-const extractSize = (fileSize) => {
-  if (fileSize.includes("KB")) {
-    return parseFloat(fileSize.replace(" KB", "")) * 1024;
-  } else if (fileSize.includes("MB")) {
-    return parseFloat(fileSize.replace(" MB", "")) * 1024 * 1024;
-  }
-  return parseFloat(fileSize);
-};
-
-const sorter = (fieldSort, a, b) => {
-  const handleDataSort = (obj) => {
-    switch (fieldSort) {
-      case "startDate":
-      case "endDate":
-        const date = NxDate.formatDate(obj[fieldSort], "DD MMM YYYY") || "";
-        return date.toString().toLowerCase();
-      case "fileSize":
-        return extractSize(obj[fieldSort]);
-      default:
-        return obj[fieldSort].toString().toLowerCase();
-    }
-  };
-  let fa = handleDataSort(a);
-  let fb = handleDataSort(b);
-  if (fieldSort === "fileSize") {
-    return fa - fb;
-  } else {
-    return fa.localeCompare(fb);
-  }
-};
 
 const columnAttachmentData = (
+  search,
   searchInput,
   searchedColumn,
   searchText,
@@ -82,9 +38,8 @@ const columnAttachmentData = (
       title: "CATEGORY",
       width: 75,
       dataIndex: "fileCategoryName",
-      onFilter: (value, record) => onFilter("fileCategoryName", value, record),
-      sorter: (a, b) => sorter("fileCategoryName", a, b),
-      ...getColumnSearchPropsPaging(
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "fileCategoryName",
         searchInput,
         searchedColumn,
@@ -97,41 +52,9 @@ const columnAttachmentData = (
       title: "FILE NAME",
       width: 200,
       dataIndex: "fileName",
-      onFilter: (value, record) => onFilter("fileName", value, record),
-      sorter: (a, b) => sorter("fileName", a, b),
-      ...getColumnSearchPropsPaging(
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "fileName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      key: "createdBy",
-      title: "UPLOADED BY",
-      width: 100,
-      dataIndex: "createdBy",
-      onFilter: (value, record) => onFilter("createdBy", value, record),
-      sorter: (a, b) => sorter("createdBy", a, b),
-      ...getColumnSearchPropsPaging(
-        "createdBy",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      key: "createdDate",
-      title: "UPLOADED DATE",
-      align: "center",
-      width: 100,
-      dataIndex: "createdDate",
-      onFilter: (value, record) => onFilter("createdDate", value, record),
-      sorter: (a, b) => sorter("createdDate", a, b),
-      ...getColumnSearchPropsPaging(
-        "createdDate",
         searchInput,
         searchedColumn,
         searchText,
@@ -144,15 +67,15 @@ const columnAttachmentData = (
       align: "center",
       width: 100,
       dataIndex: "fileSize",
-      onFilter: (value, record) => onFilter("fileSize", value, record),
-      sorter: (a, b) => sorter("fileSize", a, b),
-      ...getColumnSearchPropsPaging(
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
         "fileSize",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
+      render: (value) => (typeof value === "number" ? bytesConverter(value) : value),
     },
     {
       key: "action",
@@ -160,12 +83,12 @@ const columnAttachmentData = (
       align: "center",
       width: 75,
       fixed: "right",
-      render: (v, r, i) => {
+      render: (_, record) => {
         return (
           <div className="flex justify-center align-middle gap-2 py-1">
             <Tooltip title="Preview">
               <Button
-                onClick={() => handleShow(r)}
+                onClick={() => handleShow(record)}
                 type="table-action"
               >
                 <SVGIcon name="IconEye" width={20} />
@@ -174,8 +97,8 @@ const columnAttachmentData = (
             {type !== "detail" && type !== "confirmation" ? (
               <Tooltip title="Delete">
                 <Button
-                  onClick={() => handleDelete(r)}
-                  disabled={r.dataType === "exist"}
+                  onClick={() => handleDelete(record)}
+                  disabled={record.dataType === "exist"}
                   type="table-action"
                 >
                   <SVGIcon name="IconDelete" width={20} />
@@ -188,21 +111,32 @@ const columnAttachmentData = (
     },
   ];
   if (type === "preview") {
-    return res.filter(
-      (column) =>
-        column.dataIndex !== "createdBy" &&
-        column.dataIndex !== "createdDate" &&
-        column.title !== "ACTION"
-    );
+    return res.filter((column) => column.title !== "ACTION");
   }
-  return type !== "detail"
-    ? res.filter(
-        (column) =>
-          column.dataIndex !== "createdBy" && column.dataIndex !== "createdDate"
-      )
-    : res;
+  return res;
 };
 
+/**
+ * Shared attachment input component used across create, update, detail,
+ * preview, and confirmation contexts.
+ *
+ * Renders a file attachment table with search, fixed-column pinning, and
+ * preview/download actions. In non-detail/non-confirmation/non-preview modes
+ * it also renders a "Choose File" button that opens the upload modal.
+ *
+ * @param {{
+ *   data?: object[];
+ *   updateData?: (updater: (prev: object[]) => object[]) => void;
+ *   setDeleted?: (updater: (prev: object[]) => object[]) => void;
+ *   type?: "detail" | "preview" | "confirmation" | undefined;
+ *   getAPICategory?: () => void;
+ *   categoryData?: { id: string|number; text: string }[];
+ *   service?: object;
+ *   configApplication?: string;
+ *   getAPIGuard?: () => any;
+ *   mandatory?: boolean;
+ * }} props
+ */
 const NxAttachmentInput = ({
   data = [],
   updateData = () => {},
@@ -215,10 +149,12 @@ const NxAttachmentInput = ({
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState({});
   const [modalUpload, setModalUpload] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loadingDownload, setLoadingDownload] = useState(false);
@@ -235,16 +171,32 @@ const NxAttachmentInput = ({
   }, [categoryData]);
 
   useEffect(() => {
-    dispatch(getAPIGuard());
-  }, [dispatch, getAPIGuard]);
+    if (type !== "detail") {
+      dispatch(getAPIGuard());
+    }
+  }, [dispatch, getAPIGuard, type]);
 
+  // --- Functions / handlers ---
+
+  /**
+   * Confirms a column search and updates the active search state.
+   * @param {string[]} selectedKeys
+   * @param {() => void} confirm
+   * @param {string} dataIndex
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    setSearchedColumn(tempSearchColumn);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
   };
 
+  /**
+   * Removes an attachment from the list. If the record was previously saved
+   * as a draft (`dataType === "draft"`), it is also added to the deleted list
+   * so the API can clean it up on submit.
+   * @param {object} record
+   */
   const handleDelete = (record) => {
     updateData((prevState) =>
       prevState.filter((attachment) => attachment.key !== record.key)
@@ -261,13 +213,25 @@ const NxAttachmentInput = ({
     }
   };
 
+  /**
+   * Opens the attachment upload modal and fetches category options.
+   */
   const handleOpenModal = () => {
     setModalUpload(true);
     dispatch(getAPICategory());
   };
 
+  /**
+   * Previews or downloads a file attachment.
+   * - `dataType === "new"`: file exists only in memory (base64). Office files
+   *   are saved via FileSaver; others are opened in a preview window.
+   * - Otherwise: file lives on the server. Office files are downloaded via the
+   *   service thunk; others are fetched as a blob, converted to base64, and
+   *   opened in a preview window.
+   * @param {object} r - Attachment record
+   */
   const handleShow = async (r) => {
-    if (r.dataType !== "exist") {
+    if (r.dataType === "new") {
       if (r.fileType.includes("application/vnd")) {
         FileSaver.saveAs(r.base64, r.fileName);
       } else {
@@ -293,6 +257,21 @@ const NxAttachmentInput = ({
       }
     }
   };
+
+  const columns = useMemo(
+    () =>
+      columnAttachmentData(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleDelete,
+        type,
+        handleShow
+      ),
+    [search, searchedColumn, searchText, type]
+  );
 
   return (
     <>
@@ -320,17 +299,10 @@ const NxAttachmentInput = ({
             idTable={"attachment-table"}
             dataSource={data}
             totalData={data.length}
-            tableScrolled={{ x: 1500 }}
-            columns={columnAttachmentData(
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDelete,
-              type,
-              handleShow
-            )}
+            tableScrolled={{ x: data.length ? "max-content" : 1000 }}
+            columns={columns}
             usePagination={false}
+            showAdvanceSearch={true}
           />
         </div>
       </Spin>

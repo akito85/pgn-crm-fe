@@ -1,14 +1,20 @@
 import { Form } from "antd";
-import InputComponent from "../../../../../../../../components/InputComponent";
-import { requiredMessage } from "../../../../../../../../utils";
+import InputComponent from "../../components/InputComponent";
+import { requiredMessage } from "../../utils";
 
-const ConfirmationModalRemark = ({ disabled = false }) => {
+/**
+ * Remark textarea input
+ *
+ * @param {{ disabled?: boolean }} props
+ */
+const NxRemarkInput = ({ disabled = false }) => {
   return (
     <Form.Item
       key="remark"
       name={"remark"}
       rules={[{ message: requiredMessage("Remark"), required: true }]}
       labelCol={{ span: 24 }}
+      className="no-margin-form"
     >
       <InputComponent
         group
@@ -20,4 +26,4 @@ const ConfirmationModalRemark = ({ disabled = false }) => {
   );
 };
 
-export default ConfirmationModalRemark;
+export default NxRemarkInput;
