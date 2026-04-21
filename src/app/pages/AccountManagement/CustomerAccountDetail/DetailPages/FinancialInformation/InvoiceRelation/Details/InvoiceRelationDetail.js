@@ -251,12 +251,16 @@ const InvoiceRelationDetail = ({
                   <div className={"w-full flex justify-end gap-x-2"}>
                     <Button
                       type="reject"
+                      icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                      className="flex-row-reverse"
                       onClick={() => handleApprovalModal(true, "reject")}
                     >
                       Reject
                     </Button>
                     <Button
                       type="approve"
+                      icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                      className="flex-row-reverse"
                       onClick={() => handleApprovalModal(true, "approve")}
                     >
                       Approve
