@@ -75,6 +75,8 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "dateFormal"
     ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
@@ -91,6 +93,8 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "dateFormal"
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
@@ -109,6 +113,22 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      [
+        {
+          label: "Draft",
+          value: "DRAFT"
+        },
+        {
+          label: "Waiting Approval",
+          value: "WAITING_APPROVAL"
+        },
+        {
+          label: "Rejected",
+          value: "REJECTED"
+        }
+      ]
     ),
     render: (status) => {
       const displayText = {
@@ -142,6 +162,22 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      [
+        {
+          label: "Active",
+          value: "ACTIVE"
+        },
+        {
+          label: "Inactive",
+          value: "INACTIVE"
+        },
+        {
+          label: "Draft",
+          value: "DRAFT"
+        }
+      ]
     ),
     render: (status) => {
       const displayText = {
