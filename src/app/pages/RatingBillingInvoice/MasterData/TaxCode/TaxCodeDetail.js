@@ -372,13 +372,8 @@ const TaxCodeDetail = () => {
     dispatch(
       bodyApproval.approvalType === "INACTIVE_TAX_CODE"
         ? approvalInactiveTaxCode({
-          body: data,
-        })
-        : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
-          ? approvalActivatedTaxCode({
             body: data,
           })
-<<<<<<< HEAD
         : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
           ? approvalActivatedTaxCode({
               body: data,
@@ -386,11 +381,6 @@ const TaxCodeDetail = () => {
           : approvalRejectTaxCode({
               body: data,
             }),
-=======
-          : approvalRejectTaxCode({
-            body: data,
-          }),
->>>>>>> testing-rbip
     )
       .unwrap()
       .then(() => {
