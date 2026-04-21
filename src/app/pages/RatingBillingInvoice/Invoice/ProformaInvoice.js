@@ -31,7 +31,7 @@ const ProformaInvoice = () => {
 
   // Declaration
   const searchInput = useRef(null);
-  const dataSource = data?.result || [];
+  const dataSource = data?.content || [];
 
   // State
   const [page, setPage] = useState(1);
@@ -56,9 +56,9 @@ const ProformaInvoice = () => {
       return saved
         ? JSON.parse(saved)
         : {
-            left: ["no"], // default left fixed column keys if any
-            right: ["actions"], // default right fixed column keys - actions column
-          };
+          left: ["no"], // default left fixed column keys if any
+          right: ["actions"], // default right fixed column keys - actions column
+        };
     } catch (e) {
       return { left: ["no"], right: ["actions"] };
     }
@@ -328,15 +328,15 @@ const ProformaInvoice = () => {
       render: (record, data) => {
         const Content =
           data > 3 ? (
-              <ButtonComponent
-                icon={<SVGIcon name="IconDetail" width={20} />}
-                border={false}
-                onClick={() => {
-                  handleDetail(record);
-                }}
-              >
-                <span className="text-black ml-3">Detail</span>
-              </ButtonComponent>
+            <ButtonComponent
+              icon={<SVGIcon name="IconDetail" width={20} />}
+              border={false}
+              onClick={() => {
+                handleDetail(record);
+              }}
+            >
+              <span className="text-black ml-3">Detail</span>
+            </ButtonComponent>
           ) : (
             <Tooltip title="Detail" placement="left">
               <div

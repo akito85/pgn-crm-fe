@@ -251,6 +251,39 @@ export const inactiveDailyRates = createAsyncThunk(
   },
 );
 
+export const requestActivateDailyRates = createAsyncThunk(
+  "REQUEST_ACTIVATE_DAILY_RATES",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/daily-rate/request-activate`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const messageBody = {
+        title: `Successful`,
+        description: `Your data has been submitted`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(messageBody));
+      return response.data;
+    } catch (response) {
+      const message =
+        (response.response &&
+          response.response.data &&
+          response.response.data.message) ||
+        response.message ||
+        response.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `${message}. Please try again.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(response.response.data);
+    }
+  },
+);
+
 export const getDowloadDailyRate = createAsyncThunk(
   "DOWNLOAD_DAILY_RATE",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
@@ -383,6 +416,47 @@ export const approveRejectInactive = createAsyncThunk(
   },
 );
 
+//approve or reject ACTIVATED
+export const approveRejectActivated = createAsyncThunk(
+  "APPROVE_OR_REJECT_ACTIVATED_DAILYRATES",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/daily-rate/approve-activated";
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const messageBody = {
+        title: `Successful`,
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "Approved" : "Rejected"
+        }.`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(messageBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${
+            body.action === "APPROVE" ? "Approved" : "Rejected"
+          }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+
 const dailyrateSlice = createSlice({
   name: "daily_rate",
   initialState,
@@ -419,6 +493,19 @@ const dailyrateSlice = createSlice({
       state.loading = false;
     },
     [inactiveDailyRates.rejected]: (state) => {
+      state.isFailed = true;
+      state.loading = false;
+    },
+
+    // request activate app
+    [requestActivateDailyRates.pending]: (state) => {
+      state.loading = true;
+    },
+    [requestActivateDailyRates.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [requestActivateDailyRates.rejected]: (state) => {
       state.isFailed = true;
       state.loading = false;
     },
@@ -609,6 +696,20 @@ const dailyrateSlice = createSlice({
       state.loading = false;
     },
     [approveRejectInactive.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    // approve reject activated
+    [approveRejectActivated.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveRejectActivated.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveRejectActivated.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;

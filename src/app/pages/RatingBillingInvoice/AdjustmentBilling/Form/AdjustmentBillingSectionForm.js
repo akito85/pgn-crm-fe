@@ -114,6 +114,9 @@ const AdjustmentBillingSectionForm = ({
   const previousHydratedAccountIdRef = useRef();
   const selectedRateType = Form.useWatch("rateType", form);
   const selectedRateDate = Form.useWatch("rateDate", form);
+  const selectedTermType = Form.useWatch(["termType", "termValueDdl"], form);
+  const selectedTermValue = Form.useWatch(["termType", "termValue"], form);
+  const rawTermsOfPayment = Form.useWatch("termsOfPayment", form);
 
   const currentBillingPeriodSource = Array.isArray(dataCurrentBillingPeriod)
     ? dataCurrentBillingPeriod?.[0]
@@ -157,15 +160,29 @@ const AdjustmentBillingSectionForm = ({
 
       const normalizedValue = String(value).trim().toLowerCase();
       const match = (dataTermsOfPayment || []).find((item) => {
-        const itemText = String(item?.text || "")
-          .trim()
-          .toLowerCase();
-        return (
-          itemText === normalizedValue || String(item?.Id) === String(value)
-        );
+        const candidates = [
+          item?.Id,
+          item?.id,
+          item?.code,
+          item?.value,
+          item?.text,
+          item?.name,
+        ]
+          .filter((candidate) => candidate !== null && candidate !== undefined)
+          .map((candidate) => String(candidate).trim().toLowerCase());
+
+        return candidates.includes(normalizedValue);
       });
 
-      return match?.Id;
+      return (
+        match?.Id ??
+        match?.id ??
+        match?.code ??
+        match?.value ??
+        match?.text ??
+        match?.name ??
+        value
+      );
     },
     [dataTermsOfPayment],
   );
@@ -282,6 +299,54 @@ const AdjustmentBillingSectionForm = ({
   }, [dataListAccount, form, idAccount]);
 
   useEffect(() => {
+    const fetchTopMasterData = async () => {
+      const requests = [];
+
+      if (
+        !fetchedRef.current.topType &&
+        (dataListSelectTOP || []).length === 0
+      ) {
+        requests.push(dispatch(getSelectTOP()).unwrap());
+      }
+
+      if (
+        !fetchedRef.current.topValue &&
+        (dataTermsOfPayment || []).length === 0
+      ) {
+        requests.push(dispatch(getListTermsOfPayment()).unwrap());
+      }
+
+      if (requests.length === 0) {
+        fetchedRef.current.topType = true;
+        fetchedRef.current.topValue = true;
+        return;
+      }
+
+      setDropdownLoading((prev) => ({
+        ...prev,
+        topType: true,
+        topValue: true,
+      }));
+
+      try {
+        await Promise.all(requests);
+        fetchedRef.current.topType = true;
+        fetchedRef.current.topValue = true;
+      } catch (_error) {
+        // Keep retryable when request fails.
+      } finally {
+        setDropdownLoading((prev) => ({
+          ...prev,
+          topType: false,
+          topValue: false,
+        }));
+      }
+    };
+
+    fetchTopMasterData();
+  }, [dataListSelectTOP, dataTermsOfPayment, dispatch]);
+
+  useEffect(() => {
     if (idInvoice && idInvoice !== 0) {
       dispatch(getListInvoiceInformation({ id: idInvoice }));
     }
@@ -375,7 +440,12 @@ const AdjustmentBillingSectionForm = ({
         (item) => item.invoiceNumber === idInvoice,
       );
 
-      const termOfPaymentValue = dataTOP?.termOfPayment;
+      const existingTermsOfPayment = form.getFieldValue("termsOfPayment");
+      const termOfPaymentValue =
+        dataListInvoiceInformation?.termsOfPayment ??
+        dataTOP?.termOfPayment ??
+        existingTermsOfPayment;
+
       const termTypeValue = resolveTermType(termOfPaymentValue);
       const termOptionValue =
         termTypeValue === "TOP"
@@ -395,7 +465,7 @@ const AdjustmentBillingSectionForm = ({
         },
         rate: dataListInvoiceInformation?.rate,
       });
-    } else {
+    } else if (!idInvoice) {
       setDataInvoice({});
       setValueDdl({ action: "clear", value: null });
       form.resetFields(["termsOfPayment", "termType", "rate"]);
@@ -411,10 +481,6 @@ const AdjustmentBillingSectionForm = ({
   ]);
 
   useEffect(() => {
-    const selectedTermType = form.getFieldValue(["termType", "termValueDdl"]);
-    const selectedTermValue = form.getFieldValue(["termType", "termValue"]);
-    const rawTermsOfPayment = form.getFieldValue("termsOfPayment");
-
     if (
       selectedTermType === "TOP" &&
       !selectedTermValue &&
@@ -431,7 +497,14 @@ const AdjustmentBillingSectionForm = ({
         });
       }
     }
-  }, [dataTermsOfPayment, form, mapTermValueToOptionId]);
+  }, [
+    dataTermsOfPayment,
+    form,
+    mapTermValueToOptionId,
+    rawTermsOfPayment,
+    selectedTermType,
+    selectedTermValue,
+  ]);
 
   useEffect(() => {
     if (hasValue(billingPeriodId)) {
@@ -1151,10 +1224,10 @@ const AdjustmentBillingSectionForm = ({
                   if (!value || !txnDate) {
                     return Promise.resolve();
                   }
-                  if (moment(value).isAfter(moment(txnDate), "day")) {
+                  if (moment(value).isBefore(moment(txnDate), "day")) {
                     return Promise.reject(
                       new Error(
-                        "Accounting Date cannot be later than Transaction Date!",
+                        "Accounting Date cannot be earlier than Transaction Date!",
                       ),
                     );
                   }
@@ -1187,11 +1260,6 @@ const AdjustmentBillingSectionForm = ({
                     onChange={onChangeSelectTop}
                     placeholder="Type"
                     loading={dropdownLoading.topType}
-                    onDropdownVisibleChange={(open) => {
-                      if (open) {
-                        runLazyFetch("topType", getSelectTOP);
-                      }
-                    }}
                   >
                     {topTypeOptions.map((item, index) => (
                       <Select.Option value={item.value} key={index}>
@@ -1217,14 +1285,19 @@ const AdjustmentBillingSectionForm = ({
                       width={"100%"}
                       placeholder="Select Terms of Payment Value"
                       loading={dropdownLoading.topValue}
-                      onDropdownVisibleChange={(open) => {
-                        if (open) {
-                          runLazyFetch("topValue", getListTermsOfPayment);
-                        }
-                      }}
                     >
                       {(dataTermsOfPayment || []).map((item, index) => (
-                        <Select.Option key={index} value={item?.Id}>
+                        <Select.Option
+                          key={index}
+                          value={
+                            item?.Id ||
+                            item?.id ||
+                            item?.code ||
+                            item?.value ||
+                            item?.text ||
+                            item?.name
+                          }
+                        >
                           {item?.text}
                         </Select.Option>
                       ))}
@@ -1347,7 +1420,7 @@ const AdjustmentBillingSectionForm = ({
         <div className="relative">
           <div
             className={
-              hasSuccessfulRecalculate
+              hasSuccessfulRecalculate || listDataABI.length > 0
                 ? ""
                 : "blur-[2px] opacity-60 pointer-events-none select-none"
             }
@@ -1373,7 +1446,7 @@ const AdjustmentBillingSectionForm = ({
             />
           </div>
 
-          {!hasSuccessfulRecalculate && (
+          {!hasSuccessfulRecalculate && listDataABI.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="bg-white/95 border border-gray-200 rounded-lg px-6 py-5 text-center shadow-sm max-w-md">
                 <p className="text-sm text-gray-700 mb-4">

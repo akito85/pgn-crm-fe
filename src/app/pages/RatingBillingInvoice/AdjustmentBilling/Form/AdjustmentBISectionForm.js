@@ -11,8 +11,6 @@ import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import {
   getListDetailType,
   getListItem,
-  getInvoiceBillingItemList,
-  getInvoiceInformation,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -35,7 +33,7 @@ const AdjustmentBISectionForm = ({
   createBlockedMessage = "",
 }) => {
   // Selector
-  const { dataDetailType, dataInvoiceInfo, dataBillingItemList } = useSelector(
+  const { dataDetailType, dataBillingItemList } = useSelector(
     (state) => state.adjustmentBilling,
   );
 
@@ -65,35 +63,6 @@ const AdjustmentBISectionForm = ({
   useEffect(() => {
     dispatch(getListDetailType());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (dataInvoice?.billingCode) {
-      dispatch(getInvoiceBillingItemList(dataInvoice?.billingCode));
-    }
-  }, [dispatch, dataInvoice, dataInvoice?.billingCode]);
-
-  // Fetch invoice information when invoiceNumber changes
-  useEffect(() => {
-    if (invoiceNumber && type !== "detail" && type !== "show") {
-      dispatch(getInvoiceInformation(invoiceNumber));
-    }
-  }, [dispatch, invoiceNumber, type]);
-
-  // Fetch billing item list when billingNumber is available
-  useEffect(() => {
-    const billingNumber =
-      dataInvoiceInfo?.billingNumber || dataInvoiceInfo?.billingCode;
-
-    if (billingNumber && type !== "detail" && type !== "show") {
-      dispatch(getInvoiceBillingItemList(billingNumber));
-    }
-  }, [
-    dispatch,
-    dataInvoiceInfo,
-    dataInvoiceInfo?.billingNumber,
-    dataInvoiceInfo?.billingCode,
-    type,
-  ]);
 
   useEffect(() => {
     if (dataItem) {

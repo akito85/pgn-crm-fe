@@ -16,6 +16,7 @@ import {
   getAvailableApproval,
   getSelectedApproval,
   inactiveBillingItem,
+  requestActivateBillingItem,
   getApprovalHistory,
   downloadBillingItem,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
@@ -64,6 +65,14 @@ const BillingItemView = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
   // Save fixedColumns to localStorage when changed
   useEffect(() => {
     try {
@@ -105,11 +114,15 @@ const BillingItemView = () => {
           create: data_ApprovalHistory?.dataApprover?.BILLING_ITEM || [],
           inactive:
             data_ApprovalHistory?.dataApprover?.INACTIVE_BILLING_ITEM || [],
+          activate:
+            data_ApprovalHistory?.dataApprover?.ACTIVATED_BILLING_ITEM || [],
         },
         dataHistory: {
           create: data_ApprovalHistory?.dataHistory?.BILLING_ITEM || [],
           inactive:
             data_ApprovalHistory?.dataHistory?.INACTIVE_BILLING_ITEM || [],
+          activate:
+            data_ApprovalHistory?.dataHistory?.ACTIVATED_BILLING_ITEM || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -225,12 +238,21 @@ const BillingItemView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       id: chooseId.id,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveBillingItem(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateBillingItem : inactiveBillingItem)(
+        dataValue,
+      ),
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -254,7 +276,12 @@ const BillingItemView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -301,16 +328,17 @@ const BillingItemView = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
-
-        const isActive = record.status === "ACTIVE";
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
+        const isActive = rowStatus === "ACTIVE";
 
         const menuItems = [
           {
@@ -318,7 +346,7 @@ const BillingItemView = () => {
             label: isEditable ? (
               <Link
                 to={RBI_ROUTES.BILLING_ITEM_UPDATE}
-                state={{ id: record.billingItemCode }}
+                state={{ id: record.id }}
               >
                 Update
               </Link>
@@ -336,7 +364,7 @@ const BillingItemView = () => {
           },
           {
             key: "inactivate",
-            label: "Inactivate",
+            label: isActive ? "Inactivate" : "Activate",
             icon: (
               <Checkbox
                 className="inactive-check"
@@ -386,7 +414,7 @@ const BillingItemView = () => {
           <Tooltip title="Detail">
             <Link
               to={RBI_ROUTES.BILLING_ITEM_DETAIL}
-              state={{ id: record.billingItemCode }}
+              state={{ id: record.id }}
             >
               <div className="pt-0">
                 <SVGIcon name="IconDetail" color="#0075BF" width={20} />
@@ -486,9 +514,11 @@ const BillingItemView = () => {
           dispatch={dispatch}
           getAPIOption={getAvailableApproval}
           getAPIDetail={getSelectedApproval}
-          alertMessage={`Are you sure you want to inactivate this Transaction mapping with name ${
-            chooseId?.billingItemCode || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+              ? "activate"
+              : "inactivate"
+            } this Transaction mapping with name ${chooseId?.billingItemCode || ""
+            }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -519,6 +549,7 @@ const BillingItemView = () => {
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">
+            {`Your data was not ${bodyError?.actionType || "inactivate"}. `}
             {bodyError?.message ||
               bodyErrorGeneral?.response?.data?.message?.toString()}
           </p>

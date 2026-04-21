@@ -17,6 +17,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { dateFormatting } from "../../../../../utils";
 import FunctionalCriteriaInvoiceTemplate from "./Form/FunctionalCriteriaInvoiceTemplate";
 import {
+  approveOrRejectActivatedInvoiceTemplate,
   approveOrRejectInactiveInvoiceTemplate,
   approveOrRejectInvoiceTemplate,
   getDetailDraftInvoiceTemplate,
@@ -269,15 +270,20 @@ const InvoiceTemplateDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
+    const approvalAction =
       bodyApproval.approvalType === "INACTIVE_INVOICE_TEMPLATE"
         ? approveOrRejectInactiveInvoiceTemplate({
             body: data,
           })
-        : approveOrRejectInvoiceTemplate({
-            body: data,
-          }),
-    )
+        : bodyApproval.approvalType === "ACTIVATED_INVOICE_TEMPLATE"
+          ? approveOrRejectActivatedInvoiceTemplate({
+              body: data,
+            })
+          : approveOrRejectInvoiceTemplate({
+              body: data,
+            });
+
+    dispatch(approvalAction)
       .unwrap()
       .then(() => {
         handleClear();
