@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Input, Select, message, Modal } from "antd";
 import { SyncOutlined } from "@ant-design/icons";
@@ -13,6 +13,7 @@ import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   getGapPraBillingMaster,
   downloadGapPraBillingMaster,
+  syncGapPraBillingMaster,
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 import { getColumnsGapPraBillingMaster } from "./Table/TableGapPraBillingMaster";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
@@ -40,6 +41,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   // State untuk sync modals
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [syncRecord, setSyncRecord] = useState(null);
+  const [syncing, setSyncing] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [failedModalOpen, setFailedModalOpen] = useState(false);
   const [dataInfoExpanded, setDataInfoExpanded] = useState(true);
@@ -109,25 +111,29 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
   const handleDownload = () => {
     dispatch(
       downloadGapPraBillingMaster({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
+        period: filterPeriod,
       })
     );
-    message.success("Download berhasil!");
   };
 
-  const handleSyncData = (record) => {
+  const handleSyncData = useCallback((record) => {
     setSyncRecord(record);
     setDataInfoExpanded(true);
     setSyncModalOpen(true);
-  };
+  }, []);
 
-  const handleConfirmSync = () => {
-    setSyncModalOpen(false);
-    // TODO: wire real API call; on success -> setSuccessModalOpen(true), on error -> setFailedModalOpen(true)
-    setSuccessModalOpen(true);
+  const handleConfirmSync = async () => {
+    setSyncing(true);
+    try {
+      await dispatch(syncGapPraBillingMaster()).unwrap();
+      setSyncModalOpen(false);
+      setSuccessModalOpen(true);
+    } catch {
+      setSyncModalOpen(false);
+      setFailedModalOpen(true);
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const handleCloseSyncModal = () => {
@@ -152,7 +158,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
     setFailedModalOpen(false);
   };
 
-  const handleCreateTicket = (record) => {
+  const handleCreateTicket = useCallback((record) => {
     Modal.info({
       title: "Buat Tiket Laporan",
       content: (
@@ -194,7 +200,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
       },
       width: 600,
     });
-  };
+  }, []);
 
   // Get columns from separated file
   const baseColumns = useMemo(
@@ -210,7 +216,7 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
         handleSyncData,
         handleCreateTicket
       ),
-    [page, pageSize, searchedColumn, searchText, search]
+    [page, pageSize, searchedColumn, searchText, search, handleSyncData, handleCreateTicket]
   );
 
   // Combine columns with keys
@@ -334,15 +340,17 @@ const DetailGapPraBillingMaster = ({ filterPeriod, handleBack }) => {
           handleCancel={handleCloseSyncModal}
           footer={
             <div className="w-full flex justify-end gap-3 px-4 py-3">
-              <ButtonComponent type="default" onClick={handleCloseSyncModal}>
+              <ButtonComponent type="default" onClick={handleCloseSyncModal} disabled={syncing}>
                 Cancel
               </ButtonComponent>
               <ButtonComponent
                 type="submit"
-                icon={<SyncOutlined />}
+                icon={<SyncOutlined spin={syncing} />}
                 onClick={handleConfirmSync}
+                disabled={syncing}
+                loading={syncing}
               >
-                Sync Data
+                {syncing ? "Synchronizing..." : "Sync Data"}
               </ButtonComponent>
             </div>
           }

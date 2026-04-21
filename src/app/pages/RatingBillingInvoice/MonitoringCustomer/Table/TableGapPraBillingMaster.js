@@ -262,7 +262,7 @@ export const getColumnsGapPraBillingMaster = (
       title: "ACTION",
       width: 120,
       isClassification: true,
-      render: (record) => (
+      render: (_, record) => (
         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
           <Tooltip title="Sync dengan Master Data">
             <div 

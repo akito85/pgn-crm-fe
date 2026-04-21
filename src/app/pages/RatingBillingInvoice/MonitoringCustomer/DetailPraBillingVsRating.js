@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Spin } from "antd";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { Spin, Select } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -8,13 +9,44 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import {
+  getGapRatBill,
+  getParameters,
+  downloadGapRatBill,
+} from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
+
+const { Option } = Select;
 
 const DetailPraBillingVsRating = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const period = location.state?.period;
+  const dispatch = useDispatch();
+  const { loading, gapRatBillData, periodLov } = useSelector(
+    (state) => state.monitoring
+  );
 
+  const [filterPeriod, setFilterPeriod] = useState(
+    location.state?.period || null
+  );
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    if (periodLov.length === 0) {
+      dispatch(getParameters());
+    }
+  }, [dispatch, periodLov.length]);
+
+  useEffect(() => {
+    if (filterPeriod) {
+      dispatch(
+        getGapRatBill({
+          period: filterPeriod,
+          page: page - 1,
+          pageSize,
+        })
+      );
+    }
+  }, [filterPeriod, page, pageSize, dispatch]);
 
   const routes = [
     {
@@ -39,7 +71,7 @@ const DetailPraBillingVsRating = () => {
       width: 60,
       align: "center",
       fixed: "left",
-      render: (_, __, index) => (page - 1) * 10 + index + 1,
+      render: (_, __, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "ACCOUNT NUMBER",
@@ -88,13 +120,19 @@ const DetailPraBillingVsRating = () => {
     },
   ];
 
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
   const handleDownload = () => {
-    // Download handler — wire up when backend endpoint is ready
+    dispatch(downloadGapRatBill({ period: filterPeriod }));
   };
 
   return (
     <LayoutMenu grantPath={RBI_ROUTES.MONITORING_CUSTOMER_VIEW}>
-      <Spin spinning={false}>
+      <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -111,20 +149,47 @@ const DetailPraBillingVsRating = () => {
             </div>
           }
         >
+          <div className="w-full mb-4 mt-4">
+            <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+              <span style={{ fontWeight: 500 }}>Period:</span>
+              <Select
+                value={filterPeriod}
+                onChange={(value) => {
+                  setFilterPeriod(value);
+                  setPage(1);
+                }}
+                style={{ width: 200 }}
+                showSearch
+                filterOption={(input, option) =>
+                  option.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+                placeholder="Select period"
+              >
+                {periodLov.map((p) => (
+                  <Option key={p.value} value={p.value}>
+                    {p.label}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
           <TableRBI
             idTable="table-pra-billing-vs-rating"
-            dataSource={[]}
+            dataSource={gapRatBillData?.result || []}
             columns={tableColumns}
-            pageSize={10}
+            pageSize={pageSize}
             current={page}
-            loading={false}
-            totalData={0}
+            loading={loading}
+            totalData={gapRatBillData?.page?.totalElements || 0}
             tableScrolled={{ x: "max-content" }}
             usePagination={true}
             useSelect={true}
             showAdvanceSearch={true}
             showSearchBar={true}
-            onChange={(p) => setPage(p)}
+            onChange={handleChangePage}
           />
         </CardContainer>
       </Spin>
@@ -133,3 +198,4 @@ const DetailPraBillingVsRating = () => {
 };
 
 export default DetailPraBillingVsRating;
+

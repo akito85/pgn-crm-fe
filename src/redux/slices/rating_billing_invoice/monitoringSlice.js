@@ -89,6 +89,11 @@ const initialState = {
     volBilling: 0,
     totMasterData: 0,
     totProcessedData: 0,
+    stageNotApprovedMaster: 0,
+    stageNotApprovedPraBilling: 0,
+    stageNotApprovedRating: 0,
+    stageNotApprovedBilling: 0,
+    stageNotApprovedTotal: 0,
   },
 
   // New: failed customers list (for Rating Failed & Billing Failed tabs)
@@ -120,6 +125,15 @@ const initialState = {
 
   // Approval history detail (MV_MONITORING_CUST_APPROVAL_HISTORY_DETAIL)
   approvalHistoryDetailData: [],
+
+  // Pra-Billing vs Rating (MV_MONITORING_CUST_ANOMALIES_GAP_RAT_BILL)
+  gapRatBillData: {
+    result: [],
+    page: {
+      totalElements: 0,
+      totalPages: 0,
+    },
+  },
 
   loadingKpi: false,
   loadingDashboard: false,
@@ -526,17 +540,18 @@ export const getGapPraBillingMaster = createAsyncThunk(
 
 export const downloadPendingTransactions = createAsyncThunk(
   "DOWNLOAD_PENDING_TRANSACTIONS",
-  async (_, thunkAPI) => {
+  async ({ period, accountNumber }, thunkAPI) => {
     try {
-      return null;
+      const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
+      const url = `/v1/dbs/api/monitoringcustomer/download-pending-transactions?period=${period}${acctParam}`;
+      const response = await ratingBillingHttpService.downloadXlsx(url);
+      return response;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", description: `Download gagal. ${message}` })
+      );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
@@ -544,17 +559,18 @@ export const downloadPendingTransactions = createAsyncThunk(
 
 export const downloadPendingApprovals = createAsyncThunk(
   "DOWNLOAD_PENDING_APPROVALS",
-  async (_, thunkAPI) => {
+  async ({ search } = {}, thunkAPI) => {
     try {
-      return null;
+      const searchParam = search || "";
+      const url = `/v1/dbs/api/monitoringcustomer/download-pending-approvals?search=${searchParam}`;
+      const response = await ratingBillingHttpService.downloadXlsx(url);
+      return response;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", description: `Download gagal. ${message}` })
+      );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
@@ -562,17 +578,18 @@ export const downloadPendingApprovals = createAsyncThunk(
 
 export const downloadGapRatingBilling = createAsyncThunk(
   "DOWNLOAD_GAP_RATING_BILLING",
-  async (_, thunkAPI) => {
+  async ({ period, accountNumber }, thunkAPI) => {
     try {
-      return null;
+      const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
+      const url = `/v1/dbs/api/monitoringcustomer/download-gap-rating-billing?period=${period}${acctParam}`;
+      const response = await ratingBillingHttpService.downloadXlsx(url);
+      return response;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", description: `Download gagal. ${message}` })
+      );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
@@ -580,17 +597,60 @@ export const downloadGapRatingBilling = createAsyncThunk(
 
 export const downloadGapPraBillingMaster = createAsyncThunk(
   "DOWNLOAD_GAP_PRABIL_MASTER",
-  async (_, thunkAPI) => {
+  async ({ period, accountNumber }, thunkAPI) => {
     try {
-      return null;
+      const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
+      const url = `/v1/dbs/api/monitoringcustomer/download-gap-prabilling-master?period=${period}${acctParam}`;
+      const response = await ratingBillingHttpService.downloadXlsx(url);
+      return response;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", description: `Download gagal. ${message}` })
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const downloadGapRatBill = createAsyncThunk(
+  "DOWNLOAD_GAP_RAT_BILL",
+  async ({ period, accountNumber }, thunkAPI) => {
+    try {
+      const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
+      const url = `/v1/dbs/api/monitoringcustomer/download-gap-rat-bill?period=${period}${acctParam}`;
+      const response = await ratingBillingHttpService.downloadXlsx(url);
+      return response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(
+        showModalError({ title: "Failed", description: `Download gagal. ${message}` })
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const syncGapPraBillingMaster = createAsyncThunk(
+  "SYNC_GAP_PRABIL_MASTER",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/monitoringcustomer/refresh-gap-prabilling-master`;
+      const response = await ratingBillingHttpService.createData(url, {});
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
@@ -810,6 +870,52 @@ export const getApprovalHistoryList = createAsyncThunk(
   }
 );
 
+export const getGapRatBill = createAsyncThunk(
+  "GET_GAP_RAT_BILL",
+  async ({ period, page, pageSize, accountNumber }, thunkAPI) => {
+    try {
+      const acctParam = accountNumber ? `&accountNumber=${accountNumber}` : "";
+      const url = `/v1/dbs/api/monitoringcustomer/mv-gap-rat-bill?period=${period}&size=${pageSize}&page=${page}${acctParam}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      const pageData = response?.data ?? {};
+      const content = pageData.content ?? [];
+
+      return {
+        result: content.map((item) => ({
+          id: item.accountNumber,
+          accountNumber: item.accountNumber,
+          name: item.name || "-",
+          initCode: item.initCode || "-",
+          billingPeriod: item.rawPeriod || "-",
+          ratingCode: item.ratingCode || "-",
+          ratingValue: item.ratingValue,
+          gap: item.gap,
+        })),
+        page: {
+          totalElements: pageData.totalElements ?? content.length,
+          totalPages: pageData.totalPages ?? 1,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
 export const getApprovalHistoryDetail = createAsyncThunk(
   "GET_APPROVAL_HISTORY_DETAIL",
   async ({ appId }, thunkAPI) => {
@@ -997,6 +1103,18 @@ const monitoringSlice = createSlice({
       state.error = action.payload;
     },
 
+    // Download Gap Rat Bill (Pra-Billing vs Rating)
+    [downloadGapRatBill.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadGapRatBill.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadGapRatBill.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
     // Async Data Mart
     [asyncDataMart.pending]: (state) => {
       state.loading = true;
@@ -1072,6 +1190,19 @@ const monitoringSlice = createSlice({
       state.approvalHistoryListData = action.payload;
     },
     [getApprovalHistoryList.rejected]: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Get Gap Rat Bill (MV_MONITORING_CUST_ANOMALIES_GAP_RAT_BILL)
+    [getGapRatBill.pending]: (state) => {
+      state.loading = true;
+    },
+    [getGapRatBill.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.gapRatBillData = action.payload;
+    },
+    [getGapRatBill.rejected]: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },

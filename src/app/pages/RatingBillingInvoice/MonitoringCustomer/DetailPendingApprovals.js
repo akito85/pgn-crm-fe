@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Input, Select, message } from "antd";
+import { Spin, Input, Select } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -100,15 +100,7 @@ const DetailPendingApprovals = ({ filterPeriod, handleBack }) => {
   };
 
   const handleDownload = () => {
-    dispatch(
-      downloadPendingApprovals({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-    message.success("Download berhasil!");
+    dispatch(downloadPendingApprovals());
   };
 
   const handleApprovalDetail = (record) => {

@@ -33,16 +33,22 @@ const MonitoringCustomerPage = () => {
 
   const [filterPeriod, setFilterPeriod] = useState(null);
   const [failedPage, setFailedPage] = useState(1);
+  const [priorityPage, setPriorityPage] = useState({
+    pendingTx: 1,
+    pendingApproval: 1,
+    gapRating: 1,
+    gapPrabilling: 1,
+  });
 
   // Table columns definition for failed customers
   const tableColumns = [
     {
       title: "NO",
-      dataIndex: "no",
       key: "no",
       width: 60,
       align: "center",
       fixed: "left",
+      render: (_, __, index) => (failedPage - 1) * 10 + index + 1,
     },
     {
       title: "ACCOUNT NUMBER",
@@ -208,6 +214,7 @@ const MonitoringCustomerPage = () => {
       dispatch(getFailedCustomers({ period: filterPeriod, page: 0, size: 10 }));
       dispatch(getPriorityList(filterPeriod));
       setFailedPage(1);
+      setPriorityPage({ pendingTx: 1, pendingApproval: 1, gapRating: 1, gapPrabilling: 1 });
     }
   }, [filterPeriod, dispatch]);
 
@@ -347,12 +354,12 @@ const MonitoringCustomerPage = () => {
             <Col xs={24} lg={12}>
               <DetailStatsCard
                 title="TOTAL CUSTOMER IN EACH STAGE NOT APPROVED YET"
-                totalValue={312}
+                totalValue={dashboardSummary.stageNotApprovedTotal ?? 0}
                 details={[
-                  { label: "Master", value: 28 },
-                  { label: "Pra-Billing", value: 12 },
-                  { label: "Rating", value: 272 },
-                  { label: "Billing", value: 272 },
+                  { label: "Master", value: dashboardSummary.stageNotApprovedMaster ?? 0 },
+                  { label: "Pra-Billing", value: dashboardSummary.stageNotApprovedPraBilling ?? 0 },
+                  { label: "Rating", value: dashboardSummary.stageNotApprovedRating ?? 0 },
+                  { label: "Billing", value: dashboardSummary.stageNotApprovedBilling ?? 0 },
                 ]}
               />
             </Col>
@@ -505,17 +512,18 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-pending-transactions"
-                      dataSource={priorityList.priorPendingTransactions}
+                      dataSource={priorityList.priorPendingTransactions.slice((priorityPage.pendingTx - 1) * 5, priorityPage.pendingTx * 5)}
                       columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_DETAIL_PENDING_TRANSACTIONS)}
                       pageSize={5}
-                      current={1}
+                      current={priorityPage.pendingTx}
                       loading={loading}
                       totalData={priorityList.priorPendingTransactions.length}
                       tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
+                      usePagination={true}
                       useSelect={false}
                       showAdvanceSearch={false}
                       showSearchBar={false}
+                      onChange={(p) => setPriorityPage((prev) => ({ ...prev, pendingTx: p }))}
                     />
                   </div>
                 ),
@@ -527,17 +535,18 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-pending-approvals"
-                      dataSource={priorityList.priorApprovalBatches}
+                      dataSource={priorityList.priorApprovalBatches.slice((priorityPage.pendingApproval - 1) * 5, priorityPage.pendingApproval * 5)}
                       columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_DETAIL_PENDING_APPROVALS)}
                       pageSize={5}
-                      current={1}
+                      current={priorityPage.pendingApproval}
                       loading={loading}
                       totalData={priorityList.priorApprovalBatches.length}
                       tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
+                      usePagination={true}
                       useSelect={false}
                       showAdvanceSearch={false}
                       showSearchBar={false}
+                      onChange={(p) => setPriorityPage((prev) => ({ ...prev, pendingApproval: p }))}
                     />
                   </div>
                 ),
@@ -549,17 +558,18 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-gap-rating-billing"
-                      dataSource={priorityList.priorGapRatingBilling}
+                      dataSource={priorityList.priorGapRatingBilling.slice((priorityPage.gapRating - 1) * 5, priorityPage.gapRating * 5)}
                       columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_RATING_VS_BILLING)}
                       pageSize={5}
-                      current={1}
+                      current={priorityPage.gapRating}
                       loading={loading}
                       totalData={priorityList.priorGapRatingBilling.length}
                       tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
+                      usePagination={true}
                       useSelect={false}
                       showAdvanceSearch={false}
                       showSearchBar={false}
+                      onChange={(p) => setPriorityPage((prev) => ({ ...prev, gapRating: p }))}
                     />
                   </div>
                 ),
@@ -571,17 +581,18 @@ const MonitoringCustomerPage = () => {
                   <div className="pb-3">
                     <TableRBI
                       idTable="table-gap-prabilling-master"
-                      dataSource={priorityList.priorGapPrabillingMaster}
+                      dataSource={priorityList.priorGapPrabillingMaster.slice((priorityPage.gapPrabilling - 1) * 5, priorityPage.gapPrabilling * 5)}
                       columns={makePriorityColumns(RBI_ROUTES.MONITORING_CUSTOMER_DETAIL_GAP_PRA_BILLING_MASTER)}
                       pageSize={5}
-                      current={1}
+                      current={priorityPage.gapPrabilling}
                       loading={loading}
                       totalData={priorityList.priorGapPrabillingMaster.length}
                       tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
+                      usePagination={true}
                       useSelect={false}
                       showAdvanceSearch={false}
                       showSearchBar={false}
+                      onChange={(p) => setPriorityPage((prev) => ({ ...prev, gapPrabilling: p }))}
                     />
                   </div>
                 ),

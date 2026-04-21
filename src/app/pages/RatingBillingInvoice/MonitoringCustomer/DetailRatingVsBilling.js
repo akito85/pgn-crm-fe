@@ -9,7 +9,7 @@ import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
-import { getGapRatingBilling } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
+import { getGapRatingBilling, downloadGapRatingBilling } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 
 const DetailRatingVsBilling = () => {
   const navigate = useNavigate();
@@ -114,17 +114,10 @@ const DetailRatingVsBilling = () => {
       width: 120,
       isNumber: true,
     },
-    {
-      title: "GAP %",
-      dataIndex: "gapPercentage",
-      key: "gapPercentage",
-      width: 100,
-      isNumber: true,
-    },
   ];
 
   const handleDownload = () => {
-    // Download handler — wire up when backend endpoint is ready
+    dispatch(downloadGapRatingBilling({ period, accountNumber }));
   };
 
   return (

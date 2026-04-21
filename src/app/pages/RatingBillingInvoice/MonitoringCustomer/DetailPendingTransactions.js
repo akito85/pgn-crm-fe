@@ -115,13 +115,9 @@ const DetailPendingTransactions = ({
   const handleDownload = () => {
     dispatch(
       downloadPendingTransactions({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
+        period: filterPeriod,
       })
     );
-    message.success("Download berhasil!");
   };
 
   const handleRecalculate = (record) => {
