@@ -273,15 +273,15 @@ const InvoiceTemplateDetail = () => {
     const approvalAction =
       bodyApproval.approvalType === "INACTIVE_INVOICE_TEMPLATE"
         ? approveOrRejectInactiveInvoiceTemplate({
-          body: data,
-        })
-        : bodyApproval.approvalType === "ACTIVATED_INVOICE_TEMPLATE"
-          ? approveOrRejectActivatedInvoiceTemplate({
             body: data,
           })
+        : bodyApproval.approvalType === "ACTIVATED_INVOICE_TEMPLATE"
+          ? approveOrRejectActivatedInvoiceTemplate({
+              body: data,
+            })
           : approveOrRejectInvoiceTemplate({
-            body: data,
-          });
+              body: data,
+            });
 
     dispatch(approvalAction)
       .unwrap()
@@ -313,12 +313,12 @@ const InvoiceTemplateDetail = () => {
     },
     ...(hasDraft
       ? [
-        {
-          key: "draft",
-          label: "Draft",
-          children: null,
-        },
-      ]
+          {
+            key: "draft",
+            label: "Draft",
+            children: null,
+          },
+        ]
       : []),
     {
       key: "attachment",
@@ -430,8 +430,8 @@ const InvoiceTemplateDetail = () => {
             <DetailText label="Created Date">
               {dataLogInformation?.createdDate
                 ? moment(dataLogInformation.createdDate).format(
-                  dateFormatting.dateTime,
-                )
+                    dateFormatting.dateTime,
+                  )
                 : ""}
             </DetailText>
             <DetailText label="Created By">
@@ -440,8 +440,8 @@ const InvoiceTemplateDetail = () => {
             <DetailText label="Updated Date">
               {dataLogInformation?.updatedDate
                 ? moment(dataLogInformation.updatedDate).format(
-                  dateFormatting.dateTime,
-                )
+                    dateFormatting.dateTime,
+                  )
                 : ""}
             </DetailText>
             <DetailText label="Updated By">
@@ -515,8 +515,9 @@ const InvoiceTemplateDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              approveOrReject === "Approve" ? "Approved" : "Rejected"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

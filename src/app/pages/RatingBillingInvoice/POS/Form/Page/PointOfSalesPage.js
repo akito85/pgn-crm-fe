@@ -621,6 +621,17 @@ const PointOfSalesPage = ({
             ]}
             style={{ marginBottom: 0 }}
           >
+<<<<<<< HEAD
+            <SelectComponent onChange={(e) => setDataBillingCycle(e)}>
+              {(data_globalBillingCycle || [])?.map((item) => {
+                console.log("label: ", item)
+                return (
+                <Select.Option key={item.id} value={item.id}>
+                  {item.name}
+                </Select.Option>
+              )})}
+            </SelectComponent>
+=======
             <SelectComponent 
               onChange={(e) => setDataBillingCycle(e)}
               options={(data_globalBillingCycle || [])?.map((item) => ({
@@ -628,6 +639,7 @@ const PointOfSalesPage = ({
                 value: item.id,
               }))}
             />
+>>>>>>> testing-rbip
           </Form.Item>
           <Form.Item
             name={"billingPeriod"}
