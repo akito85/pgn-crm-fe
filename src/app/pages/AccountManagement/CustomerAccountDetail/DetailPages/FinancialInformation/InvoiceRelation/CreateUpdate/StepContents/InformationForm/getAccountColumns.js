@@ -15,7 +15,7 @@ import { nxColumnOptions } from "../../../../../../../../../../utils/Nx/nxColumn
  * @param {Function}        [setIsOpen]     - Callback to close the account selection modal.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
-const getAccountStandardColumns = (
+const getAccountColumns = (
   search,
   searchInput,
   searchedColumn,
@@ -398,4 +398,4 @@ const getAccountStandardColumns = (
   },
 ];
 
-export { getAccountStandardColumns };
+export { getAccountColumns };
