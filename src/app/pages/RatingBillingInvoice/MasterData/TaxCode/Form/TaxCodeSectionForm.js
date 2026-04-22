@@ -225,6 +225,12 @@ const TaxCodeSectionForm = ({
           <Form.Item
             label={"GL Account"}
             name={"glAccount"}
+            rules={[
+              {
+                required: true,
+                message: "Please input your GL Account!",
+              },
+            ]}
           >
             <SelectComponent showSearch optionFilterProp="children">
               {data_gl_account_list?.map((item) => (
