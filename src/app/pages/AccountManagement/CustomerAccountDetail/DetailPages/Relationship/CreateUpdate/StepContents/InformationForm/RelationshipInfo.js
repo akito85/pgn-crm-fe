@@ -222,13 +222,18 @@ const RelationshipInfo = ({
           relationshipTypeName={relationshipTypeName}
           handleCancel={() => setModalChoose(false)}
           handleSelect={(selected) => {
-            // Handle different data structure based on source
-            const isCustomer = selected.source === "CUSTOMER";
+            const normalizedRelationType = relationshipTypeName
+              ? relationshipTypeName.trim().toUpperCase().replace(/\s+/g, "_")
+              : null;
 
-            const relatedName = isCustomer ? selected.customerName : selected.accountName;
-            const relatedNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
-            const formAccountId = isCustomer ? customerId : accountId;
-            const relatedId = isCustomer ? selected.customerId : selected.accountId;
+            const isAccountType =
+              normalizedRelationType &&
+              ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
+
+            const relatedName = isAccountType ? selected.accountName : selected.customerName;
+            const relatedNumber = isAccountType ? selected.accountNumber : selected.customerNumber;
+            const formAccountId = isAccountType ? accountId : customerId;
+            const relatedId = isAccountType ? selected.accountId : selected.customerId;
 
             form.setFieldsValue({
               formAccountId,
@@ -239,7 +244,7 @@ const RelationshipInfo = ({
 
             // Pass allAccount data to parent for display in RelatedDetailCard
             let relatedDetail;
-            if (isCustomer && selected.relatedDetail)
+            if (!isAccountType && selected.relatedDetail)
               relatedDetail = [...selected.relatedDetail];
             else
               relatedDetail = [selected];
