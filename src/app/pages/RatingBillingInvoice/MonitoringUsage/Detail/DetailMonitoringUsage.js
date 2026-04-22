@@ -5,7 +5,7 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import { Alert, Button, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined, DownloadOutlined } from "@ant-design/icons";
 import {
   addDeletedData,
   addUpdatedData,
@@ -243,15 +243,8 @@ const DetailMonitoringUsage = () => {
         costCenter: formValue?.costCenter || null,
         assetSerialNum: formValue?.assetSerialNum || null,
         assetType: formValue?.assetType || null,
-        fdate:
-          formValue?.fdate === false
-            ? null
-            : moment(formValue?.fdate).format(dateFormatting.dateFormal),
-        fhour: hasValue(formValue?.fhour)
-          ? moment(formValue?.fhour).format(dateFormatting.fhour)
-          : null,
         measDate: formValue?.measDate
-          ? moment(formValue?.measDate).toISOString()
+          ? moment(formValue?.measDate).format("YYYY-MM-DDTHH:mm:ss")
           : null,
         streamId: parseNumericValue(formValue?.streamId),
         temperature: parseNumericValue(formValue?.temperature),
@@ -291,9 +284,13 @@ const DetailMonitoringUsage = () => {
           const updatedRow = {
             ...item,
             ...formValue,
-            fdate: requestBody.fdate,
-            fhour: requestBody.fhour,
             measDate: requestBody.measDate,
+            fdate: requestBody.measDate
+              ? moment(requestBody.measDate).format(dateFormatting.dateFormal)
+              : null,
+            fhour: requestBody.measDate
+              ? moment(requestBody.measDate).format(dateFormatting.fhour)
+              : null,
             streamId: requestBody.streamId,
             temperature: requestBody.temperature,
             pressure: requestBody.pressure,
@@ -541,6 +538,26 @@ const DetailMonitoringUsage = () => {
                       </StatusComponent>
                     </DetailText>
                   </div>
+                  {detail_batch?.batchInformation?.totalFailed > 0 && (
+                    <div className="mt-1 mb-3 flex justify-start">
+                      <Button
+                        type="link"
+                        onClick={handleDownloadFailed}
+                        style={{
+                          color: "#0075BF",
+                          fontSize: "13px",
+                          padding: "0 4px",
+                          height: "auto",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <DownloadOutlined style={{ fontSize: "16px" }} />
+                        Download Failed Data
+                      </Button>
+                    </div>
+                  )}
                 </CollapsibleContainer>
 
                 <CollapsibleContainer header={"Usage List"} border className="mt-1">

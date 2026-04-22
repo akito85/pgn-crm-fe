@@ -107,6 +107,21 @@ const ModalUpdateUsage = ({
         }
     };
 
+    // Auto-fill Date & Hour from measDate
+    const handleMeasDateChange = (value) => {
+        if (value) {
+            form.setFieldsValue({
+                fdate: value,
+                fhour: value,
+            });
+        } else {
+            form.setFieldsValue({
+                fdate: null,
+                fhour: null,
+            });
+        }
+    };
+
     return (
       <ModalCustom
         isOpen={isOpen}
@@ -187,19 +202,6 @@ const ModalUpdateUsage = ({
                   ))}
                 </Select>
               </Form.Item>
-              <Form.Item label={"Date"} name={"fdate"}>
-                <DatePicker
-                  className="w-full"
-                  format={dateFormatting.date}
-                />
-              </Form.Item>
-              <Form.Item label={"Hour"} name={"fhour"}>
-                <TimePicker
-                  showNow={false}
-                  className="w-full"
-                  format={"HH:mm"}
-                />
-              </Form.Item>
               <Form.Item
                 label={"Measurement Date"}
                 name={"measDate"}
@@ -212,8 +214,24 @@ const ModalUpdateUsage = ({
               >
                 <DatePicker
                   className="w-full"
-                  format={dateFormatting.dateTime}
+                  format={dateFormatting.meas_date_input}
                   showTime
+                  onChange={handleMeasDateChange}
+                />
+              </Form.Item>
+              <Form.Item label={"Date"} name={"fdate"}>
+                <DatePicker
+                  className="w-full"
+                  format={dateFormatting.date}
+                  disabled
+                />
+              </Form.Item>
+              <Form.Item label={"Hour"} name={"fhour"}>
+                <TimePicker
+                  showNow={false}
+                  className="w-full"
+                  format={"HH:mm"}
+                  disabled
                 />
               </Form.Item>
               <Form.Item label={"Stream Id"} name={"streamId"}>

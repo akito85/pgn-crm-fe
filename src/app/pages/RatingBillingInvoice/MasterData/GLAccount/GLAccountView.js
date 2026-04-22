@@ -579,6 +579,15 @@ const GLAccountView = () => {
     });
   }, [baseColumns, fixedColumns]);
 
+  // Render keys just like Prabilling module to prevent rows changing weirdly
+  const dataSourceWithKeys = useMemo(() => {
+    if (!gl_account_list || gl_account_list.length === 0) return [];
+    return gl_account_list.map((item) => ({
+      ...item,
+      key: item.glAccountId,
+    }));
+  }, [gl_account_list]);
+
   return (
     <>
       <Spin spinning={loading}>
@@ -596,7 +605,7 @@ const GLAccountView = () => {
           <div className={"w-full"}>
             <TableRBI
               idTable="glAccountTable"
-              dataSource={gl_account_list}
+              dataSource={dataSourceWithKeys}
               columns={columns}
               totalData={gl_account_pagination?.totalElements || 0}
               onSort={onSort}
@@ -613,6 +622,7 @@ const GLAccountView = () => {
               showRefresh={true}
               onRefresh={handleRefresh}
               refreshLabel="Refresh"
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>
