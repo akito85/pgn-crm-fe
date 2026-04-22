@@ -226,10 +226,10 @@ export const getBillingItemDetail = createAsyncThunk(
 
 export const getAttachmentDetail = createAsyncThunk(
   "GET_ATTACHMENT_DETAIL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
-      const url = `v1/dbs/api/billingitem/attachment-list/1?page=${page}&size=${pageSize}&search=${search}&sort=${sort}`;
-      const response = await ratingBillingHttpService.getPagination(url);
+      const url = `/v1/dbs/api/billingitem/attachment-list/${id}?page=0&size=1000`;
+      const response = await ratingBillingHttpService.getDetail(url);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(

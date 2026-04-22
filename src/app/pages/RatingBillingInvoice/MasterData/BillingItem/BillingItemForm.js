@@ -51,6 +51,7 @@ import {
   getClassificationTypeList,
   getAccountTypeList,
   resetApprovalState,
+  getAttachmentDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import {
   showModalError,
@@ -227,6 +228,19 @@ const BillingItemForm = (props) => {
   useEffect(() => {
     if (type === "update" && id) {
       dispatch(getBillingItemDetail({ id }));
+      dispatch(getAttachmentDetail(id))
+        .unwrap()
+        .then((res) => {
+          setListDataAttachment(
+            (res?.result || []).map((item, index) => ({
+              ...item,
+              key: index + 1,
+              createdDate: moment(item.createdDate).format(dateFormatting.date),
+              urlFile1: `/v1/dbs/api/billingitem/download-attachment/${item.id}`,
+              dataType: "exist",
+            })),
+          );
+        });
     }
   }, [dispatch, type, id]);
 
@@ -429,16 +443,7 @@ const BillingItemForm = (props) => {
         dispatch(getGlAccountBankById({ id: resolvedBankId }));
       }
 
-      setListDataAttachment(
-        dataDetail?.attachmentDtoList
-          ? (dataDetail?.attachmentDtoList || [])?.map((item, index) => ({
-              ...item,
-              key: index + 1,
-              createdDate: moment(item.createdDate).format(dateFormatting.date),
-              dataType: "exist",
-            }))
-          : [],
-      );
+      // Attachment list is handled in the effect using getAttachmentDetail
 
       setdataTable(
         dataDetail?.mappingInformation?.map((item, index) => ({
