@@ -4,8 +4,8 @@ import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
-import StatusComponent from "../../../../../../../components/StatusComponent";
 import { getRelatedDetailColumns } from "../getRelatedDetailColumns";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Displays relationship info fields and the related-detail table for a single record.
@@ -31,6 +31,7 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
     startDate,
     endDate,
     status,
+    statusApproval,
     description,
   } = detail;
   const listRelatedDetail = detail.relatedDetail || [];
@@ -99,9 +100,14 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
               {NxDate.formatDate(endDate, dateFormatting.date)}
             </NxDetailText>
             <NxDetailText label="Status">
-              <StatusComponent colour={status}>
+              <NxStatusComponent colour={status}>
                 {status}
-              </StatusComponent>
+              </NxStatusComponent>
+            </NxDetailText>
+            <NxDetailText label="Status Approval">
+              <NxStatusComponent colour={statusApproval}>
+                {statusApproval}
+              </NxStatusComponent>
             </NxDetailText>
           </div>
           <div className="w-full">

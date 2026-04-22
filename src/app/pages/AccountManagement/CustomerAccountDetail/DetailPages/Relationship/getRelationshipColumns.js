@@ -1,7 +1,7 @@
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../components/StatusComponent";
+import NxStatusComponent from "../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Relationship list table.
@@ -156,9 +156,9 @@ const getRelationshipColumns = ({
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status?.toUpperCase()] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
     },
@@ -185,9 +185,9 @@ const getRelationshipColumns = ({
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status?.toUpperCase()] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
     },
