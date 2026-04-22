@@ -30,5 +30,39 @@ export const nxColumnOptions = {
       label: "Rejected",
       value: "REJECTED"
     }
-  ]
+  ],
+  identificationType: [
+    {
+      label: "KTP",
+      value: "KTP",
+    },
+    {
+      label: "DUNS",
+      value: "DUNS",
+    },
+    {
+      label: "NPWP",
+      value: "NPWP",
+    },
+  ],
+  customerType: [
+    {
+      label: "Person",
+      value: "Person",
+    },
+    {
+      label: "Organization",
+      value: "Organization",
+    }
+  ],
+  accountCategory: [
+    {
+      label: "Internal",
+      value: "Internal",
+    },
+    {
+      label: "External",
+      value: "External",
+    }
+  ],
 };

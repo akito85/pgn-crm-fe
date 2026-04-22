@@ -1,6 +1,7 @@
 import { Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
+import { nxColumnOptions } from "../../../../../../../../../../utils/Nx/nxColumnsOptions";
 
 const getAccountStandardColumns = (
   search,
@@ -46,6 +47,9 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.identificationType
     ),
   },
   {
@@ -91,6 +95,9 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.customerType
     ),
   },
   {
@@ -136,6 +143,9 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.accountCategory
     ),
   },
   {
