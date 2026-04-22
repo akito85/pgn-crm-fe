@@ -1,7 +1,6 @@
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
-import StatusComponent from "../../../../../../../../components/StatusComponent";
 import NxStatusComponent from "../../../../../../../../components/Nx/NxStatusComponent";
 
 /**

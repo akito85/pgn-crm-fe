@@ -1,8 +1,8 @@
 import { toTitleCase } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import { nxColumnOptions } from "../../../../../../../utils/Nx/nxColumnsOptions";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Invoice Relation list table.
@@ -129,9 +129,9 @@ const getInvoiceRelationColumns = ({
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
     },
@@ -162,9 +162,9 @@ const getInvoiceRelationColumns = ({
 
       return (
         <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       )
     },
