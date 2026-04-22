@@ -2,6 +2,7 @@ import { toTitleCase } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import { nxColumnOptions } from "../../../../../../../utils/Nx/nxColumnsOptions";
 
 /**
  * Returns the column definitions for the Invoice Relation list table.
@@ -115,20 +116,7 @@ const getInvoiceRelationColumns = ({
       handleSearch,
       false,
       "select",
-      [
-        {
-          label: "Draft",
-          value: "DRAFT"
-        },
-        {
-          label: "Waiting Approval",
-          value: "WAITING_APPROVAL"
-        },
-        {
-          label: "Rejected",
-          value: "REJECTED"
-        }
-      ]
+      nxColumnOptions.statusApproval
     ),
     render: (status) => {
       const displayText = {
@@ -164,20 +152,7 @@ const getInvoiceRelationColumns = ({
       handleSearch,
       false,
       "select",
-      [
-        {
-          label: "Active",
-          value: "ACTIVE"
-        },
-        {
-          label: "Inactive",
-          value: "INACTIVE"
-        },
-        {
-          label: "Draft",
-          value: "DRAFT"
-        }
-      ]
+      nxColumnOptions.status
     ),
     render: (status) => {
       const displayText = {
