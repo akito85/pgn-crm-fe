@@ -61,7 +61,7 @@ const BillingItemDetail = () => {
               createdDate: item.createdDate
                 ? moment(item.createdDate).format("DD MMM YYYY")
                 : "",
-              urlFile1: `/v1/dbs/api/billingitem/download-attachment/${item.id}`,
+              urlFile1: `/v1/dbs/api/billingitem/attachment-download/${item.id}`,
               dataType: "exist",
             })),
           );
@@ -78,7 +78,8 @@ const BillingItemDetail = () => {
     if (
       dataRecord &&
       data_BillingItemDetail &&
-      data_BillingItemDetail?.billingItemCode === dataRecord
+      (data_BillingItemDetail?.billingItemCode === dataRecord ||
+        data_BillingItemDetail?.id == dataRecord)
     ) {
       // Tombol Approve/Reject
       setShowButtonApproval(

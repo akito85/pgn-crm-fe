@@ -1003,6 +1003,17 @@ const taxCodeSlice = createSlice({
       state.message = action.payload;
     },
 
+    // Get GL Account List
+    [getGlAccountList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getGlAccountList.fulfilled]: (state, action) => {
+      state.data_gl_account_list = action.payload || [];
+      state.loading = false;
+    },
+    [getGlAccountList.rejected]: (state) => {
+      state.loading = false;
+    },
 
   },
 });
