@@ -107,33 +107,33 @@ export const getDetailTransferToReceipt = createAsyncThunk(
 );
 
 export const approveOrRejectTransferToReceipt = createAsyncThunk(
-    // "APPROVE_OR_REJECT_TRANSFER",
-    // async ({ body }, thunkAPI) => {
-    //     try {
-    //         const url = `/v1/dbs/api/payment-warranty/transfer-receipt/approve-reject`;
-    //         const response = await receiptCollectionHttpService.createData(url, body);
-    //         thunkAPI.dispatch(showModalSuccess({
-    //             title: "Success",
-    //             description: response?.message || "Success Approve Transfer To Receipt"
-    //         }));
-    //         return response.data;
-    //     } catch (error) {
-    //         const message =
-    //             error?.response?.data?.message || error?.message || error?.toString();
-    //         if (
-    //             error?.response?.data?.code === 500 ||
-    //             error?.response?.data?.code === 419
-    //         ) {
-    //             thunkAPI.dispatch(setBodyError(error));
-    //         } else {
-    //             const errorBody = {
-    //                 title: "Failed",
-    //                 description: `${message}`,
-    //             };
-    //             thunkAPI.dispatch(showModalError(errorBody));
-    //         }
-    //         return thunkAPI.rejectWithValue(error.response);
-    //     }
+  // "APPROVE_OR_REJECT_TRANSFER",
+  // async ({ body }, thunkAPI) => {
+  //     try {
+  //         const url = `/v1/dbs/api/payment-warranty/transfer-receipt/approve-reject`;
+  //         const response = await receiptCollectionHttpService.createData(url, body);
+  //         thunkAPI.dispatch(showModalSuccess({
+  //             title: "Success",
+  //             description: response?.message || "Success Approve Transfer To Receipt"
+  //         }));
+  //         return response.data;
+  //     } catch (error) {
+  //         const message =
+  //             error?.response?.data?.message || error?.message || error?.toString();
+  //         if (
+  //             error?.response?.data?.code === 500 ||
+  //             error?.response?.data?.code === 419
+  //         ) {
+  //             thunkAPI.dispatch(setBodyError(error));
+  //         } else {
+  //             const errorBody = {
+  //                 title: "Failed",
+  //                 description: `${message}`,
+  //             };
+  //             thunkAPI.dispatch(showModalError(errorBody));
+  //         }
+  //         return thunkAPI.rejectWithValue(error.response);
+  //     }
   "APPROVE_OR_REJECT_TRANSFER",
   async ({ body }, thunkAPI) => {
     try {
@@ -342,8 +342,8 @@ export const deleteTransferToReceipt = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/payment-warranty/transfer-receipt/${id}`;
       const response = await receiptCollectionHttpService.deleteData(url);
-      thunkAPI.dispatch(showModalSuccess({ 
-        title: "Success", 
+      thunkAPI.dispatch(showModalSuccess({
+        title: "Success",
         description: "Data has been deleted successfully",
         return: false
       }));
@@ -362,7 +362,7 @@ export const downloadTransferToReceiptList = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/payment-warranty/download-detail-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/payment-warranty/transfer-to-receipt/download-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
     } catch (error) {
