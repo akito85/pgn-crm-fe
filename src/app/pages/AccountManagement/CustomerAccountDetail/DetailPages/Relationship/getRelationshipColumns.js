@@ -133,16 +133,7 @@ const getRelationshipColumns = ({
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     width: 180,
-    sorter: true,
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
     render: (status) => {
       const displayText = {
         "APPROVED": "Approved",
@@ -168,16 +159,7 @@ const getRelationshipColumns = ({
     title: "STATUS",
     dataIndex: "status",
     width: 120,
-    sorter: true,
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
     render: (status) => {
       const displayText = {
         "ACTIVE": "Active",
