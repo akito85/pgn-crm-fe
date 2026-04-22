@@ -7,7 +7,7 @@ import {
 } from "../../../../../../../../../../utils";
 import { getIrAccounts } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { getAccountStandardColumns } from "./getAccountStandardColumns";
+import { getAccountColumns } from "./getAccountColumns";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
@@ -134,7 +134,7 @@ export default function InfoInvoiceRelation({
 
   const columnDefinitions = useMemo(
     () =>
-      getAccountStandardColumns(
+      getAccountColumns(
         search,
         searchInput,
         searchedColumn,
