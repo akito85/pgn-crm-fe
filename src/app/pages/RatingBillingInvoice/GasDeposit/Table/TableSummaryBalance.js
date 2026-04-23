@@ -60,26 +60,25 @@ export const columnsSummaryBalance = (
     {
       key: "no",
       title: "NO",
-      isClassification: true,
-      width: 15,
+      width: 50,
       align: "center",
       render: (text, object, index) => index + 1,
     },
 
-    // ── Account Info ──────────────────────────────────────────────────────────
-    mkSearchCol("customerNumber",    "CUSTOMER NUMBER",    80,  ctx),
-    mkSearchCol("customerName",      "CUSTOMER NAME",      100, ctx),
-    mkSearchCol("accountNumber",     "ACCOUNT NUMBER",     80,  ctx),
-    mkSearchCol("accountName",       "ACCOUNT NAME",       120, ctx),
-    mkSearchCol("accountGroupType",  "ACCOUNT GROUP TYPE", 80,  ctx),
-    mkSearchCol("sor",               "SOR",                90,  ctx),
-    mkSearchCol("costCenter",        "COST CENTER",        90,  ctx),
-    mkSearchCol("accountSegment",    "ACCOUNT SEGMENT",    90,  ctx),
-    mkSearchCol("meterReadingCode",  "METER READING CODE", 90,  ctx),
-    mkSearchCol("termsEarn",         "TERMS EARN",         80,  ctx),
-    mkSearchCol("termsRedeem",       "TERMS REDEEM",       80,  ctx),
-    mkSearchCol("earnPeriod",        "EARN PERIOD",        80,  ctx),
-    mkSearchCol("period",            "PERIOD",             80,  ctx),
+    // ── Account Info (from M_ACCOUNT + M_CUSTOMER) ────────────────────────────
+    mkSearchCol("customerNumber",      "CUSTOMER NUMBER",       160, ctx),
+    mkSearchCol("customerName",        "CUSTOMER NAME",         180, ctx),
+    mkSearchCol("accountNumber",       "ACCOUNT NUMBER",        160, ctx),
+    mkSearchCol("accountName",         "ACCOUNT NAME",          180, ctx),
+    mkSearchCol("accountGroupType",    "ACCOUNT GROUP TYPE",    160, ctx),
+    mkSearchCol("sor",                 "SOR",                   100, ctx),
+    mkSearchCol("costCenter",          "COST CENTER",           130, ctx),
+    mkSearchCol("accountSegment",      "ACCOUNT SEGMENT",       150, ctx),
+    mkSearchCol("meterReadingCode",    "METER READING CODE",    160, ctx),
+
+    { ...mkCol("termsEarn",    "TERMS EARN",    120), render: (text) => text ?? "-" },
+    { ...mkCol("termsRedeem",  "TERMS REDEEM",  130), render: (text) => text ?? "-" },
+    { ...mkCol("earnPeriod",   "EARN PERIOD",   120), render: (text) => text ?? "-" },
 
     // ── Period Redeem (grouped) ───────────────────────────────────────────────
     {
@@ -87,38 +86,39 @@ export const columnsSummaryBalance = (
       title: "PERIOD REDEEM",
       isClassification: true,
       children: [
-        mkSearchCol("periodRedeemStart", "START", 80, ctx),
-        mkSearchCol("periodRedeemEnd",   "END",   80, ctx),
+        { ...mkCol("redeemStartDate", "START", 130), render: (text) => text ?? "-" },
+        { ...mkCol("redeemEndDate",   "END",   130), render: (text) => text ?? "-" },
       ],
     },
 
-    // ── Gas Deposit Info ──────────────────────────────────────────────────────
-    mkSearchCol("billingPeriod",      "BILLING PERIOD",      80,  ctx),
-    mkSearchCol("timeUnit",           "TIME UNIT",           80,  ctx),
-    mkSearchCol("currency",           "CURRENCY",            70,  ctx),
-    mkSearchCol("uom",                "UOM",                 60,  ctx),
-    mkNumCol(   "quantity",           "QUANTITY",            80,  ctx),
-    mkNumCol(   "balanceAmount",      "BALANCE AMOUNT",      90,  ctx),
-    mkSearchCol("headerType",         "HEADER TYPE",         80,  ctx),
-    mkSearchCol("accountType",        "ACCOUNT TYPE",        80,  ctx),
-    mkSearchCol("classificationType", "CLASSIFICATION TYPE", 90,  ctx),
-    mkSearchCol("source",             "SOURCE",              70,  ctx),
-    mkSearchCol("sapCustId",          "SAP CUST ID",         80,  ctx),
+    // ── Billing / Scheme Period ───────────────────────────────────────────────
+    { ...mkCol("billingPeriod",   "BILLING PERIOD",   130), render: (text) => text ?? "-" },
+    { ...mkCol("timeUnit",        "TIME UNIT",         110), render: (text) => text ?? "-" },
+    mkSearchCol("currency",       "CURRENCY",          100, ctx),
+    mkSearchCol("uom",            "UOM",                90, ctx),
 
-    // ── Mutation Info ─────────────────────────────────────────────────────────
-    mkSearchCol("mutationDate",   "MUTATION DATE",   90,  ctx),
-    mkSearchCol("mutationType",   "MUTATION TYPE",   80,  ctx),
-    mkSearchCol("category",       "CATEGORY",        80,  ctx),
-    mkNumCol(   "volume",         "VOLUME",          80,  ctx),
-    mkNumCol(   "price",          "PRICE",           80,  ctx),
-    mkSearchCol("detailType",     "DETAIL TYPE",     80,  ctx),
-    mkNumCol(   "amount",         "AMOUNT",          90,  ctx),
-    mkSearchCol("description",    "DESCRIPTION",     120, ctx),
+    // ── Balance / Amount ─────────────────────────────────────────────────────
+    mkNumCol("quantity",          "QUANTITY",           130, ctx),
+    mkNumCol("balanceAmount",     "BALANCE AMOUNT",     150, ctx),
+
+    { ...mkCol("headerType",          "HEADER TYPE",          130), render: (text) => text ?? "-" },
+    mkSearchCol("accountType",        "ACCOUNT TYPE",         130, ctx),
+    { ...mkCol("classificationType",  "CLASSIFICATION TYPE",  170), render: (text) => text ?? "-" },
+    { ...mkCol("source",              "SOURCE",               110), render: (text) => text ?? "-" },
+    mkSearchCol("sapCustId",          "SAP CUST ID",          130, ctx),
+
+    { ...mkCol("period",         "PERIOD",          110), render: (text) => text ?? "-" },
+    { ...mkCol("mutationDate",   "MUTATION DATE",   140), render: (text) => text ?? "-" },
+    { ...mkCol("mutationType",   "MUTATION TYPE",   140), render: (text) => text ?? "-" },
+    { ...mkNumCol("volume",  "VOLUME", 120, ctx), render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-") },
+    { ...mkNumCol("price",   "PRICE",  130, ctx), render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-") },
+    { ...mkNumCol("amount",  "AMOUNT", 130, ctx), render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-") },
+
 
     // ── Status ────────────────────────────────────────────────────────────────
-    mkStatusCol("status",                  "STATUS",                  60),
-    mkStatusCol("statusApproval",          "STATUS APPROVAL",         90),
-    mkStatusCol("mutationStatus",          "MUTATION STATUS",         75),
-    mkStatusCol("mutationApprovalStatus",  "MUTATION APPROVAL STATUS", 95),
+    mkStatusCol("status",                 "STATUS",                  120),
+    mkStatusCol("statusApproval",         "STATUS APPROVAL",         160),
+    mkStatusCol("mutationStatus",         "MUTATION STATUS",         140),
+    mkStatusCol("mutationApprovalStatus", "MUTATION APPROVAL STATUS", 180),
   ];
 };

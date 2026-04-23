@@ -1,62 +1,98 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Form } from "antd";
-import { CalendarOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper, NxFormFooter } from "../../../../components/Nx/NxFormStepNavigation";
 import CardContainer from "../../../../components/CardContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
 import SVGIcon from "../../../../assets/Icon/index";
-import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import SelectComponent from "../../../../components/SelectComponent";
 import InputComponent from "../../../../components/InputComponent";
-import ModalCreateMutationDetail from "./Modal/ModalCreateMutationDetail";
-import {
-  getAllGasDepositPaginate,
-  getPeriodOptions,
-  getUomOptions,
-  getTimeUnitOptions,
-  getTypeOptions,
-  createMutationSummary,
-} from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
+import DateComponent from "../../../../components/DateComponent";
+import ModalCreateMutationDetail from "../../RatingBillingInvoice/GasDeposit/Modal/ModalCreateMutationDetail";
 
-const GasDepositCreatePage = () => {
+const ACCOUNT_OPTIONS = [
+  {
+    accountNumber: "130252597",
+    accountName: "PLN (PERSERO), PT",
+    customerNumber: "CUS001",
+    customerName: "PLN (PERSERO), PT",
+    accountGroupType: "Industrial",
+    sor: "SOR-001",
+    costCenter: "CC-1001",
+    accountSegment: "Segment A",
+    meterReadingCode: "MRC-001",
+    accountType: "Prepaid",
+    classificationType: "Type A",
+    sapCustId: "SAP-000001",
+  },
+  {
+    accountNumber: "11009950",
+    accountName: "PT. JAYA MOTOR",
+    customerNumber: "CUS006",
+    customerName: "KAO INDONESIA, PT",
+    accountGroupType: "Commercial",
+    sor: "SOR-002",
+    costCenter: "CC-2002",
+    accountSegment: "Segment B",
+    meterReadingCode: "MRC-007",
+    accountType: "Postpaid",
+    classificationType: "Type B",
+    sapCustId: "SAP-000006",
+  },
+];
+
+const INITIAL_MUTATION_ROWS = [
+  { key: 1, no: 1, documentNumber: "{value}", source: "Billing", billingPeriod: "JAN 26", mutationDate: "{value}" },
+  { key: 2, no: 2, documentNumber: "{value}", source: "Billing", billingPeriod: "JUL 26", mutationDate: "{value}" },
+  { key: 3, no: 3, documentNumber: "{value}", source: "Billing", billingPeriod: "AUG 26", mutationDate: "{value}" },
+];
+
+const PERIOD_OPTIONS = [
+  { label: "Jan 26", value: "JAN26" },
+  { label: "Feb 26", value: "FEB26" },
+  { label: "Mar 26", value: "MAR26" },
+];
+
+const TIME_UNIT_OPTIONS = [
+  { label: "Monthly", value: "MONTHLY" },
+  { label: "Yearly", value: "YEARLY" },
+];
+
+const UOM_OPTIONS = [
+  { label: "MMBTU", value: "MMBTU" },
+  { label: "MSCF", value: "MSCF" },
+];
+
+const TYPE_OPTIONS = [
+  { label: "Credit", value: "CREDIT" },
+  { label: "Debit", value: "DEBIT" },
+];
+
+const SOURCE_OPTIONS = [
+  { label: "Billing", value: "BILLING" },
+  { label: "Rating", value: "RATING" },
+  { label: "Manual", value: "MANUAL" },
+];
+
+const PayGasDepositeCreatePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
   const [isModalCreateMutationOpen, setIsModalCreateMutationOpen] = useState(false);
-  const [mutationRows, setMutationRows] = useState([]);
-  const [selectedAccountData, setSelectedAccountData] = useState(null);
+  const [mutationRows, setMutationRows] = useState(INITIAL_MUTATION_ROWS);
   const isUpdateMode =
-    location.pathname === RBI_ROUTES.GAS_DEPOSIT_UPDATE ||
+    location.pathname === RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_UPDATE ||
     location.state?.mode === "update";
   const selectedData = useMemo(() => location.state?.selectedData ?? null, [location.state]);
 
-  const {
-    data: gasDepositList,
-    data_period_options: periodOptions,
-    data_uom_options: uomOptions,
-    data_time_unit_options: timeUnitOptions,
-    data_type_options: typeOptions,
-  } = useSelector((state) => state.gasDepositRbi);
-
-  // Account options derived from gas deposit list
-  const accountNumberOptions = useMemo(
-    () =>
-      (gasDepositList?.result || [])
-        .filter(Boolean)
-        .map((item) => ({ label: item.accountNumber, value: item.accountNumber })),
-    [gasDepositList],
-  );
-
   const routes = [
-    { path: "", breadcrumbName: "Rating & Billing" },
-    { path: RBI_ROUTES.GAS_DEPOSIT_VIEW, breadcrumbName: "Gas Deposit" },
-    { path: "", breadcrumbName: isUpdateMode ? "Update Gas Deposit" : "Create Gas Deposit" },
+    { path: "", breadcrumbName: "Payment & Collection" },
+    { path: RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW, breadcrumbName: "Gas Deposite" },
+    { path: "", breadcrumbName: isUpdateMode ? "Update Gas Deposite" : "Create Gas Deposite" },
   ];
 
   const steps = [
@@ -64,14 +100,6 @@ const GasDepositCreatePage = () => {
     { title: "APPROVAL" },
     { title: "ATTACHMENT" },
   ];
-
-  useEffect(() => {
-    dispatch(getAllGasDepositPaginate({ page: 1, pageSize: 1000, search: "", sort: "accountNumber~asc" }));
-    dispatch(getPeriodOptions());
-    dispatch(getUomOptions());
-    dispatch(getTimeUnitOptions());
-    dispatch(getTypeOptions());
-  }, [dispatch]);
 
   useEffect(() => {
     if (!isUpdateMode || !selectedData) return;
@@ -108,24 +136,19 @@ const GasDepositCreatePage = () => {
   const mutationColumns = useMemo(
     () => [
       { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "billingPeriod", title: "BILLING PERIOD", dataIndex: "billingPeriod", width: 80, align: "center" },
-      { key: "mutationDate", title: "MUTATION DATE", dataIndex: "mutationDate", width: 80, align: "center" },
-      { key: "mutationType", title: "MUTATION TYPE", dataIndex: "mutationType", width: 100 },
-      { key: "category", title: "CATEGORY", dataIndex: "category", width: 100 },
-      { key: "uom", title: "UOM", dataIndex: "uom", width: 60, align: "center" },
-      { key: "quantity", title: "QUANTITY", dataIndex: "quantity", width: 80, align: "right" },
-      { key: "price", title: "PRICE", dataIndex: "price", width: 100, align: "right" },
-      { key: "amount", title: "AMOUNT", dataIndex: "amount", width: 100, align: "right" },
-      { key: "description", title: "DESCRIPTION", dataIndex: "description", width: 150 },
+      { key: "documentNumber", title: "DOCUMENT NUMBER", dataIndex: "documentNumber", width: 80 },
+      { key: "source", title: "SOURCE", dataIndex: "source", width: 70 },
+      { key: "billingPeriod", title: "BILLING PERIOD", dataIndex: "billingPeriod", width: 70, align: "center" },
+      { key: "mutationDate", title: "MUTATION DATE", dataIndex: "mutationDate", width: 70, align: "center" },
       {
         key: "action",
         title: "ACTION",
         width: 70,
         align: "center",
-        fixed: "right",
-        render: (_, __, idx) => (
+        render: () => (
           <div className="flex items-center justify-center gap-2">
-            <SVGIcon name="IconDelete" width={18} color="#ef4444" onClick={() => setMutationRows((prev) => prev.filter((_, i) => i !== idx))} />
+            <SVGIcon name="IconUpdateAction" width={18} color="#0075bf" />
+            <SVGIcon name="IconDelete" width={18} color="#ef4444" />
           </div>
         ),
       },
@@ -134,9 +157,7 @@ const GasDepositCreatePage = () => {
   );
 
   const handleAccountNumberChange = (value) => {
-    const accountList = gasDepositList?.result || [];
-    const selected = accountList.filter(Boolean).find((item) => item.accountNumber === value);
-    setSelectedAccountData(selected || null);
+    const selected = ACCOUNT_OPTIONS.find((item) => item.accountNumber === value);
 
     form.setFieldsValue({
       accountNumber: value,
@@ -151,43 +172,6 @@ const GasDepositCreatePage = () => {
       accountType: selected?.accountType || "",
       classificationType: selected?.classificationType || "",
       sapCustId: selected?.sapCustId || "",
-      termsEarn: selected?.termsEarn || "",
-      termsRedeem: selected?.termsRedeem || "",
-      timeUnit: selected?.timeUnit || "",
-      uom: selected?.uom || "",
-      amount: selected?.balanceAmount || "",
-      receiptBalance: selected?.balanceVolume || "",
-    });
-  };
-
-  const handleSubmit = () => {
-    form.validateFields().then((values) => {
-      const accountList = gasDepositList?.result || [];
-      const account = selectedAccountData ||
-        accountList.filter(Boolean).find((item) => item.accountNumber === values.accountNumber);
-
-      const body = {
-        accountId: account?.accountId,
-        apphierId: values.apphierId,
-        balanceVolume: values.receiptBalance,
-        balanceAmount: values.amount,
-        currency: values.currency || account?.currency,
-        uom: values.uom,
-        schemeStartDate: values.periodEarn,
-        schemeEndDate: account?.earnEndDate,
-        redeemStartDate: values.periodStartRedeem,
-        redeemEndDate: values.periodEndRedeem,
-        actionType: "CREATE",
-        description: values.description,
-        sapCustId: account?.sapCustId == null ? undefined : String(account.sapCustId),
-        attachments: [],
-      };
-
-      dispatch(createMutationSummary(body)).then((res) => {
-        if (!res.error) {
-          navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
-        }
-      });
     });
   };
 
@@ -222,7 +206,10 @@ const GasDepositCreatePage = () => {
                 placeholder="Select Account Number"
                 onChange={handleAccountNumberChange}
                 disabled={isUpdateMode}
-                options={accountNumberOptions}
+                options={ACCOUNT_OPTIONS.map((item) => ({
+                  label: item.accountNumber,
+                  value: item.accountNumber,
+                }))}
               />
             </Form.Item>
             <Form.Item name="accountName" label="Account Name" style={{ marginBottom: 0 }}>
@@ -276,36 +263,57 @@ const GasDepositCreatePage = () => {
             <Form.Item name="termsRedeem" label="Terms Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
               <InputComponent disabled={!isUpdateMode} placeholder="Select Terms Redeem" />
             </Form.Item>
+            <Form.Item name="period" label="Period" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+              <SelectComponent placeholder="Select Period" options={PERIOD_OPTIONS} />
+            </Form.Item>
             <Form.Item name="periodEarn" label="Period Earn" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Period Earn" options={periodOptions} suffixIcon={<CalendarOutlined style={{ color: "rgba(0,0,0,0.25)" }} />} />
+              <DateComponent placeholder="Select Period Earn" dateDisable={() => false} />
             </Form.Item>
             <Form.Item name="periodStartRedeem" label="Period Start Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Period Start Redeem" options={periodOptions} suffixIcon={<CalendarOutlined style={{ color: "rgba(0,0,0,0.25)" }} />} />
+              <DateComponent placeholder="Select Period Start Redeem" dateDisable={() => false} />
             </Form.Item>
-            <Form.Item name="periodEndRedeem" label="Period End Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Period End Redeem" options={periodOptions} suffixIcon={<CalendarOutlined style={{ color: "rgba(0,0,0,0.25)" }} />} />
-            </Form.Item>
-            <Form.Item name="period" label="Period" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Period" options={periodOptions} />
+            <Form.Item
+              name="periodEndRedeem"
+              label="Period End Redeem"
+              rules={[
+                { required: true },
+                () => ({
+                  validator(_, value) {
+                    const startDate = form.getFieldValue("periodStartRedeem");
+                    if (!value || !startDate || value >= startDate) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error("Period End Redeem cannot be earlier than Period Start Redeem"));
+                  },
+                }),
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <DateComponent
+                placeholder="Select Period End Redeem"
+                dateDisable={(current) => {
+                  const startDate = form.getFieldValue("periodStartRedeem");
+                  return startDate ? current && current < startDate.startOf("day") : false;
+                }}
+              />
             </Form.Item>
             <Form.Item name="timeUnit" label="Time Unit" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Time Unit" options={timeUnitOptions} />
+              <SelectComponent placeholder="Select Time Unit" options={TIME_UNIT_OPTIONS} />
             </Form.Item>
             <Form.Item name="uom" label="UOM" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select UOM" options={uomOptions} />
+              <SelectComponent placeholder="Select UOM" options={UOM_OPTIONS} />
             </Form.Item>
             <Form.Item name="amount" label="Amount" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
               <InputComponent disabled={!isUpdateMode} placeholder="Input Amount" />
             </Form.Item>
+            <Form.Item name="receiptBalance" label="Receipt Balance" style={{ marginBottom: 0 }}>
+              <InputComponent disabled={!isUpdateMode} placeholder="Input Receipt Balance" />
+            </Form.Item>
             <Form.Item name="type" label="Type" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Type" options={typeOptions} />
+              <SelectComponent placeholder="Select Type" options={TYPE_OPTIONS} />
             </Form.Item>
             <Form.Item name="source" label="Source" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Input Source" options={[
-                { label: "Billing", value: "BILLING" },
-                { label: "Rating", value: "RATING" },
-                { label: "Manual", value: "MANUAL" },
-              ]} />
+              <SelectComponent placeholder="Input Source" options={SOURCE_OPTIONS} />
             </Form.Item>
             <Form.Item
               name="description"
@@ -339,7 +347,7 @@ const GasDepositCreatePage = () => {
               </ButtonComponent>
             </div>
             <TableRBI
-              idTable="create-gd-mutation-table"
+              idTable="rc-create-gd-mutation-table"
               dataSource={mutationRows}
               columns={mutationColumns}
               totalData={mutationRows.length}
@@ -355,10 +363,10 @@ const GasDepositCreatePage = () => {
           totalSteps={steps.length}
           onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
           onNext={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
-          onCancel={() => navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW)}
+          onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW)}
           onClear={() => form.resetFields()}
           onSaveDraft={() => {}}
-          onSubmit={handleSubmit}
+          onSubmit={() => {}}
         />
       </Form>
 
@@ -369,22 +377,17 @@ const GasDepositCreatePage = () => {
           if (!values) return;
           const mutationDateValue = values.mutationDate?.format
             ? values.mutationDate.format("YYYY-MM-DD")
-            : values.mutationDate || "";
+            : values.mutationDate || "{value}";
 
           setMutationRows((prev) => [
             ...prev,
             {
               key: prev.length + 1,
               no: prev.length + 1,
-              billingPeriod: values.billingPeriod || "",
+              documentNumber: values.documentNumber || "{value}",
+              source: values.source || "Manual",
+              billingPeriod: values.billingPeriod || "{value}",
               mutationDate: mutationDateValue,
-              mutationType: values.mutationType || "",
-              category: values.category || "",
-              uom: values.uom || "",
-              quantity: values.quantity || "",
-              price: values.price || "",
-              amount: values.amount || "",
-              description: values.description || "",
             },
           ]);
         }}
@@ -394,4 +397,4 @@ const GasDepositCreatePage = () => {
   );
 };
 
-export default GasDepositCreatePage;
+export default PayGasDepositeCreatePage;

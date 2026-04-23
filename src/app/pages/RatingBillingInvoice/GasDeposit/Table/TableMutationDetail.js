@@ -17,7 +17,7 @@ export const columnsMutationDetail = (
     key: "no",
     title: "NO",
     isClassification: true,
-    width: 15,
+    width: 60,
     align: "center",
     render: (text, object, index) => index + 1,
   },
@@ -26,7 +26,7 @@ export const columnsMutationDetail = (
     title: "DOCUMENT NUMBER",
     dataIndex: "documentNumber",
     isClassification: true,
-    width: 100,
+    width: 180,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "documentNumber", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -39,7 +39,7 @@ export const columnsMutationDetail = (
     title: "SOURCE",
     dataIndex: "source",
     isClassification: true,
-    width: 70,
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "source", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -52,7 +52,7 @@ export const columnsMutationDetail = (
     title: "BILLING PERIOD",
     dataIndex: "billingPeriod",
     isClassification: true,
-    width: 90,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "billingPeriod", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -64,7 +64,7 @@ export const columnsMutationDetail = (
     title: "MUTATION DATE",
     dataIndex: "mutationDate",
     isClassification: true,
-    width: 90,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "mutationDate", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -76,7 +76,7 @@ export const columnsMutationDetail = (
     title: "MUTATION TYPE",
     dataIndex: "mutationType",
     isClassification: true,
-    width: 80,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "mutationType", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -89,7 +89,7 @@ export const columnsMutationDetail = (
     title: "CATEGORY",
     dataIndex: "category",
     isClassification: true,
-    width: 80,
+    width: 160,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "category", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -102,7 +102,7 @@ export const columnsMutationDetail = (
     title: "UOM",
     dataIndex: "uom",
     isClassification: true,
-    width: 50,
+    width: 90,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "uom", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -115,7 +115,7 @@ export const columnsMutationDetail = (
     title: "QUANTITY",
     dataIndex: "quantity",
     isClassification: true,
-    width: 80,
+    width: 120,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -128,7 +128,7 @@ export const columnsMutationDetail = (
     title: "PRICE",
     dataIndex: "price",
     isClassification: true,
-    width: 80,
+    width: 130,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -141,7 +141,7 @@ export const columnsMutationDetail = (
     title: "AMOUNT",
     dataIndex: "amount",
     isClassification: true,
-    width: 90,
+    width: 130,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -154,7 +154,7 @@ export const columnsMutationDetail = (
     title: "TYPE",
     dataIndex: "type",
     isClassification: true,
-    width: 70,
+    width: 120,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "type", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -166,7 +166,7 @@ export const columnsMutationDetail = (
     title: "DESCRIPTION",
     dataIndex: "description",
     isClassification: true,
-    width: 120,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search, "description", searchInput, searchedColumn, searchText, handleSearch, true,
@@ -178,7 +178,7 @@ export const columnsMutationDetail = (
     title: "STATUS",
     dataIndex: "status",
     isClassification: true,
-    width: 70,
+    width: 120,
     sorter: true,
     align: "center",
     render: (text) =>
@@ -195,7 +195,7 @@ export const columnsMutationDetail = (
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     isClassification: true,
-    width: 100,
+    width: 160,
     sorter: true,
     align: "center",
     render: (text) =>

@@ -7,7 +7,7 @@ import { NxFormFooter, NxFormStepper } from "../../../../components/Nx/NxFormSte
 import CardContainer from "../../../../components/CardContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
-import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import DateComponent from "../../../../components/DateComponent";
 import SelectComponent from "../../../../components/SelectComponent";
 import InputComponent from "../../../../components/InputComponent";
@@ -37,7 +37,7 @@ const APPROVAL_ROWS = [
 ];
 
 const ATTACHMENT_ROWS = [
-  { key: 1, no: 1, fileName: "expired-gas-deposit.xlsx", uploadedBy: "maker", uploadDate: "15 Apr 2026" },
+  { key: 1, no: 1, fileName: "expired-gas-deposit.xlsx", uploadedBy: "maker", uploadDate: "16 Apr 2026" },
 ];
 
 const parseAmount = (amount = "") => {
@@ -55,7 +55,7 @@ const formatAmount = (amount = 0) => {
   }).format(safeAmount);
 };
 
-const ExpiredGasDepositSummary = ({ values, selectedRows }) => {
+const ExpiredGasDepositeSummary = ({ values, selectedRows }) => {
   const infoItems = [
     {
       label: "Expired Date",
@@ -91,7 +91,7 @@ const ExpiredGasDepositSummary = ({ values, selectedRows }) => {
 
       <CardContainer header={<p className="mt-[15px] text-primary">GAS DEPOSIT INFORMATION</p>}>
         <TableRBI
-          idTable="expired-gd-confirm-info-table"
+          idTable="rc-expired-gd-confirm-info-table"
           dataSource={selectedRows}
           columns={infoColumns}
           totalData={selectedRows.length}
@@ -105,7 +105,7 @@ const ExpiredGasDepositSummary = ({ values, selectedRows }) => {
   );
 };
 
-ExpiredGasDepositSummary.propTypes = {
+ExpiredGasDepositeSummary.propTypes = {
   values: PropTypes.shape({
     expiredDate: PropTypes.shape({ format: PropTypes.func }),
     currency: PropTypes.string,
@@ -115,7 +115,7 @@ ExpiredGasDepositSummary.propTypes = {
   selectedRows: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-const GasDepositExpiredCreatePage = () => {
+const PayGasDepositeExpiredCreatePage = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
@@ -126,9 +126,9 @@ const GasDepositExpiredCreatePage = () => {
   const [selectedDepositRows, setSelectedDepositRows] = useState([]);
 
   const routes = [
-    { path: "", breadcrumbName: "Rating & Billing" },
-    { path: RBI_ROUTES.GAS_DEPOSIT_VIEW, breadcrumbName: "Gas Deposit" },
-    { path: "", breadcrumbName: "Create Expired Gas Deposit" },
+    { path: "", breadcrumbName: "Payment & Collection" },
+    { path: RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW, breadcrumbName: "Gas Deposite" },
+    { path: "", breadcrumbName: "Create Expired Gas Deposite" },
   ];
 
   const steps = [
@@ -228,9 +228,9 @@ const GasDepositExpiredCreatePage = () => {
   const confirmationItems = [
     {
       key: "expiredGasDeposit",
-      label: "Expired Gas Deposit",
+      label: "Expired Gas Deposite",
       children: (
-        <ExpiredGasDepositSummary
+        <ExpiredGasDepositeSummary
           values={form.getFieldsValue()}
           selectedRows={selectedDepositRows}
         />
@@ -242,7 +242,7 @@ const GasDepositExpiredCreatePage = () => {
       children: (
         <CardContainer header={<p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>}>
           <TableRBI
-            idTable="expired-gd-confirm-approval-table"
+            idTable="rc-expired-gd-confirm-approval-table"
             dataSource={APPROVAL_ROWS}
             columns={approvalColumns}
             totalData={APPROVAL_ROWS.length}
@@ -259,7 +259,7 @@ const GasDepositExpiredCreatePage = () => {
       children: (
         <CardContainer header={<p className="mt-[15px] text-primary">ATTACHMENT</p>}>
           <TableRBI
-            idTable="expired-gd-confirm-attachment-table"
+            idTable="rc-expired-gd-confirm-attachment-table"
             dataSource={ATTACHMENT_ROWS}
             columns={attachmentColumns}
             totalData={ATTACHMENT_ROWS.length}
@@ -325,7 +325,7 @@ const GasDepositExpiredCreatePage = () => {
             >
               <div className="mb-3 flex justify-end">
                 <ButtonComponent type="submit" border={false} onClick={handleOpenSearch}>
-                  Search Gas Deposit
+                  Search Gas Deposite
                 </ButtonComponent>
               </div>
 
@@ -336,7 +336,7 @@ const GasDepositExpiredCreatePage = () => {
                   rules={[{ required: true }]}
                   style={{ marginBottom: 0 }}
                 >
-                  <DateComponent placeholder="Select Expired Date" dateDisable={() => false} />
+                  <DateComponent placeholder="Select Expired Date" />
                 </Form.Item>
 
                 <Form.Item
@@ -374,7 +374,7 @@ const GasDepositExpiredCreatePage = () => {
               className="mt-2"
             >
               <TableRBI
-                idTable="expired-gd-info-table"
+                idTable="rc-expired-gd-info-table"
                 dataSource={selectedDepositRows}
                 columns={infoColumns}
                 totalData={selectedDepositRows.length}
@@ -393,7 +393,7 @@ const GasDepositExpiredCreatePage = () => {
             className="mt-2"
           >
             <TableRBI
-              idTable="expired-gd-approval-table"
+              idTable="rc-expired-gd-approval-table"
               dataSource={APPROVAL_ROWS}
               columns={approvalColumns}
               totalData={APPROVAL_ROWS.length}
@@ -410,7 +410,7 @@ const GasDepositExpiredCreatePage = () => {
             className="mt-2"
           >
             <TableRBI
-              idTable="expired-gd-attachment-table"
+              idTable="rc-expired-gd-attachment-table"
               dataSource={ATTACHMENT_ROWS}
               columns={attachmentColumns}
               totalData={ATTACHMENT_ROWS.length}
@@ -426,18 +426,18 @@ const GasDepositExpiredCreatePage = () => {
           totalSteps={steps.length}
           onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
           onNext={handleNext}
-          onCancel={() => navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW)}
+          onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW)}
           onClear={handleReset}
           onSaveDraft={() => {}}
           onSubmit={handleSubmit}
         />
       </Form>
 
-      {/* Modal Search Gas Deposit */}
+      {/* Modal Search Gas Deposite */}
       <ModalCustom
         isOpen={isSearchModalOpen}
         handleCancel={() => setIsSearchModalOpen(false)}
-        header="SEARCH GAS DEPOSIT"
+        header="SEARCH GAS DEPOSITE"
         width={1200}
         footer={
           <div className="flex justify-end gap-2 px-2">
@@ -452,7 +452,7 @@ const GasDepositExpiredCreatePage = () => {
       >
         <CardContainer className="!mt-0">
           <TableRBI
-            idTable="expired-gd-search-table"
+            idTable="rc-expired-gd-search-table"
             dataSource={searchRows}
             columns={searchColumns}
             totalData={searchRows.length}
@@ -492,4 +492,4 @@ const GasDepositExpiredCreatePage = () => {
   );
 };
 
-export default GasDepositExpiredCreatePage;
+export default PayGasDepositeExpiredCreatePage;

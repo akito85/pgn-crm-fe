@@ -11,17 +11,15 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import SVGIcon from "../../../../assets/Icon/index";
-import { columnsMutationDetail } from "./Table/TableMutationDetail";
+import { columnsMutationDetail } from "../../RatingBillingInvoice/GasDeposit/Table/TableMutationDetail";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import {
-  getMutationDetailPaginate,
   getAllGasDepositPaginate,
   getApprovalHistory,
-  getAttachmentList,
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
-import ModalCreateMutationDetail from "./Modal/ModalCreateMutationDetail";
-import ModalViewMutationDetail from "./Modal/ModalViewMutationDetail";
+import ModalCreateMutationDetail from "../../RatingBillingInvoice/GasDeposit/Modal/ModalCreateMutationDetail";
+import ModalViewMutationDetail from "../../RatingBillingInvoice/GasDeposit/Modal/ModalViewMutationDetail";
 
 const formatApprovalHistoryLabel = (key) => {
   const normalizedKey = key.toUpperCase();
@@ -76,11 +74,33 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
   };
 };
 
-const GasDepositDetail = (props) => {
+const DUMMY_MUTATION_DETAIL_DATA = [
+  { key: 1, id: 1, documentNumber: "DOC-2026-001", source: "Billing",   billingPeriod: "JAN 26", mutationDate: "01-Jan-26", mutationType: "Earn",   category: "Billing Adjustment", uom: "MMBTU", quantity: 100, price: 5000000, amount: 500000000, type: "Billing",    description: "Earn dari tagihan Januari 2026",     status: "Active",  statusApproval: "Approved" },
+  { key: 2, id: 2, documentNumber: "DOC-2026-002", source: "Billing",   billingPeriod: "FEB 26", mutationDate: "01-Feb-26", mutationType: "Earn",   category: "Billing Adjustment", uom: "MMBTU", quantity: 80,  price: 5000000, amount: 400000000, type: "Billing",    description: "Earn dari tagihan Februari 2026",    status: "Active",  statusApproval: "Waiting Approval" },
+  { key: 3, id: 3, documentNumber: "DOC-2026-003", source: "Billing",   billingPeriod: "MAR 26", mutationDate: "15-Mar-26", mutationType: "Redeem", category: "Redeem",              uom: "MMBTU", quantity: 50,  price: 5000000, amount: 250000000, type: "Billing",    description: "Redeem tagihan Maret 2026",          status: "Expired", statusApproval: "Approved" },
+  { key: 4, id: 4, documentNumber: "DOC-2026-004", source: "Adjustment", billingPeriod: "APR 26", mutationDate: "01-Apr-26", mutationType: "Earn",   category: "Billing Adjustment", uom: "MMBTU", quantity: 120, price: 5000000, amount: 600000000, type: "Adjustment", description: "Earn dari adjustment April 2026",     status: "Active",  statusApproval: "Approved" },
+  { key: 5, id: 5, documentNumber: "DOC-2026-005", source: "Billing",   billingPeriod: "MAY 26", mutationDate: "01-May-26", mutationType: "Expire", category: "Expired",             uom: "MMBTU", quantity: 30,  price: 5000000, amount: 150000000, type: "Billing",    description: "Expired gas deposit Mei 2026",       status: "Expired", statusApproval: "Approved" },
+  { key: 6, id: 6, documentNumber: "DOC-2026-006", source: "Manual",    billingPeriod: "JUN 26", mutationDate: "10-Jun-26", mutationType: "Earn",   category: "Billing Adjustment", uom: "MMBTU", quantity: 200, price: 5000000, amount: 1000000000, type: "Billing",  description: "Earn manual input Juni 2026",        status: "Active",  statusApproval: "Waiting Approval" },
+  { key: 7, id: 7, documentNumber: "DOC-2026-007", source: "Billing",   billingPeriod: "JUL 26", mutationDate: "01-Jul-26", mutationType: "Redeem", category: "Redeem",              uom: "MMBTU", quantity: 60,  price: 5000000, amount: 300000000, type: "Billing",    description: "Redeem tagihan Juli 2026",           status: "Active",  statusApproval: "Rejected" },
+  { key: 8, id: 8, documentNumber: "DOC-2026-008", source: "Billing",   billingPeriod: "AUG 26", mutationDate: "01-Aug-26", mutationType: "Earn",   category: "Cancel Expired",      uom: "MMBTU", quantity: 90,  price: 5000000, amount: 450000000, type: "Adjustment", description: "Cancel expired Agustus 2026",        status: "Active",  statusApproval: "Approved" },
+  { key: 9, id: 9, documentNumber: "DOC-2026-009", source: "Billing",   billingPeriod: "SEP 26", mutationDate: "15-Sep-26", mutationType: "Redeem", category: "Redeem",              uom: "MMBTU", quantity: 45,  price: 5000000, amount: 225000000, type: "Billing",    description: "Redeem tagihan September 2026",      status: "Expired", statusApproval: "Approved" },
+  { key: 10, id: 10, documentNumber: "DOC-2026-010", source: "Manual",  billingPeriod: "DEC 26", mutationDate: "01-Dec-26", mutationType: "Expire", category: "Expired",             uom: "MMBTU", quantity: 25,  price: 5000000, amount: 125000000, type: "Billing",    description: "Expired akhir tahun 2026",           status: "Expired", statusApproval: "Approved" },
+];
+
+const DUMMY_APPROVAL_ROWS_GD = [
+  { key: 1, no: 1, approver: "Approver 1", role: "Supervisor", status: "Waiting Approval" },
+  { key: 2, no: 2, approver: "Approver 2", role: "Manager", status: "Pending" },
+];
+
+const DUMMY_ATTACHMENT_ROWS_GD = [
+  { key: 1, no: 1, fileName: "gas-deposit-document.pdf", uploadedBy: "maker", uploadDate: "15 Apr 2026" },
+];
+
+const PayGasDepositeDetail = (props) => {
   const { selectedData, onClose } = props;
   const detailRef = useRef(null);
   const dispatch = useDispatch();
-  const selectedGasDepositId = selectedData?.gasDepositId || selectedData?.id;
+  const selectedGasDepositId = selectedData?.gasDepositId;
 
   const [modalCreateMD, setModalCreateMD] = useState(false);
   const [modalViewMD, setModalViewMD] = useState(false);
@@ -89,15 +109,9 @@ const GasDepositDetail = (props) => {
   const [dataApprovalHistoryFixMD, setDataApprovalHistoryFixMD] = useState({});
 
   const {
-    data_mutation_detail,
-    loading_mutation_detail,
     data_approval_history,
     loading_history,
-    data_attachment,
-    loading_attachment,
   } = useSelector((state) => state.gasDepositRbi);
-
-  const dataSourceMutationDetail = data_mutation_detail?.result;
 
   // ===================== Mutation Detail State =====================
   const searchInputMD = useRef(null);
@@ -106,31 +120,10 @@ const GasDepositDetail = (props) => {
   const [searchMD, setSearchMD] = useState({});
   const [fixedColumnsMD, setFixedColumnsMD] = useState(() => ({
     left: [],
-    right: ["action", "status", "statusApproval"],
+    right: ["status", "statusApproval"],
   }));
 
-  // ===================== Fetch mutation detail on mount (triggered when user clicks detail icon) =====================
-  useEffect(() => {
-    if (selectedGasDepositId) {
-      dispatch(
-        getMutationDetailPaginate({
-          gasDepositId: selectedGasDepositId,
-          page: 1,
-          pageSize: 100,
-          search: "",
-          sort: "",
-        }),
-      );
-      dispatch(
-        getAttachmentList({
-          referenceId: selectedGasDepositId,
-          category: "GAS_DEPOSIT_SUMMARY",
-        }),
-      );
-      dispatch(getApprovalHistory(selectedGasDepositId));
-    }
-  }, [dispatch, selectedGasDepositId]);
-
+  // ===================== Fetch data =====================
   useEffect(() => {
     if (selectedGasDepositId && detailRef.current) {
       requestAnimationFrame(() => {
@@ -246,7 +239,6 @@ const GasDepositDetail = (props) => {
     ...col,
     width: 60,
     align: "center",
-    fixed: "right",
   }));
 
   const baseColumnsMD = useMemo(() => {
@@ -270,55 +262,22 @@ const GasDepositDetail = (props) => {
     [allColumnsMD],
   );
 
-  const dataSourceMD = useMemo(
-    () =>
-      dataSourceMutationDetail?.map((item) => ({
-        ...item,
-        key: item.mutationId ?? item.id,
-        documentNumber: item.documentNumber || null,
-        source: item.source || null,
-        billingPeriod: item.billingPeriod || null,
-        mutationDate: item.mutationDate || null,
-        mutationType: item.mutationType || null,
-        category: item.category || null,
-        uom: item.uom || null,
-        quantity: item.quantity ?? null,
-        price: item.price ?? null,
-        amount: item.amount ?? null,
-        type: item.type || null,
-        description: item.description || null,
-        status: item.status || null,
-        statusApproval: item.statusApproval || null,
-      })),
-    [dataSourceMutationDetail],
-  );
+  const dataSourceMD = DUMMY_MUTATION_DETAIL_DATA;
 
-  // ===================== Approval / Attachment Columns (Gas Deposit Detail tab) =====================
+  // ===================== Approval / Attachment Columns =====================
   const approvalColumnsGD = useMemo(() => [
-    { key: "no", title: "NO", width: 50, align: "center", render: (_, __, idx) => idx + 1 },
+    { key: "no", title: "NO", dataIndex: "no", width: 50, align: "center" },
     { key: "approver", title: "APPROVER", dataIndex: "approver", width: 150 },
     { key: "role", title: "ROLE", dataIndex: "role", width: 120 },
     { key: "status", title: "STATUS", dataIndex: "status", width: 150 },
   ], []);
 
   const attachmentColumnsGD = useMemo(() => [
-    { key: "no", title: "NO", width: 50, align: "center", render: (_, __, idx) => idx + 1 },
+    { key: "no", title: "NO", dataIndex: "no", width: 50, align: "center" },
     { key: "fileName", title: "FILE NAME", dataIndex: "fileName", width: 200 },
-    { key: "category", title: "CATEGORY", dataIndex: "category", width: 150 },
-    { key: "type", title: "TYPE", dataIndex: "type", width: 120 },
-    { key: "description", title: "DESCRIPTION", dataIndex: "description", width: 200 },
-    { key: "fileSize", title: "FILE SIZE", dataIndex: "fileSize", width: 100 },
+    { key: "uploadedBy", title: "UPLOADED BY", dataIndex: "uploadedBy", width: 150 },
+    { key: "uploadDate", title: "UPLOAD DATE", dataIndex: "uploadDate", width: 130 },
   ], []);
-
-  const approvalDataSource = useMemo(() =>
-    (data_approval_history?.dataApprover ?? []).filter(Boolean).map((item, idx) => ({ ...item, key: item.id ?? idx })),
-    [data_approval_history]
-  );
-
-  const attachmentDataSource = useMemo(() =>
-    (Array.isArray(data_attachment) ? data_attachment : []).filter(Boolean).map((item, idx) => ({ ...item, key: item.id ?? idx })),
-    [data_attachment]
-  );
 
   // ===================== Tabs content =====================
   const gasDepositTab = (
@@ -366,17 +325,14 @@ const GasDepositDetail = (props) => {
     <div className="mt-2">
       <CollapsibleContainer header="Approval Information" border>
         <TableRBI
-          idTable="gas-deposit-approval-table"
-          dataSource={approvalDataSource}
+          idTable="rc-gas-deposite-approval-table"
+          dataSource={DUMMY_APPROVAL_ROWS_GD}
           columns={approvalColumnsGD}
-          totalData={approvalDataSource.length}
+          totalData={DUMMY_APPROVAL_ROWS_GD.length}
           tableScrolled={{ x: 800, y: 250 }}
           showExport={false}
           usePagination={false}
-          useInfiniteScroll={true}
-          hasMore={false}
           showRefresh={false}
-          loading={loading_history}
         />
       </CollapsibleContainer>
     </div>
@@ -386,17 +342,14 @@ const GasDepositDetail = (props) => {
     <div className="mt-2">
       <CollapsibleContainer header="Attachment" border>
         <TableRBI
-          idTable="gas-deposit-attachment-table"
-          dataSource={attachmentDataSource}
+          idTable="rc-gas-deposite-attachment-table"
+          dataSource={DUMMY_ATTACHMENT_ROWS_GD}
           columns={attachmentColumnsGD}
-          totalData={attachmentDataSource.length}
+          totalData={DUMMY_ATTACHMENT_ROWS_GD.length}
           tableScrolled={{ x: 800, y: 250 }}
           showExport={false}
           usePagination={false}
-          useInfiniteScroll={true}
-          hasMore={false}
           showRefresh={false}
-          loading={loading_attachment}
         />
       </CollapsibleContainer>
     </div>
@@ -432,20 +385,18 @@ const GasDepositDetail = (props) => {
           </ButtonComponent>
         </div>
         <TableRBI
-          idTable="mutation-detail-table"
+          idTable="rc-mutation-detail-table"
           dataSource={dataSourceMD}
           columns={processedColumnsMD}
-          totalData={data_mutation_detail?.page?.totalElements || 0}
-          tableScrolled={{ x: 2000, y: 400 }}
+          totalData={DUMMY_MUTATION_DETAIL_DATA.length}
+          tableScrolled={{ x: 1200, y: 400 }}
           onSort={onSortMD}
           columnDefinitions={columnDefinitionsMD}
           fixedColumns={fixedColumnsMD}
           setFixedColumns={setFixedColumnsMD}
-          loading={loading_mutation_detail}
+          loading={false}
           showExport={false}
           usePagination={false}
-          useInfiniteScroll={true}
-          hasMore={false}
         />
       </CollapsibleCardContainer>
 
@@ -459,11 +410,7 @@ const GasDepositDetail = (props) => {
               : "-"}
           </DetailText>
           <DetailText label="Created By">{selectedData?.createdBy || "-"}</DetailText>
-          <DetailText label="Updated Date">
-            {selectedData?.updatedDate
-              ? moment(selectedData.updatedDate).format("DD MMM YYYY HH:mm:ss")
-              : "-"}
-          </DetailText>
+          <DetailText label="Updated Date">{selectedData?.updatedDate || "-"}</DetailText>
           <DetailText label="Updated By">{selectedData?.updatedBy || "-"}</DetailText>
         </div>
       </CollapsibleCardContainer>
@@ -503,7 +450,7 @@ const GasDepositDetail = (props) => {
   );
 };
 
-GasDepositDetail.propTypes = {
+PayGasDepositeDetail.propTypes = {
   onClose: PropTypes.func,
   selectedData: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -537,13 +484,14 @@ GasDepositDetail.propTypes = {
     description: PropTypes.string,
     createdDate: PropTypes.string,
     createdBy: PropTypes.string,
+    updatedDate: PropTypes.string,
     updatedBy: PropTypes.string,
   }),
 };
 
-GasDepositDetail.defaultProps = {
+PayGasDepositeDetail.defaultProps = {
   onClose: () => {},
   selectedData: null,
 };
 
-export default GasDepositDetail;
+export default PayGasDepositeDetail;

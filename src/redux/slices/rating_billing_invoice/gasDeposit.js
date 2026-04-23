@@ -479,6 +479,9 @@ const initialState = {
   data_detail: [],
   data_mutation_summary: [],
   data_mutation_detail: [],
+  data_approval_expired_list: [],
+  data_history: [],
+  summary_notice: null,
   data_approval_history: {},
   data_period_options: [],
   data_currency_options: [],
@@ -491,7 +494,11 @@ const initialState = {
   loading: false,
   loading_mutation_summary: false,
   loading_mutation_detail: false,
+  loading_approval_expired_list: false,
+  loading_process_approval: false,
   loading_history: false,
+  loading_history_list: false,
+  loading_attachment: false,
   loading_dropdown: false,
   isFailed: false,
   isSuccess: false,
@@ -509,18 +516,13 @@ export const getAllGasDepositPaginate = createAsyncThunk(
   "GET_ALL_GAS_DEPOSIT_PAGINATE",
   async ({ page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
-      // TODO: Replace dummy data with actual API call
-      // const searchParams = search === undefined ? "" : search;
-      // const sortParams =
-      //   sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // const url = `/v1/dbs/api/gas-deposit/list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await ratingBillingHttpService.getPagination(url);
-      // const responseData = response.data?.data ?? response.data;
-      // return { ...responseData, isLoadMore };
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { ...dummyGasDepositData, isLoadMore };
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "accountNumber~asc" : sort;
+      const url = `/v1/dbs/api/gas-deposit/list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      const responseData = response?.data ?? response;
+      return { ...responseData, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -541,26 +543,40 @@ export const getAllGasDepositPaginate = createAsyncThunk(
   },
 );
 
+export const getHistoryGasDepositPaginate = createAsyncThunk(
+  "GET_HISTORY_GAS_DEPOSIT_PAGINATE",
+  async ({ page, pageSize, search, sort, isLoadMore = false } = {}, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "accountNumber~asc" : sort;
+      const url = `/v1/dbs/api/gas-deposit/history?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      const responseData = response?.data ?? response;
+      return { ...responseData, isLoadMore };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      const errorBody = { title: "Failed", description: `${message}` };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return error;
+    }
+  },
+);
+
 export const getMutationSummaryPaginate = createAsyncThunk(
   "GET_MUTATION_SUMMARY_PAGINATE",
   async ({ gasDepositId, page, pageSize, search, sort } = {}, thunkAPI) => {
     try {
-      // TODO: Replace dummy data with actual API call
-      // const searchParams = search === undefined ? "" : search;
-      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // const url = `/v1/dbs/api/gas-deposit/mutation-summary?gasDepositId=${gasDepositId}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await ratingBillingHttpService.getPagination(url);
-      // return response.data?.data ?? response.data;
-
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return dummyMutationSummaryData;
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "accountNumber~asc" : sort;
+      const gasDepositParam = gasDepositId != null ? `&gasDepositId=${gasDepositId}` : "";
+      const url = `/v1/dbs/api/gas-deposit/mutation-summary?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}${gasDepositParam}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response?.data ?? response;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `${message}`,
-      };
+      const errorBody = { title: "Failed", description: `${message}` };
       thunkAPI.dispatch(showModalError(errorBody));
       return error;
     }
@@ -571,15 +587,11 @@ export const getMutationDetailPaginate = createAsyncThunk(
   "GET_MUTATION_DETAIL_PAGINATE",
   async ({ gasDepositId, page, pageSize, search, sort } = {}, thunkAPI) => {
     try {
-      // TODO: Replace dummy data with actual API call
-      // const searchParams = search === undefined ? "" : search;
-      // const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      // const url = `/v1/dbs/api/gas-deposit/mutation-detail?gasDepositId=${gasDepositId}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      // const response = await ratingBillingHttpService.getPagination(url);
-      // return response.data?.data ?? response.data;
-
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return dummyMutationDetailData;
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "mutationId~desc" : sort;
+      const url = `/v1/dbs/api/gas-deposit/mutation-detail?gasDepositId=${gasDepositId}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response?.data ?? response;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -698,13 +710,9 @@ export const createMutationSummary = createAsyncThunk(
   "CREATE_MUTATION_SUMMARY",
   async (body, thunkAPI) => {
     try {
-      // TODO: Replace with actual API call
-      // const url = `/v1/dbs/api/gas-deposit/mutation-summary`;
-      // const response = await ratingBillingHttpService.createData(url, body);
-      // return response.data?.data ?? response.data;
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log("Create Mutation Summary Body:", body);
+      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const responseData = response?.data ?? response;
       thunkAPI.dispatch(
         showModalSuccess({
           title: "Success",
@@ -712,7 +720,7 @@ export const createMutationSummary = createAsyncThunk(
           return: false,
         }),
       );
-      return body;
+      return responseData;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -726,18 +734,12 @@ export const getCategoryListGasDeposit = createAsyncThunk(
   "GET_CATEGORY_LIST_GAS_DEPOSIT",
   async (_, thunkAPI) => {
     try {
-      // TODO: Replace with actual API call
-      // const url = `/v1/dbs/api/rbi/adjustment/get-category-attachment`;
-      // const response = await ratingBillingHttpService.getAll(url);
-      // return response.data?.map((item) => ({ Id: item.id, text: item.text }));
-
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return [
-        { Id: 1, text: "Invoice" },
-        { Id: 2, text: "Contract" },
-        { Id: 3, text: "Supporting Document" },
-        { Id: 4, text: "Others" },
-      ];
+      const url = `/v1/dbs/api/gas-deposit/get-category-attachment`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const data = response?.data ?? response;
+      return Array.isArray(data)
+        ? data.map((item) => ({ Id: item.Id, text: item.text }))
+        : data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -783,13 +785,9 @@ export const createMutationDetail = createAsyncThunk(
   "CREATE_MUTATION_DETAIL",
   async (body, thunkAPI) => {
     try {
-      // TODO: Replace with actual API call
-      // const url = `/v1/dbs/api/gas-deposit/mutation-detail`;
-      // const response = await ratingBillingHttpService.createData(url, body);
-      // return response.data?.data ?? response.data;
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log("Create Mutation Detail Body:", body);
+      const url = `/v1/dbs/api/gas-deposit/mutation-detail/create`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const responseData = response?.data ?? response;
       thunkAPI.dispatch(
         showModalSuccess({
           title: "Success",
@@ -797,7 +795,7 @@ export const createMutationDetail = createAsyncThunk(
           return: false,
         }),
       );
-      return body;
+      return responseData;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -814,6 +812,81 @@ export const getApprovalHistory = createAsyncThunk(
       const url = `/v1/dbs/api/gas-deposit/approval-history/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
       return Array.isArray(response.data) ? {} : response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
+);
+
+export const getAttachmentList = createAsyncThunk(
+  "GET_GAS_DEPOSIT_ATTACHMENT_LIST",
+  async ({ referenceId, category = "GAS_DEPOSIT_SUMMARY" } = {}, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/attachments?referenceId=${referenceId}&category=${category}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response?.data ?? response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
+);
+
+export const getPriceByBillingPeriod = createAsyncThunk(
+  "GET_GAS_DEPOSIT_PRICE_BY_PERIOD",
+  async ({ accountNumber, billingPeriod }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/price-by-period?accountNumber=${encodeURIComponent(accountNumber)}&billingPeriod=${encodeURIComponent(billingPeriod)}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      const data = response?.data ?? response;
+      return data?.price ?? null;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
+);
+
+export const getApprovalExpiredList = createAsyncThunk(
+  "GET_GAS_DEPOSIT_APPROVAL_EXPIRED_LIST",
+  async ({ page, pageSize, search, sort } = {}, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/gas-deposit/approval-expired-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response?.data ?? response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
+);
+
+export const processGasDepositApproval = createAsyncThunk(
+  "PROCESS_GAS_DEPOSIT_APPROVAL",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/approval`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const responseData = response?.data ?? response;
+      thunkAPI.dispatch(
+        showModalSuccess({
+          title: "Success",
+          description: `Gas Deposit ${String(body?.action || "").toLowerCase()} successfully`,
+          return: false,
+        }),
+      );
+      return responseData;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -1021,6 +1094,72 @@ const gasDepositSlice = createSlice({
     [getApprovalHistory.rejected]: (state) => {
       state.loading_history = false;
       state.data_approval_history = {};
+    },
+
+    // Attachment List
+    [getAttachmentList.pending]: (state) => {
+      state.loading_attachment = true;
+    },
+    [getAttachmentList.fulfilled]: (state, action) => {
+      state.loading_attachment = false;
+      state.data_attachment = action.payload?.data ?? action.payload ?? [];
+    },
+    [getAttachmentList.rejected]: (state) => {
+      state.loading_attachment = false;
+      state.data_attachment = [];
+    },
+
+    // History Gas Deposit List
+    [getHistoryGasDepositPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_history_list = true;
+      }
+    },
+    [getHistoryGasDepositPaginate.fulfilled]: (state, action) => {
+      state.loading_history_list = false;
+      const isLoadMore = action.payload?.isLoadMore;
+      if (isLoadMore) {
+        const existing = state.data_history?.result || [];
+        const newResult = action.payload?.result || [];
+        const existingKeys = new Set(existing.map((item) => item.accountNumber));
+        const uniqueNewData = newResult.filter(
+          (item) => !existingKeys.has(item.accountNumber),
+        );
+        state.data_history = {
+          ...action.payload,
+          result: [...existing, ...uniqueNewData],
+        };
+      } else {
+        state.data_history = action.payload;
+      }
+    },
+    [getHistoryGasDepositPaginate.rejected]: (state) => {
+      state.loading_history_list = false;
+      state.isFailed = true;
+    },
+
+    // Approval Expired List
+    [getApprovalExpiredList.pending]: (state) => {
+      state.loading_approval_expired_list = true;
+    },
+    [getApprovalExpiredList.fulfilled]: (state, action) => {
+      state.loading_approval_expired_list = false;
+      state.data_approval_expired_list = action.payload || { result: [], page: {} };
+    },
+    [getApprovalExpiredList.rejected]: (state) => {
+      state.loading_approval_expired_list = false;
+      state.data_approval_expired_list = { result: [], page: {} };
+    },
+
+    // Process Approval
+    [processGasDepositApproval.pending]: (state) => {
+      state.loading_process_approval = true;
+    },
+    [processGasDepositApproval.fulfilled]: (state) => {
+      state.loading_process_approval = false;
+    },
+    [processGasDepositApproval.rejected]: (state) => {
+      state.loading_process_approval = false;
     },
   },
 });

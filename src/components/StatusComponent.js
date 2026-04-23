@@ -144,8 +144,9 @@ const StatusComponent = ({
         break;
 
       case "expire":
-        bgColor = "status-expire";
-        tColor = "text-red-700";
+      case "expired":
+        bgColor = "status-inactive";
+        tColor = "text-white";
         break;
 
       case "expire10":

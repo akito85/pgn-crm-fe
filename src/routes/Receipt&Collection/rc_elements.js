@@ -92,6 +92,9 @@ import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/L
 import ViewCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ViewCaCiMapping";
 import ListDetailCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListDetailCaCiMapping";
 import ListFormCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListFormCaCiMapping";
+import PayGasDepositePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositePage";
+import PayGasDepositeCreatePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeCreatePage";
+import PayGasDepositeExpiredCreatePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeExpiredCreatePage";
 
 
 
@@ -258,4 +261,10 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_CA_CI_MAPPING: <ListDetailCaCiMapping />,
   CREATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"create"} />,
   UPDATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"update"} />,
+
+  // Gas Deposite
+  GAS_DEPOSITE_VIEW: <PayGasDepositePage />,
+  GAS_DEPOSITE_CREATE: <PayGasDepositeCreatePage />,
+  GAS_DEPOSITE_UPDATE: <PayGasDepositeCreatePage />,
+  GAS_DEPOSITE_EXPIRED_CREATE: <PayGasDepositeExpiredCreatePage />
 };

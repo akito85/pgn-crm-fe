@@ -9,8 +9,15 @@ const CollapsibleCardContainer = ({
   element,
   className = "",
   defaultOpen = true,
+  onToggle,
 }) => {
   const [open, setOpen] = useState(defaultOpen);
+
+  const handleToggle = () => {
+    const next = !open;
+    setOpen(next);
+    if (onToggle) onToggle(next);
+  };
 
   return (
     <div className={`drop-shadow-lg bg-white rounded-lg w-full my-2 ${className}`}>
@@ -18,7 +25,7 @@ const CollapsibleCardContainer = ({
         <div
           className="flex items-center justify-between cursor-pointer select-none"
           style={{ padding: "16px" }}
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={handleToggle}
         >
           <div>{element}</div>
           <DownOutlined
@@ -34,7 +41,7 @@ const CollapsibleCardContainer = ({
         <div
           className="flex items-center justify-between bg-[#F9F9F9] rounded-t-lg cursor-pointer select-none uppercase"
           style={{ borderBottom: open ? "1px solid #BDBDBD" : "none", padding: "16px" }}
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={handleToggle}
         >
           <div>
             <div className="text-[16px] text-primary">{header}</div>

@@ -11,7 +11,6 @@ import DetailText from "../../../../../components/DetailText";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import BaseContainer from "../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";

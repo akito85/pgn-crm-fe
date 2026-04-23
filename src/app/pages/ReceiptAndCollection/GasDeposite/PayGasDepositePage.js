@@ -4,24 +4,104 @@ import { useNavigate } from "react-router-dom";
 import { Tooltip, Tabs, Dropdown } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
-  getAllGasDepositPaginate,
   getMutationSummaryPaginate,
   getApprovalHistory,
   setGasDepositFilters,
-  getHistoryGasDepositPaginate,
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
-import { columnsGasDeposit } from "./Table/TableViewGasDeposit";
-import { columnsSummaryBalance } from "./Table/TableSummaryBalance";
-import GasDepositDetail from "./GasDepositDetail";
-import ModalApprovalExpired from "./Modal/ModalApprovalExpired";
+import { columnsGasDeposit } from "../../RatingBillingInvoice/GasDeposit/Table/TableViewGasDeposit";
+import { columnsSummaryBalance } from "../../RatingBillingInvoice/GasDeposit/Table/TableSummaryBalance";
+import PayGasDepositeDetail from "./PayGasDepositeDetail";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
+
+const DUMMY_GAS_DEPOSIT_DATA = [
+  {
+    key: 1, gasDepositId: 1,
+    customerNumber: "100001", customerName: "PT Industri Gas Nusantara",
+    accountNumber: "1000001", accountName: "Gas Deposit - Industri Gas Nusantara",
+    accountGroupType: "Industrial", sor: "011 - PGN Surabaya",
+    costCenter: "CC-011", accountSegment: "I", meterReadingCode: "MR-0001",
+    currency: "IDR", uom: "MMBTU",
+    termsEarn: 12, termsRedeem: 6, periodEarn: "Jan-26",
+    periodRedeemStart: "01-Jul-25", periodRedeemEnd: "31-Dec-25",
+    period: "Jan-26", timeUnit: "Month",
+    amount: 500000000, cashBalance: 500000000, type: "Gas",
+    accountType: "GAS", classificationType: "Type A", source: "Billing",
+    description: "Gas deposit pembayaran bulan Januari 2026",
+    status: "Active", statusApproval: "Approved",
+    mutationStatus: "Active", mutationApprovalStatus: "Approved",
+  },
+  {
+    key: 2, gasDepositId: 2,
+    customerNumber: "100002", customerName: "PT Energi Sentosa",
+    accountNumber: "1000002", accountName: "Gas Deposit - Energi Sentosa",
+    accountGroupType: "Commercial", sor: "012 - PGN Jakarta",
+    costCenter: "CC-012", accountSegment: "C", meterReadingCode: "MR-0002",
+    currency: "IDR", uom: "MMBTU",
+    termsEarn: 6, termsRedeem: 3, periodEarn: "Feb-26",
+    periodRedeemStart: "01-Aug-25", periodRedeemEnd: "28-Feb-26",
+    period: "Feb-26", timeUnit: "Month",
+    amount: 300000000, cashBalance: 250000000, type: "Gas",
+    accountType: "GAS", classificationType: "Type B", source: "Adjustment",
+    description: "Gas deposit pembayaran bulan Februari 2026",
+    status: "Active", statusApproval: "Waiting Approval",
+    mutationStatus: "Active", mutationApprovalStatus: "Waiting Approval",
+  },
+  {
+    key: 3, gasDepositId: 3,
+    customerNumber: "100003", customerName: "PT Maju Jaya Mandiri",
+    accountNumber: "1000003", accountName: "Gas Deposit - Maju Jaya Mandiri",
+    accountGroupType: "Industrial", sor: "013 - PGN Bandung",
+    costCenter: "CC-013", accountSegment: "I", meterReadingCode: "MR-0003",
+    currency: "IDR", uom: "MMBTU",
+    termsEarn: 24, termsRedeem: 12, periodEarn: "Mar-26",
+    periodRedeemStart: "01-Jan-26", periodRedeemEnd: "31-Mar-26",
+    period: "Mar-26", timeUnit: "Month",
+    amount: 750000000, cashBalance: 600000000, type: "Gas",
+    accountType: "GAS", classificationType: "Type A", source: "Billing",
+    description: "Gas deposit pembayaran bulan Maret 2026",
+    status: "Expired", statusApproval: "Approved",
+    mutationStatus: "Expired", mutationApprovalStatus: "Approved",
+  },
+  {
+    key: 4, gasDepositId: 4,
+    customerNumber: "100004", customerName: "CV Sumber Energi Baru",
+    accountNumber: "1000004", accountName: "Gas Deposit - Sumber Energi Baru",
+    accountGroupType: "Small Business", sor: "014 - PGN Medan",
+    costCenter: "CC-014", accountSegment: "S", meterReadingCode: "MR-0004",
+    currency: "IDR", uom: "MMBTU",
+    termsEarn: 12, termsRedeem: 6, periodEarn: "Apr-26",
+    periodRedeemStart: "01-Oct-25", periodRedeemEnd: "30-Apr-26",
+    period: "Apr-26", timeUnit: "Month",
+    amount: 150000000, cashBalance: 150000000, type: "Gas",
+    accountType: "GAS", classificationType: "Type C", source: "Billing",
+    description: "Gas deposit pembayaran bulan April 2026",
+    status: "Active", statusApproval: "Rejected",
+    mutationStatus: "Active", mutationApprovalStatus: "Rejected",
+  },
+  {
+    key: 5, gasDepositId: 5,
+    customerNumber: "100005", customerName: "PT Gas Bumi Perkasa",
+    accountNumber: "1000005", accountName: "Gas Deposit - Gas Bumi Perkasa",
+    accountGroupType: "Industrial", sor: "015 - PGN Semarang",
+    costCenter: "CC-015", accountSegment: "I", meterReadingCode: "MR-0005",
+    currency: "IDR", uom: "MMBTU",
+    termsEarn: 18, termsRedeem: 9, periodEarn: "May-26",
+    periodRedeemStart: "01-Nov-25", periodRedeemEnd: "31-May-26",
+    period: "May-26", timeUnit: "Month",
+    amount: 900000000, cashBalance: 850000000, type: "Gas",
+    accountType: "GAS", classificationType: "Type A", source: "Billing",
+    description: "Gas deposit pembayaran bulan Mei 2026",
+    status: "Expired", statusApproval: "Approved",
+    mutationStatus: "Expired", mutationApprovalStatus: "Approved",
+  },
+];
 
 const formatApprovalHistoryLabel = (key) => {
   const normalizedKey = key.toUpperCase();
@@ -75,8 +155,8 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
   };
 };
 
-const GasDepositPage = () => {
-  const { data, loading, loading_history, loading_mutation_summary, loading_history_list, data_history, data_approval_history, data_mutation_summary, filters } = useSelector(
+const PayGasDepositePage = () => {
+  const { loading_history, data_approval_history, filters, data_mutation_summary, loading_mutation_summary } = useSelector(
     (state) => state.gasDepositRbi,
   );
 
@@ -84,11 +164,9 @@ const GasDepositPage = () => {
   const navigate = useNavigate();
   const searchInput = useRef(null);
   const suppressNextRowClickRef = useRef(false);
-  const dataSource = data?.result;
   const detailRef = useRef(null);
 
   const [page, setPage] = useState(filters?.page || 1);
-  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState(filters?.sort || "");
@@ -99,7 +177,6 @@ const GasDepositPage = () => {
   const [selectedGasDepositData, setSelectedGasDepositData] = useState(null);
   const [activeTab, setActiveTab] = useState("gasDeposit");
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
-  const [modalApprovalExpired, setModalApprovalExpired] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
@@ -110,11 +187,6 @@ const GasDepositPage = () => {
   const [fixedColumnsSummary, setFixedColumnsSummary] = useState(() => ({
     left: ["no"],
     right: ["status", "statusApproval", "mutationStatus", "mutationApprovalStatus"],
-  }));
-
-  const [fixedColumnsHistory, setFixedColumnsHistory] = useState(() => ({
-    left: ["no"],
-    right: ["status", "statusApproval"],
   }));
 
   // Simpan filters ke Redux
@@ -142,20 +214,9 @@ const GasDepositPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
-  useEffect(() => {
-    if (activeTab !== "gasDeposit") return;
-    dispatch(
-      getAllGasDepositPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: 100,
-        sort,
-        isLoadMore: false,
-      }),
-    );
-    setPage(1);
-  }, [dispatch, search, sort, activeTab]);
+  // API not ready — using dummy data
 
+  // Fetch summary balance when tab is active
   useEffect(() => {
     if (activeTab === "summaryBalance") {
       dispatch(
@@ -163,17 +224,7 @@ const GasDepositPage = () => {
           page: 1,
           pageSize: 100,
           search: encodeURIComponent(JSON.stringify(search)),
-          sort,
-        }),
-      );
-    }
-    if (activeTab === "history") {
-      dispatch(
-        getHistoryGasDepositPaginate({
-          page: 1,
-          pageSize: 100,
-          search: encodeURIComponent(JSON.stringify(search)),
-          sort,
+          sort: sort || "accountNumber~asc",
         }),
       );
     }
@@ -190,8 +241,8 @@ const GasDepositPage = () => {
   }, [data_approval_history]);
 
   const routes = [
-    { path: "", breadcrumbName: "Rating & Billing" },
-    { path: RBI_ROUTES.GAS_DEPOSIT_VIEW, breadcrumbName: "Gas Deposit" },
+    { path: "", breadcrumbName: "Payment & Collection" },
+    { path: RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW, breadcrumbName: "Gas Deposite" },
   ];
 
   const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
@@ -205,48 +256,9 @@ const GasDepositPage = () => {
     });
   }, []);
 
-  const initialPageSize = 100;
+  const handleLoadMore = async () => {};
 
-  const handleLoadMore = async () => {
-    const totalElements = data?.page?.totalElements || 0;
-    const currentDataLength = dataSource?.length || 0;
-
-    if (currentDataLength >= totalElements) return;
-
-    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
-
-    dispatch(
-      getAllGasDepositPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: nextPage,
-        pageSize: loadMoreSize,
-        sort,
-        isLoadMore: true,
-      }),
-    );
-    setPage(nextPage);
-  };
-
-  const handleHistoryLoadMore = async () => {
-    const totalElements = data_history?.page?.totalElements || 0;
-    const currentDataLength = historyDataSource?.length || 0;
-
-    if (currentDataLength >= totalElements) return;
-
-    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
-
-    dispatch(
-      getHistoryGasDepositPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: nextPage,
-        pageSize: loadMoreSize,
-        sort,
-        isLoadMore: true,
-      }),
-    );
-  };
-
-  const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
+  const hasMore = false;
 
   const onSort = (_, __, sorter) => {
     let dataSort = "";
@@ -259,32 +271,7 @@ const GasDepositPage = () => {
     setSort(dataSort);
   };
 
-  const handleRefresh = () => {
-    dispatch(
-      getAllGasDepositPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: initialPageSize,
-        sort,
-        isLoadMore: false,
-      }),
-    );
-    setPage(1);
-  };
-
-  const handleRefreshAll = () => {
-    handleRefresh();
-    if (activeTab === "history") {
-      dispatch(
-        getHistoryGasDepositPaginate({
-          page: 1,
-          pageSize: 100,
-          search: encodeURIComponent(JSON.stringify(search)),
-          sort,
-        }),
-      );
-    }
-  };
+  const handleRefresh = () => {};
 
   const suppressNextRowClick = useCallback(() => {
     suppressNextRowClickRef.current = true;
@@ -294,19 +281,22 @@ const GasDepositPage = () => {
     }, 0);
   }, []);
 
-  const toggleDetail = useCallback((record) => {
-    const recordKey = record.gasDepositId;
+  const toggleDetail = useCallback(
+    (record) => {
+      const recordKey = record.gasDepositId;
 
-    if (activeRowKey === recordKey && pageDetail) {
-      setPageDetail(false);
-      setActiveRowKey(null);
-      setSelectedGasDepositData(null);
-    } else {
-      setActiveRowKey(recordKey);
-      setSelectedGasDepositData(record);
-      setPageDetail(true);
-    }
-  }, [activeRowKey, pageDetail]);
+      if (activeRowKey === recordKey && pageDetail) {
+        setPageDetail(false);
+        setActiveRowKey(null);
+        setSelectedGasDepositData(null);
+      } else {
+        setActiveRowKey(recordKey);
+        setSelectedGasDepositData(record);
+        setPageDetail(true);
+      }
+    },
+    [activeRowKey, pageDetail],
+  );
 
   const handleDetail = (record) => {
     if (suppressNextRowClickRef.current) {
@@ -317,11 +307,14 @@ const GasDepositPage = () => {
     toggleDetail(record);
   };
 
-  const handleApprovalHistory = useCallback((record) => {
-    suppressNextRowClick();
-    dispatch(getApprovalHistory(record.gasDepositId));
-    setModalApprovalHistory(true);
-  }, [dispatch, suppressNextRowClick]);
+  const handleApprovalHistory = useCallback(
+    (record) => {
+      suppressNextRowClick();
+      dispatch(getApprovalHistory(record.gasDepositId));
+      setModalApprovalHistory(true);
+    },
+    [dispatch, suppressNextRowClick],
+  );
 
   const itemGrantAccess = useMemo(
     () => [
@@ -339,7 +332,7 @@ const GasDepositPage = () => {
                 </div>
               ),
               onClick: () =>
-                navigate(RBI_ROUTES.GAS_DEPOSIT_UPDATE, {
+                navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_UPDATE, {
                   state: {
                     mode: "update",
                     selectedData: record,
@@ -466,43 +459,21 @@ const GasDepositPage = () => {
     [allColumns],
   );
 
-  const dataSourceWithKeys = useMemo(
+  const dataSourceWithKeys = DUMMY_GAS_DEPOSIT_DATA;
+
+  const summaryDataSourceWithKeys = useMemo(
     () =>
-      (dataSource ?? []).filter(Boolean).map((item) => ({
+      data_mutation_summary?.result?.map((item) => ({
         ...item,
         key: item.accountId,
-        gasDepositId: item.masterGasDepositId ?? item.accountId,
-        status: item.statusMaster || null,
-        statusApproval: item.statusApproval || null,
-        mutationApprovalStatus: null,
-        mutationStatus: null,
-        sor: item.sor || null,
-        costCenter: item.costCenter || null,
-        accountSegment: item.accountSegment || null,
-        meterReadingCode: item.meterReadingCode || null,
-        termsEarn: item.termsEarn ?? null,
-        termsRedeem: item.termsRedeem ?? null,
-        periodEarn: item.earnStartDate || null,
-        period: item.earnStartDate && item.earnEndDate
-          ? `${item.earnStartDate} - ${item.earnEndDate}`
-          : item.earnStartDate || null,
-        periodRedeemStart: item.redeemStartDate || null,
-        periodRedeemEnd: item.redeemEndDate || null,
-        timeUnit: item.timeUnit || null,
-        currency: item.currency || null,
-        uom: item.uom || null,
+        quantity: item.balanceVolume ?? null,
         amount: item.balanceAmount ?? null,
-        cashBalance: item.balanceVolume ?? null,
-        accountType: item.accountType || null,
-        type: item.pendingActionType || null,
-        description: item.description || null,
-        sapCustId: item.sapCustId || null,
-        classificationType: item.classificationType || null,
-        source: item.source || null,
-        headerType: null,
-        billingPeriod: null,
-      })),
-    [dataSource],
+        status: item.statusMaster ?? null,
+        redeemStartDate: item.redeemStartDate ?? null,
+        redeemEndDate: item.redeemEndDate ?? null,
+        earnPeriod: item.earnStartDate ?? null,
+      })) ?? [],
+    [data_mutation_summary],
   );
 
   const baseSummaryColumns = useMemo(() => {
@@ -538,82 +509,9 @@ const GasDepositPage = () => {
     [allSummaryColumns],
   );
 
-  const summaryDataSource = useMemo(
-    () =>
-      (data_mutation_summary?.result ?? []).filter(Boolean).map((item) => ({
-        ...item,
-        key: item.accountNumber,
-        termsEarn:            item.termsEarn            ?? null,
-        termsRedeem:          item.termsRedeem          ?? null,
-        earnPeriod:           item.earnStartDate        ?? null,
-        redeemStartDate:      item.periodRedeemStart    ?? null,
-        redeemEndDate:        item.periodRedeemEnd      ?? null,
-        billingPeriod:        item.billingPeriod        ?? null,
-        timeUnit:             item.timeUnit             ?? null,
-        quantity:             item.quantity             ?? null,
-        balanceAmount:        item.balanceAmount        ?? null,
-        headerType:           item.headerType           ?? null,
-        classificationType:   item.classificationType   ?? null,
-        source:               item.source               ?? null,
-        period:               item.period               ?? null,
-        mutationDate:         item.mutationDate         ?? null,
-        mutationType:         item.mutationType         ?? null,
-        volume:               item.volume               ?? null,
-        price:                item.price                ?? null,
-        detailType:           item.detailType           ?? null,
-        amount:               item.amount               ?? null,
-        status:               item.status               ?? null,
-        statusApproval:       item.statusApproval       ?? null,
-        mutationStatus:       item.mutationStatus       ?? null,
-        mutationApprovalStatus: item.mutationApprovalStatus ?? null,
-      })),
-    [data_mutation_summary],
-  );
-
-  const historyDataSource = useMemo(
-    () =>
-      (data_history?.result ?? []).map((item) => ({
-        ...item,
-        key: item.accountNumber,
-        gasDepositId: item.accountNumber,
-        status: item.status || null,
-        statusApproval: item.statusApproval || null,
-        periodEarn: item.earnStartDate || null,
-        period: item.period || (item.earnStartDate && item.earnEndDate
-          ? `${item.earnStartDate} - ${item.earnEndDate}`
-          : item.earnStartDate || null),
-        periodRedeemStart: item.periodRedeemStart || null,
-        periodRedeemEnd: item.periodRedeemEnd || null,
-      })),
-    [data_history],
-  );
-
-  const historyColumns = useMemo(() => {
-    return columnsGasDeposit(
-      0,
-      0,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      search,
-    );
-  }, [searchInput, searchedColumn, searchText, handleSearch, search]);
-
-  const processedHistoryColumns = useMemo(
-    () => applyFixedColumns(historyColumns, fixedColumnsHistory),
-    [historyColumns, fixedColumnsHistory],
-  );
-
-  const historyColumnDefinitions = useMemo(
-    () => historyColumns.map((col) => ({ key: col.key, title: col.title })),
-    [historyColumns],
-  );
-
   const tabItems = [
     { key: "gasDeposit", label: "Gas Deposit", children: null },
     { key: "summaryBalance", label: "Summary Balance", children: null },
-    { key: "history", label: "History", children: null },
   ];
 
   return (
@@ -629,7 +527,7 @@ const GasDepositPage = () => {
                 icon={<SVGIcon name="IconRequestApproval" width={16} color="#FFF" />}
                 type="submit"
                 border={false}
-                onClick={() => setModalApprovalExpired(true)}
+                onClick={() => {}}
               >
                 Approval Expired
               </ButtonComponent>
@@ -637,7 +535,7 @@ const GasDepositPage = () => {
                 icon={<SVGIcon name="IconCalendarEvent" width={16} />}
                 type="submit"
                 border={false}
-                onClick={() => navigate(RBI_ROUTES.GAS_DEPOSIT_EXPIRED_CREATE)}
+                onClick={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_EXPIRED_CREATE)}
               >
                 Expired Gas Deposit
               </ButtonComponent>
@@ -653,7 +551,7 @@ const GasDepositPage = () => {
                 icon={<SVGIcon name="IconButtonCreate" width={16} />}
                 type="submit"
                 border={false}
-                onClick={() => navigate(RBI_ROUTES.GAS_DEPOSIT_CREATE)}
+                onClick={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_CREATE)}
               >
                 Create
               </ButtonComponent>
@@ -671,72 +569,54 @@ const GasDepositPage = () => {
 
         {activeTab === "gasDeposit" && (
           <TableRBI
-            idTable="gas-deposit-table"
+            idTable="rc-gas-deposite-table"
             dataSource={dataSourceWithKeys}
             columns={processedColumns}
-            totalData={data?.page?.totalElements || 0}
+            totalData={DUMMY_GAS_DEPOSIT_DATA.length}
             tableScrolled={{ x: 5000, y: 525 }}
             onSort={onSort}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
-            loading={loading}
+            loading={false}
             showExport={false}
             usePagination={false}
-            useInfiniteScroll={true}
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
+            useInfiniteScroll={false}
             showRefresh={true}
             onRefresh={handleRefresh}
-            loadMoreThreshold={15}
             enableRowClick={true}
             selectedRowKey={activeRowKey}
             onRowClick={handleDetail}
           />
         )}
 
-        {activeTab === "history" && (
-          <TableRBI
-            idTable="gas-deposit-history-table"
-            dataSource={historyDataSource}
-            columns={processedHistoryColumns}
-            totalData={data_history?.page?.totalElements || 0}
-            tableScrolled={{ x: 5000, y: 525 }}
-            onSort={onSort}
-            columnDefinitions={historyColumnDefinitions}
-            fixedColumns={fixedColumnsHistory}
-            setFixedColumns={setFixedColumnsHistory}
-            loading={loading_history_list}
-            showExport={false}
-            usePagination={false}
-            useInfiniteScroll={true}
-            onLoadMore={handleHistoryLoadMore}
-            hasMore={(historyDataSource.length) < (data_history?.page?.totalElements || 0)}
-            showRefresh={true}
-            onRefresh={() => dispatch(getHistoryGasDepositPaginate({ page: 1, pageSize: loadMoreSize, search: encodeURIComponent(JSON.stringify(search)), sort }))}
-            loadMoreThreshold={15}
-          />
-        )}
-
         {activeTab === "summaryBalance" && (
           <TableRBI
-              idTable="gas-deposit-summary-table"
-              dataSource={summaryDataSource}
-              columns={processedSummaryColumns}
-              totalData={data_mutation_summary?.page?.totalElements || 0}
-              tableScrolled={{ x: 5000, y: 525 }}
-              onSort={onSort}
-              columnDefinitions={summaryColumnDefinitions}
-              fixedColumns={fixedColumnsSummary}
-              setFixedColumns={setFixedColumnsSummary}
-              loading={loading_mutation_summary}
-              showExport={false}
-              usePagination={false}
-              useInfiniteScroll={true}
-              hasMore={false}
-              showRefresh={true}
-              onRefresh={() => dispatch(getMutationSummaryPaginate({ page: 1, pageSize: 100, search: encodeURIComponent(JSON.stringify(search)), sort }))}
-            />
+            idTable="rc-gas-deposite-summary-table"
+            dataSource={summaryDataSourceWithKeys}
+            columns={processedSummaryColumns}
+            totalData={data_mutation_summary?.page?.totalElements || 0}
+            tableScrolled={{ x: 10000, y: 525 }}
+            onSort={onSort}
+            columnDefinitions={summaryColumnDefinitions}
+            fixedColumns={fixedColumnsSummary}
+            setFixedColumns={setFixedColumnsSummary}
+            loading={loading_mutation_summary}
+            showExport={false}
+            usePagination={false}
+            useInfiniteScroll={false}
+            showRefresh={true}
+            onRefresh={() =>
+              dispatch(
+                getMutationSummaryPaginate({
+                  page: 1,
+                  pageSize: 100,
+                  search: encodeURIComponent(JSON.stringify(search)),
+                  sort: sort || "accountNumber~asc",
+                }),
+              )
+            }
+          />
         )}
       </CardContainer>
 
@@ -745,7 +625,7 @@ const GasDepositPage = () => {
           ref={detailRef}
           className="mt-0 border-t-4 border-blue-500 bg-blue-50/30 rounded-lg p-0"
         >
-          <GasDepositDetail
+          <PayGasDepositeDetail
             selectedData={selectedGasDepositData}
             onClose={() => {
               setPageDetail(false);
@@ -766,14 +646,8 @@ const GasDepositPage = () => {
         dataHistory={dataApprovalHistoryFix?.dataHistory}
         loading={loading_history}
       />
-
-      <ModalApprovalExpired
-        isOpen={modalApprovalExpired}
-        handleCancel={() => setModalApprovalExpired(false)}
-        handleRefresh={handleRefreshAll}
-      />
     </>
   );
 };
 
-export default GasDepositPage;
+export default PayGasDepositePage;

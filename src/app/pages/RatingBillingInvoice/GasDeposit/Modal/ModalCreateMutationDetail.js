@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
@@ -20,23 +20,11 @@ import {
 import {
   getUomOptions,
   getMutationTypeOptions,
+  getRedemPeriodOptions,
   createMutationDetail,
   getCategoryListGasDeposit,
+  getPriceByBillingPeriod,
 } from "../../../../../redux/slices/rating_billing_invoice/gasDeposit";
-
-const BILLING_PERIOD_OPTIONS = [
-  { label: "JAN 26", value: "JAN 26" },
-  { label: "JUL 26", value: "JUL 26" },
-  { label: "AUG 26", value: "AUG 26" },
-  { label: "DEC 26", value: "DEC 26" },
-];
-
-const CATEGORY_OPTIONS = [
-  { label: "Billing Adjustment", value: "Billing Adjustment" },
-  { label: "Expired", value: "Expired" },
-  { label: "Cancel Expired", value: "Cancel Expired" },
-  { label: "Redeem", value: "Redeem" },
-];
 
 const ModalCreateMutationDetail = ({
   isOpen,
@@ -54,7 +42,14 @@ const ModalCreateMutationDetail = ({
   const {
     data_uom_options: uomOptions,
     data_mutation_type_options: mutationTypeOptions,
+    data_redem_period_options: billingPeriodOptions,
+    dataListCategory,
   } = useSelector((state) => state.gasDepositRbi);
+
+  const categoryOptions = useMemo(
+    () => (dataListCategory || []).map((c) => ({ label: c.text, value: c.text })),
+    [dataListCategory],
+  );
 
   // Step state
   const [currentStep, setCurrentStep] = useState(0);
@@ -73,12 +68,12 @@ const ModalCreateMutationDetail = ({
     if (isOpen) {
       dispatch(getUomOptions());
       dispatch(getMutationTypeOptions());
+      dispatch(getRedemPeriodOptions());
+      dispatch(getCategoryListGasDeposit());
       dispatch(getAllApprovalList());
       form.setFieldsValue({
         source: "MANUAL",
         type: "Adjustment",
-        price: "{value}",
-        amount: "{value}",
       });
     }
   }, [dispatch, isOpen, form]);
@@ -167,11 +162,6 @@ const ModalCreateMutationDetail = ({
 
   const handleSave = () => {
     const values = form.getFieldsValue();
-    const body = {
-      ...values,
-      gasDepositId: selectedData?.gasDepositId,
-      attachments: listDataAttachment,
-    };
 
     // Used in create page slicing before gasDepositId exists
     if (!selectedData?.gasDepositId) {
@@ -179,6 +169,19 @@ const ModalCreateMutationDetail = ({
       handleRefresh(values);
       return;
     }
+
+    const body = {
+      gasDepositId: selectedData.gasDepositId,
+      apphierId: values.apphierId,
+      billPeriode: values.billingPeriod,
+      mutationDate: values.mutationDate,
+      transType: values.category,
+      volumeAmount: values.quantity,
+      price: values.price,
+      amountValue: values.amount,
+      description: values.description,
+      attachments: listDataAttachment,
+    };
 
     dispatch(createMutationDetail(body)).then((res) => {
       if (!res.error) {
@@ -312,7 +315,20 @@ const ModalCreateMutationDetail = ({
                 rules={[{ required: true, message: "Please select Billing Period!" }]}
                 style={{ marginBottom: 0 }}
               >
-                <SelectComponent placeholder="Select Billing Period" options={BILLING_PERIOD_OPTIONS} />
+                <SelectComponent
+                  placeholder="Select Billing Period"
+                  options={billingPeriodOptions}
+                  onChange={(val) => {
+                    if (!selectedData?.accountNumber || !val) return;
+                    dispatch(getPriceByBillingPeriod({ accountNumber: selectedData.accountNumber, billingPeriod: val }))
+                      .then((res) => {
+                        const price = res?.payload ?? "";
+                        const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
+                        const p = Number.parseFloat(price) || 0;
+                        form.setFieldsValue({ price, amount: qty * p || "" });
+                      });
+                  }}
+                />
               </Form.Item>
 
               <Form.Item
@@ -321,7 +337,7 @@ const ModalCreateMutationDetail = ({
                 rules={[{ required: true, message: "Please select Mutation Date!" }]}
                 style={{ marginBottom: 0 }}
               >
-                <DateComponent placeholder="Select Date" />
+                <DateComponent placeholder="Select Date" dateDisable={() => false} />
               </Form.Item>
 
               <Form.Item
@@ -345,7 +361,7 @@ const ModalCreateMutationDetail = ({
                 rules={[{ required: true, message: "Please select Category!" }]}
                 style={{ marginBottom: 0 }}
               >
-                <SelectComponent placeholder="Select Category" options={CATEGORY_OPTIONS} />
+                <SelectComponent placeholder="Select Category" options={categoryOptions} />
               </Form.Item>
 
               <Form.Item
@@ -369,15 +385,25 @@ const ModalCreateMutationDetail = ({
                 rules={[{ required: true, message: "Please input Quantity!" }]}
                 style={{ marginBottom: 0 }}
               >
-                <InputComponent placeholder="Input.." />
+                <InputComponent
+                  placeholder="Input.."
+                  onChange={(e) => {
+                    const qty = Number.parseFloat(e.target.value) || 0;
+                    const price = Number.parseFloat(form.getFieldValue("price")) || 0;
+                    form.setFieldsValue({ amount: qty * price || "" });
+                  }}
+                />
               </Form.Item>
 
               <Form.Item label="Price" name="price" style={{ marginBottom: 0 }}>
-                <InputComponent disabled placeholder="{value}" />
+                <InputComponent
+                  disabled
+                  placeholder="Auto-filled from billing period"
+                />
               </Form.Item>
 
               <Form.Item label="Amount" name="amount" style={{ marginBottom: 0 }}>
-                <InputComponent disabled placeholder="{value}" />
+                <InputComponent disabled placeholder="auto" />
               </Form.Item>
 
               <Form.Item label="Type" name="type" style={{ marginBottom: 0 }}>
@@ -423,7 +449,7 @@ const ModalCreateMutationDetail = ({
 
           <AttachmentComponent
             type="create"
-            typeSelector="gasDeposit"
+            typeSelector="gasDepositRbi"
             data={listDataAttachment}
             updateData={setListDataAttachment}
             dispatch={dispatch}

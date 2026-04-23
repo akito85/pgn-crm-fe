@@ -161,4 +161,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/view",
   CREATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/create",
   UPDATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/update",
+
+  // Gas Deposite
+  GAS_DEPOSITE_VIEW: "/receipt-and-collection/gas-deposite",
+  GAS_DEPOSITE_CREATE: "/receipt-and-collection/gas-deposite/create",
+  GAS_DEPOSITE_UPDATE: "/receipt-and-collection/gas-deposite/update",
+  GAS_DEPOSITE_EXPIRED_CREATE: "/receipt-and-collection/gas-deposite/create-expired",
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Tabs } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -6,15 +6,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
 import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
 import TableRBI from "../../../../../components/TableRBI";
-
-const DUMMY_APPROVAL_ROWS_VMD = [
-  { key: 1, no: 1, approver: "Approver 1", role: "Supervisor", status: "Waiting Approval" },
-  { key: 2, no: 2, approver: "Approver 2", role: "Manager", status: "Pending" },
-];
-
-const DUMMY_ATTACHMENT_ROWS_VMD = [
-  { key: 1, no: 1, fileName: "mutation-detail-document.pdf", uploadedBy: "maker", uploadDate: "15 Apr 2026" },
-];
+import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 
 const APPROVAL_COLUMNS_VMD = [
   { key: "no", title: "NO", dataIndex: "no", width: 50, align: "center" },
@@ -36,6 +28,46 @@ const ModalViewMutationDetail = ({
   selectedData = {},
   selectedMutationDetail = {},
 }) => {
+  const [approvalRows, setApprovalRows] = useState([]);
+  const [attachmentRows, setAttachmentRows] = useState([]);
+  const [loadingApproval, setLoadingApproval] = useState(false);
+  const [loadingAttachment, setLoadingAttachment] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || !selectedMutationDetail?.id) return;
+
+    setLoadingApproval(true);
+    ratingBillingHttpService
+      .getDetail(`/v1/dbs/api/gas-deposit/approval-history/${selectedMutationDetail.id}`)
+      .then((res) => {
+        const data = res?.data?.dataApprover ?? res?.dataApprover ?? [];
+        setApprovalRows(
+          (Array.isArray(data) ? data : []).filter(Boolean).map((item, idx) => ({
+            ...item,
+            key: item.id ?? idx,
+          })),
+        );
+      })
+      .catch(() => setApprovalRows([]))
+      .finally(() => setLoadingApproval(false));
+
+    setLoadingAttachment(true);
+    ratingBillingHttpService
+      .getDetail(
+        `/v1/dbs/api/gas-deposit/attachments?referenceId=${selectedMutationDetail.id}&category=GAS_DEPOSIT_MUTATION`,
+      )
+      .then((res) => {
+        const data = res?.data ?? res;
+        setAttachmentRows(
+          (Array.isArray(data) ? data : []).filter(Boolean).map((item, idx) => ({
+            ...item,
+            key: item.id ?? idx,
+          })),
+        );
+      })
+      .catch(() => setAttachmentRows([]))
+      .finally(() => setLoadingAttachment(false));
+  }, [isOpen, selectedMutationDetail]);
   const gasDepositItems = [
     { label: "Customer Number", value: selectedData?.customerNumber },
     { label: "Customer Name", value: selectedData?.customerName },
@@ -105,13 +137,14 @@ const ModalViewMutationDetail = ({
       <CollapsibleContainer header="Approval Information" border>
         <TableRBI
           idTable="mutation-detail-approval-table"
-          dataSource={DUMMY_APPROVAL_ROWS_VMD}
+          dataSource={approvalRows}
           columns={APPROVAL_COLUMNS_VMD}
-          totalData={DUMMY_APPROVAL_ROWS_VMD.length}
+          totalData={approvalRows.length}
           tableScrolled={{ x: 800, y: 250 }}
           showExport={false}
           usePagination={false}
           showRefresh={false}
+          loading={loadingApproval}
         />
       </CollapsibleContainer>
     </div>
@@ -122,13 +155,14 @@ const ModalViewMutationDetail = ({
       <CollapsibleContainer header="Attachment" border>
         <TableRBI
           idTable="mutation-detail-attachment-table"
-          dataSource={DUMMY_ATTACHMENT_ROWS_VMD}
+          dataSource={attachmentRows}
           columns={ATTACHMENT_COLUMNS_VMD}
-          totalData={DUMMY_ATTACHMENT_ROWS_VMD.length}
+          totalData={attachmentRows.length}
           tableScrolled={{ x: 800, y: 250 }}
           showExport={false}
           usePagination={false}
           showRefresh={false}
+          loading={loadingAttachment}
         />
       </CollapsibleContainer>
     </div>
