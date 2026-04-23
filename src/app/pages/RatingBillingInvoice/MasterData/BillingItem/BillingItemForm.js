@@ -33,15 +33,11 @@ import {
   getSelectedApproval,
   getAttachmentCategory,
   getDetailMappingCategory,
-  getBillType,
   createBillingItem,
   updateBillingItem,
   getBillingItemDetail,
   getBillingItemCategoryDdl,
   getConfigFileRBIBillingItem,
-  getBillingItemTypeList,
-  getBillingItemCriteriaList,
-  getBillingItemCategoryList,
   generateTransactionMappingCode,
   getSpecialGLList,
   getGLAccountList,
@@ -180,7 +176,8 @@ const BillingItemForm = (props) => {
   const [dataSend, setDataSend] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
 
-  const isLoading = loading || loadingForm || loadingDetail;
+  const isLoading =
+    loadingForm || (type === "update" && loadingDetail && !data_BillingItemDetail?.id);
 
   const handleUpdateAttachment = useCallback((updater) => {
     setListDataAttachment((prevState) => {
@@ -199,15 +196,13 @@ const BillingItemForm = (props) => {
     });
   }, []);
 
-  // Initial data fetch
+  // Initial data fetch — only eager-load data that is needed immediately
+  // (BillingItemCategory for mapping, SpecialGL/GLAccount for criteria table, bank, classification)
+  // Category/Type/BillType/Criteria dropdowns are lazy-loaded in BillingItemSectionForm
   useEffect(() => {
     dispatch(getBillingItemCategory());
     dispatch(getBillingItemCategoryDdl());
-    dispatch(getBillType());
     dispatch(getAvailableApproval());
-    dispatch(getBillingItemTypeList());
-    dispatch(getBillingItemCriteriaList());
-    dispatch(getBillingItemCategoryList());
     dispatch(getSpecialGLList());
     dispatch(getGLAccountList());
     dispatch(getBankList());
@@ -1294,6 +1289,7 @@ const BillingItemForm = (props) => {
               endDate={endDate}
               handleStartDate={handleStartDate}
               mappingData={dataTable?.length || 0}
+              criteriaData={dataCriteriaTable?.length || 0}
               handleEndDate={handleEndDate}
               onCategoryChange={handleCategoryChange}
               isCriteriaDisabled={isCriteriaEditing}
