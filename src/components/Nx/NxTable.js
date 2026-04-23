@@ -1382,7 +1382,6 @@ const NxTable = ({
                     width: expandColumnWidth,
                     flexShrink: 0,
                     background: bg,
-                    borderLeft: `1px solid ${BORDER_COL}`,
                     borderRight: `1px solid ${BORDER_COL}`,
                   }} />
                 )}
@@ -1550,7 +1549,8 @@ const NxTable = ({
             #${safeId} .ant-table-container {
               border-radius: ${rounded ? '8px 8px 0 0' : '0'};
               overflow: clip;
-              border: none;
+              border: ${showBorder ? `1px solid ${BORDER_COL}` : 'none'};
+              border-bottom: none;
             }
 
             #${safeId} .ant-table-container table > thead > tr:first-child > *:first-child {
@@ -1574,6 +1574,11 @@ const NxTable = ({
             #${safeId} .ant-table-bordered .ant-table-tbody > tr > td,
             #${safeId} .ant-table-bordered .ant-table-container {
               border-color: ${BORDER_COL} !important;
+            }
+
+            #${safeId} .ant-table-container > .ant-table-header > table,
+            #${safeId} .ant-table-container > .ant-table-body > table {
+              border-top: none !important;
             }
 
             #${safeId} .ant-table-thead > tr > th {
@@ -1624,7 +1629,7 @@ const NxTable = ({
             }
 
             #${safeId} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
-              border-left: 1px solid ${BORDER_COL} !important;
+              border-left: none !important;
             }
 
             /* Neutralise any vertical margin on inline badges/chips inside cells
@@ -1636,7 +1641,15 @@ const NxTable = ({
             }
 
             #${safeId} .ant-table-thead > tr > th:first-child {
-              border-left: 1px solid ${BORDER_COL} !important;
+              border-left: none !important;
+            }
+
+            #${safeId} .ant-table-thead > tr > th:last-child {
+              border-right: none !important;
+            }
+
+            #${safeId} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:last-child {
+              border-right: none !important;
             }
 
             /* Left border on the first right-fixed column — marks the separator
@@ -1659,8 +1672,8 @@ const NxTable = ({
                consistent with NxTableNested's "No data" row and NxTableInlineEdit */
             #${safeId} .ant-table-placeholder > td {
               background-color: ${ROW_WHITE} !important;
-              border-left: 1px solid ${BORDER_COL} !important;
-              border-right: 1px solid ${BORDER_COL} !important;
+              border-left: none !important;
+              border-right: none !important;
               border-bottom: 1px solid ${BORDER_COL} !important;
             }
 
@@ -1668,23 +1681,6 @@ const NxTable = ({
               background-color: ${ROW_WHITE} !important;
             }
 
-            ${!showBorder ? `
-            #${safeId} .ant-table-thead > tr:first-child > th {
-              border-top: none !important;
-            }
-
-            #${safeId} .ant-table-thead > tr > th:first-child,
-            #${safeId} .ant-table-tbody > tr > td:first-child,
-            #${safeId} .ant-table-placeholder > td {
-              border-left: none !important;
-            }
-
-            #${safeId} .ant-table-thead > tr > th:last-child,
-            #${safeId} .ant-table-tbody > tr > td:last-child,
-            #${safeId} .ant-table-placeholder > td {
-              border-right: none !important;
-            }
-            ` : ''}
 
             /* ── Nested table alignment ───────────────────────────────────────
                Child first column left edge aligns with parent second column
@@ -1772,12 +1768,11 @@ const NxTable = ({
               background-color: ${ROW_HOVER} !important;
             }
 
-            /* Re-add left border on child's first header/cell so the vertical
-               line from the parent second-column separator continues cleanly */
-            #${safeId} .ant-table-expanded-row .ant-table-thead > tr > th:first-child,
-            #${safeId} .ant-table-expanded-row .ant-table-tbody > tr > td:first-child {
-              border-left: 1px solid ${BORDER_COL} !important;
+            ${!showBorder ? `
+            #${safeId} .ant-table-tbody > tr:not(.ant-table-measure-row):last-child > td {
+              border-bottom: none !important;
             }
+            ` : ''}
 
             ${hasExpandedRowRender ? `
             #${safeId} .ant-table-tbody > tr.ant-table-expanded-row > td,
