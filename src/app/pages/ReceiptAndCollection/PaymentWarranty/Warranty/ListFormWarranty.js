@@ -28,6 +28,7 @@ import {
   getPaymentWarrantyPartnerList,
   getPaymentWarrantyPartnerBranchList,
   getWarrantyTypeOptions,
+  getServiceAgreementByAccountId,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 
 
@@ -42,15 +43,12 @@ import {
   getListCategoryReceipt,
 } from "../../../../../redux/slices/receipt_collection/receipt";
 
-import {
-  getListServiceAgreement
-} from "../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { showModalError, showModalSuccess } from "../../../../../redux/slices/general_slice";
-import { uploadAttachments } from "../../../../../utils/uploadHelper";
+import { uploadAttachments, validateFile } from "../../../../../utils/uploadHelper";
 import { bytesConverter } from "../../../../../utils/bytesConverter";
 import { dateFormatting, hasValue } from "../../../../../utils";
 
@@ -68,7 +66,18 @@ const ListFormWarranty = (props) => {
   const location = useLocation();
   const { id } = location?.state || {};
 
-  const { dataListAppHierId, dataListAppHierDetail, loadingDetail, loadingApproval, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, data_detail, dataMutation } = useSelector((state) => state.warranty);
+  const { 
+    dataListAppHierId, 
+    dataListAppHierDetail, 
+    loadingDetail, 
+    loadingApproval, 
+    dataPaymentWarrantyPartner, 
+    dataPaymentWarrantyPartnerBranch, 
+    data_detail, 
+    dataMutation,
+    dataServiceAgreement,
+    loadingServiceAgreement
+  } = useSelector((state) => state.warranty);
   
   const {
     dataAccountNumber,
@@ -78,7 +87,6 @@ const ListFormWarranty = (props) => {
     data_converted_currency
   } = useSelector((state) => state.receipt);
 
-  const { data: dataServiceAgreement } = useSelector((state) => state.accountServiceAgreement);
 
   const [current, setCurrent] = useState(0);
   const [modalBack, setModalBack] = useState(false);
@@ -192,7 +200,7 @@ const ListFormWarranty = (props) => {
         effStartDate: data_detail.effectiveStartDate ? moment(data_detail.effectiveStartDate) : null,
         effEndDate: data_detail.effectiveEndDate ? moment(data_detail.effectiveEndDate) : null,
         claimPeriodTermType: data_detail.claimPeriodTermType,
-        claimPeriodTermValue: data_detail.claimPeriodTermValue,
+        claimPeriodTermValue: data_detail.claimPeriodTermValue ? moment(data_detail.claimPeriodTermValue) : null,
         description: data_detail.description,
         // Set approval hierarchy form field so the dropdown auto-selects
         apphierId: data_detail.appHierId,
@@ -206,7 +214,7 @@ const ListFormWarranty = (props) => {
       
       if (data_detail.accountId) {
         dispatch(getAccountNumberDDL(data_detail.accountId));
-        dispatch(getListServiceAgreement({ id: data_detail.accountId, page: 1, pageSize: 999 }));
+        dispatch(getServiceAgreementByAccountId({ id: data_detail.accountId }));
       }
       if (data_detail.issuerBankId || data_detail.issuerBank) {
         dispatch(getPaymentWarrantyPartnerBranchList(data_detail.issuerBankId));
@@ -231,6 +239,10 @@ const ListFormWarranty = (props) => {
     }
   }, [dataMutation, type]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [current]);
+
   const isPartialEdit = useMemo(() => {
     if (type !== "update" || !data_detail) return false;
     return (
@@ -247,7 +259,12 @@ const ListFormWarranty = (props) => {
   const handleAccountChange = (value) => {
     if (hasValue(value)) {
         dispatch(getAccountNumberDDL(value));
-        dispatch(getListServiceAgreement({ id: value, page: 1, pageSize: 999 }));
+        dispatch(getServiceAgreementByAccountId({ id: value }));
+        form.setFieldsValue({
+            saNumber: null, saReference: null, saType: null, saTypeChild: null, pbgType: null,
+            saDate: null, saStartDate: null, saEndDate: null, commitmentDate: null,
+            saStatusApproval: null, saStatus: null, saDescription: null
+        });
     } else {
         dispatch(getAllAccountNumberDDL());
         dispatch(resetDataAccountNumber());
@@ -265,13 +282,14 @@ const ListFormWarranty = (props) => {
   const next = () => {
     if (current === 0) {
       form.validateFields([
-        "accountId", "warrantyType", "documentNumber", "documentDate",
-        "issuerBank", "currency", "convertedCurrency", "rateType",
-        "rateDate", "effStartDate", "effEndDate", "description"
+        "accountId", "saNumber", "warrantyType", "documentNumber", "documentDate",
+        "issuerBank", "issuerBranch", "currency", "rateType",
+        "rateDate", "effStartDate", "effEndDate", "description",
+        "claimPeriodTermType", "claimPeriodTermValue"
       ]).then(() => {
         setCurrent(current + 1);
       }).catch((e) => {
-        // Validation handled by form UI
+        message.warning("Mohon lengkapi semua field mandatory sebelum lanjut ke tahap berikutnya.");
       });
       return;
     }
@@ -318,6 +336,22 @@ const ListFormWarranty = (props) => {
       return;
     }
     
+    // Pre-validate new attachments before initiating submission to avoid contradictory alerts
+    const newAttachmentsForValidation = listDataAttachment.filter(a => a.dataType === 'new');
+    for (const att of newAttachmentsForValidation) {
+      if (att.file) {
+        const validationErrors = validateFile(att.file);
+        if (validationErrors.length > 0) {
+          dispatch(showModalError({ 
+            title: "Invalid Attachment", 
+            description: `File "${att.fileName}" is invalid: ${validationErrors.join(', ')}`, 
+            return: false 
+          }));
+          return;
+        }
+      }
+    }
+
     setIsSubmitting(true);
     try {
       const values = isDraft ? form.getFieldsValue(true) : await form.validateFields();
@@ -335,8 +369,9 @@ const ListFormWarranty = (props) => {
           currency: values.currency ? (currencyDDL?.data?.find(c => c.id === values.currency)?.name || values.currency) : "IDR",
           rateType: values.rateType || null,
           rateAmount: parsedRateAmount,
-          claimPeriodTermType: values.claimPeriodTermType ? values.claimPeriodTermType.toUpperCase() : "DATE",
-          claimPeriodTermValue: values.claimPeriodTermValue ? parseInt(values.claimPeriodTermValue, 10) : null,
+          claimPeriodTermType: values.claimPeriodTermType || "DATE",
+          claimPeriodTermDate: (values.claimPeriodTermValue || values.claimPeriodTermDate) ? moment(values.claimPeriodTermValue || values.claimPeriodTermDate).format("YYYY-MM-DD") : null,
+          claimPeriodTermValue: null,
           description: DOMPurify.sanitize(values.description || null),
           isDraft: isDraft,
           appHierId: selectedHierarchy || null,
@@ -368,10 +403,10 @@ const ListFormWarranty = (props) => {
           partners: data_detail?.partners || [],
       } : {
           ...baseBody,
-          documentDate: values.documentDate ? moment(values.documentDate).toISOString(true) : null,
-          rateDate: values.rateDate ? moment(values.rateDate).toISOString(true) : null,
-          effectiveStartDate: values.effStartDate ? moment(values.effStartDate).toISOString(true) : null,
-          effectiveEndDate: values.effEndDate ? moment(values.effEndDate).toISOString(true) : null,
+          documentDate: values.documentDate ? moment(values.documentDate).format("YYYY-MM-DD") : null,
+          rateDate: values.rateDate ? moment(values.rateDate).format("YYYY-MM-DD") : null,
+          effectiveStartDate: values.effStartDate ? moment(values.effStartDate).format("YYYY-MM-DD") : null,
+          effectiveEndDate: values.effEndDate ? moment(values.effEndDate).format("YYYY-MM-DD") : null,
       };
 
       if (id) submitBody.id = id;
@@ -471,7 +506,14 @@ const ListFormWarranty = (props) => {
       <Spin spinning={loadingDetail || loadingApproval || loadingSave}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
         
-        <Form layout="vertical" form={form} id={"formRequest"} onFinish={handleSubmit} preserve={true}>
+        <Form 
+          layout="vertical" 
+          form={form} 
+          id={"formRequest"} 
+          onFinish={handleSubmit} 
+          onFinishFailed={(errorInfo) => console.log('Validation Failed:', errorInfo)}
+          preserve={true}
+        >
           
           <div style={{ display: current !== 0 ? "none" : undefined }}>
             <WarrantyForm
@@ -496,6 +538,7 @@ const ListFormWarranty = (props) => {
                 isPartialEdit={isPartialEdit}
                 isWaitingApproval={isWaitingApproval}
                 isApprover={data_detail?.isApprover}
+                loadingServiceAgreement={loadingServiceAgreement}
             />
           </div>
 
@@ -533,7 +576,13 @@ const ListFormWarranty = (props) => {
             onPrev={prev}
             onNext={next}
             onCancel={onBack}
-            onClear={() => { form.resetFields(); setSelectedHierarchy(null); setListDataAttachment([]); setMutationDataInfo([]); }}
+            onClear={() => { 
+              form.resetFields(); 
+              setCurrent(0);
+              setSelectedHierarchy(null); 
+              setListDataAttachment([]); 
+              setMutationDataInfo([]); 
+            }}
             onSaveDraft={handleSaveDraft}
             onSubmit={() => form.submit()}
             type={type}
@@ -567,6 +616,8 @@ const ListFormWarranty = (props) => {
           dataServiceAgreement={dataServiceAgreement}
           dataPaymentWarrantyPartner={dataPaymentWarrantyPartner}
           dataPaymentWarrantyPartnerBranch={dataPaymentWarrantyPartnerBranch}
+          rateTypeDDL={rateTypeDDL}
+          currencyDDL={currencyDDL}
         />
       </ModalCustom>
 

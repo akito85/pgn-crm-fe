@@ -573,7 +573,7 @@ console.log(formValue, 'form Value');
     } else if (hasOverlapping) {
       const errorBody = {
         title: "Failed",
-        description: `You can't add Criteria. Start date and enda date can't be overlap`,
+        description: `You can't add Criteria. Start date and end date can't be overlap`,
       };
       dispatch(showModalError(errorBody));
     }

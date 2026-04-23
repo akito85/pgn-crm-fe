@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Tooltip, Dropdown, Menu } from "antd";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { EyeOutlined, WarningOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -26,7 +27,7 @@ import { getPaginateDeduction, getDownloadDeduction, deleteDeduction, getApprova
 const ViewDeduction = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data, loading, dataApprovalHistory } = useSelector((state) => state.deduction);
+  const { data, loading, dataApprovalHistory, loadingHistory } = useSelector((state) => state.deduction);
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
@@ -47,7 +48,7 @@ const ViewDeduction = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
@@ -56,17 +57,17 @@ const ViewDeduction = () => {
   ];
 
   useEffect(() => {
-    dispatch(getPaginateDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+    handleRefresh();
   }, [dispatch, page, pageSize, search]);
 
   useEffect(() => {
     if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
       setDataApprovalHistoryFix({
         dataApprover: {
-          creation: dataApprovalHistory?.dataApprover?.DEDUCTION_CREATION || [],
+          creation: dataApprovalHistory?.dataApprover?.WARRANTY_DEDUCTION || [],
         },
         dataHistory: {
-          creation: dataApprovalHistory?.dataHistory?.DEDUCTION_CREATION || [],
+          creation: dataApprovalHistory?.dataHistory?.WARRANTY_DEDUCTION || [],
         },
       });
     } else {
@@ -87,15 +88,16 @@ const ViewDeduction = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
     });
+    if (shouldResetPage) {
+      setPage(1);
+    }
   };
 
   const handleDelete = (record) => {
@@ -103,12 +105,54 @@ const ViewDeduction = () => {
     setOpenModalDelete(true);
   };
 
+  const handleRefresh = () => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+    dispatch(
+      getPaginateDeduction({ search: reqSearch, page, pageSize })
+    );
+  };
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    setSearch(simpleSearch);
+    setPage(1);
+  };
+
   const handleConfirmDelete = () => {
-    dispatch(deleteDeduction(selectedRecord.id)).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        setOpenModalDelete(false);
-        dispatch(getPaginateDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
-      }
+    dispatch(deleteDeduction(selectedRecord.id)).unwrap().then(() => {
+      setOpenModalDelete(false);
+      handleRefresh();
     });
   };
 
@@ -258,6 +302,10 @@ const ViewDeduction = () => {
             columns={[...baseColumns, ...actionCols]}
             dataSource={data?.result?.map((item, index) => ({ ...item, key: index })) || []}
             showExport={true}
+            showSearchBar={true}
+            showAdvanceSearch={true}
+            onSearch={(e) => handleGlobalSearch(e.target.value)}
+            onAdvanceSearch={handleAdvanceSearch}
             handleDownload={handleDownload}
             current={page}
             pageSize={pageSize}
@@ -273,7 +321,12 @@ const ViewDeduction = () => {
       <ModalHistory
         isOpen={openModalHistory}
         handleClose={() => setOpenModalHistory(false)}
-        header={"Approval History"}
+        header={
+          <div className="flex items-center gap-2">
+            <span>Approval History</span>
+            {loadingHistory && <Spin size="small" />}
+          </div>
+        }
         width={850}
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}

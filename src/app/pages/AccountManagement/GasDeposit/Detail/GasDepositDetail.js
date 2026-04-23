@@ -13,8 +13,8 @@ import {
   getGrantedAccessAccount
 } from "../../../../../redux/slices/account_management/accountManagement";
 import {
-  getDetailGasDeposit,
-  getDetailDraftGasDeposit,
+  getGasDeposit,
+  getGasDepositDraft,
   approveOrRejectGasDeposit,
   approveOrRejectInactiveGasDeposit
 } from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
@@ -26,8 +26,8 @@ import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import NxApproveOrRejectModal from "../../../../../components/Nx/NxApproveOrRejectModal";
 import NxTabs from "../../../../../components/Nx/NxTabs";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
-import GasDepositDetailMutationTable from "../GasDepositDetailMutationTable";
 import GasDepositDetailTable from "../GasDepositDetailTable";
+import SVGIcon from "../../../../../assets/Icon/index";
 
 /**
  * Gas deposit detail view (container + presentational component).
@@ -53,7 +53,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const isLoading = loading || loadingAccount;
   const accountId = location.state?.accountId;
   const customerId = location.state?.customerId;
-  const idGd = location.state?.id;
+  const id = location.state?.id;
 
   const tabOptions = [
     {
@@ -72,7 +72,6 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const [activeKey, setActiveKey] = useState(originalKey || "");
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
-  const [selectedDetailId, setSelectedDetailId] = useState();
 
   // Computed (depends on state + selectors)
   const detail =
@@ -84,13 +83,11 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const {
     approvalType,
     relatedAccountNumber,
-    id,
     createdDate,
     createdBy,
     updatedDate,
     updatedBy,
     tappId,
-    details,
   } = detail;
 
   const routes = [
@@ -186,8 +183,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getDetailGasDeposit(idGd));
-          dispatch(getDetailDraftGasDeposit(idGd));
+          dispatch(getGasDeposit({ id }));
+          dispatch(getGasDepositDraft({ id }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -201,8 +198,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(getDetailGasDeposit(idGd));
-          dispatch(getDetailDraftGasDeposit(idGd));
+          dispatch(getGasDeposit({ id }));
+          dispatch(getGasDepositDraft({ id }));
           handleClear();
           handleApprovalModal(false);
         })
@@ -238,28 +235,14 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isUnderAccount && customerId) dispatch(getCustomerDetail(customerId));
-  }, [customerId]);
+    if (id)
+      dispatch(getGasDeposit({ id }))
+  }, [id]);
 
   useEffect(() => {
-    if (isUnderAccount && accountId && customerId) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ accountId, customerId }));
-      } else if (isOneTime) {
-        dispatch(getAccountOneTimeDetail({ accountId, customerId }));
-      }
-    }
-  }, [accountId, customerId]);
-
-  useEffect(() => {
-    if (idGd)
-      dispatch(getDetailGasDeposit(idGd))
-  }, [idGd]);
-
-  useEffect(() => {
-    if (idGd && draftExist)
-      dispatch(getDetailDraftGasDeposit(idGd));
-  }, [idGd, draftExist])
+    if (id && draftExist)
+      dispatch(getGasDepositDraft({ id }));
+  }, [id, draftExist])
 
   return (
     <>
@@ -284,30 +267,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
               />
             </NxBaseContainer>
           )}
-          <GasDepositDetailTabs detail={detail} />
-
-          {activeKey === originalKey && (
-            <>
-              <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
-                <NxBaseContainer border>
-                  <GasDepositDetailTable
-                    dataSource={details}
-                  />
-                </NxBaseContainer>
-              </NxCardContainer>
-              {selectedDetailId && (
-                <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
-                  <NxBaseContainer border>
-                    <GasDepositDetailMutationTable
-                      detailId={selectedDetailId}
-                      />
-                  </NxBaseContainer>
-                </NxCardContainer>
-              )}
-            </>
-          )}
-
-          {/* Detail mutation table — rendered only when a row is selected */}
+          
+          <GasDepositDetailTabs id={id} detail={detail} versionActiveKey={activeKey} versionOriginalKey={originalKey} />
 
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
             <NxBaseContainer border>
@@ -326,29 +287,34 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
             </NxBaseContainer>
           </NxCardContainer>
 
-          {isApproval && (
-            <NxBaseContainer border>
-              <div className="flex justify-between">
-                <Button type={"menu"} onClick={() => navigate(-1)}>
-                  Cancel
-                </Button>
-                <div className={"w-full flex justify-end gap-5"}>
-                  <Button
-                    type="reject"
-                    onClick={() => handleApprovalModal(true, "reject")}
-                  >
-                    Reject
+          <NxBaseContainer border>
+            <div className="flex justify-between">
+              {isApproval ? (
+                <>
+                  <Button type={"menu"} onClick={() => navigate(-1)}>
+                    Cancel
                   </Button>
-                  <Button
-                    type="approve"
-                    onClick={() => handleApprovalModal(true, "approve")}
-                  >
-                    Approve
-                  </Button>
-                </div>
-              </div>
-            </NxBaseContainer>
-          )}
+                  <div className={"w-full flex justify-end gap-x-2"}>
+                    <Button
+                      type="reject"
+                      onClick={() => handleApprovalModal(true, "reject")}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      type="approve"
+                      onClick={() => handleApprovalModal(true, "approve")}
+                    >
+                      Approve
+                    </Button>
+                  </div>
+                </>
+              ) :
+              <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                Back      
+              </Button>}
+            </div>
+          </NxBaseContainer>
         </div>
       </Spin>
       <NxApproveOrRejectModal

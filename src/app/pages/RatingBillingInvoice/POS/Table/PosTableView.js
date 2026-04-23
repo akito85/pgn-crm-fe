@@ -28,17 +28,20 @@ export const PosTableView = (
       searchText,
       handleSearch,
       true,
+      "select",
+      [
+        { value: "1", label: "Customer" },
+        { value: "2", label: "Prospective Customer" },
+      ]
     ),
-    render: (type) => {
+    render: (text) => {
       const typeConfig = {
-        1: { text: "Customer", color: "#1890ff" },
-        2: { text: "Prospective Customer", color: "#1890ff" },
+        1: "Customer",
+        2: "Prospective Customer",
+        Customers: "Customer",
+        "Prospective Customer": "Prospective Customer",
       };
-      const config = typeConfig[type] || {
-        text: "UNKNOWN",
-        color: "#d9d9d9",
-      };
-      const displayText = config.text;
+      const displayText = typeConfig[text] || text || "-";
       return renderColumn(
         "customerType",
         hasValue(search["customerType"]),
@@ -49,25 +52,11 @@ export const PosTableView = (
         search,
       );
     },
-    // render: (index) => (
-    //   <div className={" flex justify-center"}>
-    //     <StatusComponent colour={index}>{index}</StatusComponent>
-    //   </div>
-    // ),
-    // render: (text) =>
-    //   renderColumn(
-    //     "customerType",
-    //     hasValue(search["customerType"]),
-    //     searchText,
-    //     text,
-    //     false,
-    //     "status",
-    //     search
-    //   ),
   },
   {
     title: "POS NUMBER",
     dataIndex: "posNumber",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -91,11 +80,12 @@ export const PosTableView = (
   },
   {
     title: "PROFORMA INVOICE NUMBER",
-    dataIndex: "proformaInvoice",
+    dataIndex: "proformaInvoiceNumber",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "proformaInvoice",
+      "proformaInvoiceNumber",
       searchInput,
       searchedColumn,
       searchText,
@@ -104,8 +94,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "proformaInvoice",
-        hasValue(search["proformaInvoice"]),
+        "proformaInvoiceNumber",
+        hasValue(search["proformaInvoiceNumber"]),
         searchText,
         text,
         false,
@@ -116,6 +106,7 @@ export const PosTableView = (
   {
     title: "INVOICE NUMBER",
     dataIndex: "invoiceNumber",
+    isClassification: true, 
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -140,6 +131,7 @@ export const PosTableView = (
   {
     title: "BILLING CYCLE",
     dataIndex: "billingCycle",
+    isClassification: true, 
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -164,6 +156,7 @@ export const PosTableView = (
   {
     title: "BILLING PERIOD",
     dataIndex: "billingPeriod",
+    isClassification: true, 
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -188,6 +181,7 @@ export const PosTableView = (
   {
     title: "CUSTOMER NUMBER",
     dataIndex: "customerNumber",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -212,6 +206,7 @@ export const PosTableView = (
   {
     title: "CUSTOMER NAME",
     dataIndex: "customerName",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -236,6 +231,7 @@ export const PosTableView = (
   {
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -260,6 +256,7 @@ export const PosTableView = (
   {
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -284,6 +281,7 @@ export const PosTableView = (
   {
     title: "PROFORMA INVOICE DATE",
     dataIndex: "proformaInvoiceDate",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -327,6 +325,7 @@ export const PosTableView = (
   {
     title: "INVOICE DATE",
     dataIndex: "invoiceDate",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -369,6 +368,7 @@ export const PosTableView = (
   {
     title: "TRANSACTION DATE",
     dataIndex: "transactionDate",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -411,6 +411,7 @@ export const PosTableView = (
   {
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -435,6 +436,7 @@ export const PosTableView = (
   {
     title: "SOR",
     dataIndex: "sor",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -458,11 +460,12 @@ export const PosTableView = (
   },
   {
     title: "COST CENTER",
-    dataIndex: "costcenter",
+    dataIndex: "costCenter",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "costcenter",
+      "costCenter",
       searchInput,
       searchedColumn,
       searchText,
@@ -471,8 +474,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "costcenter",
-        hasValue(search["costcenter"]),
+        "costCenter",
+        hasValue(search["costCenter"]),
         searchText,
         text,
         false,
@@ -483,6 +486,7 @@ export const PosTableView = (
   {
     title: "ACCOUNT SEGMENT",
     dataIndex: "accountSegment",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -507,6 +511,7 @@ export const PosTableView = (
   {
     title: "METER READING CODE",
     dataIndex: "meterReadingCode",
+    isClassification: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -542,12 +547,13 @@ export const PosTableView = (
   //   ),
   // },
   {
-    title: "AMOUNT IDR",
-    dataIndex: "amountIdr",
+    title: "AMOUNT",
+    dataIndex: "amount",
+    isNumber: true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "amountIdr",
+      "amount",
       searchInput,
       searchedColumn,
       searchText,
@@ -556,8 +562,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "amountIdr",
-        hasValue(search["amountIdr"]),
+        "amount",
+        hasValue(search["amount"]),
         searchText,
         text,
         false,
@@ -566,12 +572,12 @@ export const PosTableView = (
       ),
   },
   {
-    title: "AMOUNT USD",
-    dataIndex: "amountUsd",
+    title: "TAX BASIS",
+    dataIndex: "taxBasis",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "amountUsd",
+      "taxBasis",
       searchInput,
       searchedColumn,
       searchText,
@@ -580,8 +586,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "amountUsd",
-        hasValue(search["amountUsd"]),
+        "taxBasis",
+        hasValue(search["taxBasis"]),
         searchText,
         text,
         false,
@@ -590,12 +596,12 @@ export const PosTableView = (
       ),
   },
   {
-    title: "TAX BASIS IDR",
-    dataIndex: "taxBasisIdr",
+    title: "TAX BASIS EQV",
+    dataIndex: "taxBasisEqv",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "taxBasisIdr",
+      "taxBasisEqv",
       searchInput,
       searchedColumn,
       searchText,
@@ -604,56 +610,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "taxBasisIdr",
-        hasValue(search["taxBasisIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "TAX BASIS USD",
-    dataIndex: "taxBasisUsd",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "taxBasisUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "taxBasisUsd",
-        hasValue(search["taxBasisUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "TAX BASIS EQV IDR",
-    dataIndex: "taxBasisEqvIdr",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "taxBasisEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "taxBasisEqvIdr",
-        hasValue(search["taxBasisEqvIdr"]),
+        "taxBasisEqv",
+        hasValue(search["taxBasisEqv"]),
         searchText,
         text,
         false,
@@ -675,12 +633,12 @@ export const PosTableView = (
   //   ),
   // },
   {
-    title: "VAT IDR",
-    dataIndex: "vatIdr",
+    title: "VAT",
+    dataIndex: "vat",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "vatIdr",
+      "vat",
       searchInput,
       searchedColumn,
       searchText,
@@ -689,8 +647,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "vatIdr",
-        hasValue(search["vatIdr"]),
+        "vat",
+        hasValue(search["vat"]),
         searchText,
         text,
         false,
@@ -699,12 +657,12 @@ export const PosTableView = (
       ),
   },
   {
-    title: "VAT USD",
-    dataIndex: "vatUsd",
+    title: "VAT EQV",
+    dataIndex: "vatEqv",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "vatUsd",
+      "vatEqv",
       searchInput,
       searchedColumn,
       searchText,
@@ -713,32 +671,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "vatUsd",
-        hasValue(search["vatUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "VAT EQV IDR",
-    dataIndex: "vatEqvIdr",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "vatEqvIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "vatEqvIdr",
-        hasValue(search["vatEqvIdr"]),
+        "vatEqv",
+        hasValue(search["vatEqv"]),
         searchText,
         text,
         false,
@@ -769,72 +703,6 @@ export const PosTableView = (
         "input",
         search,
       ),
-  },
-  {
-    title: "TAX RATE TYPE",
-    dataIndex: "taxRateType",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "taxRateType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "taxRateType",
-        hasValue(search["taxRateType"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "TAX RATE DATE",
-    dataIndex: "taxRateDate",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "taxRateDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date",
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "taxRateDate",
-        hasValue(search["taxRateDate"]),
-        searchText,
-        text,
-        "date",
-        search,
-      ),
-    // render: (index) => {
-    //   const text = index ? moment(index).format("DD MMM YYYY") : "";
-    //   if (searchedColumn === "taxRateDate") {
-    //     return (
-    //       <Highlighter
-    //         highlightStyle={{
-    //           backgroundColor: "#ffc069",
-    //           padding: 0,
-    //         }}
-    //         searchWords={[searchText]}
-    //         autoEscape
-    //         textToHighlight={text ? text.toString() : ""}
-    //       />
-    //     );
-    //   } else {
-    //     return text || "";
-    //   }
-    // },
   },
   {
     title: "TAX RATE",
@@ -885,60 +753,12 @@ export const PosTableView = (
       ),
   },
   {
-    title: "DISCOUNT AMOUNT IDR",
-    dataIndex: "discountAmountIdr",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "discountAmountIdr",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "discountAmountIdr",
-        hasValue(search["discountAmountIdr"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
-    title: "DISCOUNT AMOUNT USD",
-    dataIndex: "discountAmountUsd",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "discountAmountUsd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (text) =>
-      renderColumn(
-        "discountAmountUsd",
-        hasValue(search["discountAmountUsd"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search,
-      ),
-  },
-  {
     title: "CONVERTED CURRENCY",
-    dataIndex: "currency",
+    dataIndex: "convertedCurrency",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "currency",
+      "convertedCurrency",
       searchInput,
       searchedColumn,
       searchText,
@@ -947,8 +767,8 @@ export const PosTableView = (
     ),
     render: (text) =>
       renderColumn(
-        "currency",
-        hasValue(search["currency"]),
+        "convertedCurrency",
+        hasValue(search["convertedCurrency"]),
         searchText,
         text,
         false,
@@ -1278,6 +1098,35 @@ export const PosTableView = (
       renderColumn(
         "statusPayment",
         hasValue(search["statusPayment"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      ),
+  },
+  {
+     title: "INVOICE STATUS",
+    dataIndex: "invoiceStatus",
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "invoiceStatus",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    // render: (index) => (
+    //   <div className={" flex justify-center"}>
+    //     <StatusComponent colour={index}>{index}</StatusComponent>
+    //   </div>
+    // ),
+    render: (text) =>
+      renderColumn(
+        "invoiceStatus",
+        hasValue(search["invoiceStatus"]),
         searchText,
         text,
         false,

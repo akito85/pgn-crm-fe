@@ -36,7 +36,7 @@ const GeneralTemplateDetailForm = ({
       {type ? (
         <>
           <CollapsibleContainer header={"GENERAL TEMPLATE INFORMATION"}>
-            <div className="w-full grid grid-cols-4 gap-3">
+            <div className="w-full grid grid-cols-5 gap-3">
               <DetailText label="Name">{data?.templateName || ""}</DetailText>
               <DetailText label="Template Type">{data?.type || ""}</DetailText>
               <DetailText label="Start Date">
@@ -44,9 +44,6 @@ const GeneralTemplateDetailForm = ({
               </DetailText>
               <DetailText label="End Date">
                 {handleDate(data?.endDate)}
-              </DetailText>
-              <DetailText label="Default Format">
-                {data?.defaultFormat || ""}
               </DetailText>
               <DetailText label="Status">
                 {handleStatusCase(data?.status)}
@@ -63,7 +60,7 @@ const GeneralTemplateDetailForm = ({
                   type={true}
                 />
               </DetailText>
-              <div className="col-span-4">
+              <div className="col-span-5">
                 <DetailText label="Description">
                   {data?.description || ""}
                 </DetailText>
@@ -77,7 +74,7 @@ const GeneralTemplateDetailForm = ({
             {"GENERAL TEMPLATE INFORMATION"}
           </div>
 
-          <div className="w-full grid grid-cols-4 gap-3">
+          <div className="w-full grid grid-cols-5 gap-3">
             <DetailText label="Name">{data?.name || ""}</DetailText>
             <DetailText label="Template Type">{data?.type || ""}</DetailText>
             <DetailText label="Start Date">
@@ -86,12 +83,12 @@ const GeneralTemplateDetailForm = ({
             <DetailText label="End Date">
               {handleDate(data?.endDate)}
             </DetailText>
-            <div className="col-span-4">
+            <div className="col-span-5">
               <DetailText label="Description">
                 {data?.description || ""}
               </DetailText>
             </div>
-            <div className="col-span-4">
+            <div className="col-span-5">
               <DetailText label="Template"></DetailText>
               <UploadTemplate
                 dispatch={dispatch}

@@ -21,15 +21,20 @@ const BillingItemSectionForm = ({
   checkedLateCharge,
   checkedPaymentWarranty,
   checkedInstallmentRestructure,
+  checkedBank,
   onChangeLateCharge = () => {},
   onChangePayment = () => {},
   onChangeInstallmentRestructure = () => {},
+  onChangeBank = () => {},
   startDate,
   endDate,
   handleStartDate = () => {},
   handleEndDate = () => {},
   mappingData = 0,
   isCriteriaDisabled = false,
+  data_bankList = [],
+  data_bankAccountList = [],
+  onChangeBankValue = () => {},
 }) => {
   const disabledStartDate = (current) => {
     return current && current < moment().startOf("day");
@@ -57,7 +62,7 @@ const BillingItemSectionForm = ({
 
   return (
     <CardContainer header="TRANSACTION MAPPING INFORMATION">
-      <div className="w-full grid grid-cols-4 gap-x-2 gap-y-0">
+      <div className="w-full grid grid-cols-5 gap-x-2 gap-y-0">
         {/* Category */}
         <Form.Item
           label="Category"
@@ -175,8 +180,46 @@ const BillingItemSectionForm = ({
           />
         </Form.Item>
 
+        {checkedBank ? (
+          <>
+            <Form.Item
+              label="Bank"
+              name="bankValue"
+              rules={formMessageRequired("Bank")}
+            >
+              <SelectComponent
+                placeholder="Select"
+                onChange={onChangeBankValue}
+              >
+                {data_bankList?.map((bank) => (
+                  <Select.Option value={bank.bankId} key={bank.bankId}>
+                    {bank.bankName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+
+            <Form.Item
+              label="Bank Account Number"
+              name="bankAccountNumber"
+              rules={formMessageRequired("Bank Account Number")}
+            >
+              <SelectComponent placeholder="Select">
+                {data_bankAccountList?.map((account) => (
+                  <Select.Option
+                    value={account.accountNumber}
+                    key={account.id}
+                  >
+                    {account.accountNumber}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
+            </Form.Item>
+          </>
+        ) : null}
+
         {/* Description */}
-        <div className="col-span-4">
+        <div className="col-span-5">
           <Form.Item
             label="Description"
             name="description"
@@ -188,11 +231,11 @@ const BillingItemSectionForm = ({
 
         {/* Late Charge Checkbox */}
         <Form.Item name="lateCharge" valuePropName="checked" noStyle>
-          <div className="flex flex-col pt-0 col-span-1">
-            <Checkbox checked={checkedLateCharge} onChange={onChangeLateCharge}>
+          <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+            <Checkbox checked={checkedLateCharge} onChange={onChangeLateCharge} className="font-medium">
               Late Charge Object
             </Checkbox>
-            <span className="text-xs text-[#92979D]">
+            <span className="text-xs text-[#92979D] leading-tight">
               Click or tap this checkbox if late charge applied to this item
             </span>
           </div>
@@ -200,14 +243,15 @@ const BillingItemSectionForm = ({
 
         {/* Payment Warranty Checkbox */}
         <Form.Item name="paymentWarranty" valuePropName="checked" noStyle>
-          <div className="flex flex-col pt-0 col-span-2">
+          <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
             <Checkbox
               checked={checkedPaymentWarranty}
               onChange={onChangePayment}
+              className="font-medium"
             >
               Payment Warranty Deduction Object
             </Checkbox>
-            <span className="text-xs text-[#92979D]">
+            <span className="text-xs text-[#92979D] leading-tight">
               Click or tap this checkbox if this item is included in payment
               warranty deduction list
             </span>
@@ -220,16 +264,28 @@ const BillingItemSectionForm = ({
           valuePropName="checked"
           noStyle
         >
-          <div className="flex flex-col pt-0">
+          <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
             <Checkbox
               checked={checkedInstallmentRestructure}
               onChange={onChangeInstallmentRestructure}
+              className="font-medium"
             >
               Installment / Restructure
             </Checkbox>
-            <span className="text-xs text-[#92979D]">
+            <span className="text-xs text-[#92979D] leading-tight">
               Click or tap this checkbox to apply installment or restructuring
               terms to this item
+            </span>
+          </div>
+        </Form.Item>
+
+        <Form.Item name="bank" valuePropName="checked" noStyle>
+          <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+            <Checkbox checked={checkedBank} onChange={onChangeBank} className="font-medium">
+              Bank
+            </Checkbox>
+            <span className="text-xs text-[#92979D] leading-tight">
+              Click or tap this checkbox to apply bank to this item
             </span>
           </div>
         </Form.Item>

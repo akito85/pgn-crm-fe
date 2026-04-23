@@ -78,27 +78,32 @@ const EditableCell = ({
   };
 
   const handleDisableDateBetween = (current) => {
-    if (dataIndex === 'endDate' && hasValue(formTableCriteria.getFieldValue('startDate')) && hasValue(validateEndDate)) {
-      return moment(formTableCriteria.getFieldValue('startDate')) > current || current > moment(validateEndDate).add(1, 'days')
-    } else if (validateStartDate && validateEndDate) {
-      const startDate = moment(validateStartDate).startOf("day");
-      const endDate = moment(validateEndDate).endOf("day");
-      return current.isBefore(startDate) || current.isAfter(endDate);
-    } else if (validateStartDate && !validateEndDate) {
-      // ✅ Jika hanya ada startDate di header, hanya batasi dari startDate ke atas
-      const startDate = moment(validateStartDate).startOf("day");
-      return current.isBefore(startDate);
-    } else {
-      return false; // ✅ Jangan disable semua tanggal jika tidak ada batasan
+    if (!current) return false;
+
+    const headerStart = validateStartDate ? moment(validateStartDate).startOf("day") : null;
+    const headerEnd = validateEndDate ? moment(validateEndDate).endOf("day") : null;
+    const rowStart = formTableCriteria.getFieldValue("startDate") 
+      ? moment(formTableCriteria.getFieldValue("startDate")).startOf("day") 
+      : null;
+
+    // Boundary check against Header
+    if (headerStart && current.isBefore(headerStart, "day")) return true;
+    if (headerEnd && current.isAfter(headerEnd, "day")) return true;
+
+    // End Date specific check: must be >= Row Start Date
+    if (dataIndex === "endDate" && rowStart && current.isBefore(rowStart, "day")) {
+      return true;
     }
+
+    return false;
   };
 
-  // Validation Handle Start Date from Header Data
   const handleDisableDateBefore = (current) => {
-    if (validateStartDate !== null && validateStartDate !== undefined) {
-      return moment(validateStartDate).startOf("day") > current;
+    if (!current) return false;
+    if (validateStartDate) {
+      return current.isBefore(moment(validateStartDate).startOf("day"), "day");
     }
-    return false; // ✅ Jangan disable jika tidak ada startDate
+    return false;
   };
 
   const getInputNode = (inputType) => {
@@ -314,10 +319,12 @@ const FunctionalCriteriaBillingBucket = ({
     value: item.id,
     label: item.name,
   }));
-  const sor = (data_sor || []).map((item) => ({
-    value: item.id,
-    label: item.name,
-  }));
+  const sor = (Array.isArray(data_sor) ? data_sor : data_sor?.data || []).map(
+    (item) => ({
+      value: item.id,
+      label: item.name,
+    })
+  );
   const costCenter = (data_cost_center || []).map((item) => ({
     value: item.id,
     label: item.name,
@@ -493,13 +500,12 @@ const FunctionalCriteriaBillingBucket = ({
       : null;
 
     // Cek start date criteria tidak boleh sebelum start date header
-    if (rowStart && headerStart && rowStart.isBefore(headerStart)) {
+    if (rowStart && headerStart && rowStart.isBefore(headerStart, "day")) {
       return true;
     }
 
     // Cek end date criteria tidak boleh melebihi end date header
-    // Hanya jika header end date ada nilainya
-    if (rowEnd && headerEnd && rowEnd.isAfter(headerEnd)) {
+    if (rowEnd && headerEnd && rowEnd.isAfter(headerEnd, "day")) {
       return true;
     }
 
@@ -508,45 +514,28 @@ const FunctionalCriteriaBillingBucket = ({
 
   // ✅ FIXED: checkOverlappingData - untuk validasi sebelum add row baru
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
-    // Jika tidak ada data di tabel, tidak perlu cek overlap
-    if (!dataTable || dataTable.length === 0) {
+    if (!dataTable || dataTable.length === 0) return false;
+
+    const headerStart = formHeader?.startDate ? moment(formHeader.startDate).startOf("day") : null;
+    const headerEnd = formHeader?.endDate ? moment(formHeader.endDate).endOf("day") : null;
+
+    const isInvalid = dataTable.some((item) => {
+      const itemStart = item?.startDate ? moment(item.startDate).startOf("day") : null;
+      const itemEnd = item?.endDate ? moment(item.endDate).endOf("day") : null;
+
+      // Item Start < Header Start
+      if (itemStart && headerStart && itemStart.isBefore(headerStart)) return true;
+      // Item End > Header End
+      if (itemEnd && headerEnd && itemEnd.isAfter(headerEnd)) return true;
+
       return false;
-    }
-
-    const headerStart = formHeader?.startDate
-      ? moment(formHeader.startDate).startOf("day")
-      : null;
-    const headerEnd = formHeader?.endDate
-      ? moment(formHeader.endDate).endOf("day")
-      : null;
-
-    const dataOverlap = [];
-
-    dataTable.forEach((item) => {
-      const itemStart = item?.startDate
-        ? moment(item.startDate).startOf("day")
-        : null;
-      const itemEnd = item?.endDate
-        ? moment(item.endDate).endOf("day")
-        : null;
-
-      // Cek apakah start date item sebelum header start date
-      if (itemStart && headerStart && itemStart.isBefore(headerStart)) {
-        dataOverlap.push(item);
-        return;
-      }
-
-      // Cek end date hanya jika header end date ada nilainya
-      if (itemEnd && headerEnd && itemEnd.isAfter(headerEnd)) {
-        dataOverlap.push(item);
-      }
     });
 
-    return dataOverlap.length > 0;
+    return isInvalid;
   }, []);
 
-  // Function Save Data
-  const save = async (key) => {
+  // Function Execute Save Data
+  const executeSave = async (key) => {
     try {
       const row = await formTableCriteria.validateFields();
       const newData = [...data];
@@ -580,6 +569,24 @@ const FunctionalCriteriaBillingBucket = ({
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
+    }
+  };
+
+  // Function Save Data
+  const save = async (key) => {
+    const requiredHiddenCols = columns().filter(
+      (col) => col.required === true && optionSelectedCol.includes(col.title)
+    );
+
+    if (requiredHiddenCols.length > 0) {
+      setOptionSelectedCol((prev) =>
+        prev.filter((title) => !requiredHiddenCols.some((col) => col.title === title))
+      );
+      setTimeout(() => {
+        executeSave(key);
+      }, 50);
+    } else {
+      executeSave(key);
     }
   };
 

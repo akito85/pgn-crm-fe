@@ -12,6 +12,8 @@ const nxGetAccountActions = ({
   handleApprovalHistory = () => {},
   handleRecalculate = () => {},
   handleExpire = () => {},
+  handleBulkRecalculate = () => {},
+  handleBulkExpire = () => {},
   handleDelete = () => {}
 }) => [
   {
@@ -48,6 +50,30 @@ const nxGetAccountActions = ({
         onClick={handleCreate}
       >
         Create
+      </Button>
+    )
+  },
+  {
+    action: "Bulk-Recalculate",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkRecalculate}
+      >
+        Recalculate
+      </Button>
+    )
+  },
+  {
+    action: "Bulk-Expire",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkExpire}
+      >
+        Expire
       </Button>
     )
   },
@@ -214,6 +240,8 @@ const nxGetAccountActions = ({
     action: "Recalculate",
     type: "table",
     render: (record, actionLength, index) => {
+      const disabled = ["NEED_TO_RECALCULATE", "NEED_TO_EXPIRE"].includes(record.status);
+
       const content =
         actionLength > 3 ? (
           <Button
@@ -226,6 +254,7 @@ const nxGetAccountActions = ({
             border={false}
             onClick={() => handleRecalculate(record)}
             type={"action"}
+            disabled={disabled}
           >
             <span className={"text-black ml-3"}>Recalculate</span>
           </Button>
@@ -234,6 +263,7 @@ const nxGetAccountActions = ({
             <Button
               onClick={() => handleRecalculate(record)}
               type="table-action"
+              disabled={disabled}
             >
               <SVGIcon name="IconRating" width={20} />
             </Button>
@@ -247,6 +277,8 @@ const nxGetAccountActions = ({
     action: "Expire",
     type: "table",
     render: (record, actionLength, index) => {
+      const disabled = ["NEED_TO_RECALCULATE", "NEED_TO_EXPIRE"].includes(record.status);
+
       const content =
         actionLength > 3 ? (
           <Button
@@ -259,16 +291,18 @@ const nxGetAccountActions = ({
             border={false}
             onClick={() => handleExpire(record)}
             type={"action"}
+            disabled={disabled}
           >
             <span className={"text-black ml-3"}>Recalculate</span>
           </Button>
         ) : (
-          <Tooltip title="Recalculate" key={`table-action-${index}`}>
+          <Tooltip title="Expire" key={`table-action-${index}`}>
             <Button
               onClick={() => handleExpire(record)}
               type="table-action"
+              disabled={disabled}
             >
-              <SVGIcon name="IconRating" width={20} />
+              <SVGIcon name="IconExpire" width={20} />
             </Button>
           </Tooltip>
         );

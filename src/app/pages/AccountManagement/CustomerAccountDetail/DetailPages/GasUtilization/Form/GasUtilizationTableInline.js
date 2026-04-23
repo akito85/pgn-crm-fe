@@ -152,15 +152,12 @@ const EditableCell = ({
             labelInValue
             size="small"
             style={{
-              height: 24,
-              fontSize: 11,
+              lineHeight: "32px",
             }}
           >
             {options.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                <div className="text-xs">
-                  {option.label}
-                </div>
+              <Select.Option key={option.value} value={option.value} disabled={option.disabled}>
+                <span className="text-xs">{option.label}</span>
               </Select.Option>
             ))}
           </Select>
@@ -173,15 +170,11 @@ const EditableCell = ({
             controls={false}
             style={{
               width: "100%",
-              fontSize: 11,
-              height: 24
+              height: "34px",
+              lineHeight: "32px",
             }}
           />
         );
-      case "description":
-        return <Input.TextArea rows={1} maxLength={255} />;
-      default:
-        return <InputComponent />;
     }
   };
   const inputNode = getInputNode(inputType);
@@ -210,8 +203,10 @@ const EditableCell = ({
     <td
       {...restProps}
       style={{
-        fontSize: 11,
-        lineHeight: "18px",
+        padding: "0 8px",
+        height: "34px",
+        lineHeight: "32px",
+        fontSize: 12,
       }}
     >
       {editing ? (
@@ -280,14 +275,13 @@ const GasUtilizationTableInline = ({
 
   // const [fulfilPercentage, setFulfilPercentage] = useState(0);
   const [validationError, setValidationError] = useState('');
-  const [filterDdlUtilName, setFilterDdlUtilName] = useState([]);
 
-  useEffect(() => {
-    const filteredListName = ddlUtilizationName?.filter(item => {
-      return !dataTableGasUtilization?.some(fix => fix?.name?.label === item?.label);
-    });
-    setFilterDdlUtilName(filteredListName)
-  }, [dataTableGasUtilization, ddlUtilizationName])
+  const filterDdlUtilName = (ddlUtilizationName || []).map((option) => {
+    const isSelected = dataTableGasUtilization
+      .filter((row) => String(row.key) !== String(editingKey))
+      .some((row) => String(row?.name?.value) === String(option.value));
+    return { ...option, disabled: isSelected };
+  });
 
   const itemActions = nxGetAccountActions({
     handleUpdate: (record) => edit(record.key),
@@ -345,7 +339,7 @@ const GasUtilizationTableInline = ({
   };
 
   const edit = (record, field) => {
-    const dataEdit = dataTableGasUtilization[record - 1];
+    const dataEdit = dataTableGasUtilization.find(item => String(item.key) === String(record));
     setStatusAction("edit");
     setIsEdit(true)
     formTable.setFieldsValue(dataEdit);
@@ -376,7 +370,7 @@ const GasUtilizationTableInline = ({
     setEditingKey("");
     setIsEdit(false)
     if (statusAction === "add") {
-      deleteRow(record);
+      deleteRow(record.key);
     }
     setStatusAction("");
   };
@@ -571,50 +565,33 @@ const GasUtilizationTableInline = ({
           return (
             <div className="flex w-full justify-center my-1 gap-2">
               {editable ? (
-                <>
+                <div className="flex items-center gap-2">
                   <Button
                     onClick={() => cancel(record)}
-                    className={"flex w-full justify-center"}
-                    type={"default"}
-                    size={"small"}
+                    type="default"
+                    size="small"
                     style={{
-                      borderColor: "var(--primary)",
-                      height: "22px",
-                      fontSize: "11px",
-                      cursor: "pointer",
-                      padding: "0 6px",
-                      lineHeight: "20px",
+                      borderRadius: "20px",
+                      border: "1px solid var(--primary, #0075BF)",
+                      color: "var(--primary, #0075BF)",
                     }}
                   >
-                    <div
-                      className="py-0.5 px-1 text-center"
-                    >
-                      Cancel
-                    </div>
+                    Cancel
                   </Button>
                   <Button
                     onClick={() => save(record.key)}
-                    className={"flex w-full justify-center"}
-                    type={"submit"}
-                    size={"small"}
+                    type="default"
+                    size="small"
                     style={{
-                      borderColor: "#0075bf00",
-                      backgroundColor: "var(--primary)",
+                      borderRadius: "20px",
+                      border: "1px solid var(--primary, #0075BF)",
+                      backgroundColor: "var(--primary, #0075BF)",
                       color: "#fff",
-                      height: "22px",
-                      fontSize: "11px",
-                      cursor: "pointer",
-                      padding: "0 6px",
-                      lineHeight: "20px",
                     }}
                   >
-                    <div
-                      className="py-0.5 px-1 text-center"
-                    >
-                      Save
-                    </div>
+                    Save
                   </Button>
-                </>
+                </div>
               ) : (
                 <>
                   {itemActions.map((action, index) => (
@@ -709,7 +686,7 @@ const GasUtilizationTableInline = ({
             </div>
           )}
         </Form>
-        
+
       </div>
   );
 };

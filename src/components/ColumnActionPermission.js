@@ -1,23 +1,25 @@
-import { Popover, Space } from "antd";
-import { useMemo } from "react";
+import { Popover, Skeleton } from "antd";
+import { useMemo, useState } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
-import SVGIcon from "../assets/Icon/index";
+import IconThreeDots from "../assets/Icon/Nx/IconThreeDots";
 
 // render content column
-export const RenderContentActions = (
-  text,
+export const RenderContentActions = ({
   record,
-  index,
   itemRender = [],
   totalLength,
   permissions = [],
   sliceColumn = "View",
   stopClickPropagation = false,
-) => {
+}) => {
+  const [open, setOpen] = useState(false);
+
   if (totalLength > 3) {
     return (
       <div className="w-full flex justify-center items-center gap-2.5">
         <Popover
+          open={open}
+          onOpenChange={setOpen}
           trigger={"click"}
           placement="bottomRight"
           showArrow={false}
@@ -29,7 +31,11 @@ export const RenderContentActions = (
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
-                    return item?.render(record, totalLength, index);
+                    return (
+                      <div key={item.action} onClick={() => setOpen(false)}>
+                        {item?.render(record, totalLength, index)}
+                      </div>
+                    );
                   } else {
                     return null;
                   }
@@ -43,7 +49,7 @@ export const RenderContentActions = (
               if (stopClickPropagation) e.stopPropagation();
             }}
           >
-            <SVGIcon name="IconTripleDot" width={20} />
+            <IconThreeDots />
           </div>
         </Popover>
         <div>
@@ -86,6 +92,7 @@ export const useColumnActionPermission = (
   stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
+  const isLoading = access?.loading;
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
@@ -122,9 +129,7 @@ export const useColumnActionPermission = (
   }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
 
   const columns = useMemo(() => {
-    if (arrayActions?.length === 0) {
-      return [];
-    } else {
+    if (isLoading) {
       return [
         {
           key: "action",
@@ -132,21 +137,39 @@ export const useColumnActionPermission = (
           dataIndex: "action",
           fixed: "right",
           width: 150,
-          render: (text, record, index) =>
-            RenderContentActions(
-              text,
-              record,
-              index,
-              lowerCaseItemsRender,
-              arrayActions?.length,
-              arrayActions,
-              sliceColumn,
-              stopClickPropagation,
-            ),
+          render: () => (
+            <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+              <Skeleton.Button active size="small" shape="round" block />
+            </div>
+          ),
         },
       ];
     }
-  }, [arrayActions, lowerCaseItemsRender, sliceColumn]);
+    if (!arrayActions || arrayActions.length === 0) {
+      return [];
+    }
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        dataIndex: "action",
+        fixed: "right",
+        width: 150,
+        render: (text, record, index) => (
+          <RenderContentActions
+            text={text}
+            record={record}
+            index={index}
+            itemRender={lowerCaseItemsRender}
+            totalLength={arrayActions.length}
+            permissions={arrayActions}
+            sliceColumn={sliceColumn}
+            stopClickPropagation={stopClickPropagation}
+          />
+        ),
+      },
+    ];
+  }, [isLoading, arrayActions, lowerCaseItemsRender, sliceColumn, stopClickPropagation]);
 
   return columns;
 };

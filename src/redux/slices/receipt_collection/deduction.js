@@ -20,6 +20,14 @@ const initialState = {
   // custom
   customerData: null,
   dataPeriod: [],
+  loadingHistory: false,
+  loadingType: false,
+  loadingPeriod: false,
+  loadingAppHier: false,
+  loadingAppHierDetail: false,
+  loadingCustomerList: false,
+  loadingDetail: false,
+  loadingSearchCustomer: false,
 };
 
 export const getPaginateDeduction = createAsyncThunk(
@@ -129,6 +137,7 @@ export const deleteDeduction = createAsyncThunk(
       const successBody = {
         title: "Successfull",
         description: `Your data has been deleted`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -151,7 +160,7 @@ export const deleteDeduction = createAsyncThunk(
 
 export const getApprovalHistory = createAsyncThunk(
   "GET_APPROVAL_HISTORY_METHOD",
-  async (id, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/deduction/get-approval-history/${id}`;
       const response = await receiptCollectionHttpService.getDetail(url);
@@ -403,14 +412,14 @@ const deductionSlice = createSlice({
     },
 
     [getDetailDeduction.pending]: (state) => {
-      state.loading = true;
+      state.loadingDetail = true;
     },
     [getDetailDeduction.fulfilled]: (state, action) => {
       state.data_detail = action.payload.data || action.payload;
-      state.loading = false;
+      state.loadingDetail = false;
     },
     [getDetailDeduction.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDetail = false;
     },
 
     [createDeduction.pending]: (state) => {
@@ -436,69 +445,79 @@ const deductionSlice = createSlice({
     },
 
     [getApprovalHistory.pending]: (state) => {
-      state.loading = true;
+      state.loadingHistory = true;
     },
     [getApprovalHistory.fulfilled]: (state, action) => {
       state.dataApprovalHistory = action.payload.data || action.payload;
-      state.loading = false;
+      state.loadingHistory = false;
     },
     [getApprovalHistory.rejected]: (state) => {
-      state.loading = false;
+      state.loadingHistory = false;
     },
 
     [searchCustomerDeduction.pending]: (state) => {
-      state.loading = true;
+      state.loadingSearchCustomer = true;
     },
     [searchCustomerDeduction.fulfilled]: (state, action) => {
       state.customerData = action.payload.data || action.payload;
-      state.loading = false;
+      state.loadingSearchCustomer = false;
     },
     [searchCustomerDeduction.rejected]: (state) => {
-      state.loading = false;
+      state.loadingSearchCustomer = false;
     },
 
     [getTypeDDL.pending]: (state) => {
-      state.loading = true;
+      state.loadingType = true;
     },
     [getTypeDDL.fulfilled]: (state, action) => {
-      state.dataType = action.payload?.data?.result || action.payload?.data || action.payload;
-      state.loading = false;
+      const actualData = action.payload?.data?.result || action.payload?.data || action.payload;
+      state.dataType = Array.isArray(actualData) ? actualData.map(item => ({
+        ...item,
+        label: item.name || item.label || item.p_label,
+        value: item.name || item.label || item.p_label
+      })) : [];
+      state.loadingType = false;
     },
     [getTypeDDL.rejected]: (state) => {
-      state.loading = false;
+      state.loadingType = false;
     },
 
     [getPeriodDDL.pending]: (state) => {
-      state.loading = true;
+      state.loadingPeriod = true;
     },
     [getPeriodDDL.fulfilled]: (state, action) => {
-      state.dataPeriod = action.payload?.data?.result || action.payload?.data || action.payload;
-      state.loading = false;
+      const actualData = action.payload?.data?.result || action.payload?.data || action.payload;
+      state.dataPeriod = Array.isArray(actualData) ? actualData.map(item => ({
+        ...item,
+        label: item.name || item.label || item.p_label,
+        value: item.id || item.value || item.p_value
+      })) : [];
+      state.loadingPeriod = false;
     },
     [getPeriodDDL.rejected]: (state) => {
-      state.loading = false;
+      state.loadingPeriod = false;
     },
 
     [getAllApprovalList.pending]: (state) => {
-      state.loading = true;
+      state.loadingAppHier = true;
     },
     [getAllApprovalList.fulfilled]: (state, action) => {
       state.dataListAppHierId = action.payload.data || action.payload;
-      state.loading = false;
+      state.loadingAppHier = false;
     },
     [getAllApprovalList.rejected]: (state) => {
-      state.loading = false;
+      state.loadingAppHier = false;
     },
 
     [getListApprovalById.pending]: (state) => {
-      state.loading = true;
+      state.loadingAppHierDetail = true;
     },
     [getListApprovalById.fulfilled]: (state, action) => {
       state.dataListAppHierDetail = action.payload.data || action.payload;
-      state.loading = false;
+      state.loadingAppHierDetail = false;
     },
     [getListApprovalById.rejected]: (state) => {
-      state.loading = false;
+      state.loadingAppHierDetail = false;
     },
 
     [getListCategory.pending]: (state) => {
@@ -513,14 +532,14 @@ const deductionSlice = createSlice({
     },
 
     [getCustomerDeductionList.pending]: (state) => {
-      state.loading = true;
+      state.loadingCustomerList = true;
     },
     [getCustomerDeductionList.fulfilled]: (state, action) => {
       state.customerData = action.payload.data || action.payload;
-      state.loading = false;
+      state.loadingCustomerList = false;
     },
     [getCustomerDeductionList.rejected]: (state) => {
-      state.loading = false;
+      state.loadingCustomerList = false;
     },
 
 

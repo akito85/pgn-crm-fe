@@ -44,6 +44,7 @@ export const dateFormatting = {
   dateFormal: "YYYY-MM-DD",
   datePeriod: "MMM YYYY",
   meas_date: "DD-MM-YYYY HH:mm:ss",
+  meas_date_input: "MM/DD/YYYY HH:mm:ss",
   hour_format: "HH:mm",
   f_date: "DD-MM-yyyy",
   year_only: "YYYY",
@@ -138,10 +139,12 @@ export const errorMessage = (error) => {
   let message =
     dataError ||
     error?.response?.data?.message ||
+    error?.data?.message ||
     error?.response?.data?.error ||
+    error?.data?.error ||
     error?.message ||
     error?.description ||
-    error?.toString();
+    (typeof error === "string" ? error : error?.toString());
   return message;
 };
 export const errorCode = (error) => {
@@ -153,9 +156,10 @@ export const errorCode = (error) => {
   return code;
 };
 
-export const errorBody = (code, status, message) => ({
+export const errorBody = (code, status, message, data = null) => ({
   code: code,
   message: `Your data was not ${status}. ${errorMessage(message)}.`,
+  data: data,
 });
 
 export const renderDateColumn = (
@@ -307,7 +311,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
     case "activate":
       if (
         lowerStatusApproval === "waiting approval" ||
-        lowerStatus === "inactive" ||
+        lowerStatusApproval === "draft" ||
         lowerStatus === "draft"
       ) {
         return true;
@@ -319,6 +323,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
       if (
         lowerStatusApproval === "waiting approval" ||
         lowerStatus === "inactive"
+          || (lowerStatus === 'active' && lowerStatusApproval === 'approved')
       ) {
         return true;
       } else {

@@ -3,39 +3,45 @@ import { useState } from "react";
 import GasDepositTable from "./GasDepositTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getGasDepositHistory,
   getGdApprovalHistory,
-  inactivateGasDeposit,
-  getGdApprovalHierarchy,
-  getDetailGdApprovalHierarchy,
 } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import GasDepositApprovalModal from "./GasDepositApprovalModal";
-import NxInactivateModal from "../../../../components/Nx/NxInactivateModal";
 import NxHistoryModal from "../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
+import NxTabs from "../../../../components/Nx/NxTabs";
+import GasDepositHistoryTable from "./GasDepositHistoryTable";
+import NxModal from "../../../../components/Nx/NxModal";
+import NxDetailText from "../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../components/Nx/NxDatePicker";
 
 /**
- * Gas deposit list table module
- * @param {{ moduleType: "sa" | "ua"; accountId: number; customerId: number }} props
- * @returns
+ * Top-level Gas Deposit module container. Renders a Gas Deposit List tab and a
+ * Recalculate/Expire History tab. Supports standalone ("sa") and under-account
+ * ("ua") contexts; account sub-type is inferred from the URL. Wrapped with `React.memo`.
+ *
+ * @param {{ moduleType: "sa" | "ua"; accountId?: number; customerId?: number }} props
  */
 const GasDeposit = ({ moduleType, accountId, customerId }) => {
   // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
-  const { data_gdApprovalHistory } = useSelector((state) => state.gasDeposit);
+  const {
+    detail_gdApprovalHistory,
+    loading_detailGdHistory,
+    detail_gasDepositHistory,
+  } = useSelector((state) => state.gasDeposit);
 
+  // --- State ---
+  const [activeKey, setActiveKey] = useState(0);
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [showInactiveModal, setShowInactiveModal] = useState(false);
-  const [inactivateGdId, setInactivateGdId] = useState(0);
-  const [inactivateGdAccountNumber, setInactivateGdAccountNumber] = useState(0);
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [selectedDetailId, setSelectedDetailId] = useState();
+  const [showHistoryDetailModal, setShowHistoryDetailModal] = useState(false);
 
   // --- Derived values ---
   const isStandAlone = moduleType === "sa";
@@ -43,70 +49,51 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const isStandard = isUnderAccount && location.pathname.includes("account-standard");
   const isOneTime = isUnderAccount && location.pathname.includes("account-onetime");
 
+  const {
+    period,
+    balanceM3,
+    balanceMscf,
+    balanceMmbtu,
+    balanceAmmount,
+    availableAmount,
+    remark,
+    id,
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy
+  } = detail_gasDepositHistory;
+
   // --- Functions / handlers ---
+  /** Increments the refresh signal to trigger a page-0 re-fetch in child tables. */
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
-   * Stores the selected record's ID to show the detail mutation table below the main table.
-   * @param {object} record - The clicked table row record
-   */
-  const handleSelectDetail = (record) => {
-    setSelectedDetailId(record.id);
-  };
-
-  /**
-   * Open or close inactivate modal
    * @param {boolean} show
-   * @param {number} gdId
-   * @param {string} gdAccountNumber
+   * @param {number} historyId
    */
-  const handleInactivateModal = (
-    show,
-    newGdId = 0,
-    newGdAccountNumber = ""
-  ) => {
+  const handleApprovalHistoryModal = ({ show, historyId }) => {
     if (show) {
-      setInactivateGdId(newGdId);
-      setInactivateGdAccountNumber(newGdAccountNumber);
-      setShowInactiveModal(true);
+      if (historyId)
+        dispatch(getGdApprovalHistory(historyId));
+      setShowApprovalHistoryModal(true);
     } else {
-      setInactivateGdId(0);
-      setInactivateGdAccountNumber("");
-      setShowInactiveModal(false);
+      setShowApprovalHistoryModal(false);
     }
   };
 
   /**
-   * @param {string} remark
-   * @param {() => {}} handleClear
-   */
-  const handleInactivateGd = ({ remark, appHierId }, handleClear) => {
-    const body = {
-      id: inactivateGdId,
-      appHierId,
-      remark,
-    };
-
-    dispatch(inactivateGasDeposit({ body }))
-      .unwrap()
-      .then(() => {
-        setShowInactiveModal(false);
-        triggerRefresh();
-        handleClear();
-      })
-      .catch(() => {});
-  };
-
-  /**
    * @param {boolean} show
-   * @param {number} gdId
+   * @param {number} historyId
    */
-  const handleApprovalHistoryModal = (show, gdId = 0) => {
+  const handleHistoryDetailModal = ({ show, historyId }) => {
     if (show) {
-      dispatch(getGdApprovalHistory(gdId));
-      setShowApprovalHistoryModal(true);
+      if (historyId) {
+        dispatch(getGasDepositHistory(historyId));
+        setShowHistoryDetailModal(true);
+      }
     } else {
-      setShowApprovalHistoryModal(false);
+      setShowHistoryDetailModal(false);
     }
   };
 
@@ -125,19 +112,129 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
       dispatch(getGrantedAccessAccount(path));
   }, []);
 
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Gas Deposit List",
+      children: (
+        <>
+          <NxBaseContainer border>
+            <GasDepositTable
+              moduleType={moduleType}
+              accountId={accountId}
+              customerId={customerId}
+              handleApproval={setShowApprovalModal}
+              refreshSignal={refreshSignal}
+            />
+          </NxBaseContainer>
+    
+          <GasDepositApprovalModal
+            accountId={accountId}
+            isOpen={showApprovalModal}
+            isUnderAccount={isUnderAccount}
+            handleCancel={() => setShowApprovalModal(false)}
+            afterFinish={triggerRefresh}
+          />
+        </>
+      )
+    },
+    {
+      key: 1,
+      label: "Recalculate/Expire Request History",
+      children: (
+        <>
+          <NxBaseContainer border>
+            <GasDepositHistoryTable
+              accountId={accountId}
+              handleApprovalHistoryModal={handleApprovalHistoryModal}
+              handleDetailModal={handleHistoryDetailModal}
+              refreshSignal={refreshSignal}
+              moduleType={moduleType}
+            />
+          </NxBaseContainer>
+          
+          {/* Detail Modal */}
+          <NxModal
+            isOpen={showHistoryDetailModal}
+            title="DETAIL GAS DEPOSIT"
+            loading={loading_detailGdHistory}
+            handleCancel={(() => handleHistoryDetailModal(false))}
+          >
+            <div className="flex flex-col gap-y-4 p-4">
+
+              <NxBaseContainer border header="GAS DEPOSIT DETAIL">
+                <div className="grid grid-cols-3">
+                  <NxDetailText label="Period">
+                    {period}
+                  </NxDetailText>
+                  <NxDetailText label="Balance (M3)">
+                    {balanceM3}
+                  </NxDetailText>
+                  <NxDetailText label="Balance (MSCF)">
+                    {balanceMscf}
+                  </NxDetailText>
+                  <NxDetailText label="Balance (MMBTU)">
+                    {balanceMmbtu}
+                  </NxDetailText>
+                  <NxDetailText label="Balance Amount">
+                    {balanceAmmount}
+                  </NxDetailText>
+                  <NxDetailText label="Available Amount">
+                    {availableAmount}
+                  </NxDetailText>
+                </div>
+                <NxDetailText label="Remark">
+                  {remark}
+                </NxDetailText>
+              </NxBaseContainer>
+              <NxBaseContainer border header="HISTORY INFORMATION">
+                <div className="grid grid-cols-5">
+                  <NxDetailText label="Record ID">
+                    {id}
+                  </NxDetailText>
+                  <NxDetailText label="Created Date">
+                    {NxDate.formatDate(createdDate, "DD MMM YYYY")}
+                  </NxDetailText>
+                  <NxDetailText label="Created By">
+                    {createdBy}
+                  </NxDetailText>
+                  <NxDetailText label="Updated Date">
+                    {NxDate.formatDate(updatedDate, "DD MMM YYYY")}
+                  </NxDetailText>
+                  <NxDetailText label="Updated By">
+                    {updatedBy}
+                  </NxDetailText>
+                </div>
+              </NxBaseContainer>
+            </div>
+          </NxModal>
+
+          {/* Approval History Modal */}
+          <NxHistoryModal
+            isOpen={showApprovalHistoryModal}
+            handleClose={() => handleApprovalHistoryModal(false)}
+            header={"Approval History"}
+            dataApprover={dataApprovalHistoryFix?.dataApprover}
+            dataHistory={dataApprovalHistoryFix?.dataHistory}
+          />
+        </>
+      )
+    }
+  ];
+
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_gdApprovalHistory && data_gdApprovalHistory?.dataApprover) {
+    if (detail_gdApprovalHistory && detail_gdApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_gdApprovalHistory?.dataApprover?.GAS_DEPOSIT || [],
-          inactive:
-            data_gdApprovalHistory?.dataApprover?.INACTIVE_GAS_DEPOSIT || [],
+          recalculate: detail_gdApprovalHistory?.dataApprover?.RECALCULATE_GAS_DEPOSIT || [],
+          expire:
+            detail_gdApprovalHistory?.dataApprover?.EXPIRE_GAS_DEPOSIT || [],
         },
         dataHistory: {
-          create: data_gdApprovalHistory?.dataHistory?.GAS_DEPOSIT || [],
-          inactive:
-            data_gdApprovalHistory?.dataHistory?.INACTIVE_GAS_DEPOSIT || [],
+          recalculate: detail_gdApprovalHistory?.dataHistory?.RECALCULATE_GAS_DEPOSIT || [],
+          expire:
+            detail_gdApprovalHistory?.dataHistory?.EXPIRE_GAS_DEPOSIT || [],
         },
       };
 
@@ -145,67 +242,18 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_gdApprovalHistory]);
+  }, [detail_gdApprovalHistory]);
 
   return (
-    <>
-      <NxCardContainer header={"GAS DEPOSIT"}>
-        <NxBaseContainer border>
-          <GasDepositTable
-            moduleType={moduleType}
-            accountId={accountId}
-            cutomerId={customerId}
-            handleSelectDetail={handleSelectDetail}
-            refreshSignal={refreshSignal}
-          />
-        </NxBaseContainer>
+    <div className="flex flex-col gap-y-4">
+      <NxCardContainer header="GAS DEPOSIT" withoutPadding>
+        <NxTabs
+          activeKey={activeKey}
+          onChange={setActiveKey}
+          items={tabOptions}
+        />
       </NxCardContainer>
-
-      {/* Detail mutation table — rendered only when a row is selected */}
-      {selectedDetailId && (
-        <NxCardContainer header={"GAS DEPOSIT DETAIL MUTATION"}>
-          <NxBaseContainer border>
-            <GasDepositDetailMutationTable
-              detailId={selectedDetailId}
-            />
-          </NxBaseContainer>
-        </NxCardContainer>
-      )}
-
-      <GasDepositApprovalModal
-        accountId={accountId}
-        isOpen={showApprovalModal}
-        handleCancel={() => setShowApprovalModal(false)}
-        afterFinish={triggerRefresh}
-      />
-
-      {/* Inactivate Modal */}
-      <NxInactivateModal
-        isOpen={showInactiveModal}
-        header={"INACTIVATE"}
-        handleCloseModal={() => handleInactivateModal(false)}
-        customMessage={`Are you sure you want to inactivate gas deposit - ${inactivateGdAccountNumber}?`}
-        onFinish={({ remark, appHierId }, handleClear) =>
-          handleInactivateGd({ remark, appHierId }, handleClear)
-        }
-        named={inactivateGdAccountNumber}
-        menu="gas deposit"
-        sliceName="gasDeposit"
-        approvalOptionsName="data_gdApprovalHierarchy"
-        approvalHierarchtDetailsName="detail_gdApprovalHierarchy"
-        getApprovalOptions={getGdApprovalHierarchy}
-        getApprovalHierarchyDetails={getDetailGdApprovalHierarchy}
-      />
-
-      {/* Approval History Modal */}
-      <NxHistoryModal
-        isOpen={showApprovalHistoryModal}
-        handleClose={() => handleApprovalHistoryModal(false)}
-        header={"Approval History"}
-        dataApprover={dataApprovalHistoryFix?.dataApprover}
-        dataHistory={dataApprovalHistoryFix?.dataHistory}
-      />
-    </>
+    </div>
   );
 };
 

@@ -31,7 +31,8 @@ import {
   getContryContact,
   getAllContactPaginate,
   getBankDetail,
-  getContactAddress // <-- 1. IMPORT FUNGSI API ADDRESS
+  getContactAddress,
+  getAllGLType,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { intToNPWP } from "../../../../../utils/npwp";
@@ -61,7 +62,8 @@ const BankForm = ({ type }) => {
     data_countryZone,
     data_contact,
     data_detail,
-    data_contactAddress // <-- 2. TARIK DARI REDUX STATE
+    data_contactAddress,
+    dataGLType,
   } = useSelector((state) => state.bank);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -78,6 +80,7 @@ const BankForm = ({ type }) => {
   // --- 3. BIKIN STATE UNTUK OPSI ADDRESS ---
   const [addressOptions, setAddressOptions] = useState([]);
   // -----------------------------------------
+  const [glTypeOptions, setGlTypeOptions] = useState([]);
 
   const [contactData, setContactData] = useState([]);
 
@@ -87,6 +90,7 @@ const BankForm = ({ type }) => {
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
 
+  const [flag, setFlag] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [kirimBody, setKirimBody] = useState({});
   const [codeBank, setCodeBank] = useState("");
@@ -104,7 +108,7 @@ const BankForm = ({ type }) => {
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
     { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK, breadcrumbName: "Bank" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK, breadcrumbName: type === "create" ? "Create" : "Update" },
+    { path: type === "create" ? RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK : RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK, breadcrumbName: type === "create" ? "Create" : "Update" },
   ];
 
   useEffect(() => {
@@ -118,6 +122,7 @@ const BankForm = ({ type }) => {
     
     // --- 4. TEMBAK API ADDRESS ---
     dispatch(getContactAddress());
+    dispatch(getAllGLType());
     // -----------------------------
     
     if (type === "update" && idBank) {
@@ -139,6 +144,7 @@ const BankForm = ({ type }) => {
         phoneNumber: bank.phoneNumber,
         email: bank.email,
         address: bank.address,
+        apphierId: bank.appHierId,
       });
       setCodeBank(bank.bankCode);
 
@@ -173,7 +179,8 @@ const BankForm = ({ type }) => {
       }
 
       if (data_detail.attachmentDtoList?.length > 0) {
-        const mappedAtt = data_detail.attachmentDtoList.map((att) => ({
+        const mappedAtt = data_detail.attachmentDtoList.map((att, index) => ({
+          key: index + 1,
           id: att.id,
           uid: att.id,
           name: att.fileName,
@@ -213,6 +220,12 @@ const BankForm = ({ type }) => {
     }
   }, [data_contactAddress]);
   // -------------------------------------------------------------
+
+  useEffect(() => {
+    if (dataGLType?.length > 0) {
+      setGlTypeOptions(dataGLType.map(item => ({ label: item.name, value: item.id })));
+    }
+  }, [dataGLType]);
 
   useEffect(() => {
     if (data_job?.length > 0) setJobOptions(data_job.map(item => ({ label: item.name, value: item.id })));
@@ -319,7 +332,17 @@ const BankForm = ({ type }) => {
     setListDataAttachment([]);
   };
 
-  const handleSaveSubmit = async () => {
+  const handleSubmit = () => {
+    setFlag(true);
+    handleSaveSubmit(true);
+  };
+
+  const handleSaveDraft = () => {
+    setFlag(false);
+    handleSaveSubmit(false);
+  };
+
+  const handleSaveSubmit = async (isSubmit = true) => {
     try {
       if (listDataAttachment.length === 0) {
         message.error("Attachment wajib diupload minimal 1 dokumen!");
@@ -356,6 +379,8 @@ const BankForm = ({ type }) => {
       const officeTypeVal = formValue.officeType?.toLowerCase();
       const isBranch = officeTypeVal === "branch" || officeTypeVal === "cabang";
 
+      const formattedGLAccounts = [];
+
       const dataValue = {
         id: type === "update" ? idBank : null, 
         bankCode: formValue.bankCode,
@@ -369,6 +394,8 @@ const BankForm = ({ type }) => {
         branchName: formValue.branchName || null,
         bankShortName: formValue.bankShortName,
         bankContacts: formattedContacts,
+        glAccounts: formattedGLAccounts,
+        isSubmit,
       };
 
       setKirimBody(dataValue);
@@ -427,8 +454,12 @@ const BankForm = ({ type }) => {
         setLoadingForm(false);
         setModalConfirm(false);
         handleClear();
-        dispatch(showModalSuccess({ title: "Successful", description: "Your data has been submitted" }));
-        navigate(-1);
+        dispatch(showModalSuccess({
+          title: "Successful",
+          description: `Your data has been ${kirimBody.isSubmit ? "submitted" : "saved as draft"}.`,
+          return: false,
+        }));
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK);
       })
       .catch((error) => {
         setLoadingForm(false);
@@ -520,7 +551,8 @@ const BankForm = ({ type }) => {
               onNext={handleNext}
               onCancel={handleBack}
               onClear={handleClear}
-              onSubmit={handleSaveSubmit}
+              onSaveDraft={handleSaveDraft}
+              onSubmit={handleSubmit}
               type={type}
             />
           </Form>
@@ -552,6 +584,10 @@ const BankForm = ({ type }) => {
             listDataAppHierDetail={appHierDataDetail}
             dataOption={appHierOptions}
             selectedHierarchy={selectedHierarchy}
+            glTypeOptions={glTypeOptions}
+            jobOptions={jobOptions}
+            positionOptions={positionOptions}
+            addressOptions={addressOptions}
           />
         </ModalCustom>
 

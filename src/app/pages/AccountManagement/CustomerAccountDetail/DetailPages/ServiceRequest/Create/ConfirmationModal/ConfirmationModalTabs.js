@@ -5,8 +5,7 @@ import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxTable from "../../../../../../../../components/Nx/NxTable";
-import ApprovalForm from "../StepContents/ApprovalForm";
-import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
+import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 
 // ---------------------------------------------------------------------------
@@ -148,9 +147,9 @@ const AttachmentTab = ({ attachmentsData }) => {
     { title: "FILE NAME", dataIndex: "fileName", key: "fileName" },
     {
       title: "FILE SIZE",
-      dataIndex: "size",
-      key: "size",
-      render: (size) => (size ? bytesConverter(size) : "-"),
+      dataIndex: "fileSize",
+      key: "fileSize",
+      render: (v) => v || "-",
     },
     {
       title: "ACTION",
@@ -161,7 +160,7 @@ const AttachmentTab = ({ attachmentsData }) => {
         <Tooltip title="Preview">
           <EyeOutlined
             style={{ fontSize: "20px", color: "#0075bf", cursor: "pointer" }}
-            onClick={() => previewFileAttachment(record.base64)}
+            onClick={() => previewFileAttachment(record.base64 || record.urlFile1)}
           />
         </Tooltip>
       ),
@@ -213,7 +212,15 @@ const ConfirmationModalTabs = ({
     {
       key: 3,
       label: "Approval",
-      children: <ApprovalForm form={form} dataTable={approvalTableData} formView={false} />,
+      children: (
+        <NxBaseContainer border header="APPROVAL INFORMATION">
+          <NxApprovalInput
+            form={form}
+            hierarchyDetails={approvalTableData}
+            formView={false}
+          />
+        </NxBaseContainer>
+      ),
     },
     {
       key: 4,

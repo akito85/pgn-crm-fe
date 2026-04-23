@@ -7,19 +7,14 @@ import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInp
 import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
-import { getCustomerDetail } from "../../../../../../../../redux/slices/account_management/Customer/customerAccount";
-import {
-  getAccountStandardDetail,
-  getAccountOneTimeDetail
-} from "../../../../../../../../redux/slices/account_management/accountManagement";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   createPaymentRelation,
-  getDetailDraftPaymentRelation,
-  getDetailPaymentRelation,
-  getDetailPrApprovalHierarchy,
+  getPaymentRelationDraft,
+  getPaymentRelation,
   getPrApprovalHierarchy,
-  getPrAttachmentCategory,
+  getPrApprovalHierarchies,
+  getPrAttachmentCategories,
   updatePaymentRelation
 } from "../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import {
@@ -47,46 +42,40 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const isCreate = formType === "create";
   const isUpdate = formType === "update";
 
-  const { data_accountDetail } = useSelector(
-    (state) => state.accountManagement
-  );
-
-  const accountId = data_accountDetail?.accountInformation?.accountId;
-
   const {
-    loading_listPrApprovalOption,
-    loading_detailPrApprovalHierarchyDetails,
+    loading_listPrApprovalHierarchy,
+    loading_detailPrApprovalHierarchy,
     loading_detailPr,
     loading_detailDraftPr,
     loading_createUpdatePr,
-    list_prApprovalOptions,
-    list_prApprovalHierarchyDetail,
+    list_prApprovalHierarchy,
+    detail_prApprovalHierarchy,
     detail_paymentRelation,
     detailDraft_paymentRelation,
-    data_prAttachmentCategory
+    list_prAttachmentCategory
   } = useSelector((state) => state.paymentRelation);
 
   const loading =
-    loading_listPrApprovalOption ||
-    loading_detailPrApprovalHierarchyDetails ||
+    loading_listPrApprovalHierarchy ||
+    loading_detailPrApprovalHierarchy ||
     loading_detailPr ||
     loading_detailDraftPr;
 
   //declare
   const location = useLocation();
   const [form] = Form.useForm();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
-  const idPr = location?.state?.id;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
+  const id = location?.state?.id;
 
-  const status = detail_paymentRelation.status || "DRAFT";
-  const statusApproval = detail_paymentRelation.statusApproval || "DRAFT";
+  const status = location.state?.status || detail_paymentRelation.status || "DRAFT";
+  const statusApproval = location.state?.statusApproval || detail_paymentRelation.statusApproval || "DRAFT";
 
   const isDraft = status === "DRAFT";
   const isActive = status === "ACTIVE";
 
   const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectApproval = statusApproval === "REJECT";
+  const isRejectedApproval = statusApproval === "REJECTED";
 
   //state
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
@@ -97,7 +86,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
 
   const attachmentIsRequired = true;
 
-  const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
+  const detail = (isActive && (isDraftApproval || isRejectedApproval)) ? detailDraft_paymentRelation : detail_paymentRelation;
   const attachments = detail.attachments;
 
   const formFields = [
@@ -114,28 +103,16 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   ];
 
   useEffect(() => {
-    if (idCustomer) dispatch(getCustomerDetail(idCustomer));
-  }, [idCustomer]);
-
-  useEffect(() => {
-    if (idAccount && idCustomer) {
-      if (isStandard) {
-        dispatch(getAccountStandardDetail({ idAccount, idCustomer }));
-      } else if (isOneTime) {
-        dispatch(getAccountOneTimeDetail({ idAccount, idCustomer }));
-      }
+    if (isUpdate && id) {
+      if (isActive && (isDraftApproval || isRejectedApproval))
+        dispatch(getPaymentRelationDraft(id));
+      else
+        dispatch(getPaymentRelation(id));
     }
-  }, [idAccount, idCustomer]);
+  }, [isUpdate, id, accountId, isActive, isDraftApproval, isRejectedApproval]);
 
   useEffect(() => {
-    if (isUpdate && idPr) {
-      dispatch(getDetailPaymentRelation(idPr));
-      dispatch(getDetailDraftPaymentRelation(idPr));
-    }
-  }, [formType, idPr]);
-
-  useEffect(() => {
-    if (isUpdate && list_prApprovalOptions.length) {
+    if (isUpdate && list_prApprovalHierarchy.length) {
       const {
         accountId,
         priority,
@@ -158,14 +135,14 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         appHierId
       });
 
-      const appHierOption = list_prApprovalOptions.find(
+      const appHierOption = list_prApprovalHierarchy.find(
         (option) => option.appHierId === appHierId
       );
 
       if (appHierOption)
-        handleSelectHiararchy(appHierId, appHierOption.approvalName);
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, list_prApprovalOptions]);
+  }, [detail, list_prApprovalHierarchy]);
 
   useEffect(() => {
     if (isUpdate && attachments)
@@ -176,7 +153,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   }, [detail]);
 
   useEffect(() => {
-    dispatch(getPrApprovalHierarchy());
+    dispatch(getPrApprovalHierarchies());
   }, []);
 
   const routes = [
@@ -196,8 +173,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
       state: {
-        idAccount,
-        idCustomer
+        idAccount: accountId,
+        idCustomer: customerId
       }
     },
     {
@@ -244,7 +221,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             const body = {
               stepNumber: current + 1,
               type: formType.toUpperCase(),
-              id: isUpdate ? idPr : undefined,
+              id,
               data: {
                 accountId,
                 relatedAccountId,
@@ -277,7 +254,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         form.getFieldsValue(true);
 
       const body = {
-        id: isUpdate ? idPr : undefined,
+        id,
         accountId,
         relatedAccountId,
         priority: Number.parseInt(priority),
@@ -314,8 +291,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     form.setFieldValue("accountName", accountName);
   };
 
-  const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailPrApprovalHierarchy(appHierId));
+  const handleSelectHierarchy = (appHierId, approvalName) => {
+    dispatch(getPrApprovalHierarchy(appHierId));
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -329,7 +306,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
             <InfoPaymentRelation
               form={form}
               setAccount={setAccount}
-              accountId={idAccount}
+              accountId={accountId}
               isUpdate={isUpdate}
               isDraft={isDraft}
               key={`payment-relation-tab-0`}
@@ -347,9 +324,9 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           content: (
             <NxApprovalInput
               form={form}
-              hierarchyDetails={list_prApprovalHierarchyDetail}
-              options={list_prApprovalOptions}
-              handleSelectHiararchy={handleSelectHiararchy}
+              hierarchyDetails={detail_prApprovalHierarchy}
+              options={list_prApprovalHierarchy}
+              handleSelectHierarchy={handleSelectHierarchy}
               key={`payment-relation-tab-1`}
             />
           )
@@ -368,8 +345,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
               updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
               key={`payment-relation-tab-2`}
-              getAPICategory={getPrAttachmentCategory}
-              categoryData={data_prAttachmentCategory}
+              getAPICategory={getPrAttachmentCategories}
+              categoryData={list_prAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
               mandatory={attachmentIsRequired}
@@ -410,7 +387,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         const body = {
           stepNumber: current + 1,
           type: formType.toUpperCase(),
-          id: isUpdate ? idPr : undefined,
+          id: isUpdate ? id : undefined,
           data: {
             accountId,
             relatedAccountId,
@@ -469,7 +446,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           const body = {
             stepNumber: i + 1,
             type: formType.toUpperCase(),
-            id: isUpdate ? idPr : undefined,
+            id,
             data: {
               accountId,
               relatedAccountId,
@@ -534,7 +511,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     ]);
 
     const body = {
-      id: idPr,
+      id,
       accountId,
       relatedAccountId,
       priority: Number.parseInt(priority),
@@ -563,8 +540,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount,
-                idCustomer
+                idAccount: accountId,
+                idCustomer: customerId
               }
             });
           }, 2000);
@@ -573,7 +550,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
     else if (isUpdate)
       dispatch(
         updatePaymentRelation({
-          id: idPr,
+          id,
           body,
           attachments: newAttachments,
           action: confirmationType.toUpperCase()
@@ -584,8 +561,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           setTimeout(() => {
             navigate(navigateTarget, {
               state: {
-                idAccount,
-                idCustomer
+                idAccount: accountId,
+                idCustomer: customerId
               }
             });
           }, 2000);
@@ -600,7 +577,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
       form.resetFields();
       setCurrent(0);
     } else if (isUpdate) {
-      if (list_prApprovalOptions?.length) {
+      if (list_prApprovalHierarchy?.length) {
         const {
           accountId,
           priority,
@@ -623,12 +600,12 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           appHierId
         });
 
-        const appHierOption = list_prApprovalOptions.find(
+        const appHierOption = list_prApprovalHierarchy.find(
           (option) => option.appHierId === appHierId
         );
 
         if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
+          handleSelectHierarchy(appHierId, appHierOption.approvalName);
       }
 
       if (attachments)
@@ -646,8 +623,8 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         <HeaderDetail
           data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
           dispatch={dispatch}
-          idAccount={idAccount}
-          idCustomer={idCustomer}
+          idAccount={accountId}
+          idCustomer={customerId}
           type={accountType}
         />
         <Spin spinning={loading}>
@@ -696,7 +673,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
                     type={"reject"}
                     icon={<SVGIcon name="IconButtonClear" width={14} />}
                   >
-                    {isUpdate ? "Reset" : "Clear"}
+                    {isUpdate ? "Reset" : "Clear"} Data
                   </Button>
                   <Button
                     onClick={() =>
@@ -726,16 +703,14 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
                     </Button>
                   )}
                   {current === steps.length - 1 && (
-                    <>
-                      <Button
-                        onClick={() =>
-                          handleSetShowConfirmationModal(true, "submit")
-                        }
-                        type={"submit"}
-                      >
-                        Save & Submit
-                      </Button>
-                    </>
+                    <Button
+                      onClick={() =>
+                        handleSetShowConfirmationModal(true, "submit")
+                      }
+                      type={"approve"}
+                    >
+                      Submit
+                    </Button>
                   )}
                 </div>
               </div>
@@ -745,7 +720,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
               formId={"paymentRelationForm"}
               isOpen={showConfirmationModal}
               handleCancel={() => handleSetShowConfirmationModal(false)}
-              approvalData={list_prApprovalHierarchyDetail}
+              approvalData={detail_prApprovalHierarchy}
               type={confirmationType}
               attachmentDataSource={attachmentDataSource}
               service={accountManagementService}

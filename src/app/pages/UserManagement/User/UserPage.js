@@ -1,23 +1,16 @@
 import {
   DownloadOutlined,
   ExclamationCircleOutlined,
-  LinkOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import {
-  Alert,
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
-import React, { useCallback, useEffect, useState } from "react";
+import { Alert, Form, Tooltip } from "antd";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
-import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import {
   donwloadedExcel,
@@ -25,356 +18,233 @@ import {
   getAllUserPaginate,
   inactiveUser,
 } from "../../../../redux/slices/user_management/user";
-import { useRef } from "react";
-import TablePagination from "../../../../components/TablePagination";
 import PendingTaskLayout from "./PendingTaskLayout";
 import SVGIcon from "../../../../assets/Icon/index";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconGenerateLink from "../../../../assets/Icon/Nx/IconGenerateLink";
+import IconPower from "../../../../assets/Icon/Nx/IconPower";
 import InputComponent from "../../../../components/InputComponent";
-import { formMessageRequired, hasValue, renderColumn } from "../../../../utils";
-import Toolbar from "../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { formMessageRequired, hasValue } from "../../../../utils";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchProps";
 import { clearBodyMessage, hideModalError } from "../../../../redux/slices/general_slice";
-
+import { TableUser, columnsUser } from "./TableUser";
 
 const UserPage = () => {
+  const dispatch = useDispatch();
+  const { data_status } = useSelector((state) => state.user);
+  const { bodyError } = useSelector((state) => state?.general);
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch {
+      return null;
+    }
+  }, [rawToken]);
+
+  // Pagination & filter state
+  const [pageSize, setPageSize] = useState(30);
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [advancedSearch, setAdvancedSearch] = useState(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+
+  // Local data state
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Activate/inactivate modal state
   const [openModal, setOpenModal] = useState(false);
   const [openModalError, setOpenModalError] = useState(false);
-  const dispatch = useDispatch();
-  const { data, loading, data_status } = useSelector(
-    (state) => state.user
-  );
-  const { bodyError } = useSelector(state => state?.general);
-
-  // state
-  const [userId, setUserId] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [activate, setActivate] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const searchInput = useRef(null);
-  const [search, setSearch] = useState({});
-  const [sort, setSort] = useState("");
-  const [form] = Form.useForm();
-  const [body, setBody] = useState({});
   const [record, setRecord] = useState({});
+  const [body, setBody] = useState({});
+  const [form] = Form.useForm();
 
-  // handle fetch
-  const handleFetch = useCallback(() => {
-    dispatch(getAllUserPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort }));
-  }, [dispatch, page, pageSize, search, sort]);
+  // Refs for safe access inside callbacks
+  const pageRef = useRef(0);
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
 
+  const buildSearch = useCallback((basicSearch, advSearch) => {
+    let combined = { ...basicSearch };
+    if (advSearch?.filters) {
+      advSearch.filters.forEach((f) => {
+        if (f.column && f.value) combined[f.column] = f.value;
+      });
+    }
+    if (advSearch?.filterRules) {
+      advSearch.filterRules.forEach((rule) =>
+        rule.filters.forEach((f) => {
+          if (f.column && f.value) combined[f.column] = f.value;
+        })
+      );
+    }
+    return encodeURIComponent(JSON.stringify(combined));
+  }, []);
+
+  const fetchPage = useCallback(
+    async (page, replace = false, signal = null) => {
+      if (isFetchingRef.current) return;
+      if (signal?.aborted) return;
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        const reqSearch = buildSearch(search, advancedSearch);
+        const result = await dispatch(
+          getAllUserPaginate({ page: page + 1, pageSize, sort, search: reqSearch })
+        ).unwrap();
+        if (signal?.aborted) return;
+        const rows = result?.result ?? [];
+        const pageInfo = result?.page ?? {};
+        const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+        setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+        setTotalElements(pageInfo.totalElements ?? 0);
+        setHasMore(nextHasMore);
+        hasMoreRef.current = nextHasMore;
+        pageRef.current = page;
+      } catch (e) {
+        if (!signal?.aborted) console.error("fetchPage error", e);
+      } finally {
+        isFetchingRef.current = false;
+        if (!signal?.aborted) setIsLoading(false);
+      }
+    },
+    [search, advancedSearch, sort, pageSize, dispatch, buildSearch]
+  );
 
   useEffect(() => {
-    handleFetch()
-  }, [handleFetch]);
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false;
+    };
+  }, [search, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+  const handleChange = (_, pageSizeChange) => {
+    setPageSize(pageSizeChange);
   };
 
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
 
-  // handle cancel modals
-  const handleCancel = async () => {
+  const onSort = (_, __, sortInfo) => {
+    const dataSort =
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
+
+  const onAdvanceSearch = (searchData) => {
+    setAdvancedSearch(searchData);
+  };
+
+  const handleCancel = () => {
     setOpenModal(false);
     setOpenModalError(false);
     form.resetFields();
   };
 
-
-  // handle download 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     dispatch(
       donwloadedExcel({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
+        page: pageRef.current + 1,
         pageSize,
         sort,
-      }))
-  }
+      })
+    );
+  }, [dispatch, search, pageSize, sort]);
 
-  // columns
-  const columns = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "USERNAME",
-      dataIndex: "username",
-      key: "username",
-      align: "left",
-      width: 350,
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "username",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('username', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "USER TYPE",
-      dataIndex: "userType",
-      key: "employee",
-      width: 180,
-      align: "center",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "userType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('userType', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "EMPLOYEE",
-      dataIndex: "employeeName",
-      key: "employeeName",
-      // width: 220,
-      align: "left",
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "employeeName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('employeeName', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "USER LEVEL",
-      dataIndex: "userLevel",
-      width: 180,
-      align: "left",
-      key: "user_level",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "userLevel",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('userLevel', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "EMAIL",
-      dataIndex: "email",
-      key: "email",
-      // width: 200,
-      align: "left",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "email",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('email', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "MOBILE PHONE",
-      align: "left",
-      dataIndex: "phone",
-      width: 200,
-      key: "phone",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "phone",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('phone', searchedColumn, searchText, text, false, 'input', search)
-    },
-
-    {
-      title: "AUTH TYPE",
-      dataIndex: "authType",
-      key: "authType",
-      width: 180,
-      align: "center",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "authType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('authType', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "GROUP ACCESS",
-      dataIndex: "groupAccess",
-      key: "group_access",
-      // width: 240,
-      align: "left",
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "groupAccess",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('groupAccess', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      key: "description",
-      // width: 270,
-      align: "left",
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      width: 120,
-      sorter: true,
-      fixed: "right",
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-    }
-  ];
-
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "User Management",
-    },
-    {
-      path: USER_ROUTES.VIEW_USER,
-      breadcrumbName: "User",
-    },
-  ];
-
-  // on finish
   const onFinish = async (formValue) => {
     try {
-      const body = {
-        userId,
-        ...formValue,
-        activate
-      };
-      setBody(body);
+      const bodyData = { userId: selectedUserId, ...formValue, activate };
+      setBody(bodyData);
       handleCancel();
-      await dispatch(inactiveUser(body))?.unwrap();
-      await handleFetch()?.unwrap();
+      await dispatch(inactiveUser(bodyData))?.unwrap();
+      const signal = { aborted: false };
+      pageRef.current = 0;
+      setAllData([]);
+      setHasMore(false);
+      setIsLoading(true);
+      fetchPage(0, true, signal);
     } catch (error) {
       if (hasValue(error?.code) && error?.data?.length !== 0) {
-        dispatch(clearBodyMessage())
-        dispatch(hideModalError())
-        setActivate('INACTIVE')
+        dispatch(clearBodyMessage());
+        dispatch(hideModalError());
+        setActivate("INACTIVE");
         setOpenModalError(true);
       }
     }
-
   };
 
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
+  const handleRetry = () => {
+    handleCancelTryAgain();
+    if (bodyError?.action === "GET_ALL_EMPLOYEE_PAGINATE") {
+      const signal = { aborted: false };
+      pageRef.current = 0;
+      setAllData([]);
+      setHasMore(false);
+      setIsLoading(true);
+      fetchPage(0, true, signal);
+    } else if (bodyError?.action === "DOWNLOAD_USER_EXCEL") {
+      handleDownload();
+    } else if (bodyError?.action === "FORWARD_TASK_USER") {
+      dispatch(forwardTaskUser(body));
+    } else {
+      dispatch(inactiveUser(body));
+    }
   };
 
+  const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
 
-  // array items action
-  const itemActions = [
-    // toolbar items
+  const routes = [
+    { path: "", breadcrumbName: "User Management" },
+    { path: USER_ROUTES.VIEW_USER, breadcrumbName: "User" },
+  ];
+
+  const itemActions = useMemo(() => [
+    // Toolbar actions
     {
       action: "Change",
       render: (
         <NavLink to={USER_ROUTES?.CHANGE_AUTH}>
           <ButtonComponent
-            type={"submit"}
-            icon={<SVGIcon name={"IconRevers"} width={24} color={'#FFFFFF'} />}
+            type="submit"
+            icon={<SVGIcon name="IconRevers" width={24} color="#FFFFFF" />}
           >
-            {" "}
             Change Auth Type
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
     {
-      action: 'Download',
+      action: "Download",
       render: (
         <ButtonComponent
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          type={"submit"}
+          type="submit"
           onClick={handleDownload}
         >
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Upload',
+      action: "Upload",
       render: (
         <NavLink to={USER_ROUTES?.UPLOAD_USER}>
           <ButtonComponent
@@ -384,239 +254,185 @@ const UserPage = () => {
             Upload
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={USER_ROUTES?.CREATE_USER}>
           <ButtonComponent
-            icon={<SVGIcon name={"IconButtonCreate"} width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
             Create User
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
 
-    // column action
+    // Table column actions
     {
-      action: 'View',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={USER_ROUTES.DETAIL_USER}
-              state={{ id: record?.userCode }}
-            >
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Link>
-          </Tooltip>
-        )
-      }
+      action: "View",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Detail">
+          <Link
+            to={USER_ROUTES.DETAIL_USER}
+            state={{ id: record?.userCode }}
+            className="flex flex-col justify-center items-center"
+          >
+            <ViewListIcon />
+          </Link>
+        </Tooltip>
+      ),
     },
     {
-      action: 'Update',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title={"Update"}>
-            <Link
-              to={record?.status === "ACTIVE" && USER_ROUTES.UPDATE_USER}
-              state={record?.status === "ACTIVE" && { id: record?.userCode }}
-            >
-              <div className={`flex items-center ${record?.status?.toLowerCase() === 'inactive' && 'cursor-not-allowed'}`}>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconEdit"
-                      color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#0075bf"}
-                      width={24}
-                    />
-                  }
-                  border={false}
-                  disabled={record?.status === "ACTIVE" ? false : true}
-                >
-                  {data_length > 3 && <span className={record?.status?.toLowerCase() === 'inactive' ? "text-[#8D91A0]" : "text-black ml-3"}> Update</span>}
-                </ButtonComponent>
-              </div>
-            </Link>
-          </Tooltip>
-        )
-      }
+      action: "Update",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Update">
+          <Link
+            to={record?.status === "ACTIVE" ? USER_ROUTES.UPDATE_USER : undefined}
+            state={record?.status === "ACTIVE" ? { id: record?.userCode } : undefined}
+          >
+            <ButtonComponent
+              icon={
+                <IconEditNx
+                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
+                />
+              }
+              border={false}
+              disabled={record?.status !== "ACTIVE"}
+            />
+          </Link>
+        </Tooltip>
+      ),
     },
     {
-      action: 'Generate',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title={"Generate Link Password"}>
-            <Link
-              to={record?.status === "ACTIVE" && USER_ROUTES.GENERATE_PASSWORD}
-              state={record?.status === "ACTIVE" && { id: record?.userId }}>
-              <div className="flex items-center cursor-not-allowed">
-                <ButtonComponent
-                  icon={
-                    <LinkOutlined
-                      style={{
-                        color: "#0075bf",
-                        fontSize: 24,
-                      }}
-                    />
-                  }
-                  border={false}
-                  disabled={record?.status === "ACTIVE" && record.authType !== "LDAP" ? false : true}
-                >
-                  {data_length > 3 && <span className="text-black ml-3"> Generate Link</span>}
-                </ButtonComponent>
-              </div>
-            </Link>
-          </Tooltip>
-        )
-
-      }
-    },
-    {
-      action: 'Activate',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip
-            title={
-              record.status === "ACTIVE" ? "Inactivate" : "Activate"
+      action: "Generate",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Generate Link Password">
+          <Link
+            to={
+              record?.status === "ACTIVE" && record.authType !== "LDAP"
+                ? USER_ROUTES.GENERATE_PASSWORD
+                : undefined
+            }
+            state={
+              record?.status === "ACTIVE" && record.authType !== "LDAP"
+                ? { id: record?.userId }
+                : undefined
             }
           >
             <ButtonComponent
               icon={
-                <Checkbox
-                  onClick={() => {
-                    setOpenModal(true);
-                    setUserId(record?.userId);
-                    setActivate(record?.status);
-                    setRecord(record)
-                  }}
-                  checked={record?.status !== "ACTIVE"}
+                <IconGenerateLink
+                  color={
+                    record?.status === "ACTIVE" && record.authType !== "LDAP"
+                      ? "#1976D2"
+                      : "#C0BEC6"
+                  }
                 />
               }
               border={false}
-              onClick={() => {
-                setOpenModal(true);
-                setUserId(record?.userId);
-                setActivate(record?.status);
-                setRecord(record)
-              }}
-            >
-              {
-                data_length > 3 &&
-                <span className="text-black ml-5">
-                  {record.status !== "ACTIVE"
-                    ? "Activate"
-                    : "Inactivate"}
-                </span>
-              }
-            </ButtonComponent>
-            <div></div>
-          </Tooltip>)
-      }
-    }
-  ];
+              disabled={!(record?.status === "ACTIVE" && record.authType !== "LDAP")}
+            />
+          </Link>
+        </Tooltip>
+      ),
+    },
+    {
+      action: "Activate",
+      type: "table",
+      render: (record) => (
+        <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+          <ButtonComponent
+            icon={
+              <IconPower
+                color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
+              />
+            }
+            border={false}
+            onClick={() => {
+              setOpenModal(true);
+              setSelectedUserId(record?.userId);
+              setActivate(record?.status);
+              setRecord(record);
+            }}
+          />
+        </Tooltip>
+      ),
+    },
+  ], [handleDownload]);
 
-  // handle retry
-  const handleRetry = () => {
-    handleCancelTryAgain()
-    if (bodyError?.action === "GET_ALL_EMPLOYEE_PAGINATE") {
-      handleFetch();
-    } else if (bodyError?.action === "DOWNLOAD_USER_EXCEL") {
-      handleDownload();
-      handleFetch();
-    } else if (bodyError?.action === "FORWARD_TASK_USER") {
-      dispatch(forwardTaskUser(body))
-    } else {
-      dispatch(inactiveUser(body));
-      handleFetch();
-    }
-  };
-
-  const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
   return (
     <>
       <BreadCrumb routes={routes} />
-      <Toolbar items={itemActions} />
-      <Spin spinning={loading}>
-        <BaseContainer header={"User List"}>
-          <TablePagination
-            dataSource={data?.result}
-            totalData={data?.page?.totalElements}
-            current={page}
+
+      <NxCardContainer header="USER LIST" className="mt-4" actions={itemActions}>
+        <div className="w-full">
+          <TableUser
+            dataSource={allData}
+            loading={isLoading}
+            totalData={totalElements}
+            current={pageRef.current + 1}
             pageSize={pageSize}
-            tableScrolled={{ y: 900, x: 3000 }}
             onChange={handleChange}
             onSizeChanger={handleChange}
-            columns={[
-              ...columns, ...useColumnActionPermission(['view', 'Update', 'Activate', 'Generate'], itemActions)
-            ]}
             onSort={onSort}
+            onAdvanceSearch={onAdvanceSearch}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            itemActions={itemActions}
+            columnDefinitions={columnsUser}
+            userId={userId}
           />
-        </BaseContainer>
-      </Spin>
+        </div>
+      </NxCardContainer>
+
+      {/* Activate / Inactivate confirmation modal */}
       <ModalCustom
         isOpen={openModal}
         handleCancel={handleCancel}
-        type={"confirmation"}
-        header={
-          activate === "INACTIVE"
-            ? "Active Information"
-            : "Inactive Information"
-        }
+        type="confirmation"
+        header={activate === "INACTIVE" ? "Active Information" : "Inactive Information"}
         width={1000}
       >
-        <div className={"w-full justify-center my-4 flex flex-col text-sm"}>
+        <div className="w-full justify-center my-4 flex flex-col text-sm">
           <Alert
             icon={
               <ExclamationCircleOutlined
                 style={{ fontSize: "24px", color: "#65481C" }}
               />
             }
-            message={`Are you sure you want to ${activate === "INACTIVE" ? "activate" : "inactivate"
-              } user named ${record?.username}?`}
-            type={"warning"}
+            message={`Are you sure you want to ${
+              activate === "INACTIVE" ? "activate" : "inactivate"
+            } user named ${record?.username}?`}
+            type="warning"
             showIcon
-            className={"alert-icon"}
+            className="alert-icon"
           />
-          <div className={"mt-4"}>
-            <Form
-              form={form}
-              layout="vertical"
-              className="mt-3"
-              onFinish={onFinish}
-            >
-              <Form.Item name={"remark"} rules={formMessageRequired("remark")} label={'Remark'}>
-                <InputComponent
-                  type={"textarea"}
-                  rows={1}
-                  placeholder="Type your remark"
-                />
+          <div className="mt-4">
+            <Form form={form} layout="vertical" className="mt-3" onFinish={onFinish}>
+              <Form.Item
+                name="remark"
+                rules={formMessageRequired("remark")}
+                label="Remark"
+              >
+                <InputComponent type="textarea" rows={1} placeholder="Type your remark" />
               </Form.Item>
-              <div className={"w-full flex justify-end gap-2"}>
+              <div className="w-full flex justify-end gap-2">
                 <Form.Item>
-                  <ButtonComponent
-                    type={"default"}
-                    onClick={handleCancel}
-                    border={true}
-                  >
+                  <ButtonComponent type="default" onClick={handleCancel} border={true}>
                     Cancel
                   </ButtonComponent>
                 </Form.Item>
                 <Form.Item>
-                  <ButtonComponent
-                    type={"submit"}
-                    htmlType={"submit"}
-                    border={false}
-                  >
+                  <ButtonComponent type="submit" htmlType="submit" border={false}>
                     Confirm
                   </ButtonComponent>
                 </Form.Item>
@@ -626,34 +442,38 @@ const UserPage = () => {
         </div>
       </ModalCustom>
 
-      {/* modal pending task */}
+      {/* Pending task modal — shown when inactivate has pending tasks */}
       <ModalCustom
         isOpen={openModalError}
         handleCancel={handleCancel}
-        type={"confirmation"}
-        header={
-          activate === "INACTIVE" ? "Inactive Information" : "Confirmation"
-        }
+        type="confirmation"
+        header={activate === "INACTIVE" ? "Inactive Information" : "Confirmation"}
         width={1000}
         footer={
           <div className="w-full flex justify-end gap-2">
-            <Link to={USER_ROUTES.FORWARD_TASK} state={Array.isArray(data_status?.data) && { id: data_status?.data[0]?.employeeCode }}>
-              <ButtonComponent type={'submit'}>Forward Task</ButtonComponent>
+            <Link
+              to={USER_ROUTES.FORWARD_TASK}
+              state={
+                Array.isArray(data_status?.data) && {
+                  id: data_status?.data[0]?.employeeCode,
+                }
+              }
+            >
+              <ButtonComponent type="submit">Forward Task</ButtonComponent>
             </Link>
-            <ButtonComponent type={'default'} onClick={handleCancel} border={true}>Cancel</ButtonComponent>
+            <ButtonComponent type="default" onClick={handleCancel} border={true}>
+              Cancel
+            </ButtonComponent>
           </div>
         }
       >
         <PendingTaskLayout
-          typeLayout='pending'
-          data={{
-            dataTable: data_status?.data
-          }}
+          typeLayout="pending"
+          data={{ dataTable: data_status?.data }}
           isOpen={openModalError}
         />
       </ModalCustom>
 
-      {/* modal try again */}
       {renderModal()}
     </>
   );

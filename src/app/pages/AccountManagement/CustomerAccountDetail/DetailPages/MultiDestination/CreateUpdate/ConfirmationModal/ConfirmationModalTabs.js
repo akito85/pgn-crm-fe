@@ -1,9 +1,9 @@
-import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
 import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import InfoMultiDestination from "../StepContents/InformationForm/InfoMultiDestination";
+import NxRemarkInput from "../../../../../../../../components/Nx/NxRemarkIInput";
 
 const ConfirmationModalTabs = ({
   form,
@@ -45,15 +45,16 @@ const ConfirmationModalTabs = ({
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark disabled={disabled} />,
+      children: <NxRemarkInput disabled={disabled} />,
       disabled,
+      required: true,
     },
   ]
     .filter(Boolean)
     .map((tabOption) => ({
       ...tabOption,
       children: (
-        <NxBaseContainer border header={tabOption.label}>
+        <NxBaseContainer border header={tabOption.label} required={tabOption.required}>
           {tabOption.children}
         </NxBaseContainer>
       ),

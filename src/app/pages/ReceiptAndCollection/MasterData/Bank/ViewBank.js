@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {Link, NavLink} from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import {RECEIPT_AND_COLLECTION_ROUTES} from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
-import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
-import { Checkbox, Spin, Tooltip } from "antd";
+import {DownloadOutlined} from "@ant-design/icons";
+import {Checkbox, Spin, Tooltip} from "antd";
 import TableRBI from "../../../../../components/TableRBI";
-import StatusComponent from "../../../../../components/StatusComponent";
 import {
   getAllApprovalList,
   getApprovalHistory,
@@ -20,13 +19,16 @@ import {
   inactiveBank,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
-import { intToNPWP } from "../../../../../utils/npwp";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import {intToNPWP} from "../../../../../utils/npwp";
+import {
+  getColumnSearchPropsUseFilteredValue
+} from "../../../../../utils/getColumnSearchProps";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
-import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
+import {useTryAgainHooks} from "../../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
-import { disabledActionByStatus } from "../../../../../utils";
+import {useColumnActionPermission} from "../../../../../components/ColumnActionPermission";
+import {disabledActionByStatus, hasValue, renderColumn} from "../../../../../utils";
+import {applyFixedColumns} from "../../../../../utils/applyFixedColumns";
 
 export const columnsBank = (
   page = 1,
@@ -36,13 +38,14 @@ export const columnsBank = (
   searchText,
   handleSearch = () => {},
   handleInactive = () => {},
-  handleApprovalHistory = () => {}
+  handleApprovalHistory = () => {},
+  search = {}
 ) => [
   {
     title: "NO",
+    key: "no",
     width: 60,
-    align: "center",
-    isClassification: true,
+    align: "left",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
@@ -50,8 +53,27 @@ export const columnsBank = (
     dataIndex: "bankCode",
     key: "bankCode",
     sorter: true,
-    align: "center",
-    ...getColumnSearchPropsPaging("bankCode", searchInput, searchedColumn, searchText, handleSearch),
+    align: "right",
+    filteredValue: [search?.bankCode] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "bankCode",
+        hasValue(search["bankCode"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "BANK NAME",
@@ -59,7 +81,26 @@ export const columnsBank = (
     key: "bankName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("bankName", searchInput, searchedColumn, searchText, handleSearch),
+    filteredValue: [search?.bankName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "bankName",
+        hasValue(search["bankName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "SHORT BANK NAME",
@@ -67,7 +108,56 @@ export const columnsBank = (
     key: "bankShortName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("bankShortName", searchInput, searchedColumn, searchText, handleSearch),
+    filteredValue: [search?.bankShortName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankShortName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "bankShortName",
+        hasValue(search["bankShortName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
+    title: "OFFICE TYPE",
+    dataIndex: "isBranch",
+    key: "isBranch",
+    sorter: true,
+    align: "center",
+    filteredValue: [search?.isBranch] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "isBranch",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (_, record) => {
+      const val = record.isBranch;
+      const display = val === true || val === "Y" || val === "BRANCH" ? "BRANCH" : "HEAD OFFICE";
+      return renderColumn(
+        "isBranch",
+        hasValue(search["isBranch"]),
+        searchText,
+        display,
+        false,
+        "input",
+        search,
+      );
+    },
   },
   {
     title: "BRANCH NAME",
@@ -75,15 +165,43 @@ export const columnsBank = (
     key: "branchName",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("branchName", searchInput, searchedColumn, searchText, handleSearch),
+    filteredValue: [search?.branchName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "branchName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "branchName",
+        hasValue(search["branchName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "TAX IDENTIFICATION NUMBER (NPWP)",
     dataIndex: "npwp",
     key: "npwp",
     sorter: (a, b) => a.npwp.length - b.npwp.length,
-    align: "left",
-    ...getColumnSearchPropsPaging("npwp", searchInput, searchedColumn, searchText, handleSearch, true),
+    align: "right",
+    filteredValue: [search?.npwp] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "npwp",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
     render: (text) =>
       searchedColumn === "npwp" ? (
         <Highlighter
@@ -103,8 +221,27 @@ export const columnsBank = (
     dataIndex: "phoneNumber",
     key: "phoneNumber",
     sorter: true,
-    align: "left",
-    ...getColumnSearchPropsPaging("phoneNumber", searchInput, searchedColumn, searchText, handleSearch),
+    align: "right",
+    filteredValue: [search?.phoneNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "phoneNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "phoneNumber",
+        hasValue(search["phoneNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "EMAIL",
@@ -112,7 +249,26 @@ export const columnsBank = (
     key: "email",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("email", searchInput, searchedColumn, searchText, handleSearch),
+    filteredValue: [search?.email] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "email",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "email",
+        hasValue(search["email"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "ADDRESS",
@@ -120,35 +276,82 @@ export const columnsBank = (
     key: "address",
     sorter: true,
     align: "left",
-    ...getColumnSearchPropsPaging("address", searchInput, searchedColumn, searchText, handleSearch),
+    filteredValue: [search?.address] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "address",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "address",
+        hasValue(search["address"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
+    key: "status",
     title: "STATUS",
     dataIndex: "status",
     sorter: true,
-    align: "left",
     fixed: "right",
     width: 150,
-    ...getColumnSearchPropsPaging("status", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (a) => (
-      <div className="flex justify-center">
-        <StatusComponent colour={a}>{a}</StatusComponent>
-      </div>
+    filteredValue: [search?.status] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
     ),
+    render: (text) =>
+        renderColumn(
+            "status",
+            hasValue(search["status"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+        ),
   },
   {
+    key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     sorter: true,
-    align: "left",
     fixed: "right",
-    width: 250,
-    ...getColumnSearchPropsPaging("statusApproval", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (a) => (
-      <div className="flex justify-center">
-        <StatusComponent colour={a}>{a}</StatusComponent>
-      </div>
+    width: 150,
+    filteredValue: [search?.statusApproval] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusApproval",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
     ),
+    render: (text) =>
+        renderColumn(
+            "statusApproval",
+            hasValue(search["statusApproval"]),
+            searchText,
+            text,
+            false,
+            "status",
+            search,
+        ),
   },
 ];
 
@@ -171,6 +374,10 @@ const ViewBank = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "statusApproval", "action"],
+  }));
 
   const handleFetch = useCallback(() => {
     dispatch(
@@ -361,80 +568,81 @@ const ViewBank = () => {
       type: "table",
       render: (record) => {
         return (
-          <Tooltip title="Detail">
-            <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK} state={{ id: record?.id }}>
-              <EyeOutlined style={{ fontSize: "24px" }} />
-            </Link>
-          </Tooltip>
+          <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK} state={{ id: record?.id }}>
+            <Tooltip title="Detail">
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={24} />
+              </div>
+            </Tooltip>
+          </Link>
         );
       },
     },
     {
       action: "Update",
       type: "table",
-      render: (record, data_length) => {
+      render: (record, data) => {
         const isDisabled = disabledActionByStatus("update", record?.status, record?.statusApproval);
-        return data_length > 3 ? (
-          <Link
-            to={!isDisabled && RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-            state={!isDisabled && { id: record?.id }}
+        const linkContent = data > 3 ? (
+          <ButtonComponent
+            icon={<SVGIcon name="IconEdit" color={isDisabled ? "#8D91A0" : "#0075bf"} width={24} />}
+            type={"action"}
+            border={false}
+            disabled={isDisabled}
           >
-            <ButtonComponent
-              className="gap-5 w-full"
-              icon={<SVGIcon name="IconEdit" width={24} color="#0075BF" />}
-              border={false}
-            >
-              <span className="text-black gap-2 text-xl text-center w-full">Update</span>
-            </ButtonComponent>
-          </Link>
+            <span className={`ml-0 ${isDisabled ? "text-[#8D91A0]" : "text-black"}`}> Update</span>
+          </ButtonComponent>
         ) : (
-          <Tooltip title="Update" className={isDisabled ? "cursor-not-allowed" : "cursor-pointer"}>
-            <Link
-              to={!isDisabled && RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-              state={!isDisabled && { id: record?.id }}
-            >
-              <div border={false}>
-                <SVGIcon
-                  name="IconEdit"
-                  color={isDisabled ? "#d3d3d3" : "#ACC424"}
-                  width={24}
-                  className={isDisabled ? "cursor-not-allowed" : "cursor-pointer"}
-                />
-              </div>
-            </Link>
+          <Tooltip title="Update">
+            <div className="pt-0">
+              <SVGIcon
+                name="IconEdit"
+                width={24}
+                color={isDisabled ? "#8D91A0" : "#ACC424"}
+                className={isDisabled ? "cursor-not-allowed" : undefined}
+              />
+            </div>
           </Tooltip>
+        );
+        return isDisabled ? (
+          <div>{linkContent}</div>
+        ) : (
+          <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK} state={{ id: record?.id }}>
+            {linkContent}
+          </Link>
         );
       },
     },
     {
       action: "Activate",
       type: "table",
-      render: (record, data_length) => {
+      render: (record, data) => {
         const statusLowerCase = record?.status?.toLowerCase();
         const isDisabled = disabledActionByStatus("activate", record?.status, record?.statusApproval);
-        return data_length > 3 ? (
-          <div className="w-full">
-            <ButtonComponent
-              border={false}
-              className="gap-5 w-full"
-              onClick={() => handleInactive(record)}
-              disabled={isDisabled}
-            >
+        const Content = data > 3 ? (
+          <ButtonComponent
+            icon={
               <Checkbox
+                className="inactive-check"
                 onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
                 disabled={isDisabled}
+                checked={record?.status !== "Active"}
               />
-              <span className="text-black ml-6 gap-2 text-xl text-center w-full">
-                {record?.status === "Active" ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
-          </div>
+            }
+            type={"action"}
+            border={false}
+            disabled={isDisabled}
+            onClick={() => handleInactive(record)}
+          >
+            <span className="text-black ml-1">
+              {record?.status === "Active" ? "Inactivate" : "Activate"}
+            </span>
+          </ButtonComponent>
         ) : (
           <Tooltip title={statusLowerCase === "active" || statusLowerCase === "draft" ? "Inactivate" : "Activate"}>
-            <div>
+            <div className="pt-1">
               <Checkbox
-                border={false}
+                className="inactive-check"
                 onClick={() => handleInactive(record)}
                 checked={record?.status !== "Active"}
                 disabled={isDisabled}
@@ -442,25 +650,31 @@ const ViewBank = () => {
             </div>
           </Tooltip>
         );
+        return Content;
       },
     },
     {
       action: "history",
       type: "table",
-      render: (record, data_length) => {
-        return data_length > 3 ? (
+      render: (record, data) => {
+        return data > 3 ? (
           <ButtonComponent
-            className="gap-5"
-            icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
+            icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+            type={"action"}
             border={false}
             onClick={() => handleApprovalHistory(record)}
           >
-            <span className="text-black gap-2 text-xl text-center">Approval History</span>
+            <span className={"text-black ml-0"}>Approval History</span>
           </ButtonComponent>
         ) : (
           <Tooltip title="Approval History">
-            <div border={false} onClick={() => handleApprovalHistory(record)}>
-              <SVGIcon name="IconLogHistory" color="#0075bf" width={24} />
+            <div className="pt-1">
+              <SVGIcon
+                name="IconLogHistory"
+                color={"#0075bf"}
+                width={24}
+                onClick={() => handleApprovalHistory(record)}
+              />
             </div>
           </Tooltip>
         );
@@ -484,6 +698,29 @@ const ViewBank = () => {
     }
   };
 
+  const actionCols = useColumnActionPermission(["view", "history", "update", "activate"], itemActions);
+
+  const allColumns = useMemo(() => {
+    return [
+        ...columnsBank(page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleInactive,
+        handleApprovalHistory,
+        search
+        ), ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+  }, [actionCols, handleApprovalHistory, handleSearch, page, pageSize, search, searchText, searchedColumn]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
@@ -493,10 +730,9 @@ const ViewBank = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">BANK LIST</p>
-              <div className="flex gap-2">
-                <Toolbar items={itemActions} />
-              </div>
+              <p className="mt-[15px] font-bold text-nowrap">BANK LIST</p>
+
+              <Toolbar items={itemActions} />
             </div>
           }
         >
@@ -505,25 +741,15 @@ const ViewBank = () => {
             pageSize={pageSize}
             showExport={true}
             handleDownload={handleDownload}
-            columns={[
-              ...columnsBank(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleInactive,
-                handleApprovalHistory
-              ),
-              ...useColumnActionPermission(["view", "history", "update", "activate"], itemActions),
-            ]}
+            columns={processedColumns}
             current={page}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{ x: "max-content", y: 525 }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
           />
         </CardContainer>
 

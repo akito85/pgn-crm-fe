@@ -17,6 +17,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   inactiveInvoiceTemplate,
+  requestActivateInvoiceTemplate,
   resetInvoiceTemplateList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/invoiceTemplate";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
@@ -48,10 +49,31 @@ const InvoiceTemplateView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: ["action"],
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("invoiceTemplateFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
   });
+
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("invoiceTemplateFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   // Infinite scroll config
   const initialPageSize = 100;
@@ -66,7 +88,7 @@ const InvoiceTemplateView = () => {
         pageSize: initialPageSize,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
@@ -88,7 +110,7 @@ const InvoiceTemplateView = () => {
         pageSize: loadMoreSize,
         sort,
         isLoadMore: true,
-      })
+      }),
     );
     setPage(nextPage);
   };
@@ -103,7 +125,7 @@ const InvoiceTemplateView = () => {
         pageSize: initialPageSize,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   };
@@ -116,11 +138,17 @@ const InvoiceTemplateView = () => {
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_INVOICE_TEMPLATE ||
             [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_INVOICE_TEMPLATE ||
+            [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.INVOICE_TEMPLATE || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_INVOICE_TEMPLATE || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_INVOICE_TEMPLATE ||
+            [],
         },
       };
       setDataApprovalHistory(temp);
@@ -189,12 +217,21 @@ const InvoiceTemplateView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       id: chooseId.id,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveInvoiceTemplate(dataValue))
+    dispatch(
+      (isActivateRequest
+        ? requestActivateInvoiceTemplate
+        : inactiveInvoiceTemplate)(dataValue)
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -209,7 +246,12 @@ const InvoiceTemplateView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -228,7 +270,12 @@ const InvoiceTemplateView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadInvoiceTemplate({ search: tempSearch, page, pageSize: loadMoreSize, sort })
+      downloadInvoiceTemplate({
+        search: tempSearch,
+        page,
+        pageSize: loadMoreSize,
+        sort,
+      }),
     );
   };
 
@@ -259,9 +306,9 @@ const InvoiceTemplateView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   // Grant Access Item
@@ -270,7 +317,7 @@ const InvoiceTemplateView = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={() => handleDownload()}
         >
@@ -283,7 +330,7 @@ const InvoiceTemplateView = () => {
       render: (
         <NavLink to={RBI_ROUTES.INVOICE_TEMPLATE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Invoice Template
@@ -319,8 +366,7 @@ const InvoiceTemplateView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -332,13 +378,13 @@ const InvoiceTemplateView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -377,14 +423,16 @@ const InvoiceTemplateView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -393,28 +441,29 @@ const InvoiceTemplateView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className="text-black ml-1">
+                {rowStatus !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -433,10 +482,11 @@ const InvoiceTemplateView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -458,7 +508,7 @@ const InvoiceTemplateView = () => {
 
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   ).map((col) => ({
     ...col,
     width: 50,
@@ -500,9 +550,7 @@ const InvoiceTemplateView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">
-                INVOICE TEMPLATE LIST
-              </p>
+              <p className="mt-[15px] w-full">INVOICE TEMPLATE LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
@@ -538,9 +586,10 @@ const InvoiceTemplateView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Invoice Template with name ${
-            chooseId?.invoiceName || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+              ? "activate"
+              : "inactivate"
+            } this Invoice Template with name ${chooseId?.invoiceName || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -569,7 +618,8 @@ const InvoiceTemplateView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

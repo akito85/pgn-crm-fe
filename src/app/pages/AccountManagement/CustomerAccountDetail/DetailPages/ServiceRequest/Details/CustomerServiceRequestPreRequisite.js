@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { getPrerequisitesByServiceRequest } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getSrPrerequisites } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 const COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
@@ -68,17 +68,17 @@ const CustomerServiceRequestPreRequisite = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { data_prerequisites, loading_prerequisites } = useSelector(
+  const { list_srPrerequisites, loading_listSrPrerequisites } = useSelector(
     (state) => state.serviceRequest
   );
 
   useEffect(() => {
     if (id && idAccount) {
-      dispatch(getPrerequisitesByServiceRequest({ accountId: idAccount, srId: id }));
+      dispatch(getSrPrerequisites({ accountId: idAccount, srId: id }));
     }
   }, [dispatch, id, idAccount]);
 
-  const raw = data_prerequisites;
+  const raw = list_srPrerequisites;
   const items = Array.isArray(raw?.result)
     ? raw.result
     : Array.isArray(raw?.data)
@@ -100,7 +100,7 @@ const CustomerServiceRequestPreRequisite = ({
       fontSize="small"
       tablePadding="small"
       tableScrolled={{ x: "max-content" }}
-      loading={loading_prerequisites}
+      loading={loading_listSrPrerequisites}
       onSort={onSort}
     />
   );

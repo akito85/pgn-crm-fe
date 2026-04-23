@@ -1,353 +1,191 @@
-import {
-  Alert,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
-import BaseContainer from "../../../../components/BaseContainer";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert, Form, Tooltip } from "antd";
+import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { Link, NavLink } from "react-router-dom";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  DownloadOutlined,
-  ExclamationCircleOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
-import { useCallback, useEffect, useRef, useState } from "react";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
-import SVGIcon from "../../../../assets/Icon/index";
-import {
-  downloadEmployee,
   getAllEmployeePaginate,
   terminateEmployee,
 } from "../../../../redux/slices/user_management/employee";
-import { useDispatch, useSelector } from "react-redux";
-import TablePagination from "../../../../components/TablePagination";
-import {
-  dateFormatting,
-  formMessageRequired,
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-} from "../../../../utils";
-import moment from "moment";
+import { TableEmployee, columnsEmployee } from "./TableEmployee";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconForwardTask from "../../../../assets/Icon/Nx/IconForwardTask";
+import IconTerminate from "../../../../assets/Icon/Nx/IconTerminate";
+import {
+  ExclamationCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
 import InputComponent from "../../../../components/InputComponent";
 import DateComponent from "../../../../components/DateComponent";
 import PendingTaskLayout from "../User/PendingTaskLayout";
-import Toolbar from "../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import { dateFormatting, formMessageRequired, hasValue } from "../../../../utils";
 import { clearBodyMessage, hideModalError } from "../../../../redux/slices/general_slice";
+import moment from "moment";
 
 const Employee = () => {
+  const { data_status } = useSelector((state) => state.employee);
+  const { bodyError } = useSelector((state) => state?.general);
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch {
+      return null;
+    }
+  }, [rawToken]);
+
   const dispatch = useDispatch();
-  const { data, loading, data_status } =
-    useSelector((state) => state.employee);
-  const { bodyError } = useSelector(state => state?.general);
-  const [modalTerm, setModalTerm] = useState(false);
-  const [empId, setEmpId] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
-  const searchInput = useRef(null);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
+
+  // Pagination & filter state
+  const [pageSize, setPageSize] = useState(30);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [advancedSearch, setAdvancedSearch] = useState(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+
+  // Local data state — avoids the stale Redux data / spinner flash
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  // Local loading flag — cleared AFTER setAllData so no spinner-gone/empty-table flash
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Terminate modal state
+  const [modalTerm, setModalTerm] = useState(false);
+  const [empId, setEmpId] = useState("");
   const [openPending, setOpenPending] = useState(false);
   const [body, setBody] = useState({});
+  const [form] = Form.useForm();
 
+  // Refs for safe access inside callbacks without stale closures
+  const pageRef = useRef(0); // 0-based internal; API receives page + 1 (employee API is 1-based)
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
 
-  // handle fetch
-  const handleFetch = useCallback(() => {
-    dispatch(getAllEmployeePaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort }));
-  }, [dispatch, page, pageSize, search, sort]);
+  // Build combined search string from basic + advanced search
+  const buildSearch = useCallback((basicSearch, advSearch) => {
+    let combined = { ...basicSearch };
+    if (advSearch?.filters) {
+      advSearch.filters.forEach((f) => {
+        if (f.column && f.value) combined[f.column] = f.value;
+      });
+    }
+    if (advSearch?.filterRules) {
+      advSearch.filterRules.forEach((rule) =>
+        rule.filters.forEach((f) => {
+          if (f.column && f.value) combined[f.column] = f.value;
+        })
+      );
+    }
+    return encodeURIComponent(JSON.stringify(combined));
+  }, []);
 
-  // use effect
-  useEffect(() => {
-    handleFetch()
-  }, [handleFetch]);
-
-
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+  // Fetch a single page and append (replace=true) or append to allData.
+  // The signal object lets the caller cancel a stale fetch without disrupting
+  // isFetchingRef, so the guard stays coherent across StrictMode double-mounts
+  // and rapid filter changes.
+  const fetchPage = useCallback(
+    async (page, replace = false, signal = null) => {
+      if (isFetchingRef.current) return;
+      if (signal?.aborted) return;
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        const reqSearch = buildSearch(search, advancedSearch);
+        const result = await dispatch(
+          getAllEmployeePaginate({
+            page: page + 1, // employee API is 1-based
+            pageSize,
+            sort,
+            search: reqSearch,
+          })
+        ).unwrap();
+        if (signal?.aborted) return;
+        const rows = result?.result ?? [];
+        const pageInfo = result?.page ?? {};
+        const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+        setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+        setTotalElements(pageInfo.totalElements ?? 0);
+        setHasMore(nextHasMore);
+        hasMoreRef.current = nextHasMore;
+        pageRef.current = page;
+      } catch (e) {
+        if (!signal?.aborted) console.error("fetchPage error", e);
+      } finally {
+        isFetchingRef.current = false;
+        if (!signal?.aborted) setIsLoading(false);
       }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
+    },
+    [search, advancedSearch, sort, pageSize, dispatch, buildSearch]
+  );
 
-  // handle download
-  const handleDownload = () => {
-    dispatch(
-      downloadEmployee({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      }))
-  }
+  // Initial load and reload on filter / sort / pageSize change.
+  // Signal is aborted on cleanup to discard stale results.
+  useEffect(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false;
+    };
+  }, [search, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
 
-
-  // columns
-  const columns = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "EMPLOYEE NUMBER",
-      dataIndex: "empNumber",
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "empNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      sorter: true,
-      render: (text) => renderColumn('empNumber', searchedColumn, searchText, text, false, 'input', search)
-
-    },
-    {
-      title: "FIRST NAME",
-      dataIndex: "firstName",
-      width: 200,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "firstName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      sorter: true,
-      render: (text) => renderColumn('firstName', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "LAST NAME",
-      dataIndex: "lastName",
-      width: 200,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "lastName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      sorter: true,
-      render: (text) => renderColumn('lastName', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "EMPLOYEE TYPE",
-      dataIndex: "empType",
-      align: "center",
-      width: 180,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "empType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      sorter: true,
-      render: (text) => renderColumn('empType', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "MOBILE PHONE",
-      dataIndex: "phone",
-      align: "right",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "phone",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('phone', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "EMAIL",
-      dataIndex: "email",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "email",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('email', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "JOB",
-      dataIndex: "jobName",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "jobName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('jobName', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "POSITION",
-      dataIndex: "positionName",
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "positionName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('positionName', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      sorter: true,
-      align: "center",
-      width: 140,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "startDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "date"
-      ),
-      render: (v) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, v, 'date', search),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      sorter: true,
-      align: "center",
-      width: 140,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "endDate",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "date"
-      ),
-      render: (v) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, v, 'date', search),
-    },
-    {
-      title: "DESCRIPTION",
-      sorter: true,
-      dataIndex: "description",
-      width: 270,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      sorter: true,
-      fixed: "right",
-      width: 120,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status', search)
-    },
-  ];
-
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "User Management",
-    },
-    {
-      path: "",
-      breadcrumbName: "Employee",
-    },
-  ];
-
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
+  const handleChange = (_, pageSizeChange) => {
     setPageSize(pageSizeChange);
   };
 
-  const handleCancel = () => {
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
+
+  const onSort = (_, __, sortInfo) => {
+    const dataSort =
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
+
+  const onAdvanceSearch = (searchData) => {
+    setAdvancedSearch(searchData);
+  };
+
+  const handleCancelTerminate = () => {
     form.resetFields();
     setModalTerm(false);
   };
 
-  // on finsih
   const onFinish = async (formValue) => {
-    const body = {
+    const bodyData = {
       ...formValue,
       employeeId: empId,
-      executionDate: formValue?.executionDate.format(dateFormatting?.dateTime),
+      executionDate: formValue?.executionDate?.format(dateFormatting?.dateTime),
     };
-
-    setBody(body);
-    handleCancel()
-    await dispatch(terminateEmployee(body))
+    setBody(bodyData);
+    handleCancelTerminate();
+    await dispatch(terminateEmployee(bodyData))
       .unwrap()
       .then(() => {
-        handleFetch()
+        const signal = { aborted: false };
+        pageRef.current = 0;
+        setAllData([]);
+        setHasMore(false);
+        setIsLoading(true);
+        fetchPage(0, true, signal);
       })
       .catch((e) => {
         if (hasValue(e?.data) && e?.data?.data?.length > 0) {
@@ -358,58 +196,40 @@ const Employee = () => {
       });
   };
 
-  // close modal pending
-  const handleCloseForwardTask = () => setOpenPending(false);
-
-  // sorting
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-
-  // handle retry
   const handleRetry = () => {
     try {
-      handleCancelTryAgain()
+      handleCancelTryAgain();
       if (bodyError?.action === "GET_ALL_EMPLOYEE_PAGINATE") {
-        handleFetch();
-      } else if (bodyError?.action === "DOWNLOAD_ACTION") {
-        handleDownload();
-        handleFetch();
+        const signal = { aborted: false };
+        pageRef.current = 0;
+        setAllData([]);
+        setHasMore(false);
+        setIsLoading(true);
+        fetchPage(0, true, signal);
       } else {
         dispatch(terminateEmployee(body));
-        handleFetch();
       }
-    } catch (error) {
-      handleFetch();
+    } catch {
+      const signal = { aborted: false };
+      fetchPage(0, true, signal);
     }
   };
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
-  // item actions
-  const itemActions = [
-    // toolbar items
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          type={"submit"}
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
+
+  const routes = [
+    { path: "", breadcrumbName: "User Management" },
+    { path: "", breadcrumbName: "Employee" },
+  ];
+
+  const itemActions = useMemo(() => [
+    // Toolbar actions (no type: "table")
     {
       action: "Upload",
       render: (
         <NavLink to={USER_ROUTES.UPLOAD_EMPLOYEE}>
           <ButtonComponent
-            icon={<UploadOutlined style={{ fontSize: "24px" }} />}
+            icon={<UploadOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
             Upload
@@ -421,212 +241,136 @@ const Employee = () => {
       action: "Create",
       render: (
         <NavLink to={USER_ROUTES.CREATE_EMPLOYEE}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
+          <ButtonComponent icon={<PlusOutlined />} type="submit">
             Create Employee
           </ButtonComponent>
         </NavLink>
       ),
     },
 
-    // column action
+    // Table column actions (type: "table" — permission-gated by useColumnActionPermission)
     {
       action: "View",
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={USER_ROUTES.DETAIL_EMPLOYEE}
-              state={{ id: record?.employeeCode }}
-            >
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Detail">
+          <Link
+            to={USER_ROUTES.DETAIL_EMPLOYEE}
+            state={{ id: record?.employeeCode }}
+            className="flex flex-col justify-center items-center"
+          >
+            <ViewListIcon />
+          </Link>
+        </Tooltip>
+      ),
     },
     {
       action: "Update",
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Update">
-            <Link
-              to={record?.status === "ACTIVE" && USER_ROUTES.UPDATE_EMPLOYEE}
-              state={
-                record?.status === "ACTIVE" && { id: record?.employeeCode }
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Update">
+          <Link
+            to={record?.status === "ACTIVE" ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
+            state={
+              record?.status === "ACTIVE" ? { id: record?.employeeCode } : undefined
+            }
+          >
+            <ButtonComponent
+              icon={
+                <IconEditNx
+                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
+                />
               }
-            >
-              <div
-                className={
-                  record?.status === "INACTIVE" && " cursor-not-allowed"
-                }
-              >
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconEdit"
-                      color={
-                        record?.status === "ACTIVE" ? "#0075bf" : "#C0BEC6"
-                      }
-                      width={24}
-                    />
-                  }
-                  border={false}
-                  disabled={record?.status === "ACTIVE" ? false : true}
-                >
-                  {data_length > 3 && (
-                    <span
-                      className={
-                        record?.status === "ACTIVE"
-                          ? "text-black ml-3"
-                          : "text-[#C0BEC6]"
-                      }
-                    >
-                      Update
-                    </span>
-                  )}
-                </ButtonComponent>
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
+              border={false}
+              disabled={record?.status !== "ACTIVE"}
+            />
+          </Link>
+        </Tooltip>
+      ),
     },
     {
       action: "forward",
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title={"Forward Task"}>
-            <Link
-              to={record?.status === "ACTIVE" && USER_ROUTES.FORWARD_TASK}
-              state={
-                record?.status === "ACTIVE" && {
-                  id: record?.employeeCode,
-                }
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Forward Task">
+          <Link
+            to={record?.status === "ACTIVE" ? USER_ROUTES.FORWARD_TASK : undefined}
+            state={
+              record?.status === "ACTIVE" ? { id: record?.employeeCode } : undefined
+            }
+          >
+            <ButtonComponent
+              icon={
+                <IconForwardTask
+                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
+                />
               }
-            >
-              <div>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconReleaseApprover"
-                      color={
-                        record?.status === "ACTIVE" ? "#0075bf" : "#C0BEC6"
-                      }
-                      width={24}
-                    />
-                  }
-                  border={false}
-                  disabled={record?.status === "ACTIVE" ? false : true}
-                >
-                  {data_length > 3 && (
-                    <span
-                      className={
-                        record?.status === "ACTIVE"
-                          ? "text-black ml-3"
-                          : "text-[#C0BEC6]"
-                      }
-                    >
-                      {" "}
-                      Forward Task
-                    </span>
-                  )}
-                </ButtonComponent>
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
+              border={false}
+              disabled={record?.status !== "ACTIVE"}
+            />
+          </Link>
+        </Tooltip>
+      ),
     },
     {
       action: "terminate",
-      type: 'table',
-      render: (r, data_length) => {
-        return (
-          <Tooltip title={"Terminate"}>
-            <Link
-              onClick={() => {
-                r?.status === "ACTIVE" && setEmpId(r?.employeeId);
-                r?.status === "ACTIVE" && setModalTerm(true);
-              }}
-              state={r?.status === "ACTIVE" && { id: r?.employeeId }}
-            >
-              <div border={false}>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconInactive"
-                      color={r?.status === "ACTIVE" ? "#BE3036" : "#C0BEC6"}
-                      width={24}
-                    />
-                  }
-                  border={false}
-                  disabled={r?.status === "ACTIVE" ? false : true}
-                >
-                  {data_length > 3 && (
-                    <span
-                      className={
-                        r?.status === "ACTIVE"
-                          ? "text-black ml-3"
-                          : "text-[#C0BEC6]"
-                      }
-                    >
-                      {" "}
-                      Terminate
-                    </span>
-                  )}
-                </ButtonComponent>
-              </div>
-            </Link>
-          </Tooltip>
-        );
-      },
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Terminate">
+          <ButtonComponent
+            icon={
+              <IconTerminate
+                color={record?.status === "ACTIVE" ? "#BE3036" : "#C0BEC6"}
+              />
+            }
+            border={false}
+            disabled={record?.status !== "ACTIVE"}
+            onClick={() => {
+              if (record?.status === "ACTIVE") {
+                setEmpId(record?.employeeId);
+                setModalTerm(true);
+              }
+            }}
+          />
+        </Tooltip>
+      ),
     },
-  ];
+  ], []);
 
   return (
     <>
-      <Spin spinning={loading} className={"w-full top-20"}>
-        <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"EMPLOYEE LIST"}>
-          <div className={"w-full"}>
-            <TablePagination
-              dataSource={data?.result}
-              totalData={data?.page?.totalElements}
-              current={page}
-              pageSize={pageSize}
-              tableScrolled={{ y: 900, x: 3000 }}
-              onChange={handleChange}
-              columns={[
-                ...columns,
-                ...useColumnActionPermission(
-                  ["forward", "view", "update", "terminate"],
-                  itemActions,
-                  "view"
-                ),
-              ]}
-              onSort={onSort}
-            />
-          </div>
-        </BaseContainer>
-      </Spin>
+      <BreadCrumb routes={routes} />
 
+      <NxCardContainer header="EMPLOYEE LIST" className="mt-4" actions={itemActions}>
+        <div className="w-full">
+          <TableEmployee
+            dataSource={allData}
+            loading={isLoading}
+            totalData={totalElements}
+            current={pageRef.current + 1}
+            pageSize={pageSize}
+            onChange={handleChange}
+            onSizeChanger={handleChange}
+            onSort={onSort}
+            onAdvanceSearch={onAdvanceSearch}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            itemActions={itemActions}
+            columnDefinitions={columnsEmployee}
+            userId={userId}
+          />
+        </div>
+      </NxCardContainer>
+
+      {/* Terminate modal */}
       <ModalCustom
         isOpen={modalTerm}
-        handleCancel={() => {
-          setModalTerm(false);
-          form.resetFields();
-        }}
-        header={"TERMINATE INFORMATION"}
-        type={"confirmation"}
+        handleCancel={handleCancelTerminate}
+        header="TERMINATE INFORMATION"
+        type="confirmation"
         width={800}
       >
         <div className="w-full modalTerminate">
@@ -636,72 +380,71 @@ const Employee = () => {
                 style={{ fontSize: "24px", color: "#65481C" }}
               />
             }
-            message={"Are you sure want to terminate this Employee?"}
-            description={
-              "if you terminate this employee, the user with this employee will be inactived."
-            }
-            type={"warning"}
+            message="Are you sure want to terminate this Employee?"
+            description="If you terminate this employee, the user with this employee will be inactived."
+            type="warning"
             showIcon
           />
         </div>
-        <div className={"mt-4"}>
-          <Form
-            form={form}
-            layout="vertical"
-            className="mt-3"
-            onFinish={onFinish}
-          // onFinishFailed={onFinishFailed}
-          >
+        <div className="mt-4">
+          <Form form={form} layout="vertical" className="mt-3" onFinish={onFinish}>
             <Form.Item
-              label={"Remark"}
-              name={"remark"}
+              label="Remark"
+              name="remark"
               rules={formMessageRequired("remark")}
             >
               <InputComponent rows={1} type="textarea" />
             </Form.Item>
-            <Form.Item label={"Execution Date"} name={"executionDate"}>
+            <Form.Item label="Execution Date" name="executionDate">
               <DateComponent>
-                {moment(formValue?.executionDate).format()}
+                {moment(form.getFieldValue("executionDate")).format()}
               </DateComponent>
             </Form.Item>
             <div className="flex mt-4 w-full justify-end gap-5">
-              <ButtonComponent
-                type={"default"}
-                onClick={() => {
-                  setModalTerm(false);
-                  form.resetFields();
-                }}
-              >
+              <ButtonComponent type="default" onClick={handleCancelTerminate}>
                 Cancel
               </ButtonComponent>
-              <ButtonComponent type={"submit"} htmlType={"submit"}>
+              <ButtonComponent type="submit" htmlType="submit">
                 Confirm
               </ButtonComponent>
             </div>
           </Form>
         </div>
       </ModalCustom>
+
+      {/* Pending task modal — shown after terminate when the employee has pending tasks */}
       <ModalCustom
         isOpen={openPending}
         handleCancel={() => setOpenPending(false)}
-        type={"confirmation"}
-        header={"Terminate Information"}
+        type="confirmation"
+        header="Terminate Information"
         width={900}
         footer={
           <div className="w-full flex justify-end gap-2">
             <Link
               to={USER_ROUTES.FORWARD_TASK}
               state={
-              Array?.isArray(data_status?.data?.data) &&
-              { id: data_status?.data?.data[0]?.employeeCode }}>
-              <ButtonComponent type={'submit'} border={true}>Forward Task</ButtonComponent>
+                Array.isArray(data_status?.data?.data) && {
+                  id: data_status?.data?.data[0]?.employeeCode,
+                }
+              }
+            >
+              <ButtonComponent type="submit" border={true}>
+                Forward Task
+              </ButtonComponent>
             </Link>
-            <ButtonComponent type={'default'} onClick={handleCloseForwardTask} border={true}>Cancel</ButtonComponent>
+            <ButtonComponent
+              type="default"
+              onClick={() => setOpenPending(false)}
+              border={true}
+            >
+              Cancel
+            </ButtonComponent>
           </div>
         }
       >
         <PendingTaskLayout
-          typeLayout={'pending'}
+          typeLayout="pending"
           data={{ dataTable: data_status?.data?.data }}
         />
       </ModalCustom>

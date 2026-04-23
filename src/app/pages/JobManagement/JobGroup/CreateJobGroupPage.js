@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Form, Input, Select, message } from "antd";
+import React, { useEffect, useState } from "react";
+import { Form, Input, Select, message, Button } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PlusOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -8,6 +8,7 @@ import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import NxTable from "../../../../components/Nx/NxTable";
+import useModalInfiniteData from "../../../../components/Nx/NxTable/hooks/useModalInfiniteData";
 import NxModal from "../../../../components/Nx/NxModal";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
@@ -17,6 +18,7 @@ import {
   useUpdateJobGroupMutation,
 } from "../../../../redux/slices/job_management/jobGroupApiSlice";
 import { getAllGroupAccessPaginate } from "../../../../redux/slices/system_setup/group_access";
+import { getJobsByGroupId } from "../../../../redux/slices/job_management/jobGroupSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchJobsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 const { Option } = Select;
@@ -99,57 +101,52 @@ const CreateJobGroupPage = () => {
 
   // State for selected jobs
   const [selectedJobs, setSelectedJobs] = useState([]);
+  const hasPopulatedJobs = React.useRef(false);
 
   // State for job selection modal
   const [modalVisible, setModalVisible] = useState(false);
+  const [ready, setReady] = useState(false);
 
-  // State for infinite scrolling
-  const [currentPage, setCurrentPage] = useState(0);
-  const [allJobs, setAllJobs] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  // Tracks whether the next allJobsData result should replace (reset) vs append
-  const isResetRef = React.useRef(false);
-
-  // Fetch all jobs for the modal
-  const { data: allJobsData, isLoading: allJobsLoading } = useSearchJobsQuery({
-    page: currentPage,
-    size: 20,
+  // Encapsulated infinite-scroll data management with RTK Query cache-busting.
+  // Replaces manual currentPage/allJobs/hasMore/isResetRef/pendingResolveRef state.
+  // Only fetches when modalVisible is true (no wasteful pre-fetch on page mount).
+  const jobs = useModalInfiniteData({
+    queryHook: useSearchJobsQuery,
+    pageSize: 20,
+    enabled: modalVisible,
   });
 
-  // Accumulate pages; replace the list when a modal-open reset was requested
-  useEffect(() => {
-    if (!allJobsData) return;
-    if (isResetRef.current) {
-      isResetRef.current = false;
-      setAllJobs(allJobsData.result);
-    } else {
-      setAllJobs(prev => [...prev, ...allJobsData.result]);
-    }
-    setHasMore(allJobsData.currentPage < allJobsData.totalPages - 1);
-  }, [allJobsData]);
-
-  // Returns a Promise so NxTable's IntersectionObserver can await completion
-  const loadMoreData = useCallback(() => {
-    return new Promise((resolve) => {
-      if (!hasMore || allJobsLoading) { resolve(); return; }
-      setCurrentPage(prev => prev + 1);
-      // Resolve after a tick — actual data arrival is handled by the effect above
-      setTimeout(resolve, 0);
-    });
-  }, [hasMore, allJobsLoading]);
+  // Deferred mount via setTimeout: NxTable only renders after the AntD 4.x
+  // modal animation settles (~300ms), preventing dimension measurement during
+  // the CSS transform transition that causes the visible "glitch".
+  const readyTimerRef = React.useRef(null);
 
   // Function to open the job selection modal
   const handleOpenModal = () => {
-    isResetRef.current = true; // next data arrival replaces the list
-    setCurrentPage(0);
-    setHasMore(true);
     setModalVisible(true);
+    jobs.open();
+    readyTimerRef.current = setTimeout(() => setReady(true), 300);
+  };
+
+  // Shared close logic — used by Cancel button and handleAddSelectedJobs
+  const handleCloseModal = () => {
+    if (readyTimerRef.current) { clearTimeout(readyTimerRef.current); readyTimerRef.current = null; }
+    setModalVisible(false);
+    jobs.close();
+    setReady(false);
   };
 
   // Function to add a single job to the table
   const handleAddJobToTable = (job) => {
+    const jobId = job.id || job.jobId;
+    // Prevent duplicate selection
+    if (selectedJobs.some((j) => j.jobId === jobId)) {
+      message.warning("Job already selected");
+      return;
+    }
     const newJob = {
       key: Date.now() + Math.random(),
+      jobId: jobId,
       name: job.name || job.jobName,
       code: job.code || job.jobCode,
       type: job.type || job.jobType,
@@ -161,22 +158,20 @@ const CreateJobGroupPage = () => {
 
   // Function to add selected jobs from modal to the table
   const handleAddSelectedJobs = (jobsToAdd) => {
-    const newJobs = jobsToAdd.map(job => ({
-      key: Date.now() + Math.random(), // Unique key
-      name: job.name,
-      code: job.code,
-      type: job.type,
-      execType: job.executeType || job.execType,
-      handlerClass: job.handler || job.handlerClass
-    }));
+    const newJobs = jobsToAdd
+      .filter((job) => !selectedJobs.some((j) => j.jobId === (job.id || job.jobId)))
+      .map(job => ({
+        key: Date.now() + Math.random(),
+        jobId: job.id || job.jobId,
+        name: job.name,
+        code: job.code,
+        type: job.type,
+        execType: job.executeType || job.execType,
+        handlerClass: job.handler || job.handlerClass,
+      }));
 
     setSelectedJobs(prev => [...prev, ...newJobs]);
-    setModalVisible(false);
-  };
-
-  // Function to close the modal
-  const handleCloseModal = () => {
-    setModalVisible(false);
+    handleCloseModal();
   };
 
   // RTK Query hooks
@@ -193,6 +188,8 @@ const CreateJobGroupPage = () => {
     { path: "",                                             breadcrumbName: isEditMode ? "Update" : "Create" },
   ];
 
+  const jobsByGroupId = useSelector((state) => state.jobGroup.jobsByGroupId);
+
   // Populate form in edit mode
   useEffect(() => {
     if (!isEditMode || !currentGroup) return;
@@ -202,7 +199,29 @@ const CreateJobGroupPage = () => {
       description: currentGroup.description,
       accessGroupId: currentGroup.accessGroupId,
     });
-  }, [currentGroup, isEditMode, form]);
+    // Fetch associated jobs for this group
+    dispatch(getJobsByGroupId({ groupId: id, page: 0, pageSize: 200 }));
+  }, [currentGroup, isEditMode, form, dispatch, id]);
+
+  // Populate selectedJobs when group's jobs are loaded (edit mode) — once only
+  useEffect(() => {
+    if (!isEditMode || !id || hasPopulatedJobs.current) return;
+    const cached = jobsByGroupId[id];
+    if (cached && cached.data && cached.data.length > 0) {
+      hasPopulatedJobs.current = true;
+      setSelectedJobs(
+        cached.data.map((job) => ({
+          key: Date.now() + Math.random(),
+          jobId: job.id,
+          name: job.name,
+          code: job.code,
+          type: job.type,
+          execType: job.execType,
+          handlerClass: job.handlerClass,
+        }))
+      );
+    }
+  }, [jobsByGroupId, id, isEditMode]);
 
   // Fetch group access data
   useEffect(() => {
@@ -210,11 +229,16 @@ const CreateJobGroupPage = () => {
   }, [dispatch]);
 
   const onFinish = async (values) => {
+    const jobIds = selectedJobs
+      .map((j) => j.jobId)
+      .filter(Boolean);
+
     const payload = {
       name:        values.name,
       code:        values.code.toUpperCase(),
       description: values.description,
       accessGroupId: values.accessGroupId,
+      jobIds,
     };
 
     try {
@@ -353,49 +377,39 @@ const CreateJobGroupPage = () => {
         {/* Job Selection Modal */}
         <NxModal
           isOpen={modalVisible}
-          className="p-4"
+          className="[&_.ant-modal-footer]:flex [&_.ant-modal-footer]:justify-between [&_.ant-modal-footer]:items-center"
           title="Select Jobs"
           handleCancel={handleCloseModal}
           width={1100}
-          footer={[
-            <button
-              key="cancel"
-              style={{
-                border: "1px solid #C8CDD4",
-                background: "#fff",
-                cursor: "pointer",
-                padding: "2px 10px",
-                borderRadius: "8px",
-                fontSize: "12px",
-                fontWeight: "500",
-                color: "#374151",
-                height: "28px",
-                display: "inline-flex",
-                alignItems: "center",
-                fontFamily: "inherit",
-              }}
-              onClick={handleCloseModal}
-            >
-              Cancel
-            </button>,
-          ]}
+          footer={
+            <>
+              <Button
+                onClick={handleCloseModal}
+                style={{ minWidth:88, height:38, borderRadius:7, border:"1px solid #d9d9d9", background:"#fff", color:"#555", fontWeight:500, fontSize:13 }}
+              >
+                Cancel
+              </Button>
+              <div />
+            </>
+          }
         >
-          <div className="p-4">
+          {ready && <div className="p-4">
             <NxTable
               idTable="job-selection-table"
-              dataSource={allJobs}
+              dataSource={jobs.data}
               columns={JOB_SELECTION_COLUMNS(handleAddJobToTable)}
-              loading={allJobsLoading}
+              loading={jobs.loading}
               useInfiniteScroll={true}
               useSearch={true}
               useAdvanceSearch={true}
               useColumnSettings={true}
+              autoHeight={false}
               tableScrolled={{ y: 400, x: "max-content" }}
               rowKey="id"
-              onLoadMore={loadMoreData}
-              hasMore={hasMore}
+              onLoadMore={jobs.loadMore}
+              hasMore={jobs.hasMore}
             />
-          </div>
+          </div>}
         </NxModal>
 
         <footer className="mt-4 flex justify-between items-center px-4 py-3 bg-white rounded-lg border border-solid border-[#C8CDD4]">

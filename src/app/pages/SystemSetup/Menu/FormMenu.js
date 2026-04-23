@@ -244,10 +244,10 @@ const FormMenu = (props) => {
     setIconFile(file);
     const reader = new FileReader();
     reader.onload = () => {
-      form.setFieldsValue({ icon: `uploaded_${file.name}` });
+      form.setFieldsValue({ icon: reader.result });
     };
     reader.readAsDataURL(file);
-    return false; // Prevent default upload
+    return false;
   };
 
   const handleIconSelect = (value) => {

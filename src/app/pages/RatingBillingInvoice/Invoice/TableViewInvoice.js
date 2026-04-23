@@ -17,6 +17,13 @@ export const columnsInvoice = (
 ) => {
   return [
     {
+      key: "no",
+      title: "NO",
+      isClassification: true,
+      width: 50,
+      render: (text, object, index) => index + 1,
+    },
+    {
       key: "invoiceNumber",
       title: "INVOICE NUMBER",
       dataIndex: "invoiceNumber",
@@ -69,15 +76,15 @@ export const columnsInvoice = (
         ),
     },
     {
-      key: "templateName",
+      key: "template",
       title: "TEMPLATE",
-      dataIndex: "templateName",
+      dataIndex: "template",
       isClassification: true,
       width: 200,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "templateName",
+        "template",
         searchInput,
         searchedColumn,
         searchText,
@@ -85,8 +92,8 @@ export const columnsInvoice = (
       ),
       render: (text) =>
         renderColumn(
-          "templateName",
-          hasValue(search["templateName"]),
+          "template",
+          hasValue(search["template"]),
           searchText,
           text,
           false,
@@ -176,7 +183,6 @@ export const columnsInvoice = (
       key: "customerName",
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
-      isClassification: true,
       width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -228,7 +234,6 @@ export const columnsInvoice = (
       key: "accountName",
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
-      isClassification: true,
       width: 250,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -749,7 +754,7 @@ export const columnsInvoice = (
       key: "status",
       title: "STATUS GENERATE INVOICE",
       dataIndex: "status",
-      width: 220,
+      width: 100,
       isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(

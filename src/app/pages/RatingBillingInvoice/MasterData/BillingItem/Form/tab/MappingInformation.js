@@ -43,6 +43,12 @@ const MappingInformation = ({
   endDateMap = null,
   onCriteriaEditingChange = () => {},
   onTabChange = () => {},
+  activeTab = "mapping",
+  setActiveTab = () => {},
+  defaultCriteriaValues = {},
+  disabledCriteriaColumns = [],
+  isBank = false,
+  data_glAccountBankList = [],
 }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -52,8 +58,7 @@ const MappingInformation = ({
   const [search, setSearch] = useState({});
   const [dataCategoryMap, setDataCategoryMap] = useState([]);
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState("mapping");
+  // Tab state (pending tab remains local for modal logic)
   const [pendingTab, setPendingTab] = useState(null);
   const [showTabWarning, setShowTabWarning] = useState(false);
 
@@ -270,6 +275,10 @@ const MappingInformation = ({
             endDateLock={endDate}
             setModalRequired={setModalRequired}
             onCancelEdit={handleCriteriaCancelEdit}
+            defaultNewRowValues={defaultCriteriaValues}
+            disabledColumns={disabledCriteriaColumns}
+            isBank={isBank}
+            data_glAccountBankList={data_glAccountBankList}
           />
         )}
       </CardContainer>

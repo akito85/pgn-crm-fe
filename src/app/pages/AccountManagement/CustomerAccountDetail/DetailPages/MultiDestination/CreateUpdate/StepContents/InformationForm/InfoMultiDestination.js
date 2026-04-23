@@ -12,7 +12,7 @@ import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseCont
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
-import { getMdAccountStandard } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { getMdAccounts } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 
 export default function InfoMultiDestination({
@@ -62,7 +62,7 @@ export default function InfoMultiDestination({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { list_mdAccountStandard, pagination_mdAccountStandard, loading_listMdAccountStandard } = useSelector(
+  const { list_mdAccount, pagination_listMdAccount, loading_listMdAccount } = useSelector(
     (state) => state.multiDestination
   );
 
@@ -91,7 +91,7 @@ export default function InfoMultiDestination({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPage = pagination_mdAccountStandard?.totalPage || 0;
+    const totalPage = pagination_listMdAccount?.totalPage || 0;
 
     if (nextPage <= totalPage) {
       const body = {
@@ -104,7 +104,7 @@ export default function InfoMultiDestination({
       }
 
       await dispatch(
-        getMdAccountStandard({
+        getMdAccounts({
           body,
           isLoadMore: true,
           id: accountId
@@ -126,7 +126,7 @@ export default function InfoMultiDestination({
       }
 
       dispatch(
-        getMdAccountStandard({
+        getMdAccounts({
           body,
           id: accountId,
           isLoadMore: false
@@ -165,12 +165,12 @@ export default function InfoMultiDestination({
   }, [allColumns]);
 
   const currentData = useMemo(
-    () => list_mdAccountStandard,
-    [list_mdAccountStandard]
+    () => list_mdAccount,
+    [list_mdAccount]
   );
 
   const hasMore =
-    currentData.length < (pagination_mdAccountStandard?.totalElement || 0);
+    currentData.length < (pagination_listMdAccount?.totalElement || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
@@ -388,10 +388,16 @@ export default function InfoMultiDestination({
           ]}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateForm)
+            value: value && moment(value)
           })}
         >
-          <NxDate disabled={!isDraft && isUpdate} />
+          <NxDate
+            disabled={!isDraft && isUpdate}
+            onChange={date => {
+              if (date && endDate && date.isAfter(endDate, "day"))
+                form.resetFields(["endDate"])
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -400,10 +406,15 @@ export default function InfoMultiDestination({
           label={"End Date"}
           className="no-margin-form"
           getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateForm)
+            value: value && moment(value)
           })}
         >
-          <NxDate disabled={!isDraft && isUpdate} />
+          <NxDate
+            dateDisable={(current) => {
+              if (!moment.isMoment(current)) return false;
+              return current.isBefore(startDate, "day");
+            }}
+          />
         </Form.Item>
       </div>
 
@@ -417,7 +428,6 @@ export default function InfoMultiDestination({
           <InputComponent
             type={"textarea"}
             rows={4}
-            placeholder="Asset meter baru PGN"
             maxLength={255}
             disabled={!isDraft && isUpdate}
           />
@@ -441,7 +451,7 @@ export default function InfoMultiDestination({
             <NxTable
               idTable="multi-destination-account-standard"
               dataSource={dataSourceWithKeys}
-              totalData={pagination_mdAccountStandard.totalElement || 0}
+              totalData={pagination_listMdAccount.totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
               onSort={onSort}
@@ -452,7 +462,7 @@ export default function InfoMultiDestination({
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
               columnDefinitions={columnDefinitions}
-              loading={loading_listMdAccountStandard}
+              loading={loading_listMdAccount}
             />
           </NxBaseContainer>
         </div>

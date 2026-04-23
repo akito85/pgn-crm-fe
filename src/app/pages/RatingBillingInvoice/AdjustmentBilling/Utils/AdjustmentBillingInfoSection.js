@@ -21,7 +21,9 @@ const AdjustmentBillingInfoSection = ({
     ?.find((v) => v.period)?.period;
 
   const labelBillingPeriod = apiBillingPeriod
-    ?.filter((a) => a.id === data?.billingPeriod)
+    ?.filter(
+      (a) => a.id === (data?.correctionBillingPeriod ?? data?.billingPeriod),
+    )
     ?.find((v) => v.period)?.period;
 
   const labelInvoice = apiInvoice
@@ -49,8 +51,15 @@ const AdjustmentBillingInfoSection = ({
       <DetailText label={"Billing Cycle"}>
         {labelBillingCycle ? labelBillingCycle : data?.billingCycleName}
       </DetailText>
-      <DetailText label={"Billing Period"}>
-        {labelBillingPeriod ? labelBillingPeriod : data?.billingPeriodName}
+      <DetailText label={"Current Billing Period"}>
+        {data?.currentBillingPeriodName ||
+          data?.currentBillingPeriod ||
+          data?.billingPeriodName}
+      </DetailText>
+      <DetailText label={"Correction Billing Period"}>
+        {labelBillingPeriod
+          ? labelBillingPeriod
+          : data?.correctionBillingPeriodName || data?.billingPeriodName}
       </DetailText>
       <DetailText label={"Invoice Number"}>
         {typeof data?.referenceInvoiceNumber === "string"
@@ -60,6 +69,7 @@ const AdjustmentBillingInfoSection = ({
       <DetailText label={"Currency"}>
         {typeof data?.currency === "string" ? data?.currency : labelCurrency}
       </DetailText>
+      <DetailText label={"Rate"}>{data?.rate}</DetailText>
       <DetailText label={"Document Date"}>
         {data?.documentDate
           ? moment(data?.documentDate).format(dateFormatting.date)
@@ -93,13 +103,9 @@ const AdjustmentBillingInfoSection = ({
         {data?.classification}
       </DetailText>
 
-      <DetailText label={"Post Invoice"}>
-        {data?.postInvoice}
-      </DetailText>
+      <DetailText label={"Post Invoice"}>{data?.postInvoice}</DetailText>
 
-      <DetailText label={"On Demand"}>
-        {data?.onDemand}
-      </DetailText>
+      <DetailText label={"On Demand"}>{data?.onDemand}</DetailText>
 
       <div className="col-span-5">
         <DetailText label={"Remark"}>{data?.remark}</DetailText>

@@ -8,6 +8,7 @@ export const columnsTaxExemption = (
   searchedColumn,
   searchText,
   handleSearch = () => {},
+  handlePreview = () => {},
 ) => {
   return [
     {
@@ -42,6 +43,33 @@ export const columnsTaxExemption = (
           "input",
           search,
         ),
+    },
+    {
+      key: "proformaInvoice",
+      title: "PROFORMA INVOICE",
+      dataIndex: "proformaInvoice",
+      isClassification: true,
+      width: 250,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "proformaInvoice",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+      render: (text, record) => {
+        if (!text) return "-";
+        return (
+          <span
+            style={{ color: "#0075BF", cursor: "pointer" }}
+            onClick={() => handlePreview(record)}
+          >
+            {text}
+          </span>
+        );
+      },
     },
     {
       key: "billingPeriod",
@@ -566,32 +594,6 @@ export const columnsTaxExemption = (
           searchText,
           text,
           true,
-          "input",
-          search,
-        ),
-    },
-    {
-      key: "proformaInvoice",
-      title: "PROFORMA INVOICE",
-      dataIndex: "pathFile",
-      isClassification: true,
-      width: 200,
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "proformaInvoice",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-      ),
-      render: (text) =>
-        renderColumn(
-          "proformaInvoice",
-          hasValue(search["proformaInvoice"]),
-          searchText,
-          text,
-          false,
           "input",
           search,
         ),

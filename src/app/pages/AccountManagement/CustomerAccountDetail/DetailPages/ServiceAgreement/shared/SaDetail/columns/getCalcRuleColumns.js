@@ -125,12 +125,12 @@ export const getCalcRuleColumns = ({
             title: "ACTION",
             key: "operation",
             dataIndex: "operation",
-            width: 240,
+            width: 100,
             fixed: "right",
             render: (_, record) => {
                 const editable = record.key === editingKey;
                 return (
-                    <div className="flex w-full justify-center my-3 gap-2">
+                    <div className="flex w-full justify-center gap-2">
                         {editable ? (
                             <>
                                 <ButtonComponent
@@ -155,7 +155,7 @@ export const getCalcRuleColumns = ({
                                     >
                                         <SVGIcon
                                             name="IconEdit"
-                                            color={editingKey ? "#8D91A0" : "#ACC424"}
+                                            color={editingKey ? "#8D91A0" : "#1976D2"}
                                             width={24}
                                             onClick={!editingKey ? () => edit(record) : undefined}
                                         />

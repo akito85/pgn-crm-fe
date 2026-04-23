@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { Form, Spin, Tooltip } from "antd";
+import { Button, Form, Spin, Tooltip } from "antd";
 import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -25,6 +25,7 @@ import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColu
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
+import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 
 const columns = (
   search,
@@ -292,6 +293,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   const [body, setBody] = useState({});
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [openModalDelete, setOpenModalDelete] = useState(false);
+  const [deleteItemData, setDeleteItemData] = useState(null);
   const location = useLocation();
 
   const [loadMoreSize] = useState(20);
@@ -401,8 +403,10 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   };
 
   const handleDelete = (id) => {
+    const selectedRecord = currentData.find((item) => item.id === id);
     setOpenModalDelete(true);
     setIdEquipment(id);
+    setDeleteItemData(selectedRecord);
   }
   const handleConfirmModalDelete = () => {
     setOpenModalDelete(false);
@@ -430,6 +434,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   const handleCloseModalDelete = () => {
     setOpenModalDelete(false);
     setIdEquipment("");
+    setDeleteItemData(null);
   };  
 
   const itemActions = nxGetAccountActions({
@@ -625,23 +630,31 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
         />
 
         {/* Modal Delete */}
-        <ModalConfirm
+        <ModalCustom
           isOpen={openModalDelete}
           handleCancel={handleCloseModalDelete}
           handleOk={handleConfirmModalDelete}
           width={500}
+          header={"DELETE EQUIPMENT"}
+          type={"confirmation"}
+          footer={
+            <div className='flex justify-between'>
+            <Button key="cancel" onClick={handleCloseModalDelete}>
+              Cancel
+            </Button>,
+            <Button key="ok" type="primary" danger onClick={handleConfirmModalDelete}>
+              Delete
+            </Button>
+          </div>
+          }
         >
           <div className="flex justify-center gap-[20px] mt-6">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              Are you sure want to delete equipment ?
-            </p>
+            <div className="text-[18px] font-bold">
+              <p>Are you sure want to delete equipment{deleteItemData?.name ? ` "${deleteItemData.name}"` : ''}?</p>
+            </div>
           </div>
-          {/* <Alert
-            message="Warning! your data will deleted permanently"
-            type={"error"}
-          /> */}
-        </ModalConfirm>
+        </ModalCustom>
       </Spin>
     </>
   );

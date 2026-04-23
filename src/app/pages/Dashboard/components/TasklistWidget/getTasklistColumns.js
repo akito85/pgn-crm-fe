@@ -447,7 +447,7 @@ export const getTasklistColumns = (
       const status = text || record.taskStatus || "-";
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>{toTitleCase(status)}</StatusComponent>
+          <StatusComponent colour={status} size="small">{toTitleCase(status)}</StatusComponent>
         </div>
       );
     },

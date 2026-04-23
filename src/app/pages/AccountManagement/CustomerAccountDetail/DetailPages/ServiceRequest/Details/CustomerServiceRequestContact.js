@@ -3,7 +3,7 @@ import { Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { getContactsByServiceRequest } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getSrContacts } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 // ── Expand sub-table (CONTACT DETAIL) ────────────────────────────────────────
 const EXPAND_COLUMNS = [
@@ -80,17 +80,17 @@ const CustomerServiceRequestContact = ({
   const dispatch = useDispatch();
   const [expandedKeys, setExpandedKeys] = useState([]);
 
-  const { data_contacts, loading_contacts } = useSelector(
+  const { list_srContacts, loading_listSrContacts } = useSelector(
     (state) => state.serviceRequest
   );
 
   useEffect(() => {
     if (id && idAccount) {
-      dispatch(getContactsByServiceRequest({ accountId: idAccount, srId: id }));
+      dispatch(getSrContacts({ accountId: idAccount, srId: id }));
     }
   }, [dispatch, id, idAccount]);
 
-  const contacts = Array.isArray(data_contacts) ? data_contacts : [];
+  const contacts = Array.isArray(list_srContacts) ? list_srContacts : [];
 
   return (
     <NxTable
@@ -105,7 +105,7 @@ const CustomerServiceRequestContact = ({
       fontSize="small"
       tablePadding="small"
       tableScrolled={{ x: "max-content" }}
-      loading={loading_contacts}
+      loading={loading_listSrContacts}
       onSort={onSort}
       expandable={{
         expandedRowKeys: expandedKeys,

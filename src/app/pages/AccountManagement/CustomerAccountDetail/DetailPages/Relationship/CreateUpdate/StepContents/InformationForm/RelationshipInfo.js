@@ -1,23 +1,28 @@
-import { Form, Select, Input, Button } from "antd";
-import React, { useEffect, useState } from "react";
+import { Form, Select, Button } from "antd";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import DateComponent from "../../../../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../../../components/SelectComponent";
 import {
-  getRelationshipCategory,
-  getRelationshipType,
+  getRelationshipCategories,
+  getRelationshipTypes,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
 import { requiredMessage } from "../../../../../../../../../utils";
 import ModalChooseRelated from "./ModalChooseRelated";
 import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
+import moment from "moment";
 
 /**
- * Relationship info step component 
- * @param {{ form: import("antd").FormInstance; values?: {relationshipType?: number; relationshipCategory?: number; relationshipName?: string; relationshipNumber?: string; relationshipTypeName?: string; relationshipCategoryName?: string; }; setRelatedDetails?: React.Dispatch<React.SetStateAction<any[]>>; formView?: boolean; }} props
- * @returns {JSX.Element}
+ * Relationship information step — renders editable form or read-only detail view.
+ *
+ * @param {object}   props
+ * @param {object}   props.form                        - Ant Design Form instance.
+ * @param {Function} [props.setRelatedDetails=()=>{}]  - Updates parent related-detail list.
+ * @param {boolean}  [props.formView=true]             - true = editable form, false = read-only view.
+ * @param {boolean}  [props.isDraft=false]             - Whether the record is a draft.
+ * @param {boolean}  [props.isUpdate=false]            - Whether the form is in update mode.
  */
 const RelationshipInfo = ({
   form,
@@ -26,32 +31,35 @@ const RelationshipInfo = ({
   isDraft = false,
   isUpdate = false,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
   const location = useLocation();
   const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
 
+  // --- State ---
   const [modalChoose, setModalChoose] = useState(false);
 
-  // Initialize form field states
+  // --- Form state ---
   const relationshipType = Form.useWatch("relationshipType", { form });
   const relationshipCategory = Form.useWatch("relationshipCategory", { form });
   const relationshipTypeName = Form.useWatch("relationshipTypeName", { form, preserve: true });
   const relationshipCategoryName = Form.useWatch("relationshipCategoryName", { form, preserve: true });
-  const objectName = Form.useWatch("objectName", { form, preserve: true });
-  const objectNumber = Form.useWatch("objectNumber", { form, preserve: true });
+  const relatedName = Form.useWatch("relatedName", { form, preserve: true });
+  const relatedNumber = Form.useWatch("relatedNumber", { form, preserve: true });
   const startDate = Form.useWatch("startDate", { form });
   const endDate = Form.useWatch("endDate", { form });
   const description = Form.useWatch("description", { form });
 
-  // Get data from Redux store
-  const { data_relationshipType, data_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
+  // --- Redux ---
+  const { list_relationshipType, list_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
     useSelector((state) => state.relationship);
 
-  // Fetch relationship type and category on component mount
+  // --- Effects ---
   useEffect(() => {
     if (accountId && formView) {
-      dispatch(getRelationshipType({ accountId }));
-      dispatch(getRelationshipCategory({ accountId }));
+      dispatch(getRelationshipTypes({ accountId }));
+      dispatch(getRelationshipCategories({ accountId }));
     }
   }, [dispatch, accountId]);
 
@@ -74,11 +82,10 @@ const RelationshipInfo = ({
               onChange={(_, option) => {
                 form.setFieldValue("relationshipTypeName", option.children)
                 setRelatedDetails([]);
-                // Also clear related name/number fields
-                form.resetFields(["relatedName", "relatedNumber"]);
+                form.resetFields(["relatedName", "relatedNumber", "formAccountId", "relatedId"]);
               }}
             >
-              {data_relationshipType?.map((item) => (
+              {list_relationshipType?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.text}
                 </Select.Option>
@@ -100,10 +107,14 @@ const RelationshipInfo = ({
           >
             <SelectComponent
               disabled={!isDraft && isUpdate}
-              onChange={(_, option) => form.setFieldValue("relationshipCategoryName", option.children)}
+              onChange={(_, option) => {
+                form.setFieldValue("relationshipCategoryName", option.children);
+                setRelatedDetails([]);
+                form.resetFields(["relatedName", "relatedNumber", "formAccountId", "relatedId"]);
+              }}
               loading={loading_listRelationshipCategory}
             >
-              {data_relationshipCategory?.map((item) => (
+              {list_relationshipCategory?.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   {item.text}
                 </Select.Option>
@@ -159,9 +170,16 @@ const RelationshipInfo = ({
             name="startDate"
             label="Start Date"
             rules={[{ message: requiredMessage("Start Date"), required: true }]}
+            getValueProps={(value) => ({ value: value && moment(value)})}
             className="no-margin-form"
           >
-            <DateComponent disabled={!isDraft && isUpdate} />
+            <NxDate
+              disabled={!isDraft && isUpdate}
+              onChange={date => {
+                if (date && endDate && date.isAfter(endDate, "day"))
+                  form.resetFields(["endDate"])
+              }}
+            />
           </Form.Item>
 
           {/* Row 2 - Col 3: End Date */}
@@ -169,9 +187,15 @@ const RelationshipInfo = ({
             name="endDate"
             label="End Date"
             rules={[{ message: requiredMessage("End Date"), required: false }]}
+            getValueProps={(value) => ({ value: value && moment(value)})}
             className="no-margin-form"
           >
-            <DateComponent disabled={!isDraft && isUpdate} />
+            <NxDate
+              dateDisable={(current) => {
+                if (!moment.isMoment(current)) return false;
+                return current.isBefore(startDate, "day");
+              }}
+            />
           </Form.Item>
         </div>
 
@@ -193,19 +217,24 @@ const RelationshipInfo = ({
         <ModalChooseRelated
           isOpen={modalChoose}
           accountId={accountId}
-          relationshipType={relationshipTypeName}
-          relationshipCategory={relationshipCategoryName}
+          relationshipType={relationshipType}
+          relationshipCategory={relationshipCategory}
+          relationshipTypeName={relationshipTypeName}
           handleCancel={() => setModalChoose(false)}
           handleSelect={(selected) => {
             // Handle different data structure based on source
             const isCustomer = selected.source === "CUSTOMER";
-            const displayName = isCustomer ? selected.customerName : selected.accountName;
-            const displayNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+
+            const relatedName = isCustomer ? selected.customerName : selected.accountName;
+            const relatedNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
+            const formAccountId = isCustomer ? customerId : accountId;
+            const relatedId = isCustomer ? selected.customerId : selected.accountId;
 
             form.setFieldsValue({
-              accountName: displayName,
-              accountNumber: displayNumber,
-              accountId: selected.id,
+              formAccountId,
+              relatedName,
+              relatedNumber,
+              relatedId,
             });
 
             // Pass allAccount data to parent for display in RelatedDetailCard
@@ -226,8 +255,8 @@ const RelationshipInfo = ({
         <div className="grid grid-cols-3 gap-4">
           <NxDetailText label="Relationship Type">{relationshipTypeName}</NxDetailText>
           <NxDetailText label="Relationship Category">{relationshipCategoryName}</NxDetailText>
-          <NxDetailText label="Related Name">{objectName}</NxDetailText>
-          <NxDetailText label="Related Number">{objectNumber}</NxDetailText>
+          <NxDetailText label="Related Name">{relatedName}</NxDetailText>
+          <NxDetailText label="Related Number">{relatedNumber}</NxDetailText>
           <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
           <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
         </div>

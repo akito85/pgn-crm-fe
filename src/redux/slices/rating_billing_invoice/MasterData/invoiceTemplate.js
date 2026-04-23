@@ -50,9 +50,8 @@ export const createInvoiceTemplate = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.isSubmit === false ? "created" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "created" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -68,9 +67,8 @@ export const createInvoiceTemplate = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.isSubmit === false ? "created" : "submitted"
-          }. ${message}.`,
+          description: `Your data was not ${body.isSubmit === false ? "created" : "submitted"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -87,9 +85,8 @@ export const updateInvoiceTemplate = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.isSubmit === false ? "updated" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "updated" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -105,9 +102,8 @@ export const updateInvoiceTemplate = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.isSubmit === false ? "updated" : "submitted"
-          }. ${message}.`,
+          description: `Your data was not ${body.isSubmit === false ? "updated" : "submitted"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -209,6 +205,44 @@ export const inactiveInvoiceTemplate = createAsyncThunk(
   }
 );
 
+export const requestActivateInvoiceTemplate = createAsyncThunk(
+  "REQUEST_ACTIVATE_INVOICE_TEMPLATE",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/invoice-template/request-activate`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      const successBody = {
+        title: "Successful",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (error?.data?.code === 500 || error?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const approveOrRejectInvoiceTemplate = createAsyncThunk(
   "APPROVE_OR_REJECT_INVOICE_TEMPLATE",
   async ({ body }, thunkAPI) => {
@@ -220,9 +254,8 @@ export const approveOrRejectInvoiceTemplate = createAsyncThunk(
       );
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -238,9 +271,8 @@ export const approveOrRejectInvoiceTemplate = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -260,9 +292,8 @@ export const approveOrRejectInactiveInvoiceTemplate = createAsyncThunk(
       );
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -278,9 +309,46 @@ export const approveOrRejectInactiveInvoiceTemplate = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const approveOrRejectActivatedInvoiceTemplate = createAsyncThunk(
+  "APPROVE_OR_REJECT_ACTIVATED_INVOICE_TEMPLATE",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/invoice-template/approve-activated";
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      const successApprove = {
+        title: `Successful`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successApprove));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (error?.data?.code === 500 || error?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -993,6 +1061,20 @@ const invoiceTemplateSlice = createSlice({
       state.message = action.payload;
     },
 
+    // Request Activate Invoice Template
+    [requestActivateInvoiceTemplate.pending]: (state) => {
+      state.loading = true;
+    },
+    [requestActivateInvoiceTemplate.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [requestActivateInvoiceTemplate.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
     // Approve Or Reject Pricing Rule
     [approveOrRejectInvoiceTemplate.pending]: (state) => {
       state.loading = true;
@@ -1016,6 +1098,20 @@ const invoiceTemplateSlice = createSlice({
       state.loading = false;
     },
     [approveOrRejectInactiveInvoiceTemplate.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    // Approve Or Reject Activated Invoice Template
+    [approveOrRejectActivatedInvoiceTemplate.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectActivatedInvoiceTemplate.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectActivatedInvoiceTemplate.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;

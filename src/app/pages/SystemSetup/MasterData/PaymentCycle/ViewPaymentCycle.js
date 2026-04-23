@@ -7,13 +7,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import CardContainer from "../../../../../components/CardContainer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import {
     getDetailPaymentCycle,
     approveOrRejectPaymentCycle,
+    approveOrRejectInactivePaymentCycle,
 } from "../../../../../redux/slices/receipt_collection/paymentCycle";
 import { dateFormatting } from "../../../../../utils";
 import { configApp } from "../../../../../constants/configApp";
@@ -110,7 +110,10 @@ const ViewPaymentCycle = () => {
             approvalId: detail.approvalId
         };
 
-        dispatch(approveOrRejectPaymentCycle(body))
+        const isInactive = detail.status?.toUpperCase() === "ACTIVE";
+        const thunk = isInactive ? approveOrRejectInactivePaymentCycle : approveOrRejectPaymentCycle;
+
+        dispatch(thunk(body))
             .unwrap()
             .then(() => {
                 handleClear();
@@ -118,7 +121,8 @@ const ViewPaymentCycle = () => {
                 setLoadingConfirm(false);
                 dispatch(showModalSuccess({
                     title: "Success",
-                    description: `Payment Cycle ${modalAction.type}d successfully`
+                    description: `Payment Cycle ${modalAction.type}d successfully`,
+                    return: false,
                 }));
                 navigate("/system-setup/payment-cycle");
             })

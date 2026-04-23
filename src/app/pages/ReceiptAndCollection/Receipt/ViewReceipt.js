@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -282,9 +283,42 @@ const ViewReceipt = () => {
   };
 
   // handle change page
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleChangePage = (pageChange, pageSizeChange) => {
+    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
+    setPage(tempPage);
+    setPageSize(pageSizeChange);
+  };
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => ({
+      ...prevState,
+      advanceSearch: searchData,
+    }));
+    setPage(1);
   };
 
   // handle sort
@@ -375,12 +409,26 @@ const ViewReceipt = () => {
     <Menu>
       <Menu.Item
         key="Update"
-        disabled={!(record?.status === "Draft" && record?.statusApproval === "Rejected")}
+        disabled={!(
+          (record?.status === "Draft" && record?.statusApproval === "Rejected") ||
+          (record?.status === "Draft" && record?.statusApproval === "Waiting Approval") ||
+          (record?.status === "Draft" && record?.statusApproval === "Draft") ||
+          (record?.status === "Unidentified" && record?.statusApproval === "Rejected") ||
+          (record?.status === "Unidentified" && record?.statusApproval === "Waiting Approval") ||
+          (record?.status === "Unidentified" && record?.statusApproval === "Draft")
+        )}
       >
         <Link
           to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_RECEIPT}
           state={{ id: record?.id }}
-          className={`flex items-center gap-2 ${!(record?.status === "Draft" && record?.statusApproval === "Rejected") ? 'pointer-events-none opacity-50' : ''}`}
+          className={`flex items-center gap-2 ${!(
+            (record?.status === "Draft" && record?.statusApproval === "Rejected") ||
+            (record?.status === "Draft" && record?.statusApproval === "Waiting Approval") ||
+            (record?.status === "Draft" && record?.statusApproval === "Draft") ||
+            (record?.status === "Unidentified" && record?.statusApproval === "Rejected") ||
+            (record?.status === "Unidentified" && record?.statusApproval === "Waiting Approval") ||
+            (record?.status === "Unidentified" && record?.statusApproval === "Draft")
+          ) ? 'pointer-events-none opacity-50' : ''}`}
         >
           <SVGIcon name="IconEdit" color={"#000000"} width={16} />
           <span>Update</span>
@@ -460,7 +508,8 @@ const ViewReceipt = () => {
           <span>Approval History</span>
         </div>
       </Menu.Item>
-      {record?.status === "Draft" && record?.statusApproval === "Rejected" && (
+      {((record?.status === "Draft" && record?.statusApproval === "Rejected") ||
+        (record?.status === "Unidentified" && record?.statusApproval === "Rejected")) && (
         <Menu.Item key="Delete" onClick={() => handleDeleteReceipt(record)}>
           <div className="flex items-center gap-2">
             <SVGIcon name="IconDelete" color={"#BE3036"} width={16} />
@@ -600,8 +649,8 @@ const ViewReceipt = () => {
               ]}
               current={page}
               pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              onChange={handleChangePage}
+              onSizeChanger={handleChangePage}
               totalData={data?.page?.totalElements}
               onSort={onSort}
               tableScrolled={{
@@ -610,6 +659,9 @@ const ViewReceipt = () => {
               }}
               handleDownload={handleDownload} // For Export button in TableRBI
               showExport={true}
+              showSearchBar={true}
+              onAdvanceSearch={handleAdvanceSearch}
+              onSearch={(e) => handleGlobalSearch(e.target.value)}
             />
           </div>
         </CardContainer>
