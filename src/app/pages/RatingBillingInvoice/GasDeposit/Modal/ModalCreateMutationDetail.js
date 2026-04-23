@@ -197,7 +197,23 @@ const ModalCreateMutationDetail = ({
   }));
 
   return (
-    <ModalCustom
+    <>
+      <style>{`
+        .black-text-disabled .ant-input[disabled],
+        .black-text-disabled .ant-select-disabled .ant-select-selection-item {
+          color: rgba(0, 0, 0, 0.85) !important;
+          -webkit-text-fill-color: rgba(0, 0, 0, 0.85) !important;
+        }
+        .black-text-disabled .ant-input[disabled]::placeholder {
+          color: rgba(0, 0, 0, 0.25) !important;
+          -webkit-text-fill-color: rgba(0, 0, 0, 0.25) !important;
+        }
+        .black-text-disabled .ant-select-disabled .ant-select-selection-placeholder {
+          color: rgba(0, 0, 0, 0.25) !important;
+          -webkit-text-fill-color: rgba(0, 0, 0, 0.25) !important;
+        }
+      `}</style>
+      <ModalCustom
       isOpen={isOpen}
       type="confirmation"
       header="Create Mutation Detail"
@@ -293,7 +309,7 @@ const ModalCreateMutationDetail = ({
         </div>
       </div>
 
-      <Form layout="vertical" form={form} id="formMutationDetail">
+      <Form layout="vertical" form={form} id="formMutationDetail" className="black-text-disabled">
         {/* ========== STEP 1: MUTATION DETAIL FORM ========== */}
         <div
           className={`steps-content my-[20px] ${currentStep !== 0 ? "hidden" : ""}`}
@@ -462,6 +478,7 @@ const ModalCreateMutationDetail = ({
         </div>
       </Form>
     </ModalCustom>
+    </>
   );
 };
 

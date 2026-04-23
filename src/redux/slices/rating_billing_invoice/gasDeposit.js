@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
+import productPromoHttpService from "../../services/productPromoHttpService";
 import {
   showModalError,
   setBodyError,
@@ -610,18 +611,15 @@ export const getPeriodOptions = createAsyncThunk(
   "GET_GAS_DEPOSIT_PERIOD_OPTIONS",
   async (_, thunkAPI) => {
     try {
-      // TODO: Replace with actual API call
-      // const url = `/v1/dbs/api/gas-deposit/period-options`;
-      // const response = await ratingBillingHttpService.getAll(url);
-      // return response.data?.data ?? response.data;
-
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return dummyPeriodOptions;
+      const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const rawData = response?.data?.data || response?.data || [];
+      return Array.isArray(rawData) ? rawData.map(item => ({ label: item.name, value: item.name })) : [];
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
-      return error;
+      return thunkAPI.rejectWithValue(error);
     }
   },
 );
@@ -650,18 +648,22 @@ export const getUomOptions = createAsyncThunk(
   "GET_GAS_DEPOSIT_UOM_OPTIONS",
   async (_, thunkAPI) => {
     try {
-      // TODO: Replace with actual API call
-      // const url = `/v1/dbs/api/gas-deposit/uom-options`;
-      // const response = await ratingBillingHttpService.getAll(url);
-      // return response.data?.data ?? response.data;
-
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return dummyUomOptions;
+      const url = `/v1/dbs/api/maintain-pricing/list-uom`;
+      const response = await productPromoHttpService.getAll(url);
+      const rawData = response?.data?.data || response?.data || [];
+      return Array.isArray(rawData) 
+        ? rawData
+            .filter(item => {
+              const val = (item.name || item.text || "").toUpperCase();
+              return val === "MMBTU" || val === "M3";
+            })
+            .map(item => ({ label: item.name || item.text, value: item.name || item.text })) 
+        : [];
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
-      return error;
+      return thunkAPI.rejectWithValue(error);
     }
   },
 );
@@ -670,21 +672,20 @@ export const getTimeUnitOptions = createAsyncThunk(
   "GET_GAS_DEPOSIT_TIME_UNIT_OPTIONS",
   async (_, thunkAPI) => {
     try {
-      // TODO: Replace with actual API call
-      // const url = `/v1/dbs/api/gas-deposit/time-unit-options`;
-      // const response = await ratingBillingHttpService.getAll(url);
-      // return response.data?.data ?? response.data;
-
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return dummyTimeUnitOptions;
+      const url = `/v1/dbs/api/billingcycle/timeunit-get`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const rawData = response?.data?.data || response?.data || [];
+      return Array.isArray(rawData) ? rawData.map(item => ({ label: item.name || item.text, value: item.name || item.text })) : [];
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
-      return error;
+      return thunkAPI.rejectWithValue(error);
     }
   },
 );
+
+
 
 export const getRedemPeriodOptions = createAsyncThunk(
   "GET_GAS_DEPOSIT_REDEM_PERIOD_OPTIONS",
@@ -710,7 +711,7 @@ export const createMutationSummary = createAsyncThunk(
   "CREATE_MUTATION_SUMMARY",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create`;
+      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create-update`;
       const response = await ratingBillingHttpService.createData(url, body);
       const responseData = response?.data ?? response;
       thunkAPI.dispatch(
@@ -1009,14 +1010,14 @@ const gasDepositSlice = createSlice({
       state.loading_dropdown = true;
     },
     [getTimeUnitOptions.fulfilled]: (state, action) => {
-      state.loading_dropdown = false;
       state.data_time_unit_options = action.payload;
+      state.loading_dropdown = false;
     },
     [getTimeUnitOptions.rejected]: (state) => {
       state.loading_dropdown = false;
     },
 
-    // Redem Period Options
+    // getRedemPeriodOptions
     [getRedemPeriodOptions.pending]: (state) => {
       state.loading_dropdown = true;
     },

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Form } from "antd";
+import { Form, DatePicker } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,7 +12,16 @@ import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import SelectComponent from "../../../../components/SelectComponent";
 import InputComponent from "../../../../components/InputComponent";
+import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
+import { configApp } from "../../../../constants/configApp";
 import ModalCreateMutationDetail from "./Modal/ModalCreateMutationDetail";
+import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
+import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
+import { getConfigFileRBIData } from "../../../../redux/slices/attachmentSlice";
+import {
+  getAllApprovalList,
+  getListApprovalById,
+} from "../../../../redux/slices/rating_billing_invoice/billing";
 import {
   getAllGasDepositPaginate,
   getPeriodOptions,
@@ -20,6 +29,7 @@ import {
   getTimeUnitOptions,
   getTypeOptions,
   createMutationSummary,
+  getCategoryListGasDeposit,
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
 
 const GasDepositCreatePage = () => {
@@ -43,6 +53,22 @@ const GasDepositCreatePage = () => {
     data_time_unit_options: timeUnitOptions,
     data_type_options: typeOptions,
   } = useSelector((state) => state.gasDepositRbi);
+
+  const { data_approval, data_approval_list } = useSelector((state) => state.billing);
+
+  // Approval state
+  const [selectedHierarchy, setSelectedHierarchy] = useState(undefined);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [boolApproval, setBoolApproval] = useState(false);
+
+  // Attachment state
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+
+  const SOURCE_OPTIONS = [
+    { label: "Billing", value: "Billing" },
+    { label: "Manual", value: "Manual" },
+  ];
 
   // Account options derived from gas deposit list
   const accountNumberOptions = useMemo(
@@ -71,6 +97,8 @@ const GasDepositCreatePage = () => {
     dispatch(getUomOptions());
     dispatch(getTimeUnitOptions());
     dispatch(getTypeOptions());
+    dispatch(getAllApprovalList());
+    dispatch(getConfigFileRBIData());
   }, [dispatch]);
 
   useEffect(() => {
@@ -104,6 +132,44 @@ const GasDepositCreatePage = () => {
       description: selectedData.description,
     });
   }, [form, isUpdateMode, selectedData]);
+
+  // Map approval hierarchy list to options
+  useEffect(() => {
+    if (data_approval && data_approval.length > 0) {
+      setAppHierOptions(data_approval.map((item) => ({ name: item.approvalName, value: item.appHierId })));
+    } else {
+      setAppHierOptions([]);
+    }
+  }, [data_approval]);
+
+  // Map approval hierarchy detail to table data
+  useEffect(() => {
+    if (boolApproval && data_approval_list && data_approval_list.length > 0) {
+      setAppHierDataDetail(
+        data_approval_list.map((a, index) => ({
+          ...a,
+          key: index + 1,
+          employeeDetail: (a.employeeDetail || []).map((b, i) => ({ ...b, key: i + 1 })),
+        }))
+      );
+    }
+  }, [data_approval_list, boolApproval]);
+
+  const handleSelectHierarchy = (value) => {
+    setSelectedHierarchy(value);
+    form.setFieldsValue({ apphierId: value });
+    dispatch(getListApprovalById(value));
+    setBoolApproval(true);
+  };
+
+  useEffect(() => {
+    if (mutationRows) {
+      const totalAmount = mutationRows.reduce((acc, curr) => {
+        return acc + (Number(curr.amount) || 0);
+      }, 0);
+      form.setFieldsValue({ amount: totalAmount });
+    }
+  }, [mutationRows, form]);
 
   const mutationColumns = useMemo(
     () => [
@@ -155,9 +221,31 @@ const GasDepositCreatePage = () => {
       termsRedeem: selected?.termsRedeem || "",
       timeUnit: selected?.timeUnit || "",
       uom: selected?.uom || "",
-      amount: selected?.balanceAmount || "",
       receiptBalance: selected?.balanceVolume || "",
     });
+  };
+
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      try {
+        // Only validate fields that the user can actually interact with
+        await form.validateFields([
+          "accountNumber",
+          "periodEarn",
+          "periodStartRedeem",
+          "periodEndRedeem",
+          "period",
+          "timeUnit",
+          "uom",
+          "type",
+          "source",
+          "description",
+        ]);
+      } catch {
+        return;
+      }
+    }
+    setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
   };
 
   const handleSubmit = () => {
@@ -167,24 +255,53 @@ const GasDepositCreatePage = () => {
         accountList.filter(Boolean).find((item) => item.accountNumber === values.accountNumber);
 
       const body = {
+        id: isUpdateMode ? (selectedData?.id || selectedData?.gasDepositId) : undefined,
         accountId: account?.accountId,
         apphierId: values.apphierId,
         balanceVolume: values.receiptBalance,
         balanceAmount: values.amount,
         currency: values.currency || account?.currency,
         uom: values.uom,
-        schemeStartDate: values.periodEarn,
-        schemeEndDate: account?.earnEndDate,
-        redeemStartDate: values.periodStartRedeem,
-        redeemEndDate: values.periodEndRedeem,
-        actionType: "CREATE",
+        schemeStartDate: values.periodEarn?.[0]?.format ? values.periodEarn[0].format("YYYY-MM-DD") : undefined,
+        schemeEndDate: values.periodEarn?.[1]?.format ? values.periodEarn[1].format("YYYY-MM-DD") : account?.earnEndDate,
+        redeemStartDate: values.periodStartRedeem?.format ? values.periodStartRedeem.format("YYYY-MM-DD") : undefined,
+        redeemEndDate: values.periodEndRedeem?.format ? values.periodEndRedeem.format("YYYY-MM-DD") : undefined,
+        actionType: isUpdateMode ? "UPDATE" : "CREATE",
         description: values.description,
         sapCustId: account?.sapCustId == null ? undefined : String(account.sapCustId),
         attachments: [],
+        gasDepositMutationDetailDtos: mutationRows.map(row => ({
+          billingPeriod: row.billingPeriod,
+          mutationDate: row.mutationDate,
+          mutationType: row.mutationType,
+          category: row.category,
+          uom: row.uom,
+          quantity: row.quantity,
+          price: row.price,
+          amount: row.amount,
+          description: row.description,
+        })),
       };
 
-      dispatch(createMutationSummary(body)).then((res) => {
+      dispatch(createMutationSummary(body)).then(async (res) => {
         if (!res.error) {
+          const idGasDeposit = res.payload?.id || res.payload?.gasDepositId;
+          
+          if (listDataAttachment.length > 0 && idGasDeposit) {
+            for (let i = 0; i < listDataAttachment.length; i++) {
+              const element = listDataAttachment[i];
+              const uploadBody = {
+                files: element.file,
+                fileCategoryId: element.fileCategoryId,
+                referensiId: idGasDeposit,
+                category: "GAS_DEPOSIT_SUMMARY",
+              };
+              await ratingBillingHttpService.uploadAttachment(
+                `/v1/dbs/api/attachment/upload/v1`,
+                uploadBody
+              );
+            }
+          }
           navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
         }
       });
@@ -193,6 +310,21 @@ const GasDepositCreatePage = () => {
 
   return (
     <>
+      <style>{`
+        .black-text-disabled .ant-input[disabled],
+        .black-text-disabled .ant-select-disabled .ant-select-selection-item {
+          color: rgba(0, 0, 0, 0.85) !important;
+          -webkit-text-fill-color: rgba(0, 0, 0, 0.85) !important;
+        }
+        .black-text-disabled .ant-input[disabled]::placeholder {
+          color: rgba(0, 0, 0, 0.25) !important;
+          -webkit-text-fill-color: rgba(0, 0, 0, 0.25) !important;
+        }
+        .black-text-disabled .ant-select-disabled .ant-select-selection-placeholder {
+          color: rgba(0, 0, 0, 0.25) !important;
+          -webkit-text-fill-color: rgba(0, 0, 0, 0.25) !important;
+        }
+      `}</style>
       <NxBreadCrumb routes={routes} />
 
       <NxFormStepper
@@ -202,7 +334,10 @@ const GasDepositCreatePage = () => {
         onNext={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
       />
 
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" initialValues={{ amount: 0, type: "Adjustment" }} className="black-text-disabled">
+
+        {/* ========== STEP 1: CREATE FORM ========== */}
+        <div className={currentStep !== 0 ? "hidden" : ""}>
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
@@ -270,20 +405,20 @@ const GasDepositCreatePage = () => {
           className="mt-2"
         >
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-            <Form.Item name="termsEarn" label="Terms Earn" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="termsEarn" label="Terms Earn" style={{ marginBottom: 0 }}>
               <InputComponent disabled={!isUpdateMode} placeholder="Select Terms Earn" />
             </Form.Item>
-            <Form.Item name="termsRedeem" label="Terms Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="termsRedeem" label="Terms Redeem" style={{ marginBottom: 0 }}>
               <InputComponent disabled={!isUpdateMode} placeholder="Select Terms Redeem" />
             </Form.Item>
             <Form.Item name="periodEarn" label="Period Earn" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Period Earn" options={periodOptions} suffixIcon={<CalendarOutlined style={{ color: "rgba(0,0,0,0.25)" }} />} />
+              <DatePicker.RangePicker className="w-full" picker="month" format="MMM YY" placeholder={["Start Date", "End Date"]} />
             </Form.Item>
             <Form.Item name="periodStartRedeem" label="Period Start Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Period Start Redeem" options={periodOptions} suffixIcon={<CalendarOutlined style={{ color: "rgba(0,0,0,0.25)" }} />} />
+              <DatePicker className="w-full" placeholder="Select Period Start Redeem" />
             </Form.Item>
             <Form.Item name="periodEndRedeem" label="Period End Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Period End Redeem" options={periodOptions} suffixIcon={<CalendarOutlined style={{ color: "rgba(0,0,0,0.25)" }} />} />
+              <DatePicker className="w-full" placeholder="Select Period End Redeem" />
             </Form.Item>
             <Form.Item name="period" label="Period" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select Period" options={periodOptions} />
@@ -294,18 +429,17 @@ const GasDepositCreatePage = () => {
             <Form.Item name="uom" label="UOM" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select UOM" options={uomOptions} />
             </Form.Item>
-            <Form.Item name="amount" label="Amount" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <InputComponent disabled={!isUpdateMode} placeholder="Input Amount" />
+            <Form.Item name="amount" label="Amount" style={{ marginBottom: 0 }}>
+              <InputComponent disabled={true} placeholder="Input Amount" />
             </Form.Item>
             <Form.Item name="type" label="Type" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Select Type" options={typeOptions} />
+              <SelectComponent placeholder="Select Type" options={[
+                { label: "Billing", value: "Billing" },
+                { label: "Adjustment", value: "Adjustment" },
+              ]} />
             </Form.Item>
             <Form.Item name="source" label="Source" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
-              <SelectComponent placeholder="Input Source" options={[
-                { label: "Billing", value: "BILLING" },
-                { label: "Rating", value: "RATING" },
-                { label: "Manual", value: "MANUAL" },
-              ]} />
+              <SelectComponent placeholder="Input Source" options={SOURCE_OPTIONS} />
             </Form.Item>
             <Form.Item
               name="description"
@@ -314,7 +448,7 @@ const GasDepositCreatePage = () => {
               style={{ marginBottom: 0 }}
               className="lg:col-span-5"
             >
-              <InputComponent type="textarea" rows={2} placeholder="{value}" />
+              <InputComponent type="textarea" rows={2} placeholder="Input Description" />
             </Form.Item>
           </div>
         </CardContainer>
@@ -349,12 +483,45 @@ const GasDepositCreatePage = () => {
             />
           </div>
         </CardContainer>
+        </div>{/* end step 0 */}
+
+        {/* ========== STEP 2: APPROVAL ========== */}
+        <div className={`${currentStep !== 1 ? "hidden" : ""}`}>
+          <CardContainer subHeader="Approval Information">
+            <ApprovalComponentGeneral
+              type="create"
+              dataTable={appHierDataDetail}
+              dataOption={appHierOptions}
+              selectedHierarchy={selectedHierarchy}
+              updateSelectedHierarchy={handleSelectHierarchy}
+            />
+          </CardContainer>
+        </div>
+
+        {/* ========== STEP 3: ATTACHMENT ========== */}
+        <div className={`${currentStep !== 2 ? "hidden" : ""}`}>
+          <CardContainer subHeader="Attachment Information">
+            <AttachmentComponent
+              type="create"
+              data={listDataAttachment}
+              updateData={setListDataAttachment}
+              dispatch={dispatch}
+              getAPICategory={getCategoryListGasDeposit}
+              typeSelector="gasDepositRbi"
+              service={ratingBillingHttpService}
+              configApplication={configApp.RATING_BILLING_SERVICE}
+              getAPIGuard={getConfigFileRBIData}
+              typeRBI="data"
+              mandatory={true}
+            />
+          </CardContainer>
+        </div>
 
         <NxFormFooter
           current={currentStep}
           totalSteps={steps.length}
           onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
-          onNext={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
+          onNext={handleNext}
           onCancel={() => navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW)}
           onClear={() => form.resetFields()}
           onSaveDraft={() => {}}
