@@ -92,6 +92,54 @@ export const columnsBillingBucket = (
         ),
     },
     {
+      title: "CATEGORY",
+      dataIndex: "category",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "category",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "category",
+          hasValue(search["category"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+       {
+      title: "CURRENCY",
+      dataIndex: "currency",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "currency",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "currency",
+          hasValue(search["currency"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
       title: "START DATE",
       sorter: true,
       align: "center",
