@@ -30,6 +30,8 @@ import {
   getAttachmentCategory,
   getDetailBillingBucket,
   getDetailDraftBillingBucket,
+  getBillingBucketCurrency,
+  getBillingBucketCategory,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -86,6 +88,8 @@ const BillingBucketForm = ({ type }) => {
         "billingBucketCode",
         "name",
         "priorityPeriod",
+        "currency",
+        "category",
         "criteria",
         "startDate",
       ],
@@ -206,6 +210,8 @@ const BillingBucketForm = ({ type }) => {
     dispatch(getAvailableApproval());
     dispatch(getSelectedApproval());
     dispatch(getListPriorityPeriod());
+    dispatch(getBillingBucketCurrency());
+    dispatch(getBillingBucketCategory());
   }, [dispatch]);
 
   useEffect(() => {
@@ -318,6 +324,8 @@ const BillingBucketForm = ({ type }) => {
         billingBucketCode: data_detail_draft?.information?.billingBucketCode,
         name: data_detail_draft?.information?.name,
         priorityPeriod: data_detail_draft?.information?.priorityPeriod?.value,
+        currency: data_detail_draft?.information?.currency,
+        category: data_detail_draft?.information?.category,
         startDate: moment(data_detail_draft?.information?.startDate),
         endDate: data_detail_draft?.information?.endDate
           ? moment(data_detail_draft?.information?.endDate)
@@ -431,6 +439,8 @@ const BillingBucketForm = ({ type }) => {
         billingBucketCode: data_detail?.information?.billingBucketCode,
         name: data_detail?.information?.name,
         priorityPeriod: data_detail?.information?.priorityPeriod?.value,
+        currency: data_detail?.information?.currency,
+        category: data_detail?.information?.category,
         startDate: moment(data_detail?.information?.startDate),
         endDate: data_detail?.information?.endDate
           ? moment(data_detail?.information?.endDate)
@@ -644,6 +654,8 @@ const BillingBucketForm = ({ type }) => {
       billingBucketCode: bodyData.billingBucketCode,
       name: bodyData.name,
       priorityPeriod: bodyData.priorityPeriod,
+      currency: bodyData.currency,
+      category: bodyData.category,
       startDate: bodyData.startDate
         ? moment(bodyData?.startDate).format(dateFormatting.date)
         : null,
@@ -922,6 +934,8 @@ const BillingBucketForm = ({ type }) => {
                 "billingBucketCode",
                 "name",
                 "priorityPeriod",
+                "currency",
+                "category",
                 "criteria",
                 "startDate",
               ],
@@ -1108,6 +1122,8 @@ const BillingBucketForm = ({ type }) => {
             "billingBucketCode",
             "name",
             "priorityPeriod",
+            "currency",
+            "category",
             "criteria",
             "startDate",
           ],

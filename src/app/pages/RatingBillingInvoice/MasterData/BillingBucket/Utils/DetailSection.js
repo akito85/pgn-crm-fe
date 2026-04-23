@@ -46,6 +46,9 @@ const DetailSection = ({
         {valuePage === "Detail" ? (
           <BillingBucketDetailSectionForm
             listDataBI={listDataBI}
+            billingBucketCategory={
+              dataBillingBucket?.information?.category || dataBillingBucket?.category
+            }
             type={"show"}
             showAction="show"
           />
