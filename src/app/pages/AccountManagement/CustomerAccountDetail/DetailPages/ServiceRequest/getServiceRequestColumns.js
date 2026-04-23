@@ -251,35 +251,27 @@ const getServiceRequestColumns = ({
       true
     ),
   },
-  isApproval && {
-    key: "statusApproval",
-    title: "STATUS APPROVAL",
-    dataIndex: "statusApproval",
-    width: 170,
-    sorter: true,
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 130,
     align: "center",
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
     render: (status) => {
       const displayText = {
-        draft: "Draft",
-        DRAFT: "Draft",
-        approved: "Approved",
-        APPROVED: "Approved",
-        waitingApproval: "Waiting Approval",
-        WAITING_APPROVAL: "Waiting Approval",
-        rejected: "Rejected",
-        REJECTED: "Rejected",
-        pending: "Pending",
-        PENDING: "Pending",
+        inProgress: "In Progress",
+        IN_PROGRESS: "In Progress",
+        onHold: "On Hold",
+        ON_HOLD: "On Hold",
+        closed: "Closed",
+        CLOSED: "Closed",
+        canceled: "Canceled",
+        CANCELED: "Canceled",
+        open: "Open",
+        OPEN: "Open",
+        active: "Active",
+        ACTIVE: "Active",
       };
       return (
         <div className="flex justify-center">
@@ -295,18 +287,8 @@ const getServiceRequestColumns = ({
     title: "STATUS PRE-REQUISITE",
     dataIndex: "statusPrerequisite",
     width: 180,
-    sorter: true,
     align: "center",
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusPrerequisite",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
     render: (status) => {
       const displayText = {
         completed: "Completed",
@@ -329,37 +311,25 @@ const getServiceRequestColumns = ({
       );
     },
   },
-  {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 130,
-    sorter: true,
+  !isApproval && {
+    key: "statusApproval",
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
+    width: 170,
     align: "center",
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
     render: (status) => {
       const displayText = {
-        inProgress: "In Progress",
-        IN_PROGRESS: "In Progress",
-        onHold: "On Hold",
-        ON_HOLD: "On Hold",
-        closed: "Closed",
-        CLOSED: "Closed",
-        canceled: "Canceled",
-        CANCELED: "Canceled",
-        open: "Open",
-        OPEN: "Open",
-        active: "Active",
-        ACTIVE: "Active",
+        draft: "Draft",
+        DRAFT: "Draft",
+        approved: "Approved",
+        APPROVED: "Approved",
+        waitingApproval: "Waiting Approval",
+        WAITING_APPROVAL: "Waiting Approval",
+        rejected: "Rejected",
+        REJECTED: "Rejected",
+        pending: "Pending",
+        PENDING: "Pending",
       };
       return (
         <div className="flex justify-center">
