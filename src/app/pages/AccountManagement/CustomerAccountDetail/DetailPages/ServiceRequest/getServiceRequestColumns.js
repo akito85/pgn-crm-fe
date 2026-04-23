@@ -34,9 +34,9 @@ const getServiceRequestColumns = ({
   },
   {
     key: "serviceRequestNumber",
-    title: "SERVICE REQUEST NUMBER",
+    title: "SR NUMBER",
     dataIndex: "serviceRequestNumber",
-    width: 220,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -50,9 +50,9 @@ const getServiceRequestColumns = ({
   },
   {
     key: "serviceRequestReference",
-    title: "SERVICE REQUEST REFERENCE",
+    title: "SR REFERENCE",
     dataIndex: "serviceRequestReference",
-    width: 230,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -89,7 +89,7 @@ const getServiceRequestColumns = ({
     key: "category",
     title: "CATEGORY",
     dataIndex: "category",
-    width: 160,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -105,7 +105,7 @@ const getServiceRequestColumns = ({
     key: "subCategory",
     title: "SUB CATEGORY",
     dataIndex: "subCategory",
-    width: 160,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -121,11 +121,27 @@ const getServiceRequestColumns = ({
     key: "channel",
     title: "CHANNEL",
     dataIndex: "channel",
-    width: 140,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "channel",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+  },
+  {
+    key: "priority",
+    title: "PRIORITY",
+    dataIndex: "priority",
+    width: 150,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "priority",
       searchInput,
       searchedColumn,
       searchText,
@@ -153,7 +169,7 @@ const getServiceRequestColumns = ({
     key: "requestDate",
     title: "REQUEST DATE",
     dataIndex: "requestDate",
-    width: 180,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -170,7 +186,7 @@ const getServiceRequestColumns = ({
     key: "openDate",
     title: "OPEN DATE",
     dataIndex: "openDate",
-    width: 180,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -187,7 +203,7 @@ const getServiceRequestColumns = ({
     key: "resolvedDate",
     title: "RESOLVED DATE",
     dataIndex: "resolvedDate",
-    width: 180,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -204,7 +220,7 @@ const getServiceRequestColumns = ({
     key: "closedDate",
     title: "CLOSED DATE",
     dataIndex: "closedDate",
-    width: 180,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -221,7 +237,7 @@ const getServiceRequestColumns = ({
     key: "age",
     title: "AGE (HOUR)",
     dataIndex: "age",
-    width: 120,
+    width: 150,
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -252,10 +268,28 @@ const getServiceRequestColumns = ({
     ),
   },
   {
+    key: "escalation",
+    title: "ESCALATION",
+    dataIndex: "escalation",
+    width: 150,
+    sorter: true,
+    align: "center",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "escalation",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (age) => age || "0",
+  },
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
-    width: 130,
+    width: 100,
     align: "center",
     fixed: "right",
     render: (status) => {
@@ -286,7 +320,7 @@ const getServiceRequestColumns = ({
     key: "statusPrerequisite",
     title: "STATUS PRE-REQUISITE",
     dataIndex: "statusPrerequisite",
-    width: 180,
+    width: 150,
     align: "center",
     fixed: "right",
     render: (status) => {
@@ -315,7 +349,7 @@ const getServiceRequestColumns = ({
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 170,
+    width: 140,
     align: "center",
     fixed: "right",
     render: (status) => {

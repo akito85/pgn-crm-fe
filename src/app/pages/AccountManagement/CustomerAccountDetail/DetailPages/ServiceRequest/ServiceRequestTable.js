@@ -36,7 +36,7 @@ const ServiceRequestTable = ({
   );
 
   // --- Derived values ---
-  const currentData = useMemo(() => {
+  const dataSource = useMemo(() => {
     if (!Array.isArray(list_serviceRequest)) return [];
     return list_serviceRequest.map((item, index) => ({
       ...item,
@@ -45,7 +45,7 @@ const ServiceRequestTable = ({
   }, [list_serviceRequest]);
 
   const totalElement = pagination_listSr?.totalElement || 0;
-  const hasMore = currentData.length < totalElement;
+  const hasMore = dataSource.length < totalElement;
 
   // --- State ---
   const searchInput = useRef(null);
@@ -159,7 +159,7 @@ const ServiceRequestTable = ({
     "table"
   ).map((col) => ({
     ...col,
-    width: 70,
+    width: 100,
     align: "center",
   }));
 
@@ -185,10 +185,10 @@ const ServiceRequestTable = ({
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="service-request-table"
-        dataSource={currentData}
+        dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: "max-content" }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 2700 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}
