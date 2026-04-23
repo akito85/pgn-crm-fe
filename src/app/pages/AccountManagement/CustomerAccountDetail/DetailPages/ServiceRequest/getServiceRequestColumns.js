@@ -283,7 +283,6 @@ const getServiceRequestColumns = ({
       handleSearch,
       true
     ),
-    render: (age) => age || "0",
   },
   {
     key: "status",
