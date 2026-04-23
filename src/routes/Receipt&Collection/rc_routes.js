@@ -9,6 +9,7 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   APPROVAL_RECEIPT_REVERSE: "/receipt-and-collection/receipt-list/approval/reverse/:id",
   UPDATE_RECEIPT: "/receipt-and-collection/receipt-list/update",
   CREATE_ACCOUNTING: "/receipt-and-collection/receipt-list/create-accounting",
+  DETAIL_ACCOUNTING: "/receipt-and-collection/receipt-list/view-accounting",
   // Receipt Reconciliation
 
   // Synchronize Receipt

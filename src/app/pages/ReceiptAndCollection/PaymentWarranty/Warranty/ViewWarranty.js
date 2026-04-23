@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Dropdown, Menu, Tooltip, Checkbox, Tabs } from "antd";
+import { Spin, Dropdown, Menu, Tooltip, Checkbox, Tabs, Popover } from "antd";
 import { debounce } from "lodash";
 import { DownOutlined, EyeOutlined, DownloadOutlined, EditOutlined } from "@ant-design/icons";
 
@@ -11,6 +11,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import SearchBar from "../../../../../components/SearchBar";
 
 // Utils
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
@@ -21,7 +22,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
 import Toolbar from "../../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import useGrantAccessHooks from "../../../../../components/useGrantAccessHooks";
 
 // Column Configuration
 import { columnWarranty } from "./ColumnConfig/WarrantyColumns";
@@ -134,18 +135,77 @@ const ViewWarranty = () => {
     }
   ];
 
-  const handleSearch = useMemo(() => 
-    debounce((selectedKeys, confirm, dataIndex) => {
-      confirm();
-      setSearchText(selectedKeys[0]);
-      setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
+
+    setSearch((prevState) => {
+      const nextState = { ...prevState };
+      if (selectedKeys[0]) {
+        nextState[dataIndex] = selectedKeys[0];
+      } else {
+        delete nextState[dataIndex];
+      }
+      return nextState;
+    });
+
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  }, [search]);
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
       setSearch((prevState) => {
-        if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
-        return { ...prevState, [dataIndex]: selectedKeys[0] };
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
       });
+      setPage(1);
     }, 500),
     []
   );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    if (searchData?.filterRules && Array.isArray(searchData.filterRules)) {
+      searchData.filterRules.forEach((ruleGroup) => {
+        if (Array.isArray(ruleGroup)) {
+          ruleGroup.forEach((rule) => {
+            if (rule?.column && rule?.value !== undefined && rule?.value !== null && rule?.value !== "" && rule?.condition) {
+              const conditionKey = rule.condition === "Equal to" ? "" : rule.condition;
+              simpleSearch[`${rule.column}${conditionKey}`] = rule.value;
+            }
+          });
+        }
+      });
+    }
+    setSearch(simpleSearch);
+    setPage(1);
+  };
+  
 
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -154,9 +214,10 @@ const ViewWarranty = () => {
   };
 
   const onSort = (_, __, sorter) => {
+    const field = sorter.field || sorter.columnKey;
     const dataSort =
       sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        ? `${field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -383,7 +444,7 @@ const ViewWarranty = () => {
           <Tooltip title={"Detail"}>
             <ButtonComponent
               className="gap-5"
-              icon={<EyeOutlined style={{ fontSize: "24px", color: "#0075bf" }} />}
+              icon={<SVGIcon name="IconDetail" width={24} color={"#0075bf"} />}
               border={false}
               type="action"
               onClick={(e) => {
@@ -398,7 +459,7 @@ const ViewWarranty = () => {
               e.stopPropagation();
               handleDetail(record);
             }}>
-              <EyeOutlined style={{ fontSize: "16px", color: "#0075bf" }} />
+              <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
             </div>
           </Tooltip>
         )
@@ -680,13 +741,57 @@ const ViewWarranty = () => {
     handleSearch
   ]);
 
-  const actionColumns = useColumnActionPermission(
-    ["view", "refund", "hold", "release", "history", "delete","Update"],
-    itemActions,
-    "View",
-    "page",
-    true
-  );
+  const { actions: accessList } = useGrantAccessHooks("page");
+
+  const actionColumns = useMemo(() => {
+    const permissions = accessList?.map(a => a.toLowerCase()) || [];
+    const tableActions = itemActions.filter(item => item.type === "table" && permissions.includes(item.action.toLowerCase()));
+    
+    if (tableActions.length === 0) return [];
+
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        fixed: "right",
+        width: 150,
+        render: (_, record) => {
+          const detailAction = tableActions.find(a => a.action.toLowerCase() === "view");
+          const otherActions = tableActions.filter(a => a.action.toLowerCase() !== "view");
+          
+          return (
+            <div className="flex justify-center items-center gap-4">
+              {otherActions.length > 0 && (
+                <Popover
+                  trigger="click"
+                  placement="bottomRight"
+                  showArrow={false}
+                  content={
+                    <div className="flex flex-col">
+                      {otherActions.map(action => (
+                        <div key={action.action} onClick={(e) => e.stopPropagation()}>
+                           {action.render(record, tableActions.length)}
+                        </div>
+                      ))}
+                    </div>
+                  }
+                >
+                  <div className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                    <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                  </div>
+                </Popover>
+              )}
+              {detailAction && (
+                <div onClick={(e) => e.stopPropagation()}>
+                   {detailAction.render(record, tableActions.length)}
+                </div>
+              )}
+            </div>
+          );
+        }
+      }
+    ];
+  }, [accessList, itemActions]);
 
   const allColumns = useMemo(() => {
     return [...baseColumns, ...actionColumns];
@@ -751,6 +856,9 @@ const ViewWarranty = () => {
                     fixedColumns={fixedColumns}
                     setFixedColumns={setFixedColumns}
                     loading={loadingList}
+                    showSearchBar={true}
+                    onAdvanceSearch={handleAdvanceSearch}
+                    onSearch={(e) => handleGlobalSearch(e.target.value)}
                     onRow={(record) => {
                       const recordKey = record.billingCode || record.invoiceNumber || record.id;
                       const isActive = activeRowKey === recordKey;

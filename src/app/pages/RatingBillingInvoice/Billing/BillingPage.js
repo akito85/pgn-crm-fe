@@ -35,7 +35,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const BillingPage = () => {
-  const { data, loading, data_approval_history, filters } = useSelector(
+  const { data, loadingList, loadingHistory, data_approval_history, filters } = useSelector(
     (state) => state.billing,
   );
 
@@ -65,10 +65,23 @@ const BillingPage = () => {
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedBillingData, setSelectedBillingData] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["statusApproval", "action"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("billingFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["statusApproval", "action"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("billingFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   // Simpan filters ke Redux
   useEffect(() => {
@@ -418,7 +431,7 @@ const BillingPage = () => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingList}
           showExport={false}
           usePagination={false}
           useInfiniteScroll={true}
@@ -466,6 +479,7 @@ const BillingPage = () => {
         width={1000}
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
+        loading={loadingHistory}
       />
 
       <ModalRequestApproval

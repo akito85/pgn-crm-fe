@@ -1,15 +1,15 @@
-import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 import RelationshipInfo from "../StepContents/InformationForm/RelationshipInfo";
 import RelatedDetailCard from "../StepContents/InformationForm/RelatedDetailCard";
-import RelationshipApproval from "../StepContents/ApprovalForm/RelationshipApproval";
-import RelationshipAttachment from "../StepContents/AttachmentForm/RelationshipAttachment";
+import NxRemarkInput from "../../../../../../../../components/Nx/NxRemarkIInput";
 
 const ConfirmationModalTabs = ({
   form,
-  hierarchyTableData,
-  dataAttachment,
+  approvalData,
+  attachmentDataSource,
   service,
   type = "",
   configApplication,
@@ -28,7 +28,7 @@ const ConfirmationModalTabs = ({
           <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
             <RelationshipInfo form={form} formView={false} />
           </NxBaseContainer>
-          <NxBaseContainer border header={"RELATIONSHIP INFORMATION"}>
+          <NxBaseContainer border header={"RELATED DETAIL"}>
             <RelatedDetailCard relatedDetails={relatedDetails} />
           </NxBaseContainer>
         </div>
@@ -38,38 +38,40 @@ const ConfirmationModalTabs = ({
       key: 1,
       label: "Approval",
       disabled,
-      children: (
-        <NxBaseContainer border header={"APPROVAL"}>
-          <RelationshipApproval
-            form={form}
-            dataDetailApproval={hierarchyTableData}
-            formView={false}
-          />
-        </NxBaseContainer>
-      ),
+      children: <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />,
     },
     {
       key: 2,
       label: "Attachment",
       disabled,
       children: (
-        <NxBaseContainer border header={"ATTACHMENT"}>
-          <RelationshipAttachment
-            data={dataAttachment}
-            service={service}
-            configApplication={configApplication}
-            type={"confirmation"}
-          />
-        </NxBaseContainer>
+        <NxAttachmentInput
+          data={attachmentDataSource}
+          service={service}
+          configApplication={configApplication}
+          type={"confirmation"}
+        />
       ),
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
       disabled,
-      children: <ConfirmationModalRemark disabled={disabled} />,
+      children: <NxRemarkInput disabled={disabled} />,
+      required: true,
     },
-  ].filter(Boolean);
+  ]
+    .filter(Boolean)
+    .map((tab) => ({
+      ...tab,
+      children: tab.key === 0
+        ? tab.children
+        : (
+          <NxBaseContainer border header={tab.label.toUpperCase()} required={tab.required}>
+            {tab.children}
+          </NxBaseContainer>
+        ),
+    }));
 
   return (
     <NxTabs

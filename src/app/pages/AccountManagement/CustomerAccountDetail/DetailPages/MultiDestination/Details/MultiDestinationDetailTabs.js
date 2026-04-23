@@ -1,24 +1,30 @@
-import MultiDestinationDetailAttch from "./MultiDestinationDetailAttch";
 import MultiDestinationDetailInfo from "./MultiDestinationDetailInfo";
 import { useState } from "react";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
+import { configApp } from "../../../../../../../constants/configApp";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 
+/**
+ * Tabbed detail view for a multi destination record.
+ * Renders "Multi Destination Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Multi destination detail record
+ */
 const MultiDestinationDetailTabs = ({
-  subjectAccountNumber,
-  idMd = 0,
-  dataDetail = {},
-  dispatch = () => {},
+  detail = {},
 }) => {
-  // Use provided options or fall back to default tabs
+  const attachments = detail.attachments;
+
   const tabOptions = [
     {
       key: "mdi",
       label: "Multi Destination Information",
       children: (
         <MultiDestinationDetailInfo
-          subjectAccountNumber={subjectAccountNumber}
-          dataDetail={dataDetail}
+          detail={detail}
         />
       )
     },
@@ -26,9 +32,11 @@ const MultiDestinationDetailTabs = ({
       key: "attch",
       label: "Attachment",
       children: (
-        <MultiDestinationDetailAttch
-          idMd={idMd}
-          dispatch={dispatch}
+        <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
         />
       )
     },

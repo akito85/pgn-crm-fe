@@ -254,25 +254,33 @@ const SaDetail = ({
 
   useEffect(() => {
     if (saDetailObj.createFrom === 2) {
-    const selectedPriceCode = data_price_code?.filter(
-      (item) => item.id === saDetailObj?.priceCode
-    )[0];
-    const selectedPriceRule = data_price_rule?.filter(
-      (item) => item.pricingRuleId === saDetailObj?.pricingRule
-    )[0];
+      const selectedPriceCode = data_price_code?.filter(
+        (item) => item.id === saDetailObj?.priceCode
+      )[0];
+      const selectedPriceRule = data_price_rule?.filter(
+        (item) => item.pricingRuleId === saDetailObj?.pricingRule
+      )[0];
 
-    setSaDetailObj((prevState) => ({
-      ...prevState,
-      priceCodeText: selectedPriceCode
+      const nextPriceCodeText = selectedPriceCode
         ? `${selectedPriceCode.priceCode || ""}${selectedPriceCode.mpricingDetail
           ?.map((item) => `/${item.currency}/${item.value}/${item.uomName}`)
           .join("") || ""
           }`.replace(/\n/g, "")
-        : "",
-      pricingRuleText: selectedPriceRule && selectedPriceRule.name
+        : "";
+      const nextPricingRuleText = selectedPriceRule && selectedPriceRule.name
         ? selectedPriceRule.name
-        : "Custom Tiering",
-    }));
+        : "Custom Tiering";
+
+      if (
+        saDetailObj?.priceCodeText !== nextPriceCodeText ||
+        saDetailObj?.pricingRuleText !== nextPricingRuleText
+      ) {
+        setSaDetailObj((prevState) => ({
+          ...prevState,
+          priceCodeText: nextPriceCodeText,
+          pricingRuleText: nextPricingRuleText,
+        }));
+      }
     }
   }, [
     data_price_code,
@@ -304,6 +312,14 @@ const SaDetail = ({
       }
     }
   }, [saInfoObj?.serviceAgreementType]);
+
+  // ToDo : evaluate useEffect usage
+  useEffect(() => {
+    const validPricingTabs = ["pricing", "calculationRule", "termOfService", "lateCharge", "taxImplication"];
+    if (!validPricingTabs.includes(valuePage)) {
+      setValuePage("pricing");
+    }
+  }, [valuePage, setValuePage]);
 
   // Handle Change Radio Tabs
   const onChange = (e) => {
@@ -392,8 +408,12 @@ const SaDetail = ({
 
   // Show Hide Section Detial By Create From Id (1 or 2)
   const isCreateFromTwo = saDetailObj?.createFrom === 2;
-  const isCreateFromOneWithData =
-    saDetailObj?.createFrom === 1 && Object.keys(dataDetailProduct).length !== 0;
+  const hasLoadedDetailData =
+    Object.keys(dataTableDetailProduct || {}).length > 0 ||
+    (dataTableProduct || []).length > 0 ||
+    (dataPricing || []).length > 0 ||
+    (dataTableCalcRule || []).length > 0;
+  const isCreateFromOneWithData = saDetailObj?.createFrom === 1 && hasLoadedDetailData;
   const isDataAddon = saRecordData?.typeSa === "Amendment";
 
   const getLateCharge = (priceCodeId) => {
@@ -622,7 +642,7 @@ const SaDetail = ({
                 <SelectComponent
                   onChange={(e) => {
                     handleShowHideTable(e);
-                    setSaDetailObj({ createFrom: e });
+                    setSaDetailObj((prev) => ({ ...prev, createFrom: e }));
                     form.setFieldsValue({ createFrom: e });
                   }}
                   disabled={isCreateFromLocked()}
@@ -778,6 +798,7 @@ const SaDetail = ({
             <ModalChooseProduct
               modalChooseProduct={modalChooseProduct}
               setModalChooseProduct={setModalChooseProduct}
+              loadingChooseProduct={loadingChooseProduct}
               dataProduct={data_product}
               getProductDetailById={getProductDetailById}
               getListProduct={getListProduct}

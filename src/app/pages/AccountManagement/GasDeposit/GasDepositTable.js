@@ -6,35 +6,27 @@ import NxTable from "../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { getGasDepositColumns } from "./getGasDepositColumns";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import GasDepositDetailTable from "./GasDepositDetailTable";
 import { useDispatch, useSelector } from "react-redux";
-import { getGasDeposit, downloadGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
 /**
- * Gas deposit list table (container + presentational component).
- * Owns search, pagination, sort, filter, and download state/logic.
- * The parent (`GasDepositModule`) is responsible only for modals, permissions,
- * and the detail mutation table.
+ * Level-0 gas deposit list table with search, sort, filter, and infinite scroll.
+ * Tracks expand state in `openedMemo` to skip redundant detail fetches on re-expand.
  *
- * @param {object}    props
- * @param {"sa"|"ua"} props.moduleType                    - Module context: standalone ("sa") or under-account ("ua")
- * @param {Function}  [props.handleInactivateModal]       - Opens the inactivate confirmation modal
- * @param {Function}  [props.handleApprovalHistoryModal]  - Opens the approval history modal
- * @param {Function}  [props.handleApproval]              - Triggers the approval action
- * @param {Function}  [props.handleSelectDetail]          - Row click / select-detail handler
- * @param {number}    [props.accountId]                   - Account ID (used when moduleType is "ua")
- * @param {number}    [props.cutomerId]                   - Customer ID
- * @param {number}    [props.refreshSignal=0]             - Increment to trigger a page-0 refresh from the parent
+ * @param {{
+ *   moduleType: "sa" | "ua";
+ *   handleApproval?: (show: boolean) => void;
+ *   accountId?: number;
+ *   customerId?: number;
+ *   refreshSignal?: number;
+ * }} props
  */
 const GasDepositTable = ({
   moduleType,
-  handleInactivateModal = () => {},
-  handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
-  handleSelectDetail = () => {},
   accountId,
-  cutomerId,
+  customerId,
   refreshSignal = 0,
 }) => {
   // --- Hooks ---
@@ -43,7 +35,7 @@ const GasDepositTable = ({
   const dispatch = useDispatch();
   const {
     list_gasDeposit: dataSource,
-    pagination_gasDeposit: pagination,
+    pagination_listGd: pagination,
     loading_listGd: loading,
   } = useSelector((state) => state.gasDeposit);
 
@@ -68,11 +60,6 @@ const GasDepositTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status"],
-    left: [],
-  }));
-
   // --- Handlers ---
   /**
    * Resets pagination to page 0 and re-fetches the gas deposit list with current search/sort/filter state.
@@ -88,8 +75,8 @@ const GasDepositTable = ({
     };
 
     dispatch(
-      getGasDeposit({
-        id: isUnderAccount ? accountId : undefined,
+      getGasDeposits({
+        accountId: isUnderAccount ? accountId : undefined,
         body,
         isLoadMore: false,
       })
@@ -147,8 +134,8 @@ const GasDepositTable = ({
       };
 
       await dispatch(
-        getGasDeposit({
-          id: isUnderAccount ? accountId : undefined,
+        getGasDeposits({
+          accountId: isUnderAccount ? accountId : undefined,
           body,
           isLoadMore: true,
         })
@@ -188,7 +175,7 @@ const GasDepositTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDeposit({ id: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDeposits({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
@@ -210,12 +197,12 @@ const GasDepositTable = ({
       {
         state: {
           accountId,
-          cutomerId,
+          customerId,
           id,
         }
       }
     ),
-    handleRecalculate: ({ id, recordAccountId, recordCustomerId }) => navigate(
+    handleRecalculate: ({ id, objectAccountId: recordAccountId, customerId: recordCustomerId }) => navigate(
       isStandAlone ?
         ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_SA :
       isStandard ?
@@ -225,13 +212,13 @@ const GasDepositTable = ({
         "",
       {
         state: {
-          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
-          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
+          accountId: isUnderAccount ? accountId : isUnderAccount ? recordAccountId : undefined,
+          customerId: isUnderAccount ? customerId : isUnderAccount ? recordCustomerId : undefined,
           id,
         }
       }
     ),
-    handleExpire: ({ id, recordAccountId, recordCustomerId }) => navigate(
+    handleExpire: ({ id, objectAccountId: recordAccountId, customerId: recordCustomerId }) => navigate(
       isStandAlone ?
         ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_SA :
       isStandard ?
@@ -241,19 +228,29 @@ const GasDepositTable = ({
         "",
       {
         state: {
-          accountId: isStandAlone ? accountId : isUnderAccount ? recordAccountId : undefined,
-          cutomerId: isStandAlone ? cutomerId : isUnderAccount ? recordCustomerId : undefined,
+          accountId: isUnderAccount ? accountId : isUnderAccount ? recordAccountId : undefined,
+          customerId: isUnderAccount ? customerId : isUnderAccount ? recordCustomerId : undefined,
           id,
         }
       }
     ),
+    handleBulkRecalculate: () => navigate(
+      isStandAlone ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT_SA :
+      isStandard   ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT :
+      isOneTime    ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT_ONETIME : "",
+      { state: { accountId, customerId } }
+    ),
+    handleBulkExpire: () => navigate(
+      isStandAlone ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT_SA :
+      isStandard   ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT :
+      isOneTime    ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT_ONETIME : "",
+      { state: { accountId, customerId } }
+    ),
     handleApproval,
-    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
 
-  const actionCols = useColumnActionPermission(["Inactivate", "Update", "History"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View", "Recalculate", "Expire"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
@@ -272,24 +269,18 @@ const GasDepositTable = ({
     }),
   [search, searchInput, searchText, searchedColumn]);
 
-  const columnDefinitions = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
+  const columns = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
 
   /**
    * Renders the expanded child row for a gas deposit record.
    * @param {object} record - The parent gas deposit row record
    */
-  const expandedRowRender = (record) => {
-    return (
-      <GasDepositDetailTable
-        dataSource={record.details}
-        handleView={handleSelectDetail}
-      />
-    );
-  };
+  const expandedRowRender = (record, index) => (
+    <GasDepositDetailTable
+      id={record.id}
+      index={index}
+    />
+  );
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -299,7 +290,7 @@ const GasDepositTable = ({
         dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 3000 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}
@@ -307,9 +298,6 @@ const GasDepositTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
         expandable={{ expandedRowRender }}
       />

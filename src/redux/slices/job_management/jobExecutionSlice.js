@@ -92,6 +92,37 @@ export const restartExecution = makeActionThunk(
   (executionId) => `${EXEC_BASE}/${executionId}/restart`
 );
 
+// ─── Detail & Logs ────────────────────────────────────────────────────────────
+
+export const getJobExecutionById = createAsyncThunk(
+  "jobExecution/getJobExecutionById",
+  async (executionId, thunkAPI) => {
+    try {
+      const response = await axios.get(`${EXEC_BASE}/${executionId}`, { headers: getHeaders() });
+      return response?.data ?? null;
+    } catch (error) {
+      thunkAPI.dispatch(showModalError({
+        title: "Failed to load execution detail",
+        description: error?.response?.data?.message ?? error?.message ?? "Unknown error",
+      }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const getJobExecutionLogs = createAsyncThunk(
+  "jobExecution/getJobExecutionLogs",
+  async (executionId, thunkAPI) => {
+    try {
+      const response = await axios.get(`${EXEC_BASE}/${executionId}/logs`, { headers: getHeaders() });
+      return response?.data ?? [];
+    } catch {
+      // Logs are optional — silently return empty if endpoint is unavailable
+      return [];
+    }
+  }
+);
+
 // ─── Slice ────────────────────────────────────────────────────────────────────
 
 const jobExecutionSlice = createSlice({
@@ -100,6 +131,10 @@ const jobExecutionSlice = createSlice({
     data: { content: [], totalElements: 0, totalPages: 0 },
     loading: false,
     actionLoading: false,
+    detail: null,
+    detailLoading: false,
+    logs: [],
+    logsLoading: false,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -111,7 +146,15 @@ const jobExecutionSlice = createSlice({
         state.data = action.payload;
       })
       .addCase(getAllJobExecutionPaginate.rejected, (state) => { state.loading = false; })
-      // Actions
+      // Detail
+      .addCase(getJobExecutionById.pending,   (state) => { state.detailLoading = true; state.detail = null; })
+      .addCase(getJobExecutionById.fulfilled, (state, action) => { state.detailLoading = false; state.detail = action.payload; })
+      .addCase(getJobExecutionById.rejected,  (state) => { state.detailLoading = false; })
+      // Logs
+      .addCase(getJobExecutionLogs.pending,   (state) => { state.logsLoading = true; })
+      .addCase(getJobExecutionLogs.fulfilled, (state, action) => { state.logsLoading = false; state.logs = action.payload; })
+      .addCase(getJobExecutionLogs.rejected,  (state) => { state.logsLoading = false; state.logs = []; })
+      // Actions (matchers must come after all addCase calls)
       .addMatcher(
         (action) => [
           startExecution.pending.type, stopExecution.pending.type,

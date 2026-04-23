@@ -647,6 +647,11 @@ const monitoringUsageSlice = createSlice({
     clearUpdatedBatchIds: (state) => {
       state.updatedBatchIds = [];
     },
+    clearDetailData: (state) => {
+      state.detail_batch = [];
+      state.list_approval_by_id = [];
+      state.list_approval = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -1036,4 +1041,5 @@ export const {
   clearUpdated,
   clearUpdatedDeleted,
   clearUpdatedBatchIds,
+  clearDetailData,
 } = monitoringUsageSlice.actions;

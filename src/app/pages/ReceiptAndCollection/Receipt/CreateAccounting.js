@@ -1,21 +1,26 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin, notification } from "antd";
+import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import CardContainerNoBorder from "../../../../components/CardContainerNoBorder";
+import SectionCard from "../../../../components/SectionCard";
+import DetailText from "../../../../components/DetailText";
+import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
-import { FormStepper } from "../../../../components/FormStepNavigation";
 import {
     columnsAccounting,
     computeRowSpans,
     ACCOUNTING_MERGED_FIELDS,
 } from "../../RatingBillingInvoice/Accounting/Table/TableAccounting";
 import { separatorNumber } from "../../../../utils";
-import moment from "moment";
+import { hasValue } from "../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../constants/configApp";
 import { getListCategoryReceipt } from "../../../../redux/slices/receipt_collection/receipt";
@@ -24,7 +29,8 @@ import {
     saveReceiptJournalAsDraft,
     submitAccountingAllocation,
 } from "../../../../redux/slices/receipt_collection/accounting";
-import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
+import { clearBodyMessage } from "../../../../redux/slices/general_slice";
+
 
 const ReadOnlyField = ({ label, value }) => (
     <div className="flex flex-col mb-3">
@@ -50,6 +56,10 @@ const ReadOnlyField = ({ label, value }) => (
  * so the look and feel is consistent across the application.
  *
  * Flow: Step 1 (CREATE) → Step 2 (ATTACHMENT) → Submit
+ *
+ * Table uses ROWSPAN:
+ *   - Group (transaction) level columns span multiple rows per zno_pembayaran group
+ *   - Line (item) level columns show per-row values (BUZEI, INV NUMBER, BILLING ITEM, etc.)
  */
 const CreateAccounting = () => {
     const dispatch = useDispatch();
@@ -74,7 +84,7 @@ const CreateAccounting = () => {
     const [recommendation, setRecommendation] = useState({
         customerInfo: {
             customerNumber: receiptData?.customerNumber || "",
-            customerName: receiptData?.customerName || "",
+            customerName: receiptData?.customerName || receiptData?.customer || "",
             billPeriod: receiptData?.receiptDate
                 ? moment(receiptData.receiptDate).format("MMM YYYY").toUpperCase()
                 : "",
@@ -93,10 +103,16 @@ const CreateAccounting = () => {
         { title: "ATTACHMENT", value: "attachment" },
     ];
 
-    // Breadcrumbs
+    // Table state
+    const [searchFilter1, setSearchFilter1] = useState({});
+    const [searchFilter2, setSearchFilter2] = useState({});
+    const [pagination1, setPagination1] = useState({ current: 1, pageSize: 10 });
+    const [pagination2, setPagination2] = useState({ current: 1, pageSize: 10 });
+
     const routes = [
         { path: "", breadcrumbName: "Receipt & Collection" },
         { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT, breadcrumbName: "Receipt" },
+        { path: "", breadcrumbName: "Receipt List" },
         { path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNTING, breadcrumbName: "Create Accounting" },
     ];
 
@@ -209,8 +225,8 @@ const CreateAccounting = () => {
             setCurrentStep(0);
         }
     };
-
     const handleCancel = () => {
+        dispatch(clearBodyMessage());
         navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_RECEIPT);
     };
 
@@ -411,6 +427,9 @@ const CreateAccounting = () => {
         );
     };
 
+    // =============================================
+    // STEP 2: ATTACHMENT
+    // =============================================
     const renderAttachmentStep = () => (
         <div className="w-full">
             <CardContainer subHeader="Attachment Information">

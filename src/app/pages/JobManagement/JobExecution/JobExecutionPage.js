@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { DownloadOutlined } from "@ant-design/icons";
-import { Dropdown, Form, Radio, Input, InputNumber, Select, Tag, Spin } from "antd";
+import { useNavigate } from "react-router-dom";
+import { PlusCircleOutlined, EyeOutlined } from "@ant-design/icons";
+import { Dropdown, Skeleton, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
-import NxModal from "../../../../components/Nx/NxModal";
+import StatusComponent from "../../../../components/StatusComponent";
+import ModalRunJob from "./ModalRunJob";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
@@ -18,15 +20,15 @@ import {
   restartExecution,
 } from "../../../../redux/slices/job_management/jobExecutionSlice";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
+import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
-import IconStart from "../../../../assets/Icon/Nx/IconStart";
 import IconStop from "../../../../assets/Icon/Nx/IconStop";
 import IconRestart from "../../../../assets/Icon/Nx/IconRestart";
 import IconOnHold from "../../../../assets/Icon/Nx/IconOnHold";
 import IconSuspend from "../../../../assets/Icon/Nx/IconSuspend";
 import IconCancel from "../../../../assets/Icon/Nx/IconCancel";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 30;
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const formatDate = (val) => {
@@ -41,135 +43,28 @@ const formatDate = (val) => {
   return `${date} ${hh}:${mm}:${ss}.${cs}`;
 };
 
-const STATUS_COLORS = {
-  PENDING:    "blue",
-  SCHEDULED:  "geekblue",
-  PROCESSING: "orange",
-  SUCCEEDED:  "green",
-  FAILED:     "red",
-  CANCELLED:  "default",
-  DELETED:    "default",
-  ON_HOLD:    "purple",
-  SUSPENDED:  "gold",
-};
-
-// ─── Start Job Modal ──────────────────────────────────────────────────────────
-
-const TRIGGER_TYPES = ["IMMEDIATE", "ONCE", "PERIODICALLY", "SPECIFIC_DAYS"];
-
-const TIMEZONES = [
-  "UTC", "Asia/Jakarta", "Asia/Makassar", "Asia/Jayapura",
-  "America/New_York", "Europe/London", "Asia/Tokyo",
-];
-
-const ModalStartJob = ({ open, jobId, onClose, onSubmit, loading }) => {
-  const [form] = Form.useForm();
-  const [triggerType, setTriggerType] = useState("IMMEDIATE");
-
-  const handleOk = () => {
-    form.validateFields().then((values) => {
-      onSubmit({ jobId, ...values, triggerType });
-    });
-  };
-
-  useEffect(() => {
-    if (!open) {
-      form.resetFields();
-      setTriggerType("IMMEDIATE");
-    }
-  }, [open, form]);
-
-  const handleCancel = () => {
-    form.resetFields();
-    setTriggerType("IMMEDIATE");
-    onClose();
-  };
-
-  return (
-    <NxModal
-      isOpen={open}
-      title="Start Job Execution"
-      width={520}
-      loading={loading}
-      closeable
-      handleCancel={handleCancel}
-      handleOk={handleOk}
-      footer={[
-        <ButtonComponent key="cancel" onClick={handleCancel} disabled={loading}>
-          Cancel
-        </ButtonComponent>,
-        <ButtonComponent key="submit" type="primary" isPrimary onClick={handleOk} loading={loading}>
-          Start
-        </ButtonComponent>,
-      ]}
-    >
-      <div style={{ padding: "16px 24px" }}>
-        <Form form={form} layout="vertical">
-          <Form.Item label="Trigger Type" required>
-            <Radio.Group
-              value={triggerType}
-              onChange={(e) => { setTriggerType(e.target.value); form.resetFields(["scheduledAt","intervalSeconds","cronExpression","timezone"]); }}
-            >
-              {TRIGGER_TYPES.map((t) => (
-                <Radio key={t} value={t} style={{ marginBottom: 4 }}>{t}</Radio>
-              ))}
-            </Radio.Group>
-          </Form.Item>
-
-          {triggerType === "ONCE" && (
-            <>
-              <Form.Item name="scheduledAt" label="Scheduled At" rules={[{ required: true, message: "Required" }]}>
-                <Input placeholder="2026-03-24T10:00:00" />
-              </Form.Item>
-              <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-                <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} />
-              </Form.Item>
-            </>
-          )}
-
-          {triggerType === "PERIODICALLY" && (
-            <>
-              <Form.Item name="intervalSeconds" label="Interval (seconds)" rules={[{ required: true, message: "Required" }]}>
-                <InputNumber min={1} placeholder="3600" style={{ width: "100%" }} />
-              </Form.Item>
-              <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-                <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} />
-              </Form.Item>
-            </>
-          )}
-
-          {triggerType === "SPECIFIC_DAYS" && (
-            <>
-              <Form.Item name="cronExpression" label="Cron Expression" rules={[{ required: true, message: "Required" }]}>
-                <Input placeholder="0 0 * * MON-FRI" />
-              </Form.Item>
-              <Form.Item name="timezone" label="Timezone" initialValue="UTC">
-                <Select options={TIMEZONES.map((z) => ({ value: z, label: z }))} />
-              </Form.Item>
-            </>
-          )}
-
-          <Form.Item name="inputPayload" label="Input Payload (optional JSON)">
-            <Input.TextArea rows={3} placeholder='{"key": "value"}' />
-          </Form.Item>
-        </Form>
-      </div>
-    </NxModal>
-  );
-};
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const JobExecutionPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { data, loading, actionLoading } = useSelector((state) => state.jobExecution);
+
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch { return null; }
+  }, [rawToken]);
+
+  const { loading: permissionsLoading } = useGrantAccessHooks();
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("");
   const [accumulatedData, setAccumulatedData] = useState([]);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
-  const [startModalOpen, setStartModalOpen] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [selectJobModalOpen, setSelectJobModalOpen] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
 
   const handleFetch = useCallback(() => {
@@ -231,6 +126,13 @@ const JobExecutionPage = () => {
     align: "center",
     fixed: "right",
     render: (_, record) => {
+      if (permissionsLoading) {
+        return (
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
+          </div>
+        );
+      }
       if (!record || !record.executionId) return <span>—</span>;
 
       const status = record.status;
@@ -239,13 +141,13 @@ const JobExecutionPage = () => {
 
       const menuItems = [
         {
-          key: "start",
+          key: "view",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconStart width="16" height="16" /> Start
+              <EyeOutlined /> View Details
             </span>
           ),
-          onClick: () => { setSelectedJobId(record.jobId); setStartModalOpen(true); },
+          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
         },
         {
           key: "stop",
@@ -261,7 +163,7 @@ const JobExecutionPage = () => {
           key: "suspend",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: (status === "SCHEDULED" && isRecurring) ? 1 : 0.4 }}>
-              <IconSuspend width="14" height="14" /> Suspend
+              <IconSuspend width="16" height="16" /> Suspend
             </span>
           ),
           disabled: !(status === "SCHEDULED" && isRecurring),
@@ -281,7 +183,7 @@ const JobExecutionPage = () => {
           key: "cancel",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
-              <IconCancel width="12" height="12" /> Cancel
+              <IconCancel width="16" height="16" /> Cancel
             </span>
           ),
           disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
@@ -313,7 +215,7 @@ const JobExecutionPage = () => {
         </div>
       );
     },
-  }), [handleAction]);
+  }), [permissionsLoading, handleAction, navigate]);
 
   const baseColumns = useMemo(() => [
     {
@@ -350,10 +252,27 @@ const JobExecutionPage = () => {
       dataIndex: "status",
       key: "status",
       align: "center",
-      width: 120,
-      render: (val) => val
-        ? <Tag color={STATUS_COLORS[val] || "default"}>{val}</Tag>
-        : "—",
+      width: 160,
+      render: (val) => {
+        if (!val) return "—";
+        const text = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+        const colourMap = {
+          succeeded: "completed",
+          failed: "failed",
+          cancelled: "cancelled",
+          deleted: "inactive",
+          pending: "pending",
+          scheduled: "scheduled",
+          processing: "processing",
+          on_hold: "hold",
+          suspended: "suspended",
+        };
+        return (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
+            <StatusComponent colour={colourMap[val.toLowerCase()] || val.toLowerCase()} size="small">{text.replace("_", " ")}</StatusComponent>
+          </div>
+        );
+      },
     },
     {
       title: "STARTED",
@@ -404,12 +323,14 @@ const JobExecutionPage = () => {
           <div className="flex gap-2">
             <ButtonComponent
               type="primary"
-              icon={<DownloadOutlined />}
+              icon={<PlusCircleOutlined />}
               isPrimary={true}
               className="px-2 py-2 rounded-lg min-h-[32px]"
-              onClick={() => {}}
+              onClick={() => {
+                setSelectJobModalOpen(true);
+              }}
             >
-              <span className="text-xs font-medium tracking-tight">Download List</span>
+              <span className="text-xs font-medium tracking-tight">Run Job</span>
             </ButtonComponent>
           </div>
         }
@@ -421,6 +342,7 @@ const JobExecutionPage = () => {
         )}
         <NxTable
           idTable="job-execution-list-table"
+          userId={userId}
           dataSource={accumulatedData}
           totalData={data?.totalElements}
           current={page}
@@ -436,21 +358,19 @@ const JobExecutionPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
-          onRefresh={handleRefresh}
-          showRefresh={true}
+          showExport={true}
+          handleDownload={() => {}}
         />
       </NxCardContainer>
 
-      <ModalStartJob
-        open={startModalOpen}
-        jobId={selectedJobId}
+      <ModalRunJob
+        open={selectJobModalOpen}
         loading={actionLoading}
-        onClose={() => { setStartModalOpen(false); setSelectedJobId(null); }}
+        onClose={() => setSelectJobModalOpen(false)}
         onSubmit={(values) => {
           dispatch(startExecution(values)).then((res) => {
             if (!res.error) {
-              setStartModalOpen(false);
-              setSelectedJobId(null);
+              setSelectJobModalOpen(false);
               afterAction();
             }
           });

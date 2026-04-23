@@ -1,87 +1,44 @@
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect } from "react";
 import { useState } from "react";
-import { Fragment } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
-import { downloadPaymentRelation, getPaymentRelation, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/FinancialInformationSlice";
 import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
-import { getPrApprovalHierarchy, getDetailPrApprovalHierarchy } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { getPrApprovalHierarchies, getPrApprovalHierarchy, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
+/**
+ * Payment relation list table module
+ * @param {{ id?: number; idCustomer?: number }} props
+ * @returns
+ */
 const PaymentRelation = ({
   id = 0,
   idCustomer = 0,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
 
-  const {
-    list_paymentRelation,
-    pagination_paymentRelation,
-    data_prApprovalHistory,
-    loading_listPr,
-  } = useSelector(
-    (state) => state.financialInformation
+  const { detail_prApprovalHistory } = useSelector(
+    (state) => state.paymentRelation
   );
 
-  //declare
-  const searchInput = useRef(null);
-
-  //state
-  const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
+  const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivatePrId, setInactivatePrId] = useState(0);
   const [inactivatePrAccountNumber, setInactivatePrAccountNumber] = useState(0);
-
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [tempFilters, setTempFilters] = useState([]);
 
-  const currentData = useMemo(() => list_paymentRelation, [list_paymentRelation]);
-
-  const currentPagination = pagination_paymentRelation;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
-
-  const handleRefresh = () => {
-    const body = {
-      page: 1,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      inputFields: tempFilters,
-    }
-
-    dispatch(
-      getPaymentRelation({
-        id,
-        body,
-        isLoadMore: false,
-      })
-    );
-    setPage(1);
-  };
+  // --- Functions / handlers ---
+  const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
   /**
    * Open or close inactivate modal
-   * @param {boolean} show 
-   * @param {number} prId 
-   * @param {number} prAppHierId 
+   * @param {boolean} show
+   * @param {number} prId
+   * @param {string} prAccountNumber
    */
   const handleInactivateModal = (show, newPrId = 0, newPrAccountNumber = "") => {
     if (show) {
@@ -93,72 +50,33 @@ const PaymentRelation = ({
       setInactivatePrAccountNumber("");
       setShowInactiveModal(false);
     }
-  }
+  };
 
   /**
-   * @param {string} remark 
-   * @param {() => {}} handleClear 
+   * @param {string} remark
+   * @param {() => {}} handleClear
    */
   const handleInactivatePr = ({ remark, appHierId }, handleClear) => {
     const body = {
       id: inactivatePrId,
       appHierId,
       remark,
-    }
+    };
 
-    dispatch(inactivatePaymentRelation({
-      body,
-    }))
-    .unwrap()
-    .then(() => {
-      const body = {
-        page,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        inputFields: tempFilters,
-      }
-
-      dispatch(getPaymentRelation({ id, body, isLoadMore: false }));
-      setShowInactiveModal(false);
-      handleClear();
-    })
-    .catch(() => {})
-  }
-
-  /**
-   * @param {string[]} selectedKeys 
-   * @param {() => {}} confirm 
-   * @param {string} dataIndex 
-   */
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    dispatch(inactivatePaymentRelation({ body }))
+      .unwrap()
+      .then(() => {
+        setShowInactiveModal(false);
+        triggerRefresh();
+        handleClear();
+      })
+      .catch(() => {});
   };
 
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
 
   /**
-   * @param {boolean} show 
-   * @param {number} prId 
+   * @param {boolean} show
+   * @param {number} prId
    */
   const handleApprovalHistoryModal = (show, prId = 0) => {
     if (show) {
@@ -167,78 +85,20 @@ const PaymentRelation = ({
     } else {
       setShowApprovalHistoryModal(false);
     }
-  }
-
-  const handleDownload = () => {
-    const body = {
-      page,
-      size: loadMoreSize,
-      sort,
-      inputFields: tempFilters,
-      searchs: search
-    }
-
-    dispatch(downloadPaymentRelation({ body, id, }));
   };
 
-  /**
-   * @param {*} _ 
-   * @param {*} __ 
-   * @param {import("antd/lib/table/interface").SorterResult} sort
-   */
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-  const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = pagination_paymentRelation?.totalPages || 0;
-
-    if (nextPage <= totalPages) {
-      const body = {
-        page: nextPage,
-        size: loadMoreSize,
-        sort,
-        searchs: JSON.stringify(search),
-        inputFields: tempFilters,
-      }
-
-      await dispatch(
-        getPaymentRelation({
-          id,
-          body,
-          isLoadMore: true,
-        })
-      );
-    }
-    setPage(nextPage);
-  };
-
+  // --- Effects ---
+  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    const body = {
-      page,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      inputFields: tempFilters,
-    }
-
-    dispatch(getPaymentRelation({ id, body, isLoadMore: false }));
-  }, [sort, search, tempFilters]);
-
-  useEffect(() => {
-    if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
+    if (detail_prApprovalHistory && detail_prApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_prApprovalHistory?.dataApprover?.PAYMENT_RELATION || [],
-          inactive: data_prApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_RELATION || [],
+          create: detail_prApprovalHistory?.dataApprover?.PAYMENT_RELATION || [],
+          inactive: detail_prApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_RELATION || [],
         },
         dataHistory: {
-          create: data_prApprovalHistory?.dataHistory?.PAYMENT_RELATION || [],
-          inactive: data_prApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_RELATION || [],
+          create: detail_prApprovalHistory?.dataHistory?.PAYMENT_RELATION || [],
+          inactive: detail_prApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_RELATION || [],
         },
       };
 
@@ -246,37 +106,24 @@ const PaymentRelation = ({
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_prApprovalHistory]);
+  }, [detail_prApprovalHistory]);
 
   return (
-    <Fragment>
+    <>
       <PaymentRelationTable
-        data={dataSourceWithKeys}
         idAccount={id}
         idCustomer={idCustomer}
-        totalElement={pagination_paymentRelation.totalElements}
-        page={page}
-        onSort={onSort}
         handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
         handleApproval={setShowApprovalModal}
-        handleDownload={handleDownload}
-        tempFilters={tempFilters}
-        handleLoadMore={handleLoadMore}
-        hasMore={hasMore}
-        searchText={searchText}
-        search={search}
-        searchedColumn={searchedColumn}
-        searchInput={searchInput}
-        handleSearch={handleSearch}
-        loading={loading_listPr}
+        refreshSignal={refreshSignal}
       />
 
       <PaymentRelationApprovalModal
         id={id}
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
-        afterFinish={handleRefresh}
+        afterFinish={triggerRefresh}
       />
 
       {/* Inactivate Modal */}
@@ -291,10 +138,13 @@ const PaymentRelation = ({
         named={inactivatePrAccountNumber}
         menu="payment relation"
         sliceName="paymentRelation"
-        approvalOptionsStateName="list_prApprovalOptions"
-        approvalHierarchtDetailsStateName="list_prApprovalHierarchyDetail"
-        getApprovalOptions={getPrApprovalHierarchy}
-        getApprovalHierarchyDetails={getDetailPrApprovalHierarchy}
+        approvalOptionsName="list_prApprovalHierarchy"
+        approvalHierarchtDetailsName="detail_prApprovalHierarchy"
+        loadingInactivateName="loading_inactivatePr"
+        loadingListApprovalOptionsName="loading_listPrApprovalHierarchy"
+        loadingListHierarchyDetailName="loading_detailPrApprovalHierarchy"
+        getApprovalOptions={getPrApprovalHierarchies}
+        getApprovalHierarchyDetails={getPrApprovalHierarchy}
       />
 
       {/* Approval History Modal */}
@@ -302,11 +152,10 @@ const PaymentRelation = ({
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
-        tabOptions={handleApprovalHistoryOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />
-    </Fragment>
+    </>
   );
 };
 

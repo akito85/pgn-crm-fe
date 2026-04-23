@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
 import {
+  getIrApprovalHierarchies,
   getIrApprovalHierarchy,
-  getDetailIrApprovalHierarchy,
   getIrApprovalHistory,
   inactivateInvoiceRelation
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
@@ -14,14 +14,14 @@ import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 /**
  * Invoice relation list table module
- * @param {{ id?: number; idCustomer?: number }} props
+ * @param {{ accountId: number; customerId: number }} props
  * @returns
  */
-const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
+const InvoiceRelation = ({ accountId, customerId }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
 
-  const { data_irApprovalHistory } = useSelector(
+  const { detail_irApprovalHistory } = useSelector(
     (state) => state.invoiceRelation
   );
 
@@ -81,20 +81,6 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   };
 
   /**
-   * Derives tab options for the history modal from `dataApprovalHistoryFix.dataApprover` keys.
-   * @returns {{ key: string, value: string, label: string }[]}
-   */
-  const handleApprovalHistoryOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase()
-    }));
-  };
-
-  /**
    * @param {boolean} show
    * @param {number} irId
    */
@@ -110,18 +96,18 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
   // --- Effects ---
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_irApprovalHistory && data_irApprovalHistory?.dataApprover) {
+    if (detail_irApprovalHistory && detail_irApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_irApprovalHistory?.dataApprover?.INVOICE_RELATION || [],
+          create: detail_irApprovalHistory?.dataApprover?.INVOICE_RELATION || [],
           inactive:
-            data_irApprovalHistory?.dataApprover?.INACTIVE_INVOICE_RELATION ||
+            detail_irApprovalHistory?.dataApprover?.INACTIVE_INVOICE_RELATION ||
             []
         },
         dataHistory: {
-          create: data_irApprovalHistory?.dataHistory?.INVOICE_RELATION || [],
+          create: detail_irApprovalHistory?.dataHistory?.INVOICE_RELATION || [],
           inactive:
-            data_irApprovalHistory?.dataHistory?.INACTIVE_INVOICE_RELATION || []
+            detail_irApprovalHistory?.dataHistory?.INACTIVE_INVOICE_RELATION || []
         }
       };
 
@@ -129,20 +115,20 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_irApprovalHistory]);
+  }, [detail_irApprovalHistory]);
 
   return (
     <>
       <InvoiceRelationTable
-        idAccount={id}
-        idCustomer={idCustomer}
+        accountId={accountId}
+        customerId={customerId}
         handleInactivateModal={handleInactivateModal}
         handleApprovalHistoryModal={handleApprovalHistoryModal}
         handleApproval={setShowApprovalModal}
         refreshSignal={refreshSignal}
       />
       <InvoiceRelationApprovalModal
-        id={id}
+        accountId={accountId}
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={triggerRefresh}
@@ -159,18 +145,19 @@ const InvoiceRelation = ({ id = 0, idCustomer = 0 }) => {
         named={inactivateIrAccountNumber}
         menu="invoice relation"
         sliceName="invoiceRelation"
-        approvalOptionsStateName="list_irApprovalHierarchy"
-        approvalHierarchtDetailsStateName="detail_irApprovalHierarchy"
-        loadingInactivateName={"loading_inactivateIr"}
-        getApprovalOptions={getIrApprovalHierarchy}
-        getApprovalHierarchyDetails={getDetailIrApprovalHierarchy}
+        approvalOptionsName="list_irApprovalHierarchy"
+        approvalHierarchtDetailsName="detail_irApprovalHierarchy"
+        loadingInactivateName="loading_inactivateIr"
+        loadingListApprovalOptionsName="loading_listIrApprovalHierarchy"
+        loadingListHierarchyDetailName="loading_detailIrApprovalHierarchy"
+        getApprovalOptions={getIrApprovalHierarchies}
+        getApprovalHierarchyDetails={getIrApprovalHierarchy}
       />
       {/* Approval History Modal */}
       <NxHistoryModal
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
-        tabOptions={handleApprovalHistoryOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />

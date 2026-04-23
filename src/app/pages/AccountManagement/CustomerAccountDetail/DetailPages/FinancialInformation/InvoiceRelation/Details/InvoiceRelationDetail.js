@@ -7,7 +7,7 @@ import InvoiceRelationDetailTabs from "./InvoiceRelationDetailTabs";
 import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../../routes/account_management/customer_account_routes";
 import { getGrantedAccessAccount } from "../../../../../../../../redux/slices/account_management/accountManagement";
-import { getDetailInvoiceRelation, getDetailDraftInvoiceRelation, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
+import { getInvoiceRelation, getInvoiceRelationDraft, approveOrRejectInvoiceRelation, approveOrRejectInactiveInvoiceRelation } from "../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { showModalError } from "../../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../../components/Nx/NxBreadCrumb";
@@ -44,8 +44,8 @@ const InvoiceRelationDetail = ({
 
   const navigate = useNavigate();
   const location = useLocation();
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
+  const accountId = location?.state?.idAccount;
+  const customerId = location?.state?.idCustomer;
   const idIr = location?.state?.id;
 
   const tabOptions = [
@@ -76,7 +76,7 @@ const InvoiceRelationDetail = ({
 
   const {
     approvalType,
-    relatedAccountNumber,
+    accountNumber,
     id,
     createdDate,
     createdBy,
@@ -106,6 +106,10 @@ const InvoiceRelationDetail = ({
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
           : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME,
       breadcrumbName: "Detail Account",
+      state: {
+        idAccount: accountId,
+        idCustomer: customerId
+      }
     },
     {
       path: "",
@@ -187,12 +191,12 @@ const InvoiceRelationDetail = ({
 
   useEffect(() => {
     if (idIr)
-      dispatch(getDetailInvoiceRelation(idIr));
+      dispatch(getInvoiceRelation(idIr));
   }, [idIr]);
   
   useEffect(() => {
     if (idIr && draftExist)
-      dispatch(getDetailDraftInvoiceRelation(idIr));
+      dispatch(getInvoiceRelationDraft(idIr));
   }, [idIr, draftExist])
 
   return (
@@ -203,8 +207,8 @@ const InvoiceRelationDetail = ({
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            idAccount={idAccount}
-            idCustomer={idCustomer}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
 
@@ -237,43 +241,45 @@ const InvoiceRelationDetail = ({
             </NxBaseContainer>
           </NxCardContainer>
 
-          {isApproval && (
-            <NxBaseContainer border>
-              <div className="flex justify-between">
-                <Button
-                  type={"menu"}
-                  onClick={() => navigate(-1)}
-                >
-                  Cancel
-                </Button>
-                <div className={"w-full flex justify-end gap-5"}>
-                  <Button
-                    type="reject"
-                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
-                    className="flex-row-reverse"
-                    onClick={() => handleApprovalModal(true, "reject")}
-                  >
-                    Reject
+          <NxBaseContainer border>
+            <div className="flex justify-between">
+              {isApproval ? (
+                <>
+                  <Button type={"menu"} onClick={() => navigate(-1)}>
+                    Cancel
                   </Button>
-                  <Button
-                    type="approve"
-                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
-                    className="flex-row-reverse"
-                    onClick={() => handleApprovalModal(true, "approve")}
-                  >
-                    Approve
-                  </Button>
-                </div>
-              </div>
-            </NxBaseContainer>
-          )}
+                  <div className={"w-full flex justify-end gap-x-2"}>
+                    <Button
+                      type="reject"
+                      icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                      className="flex-row-reverse"
+                      onClick={() => handleApprovalModal(true, "reject")}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      type="approve"
+                      icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                      className="flex-row-reverse"
+                      onClick={() => handleApprovalModal(true, "approve")}
+                    >
+                      Approve
+                    </Button>
+                  </div>
+                </>
+              ) :
+              <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                Back      
+              </Button>}
+            </div>
+          </NxBaseContainer>
         </div>
       </Spin>
       <NxApproveOrRejectModal
         isOpen={showApprovalModal}
         header={approveOrReject === "approve" ? "Approve" : approveOrReject === "reject" ? "Reject" : ""}
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${relatedAccountNumber}?`}
+        customMessage={`Are you sure you want to ${approveOrReject} invoice relation - ${accountNumber}?`}
         onFinish={({ remark }, handleClear) => handleApproveOrReject(remark, approveOrReject, handleClear)}
         loading={loading_approveRejectIr}
       />

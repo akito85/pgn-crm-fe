@@ -16,8 +16,10 @@ const NxInactivateModal = ({
   named,
   customMessage,
   sliceName,
-  approvalOptionsStateName,
-  approvalHierarchtDetailsStateName,
+  approvalOptionsName,
+  approvalHierarchtDetailsName,
+  loadingListApprovalOptionsName,
+  loadingListHierarchyDetailName,
   loadingInactivateName,
   getApprovalOptions = () => {},
   getApprovalHierarchyDetails = () => {},
@@ -28,8 +30,10 @@ const NxInactivateModal = ({
   const [form] = Form.useForm();
 
   const {
-    [approvalOptionsStateName]: approvalOptions,
-    [approvalHierarchtDetailsStateName]: approvalHierarchyDetails,
+    [approvalOptionsName]: approvalOptions,
+    [approvalHierarchtDetailsName]: approvalHierarchyDetails,
+    [loadingListApprovalOptionsName]: loadingApprovalOptions,
+    [loadingListHierarchyDetailName]: loadingHierarchyDetails,
     [loadingInactivateName]: inactivateLoading,
   } = useSelector(
     (state) => state[sliceName]
@@ -48,14 +52,14 @@ const NxInactivateModal = ({
     onFinish(data, handleClear);
   };
 
-  const handleSelectHiararchy = (appHierId) => {
+  const handleSelectHierarchy = (appHierId) => {
     if (appHierId)
       dispatch(getApprovalHierarchyDetails(appHierId));
   }
 
   useEffect(() => {
     dispatch(getApprovalOptions())
-  }, [])
+  }, []);
 
   return (
     <NxModal
@@ -109,8 +113,9 @@ const NxInactivateModal = ({
             form={form}
             hierarchyDetails={approvalHierarchyDetails}
             options={approvalOptions}
-            handleSelectHiararchy={handleSelectHiararchy}
-            loading={inactivateLoading}
+            handleSelectHierarchy={handleSelectHierarchy}
+            loading={inactivateLoading || loadingApprovalOptions || loadingHierarchyDetails}
+            tableLoading={loadingHierarchyDetails}
           />
           <Form.Item
             name={"remark"}

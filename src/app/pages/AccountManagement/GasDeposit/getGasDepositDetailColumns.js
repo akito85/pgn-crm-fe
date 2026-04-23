@@ -7,27 +7,23 @@ import { sorterFunction } from "../../../../utils/sorterFunction";
 /**
  * Returns the column definitions for the Gas Deposit Detail table.
  *
- * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValueFE`
- * for client-side filtering, and uses `sorterFunction` for client-side sorting.
- * The period column is formatted as "DD MMM YYYY". Numeric balance columns use
- * right-aligned text. The status column is conditionally included based on `includeStatus`.
- *
- * @param {Object} search - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} searchInput - Ref to the search input element (used for focus).
- * @param {string} searchedColumn - The dataIndex of the column currently being searched.
- * @param {string} searchText - The current search text value.
- * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
- * @param {boolean} [includeStatus=true] - Whether to include the status column.
+ * @param {Object}          params                      - Column configuration options.
+ * @param {Object}          params.search               - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput          - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn       - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText           - The current search text value.
+ * @param {Function}        params.handleSearch         - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.includeStatus=true] - When false, omits the status column.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
-const getGasDepositDetailColumns = (
+const getGasDepositDetailColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
   includeStatus = true,
-) => [
+}) => [
   {
     key: "no",
     title: "NO",
@@ -42,7 +38,6 @@ const getGasDepositDetailColumns = (
     dataIndex: "period",
     width: 180,
     align: "center",
-    sorter: (a, b) => sorterFunction("period", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "period",
@@ -61,7 +56,6 @@ const getGasDepositDetailColumns = (
     dataIndex: "balanceM3",
     width: 150,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceM3", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceM3",
@@ -78,7 +72,6 @@ const getGasDepositDetailColumns = (
     dataIndex: "balanceMscf",
     width: 160,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceMscf", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceMscf",
@@ -95,7 +88,6 @@ const getGasDepositDetailColumns = (
     dataIndex: "balanceMmbtu",
     width: 170,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceMmbtu", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceMmbtu",
@@ -112,7 +104,6 @@ const getGasDepositDetailColumns = (
     dataIndex: "balanceAmount",
     width: 170,
     align: "right",
-    sorter: (a, b) => sorterFunction("balanceAmount", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "balanceAmount",
@@ -129,7 +120,6 @@ const getGasDepositDetailColumns = (
     dataIndex: "availableAmount",
     width: 180,
     align: "right",
-    sorter: (a, b) => sorterFunction("availableAmount", a, b),
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "availableAmount",
@@ -145,7 +135,7 @@ const getGasDepositDetailColumns = (
     title: "STATUS",
     dataIndex: "status",
     width: 120,
-    sorter: (a, b) => sorterFunction("status", a, b),
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "status",

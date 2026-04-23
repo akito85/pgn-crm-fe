@@ -465,6 +465,7 @@ const PaymentPeriodForm = ({ type }) => {
                                 updateData={setFiles}
                                 typeSelector="paymentPeriod"
                                 dispatch={dispatch}
+                                mandatory={true}
                                 getAPICategory={getListCategoryPeriod}
                                 service={receiptCollectionHttpService}
                                 configApplication={configApp.PAYMENT_SERVICE}

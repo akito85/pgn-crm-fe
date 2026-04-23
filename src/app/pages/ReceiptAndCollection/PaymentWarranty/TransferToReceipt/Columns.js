@@ -17,14 +17,16 @@ export const columns = (
       title: "NO",
       width: 60,
       isClassification: true,
+      align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
 
     {
       key: "paymentWarrantyNo",
-      title: "PAYMENT WARRANTY NO",
+      title: "PAYMENT WARRANTY CODE",
       dataIndex: "paymentWarrantyNo",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "paymentWarrantyNo",
@@ -45,6 +47,7 @@ export const columns = (
       title: "TYPE PAYMENT WARRANTY",
       dataIndex: "typePaymentWarranty",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "typePaymentWarranty",
@@ -65,6 +68,7 @@ export const columns = (
       title: "MUTATION DOCUMENTATION NO",
       dataIndex: "mutationDocumentationNo",
       width: 150,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "mutationDocumentationNo",
@@ -81,10 +85,32 @@ export const columns = (
     },
 
     {
+      key: "mutationType",
+      title: "MUTATION TYPE",
+      dataIndex: "mutationType",
+      width: 120,
+      align: "center",
+      sorter: (a, b) => a?.mutationType?.localeCompare(b?.mutationType),
+      ...getColumnSearchPropsPaging(
+        "mutationType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      onFilter: (value, record) =>
+        record["mutationType"]
+          ?.toString()
+          .toLowerCase()
+          .includes(value.toLowerCase()),
+    },
+
+    {
       key: "mutationDate",
       title: "MUTATION DATE",
       dataIndex: "mutationDate",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "mutationDate",
@@ -126,6 +152,7 @@ export const columns = (
       title: "FROM CUSTOMER",
       dataIndex: "fromCustomer",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "fromCustomer",
@@ -146,6 +173,7 @@ export const columns = (
       title: "FROM RECEIPT",
       dataIndex: "fromReceipt",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "fromReceipt",
@@ -166,6 +194,7 @@ export const columns = (
       title: "TO CUSTOMER",
       dataIndex: "toCustomer",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "toCustomer",
@@ -186,6 +215,7 @@ export const columns = (
       title: "TO RECEIPT",
       dataIndex: "toReceipt",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "toReceipt",
@@ -206,6 +236,7 @@ export const columns = (
       title: "CURRENCY",
       dataIndex: "currency",
       width: 100,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "currency",
@@ -226,6 +257,7 @@ export const columns = (
       title: "AMOUNT",
       dataIndex: "amount",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "amount",
@@ -242,10 +274,32 @@ export const columns = (
     },
 
     {
+      key: "rate",
+      title: "RATE",
+      dataIndex: "rate",
+      width: 120,
+      align: "center",
+      sorter: (a, b) => a?.rate - b?.rate,
+      ...getColumnSearchPropsPaging(
+        "rate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      onFilter: (value, record) =>
+        record["rate"]
+          ?.toString()
+          .toLowerCase()
+          .includes(value.toLowerCase()),
+    },
+
+    {
       key: "rateDate",
       title: "RATE DATE",
       dataIndex: "rateDate",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
         "rateDate",
@@ -287,6 +341,7 @@ export const columns = (
       title: "EQUIVALENT",
       dataIndex: "equivalent",
       width: 120,
+      align: "center",
       sorter: (a, b) => a?.equivalent - b?.equivalent,
       ...getColumnSearchPropsPaging(
         "equivalent",
@@ -306,6 +361,7 @@ export const columns = (
       title: "REMARK",
       dataIndex: "remark",
       width: 150,
+      align: "center",
       sorter: (a, b) => a?.remark?.localeCompare(b?.remark),
       ...getColumnSearchPropsPaging(
         "remark",
@@ -321,20 +377,21 @@ export const columns = (
           .includes(value.toLowerCase()),
     },
     {
-      key: "approvalStatus",
-      title: "APPROVAL STATUS",
-      dataIndex: "approvalStatus",
+      key: "status",
+      title: "STATUS",
+      dataIndex: "status",
       width: 120,
-      sorter: (a, b) => a?.approvalStatus?.localeCompare(b?.approvalStatus),
+      align: "center",
+      sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
       ...getColumnSearchPropsPaging(
-        "approvalStatus",
+        "status",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
       onFilter: (value, record) =>
-        record["approvalStatus"]
+        record["status"]
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),
@@ -352,20 +409,21 @@ export const columns = (
       },
     },
     {
-      key: "status",
-      title: "STATUS",
-      dataIndex: "status",
+      key: "approvalStatus",
+      title: "STATUS APPROVAL",
+      dataIndex: "approvalStatus",
       width: 120,
-      sorter: (a, b) => a?.calculationCode?.localeCompare(b?.calculationCode),
+      align: "center",
+      sorter: (a, b) => a?.approvalStatus?.localeCompare(b?.approvalStatus),
       ...getColumnSearchPropsPaging(
-        "status",
+        "approvalStatus",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
       ),
       onFilter: (value, record) =>
-        record["status"]
+        record["approvalStatus"]
           ?.toString()
           .toLowerCase()
           .includes(value.toLowerCase()),

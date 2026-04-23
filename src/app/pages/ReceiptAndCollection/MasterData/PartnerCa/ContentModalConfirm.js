@@ -14,9 +14,17 @@ const ContentModalConfirm = ({
   tabData = [],
   dataOption,
   selectedHierarchy,
+  dataPartner = {},
+  dataCollectionAgent = {},
+  dataBankList = {},
 }) => {
   const [valuePage, setValuePage] = useState(tabData[0].value);
   const [expanded, setExpanded] = useState(true);
+
+  // Resolve labels from IDs
+  const partnerItem = (dataPartner?.data || []).find((p) => p.id === data?.partnerId);
+  const caItem = (dataCollectionAgent?.data || []).find((c) => c.id === data?.collectingAgentId);
+  const bankItem = (dataBankList?.data || []).find((b) => b.id === data?.settlementBankId);
 
   const items = [
     {
@@ -36,14 +44,26 @@ const ContentModalConfirm = ({
             </div>
             {expanded && (
               <div className="grid grid-cols-5 gap-y-4 gap-x-2 w-full">
-                <DetailText label={"Partner Code"}>{data?.partnerCode}</DetailText>
-                <DetailText label={"Collection Agent Code"}>{data?.caCode}</DetailText>
-                <DetailText label={"Settlement Bank"}>{data?.settlementBank}</DetailText>
-                <DetailText label={"Eff Start Date"}>
-                  {moment(data?.effStartDate).format(dateFormatting.date)}
+                <DetailText label="Partner">
+                  {partnerItem
+                    ? `${partnerItem.partnerCode} - ${partnerItem.partnerName}`
+                    : (data?.partnerId ?? "-")}
                 </DetailText>
-                <DetailText label={"End Date"}>
-                  {data?.effEndDate ? moment(data?.effEndDate).format(dateFormatting.date) : ""}
+                <DetailText label="Collecting Agent">
+                  {caItem
+                    ? `${caItem.caCode} - ${caItem.name}`
+                    : (data?.collectingAgentId ?? "-")}
+                </DetailText>
+                <DetailText label="Settlement Bank">
+                  {bankItem
+                    ? `${bankItem.bankCode} - ${bankItem.bankName}`
+                    : (data?.settlementBankId ?? "-")}
+                </DetailText>
+                <DetailText label="Start Date">
+                  {data?.startDate ? moment(data.startDate).format(dateFormatting.date) : "-"}
+                </DetailText>
+                <DetailText label="End Date">
+                  {data?.endDate ? moment(data.endDate).format(dateFormatting.date) : "-"}
                 </DetailText>
               </div>
             )}
@@ -61,11 +81,10 @@ const ContentModalConfirm = ({
               showSelect={false}
               disableSelect={true}
               approvalName={
-                (dataOption || []).filter((data) => data.value === selectedHierarchy)?.[0].name ||
-                ""
+                (dataOption || []).find((opt) => opt.value === selectedHierarchy)?.name || ""
               }
               dataTable={listDataAppHierDetail}
-              selectedHierarchy
+              selectedHierarchy={selectedHierarchy}
             />
           </div>
         </div>
@@ -77,7 +96,7 @@ const ContentModalConfirm = ({
       children: (
         <div className="p-5 bg-[#f8f7fa] min-h-[200px]">
           <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
-            <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+            <AttachmentSectionForm type="preview" data={listDataAttachment} />
           </div>
         </div>
       ),
@@ -96,7 +115,7 @@ const ContentModalConfirm = ({
           paddingLeft: "16px",
           paddingRight: "16px",
           marginBottom: 0,
-          borderBottom: "1px solid #dbdade"
+          borderBottom: "1px solid #dbdade",
         }}
       />
     </div>

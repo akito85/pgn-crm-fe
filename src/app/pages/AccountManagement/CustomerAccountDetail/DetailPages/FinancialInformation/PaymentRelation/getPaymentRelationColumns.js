@@ -3,54 +3,63 @@ import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
-const getPaymentRelationColumns = (
+/**
+ * Returns the column definitions for the Payment Relation list table.
+ *
+ * @param {Object}          params                   - Column configuration options.
+ * @param {Object}          params.search            - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput       - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn    - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText        - The current search text value.
+ * @param {Function}        params.handleSearch      - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=true] - When true, omits the statusApproval and status columns.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getPaymentRelationColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-  includeStatus = true,
-) => [
+  isApproval = false,
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",  
     dataIndex: "no",
     width: 40,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
-    key: "relatedAccountName",
+    key: "accountName",
     title: "ACCOUNT NAME",
-    dataIndex: "relatedAccountName",
+    dataIndex: "accountName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.relatedAccountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "relatedAccountName",
+      "accountName",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "relatedAccountNumber",
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
-    dataIndex: "relatedAccountNumber",
+    dataIndex: "accountNumber",
     width: 200,
     sorter: true,
-    filteredValue: [search?.relatedAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "relatedAccountNumber",
+      "accountNumber",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -60,7 +69,6 @@ const getPaymentRelationColumns = (
     width: 150,
     align: "center",
     sorter: true,
-    filteredValue: [search?.relatedAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "priority",
@@ -68,7 +76,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -77,7 +84,6 @@ const getPaymentRelationColumns = (
     dataIndex: "startDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.relatedAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -85,7 +91,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
@@ -95,7 +100,6 @@ const getPaymentRelationColumns = (
     dataIndex: "endDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.relatedAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -103,18 +107,17 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
-  includeStatus && {
+  !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -122,7 +125,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
@@ -142,21 +144,20 @@ const getPaymentRelationColumns = (
       );
     },
   },
-  includeStatus && {
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
     width: 120,
     sorter: true,
-    filteredValue: [search?.status] || null,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "statusApproval",
+      "status",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {

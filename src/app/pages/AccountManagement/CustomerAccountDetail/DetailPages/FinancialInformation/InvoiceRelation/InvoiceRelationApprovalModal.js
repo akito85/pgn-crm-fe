@@ -1,28 +1,28 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Button } from "antd";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../components/InputComponent";
 import DetailText from "../../../../../../../components/DetailText";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import {
   approveOrRejectAllInvoiceRelation,
-  getInvoiceRelationApproval
+  getInvoiceRelationApprovals
 } from "../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getInvoiceRelationColumns } from "./getInvoiceRelationColumns";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../../components/Nx/NxModal";
 import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 /**
  * Modal for approving or rejecting pending invoice relation records.
  * Displays a two-step wizard: select records + enter remark, then confirm.
- * @param {{ id?: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
+ * @param {{ accountId: number; isOpen: boolean; handleCancel?: () => void; afterFinish?: () => void }} props
  * @returns
  */
 const InvoiceRelationApprovalModal = ({
-  id = 0,
+  accountId,
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {}
@@ -30,7 +30,7 @@ const InvoiceRelationApprovalModal = ({
   // --- Hooks ---
   const {
     list_invoiceRelationApproval: invoiceRelationApprovals,
-    pagination_invoiceRelationApproval: pagination,
+    pagination_listIrApproval: pagination,
     loading_listIrApproval,
     loading_approveIr,
     loading_rejectIr
@@ -56,11 +56,6 @@ const InvoiceRelationApprovalModal = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: []
-  });
-
   // --- Effects ---
   // Fetches the first page of pending approvals whenever the modal opens or
   // any filter/search/sort parameter changes. Resets the page counter to 1.
@@ -76,8 +71,8 @@ const InvoiceRelationApprovalModal = ({
       };
 
       dispatch(
-        getInvoiceRelationApproval({
-          id,
+        getInvoiceRelationApprovals({
+          id: accountId,
           body,
           isLoadMore: false
         })
@@ -129,8 +124,8 @@ const InvoiceRelationApprovalModal = ({
       };
 
       dispatch(
-        getInvoiceRelationApproval({
-          id,
+        getInvoiceRelationApprovals({
+          id: accountId,
           body,
           isLoadMore: true
         })
@@ -283,7 +278,7 @@ const InvoiceRelationApprovalModal = ({
         approveOrRejectAllInvoiceRelation({
           body,
           inactiveBody,
-          action: action === "APPROVE" ? "approved" : "rejected"
+          action,
         })
       )
         .unwrap()
@@ -294,22 +289,18 @@ const InvoiceRelationApprovalModal = ({
     } catch {}
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
-      getInvoiceRelationColumns(
+      getInvoiceRelationColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false
-      ),
+        isApproval: true
+      }),
     [search, searchInput, searchedColumn, searchText]
   );
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
 
   return (
     <>
@@ -354,6 +345,8 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"reject"}
                     onClick={() => handleSave("REJECT")}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                    className="flex-row-reverse"
                     disabled={!loading_rejectIr && loadingApproval}
                     loading={loading_rejectIr}
                   >
@@ -362,6 +355,8 @@ const InvoiceRelationApprovalModal = ({
                   <Button
                     type={"approve"}
                     onClick={() => handleSave("APPROVE")}
+                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                    className="flex-row-reverse"
                     disabled={!loading_approveIr && loadingApproval}
                     loading={loading_approveIr}
                   >
@@ -397,9 +392,6 @@ const InvoiceRelationApprovalModal = ({
                     totalData={totalElement}
                     tableScrolled={{ x: invoiceRelationApprovals.length ? "max-content" : 1200 }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listIrApproval}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -438,9 +430,6 @@ const InvoiceRelationApprovalModal = ({
                   columns={columns}
                   tableScrolled={{ x: "max-content" }}
                   onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}

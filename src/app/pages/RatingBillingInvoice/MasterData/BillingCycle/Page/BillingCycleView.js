@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import SVGIcon from "../../../../../../assets/Icon";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
@@ -11,8 +17,9 @@ import {
   getApprovalHierarchy,
   getDetailApproval,
   inactiveBillingCycle,
+  requestActivateBillingCycle,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
-import { Checkbox, Form, Spin, Tooltip } from "antd";
+import { Checkbox, Spin, Tooltip } from "antd";
 import TableRBI from "../../../../../../components/TableRBI";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
@@ -26,9 +33,7 @@ import CardContainer from "../../../../../../components/CardContainer";
 const BillingCycleView = ({ type }) => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
-  const [form] = Form.useForm();
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const loadMoreSize = 20;
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -39,25 +44,35 @@ const BillingCycleView = ({ type }) => {
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [bodyError, setBodyError] = useState({});
   const [chooseId, setChooseId] = useState();
-  const { data_list_billing_cycle, loading, dataApprovalHistory } = useSelector(
-    (state) => state.billingCycle
-  );
+  const {
+    loading,
+    dataApprovalHistory,
+    billing_cycle_list,
+    billing_cycle_pagination,
+  } = useSelector((state) => state.billingCycle);
+
+  const hasMore =
+    billing_cycle_list.length < (billing_cycle_pagination?.totalElements || 0);
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("billingCycleFixedColumns");
     return saved
       ? JSON.parse(saved)
       : {
-          left: ["no"],
-          right: ["action"],
-        };
+        left: ["no"],
+        right: ["action"],
+      };
   });
 
+  const normalizeStatus = (value) =>
+    (value || "").toString().trim().toUpperCase();
+
   useEffect(() => {
-    localStorage.setItem(
-      "billingCycleFixedColumns",
-      JSON.stringify(fixedColumns)
-    );
+    try {
+      localStorage.setItem("billingCycleFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   const routes = [
@@ -87,20 +102,22 @@ const BillingCycleView = ({ type }) => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadBillingCycle({ search: tempSearch, page, pageSize, sort })
+      downloadBillingCycle({
+        search: tempSearch,
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+      }),
     );
   };
 
-  const handleApprovalHistory = (r) => {
-    dispatch(getApprovalHistory(r));
-    setModalApprovalHistory(true);
-  };
-
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
+  const handleApprovalHistory = useCallback(
+    (r) => {
+      dispatch(getApprovalHistory(r));
+      setModalApprovalHistory(true);
+    },
+    [dispatch],
+  );
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -114,27 +131,23 @@ const BillingCycleView = ({ type }) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   useEffect(() => {
     dispatch(
       getBillingCycleList({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [dispatch, search, page, pageSize, sort]);
+  }, [dispatch, search, sort]);
 
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
@@ -143,11 +156,15 @@ const BillingCycleView = ({ type }) => {
           create: dataApprovalHistory?.dataApprover?.BILLING_CYCLE || [],
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_BILLING_CYCLE || [],
+          activate:
+            dataApprovalHistory?.dataApprover?.ACTIVATED_BILLING_CYCLE || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.BILLING_CYCLE || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_BILLING_CYCLE || [],
+          activate:
+            dataApprovalHistory?.dataHistory?.ACTIVATED_BILLING_CYCLE || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -186,33 +203,33 @@ const BillingCycleView = ({ type }) => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       billingCycleId: chooseId.billingCycleId,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveBillingCycle(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateBillingCycle : inactiveBillingCycle)(
+        dataValue
+      )
+    )
       .unwrap()
       .then(() => {
         handleClear();
         handleCancel();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
         dispatch(
           getBillingCycleList({
-            search: tempSearch,
-            page,
-            pageSize,
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
-          })
+            isLoadMore: false,
+          }),
         );
       })
       .catch((error) => {
@@ -223,11 +240,52 @@ const BillingCycleView = ({ type }) => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (
+      billing_cycle_list.length >=
+      (billing_cycle_pagination?.totalElements || 0)
+    )
+      return;
+    const nextPage = Math.floor(billing_cycle_list.length / loadMoreSize) + 1;
+    await dispatch(
+      getBillingCycleList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [
+    dispatch,
+    billing_cycle_list.length,
+    billing_cycle_pagination,
+    search,
+    sort,
+  ]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getBillingCycleList({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, search, sort]);
 
   // Grant Access Item
   const itemGrantAccess = [
@@ -237,7 +295,8 @@ const BillingCycleView = ({ type }) => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          onClick={handleDownload}
         >
           Download List
         </ButtonComponent>
@@ -248,7 +307,7 @@ const BillingCycleView = ({ type }) => {
       render: (
         <NavLink to={RBI_ROUTES.BILLING_CYCLE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type={"submit"}
             border={false}
           >
@@ -287,8 +346,7 @@ const BillingCycleView = ({ type }) => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -300,13 +358,13 @@ const BillingCycleView = ({ type }) => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -345,14 +403,16 @@ const BillingCycleView = ({ type }) => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -361,28 +421,29 @@ const BillingCycleView = ({ type }) => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
+              <span className="text-black ml-1">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -401,10 +462,11 @@ const BillingCycleView = ({ type }) => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.billingCycleId)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -427,7 +489,7 @@ const BillingCycleView = ({ type }) => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["activate", "view", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -435,14 +497,14 @@ const BillingCycleView = ({ type }) => {
     const billingCycleCols = [
       ...columnsBillingCycleList(
         search,
-        page,
-        pageSize,
+        1,
+        loadMoreSize,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         handleApprovalHistory,
-        handleInactive
+        handleInactive,
       ),
       ...actionColumns,
     ];
@@ -454,7 +516,13 @@ const BillingCycleView = ({ type }) => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [
+    search,
+    searchedColumn,
+    searchText,
+    actionColumns,
+    handleApprovalHistory,
+  ]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -506,26 +574,31 @@ const BillingCycleView = ({ type }) => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">BILLING CYCLE LIST</p>
+              <p className="mt-[15px] w-full">BILLING CYCLE LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
           <div className="w-full">
             <TableRBI
-              dataSource={data_list_billing_cycle?.result}
+              idTable="billingCycleTable"
+              dataSource={billing_cycle_list}
               columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data_list_billing_cycle?.page?.totalElements}
+              totalData={billing_cycle_pagination?.totalElements || 0}
               tableScrolled={{ y: 525, x: 2200 }}
               onSort={onSort}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
@@ -546,9 +619,10 @@ const BillingCycleView = ({ type }) => {
           dispatch={dispatch}
           getAPIOption={getApprovalHierarchy}
           getAPIDetail={getDetailApproval}
-          alertMessage={`Are you sure you want to inactivate this Billing Cycle with Begin Cycle ${
-            chooseId?.beginCycle || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+            ? "activate"
+            : "inactivate"
+            } this Billing Cycle with Begin Cycle ${chooseId?.beginCycle || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -565,7 +639,8 @@ const BillingCycleView = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

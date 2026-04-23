@@ -21,7 +21,7 @@ const ModalApprovalBilling = ({
   handleOpenModal = () => {},
 }) => {
   // Selector
-  const { data_list_billing_approval, loading } = useSelector(
+  const { data_list_billing_approval, loadingApproval } = useSelector(
     (state) => state.billing
   );
 
@@ -333,7 +333,7 @@ const ModalApprovalBilling = ({
                     htmlType={"submit"}
                     form={"formApprove"}
                     onClick={() => setAction("REJECT")}
-                    loading={loading}
+                    loading={loadingApproval}
                   >
                     Reject
                   </ButtonComponent>
@@ -342,7 +342,7 @@ const ModalApprovalBilling = ({
                     htmlType={"submit"}
                     form={"formApprove"}
                     onClick={() => setAction("APPROVE")}
-                    loading={loading}
+                    loading={loadingApproval}
                   >
                     Approve
                   </ButtonComponent>
@@ -393,7 +393,7 @@ const ModalApprovalBilling = ({
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingApproval}
                 showExport={false}
                 rowSelection={rowSelection}
                 usePagination={false}

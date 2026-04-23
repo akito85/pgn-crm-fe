@@ -17,6 +17,10 @@ const CriteriaDetailTab = ({
   endDateLock = null,
   setModalRequired = () => {},
   onCancelEdit = null,
+  defaultNewRowValues = {},
+  disabledColumns = [],
+  isBank = false,
+  data_glAccountBankList = [],
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -72,10 +76,15 @@ const CriteriaDetailTab = ({
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
-  const glAccountOptions = data_glAccountList.map((item) => ({
-    value: item.glAccountId ?? item.id,
-    label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
-  }));
+  const glAccountOptions = (isBank && data_glAccountBankList?.length > 0)
+    ? data_glAccountBankList.map((item) => ({
+        value: item.glNumber,
+        label: `${item.glNumber} - ${item.glDescription}`,
+      }))
+    : data_glAccountList.map((item) => ({
+        value: item.glAccountId ?? item.id,
+        label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
+      }));
 
   const specialGlOptions = data_specialGLList.map((item) => ({
     value: item.id,
@@ -118,13 +127,22 @@ const CriteriaDetailTab = ({
       render: (value) => renderSelectValue(value, glAccountOptions),
       onClick: (selectedLabel, form) => {
         if (!form) return;
-        const found = data_glAccountList?.find((g) => {
-          const label = `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}`;
-          return label === selectedLabel;
-        });
-        form.setFieldsValue({
-          descriptionAccount: found ? (found.glAccountDesc ?? found.name ?? "") : "",
-        });
+        if (isBank && data_glAccountBankList?.length > 0) {
+          const found = data_glAccountBankList?.find(
+            (g) => `${g.glNumber} - ${g.glDescription}` === selectedLabel,
+          );
+          form.setFieldsValue({
+            descriptionAccount: found ? (found.glDescription ?? "") : "",
+          });
+        } else {
+          const found = data_glAccountList?.find((g) => {
+            const label = `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}`;
+            return label === selectedLabel;
+          });
+          form.setFieldsValue({
+            descriptionAccount: found ? (found.glAccountDesc ?? found.name ?? "") : "",
+          });
+        }
       },
     },
     {
@@ -188,10 +206,13 @@ const CriteriaDetailTab = ({
       isDynamicEditable={isEditabled}
       setInserted={setIsEditabled}
       handleValidateUpdate={() => true}
-      startDateLock={startDateLock || "bypass"}
+      startDateLock={startDateLock}
       endDateLock={endDateLock}
       setModalRequired={setModalRequired}
       onCancelEdit={onCancelEdit}
+      defaultNewRowValues={defaultNewRowValues}
+      disabledColumns={disabledColumns}
+      allowDeleteExisting={true}
     />
   );
 };

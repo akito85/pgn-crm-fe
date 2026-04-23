@@ -283,7 +283,7 @@ const ConditionForm = ({
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
+        (hasValue(formHeader?.endDate) && moment(item?.endDate) > moment(formHeader?.endDate))
       ) {
         dataOverlap?.push(item);
       }
@@ -299,7 +299,11 @@ const ConditionForm = ({
 
   const handleFinish = useCallback(
     (value) => {
-      const setDataRow = setRow(value, data);
+      const normalizedValue = {
+        ...value,
+        endDate: value.endDate ? value.endDate : null,
+      };
+      const setDataRow = setRow(normalizedValue, data);
 
       const isNameChosen = data.some(
         (item) =>
@@ -376,18 +380,27 @@ const ConditionForm = ({
   };
 
   const handleDisableDateBetween = (current) => {
-    if (hasValue(startDate) && hasValue(validEndDate)) {
-      return (
-        moment(startDate) > current ||
-        current > moment(validEndDate).add(1, "days")
-      );
-    } else if (validStartDate && validEndDate) {
-      const startDate = moment(validStartDate).startOf("day");
-      const endDate = moment(validEndDate).endOf("day");
-      return current.isBefore(startDate) || current.isAfter(endDate);
-    } else {
+    if (!current) return false;
+
+    const headerStartDate = validStartDate ? moment(validStartDate).startOf("day") : null;
+    const headerEndDate = validEndDate ? moment(validEndDate).endOf("day") : null;
+
+    // Disable if before local start date (from state)
+    if (hasValue(startDate)) {
+      if (current.isBefore(moment(startDate).startOf("day"))) {
+        return true;
+      }
+    }
+
+    // Disable if outside header range
+    if (headerStartDate && current.isBefore(headerStartDate)) {
       return true;
     }
+    if (headerEndDate && current.isAfter(headerEndDate)) {
+      return true;
+    }
+
+    return false;
   };
 
   const endDateValidator = (startDate) => (_, value) => {
@@ -403,10 +416,13 @@ const ConditionForm = ({
 
   // Validation Handle Start Date from Header Data
   const handleDisableDateBefore = (current) => {
-    if (validStartDate !== null) {
-      return moment(validStartDate) > current;
+    if (!current) return false;
+    const headerStartDate = validStartDate ? moment(validStartDate).startOf("day") : null;
+
+    if (headerStartDate) {
+      return current.isBefore(headerStartDate);
     }
-    return moment().add(-1, "days") >= current;
+    return current.isBefore(moment().startOf("day"));
   };
 
   return (

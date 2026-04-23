@@ -20,6 +20,7 @@ import {
   getDetailEfakturCode,
   approveRejectEfakturCode,
   approveRejectInactiveEfakturCode,
+  approveRejectActivatedEfakturCode,
   resetEfakturCodeState,
   getCategoryList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
@@ -30,7 +31,7 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 const EFakturCodeDetail = () => {
   // Selector
   const { loading, data_detail } = useSelector(
-    (state) => state.masterEfakturCode
+    (state) => state.masterEfakturCode,
   );
 
   // Declaration
@@ -82,15 +83,15 @@ const EFakturCodeDetail = () => {
       // Data Additional Code
       const mappedAdditionalCode = additionalCodes.map((item, index) => ({
         id: item.additionalId || index,
-        code: item.code || "-",
-        description: item.description || "-",
+        code: item.code || "",
+        description: item.description || "",
         startDate: item.startDate || null,
         endDate: item.endDate || null,
-        status: item.status || "Inactive",
+        status: item.status,
         createdDate: item.createdDate || null,
-        createdBy: item.createdBy || "-",
+        createdBy: item.createdBy || "",
         updatedDate: item.updatedDate || null,
-        updatedBy: item.updatedBy || "-",
+        updatedBy: item.updatedBy || "",
       }));
 
       // Data Attachment Information
@@ -126,6 +127,8 @@ const EFakturCodeDetail = () => {
       setDataDetail({
         code: fakturCode?.einvoiceCode || "-",
         description: fakturCode?.description || "-",
+        status: fakturCode?.status || null,
+        statusApproval: fakturCode?.statusApproval || null,
       });
 
       setAdditionalCodeList(mappedAdditionalCode);
@@ -151,12 +154,12 @@ const EFakturCodeDetail = () => {
       breadcrumbName: "Master Data",
     },
     {
-      path: RBI_ROUTES.EFAKTUR_CODE_VIEW,
-      breadcrumbName: "Efaktur Code",
+      path: RBI_ROUTES.EFAKTUR_CODE,
+      breadcrumbName: "E-faktur Code",
     },
     {
       path: RBI_ROUTES.EFAKTUR_CODE_DETAIL,
-      breadcrumbName: "Detail Efaktur Code",
+      breadcrumbName: "Detail E-faktur Code",
     },
   ];
 
@@ -214,19 +217,24 @@ const EFakturCodeDetail = () => {
     setModalConfirm(false);
     const data = {
       remark: res.remark,
-      action: approveOrReject.toUpperCase(),
+      action: approveOrReject.startsWith("Approve") ? "APPROVE" : approveOrReject.toUpperCase(),
       approvalId: bodyApproval.tAppId,
     };
     dispatch(
       bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
         ? approveRejectInactiveEfakturCode({
+          id: id,
+          body: data,
+        })
+        : bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+          ? approveRejectActivatedEfakturCode({
             id: id,
             body: data,
           })
-        : approveRejectEfakturCode({
+          : approveRejectEfakturCode({
             id: id,
             body: data,
-          })
+          }),
     )
       .unwrap()
       .then(() => {
@@ -259,14 +267,22 @@ const EFakturCodeDetail = () => {
         <div className="flex flex-col w-full">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE" && (
-              <BaseContainer header={"Inactive Request Information"}>
+            ["INACTIVE_FAKTUR_CODE", "ACTIVATED_FAKTUR_CODE"].includes(
+              bodyApproval.approvalType,
+            ) && (
+              <BaseContainer
+                header={
+                  bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+                    ? "Activate Request Information"
+                    : "Inactive Request Information"
+                }
+              >
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail?.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
-                        ).format(dateFormatting.date)
+                        bodyApproval.approvalDetail.requestedDate,
+                      ).format(dateFormatting.date)
                       : "-"}
                   </DetailText>
                   <DetailText label={"Requested By"}>
@@ -282,20 +298,8 @@ const EFakturCodeDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 
@@ -314,10 +318,20 @@ const EFakturCodeDetail = () => {
                 type="approve"
                 onClick={() => {
                   setModalConfirm(true);
-                  setApproveOrReject("Approve");
+                  setApproveOrReject(
+                    bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
+                      ? "Approve Inactive"
+                      : bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+                        ? "Approve Activate"
+                        : "Approve",
+                  );
                 }}
               >
-                Approve
+                {bodyApproval.approvalType === "INACTIVE_FAKTUR_CODE"
+                  ? "Approve Inactive"
+                  : bodyApproval.approvalType === "ACTIVATED_FAKTUR_CODE"
+                    ? "Approve Activate"
+                    : "Approve"}
               </ButtonComponent>
             </div>
           ) : null}
@@ -346,9 +360,8 @@ const EFakturCodeDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

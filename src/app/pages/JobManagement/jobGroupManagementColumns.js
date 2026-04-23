@@ -1,4 +1,5 @@
 import React from "react";
+import StatusComponent from "../../../components/StatusComponent";
 import { getJobManagementColumns } from "./jobManagementColumns";
 
 /**
@@ -12,12 +13,14 @@ export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
     width: 60,
     align: "center",
     render: (_, __, index) => index + 1,
+    // fixed: "left"
   },
   {
     title: "JOB GROUP NAME",
     dataIndex: "name",
     key: "name",
     align: "left",
+    // fixed: "left"
   },
   {
     title: "JOB GROUP CODE",
@@ -50,24 +53,17 @@ export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
     dataIndex: "isActive",
     key: "isActive",
     align: "center",
-    width: 100,
+    width: 120,
     fixed: "right",
-    render: (val) => (
-      <span
-        style={{
-          display: "inline-block",
-          padding: "2px 10px",
-          borderRadius: 12,
-          fontSize: 11,
-          fontWeight: 600,
-          background: val === "Y" ? "#e8f5e9" : "#f5f5f5",
-          color: val === "Y" ? "#2e7d32" : "#757575",
-          border: `1px solid ${val === "Y" ? "#c8e6c9" : "#e0e0e0"}`,
-        }}
-      >
-        {val === "Y" ? "Active" : "Inactive"}
-      </span>
-    ),
+    render: (val) => {
+      const colour = val === "Y" ? "active" : "inactive";
+      const text = val === "Y" ? "Active" : "Inactive";
+      return (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
+          <StatusComponent colour={colour} size="small">{text}</StatusComponent>
+        </div>
+      );
+    },
   },
 ];
 
@@ -86,7 +82,24 @@ export const getJobGroupChildTableColumns = (accessGroupsMap = {}) => {
   // Exclude MODULE and PARENT columns
   const excludeKeys = ["module", "parent"];
 
-  return allJobColumns.filter(
+  const filtered = allJobColumns.filter(
     (col) => !excludeKeys.includes(col.key || col.dataIndex)
   );
+
+  // Prioritize and configure NO, NAME, CODE columns (fixed to left)
+  const prioritized = [];
+  const noCol = filtered.find(c => c.key === "no");
+  const nameCol = filtered.find(c => c.key === "name");
+  const codeCol = filtered.find(c => c.key === "code");
+
+  if (noCol) prioritized.push({...noCol, width: 60, align: "center"});
+  if (nameCol) prioritized.push({...nameCol, width: 150, align: "left"});
+  if (codeCol) prioritized.push({...codeCol, width: 120, align: "left"});
+
+  // Add remaining columns (excluding ones we already added)
+  filtered
+    .filter(c => !["no", "name", "code"].includes(c.key || c.dataIndex))
+    .forEach(col => prioritized.push(col));
+
+  return prioritized;
 };

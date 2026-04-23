@@ -1,15 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Checkbox, Spin, Tooltip } from "antd";
 import moment from "moment";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import {  getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../../components/Card/CardComponent";
-import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";
+import {
+  dateFormatting,
+  hasValue,
+  renderColumn,
+} from "../../../../../../utils";
 import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import DetailText from "../../../../../../components/DetailText";
@@ -19,9 +23,10 @@ import {
   getRateTypePaginate,
   inactiveMasterRateType,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/rateType";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import CardContainer from "../../../../../../components/CardContainer";
 
 export const columnRateType = (
   search,
@@ -32,10 +37,11 @@ export const columnRateType = (
   searchText,
   handleSearch = () => {},
   handleModalDetail = () => {},
-  handleModalInactive = () => {}
+  handleModalInactive = () => {},
 ) => [
   {
     title: "NO",
+    key: "no",
     width: 60,
     align: "center",
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -46,40 +52,60 @@ export const columnRateType = (
     key: "code",
     sorter: true,
     align: "left",
+    width: 160,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "code",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
-    render: (text) => renderColumn('code', hasValue(search['code']), searchText, text, false, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "code",
+        hasValue(search["code"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "DESCRIPTION",
     dataIndex: "description",
+    key: "description",
     align: "left",
+    width: 350,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "description",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     ellipsis: {
       showTitle: false,
     },
     sorter: true,
-    render: (text) => renderColumn('description', hasValue(search['description']), searchText, text, true, 'input', search)
+    render: (text) =>
+      renderColumn(
+        "description",
+        hasValue(search["description"]),
+        searchText,
+        text,
+        true,
+        "input",
+        search,
+      ),
   },
   {
     title: "STATUS",
     dataIndex: "status",
     key: "status",
-    fixed: "right",
-    width: 150,
+    width: 130,
     sorter: true,
     align: "left",
     ...getColumnSearchPropsUseFilteredValue(
@@ -88,7 +114,7 @@ export const columnRateType = (
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ),
     render: (a) => {
       let text;
@@ -103,7 +129,15 @@ export const columnRateType = (
           text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
           break;
       }
-      return renderColumn('status', hasValue(search['status']), searchText, text, false, 'status', search)
+      return renderColumn(
+        "status",
+        hasValue(search["status"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      );
     },
   },
 ];
@@ -111,7 +145,7 @@ export const columnRateType = (
 const RateTypeView = () => {
   // Selector
   const { data_list, data_detail, loading } = useSelector(
-    (state) => state.rate_type
+    (state) => state.rate_type,
   );
 
   // Declaration
@@ -133,6 +167,24 @@ const RateTypeView = () => {
   const [modalInactive, setModalInactive] = useState(false);
   const [modalDetailRate, setModalDetailRate] = useState(false);
 
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("rateTypeFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["status"] };
+    } catch (e) {
+      return { left: ["no"], right: ["status"] };
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "rateTypeFixedColumns",
+        JSON.stringify(fixedColumns),
+      );
+    } catch (e) {}
+  }, [fixedColumns]);
+
   // Use Effect
   useEffect(() => {
     dispatch(
@@ -141,7 +193,7 @@ const RateTypeView = () => {
         page,
         pageSize,
         sort,
-      })
+      }),
     );
   }, [search, page, pageSize, sort, dispatch]);
 
@@ -201,7 +253,7 @@ const RateTypeView = () => {
             page,
             pageSize,
             sort,
-          })
+          }),
         );
       });
   };
@@ -215,7 +267,7 @@ const RateTypeView = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={() => {
             let tempSearch = "";
@@ -234,7 +286,7 @@ const RateTypeView = () => {
                 page,
                 pageSize,
                 sort,
-              })
+              }),
             );
           }}
         >
@@ -247,7 +299,7 @@ const RateTypeView = () => {
       render: (
         <NavLink to={RBI_ROUTES.RATE_TYPE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Rate Type
@@ -315,45 +367,95 @@ const RateTypeView = () => {
     },
   ];
 
+  const actionColumns = useColumnActionPermission(
+    ["view", "activate", "update"],
+    itemGrantAccess,
+  ).map((col) => ({
+    ...col,
+    width: 60,
+    align: "center",
+  }));
+
+  const baseColumns = useMemo(() => {
+    return [
+      ...columnRateType(
+        search,
+        page,
+        pageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleModalDetail,
+        handleModalInactive,
+      ),
+      ...actionColumns,
+    ].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key,
+      title: col.title,
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key;
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push({ ...col, fixed: "left" });
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push({ ...col, fixed: "right" });
+      } else {
+        const c = { ...col };
+        delete c.fixed;
+        normal.push(c);
+      }
+    });
+
+    return [...leftFixed, ...normal, ...rightFixed];
+  }, [baseColumns, fixedColumns]);
+
   return (
     <div>
       <Spin spinning={loading}>
-        <div className="w-full flex justify-end gap-[20px]">
-          <Toolbar items={itemGrantAccess} />
-        </div>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="w-full mt-[15px] text-primary">RATE TYPE LIST</p>
 
-        <BaseContainer header={"RATE TYPE LIST"}>
-          <TablePaginationNew
+              <Toolbar items={itemGrantAccess} />
+            </div>
+          }
+        >
+          <TableRBI
+            idTable="rateTypeTable"
             dataSource={data_list?.result}
-            pageSize={pageSize}
-            columns={[
-              ...columnRateType(
-                search,
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleModalDetail,
-                handleModalInactive
-              ),
-              ...useColumnActionPermission(
-                ["view", "activate", "update", "history"],
-                itemGrantAccess
-              ),
-            ]}
+            columns={columns}
             current={page}
+            pageSize={pageSize}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data_list?.page?.totalElements || 0}
             onSort={onSort}
-            tableScrolled={{
-              x: 1000,
-              y: 525,
-            }}
+            tableScrolled={{ x: "max-content", y: 525 }}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={true}
+            showExport={false}
           />
-        </BaseContainer>
+        </CardContainer>
 
         {/* MODAL DETAIL */}
         <ModalCustom
@@ -396,7 +498,7 @@ const RateTypeView = () => {
             <DetailText label={"Created Date"}>
               {data_detail?.createdDate !== null
                 ? moment(data_detail?.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : " "}
             </DetailText>
@@ -406,7 +508,7 @@ const RateTypeView = () => {
             <DetailText label={"Updated Date"}>
               {data_detail?.updatedDate !== null
                 ? moment(data_detail?.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : " "}
             </DetailText>

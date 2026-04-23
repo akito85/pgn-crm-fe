@@ -1,32 +1,46 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import moment from "moment";
+import { useMemo, useRef, useState } from "react";
 import { dateFormatting } from "../../../../../../../utils";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
-import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getRelatedDetailColumns } from "../getRelatedDetailColumns";
 
-const RelationshipDetailInfo = ({ dataDetail = {} }) => {
+/**
+ * Displays relationship info fields and the related-detail table for a single record.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Relationship detail record.
+ */
+const RelationshipDetailInfo = ({ detail = {} }) => {
+  // --- Refs ---
   const searchInput = useRef(null);
 
-  // Related Detail table state
+  // --- State ---
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: [],
-    left: [],
-  }));
+  // --- Derived values ---
+  const {
+    relationshipTypeName,
+    relationshipCategoryName,
+    relatedAccountName,
+    relatedAccountNumber,
+    startDate,
+    endDate,
+    status,
+    description,
+  } = detail;
+  const listRelatedDetail = detail.relatedDetail || [];
 
-  const listRelatedDetail = dataDetail?.relatedDetail || [];
-
+  // --- Handlers ---
   /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
+   * Applies column search filter and updates search state.
+   * @param {string[]} selectedKeys - Active filter values
+   * @param {Function} confirm      - Antd confirm callback
+   * @param {string}   dataIndex    - Column key being searched
    */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -40,19 +54,20 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
     });
   };
 
+  // --- Columns ---
   const baseColumns = useMemo(
     () =>
-      getRelatedDetailColumns(
+      getRelatedDetailColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch
-      ),
+      }),
     [search, searchText, searchedColumn]
   );
 
-  const allColumns = useMemo(() => {
+  const columns = useMemo(() => {
     const columnsWithKeys = baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
@@ -60,62 +75,38 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
     return columnsWithKeys;
   }, [baseColumns]);
 
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!listRelatedDetail?.length) return [];
-
-    return listRelatedDetail.map((item, index) => ({
-      ...item,
-      key: `related-${item.id || item.accountNumber || index}`,
-    }));
-  }, [listRelatedDetail]);
-
   return (
     <div className="flex flex-col gap-y-4">
       <NxBaseContainer border header="RELATIONSHIP INFORMATION">
         <div className="flex flex-col gap-y-4">
           <div className="w-full grid grid-cols-4 gap-4">
             <NxDetailText label="Relationship Type">
-              {dataDetail?.relationshipTypeName?.toUpperCase() || "-"}
+              {relationshipTypeName?.toUpperCase()}
             </NxDetailText>
             <NxDetailText label="Relationship Category">
-              {dataDetail?.relationshipCategoryName?.toUpperCase() || "-"}
+              {relationshipCategoryName?.toUpperCase()}
             </NxDetailText>
             <NxDetailText label="Related Name">
-              {dataDetail?.subjectName || dataDetail?.objectName || "-"}
+              {relatedAccountName}
             </NxDetailText>
             <NxDetailText label="Related Number">
-              {dataDetail?.subjectNumber || dataDetail?.objectNumber || "-"}
+              {relatedAccountNumber}
             </NxDetailText>
             <NxDetailText label="Start Date">
-              {dataDetail?.startDate
-                ? moment(dataDetail.startDate).format(dateFormatting.date)
-                : "-"}
+              {NxDate.formatDate(startDate, dateFormatting.date)}
             </NxDetailText>
             <NxDetailText label="End Date">
-              {dataDetail?.endDate
-                ? moment(dataDetail.endDate).format(dateFormatting.date)
-                : "-"}
+              {NxDate.formatDate(endDate, dateFormatting.date)}
             </NxDetailText>
             <NxDetailText label="Status">
-              <StatusComponent colour={dataDetail?.status}>
-                {dataDetail?.status || "-"}
+              <StatusComponent colour={status}>
+                {status}
               </StatusComponent>
             </NxDetailText>
           </div>
           <div className="w-full">
             <NxDetailText label="Description">
-              {dataDetail?.description || "-"}
+              {description}
             </NxDetailText>
           </div>
         </div>
@@ -124,14 +115,11 @@ const RelationshipDetailInfo = ({ dataDetail = {} }) => {
       <NxBaseContainer border header="RELATED DETAIL">
         <NxTable
           idTable="relationship-related-detail-table"
-          dataSource={dataSourceWithKeys}
+          dataSource={listRelatedDetail}
           tableScrolled={{ x: listRelatedDetail.length ? "max-content" : 3000 }}
-          columns={processedColumns}
+          columns={columns}
           usePagination={false}
           useInfiniteScroll={false}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          columnDefinitions={columnDefinitions}
           showAdvanceSearch={false}
         />
       </NxBaseContainer>

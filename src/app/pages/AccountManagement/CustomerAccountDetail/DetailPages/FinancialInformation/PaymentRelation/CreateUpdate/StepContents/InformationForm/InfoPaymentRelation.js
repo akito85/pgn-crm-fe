@@ -3,7 +3,7 @@ import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../../../../components/InputComponent";
 import { dateFormatting, requiredMessage } from "../../../../../../../../../../utils";
 import moment from "moment";
-import { getPrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { getPrAccounts } from "../../../../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
@@ -46,13 +46,11 @@ export default function InfoPaymentRelation({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { list_prAccountStandard, pagination_prAccountStandard } = useSelector(
-    (state) => state.paymentRelation
-  );
-
-  const handleOk = () => {
-    console.log("ok")
-  }
+  const {
+    list_prAccount: prAccountStandards,
+    pagination_prAccount: pagination,
+    loading_listPrAccount: loading,
+  } = useSelector((state) => state.paymentRelation);
 
   const handleCancel = () => {
     setIsOpen(false)
@@ -79,74 +77,65 @@ export default function InfoPaymentRelation({
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_prAccountStandard?.totalPages || 0;
+    const totalPages = pagination?.totalPage || 0;
 
     if (nextPage <= totalPages) {
+      const body = {
+        searchs: search,
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+      };
+
       await dispatch(
-        getPrAccountStandard({
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
-          isLoadMore: true,
+        getPrAccounts({
           id: accountId,
+          body,
+          isLoadMore: true,
         })
-      );
+      ).unwrap();
+
+      setPage(nextPage);
     }
-    setPage(nextPage);
   };
 
   useEffect(() => {
-    if (formView)
-      dispatch(getPrAccountStandard({
+    if (formView) {
+      const body = {
         page,
         size: loadMoreSize,
         sort,
-        searchs: JSON.stringify(search),
-        id: accountId,
-        isLoadMore: false,
-      }));
-  }, [ sort, search ]);
+        searchs: search,
+      };
 
-  const baseColumns = useMemo(() =>
-    getAccountStandardColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      setAccount,
-      setIsOpen
-    ),
-  [search, searchText, searchedColumn]);
+      dispatch(
+        getPrAccounts({
+          id: accountId,
+          body,
+          isLoadMore: false,
+        })
+      );
+    }
+  }, [sort, search]);
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
+  const columnDefinitions = useMemo(
+    () =>
+      getAccountStandardColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        setAccount,
+        setIsOpen
+      ),
+    [search, searchInput, searchText, searchedColumn]
+  );
 
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
 
-  const currentData = useMemo(() => list_prAccountStandard, [list_prAccountStandard]);
-
-  const hasMore = currentData.length < (pagination_prAccountStandard?.totalElements || 0);
-
-  const dataSourceWithKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-
-    return currentData.map((item, index) => ({
-      ...item,
-      key: `${item.id}-${index}`,
-    }));
-  }, [currentData]);
+  const totalElement = pagination.totalElement;
+  const hasMore = prAccountStandards.length < totalElement;
 
   if (!formView) {
     return (
@@ -166,114 +155,122 @@ export default function InfoPaymentRelation({
   }
 
   return(
-    <div className="flex flex-col gap-y-4">
-      <div className="w-full grid grid-cols-3 gap-4">
-        <div className="flex gap-2 items-end">
+    <>
+      <div className="flex flex-col gap-y-4">
+        <div className="w-full grid grid-cols-3 gap-4">
+          <div className="flex gap-2 items-start">
+            <Form.Item
+              label={"Account Number"}
+              required
+              className="no-margin-form w-full"
+            >
+              <div className="flex gap-x-1">
+                <Form.Item
+                  key="accountNumber"
+                  name={"accountNumber"}
+                  rules={[
+                    {
+                      message: requiredMessage("Account Number"),
+                      required: true,
+                    }
+                  ]}
+                  noStyle
+                >
+                  <InputComponent disabled />
+                </Form.Item>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    setIsOpen(true)
+                  }}
+                  className="w-[120px]"
+                  disabled={!isDraft && isUpdate}
+                >
+                  Select
+                </Button>
+              </div>
+            </Form.Item>
+          </div>
+
           <Form.Item
-            label={"Account Number"}
-            required
-            className="no-margin-form w-full"
+            key="accountName"
+            name={"accountName"}
+            label={"Account Name"}
+            className="no-margin-form"
           >
-            <div className="flex gap-x-1">
-              <Form.Item
-                key="accountNumber"
-                name={"accountNumber"}
-                rules={[
-                  {
-                    message: requiredMessage("Account Number"),
-                    required: true,
-                  }
-                ]}
-                noStyle
-              >
-                <InputComponent disabled />
-              </Form.Item>
-              <Button
-                type="submit"
-                onClick={() => {
-                  setIsOpen(true)
-                }}
-                className="w-[120px]"
-                disabled={!isDraft && isUpdate}
-              >
-                Select
-              </Button>
-            </div>
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="priority"
+            name={"priority"}
+            label={"Priority"}
+            rules={[
+              {
+                message: requiredMessage("Priority"),
+                required: true,
+              },
+            ]}
+            className="no-margin-form"
+          >
+            <InputComponent disabled={!isDraft && isUpdate} typeNumber={"number"} />
+          </Form.Item>
+
+          <Form.Item
+            key="startDate"
+            name={"startDate"}
+            label={"Start Date"}
+            rules={[
+              {
+                message: requiredMessage("Start Date"),
+                required: true,
+              },
+            ]}
+            getValueProps={(value) => ({ value: value && moment(value)})}
+            className="no-margin-form"
+          >
+            <NxDate
+              disabled={!isDraft && isUpdate}
+              onChange={date => {
+                if (date && endDate && date.isAfter(endDate, "day"))
+                  form.resetFields(["endDate"])
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            key="endDate"
+            name={"endDate"}
+            label={"End Date"}
+            getValueProps={(value) => ({ value: value && moment(value)})}
+            className="no-margin-form"
+          >
+            <NxDate
+              placeholder="Select date"
+              dateDisable={(current) => {
+                if (!moment.isMoment(current)) return false;
+                return current.isBefore(startDate, "day");
+              }}
+            />
           </Form.Item>
         </div>
-
         <Form.Item
-          key="accountName"
-          name={"accountName"}
-          label={"Account Name"}
+          key="description"
+          name={"description"}
+          label={"Description"}
           className="no-margin-form"
         >
-          <InputComponent disabled />
-        </Form.Item>
-
-        <Form.Item
-          key="priority"
-          name={"priority"}
-          label={"Priority"}
-          rules={[
-            {
-              message: requiredMessage("Priority"),
-              required: true,
-            },
-          ]}
-          className="no-margin-form"
-        >
-          <InputComponent disabled={!isDraft && isUpdate} />
-        </Form.Item>
-
-        <Form.Item
-          key="startDate"
-          name={"startDate"}
-          label={"Start Date"}
-          rules={[
-            {
-              message: requiredMessage("Start Date"),
-              required: true,
-            },
-          ]}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
-          className="no-margin-form"
-        >
-          <NxDate
+          <InputComponent
             disabled={!isDraft && isUpdate}
-          />
-        </Form.Item>
-
-        <Form.Item
-          key="endDate"
-          name={"endDate"}
-          label={"End Date"}
-          getValueProps={(value) => ({ value: value && moment(value, dateFormatting.dateFormal)})}
-          className="no-margin-form"
-        >
-          <NxDate
-            placeholder="Select date"
+            type={"textarea"}
+            rows={4}
+            maxLength={255}
           />
         </Form.Item>
       </div>
-      <Form.Item
-        key="description"
-        name={"description"}
-        label={"Description"}
-        className="no-margin-form"
-      >
-        <InputComponent
-          disabled={!isDraft && isUpdate}
-          type={"textarea"}
-          rows={4}
-          maxLength={255}
-        />
-      </Form.Item>
-
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        handleOk={handleOk}
         title={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}
@@ -287,22 +284,23 @@ export default function InfoPaymentRelation({
           <NxBaseContainer border>
             <NxTable
               idTable="payment-relation-account-standard"
-              dataSource={dataSourceWithKeys}
-              totalData={pagination_prAccountStandard.totalElements || 0}
+              dataSource={prAccountStandards}
+              totalData={totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
               onSort={onSort}
-              columns={allColumns}
+              columns={columns}
               usePagination={false}
               useInfiniteScroll
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
               columnDefinitions={columnDefinitions}
+              loading={loading}
             />
           </NxBaseContainer>
         </div>
       </NxModal>
-    </div>
+    </>
   )
 }

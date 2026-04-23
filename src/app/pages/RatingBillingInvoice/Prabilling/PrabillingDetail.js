@@ -56,10 +56,12 @@ const PrabillingDetail = () => {
 
   // Fetch init detail
   useEffect(() => {
-    if (initId) {
-      dispatch(getDetailPrabillingInit(initId));
+    if (!initId) {
+      navigate(RBI_ROUTES.PRABILLING_VIEW, { replace: true });
+      return;
     }
-  }, [dispatch, initId]);
+    dispatch(getDetailPrabillingInit(initId));
+  }, [dispatch, initId, navigate]);
 
   // Fetch prabilling result whenever initCode tersedia
   useEffect(() => {
@@ -321,20 +323,20 @@ const PrabillingDetail = () => {
         key: "action",
         title: "ACTION",
         width: 60,
-        fixed: "right",
+        align: "center",
         render: (text, record) => (
           <Tooltip title="View Account Detail">
             <div
               onClick={() => handleViewDetail(record)}
-              style={{ cursor: "pointer", display: "inline-block" }}
+              style={{ cursor: "pointer", display: "flex", justifyContent: "center" }}
             >
-              <SVGIcon name="IconDetail" width={20} />
+              <SVGIcon name="IconDetail" color="#0075BF" width={20} />
             </div>
           </Tooltip>
         ),
       },
     ],
-    [search, searchText, searchedColumn, prabillData]
+    [search, searchText, searchedColumn, prabillData, handleViewDetail]
   );
 
   const allColumns = useMemo(() => {

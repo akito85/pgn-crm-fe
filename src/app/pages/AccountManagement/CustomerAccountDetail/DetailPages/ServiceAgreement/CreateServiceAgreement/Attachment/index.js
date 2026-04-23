@@ -119,11 +119,11 @@ const columnAttachment = (
     {
       title: "ACTION",
       align: "center",
-      width: 120,
+      width: 100,
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex w-full justify-center gap-6">
+          <div className="flex w-full justify-center gap-2">
             <Tooltip title="Preview">
               <EyeOutlined
                 // onClick={
@@ -132,14 +132,14 @@ const columnAttachment = (
                 //     : () => previewFile(r.urlFile1)
                 // }
                 onClick={() => handleShow(r)}
-                style={{ fontSize: "24px", color: "#0075bf" }}
+                style={{ fontSize: "20px"}}
               />
             </Tooltip>
 
             <Tooltip title="Delete">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 className={
                   r.type === "exist" ? "disabled cursor-not-allowed" : undefined
                 }
@@ -309,6 +309,7 @@ const Attachment = ({ data = [], updateData = () => { }, type }) => {
         {/* ATTACHMENT LIST TABLE */}
         <div className="pt-2">
           <NxTable
+            idTable="sa-create-attachment-table"
             columns={columnAttachment(
               searchInput,
               searchedColumn,

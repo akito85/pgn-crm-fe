@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Input, Select, InputNumber, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -9,6 +9,7 @@ import NxSwitch from "../../../../components/Nx/NxSwitch";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { LeftOutlined, PlusOutlined } from "@ant-design/icons";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
+import NxTableBase from "../../../../components/Nx/NxTableBase";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
 import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
@@ -68,7 +69,40 @@ const PARAMETER_COLUMNS = [
   },
   { title: 'Length',      dataIndex: 'length',      editable: true, inputType: 'number', placeholder: 'Length',      width: 110, min: 0 },
   { title: 'Description', dataIndex: 'description', editable: true, inputType: 'text',   placeholder: 'Description' },
+  {
+    title: 'Required',
+    dataIndex: 'required',
+    editable: true,
+    inputType: 'select',
+    width: 110,
+    selectOptions: [
+      { value: true,  label: 'Yes' },
+      { value: false, label: 'No'  },
+    ],
+  },
 ];
+
+// Map Oracle data type string to the PARAMETER_COLUMNS type options
+const mapOracleTypeToParamType = (dataType) => {
+  if (!dataType) return 'String';
+  const upper = dataType.toUpperCase();
+  if (upper.includes('CHAR') || upper.includes('CLOB') || upper.includes('TEXT')) return 'String';
+  if (upper.includes('NUMBER') || upper.includes('INTEGER') || upper.includes('FLOAT') ||
+      upper.includes('DECIMAL') || upper.includes('NUMERIC')) return 'Number';
+  if (upper.includes('DATE') || upper.includes('TIMESTAMP')) return 'Date';
+  if (upper === 'BOOLEAN') return 'Boolean';
+  return 'String';
+};
+
+const mapSpParamToParameter = (spParam, index) => ({
+  key: index + 1,
+  name: spParam.name,
+  code: spParam.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
+  type: mapOracleTypeToParamType(spParam.dataType),
+  length: null,
+  description: spParam.direction?.oracleValue ?? spParam.direction ?? '',
+  required: !spParam.hasDefault,
+});
 
 const SP_PARAM_COLUMNS = [
   { title: 'Parameter', dataIndex: 'name',       editable: false, width: 200 },
@@ -132,6 +166,9 @@ const CreateJobPage = () => {
   const groupList = groupAccessData?.result ?? [];
   const [selectedSchema,    setSelectedSchema]    = useState(null);
   const [selectedProcedure, setSelectedProcedure] = useState(null);
+  // Set to true only when the user explicitly selects a procedure — guards against
+  // overwriting saved parameters when an existing job is loaded in edit mode.
+  const shouldAutoPopulateParamsRef = useRef(false);
 
   useEffect(() => {
     dispatch(fetchTaskQueues());
@@ -202,6 +239,7 @@ const CreateJobPage = () => {
 
   const handleProcedureChange = (procedure) => {
     setSelectedProcedure(procedure);
+    shouldAutoPopulateParamsRef.current = true;
     dispatch(fetchProcedureParameters({ schema: selectedSchema, procedure }));
   };
 
@@ -209,12 +247,22 @@ const CreateJobPage = () => {
     ? (spParametersMap[`${selectedSchema}/${selectedProcedure}`] ?? [])
     : [];
 
+  // When SP parameters load after the user explicitly picks a procedure, copy them
+  // into the editable parameters table (non-edit mode — autoEditOnAppend is false).
+  useEffect(() => {
+    if (!shouldAutoPopulateParamsRef.current) return;
+    if (spParams.length > 0) {
+      setParameters(spParams.map(mapSpParamToParameter));
+      shouldAutoPopulateParamsRef.current = false;
+    }
+  }, [spParams]);
+
   const updateNotification = (key) => (checked) =>
     setNotificationSettings(prev => ({ ...prev, [key]: checked }));
 
   const handleAddParameter = () => {
     const newKey = parameters.length > 0 ? Math.max(...parameters.map(p => p.key)) + 1 : 1;
-    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', length: null, description: '' }]);
+    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', length: null, description: '', required: false }]);
   };
 
   const onFinish = async (values) => {
@@ -259,9 +307,9 @@ const CreateJobPage = () => {
   const handleLoadSample = () => {
     form.setFieldsValue(SAMPLE_JOB);
     setParameters([
-      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   length: 10, description: 'Report start date (YYYY-MM-DD)' },
-      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   length: 10, description: 'Report end date (YYYY-MM-DD)' },
-      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', length: 50, description: 'Target region code' },
+      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   length: 10, description: 'Report start date (YYYY-MM-DD)', required: false },
+      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   length: 10, description: 'Report end date (YYYY-MM-DD)',   required: false },
+      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', length: 50, description: 'Target region code',            required: false },
     ]);
   };
 
@@ -408,23 +456,24 @@ const CreateJobPage = () => {
 
                 {selectedProcedure && (
                   <div className="md:col-span-3">
-                    <NxBaseContainer border={false} minHeight="250px" padding={false}>
-                      <NxTableInlineEdit
-                        idTable="sp-parameters-info-table"
-                        dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
-                        onDataChange={() => {}}
-                        columns={SP_PARAM_COLUMNS}
-                        emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
-                      />
-                    </NxBaseContainer>
+                    <div className="justify-start">
+                      <span class="text-black/85 text-md font-normal leading-[21.98px]">Parameters</span>
+                    </div>
+                    <NxTableBase
+                      idTable="sp-parameters-info-table"
+                      dataSource={spParams.map((p, i) => ({ key: i, ...p }))}
+                      onDataChange={() => {}}
+                      columns={SP_PARAM_COLUMNS}
+                      emptyText={parametersLoading ? "Loading parameters…" : "No parameters found for this procedure."}
+                   />
                   </div>
                 )}
               </>)}
             </div>
           </NxBaseContainer>
 
-          {/* CONFIGURATION */}
-          <NxBaseContainer border header="CONFIGURATION" className="mt-4">
+          {/* RETRY POLICY */}
+          <NxBaseContainer border header="RETRY POLICY" className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
               <Form.Item
                 label="Timeout (seconds)"
@@ -474,7 +523,9 @@ const CreateJobPage = () => {
                 </Select>
               </Form.Item>
 
-              <Form.Item label="Access Group" name="accessGroupId" {...formItemProps}>
+              <Form.Item label="Group" name="accessGroupId" {...formItemProps}  rules={[
+                { required: true, message: "Please select group" },
+              ]}>
                 <Select
                   placeholder="Select access group"
                   style={fieldStyle}
@@ -509,6 +560,7 @@ const CreateJobPage = () => {
               onDataChange={setParameters}
               columns={PARAMETER_COLUMNS}
               emptyText='No parameters defined. Click Create to add one.'
+              autoEditOnAppend={false}
             />
           </NxBaseContainer>
 

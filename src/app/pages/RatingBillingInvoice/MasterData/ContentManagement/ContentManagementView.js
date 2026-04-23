@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import { PlusOutlined, MoreOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip, Dropdown, Menu } from "antd";
 import { Link, NavLink } from "react-router-dom";
@@ -14,6 +20,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   inactiveContentManagement,
+  downloadContentManagementList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -25,22 +32,22 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const ContentManagementView = () => {
   // Selector
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.contentManagement
-  );
+  const { loading, data_approval_history, content_list, content_pagination } =
+    useSelector((state) => state.contentManagement);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+
+  const hasMore =
+    content_list.length < (content_pagination?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -49,23 +56,29 @@ const ContentManagementView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("contentManagementFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["NO"],
-          right: ["action"],
+    try {
+      const saved = localStorage.getItem("contentManagementFixedColumns");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          left: parsed.left || [],
+          right: parsed.right || [],
         };
+      }
+      return { left: ["NO"], right: ["action"] };
+    } catch (e) {
+      return { left: ["NO"], right: ["action"] };
+    }
   });
 
-  // ✅ Save to localStorage when fixedColumns change
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem(
-      "contentManagementFixedColumns",
-      JSON.stringify(fixedColumns)
-    );
+    try {
+      localStorage.setItem("contentManagementFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   // Use Effect
@@ -73,12 +86,13 @@ const ContentManagementView = () => {
     dispatch(
       getAllContentManagementPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [search, sort, page, pageSize, dispatch]);
+  }, [search, sort, dispatch]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -122,23 +136,46 @@ const ContentManagementView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  // Handle Change Page Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // Handle Sort Table
+  const onSort = (_, __, sort) => {
+    const dataSort =
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (content_list.length >= (content_pagination?.totalElements || 0)) return;
+    const nextPage = Math.floor(content_list.length / loadMoreSize) + 1;
+    await dispatch(
+      getAllContentManagementPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, content_list.length, content_pagination, search, sort]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getAllContentManagementPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, search, sort]);
 
   const handleRetry = () => {
     handleOk();
@@ -149,15 +186,6 @@ const ContentManagementView = () => {
   const handleCloseModalError = () => {
     setModalError(false);
     setBodyError({});
-  };
-
-  // Handle Sort Table
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
   };
 
   const handleOptions = () => {
@@ -179,23 +207,14 @@ const ContentManagementView = () => {
       .then(() => {
         handleClear();
         handleCancel();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
         dispatch(
           getAllContentManagementPaginate({
-            search: tempSearch,
-            page,
-            pageSize,
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
-          })
+            isLoadMore: false,
+          }),
         );
       })
       .catch((error) => {
@@ -232,8 +251,24 @@ const ContentManagementView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    // Backend belum menyediakan endpoint download
-    console.log("Download feature not yet available");
+    let tempSearch = "";
+    for (const dataIndex in search) {
+      if (Object.hasOwnProperty.call(search, dataIndex)) {
+        const tempSearchText = search[dataIndex];
+        if (tempSearchText) {
+          tempSearch += `${dataIndex}~${tempSearchText},`;
+        }
+      }
+    }
+    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    dispatch(
+      downloadContentManagementList({
+        search: tempSearch,
+        page: 1,
+        pageSize: loadMoreSize,
+        sort,
+      }),
+    );
   };
 
   // Grant Access Item - moved outside useMemo
@@ -244,7 +279,7 @@ const ContentManagementView = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -258,7 +293,7 @@ const ContentManagementView = () => {
       render: (
         <NavLink to={RBI_ROUTES.CONTENT_MANAGEMENT_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
             Create Content Management
@@ -290,8 +325,7 @@ const ContentManagementView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVE");
+          record.statusApproval === "REJECTED";
 
         const linkContent = (
           <div className="flex items-center gap-2">
@@ -329,36 +363,50 @@ const ContentManagementView = () => {
       type: "table",
       render: (record, data) => {
         const isActivateOrInactivate =
-          (record.statusApproval === "APPROVE" && record.status === "ACTIVE") ||
+          (record.statusApproval === "APPROVED" &&
+            record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
           (record.statusApproval === "REJECTED" &&
             record.status === "ACTIVE") ||
           (record.statusApproval === "WAITING APPROVAL" &&
             record.status === "ACTIVE");
 
-        return (
-          <div
-            className={`flex items-center gap-2 ${
-              !isActivateOrInactivate ? "cursor-not-allowed" : "cursor-pointer"
-            }`}
-            onClick={
-              isActivateOrInactivate ? () => handleInactive(record) : undefined
-            }
-          >
-            <Checkbox
-              className="inactive-check"
-              disabled={!isActivateOrInactivate}
-              checked={record.status !== "ACTIVE"}
-            />
-            <span
-              className={
-                isActivateOrInactivate ? "text-black" : "text-[#8D91A0]"
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  onClick={() => handleInactive(record)}
+                  disabled={record.status === "ACTIVE" ? false : true}
+                  checked={record.status === "ACTIVE" ? false : true}
+                />
               }
+              type={"action"}
+              border={false}
+              disabled={!isActivateOrInactivate}
+              onClick={() => handleInactive(record)}
             >
-              {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-            </span>
-          </div>
-        );
+              <span className="text-black ml-1">
+                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+            >
+              <div className="pt-1">
+                <Checkbox
+                  className="inactive-check"
+                  onClick={() => handleInactive(record)}
+                  disabled={record.status === "ACTIVE" ? false : true}
+                  checked={record.status === "ACTIVE" ? false : true}
+                />
+              </div>
+            </Tooltip>
+          );
+
+        return Content;
       },
     },
     {
@@ -382,29 +430,34 @@ const ContentManagementView = () => {
     const contentManagementCols = [
       ...columnsContentManagement(
         search,
-        page,
-        pageSize,
+        1,
+        loadMoreSize,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
-      // ✅ Definisikan manual action column dengan Dropdown Menu
+      // ✅ Definisikan manual action column dengan Detail icon + Dropdown Menu
       {
         title: "ACTION",
         key: "action",
         dataIndex: "action",
         fixed: "right",
-        width: 80,
+        width: 100,
         align: "center",
         render: (_, record) => {
-          // Filter hanya action dengan type "table"
-          const tableActions = itemGrantAccess.filter(
-            (item) => item.type === "table"
+          // Filter action table selain "View" untuk dropdown
+          const dropdownActions = itemGrantAccess.filter(
+            (item) => item.type === "table" && item.action !== "View",
+          );
+
+          // Ambil action "View" untuk icon detail
+          const viewAction = itemGrantAccess.find(
+            (item) => item.type === "table" && item.action === "View",
           );
 
           // Buat menu items untuk dropdown
-          const menuItems = tableActions.map((item, idx) => ({
+          const menuItems = dropdownActions.map((item, idx) => ({
             key: idx,
             label: item.render(record, 5),
           }));
@@ -412,19 +465,22 @@ const ContentManagementView = () => {
           const menu = <Menu items={menuItems} />;
 
           return (
-            <Dropdown
-              overlay={menu}
-              trigger={["click"]}
-              placement="bottomRight"
-            >
-              <MoreOutlined
-                style={{
-                  fontSize: "20px",
-                  cursor: "pointer",
-                  color: "#0075bf",
-                }}
-              />
-            </Dropdown>
+            <div className="flex items-center justify-center gap-2">
+              <Dropdown
+                overlay={menu}
+                trigger={["click"]}
+                placement="bottomRight"
+              >
+                <MoreOutlined
+                  style={{
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    color: "#0075bf",
+                  }}
+                />
+              </Dropdown>
+              {viewAction && viewAction.render(record)}
+            </div>
           );
         },
       },
@@ -437,7 +493,7 @@ const ContentManagementView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText]);
+  }, [search, searchedColumn, searchText]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -489,7 +545,7 @@ const ContentManagementView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
+              <p className="w-full mt-[15px] text-primary">
                 CONTENT MANAGEMENT LIST
               </p>
 
@@ -499,19 +555,24 @@ const ContentManagementView = () => {
         >
           <div className={"w-full"}>
             <TableRBI
-              dataSource={dataSource}
+              idTable="contentManagementTable"
+              dataSource={content_list}
               columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
+              totalData={content_pagination?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 1000 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>

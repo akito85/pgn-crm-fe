@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { Dropdown } from "antd";
+import { Dropdown, Skeleton } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -11,18 +11,12 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { getJobManagementColumns } from "../jobManagementColumns";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
-import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
+import { useSearchJobsQuery, useDeleteJobMutation, useGetAccessGroupsQuery, useCreateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
+import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
+import IconCopy from "../../../../assets/Icon/Nx/IconCopy";
 
-const PAGE_SIZE = 20;
-
-// ─── SVG Icons ───────────────────────────────────────────────────────────────
-
-const ThreeDotsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path fillRule="evenodd" clipRule="evenodd" d="M8.75 4.16663C8.75 3.83511 8.8817 3.51716 9.11612 3.28274C9.35054 3.04832 9.66848 2.91663 10 2.91663H10.0083C10.3399 2.91663 10.6578 3.04832 10.8922 3.28274C11.1266 3.51716 11.2583 3.83511 11.2583 4.16663V4.17496C11.2583 4.50648 11.1266 4.82442 10.8922 5.05884C10.6578 5.29326 10.3399 5.42496 10.0083 5.42496H10C9.66848 5.42496 9.35054 5.29326 9.11612 5.05884C8.8817 4.82442 8.75 4.50648 8.75 4.17496V4.16663ZM8.75 9.99996C8.75 9.66844 8.8817 9.3505 9.11612 9.11608C9.35054 8.88166 9.66848 8.74996 10 8.74996H10.0083C10.3399 8.74996 10.6578 8.88166 10.8922 9.11608C11.1266 9.3505 11.2583 9.66844 11.2583 9.99996V10.0083C11.2583 10.3398 11.1266 10.6578 10.8922 10.8922C10.6578 11.1266 10.3399 11.2583 10.0083 11.2583H10C9.66848 11.2583 9.35054 11.1266 9.11612 10.8922C8.8817 10.6578 8.75 10.3398 8.75 10.0083V9.99996ZM10 14.5833C9.66848 14.5833 9.35054 14.715 9.11612 14.9494C8.8817 15.1838 8.75 15.5018 8.75 15.8333V15.8416C8.75 16.1731 8.8817 16.4911 9.11612 16.7255C9.35054 16.9599 9.66848 17.0916 10 17.0916H10.0083C10.3399 17.0916 10.6578 16.9599 10.8922 16.7255C11.1266 16.4911 11.2583 16.1731 11.2583 15.8416V15.8333C11.2583 15.5018 11.1266 15.1838 10.8922 14.9494C10.6578 14.715 10.3399 14.5833 10.0083 14.5833H10Z" fill="#1976D2"/>
-  </svg>
-);
+const PAGE_SIZE = 30;
 
 const ViewListIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -51,8 +45,16 @@ const JobPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch { return null; }
+  }, [rawToken]);
+
   // Permission check
-  const { actions } = useGrantAccessHooks();
+  const { actions, loading: permissionsLoading } = useGrantAccessHooks();
   const permissions = useMemo(
     () => (actions ?? []).map((a) => a.toLowerCase()),
     [actions]
@@ -71,6 +73,9 @@ const JobPage = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [jobToDelete, setJobToDelete]         = useState(null); // { id, name, code }
 
+  // Copy state
+  const [copyingId, setCopyingId] = useState(null);
+
   // RTK Query hooks
   const { data, isFetching } = useSearchJobsQuery({
     page,
@@ -86,6 +91,7 @@ const JobPage = () => {
   }, [accessGroupsRaw]);
 
   const [deleteJobMutation, { isLoading: deleteLoading }] = useDeleteJobMutation();
+  const [createJobMutation] = useCreateJobMutation();
 
   // Accumulate pages for infinite scroll
   useEffect(() => {
@@ -140,7 +146,7 @@ const JobPage = () => {
       setJobToDelete(null);
       handleRefresh(); // reset to page 0 — RTK Query cache invalidation re-fetches automatically
     } catch {
-      // error shown via showModalError in the slice
+      // intentionally empty: deleteJob queryFn dispatches showModalError on failure
     }
   };
 
@@ -149,70 +155,118 @@ const JobPage = () => {
     setJobToDelete(null);
   };
 
-  // Action column (permission-gated)
-  const actionColumn = useMemo(() => {
-    const hasAnyAction = canUpdate || canDelete || canView;
-    if (!hasAnyAction) return null;
+  const handleCopy = useCallback(async (record) => {
+    setCopyingId(record.id);
+    try {
+      await createJobMutation({
+        name:                 `${record.name} (Copy)`,
+        code:                 `${record.code}_COPY`,
+        description:          record.description,
+        type:                 record.type,
+        executeType:          record.executeType,
+        handler:              record.handler,
+        taskQueueId:          record.taskQueueId    ?? null,
+        timeout:              record.timeout        ?? null,
+        maxRetry:             record.maxRetry       ?? 0,
+        retryPolicy:          record.retryPolicy    ?? null,
+        module:               record.module         ?? null,
+        defaultInput:         record.defaultInput   ?? null,
+        parameters:           record.parameters     ?? [],
+        accessGroupId:        record.accessGroupId  ?? null,
+        notificationSettings: record.notificationSettings ?? null,
+      }).unwrap();
+      handleRefresh();
+    } catch {
+      // intentionally empty: createJob queryFn dispatches showModalError on failure
+    } finally {
+      setCopyingId(null);
+    }
+  }, [createJobMutation]);
 
-    return {
-      title: "ACTIONS",
-      key: "actions",
-      width: 120,
-      align: "center",
-      fixed: "right",
-      render: (_, record) => {
-        const menuItems = [
-          canUpdate && {
-            key: "update",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <EditMenuIcon /> Update
-              </span>
-            ),
-            onClick: () => toUpdate(record.id),
-          },
-          canDelete && {
-            key: "delete",
-            label: (
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <DeleteMenuIcon /> Delete
-              </span>
-            ),
-            onClick: () => {
-              setJobToDelete({ id: record.id, name: record.name, code: record.code });
-              setDeleteModalOpen(true);
-            },
-          },
-        ].filter(Boolean);
-
+  // Action column — always present in baseColumns so the fixed-right column
+  // never appears/disappears (no layout shift). Skeleton and permission checks
+  // live inside render so only cell content changes during loading.
+  const actionColumn = useMemo(() => ({
+    title: "ACTIONS",
+    key: "actions",
+    width: 120,
+    align: "center",
+    fixed: "right",
+    render: (_, record) => {
+      if (permissionsLoading) {
         return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {menuItems.length > 0 && (
-              <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-                <button
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ThreeDotsIcon />
-                </button>
-              </Dropdown>
-            )}
-            {canView && (
-              <button
-                style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
-                onClick={() => toView(record.id)}
-              >
-                <ViewListIcon />
-              </button>
-            )}
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
           </div>
         );
-      },
-    };
-  }, [toView, toUpdate, canUpdate, canDelete, canView]);
+      }
+
+      const hasAnyAction = canCreate || canUpdate || canDelete || canView;
+      if (!hasAnyAction) return null;
+
+      const menuItems = [
+        canCreate && {
+          key: "copy",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
+              <IconCopy width="18" height="18" /> Copy
+            </span>
+          ),
+          onClick: () => handleCopy(record),
+          disabled: copyingId === record.id,
+        },
+        canUpdate && {
+          key: "update",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EditMenuIcon /> Update
+            </span>
+          ),
+          onClick: () => toUpdate(record.id),
+        },
+        canDelete && {
+          key: "delete",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <DeleteMenuIcon /> Delete
+            </span>
+          ),
+          onClick: () => {
+            setJobToDelete({ id: record.id, name: record.name, code: record.code });
+            setDeleteModalOpen(true);
+          },
+        },
+      ].filter(Boolean);
+
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          {menuItems.length > 0 && (
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
+              <button
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+                onClick={(e) => e.stopPropagation()}
+                type="button"
+              >
+                <IconThreeDots />
+              </button>
+            </Dropdown>
+          )}
+          {canView && (
+            <button
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
+              onClick={() => toView(record.id)}
+              type="button"
+            >
+              <ViewListIcon />
+            </button>
+          )}
+        </div>
+      );
+    },
+  }), [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
+    () => [...getJobManagementColumns(accessGroupsMap), actionColumn],
     [actionColumn, accessGroupsMap]
   );
 
@@ -265,6 +319,7 @@ const JobPage = () => {
       >
         <NxTable
           idTable="job-list-table"
+          userId={userId}
           dataSource={accumulatedData}
           totalData={data?.totalElements}
           current={page + 1}
@@ -280,8 +335,8 @@ const JobPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
-          onRefresh={handleRefresh}
-          showRefresh={true}
+          // onRefresh={handleRefresh}
+          // showRefresh={true}
         />
       </NxCardContainer>
 
@@ -293,18 +348,21 @@ const JobPage = () => {
         handleCancel={handleDeleteCancel}
         width={480}
         footer={[
-          <ButtonComponent key="cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
-            Cancel
-          </ButtonComponent>,
-          <ButtonComponent
-            key="delete"
-            border={false}
-            className="!bg-[#d32f2f] !text-white !border-transparent"
-            onClick={handleDeleteConfirm}
-            loading={deleteLoading}
-          >
-            Delete
-          </ButtonComponent>,
+          <div className="flex flex-row justify-between items-center">
+            <ButtonComponent size={"small"} key="cancel" onClick={handleDeleteCancel} disabled={deleteLoading}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              size={"small"}
+              key="delete"
+              border={false}
+              className="!bg-[#d32f2f] !text-white !border-transparent"
+              onClick={handleDeleteConfirm}
+              loading={deleteLoading}
+            >
+              Delete
+            </ButtonComponent>
+          </div>
         ]}
       >
         <div style={{ padding: "20px 24px" }}>

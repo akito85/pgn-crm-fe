@@ -1,5 +1,3 @@
-// PERUBAHAN PADA CALCULATIONSUMMARY COMPONENT
-
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../../components/TableRBI";
@@ -13,12 +11,12 @@ import {
 } from "./columns/ColumnsCalculationSummary";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const CalculationSummary = ({ ratingCode, saType }) => {
+const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
   const { 
     data_calculationSummary, 
     data_calculationSummaryExpand,
     loadingExpand,
-    loading 
+    loadingCalculation 
   } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -51,10 +49,11 @@ const CalculationSummary = ({ ratingCode, saType }) => {
 
   // Initial fetch - load pertama kali dengan pageSize besar
   useEffect(() => {
-    if (ratingCode) {
+    if (ratingCode && calculationCode) {
       dispatch(
         getAllCalculationSummaryPaginate({
           ratingCode,
+          calculationCode,
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
           pageSize: initialPageSize,
@@ -64,18 +63,22 @@ const CalculationSummary = ({ ratingCode, saType }) => {
       );
       setPage(1);
     }
-  }, [ratingCode, search, sort, dispatch]);
+  }, [ratingCode, calculationCode, search, sort, dispatch]);
 
   // Handle expand row
   const handleExpand = (expanded, record) => {
-    const rowKey = record.id;
+    // Hitung rowKey konsisten dengan dataSource mapping
+    const rowKey = record.id || `${record.transactionDate}-${record.saType}`;
     
     if (expanded) {
       setExpandedRowKeys([...expandedRowKeys, rowKey]);
       
       dispatch(
         getAllCalculationSummaryExpandPaginate({
-          id: record.id,
+          id: record.id || rowKey,
+          ratingCode,
+          calculationCode,
+          saType,
           page: 1,
           pageSize: 100,
           search: "",
@@ -117,6 +120,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
     await dispatch(
       getAllCalculationSummaryPaginate({
         ratingCode,
+        calculationCode,
         search: encodeURIComponent(JSON.stringify(search)),
         page: nextPage,
         pageSize: loadMoreSize,
@@ -130,10 +134,11 @@ const CalculationSummary = ({ ratingCode, saType }) => {
 
   // Handle refresh
   const handleRefresh = () => {
-    if (ratingCode) {
+    if (ratingCode && calculationCode) {
       dispatch(
         getAllCalculationSummaryPaginate({
           ratingCode,
+          calculationCode,
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
           pageSize: initialPageSize,
@@ -165,7 +170,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
         searchText,
         handleSearch,
       ),
-    [searchedColumn, searchText, search]
+    [searchedColumn, searchText, search, page]
   );
 
   const allColumns = useMemo(() => {
@@ -200,7 +205,7 @@ const CalculationSummary = ({ ratingCode, saType }) => {
         columnDefinitions={columnDefinitions}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
-        loading={loading}
+        loading={loadingCalculation}
         usePagination={false}
         useInfiniteScroll={true}
         onLoadMore={handleLoadMore}

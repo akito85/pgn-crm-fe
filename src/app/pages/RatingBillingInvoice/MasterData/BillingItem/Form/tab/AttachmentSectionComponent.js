@@ -190,19 +190,12 @@ const columnAttachmentData = (
             </Tooltip>
             {type !== "detail" ? (
               <Tooltip title="Delete">
-                <span
-                  className={`flex justify-center${
-                    r.dataType === "exist" ? " cursor-not-allowed" : ""
-                  }`}
-                >
+                <span className="flex justify-center">
                   <SVGIcon
                     name="IconDelete"
-                    color={r.dataType !== "exist" ? "#D90000" : "#8D91A0"}
+                    color="#D90000"
                     width={24}
-                    className={r.dataType === "exist" ? "disabled" : undefined}
-                    onClick={
-                      r.dataType !== "exist" ? () => handleDelete(r) : undefined
-                    }
+                    onClick={() => handleDelete(r)}
                   />
                 </span>
               </Tooltip>

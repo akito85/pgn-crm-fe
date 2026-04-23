@@ -76,6 +76,13 @@ const COL_PAD           = 24;  // px — 8px left + 8px right padding + 8px buff
 const HEADER_FONT_SIZE  = 10;  // px — matches CSS font-size on header cells
 const CELL_FONT_SIZE    = 12;  // px — matches CSS font-size on data cells
 
+// ── Column settings prefix constants ──────────────────────────────────────────
+// Namespace parent vs child column keys inside ColumnSettings so each table's
+// hidden/fixed state is fully independent.  Prefixes are stripped before storing
+// in actual state; they only exist in the data passed to ColumnSettings.
+const PARENT_COL_PFX = "parent:";
+const CHILD_COL_PFX  = "child:";
+
 // ── Module-level style objects (stable references — never recreated per render) ──
 const HEADER_CELL_STYLE = {
   background: HEADER_BG, display: "flex", alignItems: "center",
@@ -277,7 +284,11 @@ const useColumnPreferences = ({ userId, idTable, fixedColumnsProp, childFixedCol
 
   const write = useCallback((patch) => { writerRef.current(patch); }, []);
 
-  const initHiddenColumns       = savedPrefs?.hiddenColumns        ?? [];
+  // Migrate: old schema stored a single shared `hiddenColumns`; new schema
+  // stores per-table `parentHiddenColumns` / `childHiddenColumns`.
+  // When reading old prefs, seed both with the old value so nothing is lost.
+  const initParentHiddenColumns = savedPrefs?.parentHiddenColumns ?? savedPrefs?.hiddenColumns ?? [];
+  const initChildHiddenColumns  = savedPrefs?.childHiddenColumns  ?? savedPrefs?.hiddenColumns ?? [];
   const initFixedColumns        = savedPrefs?.fixedColumns         ?? {
     left:  Array.isArray(fixedColumnsProp?.left)       ? [...fixedColumnsProp.left]       : [],
     right: Array.isArray(fixedColumnsProp?.right)      ? [...fixedColumnsProp.right]      : [],
@@ -293,7 +304,8 @@ const useColumnPreferences = ({ userId, idTable, fixedColumnsProp, childFixedCol
 
   return {
     write,
-    initHiddenColumns,
+    initParentHiddenColumns,
+    initChildHiddenColumns,
     initFixedColumns,
     initChildFixedColumns,
     initParentColumnWidths,
@@ -663,7 +675,8 @@ const ChildTable = React.memo(({
   // resize handle and drag events are actually wired up.  Previously ChildTable
   // rendered plain <div>s and the _on* callbacks were silently ignored.
   // isLastBorder: whether to omit the right border (last column in the visual row).
-  // All columns use explicit col.width — no flex:1 anywhere.
+  // Fill columns (col._fill) use flex:1 to absorb remaining width; all others
+  // use explicit widths matching the parent row behaviour.
   const renderHeaderCell = (col, isLastBorder, extraStyle = {}) => (
     <ResizableHeaderCell
       key={col.key || col.dataIndex}
@@ -676,9 +689,9 @@ const ChildTable = React.memo(({
       onDragEnd={col._onDragEnd}
       style={{
         ...HEADER_CELL_STYLE,
-        width:      col.width,
-        flex:       "none",
-        minWidth:   col.width,
+        ...(col._fill
+          ? { flex: 1, minWidth: col.width }
+          : { flex: "none", width: col.width, minWidth: col.width }),
         justifyContent: "center",
         borderRight: isLastBorder ? "none" : `1px solid rgba(255,255,255,0.2)`,
         opacity:    col._isDragging ? 0.5 : 1,
@@ -728,29 +741,31 @@ const ChildTable = React.memo(({
   const rightFixed = processedColumns.filter(c => c._fixed === "right");
   const normal     = processedColumns.filter(c => !c._fixed);
   const hasFixed   = leftFixed.length > 0 || rightFixed.length > 0;
+  // When any column is a fill column the row containers must stretch to 100%
+  // width instead of max-content so the fill column has space to grow into.
+  const hasFill = processedColumns.some(c => c._fill);
 
   if (!hasFixed) {
     return (
       <div className="nx-child-scroll" style={{ overflowX: "auto", width: "100%" }}>
         {/* Header row — ResizableHeaderCell for resize + drag */}
-        <div style={{ display: "flex", minWidth: "max-content" }}>
+        <div style={{ display: "flex", minWidth: hasFill ? "100%" : "max-content" }}>
           {processedColumns.map((col, colIdx) =>
             renderHeaderCell(col, colIdx === lastIdx)
           )}
         </div>
         {/* Data rows — column-per-flex-div layout for perf.
-             All columns use explicit widths — same rule as parent. */}
-        <div style={{ display: "flex", minWidth: "max-content" }}>
+             Fill columns (col._fill) use flex:1; all others use explicit widths. */}
+        <div style={{ display: "flex", minWidth: hasFill ? "100%" : "max-content" }}>
           {processedColumns.map((col, colIdx) => {
             const isLastBorder = colIdx === lastIdx;
             return (
               <div
                 key={col.key || col.dataIndex || colIdx}
                 style={{
-                  width:         col.width,
-                  minWidth:      col.width,
-                  flexShrink:    0,
-                  flex:          "none",
+                  ...(col._fill
+                    ? { flex: 1, minWidth: col.width }
+                    : { flex: "none", width: col.width, minWidth: col.width, flexShrink: 0 }),
                   borderRight:   isLastBorder ? "none" : `1px solid ${BORDER_COL}`,
                   display:       "flex",
                   flexDirection: "column",
@@ -759,8 +774,11 @@ const ChildTable = React.memo(({
                 {filteredRows.map((row, rowIdx) => {
                   const rawValue = row[col.dataIndex ?? col.key];
                   const cellValue = col.render ? col.render(rawValue, row, rowIdx) : (rawValue ?? "—");
+                  const cellStyle = col._fill
+                    ? { ...dataCellStyle(col, rowIdx, false), width: "100%", minWidth: 0 }
+                    : dataCellStyle(col, rowIdx, false);
                   return (
-                    <div key={row.id ?? row.key ?? rowIdx} style={dataCellStyle(col, rowIdx, false)}>
+                    <div key={row.id ?? row.key ?? rowIdx} style={cellStyle}>
                       {highlightText(cellValue, searchValue)}
                     </div>
                   );
@@ -1091,7 +1109,8 @@ const NxTableNested = ({
   // ── Preference persistence ─────────────────────────────────────────────────
   const {
     write: writePrefs,
-    initHiddenColumns,
+    initParentHiddenColumns,
+    initChildHiddenColumns,
     initFixedColumns,
     initChildFixedColumns,
     initParentColumnWidths,
@@ -1108,7 +1127,10 @@ const NxTableNested = ({
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [expandedKeys,         setExpandedKeys]         = useState(new Set());
-  const [optionSelectedCol,    setOptionSelectedCol]    = useState(() => initHiddenColumns);
+  // Per-table hidden column state — separate so parent and child columns can be
+  // hidden/shown independently in Column Settings.
+  const [parentHiddenCols,     setParentHiddenCols]     = useState(() => initParentHiddenColumns);
+  const [childHiddenCols,      setChildHiddenCols]      = useState(() => initChildHiddenColumns);
   const [isAdvanceOpen,        setIsAdvanceOpen]        = useState(false);
   const [isLoadingMore,        setIsLoadingMore]        = useState(false);
   const [searchValue,          setSearchValue]          = useState("");
@@ -1240,35 +1262,123 @@ const NxTableNested = ({
     right: Array.isArray(internalChildFixed?.right) ? internalChildFixed.right : [],
   }), [internalChildFixed]);
 
-  // ColumnSettings receives parent fixed state for parent-only + shared columns,
-  // child fixed state for child-only columns, and a union only for the display
-  // check so that fixing a shared column shows it as checked in both sections.
+  // ── Build columns list for ColumnSettings ─────────────────────────────────
+  // When no columnDefinitions override is provided we build a combined list with
+  // PREFIXED keys (PARENT_COL_PFX / CHILD_COL_PFX).  Prefixed keys give each
+  // table's columns a distinct identity inside ColumnSettings so that hiding or
+  // fixing a column in one table never affects the other — even for shared keys.
   //
-  // Previously this was a single merged set, meaning a column fixed in the parent
-  // would show as checked even in the child section, and vice-versa (Issue 4 fix).
-  //
-  // We still pass the union to ColumnSettings' fixedColumns prop because
-  // ColumnSettings has no concept of parent vs child — the per-table routing is
-  // handled inside onFixedColumnsChange above (Issue 3 fix).  The union gives the
-  // correct visual state: a shared column appears checked when it is fixed in
-  // EITHER table (after Issue 3 fix they are always in sync anyway).
-  const combinedFixedForSettings = useMemo(() => ({
-    left:  [...new Set([...safeFixed.left,  ...safeChildFixed.left])],
-    right: [...new Set([...safeFixed.right, ...safeChildFixed.right])],
-  }), [safeFixed, safeChildFixed]);
+  // For callers who pass columnDefinitions we fall back to combined behaviour:
+  // keys are normalised but not prefixed, and a shared key routes to both tables.
+  const columnsForSettings = useMemo(() => {
+    if (columnDefinitions) {
+      return columnDefinitions.map(c => ({ ...c, key: c.key || c.dataIndex || c.title }));
+    }
+    const pCols = filteredParentColumns.map(c => ({
+      ...c, key: PARENT_COL_PFX + (c.key || c.dataIndex || c.title),
+    }));
+    const cCols = childColumns.map(c => ({
+      ...c, key: CHILD_COL_PFX + (c.key || c.dataIndex || c.title),
+    }));
+    return [...pCols, ...cCols];
+  }, [columnDefinitions, filteredParentColumns, childColumns]);
+
+  // Hidden state for ColumnSettings — prefixed so each table is independent.
+  const hiddenForSettings = useMemo(() => {
+    if (columnDefinitions) {
+      return [...new Set([...parentHiddenCols, ...childHiddenCols])];
+    }
+    return [
+      ...parentHiddenCols.map(k => PARENT_COL_PFX + k),
+      ...childHiddenCols.map(k  => CHILD_COL_PFX  + k),
+    ];
+  }, [columnDefinitions, parentHiddenCols, childHiddenCols]);
+
+  // Fixed state for ColumnSettings — prefixed so each table is independent.
+  const fixedForSettings = useMemo(() => {
+    if (columnDefinitions) {
+      return {
+        left:  [...new Set([...safeFixed.left,  ...safeChildFixed.left])],
+        right: [...new Set([...safeFixed.right, ...safeChildFixed.right])],
+      };
+    }
+    return {
+      left: [
+        ...safeFixed.left.map(k      => PARENT_COL_PFX + k),
+        ...safeChildFixed.left.map(k => CHILD_COL_PFX  + k),
+      ],
+      right: [
+        ...safeFixed.right.map(k      => PARENT_COL_PFX + k),
+        ...safeChildFixed.right.map(k => CHILD_COL_PFX  + k),
+      ],
+    };
+  }, [columnDefinitions, safeFixed, safeChildFixed]);
+
+  // Parses prefixed hidden keys from ColumnSettings and routes to correct state.
+  const handleHiddenColumnsChange = useCallback((newPrefixed) => {
+    if (columnDefinitions) {
+      const parentKeySet = new Set(
+        filteredParentColumns.map(c => c.key || c.dataIndex || c.title).filter(Boolean)
+      );
+      const childKeySet = new Set(
+        childColumns.map(c => c.key || c.dataIndex || c.title).filter(Boolean)
+      );
+      setParentHiddenCols(newPrefixed.filter(k => parentKeySet.has(k)));
+      setChildHiddenCols(newPrefixed.filter(k => childKeySet.has(k)));
+      return;
+    }
+    const pNew = [];
+    const cNew = [];
+    newPrefixed.forEach(pk => {
+      if      (pk.startsWith(PARENT_COL_PFX)) pNew.push(pk.slice(PARENT_COL_PFX.length));
+      else if (pk.startsWith(CHILD_COL_PFX))  cNew.push(pk.slice(CHILD_COL_PFX.length));
+    });
+    setParentHiddenCols(pNew);
+    setChildHiddenCols(cNew);
+  }, [columnDefinitions, filteredParentColumns, childColumns]);
+
+  // Parses prefixed fixed keys from ColumnSettings and routes to correct state.
+  const handleFixedColumnsChange = useCallback((next) => {
+    const parentNext = { left: [], right: [] };
+    const childNext  = { left: [], right: [] };
+    if (columnDefinitions) {
+      const parentKeySet = new Set(
+        filteredParentColumns.map(c => c.key || c.dataIndex || c.title).filter(Boolean)
+      );
+      const childKeySet = new Set(
+        childColumns.map(c => c.key || c.dataIndex || c.title).filter(Boolean)
+      );
+      ["left", "right"].forEach(side => {
+        (next[side] || []).forEach(key => {
+          if (parentKeySet.has(key)) parentNext[side].push(key);
+          if (childKeySet.has(key))  childNext[side].push(key);
+        });
+      });
+    } else {
+      ["left", "right"].forEach(side => {
+        (next[side] || []).forEach(pk => {
+          if      (pk.startsWith(PARENT_COL_PFX)) parentNext[side].push(pk.slice(PARENT_COL_PFX.length));
+          else if (pk.startsWith(CHILD_COL_PFX))  childNext[side].push(pk.slice(CHILD_COL_PFX.length));
+        });
+      });
+    }
+    setInternalFixedColumns(parentNext);
+    setInternalChildFixed(childNext);
+  }, [columnDefinitions, filteredParentColumns, childColumns]);
 
   // ── Persist preferences on every relevant state change ────────────────────
   useEffect(() => {
     writePrefs({
-      hiddenColumns:      optionSelectedCol,
-      fixedColumns:       internalFixedColumns,
-      childFixedColumns:  internalChildFixed,
+      parentHiddenColumns: parentHiddenCols,
+      childHiddenColumns:  childHiddenCols,
+      fixedColumns:        internalFixedColumns,
+      childFixedColumns:   internalChildFixed,
       parentColumnWidths,
       childColumnWidths,
       parentColumnOrder,
       childColumnOrder,
     });
-  }, [optionSelectedCol, internalFixedColumns, internalChildFixed, parentColumnWidths, childColumnWidths, parentColumnOrder, childColumnOrder, writePrefs]);
+  }, [parentHiddenCols, childHiddenCols, internalFixedColumns, internalChildFixed, parentColumnWidths, childColumnWidths, parentColumnOrder, childColumnOrder, writePrefs]);
 
   // ── Sync column order when column definitions change ──────────────────────
   const getAllKeys = useCallback((cols) => cols.map(c => c.key || c.dataIndex || c.title).filter(Boolean), []);
@@ -1288,7 +1398,7 @@ const NxTableNested = ({
       prevParentKeysRef.current = sig;
       setParentColumnOrder(keys);
       const keySet = new Set(keys);
-      setOptionSelectedCol(prev => prev.filter(k => keySet.has(k)));
+      setParentHiddenCols(prev => prev.filter(k => keySet.has(k)));
     }
   }, [filteredParentColumns, getAllKeys]);
 
@@ -1302,6 +1412,8 @@ const NxTableNested = ({
     if (sig !== prevChildKeysRef.current) {
       prevChildKeysRef.current = sig;
       setChildColumnOrder(keys);
+      const childKeySet = new Set(keys);
+      setChildHiddenCols(prev => prev.filter(k => childKeySet.has(k)));
     }
   }, [childColumns, getAllKeys]);
 
@@ -1476,7 +1588,7 @@ const NxTableNested = ({
     const parentWidthsMerged = { ...autoMeasuredWidths, ...parentColumnWidths };
     const baseCols = buildDisplayColumns(
       filteredParentColumns,
-      optionSelectedCol,
+      parentHiddenCols,
       parentColumnOrder,
       safeFixed,
       parentWidthsMerged,
@@ -1505,9 +1617,9 @@ const NxTableNested = ({
       }];
     }
     return baseCols;
-  }, [filteredParentColumns, optionSelectedCol, parentColumnOrder, safeFixed, parentColumnWidths,
+  }, [filteredParentColumns, parentHiddenCols, parentColumnOrder, safeFixed, parentColumnWidths,
       parentHandleResize, handleParentDragStart, handleParentDragOver, handleParentDrop,
-      handleParentDragEnd, buildDisplayColumns, autoMeasuredWidths]);
+      handleParentDragEnd, buildDisplayColumns, autoMeasuredWidths, actionColumn]);
 
   // ── Build processed child columns ─────────────────────────────────────────
   const processedChildColumns = useMemo(() => {
@@ -1515,7 +1627,7 @@ const NxTableNested = ({
     const childWidthsMerged = { ...autoMeasuredWidths, ...childColumnWidths };
     return buildDisplayColumns(
       childColumns,
-      optionSelectedCol, // shared hidden-column toggle
+      childHiddenCols,
       childColumnOrder,
       safeChildFixed,
       childWidthsMerged,
@@ -1527,7 +1639,7 @@ const NxTableNested = ({
       handleChildDragEnd,
       draggedChildKeyRef,
     );
-  }, [childColumns, optionSelectedCol, childColumnOrder, safeChildFixed, childColumnWidths,
+  }, [childColumns, childHiddenCols, childColumnOrder, safeChildFixed, childColumnWidths,
       childHandleResize, childResizable, handleChildDragStart, handleChildDragOver,
       handleChildDrop, handleChildDragEnd, buildDisplayColumns, autoMeasuredWidths]);
 
@@ -1777,7 +1889,8 @@ const NxTableNested = ({
   const handleSearchChange  = useCallback((val) => { setSearchValue(val); }, []);
 
   const handleClearPreferences = useCallback(() => {
-    setOptionSelectedCol([]);
+    setParentHiddenCols([]);
+    setChildHiddenCols([]);
     setParentColumnWidths({});
     setChildColumnWidths({});
     setParentColumnOrder([]);
@@ -1836,35 +1949,11 @@ const NxTableNested = ({
         <div style={{ width: "100%", display: "flex", marginBottom: 12, justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <ColumnSettings
-              columns={columnDefinitions || [...parentColumns, ...childColumns]}
-              hiddenColumns={optionSelectedCol}
-              onHiddenColumnsChange={setOptionSelectedCol}
-              fixedColumns={combinedFixedForSettings}
-              onFixedColumnsChange={(next) => {
-                const parentKeySet = new Set(
-                  filteredParentColumns.map(c => c.key || c.dataIndex || c.title).filter(Boolean)
-                );
-                const childKeySet = new Set(
-                  childColumns.map(c => c.key || c.dataIndex || c.title).filter(Boolean)
-                );
-
-                const parentNext = { left: [], right: [] };
-                const childNext  = { left: [], right: [] };
-
-                ["left", "right"].forEach(side => {
-                  (next[side] || []).forEach(key => {
-                    // Route shared keys to BOTH tables so fixing a shared column
-                    // (e.g. "name") actually fixes it in parent AND child.
-                    // Previously the `!parentKeySet.has(key)` guard silently dropped
-                    // shared keys from childNext (Issue 3 fix).
-                    if (parentKeySet.has(key)) parentNext[side].push(key);
-                    if (childKeySet.has(key))  childNext[side].push(key);
-                  });
-                });
-
-                setInternalFixedColumns(parentNext);
-                setInternalChildFixed(childNext);
-              }}
+              columns={columnsForSettings}
+              hiddenColumns={hiddenForSettings}
+              onHiddenColumnsChange={handleHiddenColumnsChange}
+              fixedColumns={fixedForSettings}
+              onFixedColumnsChange={handleFixedColumnsChange}
               buttonText="Column Settings"
               buttonStyle={{ height: "32px", fontSize: "12px" }}
             />

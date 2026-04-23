@@ -34,11 +34,9 @@ import PrabillSaCalcRuleSection from "./ServiceAgreement/PrabillSaCalcRuleSectio
 import PrabillSaPricingSection from "./ServiceAgreement/PrabillSaPricingSection";
 import PrabillSaTosSection from "./ServiceAgreement/PrabillSaTosSection";
 
-const { TabPane } = Tabs;
-
 const renderValue = (val) => {
-  if (val === null || val === undefined || val === "") return "";
-  return val;
+  if (val === null || val === undefined || val === "") return "-";
+  return String(val);
 };
 
 const createFixedColumnsState = (leftCols = ["no"], rightCols = []) => ({
@@ -149,6 +147,10 @@ const AccountDetailPage = () => {
     };
 
     dispatch(getCustomerHeaderData(baseParams));
+    dispatch(getCustomerUsageData({ ...baseParams, sort: "measDate~desc" }));
+    dispatch(getCustomerTaxData(baseParams));
+    dispatch(getCustomerBillingBucketData(baseParams));
+    dispatch(getCustomerBillingItemData(baseParams));
     dispatch(
       getCustomerSaData({
         customerNumber,
@@ -157,10 +159,6 @@ const AccountDetailPage = () => {
         size: 10,
       })
     );
-    dispatch(getCustomerUsageData({ ...baseParams, sort: "measDate~desc" }));
-    dispatch(getCustomerTaxData(baseParams));
-    dispatch(getCustomerBillingBucketData(baseParams));
-    dispatch(getCustomerBillingItemData(baseParams));
 
     return () => {
       dispatch(resetCustomerDetail());
@@ -255,7 +253,6 @@ const AccountDetailPage = () => {
   }, []);
 
   // Data dari Redux
-  const headerData = customer_account_detail?.headerData || {};
   const saData = customer_account_detail?.saData?.result || [];
   const saPage = customer_account_detail?.saData?.page || {};
   const usageData = customer_account_detail?.usageData?.result || [];
@@ -268,11 +265,12 @@ const AccountDetailPage = () => {
   const billingItemPage = customer_account_detail?.billingItemData?.page || {};
 
   const firstHeaderData = useMemo(() => {
+    const headerData = customer_account_detail?.headerData || {};
     if (Array.isArray(headerData) && headerData.length > 0) {
       return headerData[0];
     }
     return headerData || {};
-  }, [headerData]);
+  }, [customer_account_detail?.headerData]);
 
   // Base Columns
   const saColumnsBase = useMemo(() => createSAColumns(renderValue), []);
@@ -293,9 +291,10 @@ const AccountDetailPage = () => {
         render: (text, record) => (
           <div className="flex w-full justify-center gap-6">
             <Tooltip title="Detail">
-              <div className="pt-1 cursor-pointer">
+              <div className="pt-0 cursor-pointer">
                 <SVGIcon
                   name="IconDetail"
+                  color="#0075BF"
                   width={20}
                   onClick={() => handleViewSaDetail(record)}
                 />
@@ -519,21 +518,22 @@ const AccountDetailPage = () => {
         }
         className="mt-1"
       >
-        <Tabs activeKey={activeTab} onChange={handleTabChange} type="card">
-          {TAB_CONFIGS.map((tab) => {
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          type="card"
+          items={TAB_CONFIGS.map((tab) => {
             const tabData = tabDataMapping[tab.key];
             const currentPag = pagination[tab.key];
-
-            return (
-              <TabPane
-                tab={
-                  <span>
-                    {tab.label}
-                    {` (${tabData.page?.totalElements || 0})`}
-                  </span>
-                }
-                key={tab.key}
-              >
+            return {
+              key: tab.key,
+              label: (
+                <span>
+                  {tab.label}
+                  {` (${tabData.page?.totalElements || 0})`}
+                </span>
+              ),
+              children: (
                 <TableRBI
                   columns={tabData.columns}
                   dataSource={tabData.data}
@@ -555,10 +555,10 @@ const AccountDetailPage = () => {
                   loading={tabData.loading}
                   pagination={true}
                 />
-              </TabPane>
-            );
+              ),
+            };
           })}
-        </Tabs>
+        />
       </CardContainer>
 
       {/* SA Detail Section */}

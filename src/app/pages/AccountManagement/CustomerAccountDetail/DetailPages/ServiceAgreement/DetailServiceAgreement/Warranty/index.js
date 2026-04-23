@@ -51,7 +51,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
-  const [openModalHistory, setOpenModalHistory] = useState(false);
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [dataInactivate, setDataInactivate] = useState({});
@@ -178,9 +178,14 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     setPage(1);
   };
 
-  const handleApprovalHistory = (record) => {
-    dispatch(getApprovalHistoryWarranty(record.id));
-    setOpenModalHistory(true);
+  const handleApprovalHistoryModal = (show, warrantyTermId = 0) => {
+    if (show) {
+      dispatch(getApprovalHistoryWarranty(warrantyTermId));
+      setShowApprovalHistoryModal(true);
+      return;
+    }
+
+    setShowApprovalHistoryModal(false);
   };
   const handleOpenModalInactivate = (record) => {
     setDataInactivate(record);
@@ -254,15 +259,6 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     setModalError(false);
     setBodyError({});
   };
-  const handleOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    return Object.keys(data).map((item) => ({
-      key: item,
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-      label: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
-
   // ─── WARRANTY INFORMATION columns (display-only, ACTION = detail icon) ─
   const warrantyInfoColumns = useMemo(
     () => [
@@ -644,7 +640,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
             <ButtonComponent
               icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
               border={false}
-              onClick={() => handleApprovalHistory(record)}
+              onClick={() => handleApprovalHistoryModal(true, record?.id)}
             >
               <span className={"text-black"}>Approval History</span>
             </ButtonComponent>
@@ -654,7 +650,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
                 <ButtonComponent
                   icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
                   border={false}
-                  onClick={() => handleApprovalHistory(record)}
+                  onClick={() => handleApprovalHistoryModal(true, record?.id)}
                 />
               </span>
             </Tooltip>
@@ -740,10 +736,9 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
 
       {/* ── Modals ── */}
       <NxHistoryModal
-        isOpen={openModalHistory && dataApprovalHistoryFix}
-        handleClose={() => setOpenModalHistory(false)}
+        isOpen={showApprovalHistoryModal}
+        handleClose={() => handleApprovalHistoryModal(false)}
         header={"Approval History"}
-        tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
         dataHistory={dataApprovalHistoryFix?.dataHistory}
       />

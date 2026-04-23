@@ -32,6 +32,7 @@ logs/
 docs/
 
 .cla*
+.q*
 *.md
 *.MD
 *.sh
@@ -41,3 +42,6 @@ docs/
 # Local workspace (mockups, scratch work, design artifacts)
 .workspace/
 .sup*
+
+src/setupProxy.js
+.gitnexus

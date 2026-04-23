@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
@@ -15,6 +21,7 @@ import {
   getApprovalHierarchyList,
   getApprovalHierarchyDetail,
   inactiveEfakturCode,
+  requestActivateEfakturCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/efakturCode";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -26,8 +33,8 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const EFakturCodeView = () => {
   // Selector - Fully integrated with Redux
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.masterEfakturCode
+  const { data, data_list, loading, data_approval_history } = useSelector(
+    (state) => state.masterEfakturCode,
   );
 
   // Declaration
@@ -42,6 +49,10 @@ const EFakturCodeView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const loadMoreSize = 20;
+  const hasMore = data_list.length < (data?.page?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -50,22 +61,30 @@ const EFakturCodeView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
   // Fixed columns state with new format { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
     const saved = localStorage.getItem("efakturCodeFixedColumns");
     return saved
       ? JSON.parse(saved)
       : {
-          left: ["no"],
-          right: ["action"],
-        };
+        left: ["no"],
+        right: ["action"],
+      };
   });
 
   // Save to localStorage when fixedColumns change
   useEffect(() => {
     localStorage.setItem(
       "efakturCodeFixedColumns",
-      JSON.stringify(fixedColumns)
+      JSON.stringify(fixedColumns),
     );
   }, [fixedColumns]);
 
@@ -73,12 +92,13 @@ const EFakturCodeView = () => {
     dispatch(
       getAllEfakturCodePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [page, pageSize, sort, dispatch, search]);
+  }, [sort, dispatch, search, refreshKey]);
 
   // Format approval history data
   useEffect(() => {
@@ -88,11 +108,15 @@ const EFakturCodeView = () => {
           create: data_approval_history?.dataApprover?.FAKTUR_CODE || [],
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_FAKTUR_CODE || [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_FAKTUR_CODE || [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.FAKTUR_CODE || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_FAKTUR_CODE || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_FAKTUR_CODE || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -123,9 +147,6 @@ const EFakturCodeView = () => {
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -160,6 +181,25 @@ const EFakturCodeView = () => {
     setSort(dataSort);
   };
 
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    const nextPage = Math.floor(data_list.length / loadMoreSize) + 1;
+    await dispatch(
+      getAllEfakturCodePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [dispatch, search, sort, data_list.length]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
+
   const handleOptions = () => {
     const data = dataApprovalHistory?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -169,12 +209,21 @@ const EFakturCodeView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       fakturCodeId: chooseId.einvoiceCodeId,
-      apphierId: chooseId.apphierId,
+      apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveEfakturCode(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateEfakturCode : inactiveEfakturCode)(
+        dataValue,
+      ),
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -192,10 +241,11 @@ const EFakturCodeView = () => {
         dispatch(
           getAllEfakturCodePaginate({
             search: tempSearch,
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
-          })
+            isLoadMore: false,
+          }),
         );
       })
       .catch((error) => {
@@ -206,7 +256,12 @@ const EFakturCodeView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -248,7 +303,7 @@ const EFakturCodeView = () => {
         pageSize,
         sort,
         search: tempSearch,
-      })
+      }),
     );
   };
 
@@ -260,7 +315,9 @@ const EFakturCodeView = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20px" }} />
+          }
           onClick={() => {
             handleDownload();
           }}
@@ -274,7 +331,9 @@ const EFakturCodeView = () => {
       render: (
         <NavLink to={RBI_ROUTES.EFAKTUR_CODE_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20px" }} />
+            }
             type="submit"
           >
             Create E-Faktur Code
@@ -306,8 +365,7 @@ const EFakturCodeView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -319,13 +377,13 @@ const EFakturCodeView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -362,14 +420,16 @@ const EFakturCodeView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -378,28 +438,29 @@ const EFakturCodeView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className="text-black ml-1">
+                {rowStatus !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status !== "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -418,10 +479,11 @@ const EFakturCodeView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.einvoiceCodeId)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -444,7 +506,7 @@ const EFakturCodeView = () => {
   // Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // Get base columns with key property
@@ -457,7 +519,7 @@ const EFakturCodeView = () => {
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];
@@ -521,7 +583,7 @@ const EFakturCodeView = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
+              <p className="w-full mt-[15px] text-primary">
                 LIST E-FAKTUR CODE
               </p>
 
@@ -531,19 +593,28 @@ const EFakturCodeView = () => {
         >
           <div className={"w-full"}>
             <TableRBI
-              dataSource={dataSource}
+              idTable="efakturCodeTable"
+              dataSource={data_list}
               columns={columns}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
+              loading={loading}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 1000 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              useInfiniteScroll={true}
+              usePagination={false}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
@@ -565,9 +636,10 @@ const EFakturCodeView = () => {
           dispatch={dispatch}
           getAPIOption={getApprovalHierarchyList}
           getAPIDetail={getApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this E-Faktur Code with name ${
-            chooseId?.einvoiceCodeId || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+              ? "activate"
+              : "inactivate"
+            } this E-Faktur Code with name ${chooseId?.einvoiceCodeId || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -585,7 +657,8 @@ const EFakturCodeView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError?.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

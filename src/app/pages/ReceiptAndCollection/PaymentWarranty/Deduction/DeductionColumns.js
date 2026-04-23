@@ -19,6 +19,7 @@ export const getDeductionColumns = ({
             align: "center",
             key: "no",
             width: 60,
+            fixed: "left",
             render: (text, object, index) => (page - 1) * pageSize + index + 1,
         },
         {
@@ -140,7 +141,7 @@ export const getDeductionColumns = ({
             render: (value) => (value ? value.toLocaleString("id-ID") : 0),
         },
         {
-            title: "TOTAL SUCCESS",
+            title: "TOTAL SUCCES",
             dataIndex: "totalSuccess",
             key: "totalSuccess",
             width: 150,
@@ -219,41 +220,11 @@ export const getDeductionColumns = ({
                     .includes(value.toLowerCase()),
         },
         {
-            title: "APPROVAL STATUS",
-            dataIndex: "approvalStatus",
-            key: "approvalStatus",
-            width: 150,
-            sorter: (a, b) => a?.approvalStatus?.localeCompare(b?.approvalStatus),
-            ...getColumnSearchPropsPaging(
-                "approvalStatus",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch
-            ),
-            onFilter: (value, record) =>
-                record["approvalStatus"]
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(value.toLowerCase()),
-            render: (status) => {
-                const displayStatus = status || "DRAFT";
-                const statusLabel = displayStatus.replace(/_/g, " ");
-
-                return (
-                    <div className="flex justify-center">
-                        <StatusComponent colour={displayStatus.toLowerCase()}>
-                            {statusLabel}
-                        </StatusComponent>
-                    </div>
-                );
-            }
-        },
-        {
             title: "STATUS",
             dataIndex: "status",
             key: "status",
-            width: 100,
+            width: 150,
+            fixed: "right",
             sorter: (a, b) => a?.status?.localeCompare(b?.status),
             ...getColumnSearchPropsPaging(
                 "status",
@@ -280,7 +251,38 @@ export const getDeductionColumns = ({
                 );
             }
         },
+        {
+            title: "STATUS APPROVAL",
+            dataIndex: "approvalStatus",
+            key: "approvalStatus",
+            width: 150,
+            fixed: "right",
+            sorter: (a, b) => a?.approvalStatus?.localeCompare(b?.approvalStatus),
+            ...getColumnSearchPropsPaging(
+                "approvalStatus",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch
+            ),
+            onFilter: (value, record) =>
+                record["approvalStatus"]
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(value.toLowerCase()),
+            render: (status) => {
+                const displayStatus = status || "DRAFT";
+                const statusLabel = displayStatus.replace(/_/g, " ");
 
+                return (
+                    <div className="flex justify-center">
+                        <StatusComponent colour={displayStatus.toLowerCase()}>
+                            {statusLabel}
+                        </StatusComponent>
+                    </div>
+                );
+            }
+        },
     ];
 
     return columns;

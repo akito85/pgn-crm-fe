@@ -18,6 +18,7 @@ const ConfirmationEFakturCode = ({
   handleConfirm = () => {},
   dataOption = [],
 }) => {
+  console.log("data", data);
   // State
   const [valuePage, setValuePage] = useState("Efaktur Code");
 
@@ -60,7 +61,7 @@ const ConfirmationEFakturCode = ({
               disableSelect={true}
               approvalName={
                 (dataOption || []).filter(
-                  (data) => data.value === selectedHierarchy
+                  (data) => data.value === selectedHierarchy,
                 )?.[0]?.name || ""
               }
               dataTable={listDataAppHierDetail}

@@ -1,20 +1,19 @@
-import { LeftOutlined } from "@ant-design/icons";
+import { Tabs, Spin, Form } from "antd";
 import moment from "moment";
 import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Form } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import RadioTabs from "../../../../../components/RadioTabs";
 import {
     getDetailTransferToCustomer,
     approveOrRejectTransferToCustomer,
     getListCategory,
     getAllApprovalList,
-    getListApprovalById
+    getListApprovalById,
+    resetDetailState
 } from "../../../../../redux/slices/receipt_collection/transferToCustomer";
+import { showModalSuccess } from "../../../../../redux/slices/general_slice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailTransferToCustomer from "./DetailTransferToCustomer";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -25,27 +24,18 @@ import TableRBI from "../../../../../components/TableRBI";
 import { getCustomerListColumns } from "./CustomerListColumns";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailWarrantyInformation from "./DetailWarrantyInformation";
-import GridLayout from "../../../../../components/GridLayout";
-import DetailText from "../../../../../components/DetailText";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
+import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
+import FooterDetail from "../../../../../components/FooterDetail";
+
+import SubSectionCard from "../../../../../components/SubSectionCard";
 
 const ListDetailTransferToCustomer = () => {
     const dispatch = useDispatch();
     const location = useLocation();
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [modalApprove, setModalApprove] = useState(false);
-    const [approveOrReject, setApproveOrReject] = useState("");
     const id = location?.state?.id;
-    const [dataHeader, setDataHeader] = useState({});
-    const [listDataAttachment, setListDataAttachment] = useState([]);
-
-    // Tabs
-    const [tabData] = useState([
-        { value: "Transfer to Customer" },
-        { value: "Approval" },
-        { value: "Attachment" },
-    ]);
-
     const {
         loading,
         data_detail,
@@ -53,7 +43,10 @@ const ListDetailTransferToCustomer = () => {
         dataListAppHierDetail
     } = useSelector((state) => state.transferToCustomer);
 
-    const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
+    const [activeTab, setActiveTab] = useState("transfer");
+    const [modalApprove, setModalApprove] = useState(false);
+    const [approveOrReject, setApproveOrReject] = useState("");
+    const [listDataAttachment, setListDataAttachment] = useState([]);
     const [appHierOptions, setAppHierOptions] = useState([]);
     const [selectedHierarchy, setSelectedHierarchy] = useState(null);
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
@@ -62,8 +55,8 @@ const ListDetailTransferToCustomer = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
-    const handleSegmentedPage = (e) => {
-        setSegmentedPage(e.target.value);
+    const handleTabChange = (key) => {
+        setActiveTab(key);
     };
 
     useEffect(() => {
@@ -138,6 +131,8 @@ const ListDetailTransferToCustomer = () => {
         }
     }, [dataListAppHierDetail]);
 
+    const [dataHeader, setDataHeader] = useState({});
+
     const columnsCustomer = useMemo(() => {
         return getCustomerListColumns({
             page,
@@ -151,70 +146,24 @@ const ListDetailTransferToCustomer = () => {
         setPageSize(pageSize);
     };
 
-    const renderSection = (segmentedPage) => {
-        switch (segmentedPage) {
-            case "Transfer to Customer":
-                return (
-                    <>
-                        <DetailTransferToCustomer data_detail={dataHeader} />
-                        <div className="mt-5">
-                            <DetailWarrantyInformation data_detail={dataHeader} />
-                        </div>
-                        <div className="mt-5">
-                            <BaseContainer header={"TO CUSTOMER LIST INFORMATION"}>
-                                <TableRBI
-                                    columns={columnsCustomer}
-                                    dataSource={IndexCustomer(dataHeader?.customerList || [], page, pageSize).slice((page - 1) * pageSize, page * pageSize)}
-                                    pagination={false}
-                                    tableScrolled={{ x: 1000 }}
-                                    current={page}
-                                    pageSize={pageSize}
-                                    totalData={dataHeader?.customerList?.length || 0}
-                                    onChange={onChangePage}
-                                    onSizeChanger={onChangePage}
-                                />
-                            </BaseContainer>
-                        </div>
-                        <div className="mt-5">
-                            <HistoryLog
-                                recordId={dataHeader?.id}
-                                createdDate={
-                                    dataHeader?.createdDate &&
-                                    moment(dataHeader?.createdDate).format(
-                                        "DD MMM YYYY HH:mm"
-                                    )
-                                }
-                                createdBy={dataHeader?.createdBy}
-                                updatedDate={
-                                    dataHeader?.updatedDate &&
-                                    moment(dataHeader?.updatedDate).format(
-                                        "DD MMM YYYY HH:mm"
-                                    )
-                                }
-                                updatedBy={dataHeader?.updatedBy}
-                            />
-                        </div>
-                    </>
-                );
-            case "Approval":
-                return (
-                    <div className="mt-5">
-                        <BaseContainer header={"TRANSFER TO CUSTOMER APPROVAL"}>
-                            <Form form={form}>
-                                <ApprovalComponentGeneral
-                                    dataTable={appHierDataDetail}
-                                    dataOption={appHierOptions}
-                                    selectedHierarchy={selectedHierarchy}
-                                    updateSelectedHierarchy={setSelectedHierarchy}
-                                    disableSelect={true}
-                                />
-                            </Form>
-                        </BaseContainer>
-                    </div>
-                );
-            case "Attachment":
-                return (
-                    <BaseContainer header={"ATTACHMENT INFORMATION"}>
+    const approvalName = appHierOptions.find(x => x.value === selectedHierarchy)?.name || data_detail?.transferToCustomer?.approvalName || "-";
+
+    const items = [
+        {
+            key: "transfer",
+            label: "Transfer to Customer",
+            children: (
+                <div className="p-5">
+                    <DetailTransferToCustomer data_detail={data_detail?.transferToCustomer} />
+                </div>
+            ),
+        },
+        {
+            key: "attachment",
+            label: "Attachment",
+            children: (
+                <div className="p-5">
+                    <SubSectionCard title="ATTACHMENT INFORMATION">
                         <AttachmentComponent
                             type={"detail"}
                             data={listDataAttachment}
@@ -225,12 +174,11 @@ const ListDetailTransferToCustomer = () => {
                             service={receiptCollectionHttpService}
                             configApplication={configApp.PAYMENT_SERVICE}
                         />
-                    </BaseContainer>
-                );
-            default:
-                return <></>;
-        }
-    };
+                    </SubSectionCard>
+                </div>
+            ),
+        },
+    ];
 
     const isShowButton = data_detail?.tApprovalDto?.isApprover;
 
@@ -241,7 +189,7 @@ const ListDetailTransferToCustomer = () => {
         },
         {
             path: "",
-            breadcrumbName: "Payment Warranty",
+            breadcrumbName: "Payment  Guarantee",
         },
         {
             path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER,
@@ -253,7 +201,7 @@ const ListDetailTransferToCustomer = () => {
         },
     ];
 
-    const handleConfirm = (res, handleClear) => {
+    const handleConfirm = async (res, handleClear) => {
         const data = {
             id: id,
             remark: res.remark,
@@ -261,9 +209,15 @@ const ListDetailTransferToCustomer = () => {
             action: approveOrReject.toUpperCase(),
         };
 
-        dispatch(approveOrRejectTransferToCustomer({ body: data }));
-        handleClear();
-        setModalApprove(false);
+        try {
+            await dispatch(approveOrRejectTransferToCustomer({ body: data })).unwrap();
+            handleClear();
+            setModalApprove(false);
+        } catch (error) {
+            // Error sudah di-handle di thunk
+            handleClear();
+            setModalApprove(false);
+        }
     };
 
     const handleCancel = () => {
@@ -271,103 +225,100 @@ const ListDetailTransferToCustomer = () => {
     };
 
     return (
-        <>
+        <Spin spinning={loading}>
             <BreadCrumb routes={routes} />
-            <div>
-                <RadioTabs data={tabData} onChange={handleSegmentedPage} />
-                {renderSection(segmentedPage)}
-            </div>
+            
+            <CardContainerNoBorder
+                header="TRANSFER TO CUSTOMER DETAIL"
+                className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+                noPadding
+                collapsible={true}
+                defaultExpanded={true}
+            >
+                <div className="full-width-tabs">
+                    <Tabs
+                        activeKey={activeTab}
+                        items={items}
+                        onChange={handleTabChange}
+                        className="custom-tabs-layout"
+                    />
+                </div>
+            </CardContainerNoBorder>
+
+            <CardContainerNoBorder
+                header="GUARANTEE DETAIL"
+                className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+                noPadding
+                collapsible={true}
+                defaultExpanded={true}
+            >
+               <div className="p-5">
+                    <DetailWarrantyInformation data_detail={data_detail?.transferToCustomer} />
+               </div>
+            </CardContainerNoBorder>
+
+            <CardContainerNoBorder
+                header="CUSTOMER INFORMATION"
+                className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+                noPadding
+                collapsible={true}
+                defaultExpanded={true}
+            >
+                <div className="p-5">
+                    <SubSectionCard>
+                        <TableRBI
+                            columns={columnsCustomer}
+                            dataSource={IndexCustomer(data_detail?.transferToCustomer?.customerList || [], page, pageSize).slice((page - 1) * pageSize, page * pageSize)}
+                            pagination={false}
+                            tableScrolled={{ x: 1000 }}
+                            current={page}
+                            pageSize={pageSize}
+                            totalData={data_detail?.transferToCustomer?.customerList?.length || 0}
+                            onChange={onChangePage}
+                            onSizeChanger={onChangePage}
+                        />
+                    </SubSectionCard>
+                </div>
+            </CardContainerNoBorder>
+
+            <LogHistoryInfo
+                data={{
+                    recordId: data_detail?.transferToCustomer?.id || "-",
+                    createdDate: data_detail?.transferToCustomer?.createdDate ? moment(data_detail?.transferToCustomer?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
+                    createdBy: data_detail?.transferToCustomer?.createdBy || "-",
+                    updatedDate: data_detail?.transferToCustomer?.updatedDate ? moment(data_detail?.transferToCustomer?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
+                    updatedBy: data_detail?.transferToCustomer?.updatedBy || "-"
+                }}
+            />
+
+            <FooterDetail
+                onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER)}
+                showApproval={isShowButton === true}
+                onApprove={() => {
+                    setApproveOrReject("approve");
+                    setModalApprove(true);
+                }}
+                onReject={() => {
+                    setApproveOrReject("reject");
+                    setModalApprove(true);
+                }}
+            />
 
             <ModalApproveOrReject
                 isOpen={modalApprove}
                 handleCloseModal={handleCancel}
                 onFinish={handleConfirm}
-                header={approveOrReject}
+                header={approveOrReject === "approve" ? "Approve" : "Reject"}
                 approveOrReject={approveOrReject}
                 menu={"Transfer To Customer"}
                 named={dataHeader?.id}
             />
-
-            <div className="flex mt-[30px] justify-between py-5">
-                <ButtonComponent
-                    type={"submit"}
-                    onClick={() => navigate(-1)}
-                    icon={
-                        <LeftOutlined
-                            style={{
-                                color: "#fff",
-                                fontSize: 24,
-                                justifyItems: "center",
-                            }}
-                        />
-                    }
-                >
-                    Back
-                </ButtonComponent>
-
-                {isShowButton === true ? (
-                    <div className="flex align-middle gap-5">
-                        <ButtonComponent
-                            type="reject"
-                            onClick={() => {
-                                setModalApprove(true);
-                                setApproveOrReject("reject");
-                            }}
-                        >
-                            Reject
-                        </ButtonComponent>
-                        <ButtonComponent
-                            type="approve"
-                            onClick={() => {
-                                setModalApprove(true);
-                                setApproveOrReject("approve");
-                            }}
-                        >
-                            Approve
-                        </ButtonComponent>
-                    </div>
-                ) : null}
-            </div>
-        </>
+        </Spin>
     );
 };
 
 
-const HistoryLog = ({
-    recordId,
-    createdDate,
-    createdBy,
-    updatedDate,
-    updatedBy
-}) => {
-    return (
-        <BaseContainer header={"HISTORY LOG INFORMATION"}>
-            <GridLayout cols={5}>
-                {recordId && (
-                    <DetailText label={"Record Id"}>
-                        {recordId}
-                    </DetailText>
-                )}
 
-                <DetailText label={"Created Date"}>
-                    {createdDate || "-"}
-                </DetailText>
-
-                <DetailText label={"Created By"}>
-                    {createdBy || "-"}
-                </DetailText>
-
-                <DetailText label={"Updated Date"}>
-                    {updatedDate || "-"}
-                </DetailText>
-
-                <DetailText label={"Updated By"}>
-                    {updatedBy || "-"}
-                </DetailText>
-            </GridLayout>
-        </BaseContainer>
-    );
-};
 
 const IndexCustomer = (data, page, pageSize) => {
     return data.map((item, index) => {

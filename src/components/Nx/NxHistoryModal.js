@@ -4,46 +4,46 @@ import {
   RightCircleFilled,
   RightOutlined,
 } from "@ant-design/icons";
-import { Avatar, Divider, List, Modal, Tooltip } from "antd";
-import React, { Fragment, useEffect, useState } from "react";
+import { Avatar, Button, Divider, List, Tooltip } from "antd";
+import { useEffect, useMemo, useRef, useState } from "react";
 import SVGIcon from "../../assets/Icon/index";
 import { dateFormatting } from "../../utils";
 import moment from "moment";
 import ButtonComponent from "../ButtonComponent";
-import RadioTabs from "../RadioTabs";
 import NxModal from "./NxModal";
 import NxTabs from "./NxTabs";
+import NxBaseContainer from "./NxBaseContainer";
 
 const defaultValueHistory = [
   {
     type: "SUBMIT",
-    icon: <SVGIcon name="IconSubmitApprover" width={24} />,
-    textColor: "#0063A2",
+    icon: <SVGIcon name="IconSubmitApprover" width={18} />,
+    textColor: "#0075BF",
     style: {
-      backgroundColor: "#C2DEF0",
+      backgroundColor: "#E6F0F4",
       lineHeight: "50px",
     },
   },
   {
     type: "APPROVE",
-    icon: <CheckCircleFilled width={24} style={{ color: "#ACC424" }} />,
-    textColor: "#92A71F",
+    icon: <SVGIcon name="IconSquareCheck" width={18} color="#388E3C" />,
+    textColor: "#388E3C",
     style: {
-      backgroundColor: "#EBF1CA",
+      backgroundColor: "#E8F5E9",
     },
   },
   {
     type: "REJECT",
-    icon: <SVGIcon name="IconCross" width={24} style={{ color: "#FF0000" }} />,
-    textColor: "#D90000",
+    icon: <SVGIcon name="IconSquareX" width={18} color="#D32F2F" />,
+    textColor: "#D32F2F",
     style: {
-      backgroundColor: "#FFC2C2",
+      backgroundColor: "#FFEBEE",
       lineHeight: "50px",
     },
   },
   {
     type: "Released",
-    icon: <SVGIcon name="IconReleaseApprover" width={24} />,
+    icon: <SVGIcon name="IconReleaseApprover" width={18} />,
     textColor: "#118B76",
     style: {
       backgroundColor: "rgba(17, 139, 118, 0.25)",
@@ -52,75 +52,74 @@ const defaultValueHistory = [
   },
 ];
 
-const styleBackgroundAvatar = (dataApprover) => {
-  const dataBackground = defaultValueHistory.filter((valueHistory) =>
-    dataApprover?.status?.includes(valueHistory.type)
-  );
-  return dataBackground.length > 0 ? dataBackground[0].style : undefined;
-};
-
-const handleIconAvatar = (dataApprover) => {
-  const dataIcon = defaultValueHistory.filter((valueHistory) =>
-    dataApprover?.status?.includes(valueHistory.type)
-  );
-  return dataIcon.length > 0 ? dataIcon[0].icon : undefined;
-};
-
-const handleTextColor = (dataHistory) => {
-  const dataIcon = defaultValueHistory.filter((valueHistory) =>
-    dataHistory?.status?.includes(valueHistory.type)
-  );
-  return dataIcon.length > 0 ? dataIcon[0].textColor : "white";
-};
-
-// const tabOptions = ["Create", "Inactive"];
+const getHistoryConfig = (status) =>
+  defaultValueHistory.find((h) => status?.includes(h.type)) ?? {};
 
 const NxHistoryModal = ({
   isOpen,
   handleClose = () => {},
   header,
-  tabOptions = [],
   dataApprover,
   dataHistory,
 }) => {
-  const [tabActive, setTabActive] = useState("");
-  const [dataApproverFinal, setDataApproverFinal] = useState([]);
-  const [dataHistoryFinal, setDataHistoryFinal] = useState([]);
+  const [tabActiveOverride, setTabActiveOverride] = useState(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
+  const sliderRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen && dataApprover && dataHistory) {
-      const useTabs = tabOptions && (tabOptions?.length > 0 || false);
-      if (useTabs) {
-        const tempTab = tabOptions[0].value.toLowerCase();
-        setTabActive(tempTab);
-        setDataApproverFinal(dataApprover[tempTab]);
-        setDataHistoryFinal(dataHistory[tempTab]);
-      } else {
-        setDataApproverFinal(dataApprover || []);
-        setDataHistoryFinal(dataHistory || []);
-      }
-    } else {
-      setDataApproverFinal([]);
-      setDataHistoryFinal([]);
+    if (!isOpen) {
+      setTabActiveOverride(null);
+      setExpandedDescriptions({});
     }
-  }, [isOpen, tabOptions, dataApprover, dataHistory]);
+  }, [isOpen]);
 
-  const handleTabs = (value) => {
-    const tempTab = value.toLowerCase();
-    setTabActive(value);
-    setDataApproverFinal(tabActive ? dataApprover[tempTab] : dataApprover);
-    setDataHistoryFinal(tabActive ? dataHistory[tempTab] : dataHistory);
-  };
+  const { tabOptions, tabActive, dataApproverFinal, dataHistoryFinal } =
+    useMemo(() => {
+      const empty = {
+        tabOptions: [],
+        tabActive: "",
+        dataApproverFinal: [],
+        dataHistoryFinal: [],
+      };
+
+      if (
+        !isOpen ||
+        !dataApprover ||
+        typeof dataApprover !== "object" ||
+        Array.isArray(dataApprover)
+      ) {
+        return empty;
+      }
+
+      const keys = Object.keys(dataApprover);
+      if (keys.length === 0) return empty;
+
+      const options = keys.map((key) => ({
+        key,
+        label: key.charAt(0).toUpperCase() + key.slice(1).toLowerCase(),
+      }));
+
+      const effectiveKey =
+        tabActiveOverride && dataApprover[tabActiveOverride] !== undefined
+          ? tabActiveOverride
+          : keys[0];
+
+      return {
+        tabOptions: options,
+        tabActive: effectiveKey,
+        dataApproverFinal: dataApprover[effectiveKey] ?? [],
+        dataHistoryFinal: dataHistory?.[effectiveKey] ?? [],
+      };
+    }, [isOpen, dataApprover, dataHistory, tabActiveOverride]);
+
+  const handleTabs = (key) => setTabActiveOverride(key);
 
   const sliderLeft = () => {
-    const slider = document.getElementById("sliderModalHistory");
-    slider.scrollLeft = slider.scrollLeft - 250;
+    if (sliderRef.current) sliderRef.current.scrollLeft -= 250;
   };
 
   const sliderRight = () => {
-    const slider = document.getElementById("sliderModalHistory");
-    slider.scrollLeft = slider.scrollLeft + 250;
+    if (sliderRef.current) sliderRef.current.scrollLeft += 250;
   };
 
   const toggleDescription = (itemId) => {
@@ -139,13 +138,13 @@ const NxHistoryModal = ({
       title={header}
       footer={
         <div className="flex justify-end">
-          <ButtonComponent onClick={handleClose} type="default">
+          <Button onClick={handleClose} type="menu">
             Back
-          </ButtonComponent>
+          </Button>
         </div>
       }
     >
-      <Fragment>
+      <>
         {/* content section */}
         <NxTabs
           items={tabOptions}
@@ -158,34 +157,35 @@ const NxHistoryModal = ({
               <LeftCircleFilled width={32} onClick={sliderLeft} />
             ) : null}
             <div
-              id="sliderModalHistory"
-              className={`flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar`}
+              ref={sliderRef}
+              className={`flex items-center gap-x-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar`}
             >
               {dataApproverFinal.map((approver, index) => (
-                <div
-                  className="flex flex-row items-center gap-1.5"
-                  key={`Approver ${index + 1}`}
-                >
-                  <Avatar
-                    shape="square"
-                    size={36}
-                    icon={handleIconAvatar(approver)}
-                    style={styleBackgroundAvatar(approver)}
-                  />
-                  <div className="flex flex-col gap-0.5 max-w-[180px]">
-                    <p className="text-xs m-0 truncate">
-                      {approver?.name || "-"}
-                    </p>
-                    <Tooltip title={approver?.role} className="cursor-pointer">
-                      <p className="text-[10px] font-thin m-0 truncate">
-                        {approver?.role}
+                <>
+                  <div
+                    className="flex items-center gap-x-2 p-2 border border-solid border-[#C8CDD4] rounded-lg"
+                    key={`Approver ${index + 1}`}
+                  >
+                    <div className="flex justify-center items-center w-10 h-10 rounded-sm" style={getHistoryConfig(approver?.status).style}>
+                      {getHistoryConfig(approver?.status).icon}
+                    </div>
+                    <div className="flex flex-col gap-0.5 max-w-[180px]">
+                      <p className="text-xs m-0 truncate">
+                        {approver?.name || "-"}
                       </p>
-                    </Tooltip>
+                      <Tooltip title={approver?.role} className="cursor-pointer">
+                        <p className="text-[10px] font-thin m-0 truncate">
+                          {approver?.role}
+                        </p>
+                      </Tooltip>
+                    </div>
                   </div>
                   {index !== dataApproverFinal.length - 1 ? (
-                    <RightOutlined className="text-xs" />
-                  ) : null}
-                </div>
+                      <div className="flex justify-center items-center w-6 h-4">
+                        <RightOutlined className="text-xs" />
+                      </div>
+                    ) : null}
+                </>
               ))}
             </div>
 
@@ -194,29 +194,21 @@ const NxHistoryModal = ({
             ) : null}
           </div>
           <Divider style={{ margin: 0 }} />
-          <div
-            className="shadow-lg h-72 overflow-auto p-1.5 rounded-md"
-            style={{ border: "1px solid #DBDADE" }}
-          >
+          <NxBaseContainer border padding={false}>
             <List
               dataSource={dataHistoryFinal}
               renderItem={(item) => (
-                <List.Item key={item.id} style={{ padding: "8px 0" }}>
-                  <div className="flex flex-row w-full px-2 py-1 gap-3 justify-between">
-                    <div className="flex flex-col gap-1 w-1/2">
-                      <p
-                        className="text-xs m-0 font-semibold"
-                        style={{ color: handleTextColor(item) }}
+                <List.Item key={item.id} style={{ padding: "0" }}>
+                  <div className="flex flex-col w-full p-4 gap-y-2 justify-between">
+                    <div className="flex justify-between">
+                      <span
+                        className="text-xs font-semibold"
+                        style={{ color: getHistoryConfig(item?.status).textColor ?? "white" }}
                       >
                         {item.status}
-                      </p>
-                      <p className="text-[11px] m-0">{`Hierachy: ${item.hierarchy}`}</p>
-                      <p className="text-[11px] m-0">{`Action by: ${item.name}`}</p>
-                      <p className="text-[11px] m-0">{`Position: ${item.role}`}</p>
-                    </div>
-                    <div className="flex flex-col items-end justify-between gap-1 w-1/2">
-                      <div className="flex gap-0.5 items-end">
-                        <p className="text-[10px] m-0 font-light">
+                      </span>
+                      <div className="flex gap-x-10">
+                        <span className="text-xs">
                           {`Task: ${
                             item.taskDate
                               ? moment(item.taskDate).format(
@@ -224,8 +216,8 @@ const NxHistoryModal = ({
                                 )
                               : "-"
                           }`}
-                        </p>
-                        <p className="text-[10px] m-0 font-light">
+                        </span>
+                        <span className="text-xs">
                           {`Action: ${
                             item.actionDate
                               ? moment(item.actionDate).format(
@@ -233,11 +225,27 @@ const NxHistoryModal = ({
                                 )
                               : "-"
                           }`}
-                        </p>
+                        </span>
                       </div>
-                      {item.description ? (
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-10">
+                      <div className="text-xs">
+                        <div className="flex gap-x-2">
+                          <span className="min-w-[95px] text-[#9E9E9E]">Hierarchy:</span>
+                          <span>{item.hierarchy}</span>
+                        </div>
+                        <div className="flex gap-x-2">
+                          <span className="min-w-[95px] text-[#9E9E9E]">Action by:</span>
+                          <span>{item.name}</span>
+                        </div>
+                        <div className="flex gap-x-2">
+                          <span className="min-w-[95px] text-[#9E9E9E]">Position:</span>
+                          <span>{item.role}</span>
+                        </div>
+                      </div>
+                      {item.description && (
                         <p
-                          className={`text-[11px] m-0 w-full font-semibold cursor-pointer break-words ${
+                          className={`m-0 text-xs font-semibold cursor-pointer break-words text-right ${
                             expandedDescriptions[item.id]
                               ? ""
                               : "overflow-hidden whitespace-nowrap text-ellipsis"
@@ -246,15 +254,15 @@ const NxHistoryModal = ({
                         >
                           {item.description}
                         </p>
-                      ) : null}
+                      )}
                     </div>
                   </div>
                 </List.Item>
               )}
             />
-          </div>
+          </NxBaseContainer>
         </div>
-      </Fragment>
+      </>
     </NxModal>
   );
 };

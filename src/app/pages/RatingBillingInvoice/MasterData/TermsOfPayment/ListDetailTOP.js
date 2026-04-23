@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
@@ -13,12 +12,14 @@ import { configApp } from "../../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import {
   approveCreateUpdateTOP,
+  approveActivatedTOP,
   approveInactive,
   getDetailDraftTOP,
   getDetailTOP,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/termsofPayment";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import DetailTOP from "./DetailTOP";
+import CardContainer from "../../../../../components/CardContainer";
 
 const ListDetailTOP = () => {
   const { data_detail, data_detail_draft } = useSelector((state) => state.top);
@@ -85,7 +86,7 @@ const ListDetailTOP = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataAttachment);
       // Data Criteria name
@@ -125,7 +126,7 @@ const ListDetailTOP = () => {
             updatedDate: item.updateDate,
             updatedBy: item.updatedBy,
           };
-        }
+        },
       );
       setListDataCriteria(dataCriteriaList);
       setCriteriaValues(mappingCriteria);
@@ -189,7 +190,7 @@ const ListDetailTOP = () => {
             key: index + 1,
             // type: "exist",
           };
-        }
+        },
       );
       setDataTextDraft(data_detail_draft?.information);
       setListDataCriteriaDraft(dataCriteriaList);
@@ -237,7 +238,7 @@ const ListDetailTOP = () => {
         );
       case "Attachment":
         return (
-          <BaseContainer header={"ATTACHMENT INFORMATION"}>
+          <CardContainer header={"ATTACHMENT INFORMATION"}>
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
@@ -246,7 +247,7 @@ const ListDetailTOP = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return <></>;
@@ -284,10 +285,23 @@ const ListDetailTOP = () => {
       setModalApprove(false);
       dispatch(approveCreateUpdateTOP({ body: data }));
       handleClear();
+    } else if (
+      data_detail?.approvalInformation?.approvalType ===
+      "ACTIVATED_TERMS_OF_PAYMENT"
+    ) {
+      const data = {
+        id: id,
+        description: res.remark,
+        approvalId: data_detail?.approvalInformation?.tAppId,
+        action: approveOrReject.toUpperCase(),
+      };
+      setModalApprove(false);
+      dispatch(approveActivatedTOP({ body: data }));
+      handleClear();
     } else {
       const data = {
         id: id,
-        description: remark,
+        description: res.remark,
         approvalId: data_detail?.approvalInformation?.tAppId,
         action: approveOrReject.toUpperCase(),
       };

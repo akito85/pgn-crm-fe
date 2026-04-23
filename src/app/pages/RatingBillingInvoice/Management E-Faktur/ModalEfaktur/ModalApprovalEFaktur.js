@@ -544,6 +544,7 @@ const ModalApprovalEFaktur = ({
               <Select.Option value="replacement">Replacement</Select.Option>
               <Select.Option value="cancellation">Cancellation</Select.Option>
               <Select.Option value="manual_upload">Manual Upload</Select.Option>
+              <Select.Option value="sync">Sync</Select.Option>
             </Select>
           </div>
 

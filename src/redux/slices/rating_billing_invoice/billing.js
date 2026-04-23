@@ -22,7 +22,12 @@ const initialState = {
   data_list_billing_approval: [],
   data_list_billing_approved: [],
   data_prevBilling: [],
-  loading: false,
+  loadingList: false,
+  loadingRequest: false,
+  loadingApproval: false,
+  loadingDetail: false,
+  loadingHistory: false,
+  loadingDownload: false,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -505,28 +510,28 @@ const billingSlice = createSlice({
   extraReducers: {
     // Requested Billing
     [requestedBilling.pending]: (state) => {
-      state.loading = true;
+      state.loadingRequest = true;
     },
     [requestedBilling.fulfilled]: (state) => {
       state.isSuccess = true;
-      state.loading = false;
+      state.loadingRequest = false;
     },
     [requestedBilling.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingRequest = false;
       state.isFailed = true;
       state.result = action.payload;
     },
 
     // Approved Billing
     [approvedBilling.pending]: (state) => {
-      state.loading = true;
+      state.loadingApproval = true;
     },
     [approvedBilling.fulfilled]: (state) => {
       state.isSuccess = true;
-      state.loading = false;
+      state.loadingApproval = false;
     },
     [approvedBilling.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingApproval = false;
       state.isFailed = true;
       state.result = action.payload;
     },
@@ -534,7 +539,7 @@ const billingSlice = createSlice({
     // Get All Billing Pagination
     [getAllBillingPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loadingList = true;
         // TAMBAHAN: simpan requestId terbaru untuk deteksi stale response
         state.currentRequestId = action.meta.requestId;
       }
@@ -551,7 +556,7 @@ const billingSlice = createSlice({
         return;
       }
 
-      state.loading = false;
+      state.loadingList = false;
       const newResult = action.payload?.result || [];
 
       if (isLoadMore) {
@@ -571,7 +576,7 @@ const billingSlice = createSlice({
       }
     },
     [getAllBillingPaginate.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingList = false;
       if (!action.meta.arg?.isLoadMore) {
         state.data = [];
       }
@@ -580,11 +585,11 @@ const billingSlice = createSlice({
     // Get All Billing Request Pagination
     [getAllBillingRequestPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loadingRequest = true;
       }
     },
     [getAllBillingRequestPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingRequest = false;
       const isLoadMore = action.payload?.isLoadMore;
       const newResult = action.payload?.result || [];
 
@@ -603,7 +608,7 @@ const billingSlice = createSlice({
       }
     },
     [getAllBillingRequestPaginate.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingRequest = false;
       if (!action.meta.arg?.isLoadMore) {
         state.data_list_billing_request_approval = [];
       }
@@ -612,11 +617,11 @@ const billingSlice = createSlice({
     // Get All Billing Approve Pagination
     [getAllBillingApprovePaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loadingApproval = true;
       }
     },
     [getAllBillingApprovePaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingApproval = false;
       const newData = action.payload?.result || [];
       const isLoadMore = action.payload?.isLoadMore;
 
@@ -646,7 +651,7 @@ const billingSlice = createSlice({
       }
     },
     [getAllBillingApprovePaginate.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingApproval = false;
       if (!action.meta.arg?.isLoadMore) {
         state.data_list_billing_approval = {
           result: [],
@@ -662,110 +667,110 @@ const billingSlice = createSlice({
 
     // Get All Billing Item Pagination
     [getAllBillingItemPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingDetail = true;
     },
     [getAllBillingItemPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_billingItem = action.payload;
     },
     [getAllBillingItemPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDetail = false;
     },
 
     // Get All Rating Result Pagination
     [getAllRatingResultPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingDetail = true;
     },
     [getAllRatingResultPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_ratingResult = action.payload;
     },
     [getAllRatingResultPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDetail = false;
     },
 
     // Get All Adjustment Pagination
     [getAllAdjustmentPaginate.pending]: (state) => {
-      state.loading = true;
+      state.loadingDetail = true;
     },
     [getAllAdjustmentPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_adjustment = action.payload;
     },
     [getAllAdjustmentPaginate.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDetail = false;
     },
 
     // Download Billing
     [downloadBillingList.pending]: (state) => {
-      state.loading = true;
+      state.loadingDownload = true;
     },
     [downloadBillingList.fulfilled]: (state) => {
-      state.loading = true;
+      state.loadingDownload = false;
     },
     [downloadBillingList.rejected]: (state) => {
-      state.loading = false;
+      state.loadingDownload = false;
     },
 
     // Get Approval History
     [getApprovalHistory.pending]: (state, action) => {
-      state.loading = true;
+      state.loadingHistory = true;
       state.data_approval_history = action.payload;
     },
     [getApprovalHistory.fulfilled]: (state, action) => {
       state.data_approval_history = action.payload;
-      state.loading = false;
+      state.loadingHistory = false;
     },
     [getApprovalHistory.rejected]: (state, action) => {
       state.data_approval_history = action.payload;
-      state.loading = false;
+      state.loadingHistory = false;
     },
 
     // Get Detail Payment
     [getPaymentBilling.pending]: (state, action) => {
-      state.loading = true;
+      state.loadingDetail = true;
       state.data_Payment = action.payload;
     },
     [getPaymentBilling.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_Payment = action.payload;
     },
     [getPaymentBilling.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_Payment = action.payload;
     },
 
     // Get Detail Prev Payment
     [getPrevPaymentBilling.pending]: (state, action) => {
-      state.loading = true;
+      state.loadingDetail = true;
       state.data_PrevPayment = action.payload;
     },
     [getPrevPaymentBilling.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_PrevPayment = action.payload;
     },
     [getPrevPaymentBilling.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_PrevPayment = action.payload;
     },
 
     // Get Detail Prev Billing
     [getPrevBilling.pending]: (state, action) => {
-      state.loading = true;
+      state.loadingDetail = true;
       state.data_prevBilling = action.payload;
     },
     [getPrevBilling.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_prevBilling = action.payload;
     },
     [getPrevBilling.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingDetail = false;
       state.data_prevBilling = action.payload;
     },
 
     // Get Approve Hierarchy List
     [getAllApprovalList.pending]: (state) => {
-      state.loading = true;
+      state.loadingApproval = true;
     },
     [getAllApprovalList.fulfilled]: (state, action) => {
       // Guard: pastikan selalu array meskipun API return object atau null
@@ -777,16 +782,16 @@ const billingSlice = createSlice({
       } else {
         state.data_approval = [];
       }
-      state.loading = false;
+      state.loadingApproval = false;
     },
     [getAllApprovalList.rejected]: (state) => {
       state.data_approval = [];
-      state.loading = false;
+      state.loadingApproval = false;
     },
 
     // Get List Approval By Id
     [getListApprovalById.pending]: (state) => {
-      state.loading = true;
+      state.loadingApproval = true;
     },
     [getListApprovalById.fulfilled]: (state, action) => {
       const payload = action.payload;
@@ -797,11 +802,11 @@ const billingSlice = createSlice({
       } else {
         state.data_approval_list = [];
       }
-      state.loading = false;
+      state.loadingApproval = false;
     },
     [getListApprovalById.rejected]: (state) => {
       state.data_approval_list = [];
-      state.loading = false;
+      state.loadingApproval = false;
     },
   },
 });

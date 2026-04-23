@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Checkbox, Spin, Tooltip } from "antd";
@@ -6,8 +6,7 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
-import BaseContainer from "../../../../../components/BaseContainer";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../components/TableRBI";
 import { columnsInvoiceTemplate } from "./Table/TableInvoiceTemplateList";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -18,30 +17,30 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   inactiveInvoiceTemplate,
+  requestActivateInvoiceTemplate,
+  resetInvoiceTemplateList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/invoiceTemplate";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../../components/CardContainer";
 
 const InvoiceTemplateView = () => {
   // Selector
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.invoice_template
-  );
+  const { data_list, data_pagination, loading, data_approval_history } =
+    useSelector((state) => state.invoice_template);
 
   // Declaration
   const dispatch = useDispatch();
-  const dataSource = data?.result;
   const searchInput = useRef(null);
 
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -50,16 +49,86 @@ const InvoiceTemplateView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("invoiceTemplateFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
+  });
+
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("invoiceTemplateFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
+
+  // Infinite scroll config
+  const initialPageSize = 100;
+  const [loadMoreSize] = useState(20);
+
+  // Fetch data
   useEffect(() => {
     dispatch(
       getInvoiceTemplatePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [dispatch, search, page, pageSize, sort]);
+    setPage(1);
+  }, [dispatch, search, sort]);
+
+  // Infinite scroll: hasMore
+  const hasMore = data_list.length < (data_pagination?.totalElements || 0);
+
+  // Handle load more
+  const handleLoadMore = async () => {
+    const totalElements = data_pagination?.totalElements || 0;
+    if (data_list.length >= totalElements) return;
+
+    const nextPage = Math.floor(data_list.length / loadMoreSize) + 1;
+
+    await dispatch(
+      getInvoiceTemplatePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+    setPage(nextPage);
+  };
+
+  // Handle refresh
+  const handleRefresh = () => {
+    dispatch(resetInvoiceTemplateList());
+    dispatch(
+      getInvoiceTemplatePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+    setPage(1);
+  };
 
   useEffect(() => {
     if (data_approval_history) {
@@ -69,11 +138,17 @@ const InvoiceTemplateView = () => {
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_INVOICE_TEMPLATE ||
             [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_INVOICE_TEMPLATE ||
+            [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.INVOICE_TEMPLATE || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_INVOICE_TEMPLATE || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_INVOICE_TEMPLATE ||
+            [],
         },
       };
       setDataApprovalHistory(temp);
@@ -114,12 +189,6 @@ const InvoiceTemplateView = () => {
     });
   };
 
-  // Function Change Pagination
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
-
   // Function Sort Table
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -148,24 +217,26 @@ const InvoiceTemplateView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       id: chooseId.id,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveInvoiceTemplate(dataValue))
+    dispatch(
+      (isActivateRequest
+        ? requestActivateInvoiceTemplate
+        : inactiveInvoiceTemplate)(dataValue)
+    )
       .unwrap()
       .then(() => {
         handleClear();
         handleCancel();
-        dispatch(
-          getInvoiceTemplatePaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
-            sort,
-          })
-        );
+        handleRefresh();
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -175,7 +246,12 @@ const InvoiceTemplateView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -194,7 +270,12 @@ const InvoiceTemplateView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadInvoiceTemplate({ search: tempSearch, page, pageSize, sort })
+      downloadInvoiceTemplate({
+        search: tempSearch,
+        page,
+        pageSize: loadMoreSize,
+        sort,
+      }),
     );
   };
 
@@ -217,13 +298,26 @@ const InvoiceTemplateView = () => {
     }));
   };
 
+  // Columns
+  const baseColumns = useMemo(
+    () =>
+      columnsInvoiceTemplate(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+    [search, searchText, searchedColumn],
+  );
+
   // Grant Access Item
   const itemGrantAccess = [
     {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={() => handleDownload()}
         >
@@ -236,7 +330,7 @@ const InvoiceTemplateView = () => {
       render: (
         <NavLink to={RBI_ROUTES.INVOICE_TEMPLATE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Invoice Template
@@ -272,8 +366,7 @@ const InvoiceTemplateView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -285,13 +378,13 @@ const InvoiceTemplateView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -330,14 +423,16 @@ const InvoiceTemplateView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -346,28 +441,29 @@ const InvoiceTemplateView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className="text-black ml-1">
+                {rowStatus !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -386,10 +482,11 @@ const InvoiceTemplateView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -409,46 +506,76 @@ const InvoiceTemplateView = () => {
     },
   ];
 
+  const actionCols = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess,
+  ).map((col) => ({
+    ...col,
+    width: 50,
+    align: "center",
+  }));
+
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+    return columnsWithKeys;
+  }, [baseColumns, actionCols]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    }));
+  }, [allColumns]);
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!data_list || data_list.length === 0) return [];
+    return data_list.map((item, index) => ({
+      ...item,
+      key: item.id || index,
+    }));
+  }, [data_list]);
+
   return (
     <>
-      <Spin spinning={loading}>
+      <Spin spinning={false}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">
-                INVOICE TEMPLATE LIST
-              </p>
+              <p className="mt-[15px] w-full">INVOICE TEMPLATE LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
           <div className="w-full">
-            <TablePaginationNew
-              dataSource={dataSource}
-              columns={[
-                ...columnsInvoiceTemplate(
-                  search,
-                  page,
-                  pageSize,
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch
-                ),
-                ...useColumnActionPermission(
-                  ["view", "activate", "update", "history"],
-                  itemGrantAccess
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
+            <TableRBI
+              idTable="invoice-template-table"
+              dataSource={dataSourceWithKeys}
+              columns={processedColumns}
+              totalData={data_pagination?.totalElements || 0}
+              tableScrolled={{ x: 2400, y: 525 }}
               onSort={onSort}
-              tableScrolled={{ y: 525, x: 2400 }}
+              showExport={false}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              loadMoreThreshold={20}
+              enableRowClick={false}
             />
           </div>
         </CardContainer>
@@ -459,9 +586,10 @@ const InvoiceTemplateView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Invoice Template with name ${
-            chooseId?.invoiceName || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+              ? "activate"
+              : "inactivate"
+            } this Invoice Template with name ${chooseId?.invoiceName || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -490,7 +618,8 @@ const InvoiceTemplateView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

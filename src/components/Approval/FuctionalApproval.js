@@ -123,7 +123,7 @@ const FunctionalApproval = ({
   disableSelect = false,
   approvalName,
 }) => {
-  const handleSelectHiararchy = (value) => {
+  const handleSelectHierarchy = (value) => {
     updateSelectHierarchy(value);
     return value;
   };
@@ -146,7 +146,7 @@ const FunctionalApproval = ({
             },
           ]}
           className="no-margin-form w-1/3"
-          getValueFromEvent={handleSelectHiararchy}
+          getValueFromEvent={handleSelectHierarchy}
           label={"Approval Hierarchy"}
           required
         >
