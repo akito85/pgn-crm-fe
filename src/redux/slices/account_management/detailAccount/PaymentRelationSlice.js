@@ -47,9 +47,9 @@ const initialState = {
   detail_prApprovalHierarchy: [],
   loading_listPrAttachmentCategory: false,
   list_prAttachmentCategory: [],
-  loading_listPrAccountStandard: false,
-  list_prAccountStandard: [],
-  pagination_prAccountStandard: {
+  loading_listPrAccount: false,
+  list_prAccount: [],
+  pagination_prAccount: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -693,28 +693,28 @@ const paymentRelationSlice = createSlice({
     /** Get Payment Relation Accounts */
     [getPrAccounts.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listPrAccountStandard = true;
+        state.loading_listPrAccount = true;
       }
     },
     [getPrAccounts.fulfilled]: (state, action) => {
-      state.loading_listPrAccountStandard = false;
+      state.loading_listPrAccount = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId));
+          const currentIds = new Set(state.list_prAccount.map((item) => item.accountId));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
 
-          state.list_prAccountStandard = [
-            ...state.list_prAccountStandard,
+          state.list_prAccount = [
+            ...state.list_prAccount,
             ...filteredResult,
           ];
         }
         else
-          state.list_prAccountStandard = result;
+          state.list_prAccount = result;
       }
 
-      state.pagination_prAccountStandard = {
+      state.pagination_prAccount = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
@@ -722,11 +722,11 @@ const paymentRelationSlice = createSlice({
       }
     },
     [getPrAccounts.rejected]: (state, action) => {
-      state.loading_listPrAccountStandard = false;
+      state.loading_listPrAccount = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_prAccountStandard = [];
-        state.pagination_prAccountStandard = {
+        state.list_prAccount = [];
+        state.pagination_prAccount = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,

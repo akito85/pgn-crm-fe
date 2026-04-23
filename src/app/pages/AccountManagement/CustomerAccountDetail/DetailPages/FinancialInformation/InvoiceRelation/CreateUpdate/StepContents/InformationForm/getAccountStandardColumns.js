@@ -116,7 +116,7 @@ const getAccountStandardColumns = (
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "accountNumber",
+      "accountName",
       searchInput,
       searchedColumn,
       searchText,
@@ -259,14 +259,14 @@ const getAccountStandardColumns = (
     ),
   },
   {
-    key: "subdistrict",
+    key: "subDistrict",
     title: "SUBDISTRICT",
-    dataIndex: "subdistrict",
+    dataIndex: "subDistrict",
     width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "subdistrict",
+      "subDistrict",
       searchInput,
       searchedColumn,
       searchText,
