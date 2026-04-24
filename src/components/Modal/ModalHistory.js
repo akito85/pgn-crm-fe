@@ -76,7 +76,7 @@ const handleTextColor = (dataHistory) => {
 const ModalHistory = (props) => {
   const {
     isOpen,
-    handleClose = () => {},
+    handleClose = () => { },
     header,
     width,
     tabOptions,
@@ -112,8 +112,8 @@ const ModalHistory = (props) => {
     const value = e.target.value;
     const tempTab = value.toLowerCase();
     setTabActive(value);
-    setDataApproverFinal(tabActive ? dataApprover[tempTab] : dataApprover);
-    setDataHistoryFinal(tabActive ? dataHistory[tempTab] : dataHistory);
+    setDataApproverFinal(dataApprover?.[tempTab] || []);
+    setDataHistoryFinal(dataHistory?.[tempTab] || []);
   };
 
   const sliderLeft = () => {
@@ -171,111 +171,108 @@ const ModalHistory = (props) => {
 
         {/* content section */}
         <Spin spinning={loading}>
-        <div className={"flex flex-col w-full gap-3 p-3"}>
-          {tabOptions && tabOptions.length > 0 ? (
-            <RadioTabs data={tabOptions} onChange={handleTabs} />
-          ) : null}
-          <div className="relative flex justify-center items-center gap-2">
-            {dataApproverFinal.length > 0 ? (
-              <LeftCircleFilled width={32} onClick={sliderLeft} />
+          <div className={"flex flex-col w-full gap-3 p-3"}>
+            {tabOptions && tabOptions.length > 0 ? (
+              <RadioTabs data={tabOptions} onChange={handleTabs} />
             ) : null}
-            <div
-              id="sliderModalHistory"
-              className={`flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar`}
-            >
-              {dataApproverFinal.map((approver, index) => (
-                <div
-                  className="flex flex-row items-center gap-1.5"
-                  key={`Approver ${index + 1}`}
-                >
-                  <Avatar
-                    shape="square"
-                    size={36}
-                    icon={handleIconAvatar(approver)}
-                    style={styleBackgroundAvatar(approver)}
-                  />
-                  <div className="flex flex-col gap-0.5 max-w-[180px]">
-                    <p className="text-xs m-0 truncate">
-                      {approver?.name || "-"}
-                    </p>
-                    <Tooltip title={approver?.role} className="cursor-pointer">
-                      <p className="text-[10px] font-thin m-0 truncate">
-                        {approver?.role}
+            <div className="relative flex justify-center items-center gap-2">
+              {dataApproverFinal.length > 0 ? (
+                <LeftCircleFilled width={32} onClick={sliderLeft} />
+              ) : null}
+              <div
+                id="sliderModalHistory"
+                className={`flex gap-2 w-full h-full overflow-x-auto scroll whitespace-nowrap scroll-smooth no-scrollbar`}
+              >
+                {dataApproverFinal.map((approver, index) => (
+                  <div
+                    className="flex flex-row items-center gap-1.5"
+                    key={`Approver ${index + 1}`}
+                  >
+                    <Avatar
+                      shape="square"
+                      size={36}
+                      icon={handleIconAvatar(approver)}
+                      style={styleBackgroundAvatar(approver)}
+                    />
+                    <div className="flex flex-col gap-0.5 max-w-[180px]">
+                      <p className="text-xs m-0 truncate">
+                        {approver?.name || "-"}
                       </p>
-                    </Tooltip>
+                      <Tooltip title={approver?.role} className="cursor-pointer">
+                        <p className="text-[10px] font-thin m-0 truncate">
+                          {approver?.role}
+                        </p>
+                      </Tooltip>
+                    </div>
+                    {index !== dataApproverFinal.length - 1 ? (
+                      <RightOutlined className="text-xs" />
+                    ) : null}
                   </div>
-                  {index !== dataApproverFinal.length - 1 ? (
-                    <RightOutlined className="text-xs" />
-                  ) : null}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {dataApproverFinal.length > 0 ? (
-              <RightCircleFilled width={32} onClick={sliderRight} />
-            ) : null}
-          </div>
-          <Divider style={{ margin: 0 }} />
-          <div
-            className="shadow-lg h-72 overflow-auto mb-2 p-1.5 rounded-md"
-            style={{ border: "1px solid #DBDADE" }}
-          >
-            <List
-              dataSource={dataHistoryFinal}
-              renderItem={(item) => (
-                <List.Item key={item.id} style={{ padding: "8px 0" }}>
-                  <div className="flex flex-row w-full px-2 py-1 gap-3 justify-between">
-                    <div className="flex flex-col gap-1 w-1/2">
-                      <p
-                        className="text-xs m-0 font-semibold"
-                        style={{ color: handleTextColor(item) }}
-                      >
-                        {item.status}
-                      </p>
-                      <p className="text-[11px] m-0">{`Hierachy: ${item.hierarchy}`}</p>
-                      <p className="text-[11px] m-0">{`Action by: ${item.name}`}</p>
-                      <p className="text-[11px] m-0">{`Position: ${item.role}`}</p>
-                    </div>
-                    <div className="flex flex-col items-end justify-between gap-1 w-1/2">
-                      <div className="flex gap-0.5 items-end">
-                        <p className="text-[10px] m-0 font-light">
-                          {`Task: ${
-                            item.taskDate
-                              ? moment(item.taskDate).format(
-                                  dateFormatting.dateTime
-                                )
-                              : "-"
-                          }`}
-                        </p>
-                        <p className="text-[10px] m-0 font-light">
-                          {`Action: ${
-                            item.actionDate
-                              ? moment(item.actionDate).format(
-                                  dateFormatting.dateTime
-                                )
-                              : "-"
-                          }`}
-                        </p>
-                      </div>
-                      {item.description ? (
+              {dataApproverFinal.length > 0 ? (
+                <RightCircleFilled width={32} onClick={sliderRight} />
+              ) : null}
+            </div>
+            <Divider style={{ margin: 0 }} />
+            <div
+              className="shadow-lg h-72 overflow-auto mb-2 p-1.5 rounded-md"
+              style={{ border: "1px solid #DBDADE" }}
+            >
+              <List
+                dataSource={dataHistoryFinal}
+                renderItem={(item) => (
+                  <List.Item key={item.id} style={{ padding: "8px 0" }}>
+                    <div className="flex flex-row w-full px-2 py-1 gap-3 justify-between">
+                      <div className="flex flex-col gap-1 w-1/2">
                         <p
-                          className={`text-[11px] m-0 w-full font-semibold cursor-pointer break-words ${
-                            expandedDescriptions[item.id]
-                              ? ""
-                              : "overflow-hidden whitespace-nowrap text-ellipsis"
-                          }`}
-                          onClick={() => toggleDescription(item.id)}
+                          className="text-xs m-0 font-semibold"
+                          style={{ color: handleTextColor(item) }}
                         >
-                          {item.description}
+                          {item.status}
                         </p>
-                      ) : null}
+                        <p className="text-[11px] m-0">{`Hierachy: ${item.hierarchy}`}</p>
+                        <p className="text-[11px] m-0">{`Action by: ${item.name}`}</p>
+                        <p className="text-[11px] m-0">{`Position: ${item.role}`}</p>
+                      </div>
+                      <div className="flex flex-col items-end justify-between gap-1 w-1/2">
+                        <div className="flex gap-0.5 items-end">
+                          <p className="text-[10px] m-0 font-light">
+                            {`Task: ${item.taskDate
+                                ? moment(item.taskDate).format(
+                                  dateFormatting.dateTime
+                                )
+                                : "-"
+                              }`}
+                          </p>
+                          <p className="text-[10px] m-0 font-light">
+                            {`Action: ${item.actionDate
+                                ? moment(item.actionDate).format(
+                                  dateFormatting.dateTime
+                                )
+                                : "-"
+                              }`}
+                          </p>
+                        </div>
+                        {item.description ? (
+                          <p
+                            className={`text-[11px] m-0 w-full font-semibold cursor-pointer break-words ${expandedDescriptions[item.id]
+                                ? ""
+                                : "overflow-hidden whitespace-nowrap text-ellipsis"
+                              }`}
+                            onClick={() => toggleDescription(item.id)}
+                          >
+                            {item.description}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                </List.Item>
-              )}
-            />
+                  </List.Item>
+                )}
+              />
+            </div>
           </div>
-        </div>
         </Spin>
       </Fragment>
     </Modal>
