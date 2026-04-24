@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Button, message } from "antd";
+import { Input, Button, message, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import CardContainer from "../../../../../components/CardContainer";
 import SelectComponent from "../../../../../components/SelectComponent";
@@ -145,7 +145,15 @@ const GLAccountCreate = ({
         return (
           <div className="flex gap-3 justify-center text-primary cursor-pointer">
             <EditOutlined style={{ fontSize: "16px" }} onClick={() => handleEdit(record)} />
-            <DeleteOutlined style={{ fontSize: "16px", color: "#D90000" }} className="text-red-500" onClick={() => handleDelete(record.key)} />
+            <Popconfirm
+              title="Hapus GL Account?"
+              description="Yakin ingin menghapus data ini?"
+              onConfirm={() => handleDelete(record.key)}
+              okText="Hapus"
+              cancelText="Batal"
+            >
+              <DeleteOutlined style={{ fontSize: "16px", color: "#D90000" }} className="text-red-500" />
+            </Popconfirm>
           </div>
         );
       }

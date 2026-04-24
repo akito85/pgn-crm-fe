@@ -25,6 +25,7 @@ const AccountForm = ({
   form,
   storedData,
   setStoredData,
+  dataGLAccount = [],
   // handleSelectCriteria = () => {},
   // handleDeselectCriteria = () => {},
   // handleClearCriteria = () => {},
@@ -176,7 +177,7 @@ const AccountForm = ({
               >
                 {data_select_criteria &&
                   data_select_criteria?.map((data, index) => (
-                    <Select.Option value={data.Id} key={index}>
+                    <Select.Option value={data.Id} key={data.Id}>
                       {data.text}
                     </Select.Option>
                   ))}
@@ -207,15 +208,13 @@ const AccountForm = ({
           <div>
             <div className="w-full flex justify-end gap-5">
               <div className="w-full grid grid-cols-3 gap-5">
-                <Form.Item name={"isVA"}>
-                  <div className="flex flex-col pt-[12px]">
-                    <Checkbox onChange={handlePage} checked={isVA}>
-                      Is VA
-                    </Checkbox>
-                    <span className="text-[10px]">
-                      Click or tap this checkbox if data can be VA.
-                    </span>
-                  </div>
+                <Form.Item name={"isVA"} valuePropName="checked">
+                  <Checkbox onChange={(e) => setIsVA(e.target.checked)} checked={isVA}>
+                    Is VA
+                  </Checkbox>
+                  <span className="text-[10px]">
+                    Click or tap this checkbox if data can be VA.
+                  </span>
                 </Form.Item>
                 {isVA === true ? (
                   <>
@@ -235,7 +234,7 @@ const AccountForm = ({
                     <Form.Item
                       label={"First Static Code"}
                       name={"fsCode"}
-                      rules={formMessageRequired("Fist Static Code")}
+                      rules={formMessageRequired("First Static Code")}
                     >
                       <Input
                         allowClear
@@ -257,158 +256,114 @@ const AccountForm = ({
       <BaseContainer header={"GL Accounts"}>
         <div className="w-full grid grid-cols-3 gap-2">
           <Form.Item label={"Cash"} name={"cash"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item
             label={"Receipt Confirmation"}
             name={"receiptConfirmation"}
           >
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item label={"Remittance"} name={"remittance"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
         </div>
         <div className="w-full grid grid-cols-3 gap-2">
           <Form.Item label={"Factoring"} name={"factoring"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item label={"Short Term Debt"} name={"shortTermDebt"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item label={"Bank Charges"} name={"bankCharges"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
         </div>
         <div className="w-full grid grid-cols-3 gap-2">
           <Form.Item label={"Unapplied Receipt"} name={"unappliedReceipt"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item
             label={"Unidentified Receipt"}
             name={"unidentifiedReceipt"}
           >
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item label={"On Account Receipt"} name={"onAccountReceipt"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
         </div>
         <div className="w-full grid grid-cols-3 gap-2">
           <Form.Item label={"Unearned Discount"} name={"unearnedDiscount"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
           <Form.Item label={"Earned Discount"} name={"earnedDiscount"}>
-            <SelectComponent
-            // mode="multiple"
-            // disabled={!addressTable?.map((a) => a.overview)[0] ? true : false}
-            >
-              {/* {dataBusinessPurpose &&
-              dataBusinessPurpose?.map((data) => (
+            <SelectComponent allowClear placeholder="Pilih GL Account">
+              {dataGLAccount?.map((data) => (
                 <Select.Option key={data.id} value={data.id}>
-                  {data.name}
+                  {data.glNumber} - {data.glName}
                 </Select.Option>
-              ))} */}
+              ))}
             </SelectComponent>
           </Form.Item>
         </div>

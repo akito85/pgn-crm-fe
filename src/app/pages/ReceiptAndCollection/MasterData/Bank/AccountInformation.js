@@ -62,12 +62,10 @@ const AccountInformation = ({ type, bankId }) => {
   const [modalBack, setModalBack] = useState(false);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [isVA, setIsVA] = useState(false);
-  console.log("🚀 ~ AccountInformation ~ isVA:", isVA);
   const [kirimBody, setKirimBody] = useState();
   const [loadingForm, setLoadingForm] = useState(loading);
   const [Id, setId] = useState();
   const [storedData, setStoredData] = useState(false);
-console.log(data_list_gl, ' data list gl');
 
   //use effect
   useEffect(() => {
@@ -379,7 +377,7 @@ console.log(data_list_gl, ' data list gl');
         endDate: endDate,
         description: formValue?.description,
         isVa: isVA,
-        staticCode: formValue?.staticCode || null,
+        staticCode: formValue?.fsCode || null,
         appHierId: selectedHierarchy,
         criteriaIdList: formValue?.criteria,
         criteriaDataDtoList: dataCriteriaObject,
@@ -419,7 +417,7 @@ console.log(data_list_gl, ' data list gl');
   const handleError = ({ values, errorFields, outOfDate }) => {
     setTabData((prevState) => {
       const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length < 0) {
+        if (!item.paramValue || item.paramValue.length === 0) {
           return {
             value: item.value,
             paramValue: item.paramValue,
@@ -443,7 +441,7 @@ console.log(data_list_gl, ' data list gl');
   const handleProcessModalConfirm = () => {
     setModalConfirm(false);
     const successMessageCreate = {
-      title: "Successfull",
+      title: "Successful",
       description: `Your data has been submitted`,
       return: true,
     };
@@ -479,14 +477,16 @@ console.log(data_list_gl, ' data list gl');
         dispatch(showModalSuccess(successMessageCreate));
       })
       .catch((error) => {
-        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-          const message =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString();
-          dispatch(showModalError(message));
+        const code = error?.response?.data?.code ?? 0;
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          error?.toString() ||
+          "Terjadi kesalahan tidak terduga.";
+        if (Math.floor(code / 100) === 5) {
+          dispatch(showModalError({ title: "Server Error", description: message }));
+        } else {
+          dispatch(showModalError({ title: "Failed", description: message }));
         }
       });
   };
@@ -527,6 +527,7 @@ console.log(data_list_gl, ' data list gl');
               formValue={formValue}
               storedData={storedData}
               setStoredData={setStoredData}
+              dataGLAccount={data_list_gl?.data || []}
             />
             {/* <ContactListCreate
             /> */}
@@ -555,7 +556,7 @@ console.log(data_list_gl, ' data list gl');
           </div>
           <div className="flex w-full justify-between align-middle my-3 gap-5">
             <ButtonComponent
-              type={"submit"}
+              type="default"
               onClick={() => navigate(-1)}
               icon={
                 <LeftOutlined

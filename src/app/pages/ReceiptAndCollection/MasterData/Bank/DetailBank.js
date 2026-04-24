@@ -64,10 +64,10 @@ const DetailBank = ({
   } = useSelector((state) => state.bank);
   
   const dispatch = useDispatch();
-  const [page, setPage] = useState([1]);
-  const [pageSize, setPageSize] = useState([10]);
-  const [pageContact, setPageContact] = useState([1]);
-  const [pageSizeContact, setPageSizeContact] = useState([10]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pageContact, setPageContact] = useState(1);
+  const [pageSizeContact, setPageSizeContact] = useState(10);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");

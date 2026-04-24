@@ -75,6 +75,7 @@ const TableVA = ({
   id,
 }) => {
   const { dataVA } = useSelector((state) => state.bank);
+  const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState("");
@@ -105,7 +106,6 @@ const TableVA = ({
     );
   }, [id, page, pageSize, sort, search]);
 
-  const dispatch = useDispatch();
   const handleChange = (page, pageSize) => {
     setPage(page);
     setPageSize(pageSize);
