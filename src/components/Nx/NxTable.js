@@ -1296,6 +1296,20 @@ const NxTable = ({
     return () => ro.disconnect();
   }, []);
 
+  // ── Own border-radius via inline style ───────────────────────────────────
+  // CSS descendant selectors from any ancestor NxTable (e.g. `#parentId .ant-table-container`)
+  // bleed into this NxTable's own DOM nodes. Inline `!important` styles have
+  // absolute highest priority and cannot be overridden by any stylesheet rule,
+  // so we apply border-radius directly on this NxTable's own elements only.
+  React.useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    const radius = rounded ? (showFooter ? '8px 8px 0 0' : '8px') : '0';
+    const antTable = containerRef.current.querySelector(`#${safeId} .ant-table`);
+    const antTableContainer = containerRef.current.querySelector(`#${safeId} .ant-table-container`);
+    if (antTable) antTable.style.setProperty('border-radius', radius, 'important');
+    if (antTableContainer) antTableContainer.style.setProperty('border-radius', radius, 'important');
+  }, [safeId, rounded, showFooter]);
+
   // ── Fixed-column overflow warning ─────────────────────────────────────────
   // Computes a warning when the combined width of all fixed columns leaves no
   // visible scroll area for the non-fixed (normal) columns. The message names
@@ -1539,7 +1553,7 @@ const NxTable = ({
             }
 
             #${safeId} .ant-table {
-              border-radius: ${rounded ? '8px 8px 0 0' : '0'};
+              border-radius: ${rounded ? (showFooter ? '8px 8px 0 0' : '8px') : '0'};
               overflow: clip;
               border: none;
               border-collapse: collapse;
@@ -1547,7 +1561,7 @@ const NxTable = ({
             }
 
             #${safeId} .ant-table-container {
-              border-radius: ${rounded ? '8px 8px 0 0' : '0'};
+              border-radius: ${rounded ? (showFooter ? '8px 8px 0 0' : '8px') : '0'};
               overflow: clip;
               border: ${showBorder ? `1px solid ${BORDER_COL}` : 'none'};
               border-bottom: none;
