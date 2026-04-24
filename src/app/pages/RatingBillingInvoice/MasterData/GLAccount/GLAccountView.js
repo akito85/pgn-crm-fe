@@ -447,7 +447,7 @@ const GLAccountView = () => {
         const rowApprovalStatus = normalizeStatus(record.approvalStatus);
         const canInactivate =
           rowStatus === "ACTIVE" &&
-          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+          ["ACTIVE", "APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
             rowApprovalStatus,
           );
         const canActivate =
