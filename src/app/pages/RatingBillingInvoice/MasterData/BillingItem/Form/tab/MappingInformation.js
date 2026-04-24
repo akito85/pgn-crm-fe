@@ -1,4 +1,10 @@
-import React, { useEffect, Fragment, useState, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  Fragment,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
 import { Tabs } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 import columnsMapping from "../../Table/TableMappingInformation";
@@ -7,6 +13,7 @@ import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 import { hasValue } from "../../../../../../../utils";
 import CriteriaDetailTab from "./CriteriaDetailTab";
 import DetailMappingInformation from "./DetailMappingInformation";
+import MappingItemTab from "./MappingItemTab";
 import CardContainer from "../../../../../../../components/CardContainer";
 import { ModalConfirm } from "../../../../../../../components/Modal/ModalPopUp";
 
@@ -49,6 +56,9 @@ const MappingInformation = ({
   disabledCriteriaColumns = [],
   isBank = false,
   data_glAccountBankList = [],
+  showMappingItemTab = false,
+  dataMappingItemTable = [],
+  handleChangesMappingItemTable = () => {},
 }) => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
@@ -64,6 +74,7 @@ const MappingInformation = ({
 
   const cancelMappingEditRef = useRef(null);
   const cancelCriteriaEditRef = useRef(null);
+  const cancelMappingItemEditRef = useRef(null);
 
   const handleMappingCancelEdit = useCallback((fn) => {
     cancelMappingEditRef.current = fn;
@@ -72,6 +83,17 @@ const MappingInformation = ({
   const handleCriteriaCancelEdit = useCallback((fn) => {
     cancelCriteriaEditRef.current = fn;
   }, []);
+
+  const handleMappingItemCancelEdit = useCallback((fn) => {
+    cancelMappingItemEditRef.current = fn;
+  }, []);
+
+  useEffect(() => {
+    if (!showMappingItemTab && activeTab === "mappingItem") {
+      setActiveTab("mapping");
+      onTabChange();
+    }
+  }, [activeTab, onTabChange, setActiveTab, showMappingItemTab]);
 
   useEffect(() => {
     onCriteriaEditingChange(activeTab === "criteria" && isEditabled);
@@ -188,6 +210,9 @@ const MappingInformation = ({
     if (activeTab === "criteria" && cancelCriteriaEditRef.current) {
       cancelCriteriaEditRef.current();
     }
+    if (activeTab === "mappingItem" && cancelMappingItemEditRef.current) {
+      cancelMappingItemEditRef.current();
+    }
     setIsEditabled(false);
     setActiveTab(pendingTab);
     setPendingTab(null);
@@ -213,6 +238,9 @@ const MappingInformation = ({
           >
             <TabPane tab="Mapping Detail" key="mapping" />
             <TabPane tab="Criteria Detail" key="criteria" />
+            {showMappingItemTab && (
+              <TabPane tab="Mapping Item" key="mappingItem" />
+            )}
           </Tabs>
         }
       >
@@ -281,26 +309,42 @@ const MappingInformation = ({
             data_glAccountBankList={data_glAccountBankList}
           />
         )}
+
+        {activeTab === "mappingItem" && showMappingItemTab && (
+          <MappingItemTab
+            dataTable={dataMappingItemTable}
+            onDataChange={handleChangesMappingItemTable}
+            type={type}
+            isEditabled={isEditabled}
+            setIsEditabled={setIsEditabled}
+            startDateLock={startDate}
+            endDateLock={endDate}
+            setModalRequired={setModalRequired}
+            onCancelEdit={handleMappingItemCancelEdit}
+          />
+        )}
       </CardContainer>
 
       {/* Detail Mapping Information */}
-      {detailMapping && dataTable?.length > 0 && (dataTable || []).find((item) => item.category === category) && (
-        <CardContainer header="DETAIL MAPPING INFORMATION">
-          <DetailMappingInformation
-            key="mappingDetailInformation"
-            dataMapDetailItemList={detail_mapping_category}
-            subHeader={`${(dataCategoryMapList || []).find((item) => item.id === category)?.name}`}
-            dataTable={dataDetailTable || []}
-            handleDataMapChanges={handleChangesMapDetailInformation}
-            setIsEditabled={setIsEditabled}
-            isEditabled={isEditabled}
-            type={type}
-            startDateMappping={startDateMap}
-            endDateMapping={endDateMap}
-            handleValidateUpdate={handleValidateUpdate}
-          />
-        </CardContainer>
-      )}
+      {detailMapping &&
+        dataTable?.length > 0 &&
+        (dataTable || []).find((item) => item.category === category) && (
+          <CardContainer header="DETAIL MAPPING INFORMATION">
+            <DetailMappingInformation
+              key="mappingDetailInformation"
+              dataMapDetailItemList={detail_mapping_category}
+              subHeader={`${(dataCategoryMapList || []).find((item) => item.id === category)?.name}`}
+              dataTable={dataDetailTable || []}
+              handleDataMapChanges={handleChangesMapDetailInformation}
+              setIsEditabled={setIsEditabled}
+              isEditabled={isEditabled}
+              type={type}
+              startDateMappping={startDateMap}
+              endDateMapping={endDateMap}
+              handleValidateUpdate={handleValidateUpdate}
+            />
+          </CardContainer>
+        )}
 
       {/* Modal Konfirmasi Pindah Tab saat Ada Row yang Sedang Diedit */}
       <ModalConfirm
@@ -310,11 +354,14 @@ const MappingInformation = ({
         width={450}
       >
         <div className="flex justify-center mt-5 gap-[20px] px-4">
-          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036", flexShrink: 0 }} />
+          <WarningOutlined
+            style={{ fontSize: "24px", color: "#BE3036", flexShrink: 0 }}
+          />
           <div>
             <p className="text-[18px] font-bold mb-1">Unsaved Changes</p>
             <p className="text-sm text-gray-600">
-              You have a row that is currently being edited. Switching tabs will discard your unsaved changes. Are you sure you want to continue?
+              You have a row that is currently being edited. Switching tabs will
+              discard your unsaved changes. Are you sure you want to continue?
             </p>
           </div>
         </div>
