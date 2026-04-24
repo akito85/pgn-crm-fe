@@ -571,6 +571,7 @@ const BillingItemForm = (props) => {
 
           return {
             key: `${index + 1}`,
+            id: item?.id ?? item?.mappingItemId ?? null,
             type: resolvedTypeName,
             transactionMappingCode:
               item?.transactionMappingCode || item?.billingItemCode,
@@ -1096,8 +1097,9 @@ const BillingItemForm = (props) => {
       })();
 
       return {
-        type: resolvedTypeCode,
-        transactionMappingCode: item?.transactionMappingCode || null,
+        id: item?.id || null,
+        typeItem: resolvedTypeCode,
+        transMappingCode: item?.transactionMappingCode || null,
         name: item?.name || null,
         startDate: item?.startDate || null,
         endDate: item?.endDate || null,
@@ -1128,7 +1130,7 @@ const BillingItemForm = (props) => {
         ? allValues.bankAccountNumber || null
         : null,
       mappingInfo: handleMappingInfo(allDataDetailTable),
-      mappingItem: showMappingItemTab ? mappingItemPayload : [],
+      mappingItems: showMappingItemTab ? mappingItemPayload : [],
       criteria: criteriaPayload,
       appHierId: allValues.apphierId,
       action: typeSubmit ? "SUBMIT" : "DRAFT",
