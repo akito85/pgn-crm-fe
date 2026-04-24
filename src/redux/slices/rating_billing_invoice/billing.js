@@ -22,12 +22,15 @@ const initialState = {
   data_list_billing_approval: [],
   data_list_billing_approved: [],
   data_prevBilling: [],
+  data_cancel_billing: [],
+  dataListCategory: [],
   loadingList: false,
   loadingRequest: false,
   loadingApproval: false,
   loadingDetail: false,
   loadingHistory: false,
   loadingDownload: false,
+  loadingCancel: false,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -80,6 +83,40 @@ export const approvedBilling = createAsyncThunk(
   async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/billing/approval-billing";
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${action}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (response) {
+      const message =
+        response?.response?.data?.message ||
+        response?.message ||
+        response?.toString();
+      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
+        if (response?.data?.code === 419) {
+          thunkAPI.dispatch(setBodyError(response));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${action}. ${message}. Please try again.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(response);
+      }
+    }
+  },
+);
+
+export const cancelApprovalBilling = createAsyncThunk(
+  "CANCEL_APPROVAL_BILLING",
+  async ({ body, action }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billing/cancel-approval";
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
@@ -177,7 +214,7 @@ export const getAllBillingRequestPaginate = createAsyncThunk(
 
 export const getAllBillingApprovePaginate = createAsyncThunk(
   "GET_ALL_BILLING_APPROVE_PAGINATE",
-  async ({ page, pageSize, search, sort } = {}, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore = false } = {}, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
@@ -185,7 +222,44 @@ export const getAllBillingApprovePaginate = createAsyncThunk(
       const url = `/v1/dbs/api/billing/approval-billing-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
-      return responseData;
+      return {
+        ...responseData,
+        isLoadMore,
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return error;
+    }
+  },
+);
+
+export const getAllBillingCancelTaskPaginate = createAsyncThunk(
+  "GET_ALL_BILLING_CANCEL_TASK_PAGINATE",
+  async ({ page, pageSize, search, sort, isLoadMore = false } = {}, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/billing//cancel-tasks?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      const responseData = response.data?.data ?? response.data;
+      return {
+        ...responseData,
+        isLoadMore,
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -489,6 +563,77 @@ export const getListApprovalById = createAsyncThunk(
   },
 );
 
+export const cancelBilling = createAsyncThunk(
+  "CANCEL_BILLING",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billing/cancel-request";
+      // Payload structure:
+      // - billHeaderId: number
+      // - cancelDate: string (yyyy-MM-dd)
+      // - reasonCode: string
+      // - accountingDate: string (yyyy-MM-dd)
+      // - remark: string
+      // - apphierId: number
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successBody = {
+        title: `Successful`,
+        description: "Your billing has been cancelled.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (response) {
+      const message =
+        response?.response?.data?.message ||
+        response?.message ||
+        response?.toString();
+      if (Math.floor((response.response.data.code || 0) / 100) === 4) {
+        if (response?.data?.code === 419) {
+          thunkAPI.dispatch(setBodyError(response));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your billing was not cancelled. ${message}. Please try again.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(response);
+      }
+    }
+  },
+);
+
+export const getAttachmentCategoryBilling = createAsyncThunk(
+  "GET_ATTACHMENT_CATEGORY_BILLING",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/billing-bucket/list-attachment-category`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return (response.data || []).map((item) => ({
+        Id: item.id,
+        text: item.text,
+      }));
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return [];
+    }
+  },
+);
+
 const billingSlice = createSlice({
   name: "billing",
   initialState,
@@ -505,6 +650,10 @@ const billingSlice = createSlice({
     // TAMBAHAN: reset data billing request approval (untuk modal request)
     resetBillingRequestData: (state) => {
       state.data_list_billing_request_approval = [];
+    },
+    // TAMBAHAN: reset data cancel billing (untuk modal cancel)
+    resetCancelBillingData: (state) => {
+      state.data_cancel_billing = [];
     },
   },
   extraReducers: {
@@ -531,6 +680,20 @@ const billingSlice = createSlice({
       state.loadingApproval = false;
     },
     [approvedBilling.rejected]: (state, action) => {
+      state.loadingApproval = false;
+      state.isFailed = true;
+      state.result = action.payload;
+    },
+
+    // Cancel Approval Billing
+    [cancelApprovalBilling.pending]: (state) => {
+      state.loadingApproval = true;
+    },
+    [cancelApprovalBilling.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loadingApproval = false;
+    },
+    [cancelApprovalBilling.rejected]: (state, action) => {
       state.loadingApproval = false;
       state.isFailed = true;
       state.result = action.payload;
@@ -651,6 +814,57 @@ const billingSlice = createSlice({
       }
     },
     [getAllBillingApprovePaginate.rejected]: (state, action) => {
+      state.loadingApproval = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_list_billing_approval = {
+          result: [],
+          page: {
+            totalElements: 0,
+            totalPages: 0,
+            number: 0,
+            size: 10,
+          },
+        };
+      }
+    },
+
+    // Get All Billing Cancel Task Pagination
+    [getAllBillingCancelTaskPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingApproval = true;
+      }
+    },
+    [getAllBillingCancelTaskPaginate.fulfilled]: (state, action) => {
+      state.loadingApproval = false;
+      const newData = action.payload?.result || [];
+      const isLoadMore = action.payload?.isLoadMore;
+
+      if (isLoadMore) {
+        state.data_list_billing_approval = {
+          result: [
+            ...(state.data_list_billing_approval?.result || []),
+            ...newData,
+          ],
+          page: {
+            totalElements: action.payload.page?.totalElements || 0,
+            totalPages: action.payload.page?.totalPages || 0,
+            number: action.payload.page?.number || 0,
+            size: action.payload.page?.size || 10,
+          },
+        };
+      } else {
+        state.data_list_billing_approval = {
+          result: newData,
+          page: {
+            totalElements: action.payload?.page?.totalElements || 0,
+            totalPages: action.payload?.page?.totalPages || 0,
+            number: action.payload?.page?.number || 0,
+            size: action.payload?.page?.size || 10,
+          },
+        };
+      }
+    },
+    [getAllBillingCancelTaskPaginate.rejected]: (state, action) => {
       state.loadingApproval = false;
       if (!action.meta.arg?.isLoadMore) {
         state.data_list_billing_approval = {
@@ -808,9 +1022,34 @@ const billingSlice = createSlice({
       state.data_approval_list = [];
       state.loadingApproval = false;
     },
+
+    // Cancel Billing
+    [cancelBilling.pending]: (state) => {
+      state.loadingCancel = true;
+    },
+    [cancelBilling.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loadingCancel = false;
+    },
+    [cancelBilling.rejected]: (state, action) => {
+      state.loadingCancel = false;
+      state.isFailed = true;
+      state.result = action.payload;
+    },
+
+    // Attachment Category for Cancel Billing
+    [getAttachmentCategoryBilling.pending]: (state) => {
+      state.dataListCategory = [];
+    },
+    [getAttachmentCategoryBilling.fulfilled]: (state, action) => {
+      state.dataListCategory = action.payload;
+    },
+    [getAttachmentCategoryBilling.rejected]: (state) => {
+      state.dataListCategory = [];
+    },
   },
 });
 
-export const { setBillingFilters, resetBillingData, resetBillingRequestData } = billingSlice.actions;
+export const { setBillingFilters, resetBillingData, resetBillingRequestData, resetCancelBillingData } = billingSlice.actions;
 const { reducer } = billingSlice;
 export default reducer;

@@ -28,11 +28,13 @@ import { columnsBilling } from "./Table/TableViewBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
+import ModalCancelBilling from "./ModalCancelBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
+import { CloseSquareOutlined } from "@ant-design/icons";
 
 const BillingPage = () => {
   const { data, loadingList, loadingHistory, data_approval_history, filters } = useSelector(
@@ -56,6 +58,7 @@ const BillingPage = () => {
   const [modalRequest, setModalRequest] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [modalApproval, setModalApproval] = useState(false);
+  const [modalCancel, setModalCancel] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [billingCode, setBillingCode] = useState("");
   const [billHeaderId, setBillHeaderId] = useState("");
@@ -124,8 +127,16 @@ const BillingPage = () => {
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
       const temp = {
-        dataApprover: data_approval_history?.dataApprover?.BILLING || [],
-        dataHistory: data_approval_history?.dataHistory?.BILLING || [],
+        dataApprover: {
+          billing: data_approval_history?.dataApprover?.BILLING || [],
+          canceled_billing:
+            data_approval_history?.dataApprover?.CANCELED_BILLING || [],
+        },
+        dataHistory: {
+          billing: data_approval_history?.dataHistory?.BILLING || [],
+          canceled_billing:
+            data_approval_history?.dataHistory?.CANCELED_BILLING || [],
+        },
       };
       setDataApprovalHistory(temp);
     } else {
@@ -219,6 +230,12 @@ const BillingPage = () => {
   const handleApprovalHistory = (record) => {
     dispatch(getApprovalHistory(record.billCode));
     setModalApprovalHistory(true);
+  };
+
+  const handleCancelBilling = (e, record) => {
+    e.stopPropagation();
+    setSelectedBillingData(record);
+    setModalCancel(true);
   };
 
   const handleRefresh = () => {
@@ -359,10 +376,33 @@ const BillingPage = () => {
         );
       },
     },
+    {
+      action: "Cancel",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Cancel Billing">
+          <div
+            onClick={(e) => {
+              handleCancelBilling(e, record);
+            }}
+            style={{
+              cursor: "pointer",
+              display: "inline-block",
+              lineHeight: 0,
+            }}
+          >
+            <CloseSquareOutlined
+              width={20}
+              style={{ color: "#0075BF" }}
+            />
+          </div>
+        </Tooltip>
+      ),
+    },
   ];
 
   const actionCols = useColumnActionPermission(
-    ["view", "history"],
+    ["view", "history", "cancel"],
     itemGrantAccess,
   ).map((col) => ({
     ...col,
@@ -477,6 +517,10 @@ const BillingPage = () => {
         handleClose={() => setModalApprovalHistory(false)}
         header={"Approval History"}
         width={1000}
+        tabOptions={[
+          { value: "billing", label: "Request" },
+          { value: "canceled_billing", label: "Cancel" },
+        ]}
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
         loading={loadingHistory}
@@ -494,6 +538,14 @@ const BillingPage = () => {
         handleCancel={() => setModalApproval(false)}
         handleRefresh={handleRefresh}
         handleOpenModal={() => setModalApproval(true)}
+      />
+
+      <ModalCancelBilling
+        isOpen={modalCancel}
+        handleCancel={() => setModalCancel(false)}
+        handleRefresh={handleRefresh}
+        handleOpenModal={() => setModalCancel(true)}
+        selectedBilling={selectedBillingData}
       />
     </>
   );
