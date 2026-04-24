@@ -8,8 +8,8 @@ const initialState = {
   data_reconcile: null,
   accountingAllocation: null, // For Create Accounting feature
   submitResult: null, // For Create Accounting submit
-  //   data_detail: null,
-  //   data_allocation: null,
+  journalRecommendation: null, // For Journal Recommendation endpoint
+  saveDraftResult: null, // For Save as Draft endpoint
 };
 
 export const getReciptHistoriesPagging = createAsyncThunk(
@@ -130,6 +130,54 @@ export const submitAccountingAllocation = createAsyncThunk(
   }
 );
 
+/**
+ * Get journal recommendation from M_PAY_RECEIPT + R_PAY_RECEIPT_ALLOCATION
+ * Calls: GET /v1/dbs/api/receipt/accounting/recommendation/{receiptId}
+ */
+export const getReceiptJournalRecommendation = createAsyncThunk(
+  "GET_RECEIPT_JOURNAL_RECOMMENDATION",
+  async ({ receiptId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/accounting/recommendation/${receiptId}`;
+      const response = await receiptCollectionHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "GET_RECEIPT_JOURNAL_RECOMMENDATION",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+/**
+ * Save journal recommendation as DRAFT into M_ACCOUNTING_JOURNAL + M_ACCOUNTING_JOURNAL_DETAIL
+ * Calls: POST /v1/dbs/api/receipt/accounting/save-draft
+ */
+export const saveReceiptJournalAsDraft = createAsyncThunk(
+  "SAVE_RECEIPT_JOURNAL_DRAFT",
+  async ({ receiptId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/receipt/accounting/save-draft`;
+      const response = await receiptCollectionHttpService.createData(url, { receiptId });
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "SAVE_RECEIPT_JOURNAL_DRAFT",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 export const downloadReceiptHistories = createAsyncThunk(
   "DOWNLOAD_RECEIPT_HISTORIES",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
@@ -241,6 +289,34 @@ const receiptHistoriesReducer = createSlice({
     },
     [submitAccountingAllocation.rejected]: (state, action) => {
       state.submitResult = null;
+      state.loading = false;
+    },
+
+    // Get Journal Recommendation
+    [getReceiptJournalRecommendation.pending]: (state) => {
+      state.loading = true;
+      state.journalRecommendation = null;
+    },
+    [getReceiptJournalRecommendation.fulfilled]: (state, action) => {
+      state.journalRecommendation = action.payload;
+      state.loading = false;
+    },
+    [getReceiptJournalRecommendation.rejected]: (state) => {
+      state.journalRecommendation = null;
+      state.loading = false;
+    },
+
+    // Save Journal Draft
+    [saveReceiptJournalAsDraft.pending]: (state) => {
+      state.loading = true;
+      state.saveDraftResult = null;
+    },
+    [saveReceiptJournalAsDraft.fulfilled]: (state, action) => {
+      state.saveDraftResult = action.payload;
+      state.loading = false;
+    },
+    [saveReceiptJournalAsDraft.rejected]: (state) => {
+      state.saveDraftResult = null;
       state.loading = false;
     },
   },

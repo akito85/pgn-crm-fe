@@ -566,7 +566,7 @@ export const inactiveBank = createAsyncThunk(
         body
       );
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been submitted.",
         return: false,
       };
@@ -600,7 +600,7 @@ export const inactiveBankAccount = createAsyncThunk(
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been submitted.",
         return: false,
       };
@@ -863,7 +863,7 @@ export const approveOrRejectInactiveBank = createAsyncThunk(
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: `${message}`,
         return: true,
       };

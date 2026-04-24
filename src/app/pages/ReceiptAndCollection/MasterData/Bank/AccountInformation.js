@@ -80,6 +80,7 @@ const AccountInformation = ({ type, bankId }) => {
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [modalBack, setModalBack] = useState(false);
   const [criteriaValues, setCriteriaValues] = useState([]);
+  const [isVA, setIsVA] = useState(false);
   const [kirimBody, setKirimBody] = useState();
   const [loadingForm, setLoadingForm] = useState(loading);
   const [storedData, setStoredData] = useState(false);
@@ -538,6 +539,8 @@ const AccountInformation = ({ type, bankId }) => {
         startDate,
         endDate,
         description: formValue?.description,
+        isVa: isVA,
+        staticCode: formValue?.fsCode || null,
         appHierId: selectedHierarchy,
         glAccountDataDtoList: dataGLObject,
         categoryDataDtoList: dataCategoryObject,
@@ -585,19 +588,36 @@ const AccountInformation = ({ type, bankId }) => {
       }
     }
   };
-
-  const handleError = ({ errorFields }) => {
-    if (errorFields?.length > 0) {
-      message.error("Mohon lengkapi data mandatori");
-    }
+  //handle Error
+  const handleError = ({ values, errorFields, outOfDate }) => {
+    setTabData((prevState) => {
+      const res = prevState.map((item) => {
+        if (!item.paramValue || item.paramValue.length === 0) {
+          return {
+            value: item.value,
+            paramValue: item.paramValue,
+          };
+        }
+        const errorBadge = errorFields.reduce(
+          (current, next) =>
+            item.paramValue.includes(next.name[0]) ? current + 1 : current,
+          0
+        );
+        return {
+          value: item.value,
+          paramValue: item.paramValue,
+          errorBadge,
+        };
+      });
+      return res;
+    });
   };
 
   const handleProcessModalConfirm = async () => {
     setModalConfirm(false);
-    setLoadingForm(true);
-    const successMessage = {
-      title: "Successfull",
-      description: "Your data has been submitted",
+    const successMessageCreate = {
+      title: "Successful",
+      description: `Your data has been submitted`,
       return: true,
     };
 
@@ -676,12 +696,16 @@ const AccountInformation = ({ type, bankId }) => {
         dispatch(showModalSuccess(successMessage));
       })
       .catch((error) => {
-        if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
-          const msg =
-            (error.response?.data?.message) ||
-            error.message ||
-            error.toString();
-          dispatch(showModalError(msg));
+        const code = error?.response?.data?.code ?? 0;
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          error?.toString() ||
+          "Terjadi kesalahan tidak terduga.";
+        if (Math.floor(code / 100) === 5) {
+          dispatch(showModalError({ title: "Server Error", description: message }));
+        } else {
+          dispatch(showModalError({ title: "Failed", description: message }));
         }
       })
       .finally(() => {
@@ -766,13 +790,7 @@ const AccountInformation = ({ type, bankId }) => {
               formValue={formValue}
               storedData={storedData}
               setStoredData={setStoredData}
-              listDataGLAccountInfo={listDataGLAccountInfo}
-              setListDataGLAccountInfo={type === "update" ? handleUpdateGL : setListDataGLAccountInfo}
-              listDataCategoryInfo={listDataCategoryInfo}
-              setListDataCategoryInfo={type === "update" ? handleUpdateCategory : setListDataCategoryInfo}
-              parentRequired={parentRequired}
-              headerCategory={headerCategory}
-              parentOptions={data_parent_options}
+              dataGLAccount={data_list_gl?.data || []}
             />
           </div>
           <div className={`rc-bank-small${currentStepIndex !== 1 ? " hidden" : ""}`}>
@@ -798,17 +816,50 @@ const AccountInformation = ({ type, bankId }) => {
               />
             </BaseContainer>
           </div>
-
-          <FormFooter
-            current={currentStepIndex}
-            totalSteps={steps.length}
-            onPrev={handlePrev}
-            onNext={handleNext}
-            onCancel={() => setModalBack(true)}
-            onClear={handleClear}
-            onSubmit={() => form.submit()}
-            type={type}
-          />
+          <div className="flex w-full justify-between align-middle my-3 gap-5">
+            <ButtonComponent
+              type="default"
+              onClick={() => navigate(-1)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+              disabled={storedData === true ? true : false}
+            >
+              Back
+            </ButtonComponent>
+            <div className="flex align-middle gap-3">
+              <ButtonComponent
+                icon={
+                  <SVGIcon
+                    name={
+                      type === "update" ? `IconButtonReset` : `IconButtonClear`
+                    }
+                    width={24}
+                  />
+                }
+                type="submit"
+                onClick={handleClear}
+                disabled={storedData === true ? true : false}
+              >
+                {type === "update" ? "Reset" : "Clear"}
+              </ButtonComponent>
+              <ButtonComponent
+                htmlType="submit"
+                type="submit"
+                // onClick={() => setModalConfirm(true)}
+                // disabled={disableSubmit}
+                disabled={storedData === true ? true : false}
+              >
+                Save & Submit
+              </ButtonComponent>
+            </div>
+          </div>
         </Form>
 
         <ModalCustom

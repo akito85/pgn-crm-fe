@@ -6,7 +6,9 @@ import React, {
   useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Tooltip } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Tooltip, Dropdown, Menu } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -20,6 +22,8 @@ import {
   getApprovalHistory,
   setBillingFilters,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
+import { checkAccountingExists } from "../../../../redux/slices/rating_billing_invoice/accounting";
+import { showModalError } from "../../../../redux/slices/general_slice";
 import { columnsBilling } from "./Table/TableViewBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
@@ -36,6 +40,7 @@ const BillingPage = () => {
   );
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
   const dataSource = data?.result;
   const detailRef = useRef(null);
@@ -289,23 +294,70 @@ const BillingPage = () => {
     {
       action: "History",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Approval Hierarchy">
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              handleApprovalHistory(record);
-            }}
-            style={{
-              cursor: "pointer",
-              display: "inline-block",
-              lineHeight: 0,
-            }}
-          >
-            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
-          </div>
-        </Tooltip>
-      ),
+      render: (record) => {
+        const menu = (
+          <Menu>
+            <Menu.Item
+              key="approval-history"
+              icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                handleApprovalHistory(record);
+              }}
+            >
+              Approval History
+            </Menu.Item>
+            <Menu.Item
+              key="create-accounting"
+              icon={<SVGIcon name="IconButtonCreate" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                dispatch(checkAccountingExists(record.invoiceNumber))
+                  .unwrap()
+                  .then((result) => {
+                    if (result?.exists) {
+                      dispatch(
+                        showModalError({
+                          title: "Accounting Already Exists",
+                          description: `An accounting journal already exists for this billing (Status: ${result.status || "-"}). Please use View Accounting to review it.`,
+                        })
+                      );
+                    } else {
+                      navigate(RBI_ROUTES.ACCOUNTING_CREATE, {
+                        state: { billingData: record },
+                      });
+                    }
+                  })
+                  .catch(() => {});
+              }}
+            >
+              Create Accounting
+            </Menu.Item>
+            <Menu.Item
+              key="view-accounting"
+              icon={<SVGIcon name="IconReport" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                navigate(RBI_ROUTES.ACCOUNTING_VIEW, {
+                  state: { billingData: record },
+                });
+              }}
+            >
+              View Accounting
+            </Menu.Item>
+          </Menu>
+        );
+        return (
+          <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{ cursor: "pointer", display: "inline-flex", alignItems: "center" }}
+            >
+              <MoreOutlined className="text-xl text-[#0075bf] cursor-pointer" />
+            </div>
+          </Dropdown>
+        );
+      },
     },
   ];
 
