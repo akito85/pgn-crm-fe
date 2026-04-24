@@ -205,7 +205,7 @@ const GasDepositDetailTable = ({
    * @param {object} record - The detail row record
    */
   const expandedRowRender = (record, detailIndex) => (
-    <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 p-4">
       <span className="text-primary text-base uppercase leading-6">
         GAS DEPOSIT DETAIL MUTATION LIST
       </span>
@@ -222,7 +222,7 @@ const GasDepositDetailTable = ({
 
   return (
     <NxTable
-      idTable="gas-deposit-detail-table"
+      idTable={`gas-deposit-detail-table-${index}`}
       className="[&_.ant-table-expanded-row-fixed]:!pl-2"
       dataSource={dataSource}
       totalData={totalElement}
@@ -240,6 +240,9 @@ const GasDepositDetailTable = ({
       showAdvanceSearch={false}
       showSearchBar={false}
       useSelect={false}
+      showBorder={!!parentKey}
+      showFooter={!!parentKey}
+      rounded={!!parentKey}
     />
   );
 };
