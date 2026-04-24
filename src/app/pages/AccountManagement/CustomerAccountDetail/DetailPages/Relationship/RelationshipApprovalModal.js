@@ -339,7 +339,7 @@ const RelationshipApprovalModal = ({
                     columns={columns}
                     totalData={pagination_listRelationshipApproval.totalElements || 0}
                     tableScrolled={{
-                      x: pagination_listRelationshipApproval.totalElements ? "max-content" : 2000,
+                      x: pagination_listRelationshipApproval.totalElements ? "max-content" : 1486,
                     }}
                     onSort={onSort}
                     loading={loading_listRelationshipApproval}
@@ -380,7 +380,7 @@ const RelationshipApprovalModal = ({
                   columns={columns}
                   totalData={selectedRows.length}
                   tableScrolled={{
-                    x: selectedRows.length ? "max-content" : 2000,
+                    x: selectedRows.length ? "max-content" : 1438,
                   }}
                   onSort={onSort}
                   loading={false}
