@@ -8,7 +8,7 @@ import NxTable from "../../../../../../components/Nx/NxTable";
  * @param {object}   props
  * @param {Array}    [props.relatedDetail=[]] - Related detail records from the parent row.
  */
-const RelationshipDetailTable = ({ relatedDetail = [] }) => {
+const RelationshipDetailTable = ({ relatedDetail = [], key }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -32,7 +32,10 @@ const RelationshipDetailTable = ({ relatedDetail = [] }) => {
       usePagination={false}
       dataSource={relatedDetail}
       columns={columns}
-      className="related-detail-nested-table"
+      idTable={`relationship-detail-table-${key}`}
+      rounded={false}
+      showFooter={false}
+      showBorder={false}
     />
   );
 };

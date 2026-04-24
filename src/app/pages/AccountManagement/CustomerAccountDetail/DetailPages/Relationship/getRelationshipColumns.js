@@ -36,7 +36,7 @@ const getRelationshipColumns = ({
     key: "relationshipTypeName",
     title: "TYPE",
     dataIndex: "relationshipTypeName",
-    width: 150,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -52,7 +52,7 @@ const getRelationshipColumns = ({
     key: "relationshipCategoryName",
     title: "CATEGORY",
     dataIndex: "relationshipCategoryName",
-    width: 150,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -128,11 +128,31 @@ const getRelationshipColumns = ({
     ),
     render: (endDate) => endDate ? moment(endDate).format(dateFormatting.date) : "-",
   },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 100,
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive",
+      };
+      return (
+        <div className="flex justify-center">
+          <NxStatusComponent colour={status}>
+            {displayText[status?.toUpperCase()] || toTitleCase(String(status || "")) || "-"}
+          </NxStatusComponent>
+        </div>
+      );
+    },
+  },
   !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 180,
+    width: 140,
     fixed: "right",
     render: (status) => {
       const displayText = {
@@ -144,26 +164,6 @@ const getRelationshipColumns = ({
         "PENDING": "Pending",
         "REJECTED": "Rejected",
         "DRAFT": "Draft",
-      };
-      return (
-        <div className="flex justify-center">
-          <NxStatusComponent colour={status}>
-            {displayText[status?.toUpperCase()] || toTitleCase(String(status || "")) || "-"}
-          </NxStatusComponent>
-        </div>
-      );
-    },
-  },
-  {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 120,
-    fixed: "right",
-    render: (status) => {
-      const displayText = {
-        "ACTIVE": "Active",
-        "INACTIVE": "Inactive",
       };
       return (
         <div className="flex justify-center">
