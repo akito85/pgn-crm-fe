@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, Select } from "antd";
+import { Form, Select } from "antd";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import moment from "moment";
 import React, { useState } from "react";
@@ -9,6 +9,7 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import { formMessageRequired, requiredMessage } from "../../../../../utils";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
 import FunctionalTableGLAccountInformation from "./Table/FunctionalTableGLAccountInformation";
+import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
 
 const AccountForm = ({
   listDataCriteria,
@@ -25,18 +26,19 @@ const AccountForm = ({
   form,
   storedData,
   setStoredData,
-  dataGLAccount = [],
+  listDataGLAccountInfo,
+  setListDataGLAccountInfo,
+  listDataCategoryInfo,
+  setListDataCategoryInfo,
   handleSelectCriteria = () => {},
   handleDeselectCriteria = () => {},
   handleClearCriteria = () => {},
-  parentRequired,
+  parentRequired = false,
+  headerCategory,
   parentOptions = [],
-  isVA,
-  setIsVA,
-  listDataGLAccountInfo,
-  setListDataGLAccountInfo,
 }) => {
-  const [glAccountCollapsed] = useState(false);
+  const [categoryCollapsed, setCategoryCollapsed] = useState(false);
+  const [glAccountCollapsed, setGLAccountCollapsed] = useState(false);
   const [criteriaCollapsed, setCriteriaCollapsed] = useState(false);
 
   const disabledDate = (current) => {
@@ -117,18 +119,9 @@ const AccountForm = ({
               name={"category"}
               rules={formMessageRequired("Category")}
             >
-              <SelectComponent
-                mode="multiple"
-                onSelect={handleSelectCriteria}
-                onDeselect={handleDeselectCriteria}
-                onClear={handleClearCriteria}
-              >
-                {data_select_criteria &&
-                  data_select_criteria?.map((data, index) => (
-                    <Select.Option value={data.Id} key={data.Id}>
-                      {data.text}
-                    </Select.Option>
-                  ))}
+              <SelectComponent>
+                <Select.Option value="Virtual Account">Virtual Account</Select.Option>
+                <Select.Option value="Online Payment">Online Payment</Select.Option>
               </SelectComponent>
             </Form.Item>
             <Form.Item
@@ -185,166 +178,39 @@ const AccountForm = ({
               <InputComponent rows={5} type="textarea" />
             </Form.Item>
           </div>
-          <div>
-            <div className="w-full flex justify-end gap-5">
-              <div className="w-full grid grid-cols-3 gap-5">
-                <Form.Item name={"isVA"} valuePropName="checked">
-                  <Checkbox onChange={(e) => setIsVA(e.target.checked)} checked={isVA}>
-                    Is VA
-                  </Checkbox>
-                  <span className="text-[10px]">
-                    Click or tap this checkbox if data can be VA.
-                  </span>
-                </Form.Item>
-                {isVA === true ? (
-                  <>
-                    <Form.Item
-                      label={"Total Digit"}
-                      name={"totalDigit"}
-                      rules={formMessageRequired("Total Digit")}
-                    >
-                      <Input
-                        allowClear
-                        maxLength={2}
-                        onInput={(e) =>
-                          (e.target.value = e.target.value.replace(/\D/g, ""))
-                        }
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label={"First Static Code"}
-                      name={"fsCode"}
-                      rules={formMessageRequired("First Static Code")}
-                    >
-                      <Input
-                        allowClear
-                        maxLength={8}
-                        onInput={(e) =>
-                          (e.target.value = e.target.value.replace(/\D/g, ""))
-                        }
-                      />
-                    </Form.Item>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </div>
         </div>
       </BaseContainer>
 
-      <BaseContainer header={"GL Accounts"}>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Cash"} name={"cash"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            label={"Receipt Confirmation"}
-            name={"receiptConfirmation"}
-          >
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Remittance"} name={"remittance"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
+      {/* Category Information */}
+      <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+        <div className="flex justify-between items-center cursor-pointer" onClick={() => setCategoryCollapsed(!categoryCollapsed)}>
+          <div className="text-primary text-xs font-bold uppercase">CATEGORY INFORMATION</div>
+          <div className="text-primary">
+            {categoryCollapsed ? <DownOutlined /> : <UpOutlined />}
+          </div>
         </div>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Factoring"} name={"factoring"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Short Term Debt"} name={"shortTermDebt"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Bank Charges"} name={"bankCharges"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Unapplied Receipt"} name={"unappliedReceipt"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            label={"Unidentified Receipt"}
-            name={"unidentifiedReceipt"}
-          >
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"On Account Receipt"} name={"onAccountReceipt"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-3 gap-2">
-          <Form.Item label={"Unearned Discount"} name={"unearnedDiscount"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item label={"Earned Discount"} name={"earnedDiscount"}>
-            <SelectComponent allowClear placeholder="Pilih GL Account">
-              {dataGLAccount?.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.glNumber} - {data.glName}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
+        {!categoryCollapsed && (
+          <div className="mt-4 rc-bank-small">
+            <FunctionalTableCategoryInformation
+              type={type}
+              data={listDataCategoryInfo}
+              updateData={setListDataCategoryInfo}
+              storedData={storedData}
+              setStoredData={setStoredData}
+              status={status}
+              headerCategory={headerCategory}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* GL Account Information */}
+      <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+        <div className="flex justify-between items-center cursor-pointer" onClick={() => setGLAccountCollapsed(!glAccountCollapsed)}>
+          <div className="text-primary text-xs font-bold uppercase">GL ACCOUNT INFORMATION</div>
+          <div className="text-primary">
+            {glAccountCollapsed ? <DownOutlined /> : <UpOutlined />}
+          </div>
         </div>
         {!glAccountCollapsed && (
           <div className="mt-4 rc-bank-small">
@@ -358,7 +224,7 @@ const AccountForm = ({
             />
           </div>
         )}
-      </BaseContainer>
+      </div>
 
       {/* Criteria Information */}
       <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">

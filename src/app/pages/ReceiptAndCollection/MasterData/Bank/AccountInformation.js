@@ -1,11 +1,11 @@
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin, message } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumbAdvanced from "../../../../../components/BreadCrumbAdvanced";
-import { FormStepper } from "../../../../../components/FormStepNavigation";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import {
   createAccountInformation,
@@ -46,7 +46,6 @@ import {
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
-import SVGIcon from "../../../../../assets/Icon/index";
 
 // ID criteria "All / Semua" dari backend — digunakan di beberapa validasi
 const CRITERIA_ALL_ID = 24;
@@ -61,7 +60,6 @@ const AccountInformation = ({ type, bankId }) => {
     dataListAppHierDetail,
     loading,
     data_modal,
-    data_list_gl,
     dataGLAccount,
     dataGLType,
     data_va_category,
@@ -81,7 +79,6 @@ const AccountInformation = ({ type, bankId }) => {
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [modalBack, setModalBack] = useState(false);
   const [criteriaValues, setCriteriaValues] = useState([]);
-  const [isVA, setIsVA] = useState(false);
   const [kirimBody, setKirimBody] = useState();
   const [loadingForm, setLoadingForm] = useState(loading);
   const [storedData, setStoredData] = useState(false);
@@ -95,6 +92,7 @@ const AccountInformation = ({ type, bankId }) => {
 
   // Watch form fields for conditional logic
   const typeValue = Form.useWatch('type', form);
+  const headerCategory = Form.useWatch('category', form);
   // null = data belum diload; string kosong = tidak ditemukan
   const typeLabel = data_type_detail?.find(t => t.id === typeValue)?.name ?? null;
   const parentRequired = typeLabel !== null && typeLabel.toLowerCase() === 'pooling';
@@ -225,6 +223,10 @@ const AccountInformation = ({ type, bankId }) => {
   const handleUpdateGL = (newData) => {
     setListDataGLAccountInfo(newData);
     if (type === "update") setGlDirty(true);
+  };
+  const handleUpdateCategory = (newData) => {
+    setListDataCategoryInfo(newData);
+    if (type === "update") setCategoryDirty(true);
   };
   const handleUpdateCriteria = (newData) => {
     setListDataCriteria(newData);
@@ -535,8 +537,6 @@ const AccountInformation = ({ type, bankId }) => {
         startDate,
         endDate,
         description: formValue?.description,
-        isVa: isVA,
-        staticCode: formValue?.fsCode || null,
         appHierId: selectedHierarchy,
         glAccountDataDtoList: dataGLObject,
         categoryDataDtoList: dataCategoryObject,
@@ -584,14 +584,19 @@ const AccountInformation = ({ type, bankId }) => {
       }
     }
   };
-  //handle Error
-  const handleError = ({ values, errorFields, outOfDate }) => {};
+
+  const handleError = ({ errorFields }) => {
+    if (errorFields?.length > 0) {
+      message.error("Mohon lengkapi data mandatori");
+    }
+  };
 
   const handleProcessModalConfirm = async () => {
     setModalConfirm(false);
-    const successMessageCreate = {
-      title: "Successful",
-      description: `Your data has been submitted`,
+    setLoadingForm(true);
+    const successMessage = {
+      title: "Successfull",
+      description: "Your data has been submitted",
       return: true,
     };
 
@@ -629,7 +634,7 @@ const AccountInformation = ({ type, bankId }) => {
         }
         // Remove pending-delete rows from the displayed list
         setListDataAttachment((prev) => prev.filter((item) => !item.pendingDelete));
-        dispatch(showModalSuccess(successMessageCreate));
+        dispatch(showModalSuccess(successMessage));
         setBankInfoDirty(false);
         setGlDirty(false);
         setCategoryDirty(false);
@@ -667,19 +672,15 @@ const AccountInformation = ({ type, bankId }) => {
         }
         handleCancelModalConfirm();
         handleClear();
-        dispatch(showModalSuccess(successMessageCreate));
+        dispatch(showModalSuccess(successMessage));
       })
       .catch((error) => {
-        const code = error?.response?.data?.code ?? 0;
-        const message =
-          error?.response?.data?.message ||
-          error?.message ||
-          error?.toString() ||
-          "Terjadi kesalahan tidak terduga.";
-        if (Math.floor(code / 100) === 5) {
-          dispatch(showModalError({ title: "Server Error", description: message }));
-        } else {
-          dispatch(showModalError({ title: "Failed", description: message }));
+        if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
+          const msg =
+            (error.response?.data?.message) ||
+            error.message ||
+            error.toString();
+          dispatch(showModalError(msg));
         }
       })
       .finally(() => {
@@ -764,13 +765,13 @@ const AccountInformation = ({ type, bankId }) => {
               formValue={formValue}
               storedData={storedData}
               setStoredData={setStoredData}
-              dataGLAccount={data_list_gl?.data || []}
-              parentRequired={parentRequired}
-              parentOptions={data_parent_options || []}
-              isVA={isVA}
-              setIsVA={setIsVA}
               listDataGLAccountInfo={listDataGLAccountInfo}
               setListDataGLAccountInfo={type === "update" ? handleUpdateGL : setListDataGLAccountInfo}
+              listDataCategoryInfo={listDataCategoryInfo}
+              setListDataCategoryInfo={type === "update" ? handleUpdateCategory : setListDataCategoryInfo}
+              parentRequired={parentRequired}
+              headerCategory={headerCategory}
+              parentOptions={data_parent_options}
             />
           </div>
           <div className={`rc-bank-small${currentStepIndex !== 1 ? " hidden" : ""}`}>
@@ -796,50 +797,17 @@ const AccountInformation = ({ type, bankId }) => {
               />
             </BaseContainer>
           </div>
-          <div className="flex w-full justify-between align-middle my-3 gap-5">
-            <ButtonComponent
-              type="default"
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedData === true ? true : false}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-                disabled={storedData === true ? true : false}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                // onClick={() => setModalConfirm(true)}
-                // disabled={disableSubmit}
-                disabled={storedData === true ? true : false}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+
+          <FormFooter
+            current={currentStepIndex}
+            totalSteps={steps.length}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onCancel={() => setModalBack(true)}
+            onClear={handleClear}
+            onSubmit={() => form.submit()}
+            type={type}
+          />
         </Form>
 
         <ModalCustom
