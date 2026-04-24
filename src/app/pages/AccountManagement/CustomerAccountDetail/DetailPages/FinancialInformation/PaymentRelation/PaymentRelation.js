@@ -4,7 +4,7 @@ import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
 import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
-import { getPrApprovalHierarchy, getDetailPrApprovalHierarchy, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
+import { getPrApprovalHierarchies, getPrApprovalHierarchy, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
 /**
@@ -19,7 +19,7 @@ const PaymentRelation = ({
   // --- Hooks ---
   const dispatch = useDispatch();
 
-  const { data_prApprovalHistory } = useSelector(
+  const { detail_prApprovalHistory } = useSelector(
     (state) => state.paymentRelation
   );
 
@@ -90,15 +90,15 @@ const PaymentRelation = ({
   // --- Effects ---
   // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_prApprovalHistory && data_prApprovalHistory?.dataApprover) {
+    if (detail_prApprovalHistory && detail_prApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_prApprovalHistory?.dataApprover?.PAYMENT_RELATION || [],
-          inactive: data_prApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_RELATION || [],
+          create: detail_prApprovalHistory?.dataApprover?.PAYMENT_RELATION || [],
+          inactive: detail_prApprovalHistory?.dataApprover?.INACTIVE_PAYMENT_RELATION || [],
         },
         dataHistory: {
-          create: data_prApprovalHistory?.dataHistory?.PAYMENT_RELATION || [],
-          inactive: data_prApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_RELATION || [],
+          create: detail_prApprovalHistory?.dataHistory?.PAYMENT_RELATION || [],
+          inactive: detail_prApprovalHistory?.dataHistory?.INACTIVE_PAYMENT_RELATION || [],
         },
       };
 
@@ -106,7 +106,7 @@ const PaymentRelation = ({
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_prApprovalHistory]);
+  }, [detail_prApprovalHistory]);
 
   return (
     <>
@@ -138,13 +138,13 @@ const PaymentRelation = ({
         named={inactivatePrAccountNumber}
         menu="payment relation"
         sliceName="paymentRelation"
-        approvalOptionsName="list_prApprovalOptions"
-        approvalHierarchtDetailsName="list_prApprovalHierarchyDetail"
+        approvalOptionsName="list_prApprovalHierarchy"
+        approvalHierarchtDetailsName="detail_prApprovalHierarchy"
         loadingInactivateName="loading_inactivatePr"
-        loadingListApprovalOptionsName="loading_listPrApprovalOption"
-        loadingListHierarchyDetailName="loading_detailPrApprovalHierarchyDetails"
-        getApprovalOptions={getPrApprovalHierarchy}
-        getApprovalHierarchyDetails={getDetailPrApprovalHierarchy}
+        loadingListApprovalOptionsName="loading_listPrApprovalHierarchy"
+        loadingListHierarchyDetailName="loading_detailPrApprovalHierarchy"
+        getApprovalOptions={getPrApprovalHierarchies}
+        getApprovalHierarchyDetails={getPrApprovalHierarchy}
       />
 
       {/* Approval History Modal */}

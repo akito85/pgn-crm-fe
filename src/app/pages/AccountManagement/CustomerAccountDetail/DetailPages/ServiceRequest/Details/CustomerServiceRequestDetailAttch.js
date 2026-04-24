@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import { getAttachmentsByServiceRequest } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getSrAttachments } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
 const COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
@@ -59,17 +59,17 @@ const CustomerServiceRequestDetailAttch = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { data_attachments, loading_attachments } = useSelector(
+  const { list_srAttachments, loading_listSrAttachments } = useSelector(
     (state) => state.serviceRequest
   );
 
   useEffect(() => {
     if (id && idAccount) {
-      dispatch(getAttachmentsByServiceRequest({ accountId: idAccount, srId: id }));
+      dispatch(getSrAttachments({ accountId: idAccount, srId: id }));
     }
   }, [dispatch, id, idAccount]);
 
-  const items = Array.isArray(data_attachments) ? data_attachments : [];
+  const items = Array.isArray(list_srAttachments) ? list_srAttachments : [];
 
   return (
     <NxTable
@@ -84,7 +84,7 @@ const CustomerServiceRequestDetailAttch = ({
       fontSize="small"
       tablePadding="small"
       tableScrolled={{ x: "max-content" }}
-      loading={loading_attachments}
+      loading={loading_listSrAttachments}
       onSort={onSort}
     />
   );

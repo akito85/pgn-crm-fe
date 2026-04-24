@@ -231,6 +231,19 @@ const AccountDetailInformation = ({
     ) {
       setTypeAccountInfoDetailSection(dataTabs.gd);
     }
+    else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/service-request"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/service-request"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.sr);
+    }
     else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
     }

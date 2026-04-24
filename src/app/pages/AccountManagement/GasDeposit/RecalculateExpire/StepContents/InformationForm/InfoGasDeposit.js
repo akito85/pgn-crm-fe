@@ -1,5 +1,13 @@
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import StatusComponent from "../../../../../../../components/StatusComponent";
 
+/**
+ * Read-only summary of a single gas deposit record's key fields,
+ * displayed in the Gas Deposit Information card on step 0.
+ *
+ * @param {{ detail: object }} props
+ */
 const InfoGasDeposit = ({ detail }) => {
   const {
     earnPeriodStart,
@@ -13,6 +21,7 @@ const InfoGasDeposit = ({ detail }) => {
     balanceAmount,
     availableAmount,
     status,
+    statusApproval,
     remark,
   } = detail;
 
@@ -34,6 +43,11 @@ const InfoGasDeposit = ({ detail }) => {
           <NxDetailText label="Status">
             <StatusComponent colour={status} margin={false}>
               {status}
+            </StatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <StatusComponent colour={statusApproval} margin={false}>
+              {statusApproval}
             </StatusComponent>
           </NxDetailText>
         </div>

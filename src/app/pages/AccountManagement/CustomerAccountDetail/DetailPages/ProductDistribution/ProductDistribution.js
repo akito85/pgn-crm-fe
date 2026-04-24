@@ -5,6 +5,8 @@ import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { Tabs } from "antd";
 
 const ProductDistribution = ({ id, idCustomer }) => {
+  const [activeKey, setActiveKey] = useState("current");
+
   const tabOptions = [
     {
       key: "current",
@@ -17,12 +19,10 @@ const ProductDistribution = ({ id, idCustomer }) => {
       key: "history",
       label: "Product Distribution History",
       children: (
-        <ProductDistributionHistory id={id} idCustomer={idCustomer} />
+        <ProductDistributionHistory id={id} idCustomer={idCustomer} setActiveKey={setActiveKey} />
       )
     },
   ];
-
-  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
 
   return (
     <NxCardContainer

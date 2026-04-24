@@ -2,6 +2,18 @@ import { Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
+/**
+ * Builds Ant Design column definitions for the account selection table.
+ *
+ * @param {object}   search          - Active search filters keyed by dataIndex.
+ * @param {object}   searchInput     - Ref attached to the search input element.
+ * @param {string}   searchedColumn  - dataIndex of the currently searched column.
+ * @param {string}   searchText      - Current search text value.
+ * @param {Function} handleSearch    - Column search submit handler.
+ * @param {Function} [handleSelect]  - Called with the selected row record.
+ * @param {Function} [handleCancel]  - Closes the parent modal.
+ * @returns {object[]} Array of Ant Design column definition objects.
+ */
 const getAccountColumns = (
   search,
   searchInput,
@@ -24,7 +36,6 @@ const getAccountColumns = (
     dataIndex: "customerNumber",
     width: 220,
     sorter: true,
-    filteredValue: [search?.customerNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -32,7 +43,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -41,7 +51,6 @@ const getAccountColumns = (
     dataIndex: "identificationType",
     width: 231,
     sorter: true,
-    filteredValue: [search?.identificationType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "identificationType",
@@ -49,7 +58,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -58,7 +66,6 @@ const getAccountColumns = (
     dataIndex: "customerIdentificationNumber",
     width: 343,
     sorter: true,
-    filteredValue: [search?.customerIdentificationNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerIdentificationNumber",
@@ -66,7 +73,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -75,7 +81,6 @@ const getAccountColumns = (
     dataIndex: "customerName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -83,7 +88,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -92,7 +96,6 @@ const getAccountColumns = (
     dataIndex: "customerTypeName",
     width: 194,
     sorter: true,
-    filteredValue: [search?.customerTypeName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerTypeName",
@@ -100,7 +103,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -109,7 +111,6 @@ const getAccountColumns = (
     dataIndex: "accountNumber",
     width: 209,
     sorter: true,
-    filteredValue: [search?.accountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountNumber",
@@ -117,7 +118,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -126,7 +126,6 @@ const getAccountColumns = (
     dataIndex: "accountName",
     width: 189,
     sorter: true,
-    filteredValue: [search?.accountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountName",
@@ -134,7 +133,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -143,7 +141,6 @@ const getAccountColumns = (
     dataIndex: "accountCategory",
     width: 148,
     sorter: true,
-    filteredValue: [search?.accountCategory] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountCategory",
@@ -151,7 +148,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -160,7 +156,6 @@ const getAccountColumns = (
     dataIndex: "sor",
     width: 100,
     sorter: true,
-    filteredValue: [search?.sor] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "sor",
@@ -168,7 +163,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -177,7 +171,6 @@ const getAccountColumns = (
     dataIndex: "costCenter",
     width: 150,
     sorter: true,
-    filteredValue: [search?.costCenter] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "costCenter",
@@ -185,7 +178,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -194,7 +186,6 @@ const getAccountColumns = (
     dataIndex: "meterReadingCode",
     width: 173,
     sorter: true,
-    filteredValue: [search?.meterReadingCode] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "meterReadingCode",
@@ -202,7 +193,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -211,7 +201,6 @@ const getAccountColumns = (
     dataIndex: "customerManagement",
     width: 246,
     sorter: true,
-    filteredValue: [search?.customerManagement] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerManagement",
@@ -219,7 +208,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -228,7 +216,6 @@ const getAccountColumns = (
     dataIndex: "classificationType",
     width: 235,
     sorter: true,
-    filteredValue: [search?.classificationType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "classificationType",
@@ -236,7 +223,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -245,7 +231,6 @@ const getAccountColumns = (
     dataIndex: "accountSegment",
     width: 142,
     sorter: true,
-    filteredValue: [search?.accountSegment] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountSegment",
@@ -253,7 +238,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -262,7 +246,6 @@ const getAccountColumns = (
     dataIndex: "accountGroupType",
     width: 239,
     sorter: true,
-    filteredValue: [search?.accountGroupType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "accountGroupType",
@@ -270,7 +253,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -279,7 +261,6 @@ const getAccountColumns = (
     dataIndex: "premiseAddress",
     width: 280,
     sorter: true,
-    filteredValue: [search?.premiseAddress] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "premiseAddress",
@@ -287,7 +268,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -296,7 +276,6 @@ const getAccountColumns = (
     dataIndex: "subDistrict",
     width: 169,
     sorter: true,
-    filteredValue: [search?.subDistrict] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "subDistrict",
@@ -304,7 +283,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -313,7 +291,6 @@ const getAccountColumns = (
     dataIndex: "district",
     width: 138,
     sorter: true,
-    filteredValue: [search?.district] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "district",
@@ -321,7 +298,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -330,7 +306,6 @@ const getAccountColumns = (
     dataIndex: "city",
     width: 150,
     sorter: true,
-    filteredValue: [search?.city] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "city",
@@ -338,7 +313,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -347,7 +321,6 @@ const getAccountColumns = (
     dataIndex: "country",
     width: 141,
     sorter: true,
-    filteredValue: [search?.country] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "country",
@@ -355,7 +328,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -364,7 +336,6 @@ const getAccountColumns = (
     dataIndex: "longitude",
     width: 155,
     sorter: true,
-    filteredValue: [search?.longitude] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "longitude",
@@ -372,7 +343,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -381,7 +351,6 @@ const getAccountColumns = (
     dataIndex: "latitude",
     width: 141,
     sorter: true,
-    filteredValue: [search?.latitude] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "latitude",
@@ -389,7 +358,6 @@ const getAccountColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {

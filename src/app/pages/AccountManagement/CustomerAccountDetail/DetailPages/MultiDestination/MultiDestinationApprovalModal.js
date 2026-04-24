@@ -5,10 +5,9 @@ import InputComponent from "../../../../../../components/InputComponent";
 import DetailText from "../../../../../../components/DetailText";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import {
-  getMultiDestinationApproval,
+  getMultiDestinationApprovals,
   approveOrRejectAllMultiDestination
 } from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
@@ -31,7 +30,7 @@ const MultiDestinationApprovalModal = ({
   // --- Hooks ---
   const {
     list_multiDestinationApproval,
-    pagination_multiDestinationApproval,
+    pagination_listMdApproval,
     loading_listMdApproval,
     loading_approveMd,
     loading_rejectMd
@@ -57,11 +56,6 @@ const MultiDestinationApprovalModal = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: []
-  });
-
   // --- Effects ---
   // Fetches the first page of pending approvals whenever the modal opens or
   // any filter/search/sort parameter changes. Resets the page counter to 1.
@@ -77,7 +71,7 @@ const MultiDestinationApprovalModal = ({
       };
 
       dispatch(
-        getMultiDestinationApproval({
+        getMultiDestinationApprovals({
           id: accountId,
           body,
           isLoadMore: false
@@ -117,7 +111,7 @@ const MultiDestinationApprovalModal = ({
    */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPage = pagination_multiDestinationApproval?.totalPage || 0;
+    const totalPage = pagination_listMdApproval?.totalPage || 0;
 
     if (nextPage <= totalPage) {
       const body = {
@@ -130,7 +124,7 @@ const MultiDestinationApprovalModal = ({
       };
 
       dispatch(
-        getMultiDestinationApproval({
+        getMultiDestinationApprovals({
           id: accountId,
           body,
           isLoadMore: true
@@ -143,7 +137,7 @@ const MultiDestinationApprovalModal = ({
   // --- Derived values ---
   const hasMore =
     list_multiDestinationApproval.length <
-    (pagination_multiDestinationApproval?.totalElement || 0);
+    (pagination_listMdApproval?.totalElement || 0);
 
   /**
    * Handles table sort changes and updates the sort query string.
@@ -296,22 +290,17 @@ const MultiDestinationApprovalModal = ({
     } catch {}
   };
 
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
-      getMultiDestinationColumns(
+      getMultiDestinationColumns({
         search,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        false
-      ),
+        includeStatus: false
+      }),
     [search, searchInput, searchedColumn, searchText]
-  );
-
-  const columns = useMemo(
-    () => nxApplyFixedColumns(columnDefinitions, fixedColumns),
-    [columnDefinitions, fixedColumns]
   );
 
   const dataSourceWithKeys = useMemo(() => {
@@ -416,15 +405,12 @@ const MultiDestinationApprovalModal = ({
                     dataSource={dataSourceWithKeys}
                     columns={columns}
                     totalData={
-                      pagination_multiDestinationApproval?.totalElement || 0
+                      pagination_listMdApproval?.totalElement || 0
                     }
                     tableScrolled={{
                       x: dataSourceWithKeys.length ? "max-content" : 5000
                     }}
                     onSort={onSort}
-                    columnDefinitions={columnDefinitions}
-                    fixedColumns={fixedColumns}
-                    setFixedColumns={setFixedColumns}
                     loading={loading_listMdApproval}
                     showExport={false}
                     rowSelection={rowSelection}
@@ -462,15 +448,12 @@ const MultiDestinationApprovalModal = ({
                   dataSource={selectedRows}
                   columns={columns}
                   totalData={
-                    pagination_multiDestinationApproval?.totalElement || 0
+                    pagination_listMdApproval?.totalElement || 0
                   }
                   tableScrolled={{
                     x: selectedRows.length ? "max-content" : 5000
                   }}
                   onSort={onSort}
-                  columnDefinitions={columnDefinitions}
-                  fixedColumns={fixedColumns}
-                  setFixedColumns={setFixedColumns}
                   loading={false}
                   usePagination={false}
                   useInfiniteScroll={false}

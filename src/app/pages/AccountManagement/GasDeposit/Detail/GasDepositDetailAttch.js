@@ -8,7 +8,6 @@ import { previewFileAttachment } from "../../../../../utils/previewFileAttachmen
 import { configApp } from "../../../../../constants/configApp";
 import NxTable from "../../../../../components/Nx/NxTable";
 import { getDetailAttachmentColumns } from "./getDetailAttachmentColumns";
-import { nxApplyFixedColumns } from "../../../../../utils/Nx/nxApplyFixedColumns";
 
 /**
  * Presentational attachment panel for a gas deposit record.
@@ -24,11 +23,6 @@ const GasDepositDetailAttch = ({ attachments = [] }) => {
   const [search, setSearch] = useState({});
 
   const [loadingDownload, setLoadingDownload] = useState(false);
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["action"],
-    left: []
-  }));
 
   const searchInput = useRef(null);
 
@@ -74,7 +68,7 @@ const GasDepositDetailAttch = ({ attachments = [] }) => {
   };
 
   // --- Derived values ---
-  const columnDefinitions = useMemo(
+  const columns = useMemo(
     () =>
       getDetailAttachmentColumns(
         search,
@@ -87,10 +81,6 @@ const GasDepositDetailAttch = ({ attachments = [] }) => {
     [search, searchText, searchedColumn]
   );
 
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
-
   return (
     <Spin spinning={loadingDownload}>
       <NxTable
@@ -102,9 +92,6 @@ const GasDepositDetailAttch = ({ attachments = [] }) => {
         usePagination={false}
         useInfiniteScroll={false}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         showAdvanceSearch={true}
       />
     </Spin>

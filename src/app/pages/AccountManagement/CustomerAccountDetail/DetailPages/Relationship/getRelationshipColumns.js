@@ -3,20 +3,33 @@ import { dateFormatting, toTitleCase } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
-const getRelationshipColumns = (
+/**
+ * Returns the column definitions for the Relationship list table.
+ *
+ * @param {Object}          params                    - Column configuration options.
+ * @param {Object}          params.search             - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput        - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn     - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText         - The current search text value.
+ * @param {Function}        params.handleSearch       - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=false] - When true, omits the statusApproval and status columns.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getRelationshipColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-  includeStatus = true,
-) => [
+  isApproval = false,
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",
     dataIndex: "no",
     width: 50,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
@@ -25,7 +38,6 @@ const getRelationshipColumns = (
     dataIndex: "relationshipTypeName",
     width: 150,
     sorter: true,
-    filteredValue: [search?.relationshipTypeName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "relationshipTypeName",
@@ -33,7 +45,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (text) => text ? text.toUpperCase() : "-",
   },
@@ -43,7 +54,6 @@ const getRelationshipColumns = (
     dataIndex: "relationshipCategoryName",
     width: 150,
     sorter: true,
-    filteredValue: [search?.relationshipCategoryName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "relationshipCategoryName",
@@ -51,45 +61,40 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (text) => text ? text.toUpperCase() : "-",
   },
   {
-    key: "subjectName",
+    key: "relatedName",
     title: "RELATED NAME",
-    dataIndex: "subjectName",
+    dataIndex: "relatedName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.subjectName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "subjectName",
+      "relatedName",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
-    render: (text, record) => record.subjectName || record.objectName || "-",
+    render: (_, record) => record.relatedName,
   },
   {
-    key: "subjectNumber",
+    key: "relatedNumber",
     title: "RELATED NUMBER",
-    dataIndex: "subjectNumber",
+    dataIndex: "relatedNumber",
     width: 200,
     sorter: true,
-    filteredValue: [search?.subjectNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "subjectNumber",
+      "relatedNumber",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
-    render: (text, record) => record.subjectNumber || record.objectNumber || "-",
+    render: (_, record) => record.relatedNumber,
   },
   {
     key: "startDate",
@@ -97,7 +102,6 @@ const getRelationshipColumns = (
     dataIndex: "startDate",
     width: 150,
     sorter: true,
-    filteredValue: [search?.startDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -105,7 +109,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (startDate) => startDate ? moment(startDate).format(dateFormatting.date) : "-",
   },
@@ -115,7 +118,6 @@ const getRelationshipColumns = (
     dataIndex: "endDate",
     width: 150,
     sorter: true,
-    filteredValue: [search?.endDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -123,17 +125,16 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (endDate) => endDate ? moment(endDate).format(dateFormatting.date) : "-",
   },
-  includeStatus && {
+  !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     width: 180,
     sorter: true,
-    filteredValue: [search?.statusApproval] || null,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -141,7 +142,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
@@ -163,13 +163,13 @@ const getRelationshipColumns = (
       );
     },
   },
-  includeStatus && {
+  {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
     width: 120,
     sorter: true,
-    filteredValue: [search?.status] || null,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
@@ -177,7 +177,6 @@ const getRelationshipColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {

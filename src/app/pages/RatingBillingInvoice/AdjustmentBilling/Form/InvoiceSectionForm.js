@@ -444,13 +444,11 @@ const InvoiceSectionForm = ({ data, type, useInformationLayout = false }) => {
   });
 
   const billingCode = data?.billingCode;
-  const selectedInvoiceNumber = data?.invoiceNumber;
-
   useEffect(() => {
-    if (selectedInvoiceNumber && billingCode) {
+    if (billingCode) {
       dispatch(getTransactionMappingInformation(billingCode));
     }
-  }, [billingCode, dispatch, selectedInvoiceNumber]);
+  }, [billingCode, dispatch]);
 
   const invoiceInfoItems = useMemo(() => buildInvoiceInfoItems(data), [data]);
 

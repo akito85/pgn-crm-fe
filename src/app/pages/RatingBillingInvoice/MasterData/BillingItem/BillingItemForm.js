@@ -33,16 +33,11 @@ import {
   getSelectedApproval,
   getAttachmentCategory,
   getDetailMappingCategory,
-  getBillType,
   createBillingItem,
   updateBillingItem,
   getBillingItemDetail,
   getBillingItemCategoryDdl,
   getConfigFileRBIBillingItem,
-  getDetailDraft,
-  getBillingItemTypeList,
-  getBillingItemCriteriaList,
-  getBillingItemCategoryList,
   generateTransactionMappingCode,
   getSpecialGLList,
   getGLAccountList,
@@ -52,6 +47,7 @@ import {
   getClassificationTypeList,
   getAccountTypeList,
   resetApprovalState,
+  getAttachmentDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import {
   showModalError,
@@ -78,7 +74,6 @@ const BillingItemForm = (props) => {
     dataListAppHierDetail,
     detail_mapping_category,
     data_BillingItemDetail,
-    data_detailDraft,
     data_typeList,
     data_criteriaList,
     data_categoryList,
@@ -181,7 +176,8 @@ const BillingItemForm = (props) => {
   const [dataSend, setDataSend] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
 
-  const isLoading = loading || loadingForm || loadingDetail;
+  const isLoading =
+    loadingForm || (type === "update" && loadingDetail && !data_BillingItemDetail?.id);
 
   const handleUpdateAttachment = useCallback((updater) => {
     setListDataAttachment((prevState) => {
@@ -200,15 +196,13 @@ const BillingItemForm = (props) => {
     });
   }, []);
 
-  // Initial data fetch
+  // Initial data fetch — only eager-load data that is needed immediately
+  // (BillingItemCategory for mapping, SpecialGL/GLAccount for criteria table, bank, classification)
+  // Category/Type/BillType/Criteria dropdowns are lazy-loaded in BillingItemSectionForm
   useEffect(() => {
     dispatch(getBillingItemCategory());
     dispatch(getBillingItemCategoryDdl());
-    dispatch(getBillType());
     dispatch(getAvailableApproval());
-    dispatch(getBillingItemTypeList());
-    dispatch(getBillingItemCriteriaList());
-    dispatch(getBillingItemCategoryList());
     dispatch(getSpecialGLList());
     dispatch(getGLAccountList());
     dispatch(getBankList());
@@ -229,7 +223,19 @@ const BillingItemForm = (props) => {
   useEffect(() => {
     if (type === "update" && id) {
       dispatch(getBillingItemDetail({ id }));
-      dispatch(getDetailDraft({ id }));
+      dispatch(getAttachmentDetail(id))
+        .unwrap()
+        .then((res) => {
+          setListDataAttachment(
+            (res?.result || []).map((item, index) => ({
+              ...item,
+              key: index + 1,
+              createdDate: moment(item.createdDate).format(dateFormatting.date),
+              urlFile1: `/v1/dbs/api/billingitem/download-attachment/${item.id}`,
+              dataType: "exist",
+            })),
+          );
+        });
     }
   }, [dispatch, type, id]);
 
@@ -432,16 +438,7 @@ const BillingItemForm = (props) => {
         dispatch(getGlAccountBankById({ id: resolvedBankId }));
       }
 
-      setListDataAttachment(
-        dataDetail?.attachmentDtoList
-          ? (dataDetail?.attachmentDtoList || [])?.map((item, index) => ({
-              ...item,
-              key: index + 1,
-              createdDate: moment(item.createdDate).format(dateFormatting.date),
-              dataType: "exist",
-            }))
-          : [],
-      );
+      // Attachment list is handled in the effect using getAttachmentDetail
 
       setdataTable(
         dataDetail?.mappingInformation?.map((item, index) => ({
@@ -509,36 +506,9 @@ const BillingItemForm = (props) => {
       type === "update" &&
       id &&
       data_BillingItemDetail &&
-      data_BillingItemDetail.billingItemCode === id
+      (data_BillingItemDetail.billingItemCode === id || data_BillingItemDetail.id === id)
     ) {
-      if (
-        data_BillingItemDetail?.status === "ACTIVE" &&
-        data_BillingItemDetail?.statusApproval === "DRAFT" &&
-        data_BillingItemDetail.billingItemCode === id
-      ) {
-        const body = {
-          ...data_detailDraft,
-          billingItemCode: data_BillingItemDetail?.billingItemCode,
-          startDate: data_detailDraft.startDate,
-          endDate: data_detailDraft?.endDate,
-          approvalHierarchy: data_detailDraft?.approvalHierarchy,
-          billingItemCategory: data_detailDraft?.billingItemCategoryId,
-          name: data_detailDraft?.billingItemName,
-          billType: data_detailDraft?.billingTypeId,
-          apphierId: data_detailDraft?.approvalHierarchy,
-          attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
-          lateCharge: data_detailDraft?.lateCharge,
-          paymentWarranty: data_detailDraft?.paymentWarranty,
-          installment: data_detailDraft?.installment || false,
-          transMappingType: data_detailDraft?.transMappingType,
-          criteria: data_detailDraft?.criteria,
-          status: data_BillingItemDetail?.status,
-          statusApproval: data_BillingItemDetail?.statusApproval,
-        };
-        handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
-      } else {
-        handleSetDataUpdate(data_BillingItemDetail);
-      }
+      handleSetDataUpdate(data_BillingItemDetail);
     }
   }, [data_BillingItemDetail, type, id, handleSetDataUpdate]);
 
@@ -1227,33 +1197,7 @@ const BillingItemForm = (props) => {
     } else {
       setDetailMapping(false);
       setCategory("");
-      if (
-        data_BillingItemDetail?.status === "ACTIVE" &&
-        data_BillingItemDetail?.statusApproval === "DRAFT" &&
-        data_BillingItemDetail.billingItemCode === id
-      ) {
-        const body = {
-          ...data_detailDraft,
-          startDate: data_detailDraft.startDate,
-          endDate: data_detailDraft?.endDate,
-          approvalHierarchy: data_detailDraft?.approvalHierarchy,
-          billingItemCategory: data_detailDraft?.billingItemCategoryId,
-          name: data_detailDraft?.billingItemName,
-          billType: data_detailDraft?.billingTypeId,
-          apphierId: data_detailDraft?.approvalHierarchy,
-          attachmentDtoList: data_BillingItemDetail?.attachmentDtoList,
-          lateCharge: data_detailDraft?.lateCharge,
-          paymentWarranty: data_detailDraft?.paymentWarranty,
-          installment: data_detailDraft?.installment || false,
-          transMappingType: data_detailDraft?.transMappingType,
-          criteria: data_detailDraft?.criteria,
-          status: data_BillingItemDetail?.status,
-          statusApproval: data_BillingItemDetail?.statusApproval,
-        };
-        handleSetDataUpdate(body, data_BillingItemDetail?.mappingInformation);
-      } else {
-        handleSetDataUpdate(data_BillingItemDetail);
-      }
+      handleSetDataUpdate(data_BillingItemDetail);
     }
     setOpenModal(false);
   };
@@ -1345,6 +1289,7 @@ const BillingItemForm = (props) => {
               endDate={endDate}
               handleStartDate={handleStartDate}
               mappingData={dataTable?.length || 0}
+              criteriaData={dataCriteriaTable?.length || 0}
               handleEndDate={handleEndDate}
               onCategoryChange={handleCategoryChange}
               isCriteriaDisabled={isCriteriaEditing}

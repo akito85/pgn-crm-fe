@@ -83,6 +83,10 @@ const SaInformation = ({
 
   // For validation all date
   const handleDateValidation = (value, type) => {
+    const shouldKeepGasInPlanDate =
+      saRecordData?.status === "ACTIVE" &&
+      saRecordData?.approvalStatus === "APPROVED";
+
     if (type === "serviceAgreementDate") {
       form.resetFields(["startDate", "endDate", "gasInPlanDate", "commitmentDate"])
       setServiceAgreementDate(value);
@@ -92,7 +96,9 @@ const SaInformation = ({
       setStartDate(value);
       return value;
     } else if (type === "endDate") {
-      form.resetFields(["gasInPlanDate"])
+      if (!shouldKeepGasInPlanDate) {
+        form.resetFields(["gasInPlanDate"])
+      }
       setEndDate(value);
       return value;
     } else if (type === "gasInPlanDate") {
@@ -354,7 +360,7 @@ const SaInformation = ({
                   getValueFromEvent={(e) => handleSaInformationObj(e, "alreadyGasIn")}
                 >
                   <div className='flex flex-col'>
-                    <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked}>Already Gas In</Checkbox>
+                    <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked} disabled={(saRecordData.status === "ACTIVE" || saRecordData.isMain !== "Y" ? true : false)}>Already Gas In</Checkbox>
                     <span className='pl-[26px] text-[10px]'>Check if the service agreement is gas in or not</span>
                   </div>
                 </Form.Item>
@@ -386,7 +392,7 @@ const SaInformation = ({
                   <DateComponent
                     dateDisable={handleRangeStartEnd}
                     onChange={(e) => handleDateValidation(e, "gasInPlanDate")}
-                    disabled={(!isGasServiceType || saInfoObj?.alreadyGasIn === true) && true}
+                    disabled={(!isGasServiceType || saInfoObj?.alreadyGasIn === true) || (saRecordData.status === "ACTIVE" && saRecordData.isMain === "Y" ? true : false)}
                   />
                 </Form.Item>
                 <Form.Item

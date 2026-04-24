@@ -346,7 +346,7 @@ const BillingItemView = () => {
             label: isEditable ? (
               <Link
                 to={RBI_ROUTES.BILLING_ITEM_UPDATE}
-                state={{ id: record.billingItemCode }}
+                state={{ id: record.id }}
               >
                 Update
               </Link>
@@ -414,7 +414,7 @@ const BillingItemView = () => {
           <Tooltip title="Detail">
             <Link
               to={RBI_ROUTES.BILLING_ITEM_DETAIL}
-              state={{ id: record.billingItemCode }}
+              state={{ id: record.id }}
             >
               <div className="pt-0">
                 <SVGIcon name="IconDetail" color="#0075BF" width={20} />

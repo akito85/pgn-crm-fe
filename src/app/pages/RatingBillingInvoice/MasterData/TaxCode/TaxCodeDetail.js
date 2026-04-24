@@ -372,15 +372,15 @@ const TaxCodeDetail = () => {
     dispatch(
       bodyApproval.approvalType === "INACTIVE_TAX_CODE"
         ? approvalInactiveTaxCode({
-          body: data,
-        })
-        : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
-          ? approvalActivatedTaxCode({
             body: data,
           })
+        : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+          ? approvalActivatedTaxCode({
+              body: data,
+            })
           : approvalRejectTaxCode({
-            body: data,
-          }),
+              body: data,
+            }),
     )
       .unwrap()
       .then(() => {
@@ -411,8 +411,16 @@ const TaxCodeDetail = () => {
         <div className="flex flex-col w-full gap-4">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_TAX_CODE" && (
-              <CardContainer header={"inactive request information"}>
+            ["INACTIVE_TAX_CODE", "ACTIVATED_TAX_CODE"].includes(
+              bodyApproval.approvalType,
+            ) && (
+              <CardContainer
+                header={
+                  bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+                    ? "activate request information"
+                    : "inactive request information"
+                }
+              >
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate}

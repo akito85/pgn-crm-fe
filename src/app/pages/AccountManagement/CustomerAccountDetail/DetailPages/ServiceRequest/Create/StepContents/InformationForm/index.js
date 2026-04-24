@@ -10,10 +10,9 @@ export default function InformationForm(props) {
   const form = props.form;
 
   return (
-    <Fragment>
+    <>
       <InfoServiceRequest form={form} account={account} customer={customer} dropdowns={dropdowns}/>
-      <div style={{ marginTop: 24 }} />
       <InfoDataRequirement form={form} dropdowns={dropdowns} accountId={account?.accountInformation?.accountId} />
-    </Fragment>
+    </>
   );
 }

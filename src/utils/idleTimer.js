@@ -5,7 +5,7 @@ import { IdleTimerProvider } from "react-idle-timer";
 const IdleTimerContainer = (props) => {
     const idleTimerRef = useRef(null);
     const config = localStorage.getItem('config') || window.sessionStorage.getItem('config');
-    const configParsed = parseInt(JSON.parse(config)?.filter(item => (item?.name === 'IDLE_TIME'))[0]?.vale)
+    const configParsed = parseInt(JSON.parse(config)?.filter(item => (item?.name === 'IDLE_TIME'))[0]?.value)
     const [timeoutDuration, setTimeoutDuration] = useState(1000 * 60 * configParsed);
 
     // disable reload window

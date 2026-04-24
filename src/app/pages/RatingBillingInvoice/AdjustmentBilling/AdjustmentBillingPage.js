@@ -323,7 +323,7 @@ const AdjustmentBillingPage = () => {
 
         return isEditable ? (
           <Link
-            to={RBI_ROUTES.ADJUSTMENT_BILLING_UPDATE}
+            to={`${RBI_ROUTES.ADJUSTMENT_BILLING_UPDATE}`}
             state={{
               id: record.id,
               adjustmentNumber: record.adjustmentNumber,

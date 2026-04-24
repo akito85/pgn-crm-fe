@@ -727,6 +727,8 @@ export const approvalActivatedTaxCode = createAsyncThunk(
   },
 );
 
+
+
 const taxCodeSlice = createSlice({
   name: "tax_code",
   initialState,
@@ -1000,6 +1002,19 @@ const taxCodeSlice = createSlice({
       state.loading = false;
       state.message = action.payload;
     },
+
+    // Get GL Account List
+    [getGlAccountList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getGlAccountList.fulfilled]: (state, action) => {
+      state.data_gl_account_list = action.payload || [];
+      state.loading = false;
+    },
+    [getGlAccountList.rejected]: (state) => {
+      state.loading = false;
+    },
+
   },
 });
 

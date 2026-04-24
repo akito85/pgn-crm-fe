@@ -3,19 +3,33 @@ import { toTitleCase } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
-const getServiceRequestColumns = (
+/**
+ * Returns the column definitions for the Service Request list table.
+ *
+ * @param {Object}          params                    - Column configuration options.
+ * @param {Object}          params.search             - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput        - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn     - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText         - The current search text value.
+ * @param {Function}        params.handleSearch       - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=false] - When true, fixes the NO column left and shows the statusApproval column.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getServiceRequestColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
-) => [
+  handleSearch,
+  isApproval = false
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",
     dataIndex: "no",
     width: 50,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
@@ -24,7 +38,6 @@ const getServiceRequestColumns = (
     dataIndex: "serviceRequestNumber",
     width: 220,
     sorter: true,
-    filteredValue: [search?.serviceRequestNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "serviceRequestNumber",
@@ -41,7 +54,6 @@ const getServiceRequestColumns = (
     dataIndex: "serviceRequestReference",
     width: 230,
     sorter: true,
-    filteredValue: [search?.serviceRequestReference] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "serviceRequestReference",
@@ -63,7 +75,6 @@ const getServiceRequestColumns = (
     dataIndex: "type",
     width: 150,
     sorter: true,
-    filteredValue: [search?.type] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "type",
@@ -80,7 +91,6 @@ const getServiceRequestColumns = (
     dataIndex: "category",
     width: 160,
     sorter: true,
-    filteredValue: [search?.category] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "category",
@@ -97,7 +107,6 @@ const getServiceRequestColumns = (
     dataIndex: "subCategory",
     width: 160,
     sorter: true,
-    filteredValue: [search?.subCategory] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "subCategory",
@@ -114,7 +123,6 @@ const getServiceRequestColumns = (
     dataIndex: "channel",
     width: 140,
     sorter: true,
-    filteredValue: [search?.channel] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "channel",
@@ -131,7 +139,6 @@ const getServiceRequestColumns = (
     dataIndex: "requestSource",
     width: 150,
     sorter: true,
-    filteredValue: [search?.requestSource] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "requestSource",
@@ -148,7 +155,6 @@ const getServiceRequestColumns = (
     dataIndex: "requestDate",
     width: 180,
     sorter: true,
-    filteredValue: [search?.requestDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "requestDate",
@@ -166,7 +172,6 @@ const getServiceRequestColumns = (
     dataIndex: "openDate",
     width: 180,
     sorter: true,
-    filteredValue: [search?.openDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "openDate",
@@ -184,7 +189,6 @@ const getServiceRequestColumns = (
     dataIndex: "resolvedDate",
     width: 180,
     sorter: true,
-    filteredValue: [search?.resolvedDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "resolvedDate",
@@ -202,7 +206,6 @@ const getServiceRequestColumns = (
     dataIndex: "closedDate",
     width: 180,
     sorter: true,
-    filteredValue: [search?.closedDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "closedDate",
@@ -221,7 +224,6 @@ const getServiceRequestColumns = (
     width: 120,
     sorter: true,
     align: "center",
-    filteredValue: [search?.age] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "age",
@@ -239,7 +241,6 @@ const getServiceRequestColumns = (
     dataIndex: "description",
     width: 200,
     sorter: true,
-    filteredValue: [search?.description] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "description",
@@ -250,14 +251,14 @@ const getServiceRequestColumns = (
       true
     ),
   },
-  {
+  isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -296,7 +297,7 @@ const getServiceRequestColumns = (
     width: 180,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusPrerequisite] || null,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusPrerequisite",
@@ -335,7 +336,7 @@ const getServiceRequestColumns = (
     width: 130,
     sorter: true,
     align: "center",
-    filteredValue: [search?.status] || null,
+    fixed: "right",
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "status",
@@ -369,6 +370,6 @@ const getServiceRequestColumns = (
       );
     },
   },
-];
+].filter(Boolean);
 
 export { getServiceRequestColumns };

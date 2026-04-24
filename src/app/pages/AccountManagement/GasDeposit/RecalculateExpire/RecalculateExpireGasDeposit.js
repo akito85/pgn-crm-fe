@@ -3,16 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import InfoGasDeposit from "./StepContents/InformationForm/InfoGasDeposit";
+import GasDepositBulkTable from "./StepContents/InformationForm/GasDepositBulkTable";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
-import { getCustomerDetail } from "../../../../../redux/slices/account_management/Customer/customerAccount";
-import {
-  getAccountStandardDetail,
-  getAccountOneTimeDetail
-} from "../../../../../redux/slices/account_management/accountManagement";
 import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import {
   showModalError,
-  validateCreateUpdate
+  validateCreateUpdate,
 } from "../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../redux/services/account_management/accountManagementService";
 import { configApp } from "../../../../../constants/configApp";
@@ -20,115 +16,116 @@ import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper } from "../../../../../components/Nx/NxFormStepNavigation";
-import HeaderDetail from "../HeaderDetail";
 import { nxRemoveKeys } from "../../../../../components/Nx/NxRemoveKeys";
 import GasDepositDetailTable from "../GasDepositDetailTable";
 import NxApprovalInput from "../../../../../components/Nx/NxApprovalInput";
 import {
-  getGdAttachmentCategory,
+  getGdAttachmentCategories,
   recalculateGasDeposit,
   expireGasDeposit,
-  getDetailGasDeposit,
-  getDetailDraftGasDeposit,
-  getDetailGdApprovalHierarchy,
+  getGasDeposit,
+  getGasDepositDraft,
   getGdApprovalHierarchy,
+  getGdApprovalHierarchies,
 } from "../../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import NxAttachmentInput from "../../../../../components/Nx/NxAttachmentInput";
 import SVGIcon from "../../../../../assets/Icon/index";
+import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
 
-const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
-  const isStandard = accountType === "standard";
-  const isOneTime = accountType === "oneTime";
-  const [current, setCurrent] = useState(0);
-
+/**
+ * Three-step form (Gas Deposit → Approval → Attachment) for submitting a
+ * recalculate or expire request against an existing gas deposit record.
+ * Supports Standard and One-Time account types. Navigates back to the
+ * appropriate account detail page on success.
+ *
+ * @param {{ formType: "recalculate" | "expire"; accountType?: "standard" | "oneTime"; isBulk?: boolean; }} props
+ */
+const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
-
-  const isRecalculate = formType === "recalculate";
-  const isExpire = formType === "expire";
-
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
   const {
     loading_listGdApprovalHierarchy,
     loading_detailGdApprovalHierarchy,
     loading_detailGd,
     loading_detailDraftGd,
     loading_recalculateExpireGd,
-    list_gdApprovalOptions,
+    list_gdApprovalHierarchy,
     detail_gdApprovalHierarchy,
     detail_gasDeposit,
     detailDraft_gasDeposit,
     list_gdAttachmentCategory,
   } = useSelector((state) => state.gasDeposit);
-  
+
+  // --- State ---
+  const [current, setCurrent] = useState(0);
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [confirmationType, setConfirmationType] = useState("");
+
+  // Bulk-only: selection and expand tracking (needed for submission + confirmation modal)
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [openedMemo, setOpenedMemo] = useState({});
+
+  // --- Derived values ---
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
+  const isRecalculate = formType === "recalculate";
+  const isExpire = formType === "expire";
+
   const loading =
     loading_listGdApprovalHierarchy ||
     loading_detailGdApprovalHierarchy ||
     loading_detailGd ||
     loading_detailDraftGd ||
     loading_recalculateExpireGd;
-    
-  //declare
-  const location = useLocation();
-  const [form] = Form.useForm();
+
   const accountId = location?.state?.accountId;
   const customerId = location?.state?.customerId;
-  const idGd = location?.state?.id;
-  
+  const id = location?.state?.id;
+
   const status = detail_gasDeposit.status || "DRAFT";
   const statusApproval = detail_gasDeposit.statusApproval || "DRAFT";
 
-  const isDraft = location.state?.status === "DRAFT" || status === "DRAFT";
   const isActive = location.state?.status === "ACTIVE" || status === "ACTIVE";
-  
+
   const isDraftApproval = location.state?.statusApproval === "DRAFT" || statusApproval === "DRAFT";
   const isRejectApproval = location.state?.statusApproval === "REJECT" || statusApproval === "REJECT";
 
-  
-  //state
-  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
-  const [deletedAttachments, setDeletedAttachments] = useState([]);
-  
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [confirmationType, setConfirmationType] = useState("");
-  
-  const attachmentIsRequired = true;
-  
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const handleType = (isDraftApproval || isRejectApproval) ? "UPDATE" : "CREATE";
 
-  const rowSelection = {
-    fixed: true,
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys) => {
-      setSelectedRowKeys([...newSelectedRowKeys]);
-    },
-    preserveSelectedRowKeys: true
-  };
+  const attachmentIsRequired = false;
 
   const detail = (isActive && (isDraftApproval || isRejectApproval)) ? detailDraft_gasDeposit : detail_gasDeposit;
-  const { details, attachments } = detail;
-  
-  const [selectedDetailId, setSelectedDetailId] = useState();
-  
+  const parentKey = (isActive && (isDraftApproval || isRejectApproval))
+    ? "detailDraft_gasDeposit"
+    : "detail_gasDeposit";
+  const { attachments } = detail;
+
   const formFields = [
     [],
     ["appHierId"],
     []
   ];
 
+  // --- Effects ---
+  // Fetch gas deposit record (single mode only)
   useEffect(() => {
-    if (customerId) dispatch(getCustomerDetail(customerId));
-  }, [customerId]);
+    if (!isBulk && id) dispatch(getGasDeposit({ id }));
+  }, [id, isBulk]);
 
+  // Fetch draft when record is active with pending approval
   useEffect(() => {
-    if (idGd) {
-      if (isActive && (isDraftApproval || isRejectApproval))
-        dispatch(getDetailDraftGasDeposit(idGd));
-      else  
-        dispatch(getDetailGasDeposit(idGd));
-    }
-  }, [idGd]);
+    if (id && isActive && (isDraftApproval || isRejectApproval))
+      dispatch(getGasDepositDraft({ id }));
+  }, [id, isActive, isDraftApproval, isRejectApproval]);
 
+  // Pre-fill form fields when record and hierarchy are loaded
   useEffect(() => {
-    if (list_gdApprovalOptions.length) {
+    if (list_gdApprovalHierarchy.length) {
       const {
         accountId,
         appHierId,
@@ -139,15 +136,16 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
         appHierId
       });
 
-      const appHierOption = list_gdApprovalOptions.find(
+      const appHierOption = list_gdApprovalHierarchy.find(
         (option) => option.appHierId === appHierId
       );
 
       if (appHierOption)
-        handleSelectHiararchy(appHierId, appHierOption.approvalName);
+        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
-  }, [detail, list_gdApprovalOptions]);
+  }, [detail, list_gdApprovalHierarchy]);
 
+  // Sync attachment list from loaded record
   useEffect(() => {
     if (Array.isArray(attachments))
       setAttachmentDataSource([...attachments.map((attachment) => ({
@@ -156,9 +154,281 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
       }))]);
   }, [attachments]);
 
+  // Fetch approval hierarchy options
   useEffect(() => {
-    dispatch(getGdApprovalHierarchy());
+    dispatch(getGdApprovalHierarchies());
   }, []);
+
+  // --- Functions / handlers ---
+  /**
+   * Fetches and displays the approval hierarchy for the selected option,
+   * then sets `appHierName` in the form.
+   *
+   * @param {number} appHierId
+   * @param {string} approvalName
+   */
+  const handleSelectHierarchy = (appHierId, approvalName) => {
+    dispatch(getGdApprovalHierarchy(appHierId));
+    form.setFieldValue("appHierName", approvalName);
+  };
+
+  const onExpand = (expanded, record) => {
+    if (expanded) setOpenedMemo((prev) => ({ ...prev, [record.id]: true }));
+  };
+
+  /** Resets the form to its initial state based on `formType`. */
+  const handleReset = () => {
+    if (isRecalculate) {
+      setAttachmentDataSource([]);
+      setDeletedAttachments([]);
+      form.resetFields();
+      setCurrent(0);
+    } else if (isExpire) {
+      if (list_gdApprovalHierarchy?.length) {
+        const { accountId, appHierId } = detail;
+
+        form.setFieldsValue({ accountId, appHierId });
+
+        const appHierOption = list_gdApprovalHierarchy.find(
+          (option) => option.appHierId === appHierId
+        );
+
+        if (appHierOption)
+          handleSelectHierarchy(appHierId, appHierOption.approvalName);
+      }
+
+      if (attachments)
+        setAttachmentDataSource([...attachments.map((attachment) => ({
+          ...attachment,
+          key: attachment.id,
+        }))]);
+
+      setDeletedAttachments([]);
+      setCurrent(0);
+    }
+  };
+
+  /**
+   * Validates the current step (and runs pre-submission API validation for
+   * "submit" actions) before opening the confirmation modal.
+   *
+   * @param {boolean} show
+   * @param {"draft" | "submit"} submitType
+   */
+  const handleSetShowConfirmationModal = async (show, submitType) => {
+    if (show) {
+      try {
+        if (["submit", "draft"].includes(submitType)) {
+          if (submitType === "submit") {
+            if (current === 2) {
+              if (attachmentIsRequired && !attachmentDataSource.length) {
+                const errorBody = {
+                  title: "Failed",
+                  description: `Please upload at least one attachment`
+                };
+                dispatch(showModalError(errorBody));
+
+                throw new Error("There was no file attached");
+              }
+            } else {
+              await form.validateFields(formFields[current]);
+
+              const {
+                appHierId
+              } = form.getFieldsValue(true);
+
+              const body = {
+                stepNumber: current + 1,
+                type: handleType,
+                id,
+                data : {
+                  gasDepositIds: isBulk ? selectedRowKeys : [id],
+                  appHierId,
+                }
+              }
+
+              await dispatch(
+                validateCreateUpdate({
+                  body,
+                  services: accountManagementService,
+                  endPoint: `/v1/dbs/api/gas-deposit/${formType}/validate-step`,
+                  type: formType
+                })
+              ).unwrap();
+            }
+          }
+        } else
+          return;
+      } catch (err) {
+        return;
+      }
+
+      const { appHierId } =
+        form.getFieldsValue(true);
+
+      const body = {
+        id,
+        accountId,
+        appHierId,
+        action: submitType
+      };
+
+      try {
+        await dispatch(
+          validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/gas-deposit/validate-${formType}`,
+            type: formType
+          })
+        ).unwrap()
+      } catch {
+        return;
+      }
+
+      setShowConfirmationModal(show);
+      setConfirmationType(submitType);
+    } else {
+      setShowConfirmationModal(show);
+      setConfirmationType("");
+    }
+  };
+
+  /**
+   * Validates the current step and calls `POST /v1/dbs/api/gas-deposit/validate-step`
+   * before advancing to the next step.
+   */
+  const next = async () => {
+    if (isBulk && current === 0) {
+      if (!selectedRowKeys.length) {
+        dispatch(showModalError({ title: "Failed", description: "Please select at least one record" }));
+        return;
+      }
+      setCurrent(current + 1);
+      return;
+    }
+
+    try {
+      if (current === 2) {
+        if (attachmentIsRequired && !attachmentDataSource.length) {
+          const errorBody = {
+            title: "Failed",
+            description: `Please upload at least one attachment`
+          };
+          dispatch(showModalError(errorBody));
+
+          throw new Error("There was no file attached");
+        }
+      } else {
+        await form.validateFields(formFields[current]);
+
+        const {
+          appHierId
+        } = form.getFieldsValue(true);
+        
+        const body = {
+          stepNumber: current + 1,
+          type: handleType,
+          id,
+          data : {
+            gasDepositIds: isBulk ? selectedRowKeys : [id],
+            appHierId,
+          }
+        }
+
+        await dispatch(
+          validateCreateUpdate({
+            body,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/gas-deposit/${formType}/validate-step`,
+            type: formType
+          })
+        ).unwrap();
+      }
+    } catch (err) {
+      return;
+    }
+
+    setCurrent(current + 1);
+  };
+
+  /** Moves back one step without validation. */
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+
+  /** Async wrapper for `next()` bound to the Next button's `onClick`. */
+  const handleButtonNext = async () => {
+    await next();
+  };
+
+  /**
+   * Builds the submission payload and dispatches `recalculateGasDeposit` or
+   * `expireGasDeposit`, then uploads new attachments and navigates on success.
+   */
+  const handleSubmitForm = async () => {
+    const {
+      appHierId,
+      remark
+    } = form.getFieldsValue(true);
+
+    const attachments = nxRemoveKeys([
+      ...attachmentDataSource.filter(
+        attachment => ["exist", "draft"].includes(attachment.dataType)
+      ),
+      ...deletedAttachments
+    ]);
+
+    const body = {
+      appHierId,
+      action: confirmationType,
+      gasDepositIds: isBulk ? selectedRowKeys : [id],
+      remark,
+      attachments
+    };
+
+    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
+
+    const navigateTarget = isStandard
+      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
+      : isOneTime
+        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
+        : ACCOUNT_MANAGEMENT_ROUTES.VIEW_GAS_DEPOSIT_SA;
+
+    try {
+      if (isRecalculate) {
+        await dispatch(
+          recalculateGasDeposit({
+            body,
+            attachments: newAttachments,
+            action: confirmationType.toUpperCase()
+          })
+        ).unwrap();
+      } else if (isExpire) {
+          await dispatch(
+          expireGasDeposit({
+            body,
+            attachments: attachmentDataSource.filter(
+              (attachment) => attachment.dataType === "new"
+            ),
+            action: confirmationType.toUpperCase()
+          })
+        ).unwrap();
+      } else
+        return
+    } catch {
+      return
+    }
+
+    setTimeout(() => {
+      navigate(navigateTarget, {
+        state: {
+          accountId,
+          customerId
+        }
+      });
+    }, 2000);
+  };
 
   const routes = [
     {
@@ -192,141 +462,6 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
     }
   ];
 
-  /**
-   * @param {boolean} show
-   * @param {"draft" | "submit"} submitType
-   */
-  const handleSetShowConfirmationModal = async (show, submitType) => {
-    if (show) {
-      try {
-        if (["submit", "draft"].includes(submitType)) {
-          if (submitType === "submit") {
-            if (current === 2) {
-              if (attachmentIsRequired && !attachmentDataSource.length) {
-                const errorBody = {
-                  title: "Failed",
-                  description: `Please upload at least one attachment`
-                };
-                dispatch(showModalError(errorBody));
-    
-                throw new Error("There was no file attached");
-              }
-            } else {
-              await form.validateFields(formFields[current]);
-    
-              const {
-                appHierId
-              } = form.getFieldsValue(true);
-    
-              const body = {
-                stepNumber: current + 1,
-                type: formType.toUpperCase(),
-                id: idGd,
-                data : {
-                  accountId, 
-                  appHierId,
-                }
-              }
-    
-              await dispatch(
-                validateCreateUpdate({
-                  body,
-                  services: accountManagementService,
-                  endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
-                  type: formType
-                })
-              ).unwrap();
-            }
-          }
-        } else
-          return;
-      } catch (err) {
-        return;
-      }
-
-      const { appHierId } =
-        form.getFieldsValue(true);
-
-      const body = {
-        id: idGd,
-        accountId,
-        appHierId,
-        action: submitType
-      };
-
-      dispatch(
-        validateCreateUpdate({
-          body,
-          services: accountManagementService,
-          endPoint: `/v1/dbs/api/gas-deposit/validate-${formType}`,
-          type: formType
-        })
-      )
-        .unwrap()
-        .then((data) => {
-          setShowConfirmationModal(show);
-          setConfirmationType(submitType);
-        })
-        .catch(() => {});
-    } else {
-      setShowConfirmationModal(show);
-      setConfirmationType("");
-    }
-  };
-
-  // Fetch Account Standard/OneTime Detail
-  useEffect(() => {
-    if (accountId && customerId && accountType) {
-      if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ customerId, accountId }));
-      } else {
-        dispatch(getAccountOneTimeDetail({ customerId, accountId }));
-      }
-    }
-  }, [dispatch, accountId, customerId, accountType]);
-
-  const setAccount = (accountId, accountNumber, accountName) => {
-    form.setFieldValue("accountId", accountId);
-    form.setFieldValue("accountNumber", accountNumber);
-    form.setFieldValue("accountName", accountName);
-  };
-
-  const handleSelectHiararchy = (appHierId, approvalName) => {
-    dispatch(getDetailGdApprovalHierarchy(appHierId));
-    form.setFieldValue("appHierName", approvalName);
-  };
-
-  const handleReset = () => {
-    if (isRecalculate) {
-      setAttachmentDataSource([]);
-      setDeletedAttachments([]);
-      form.resetFields();
-      setCurrent(0);
-    } else if (isExpire) {
-      if (list_gdApprovalOptions?.length) {
-        const { accountId, appHierId } = detail;
-
-        form.setFieldsValue({ accountId, appHierId });
-
-        const appHierOption = list_gdApprovalOptions.find(
-          (option) => option.appHierId === appHierId
-        );
-
-        if (appHierOption)
-          handleSelectHiararchy(appHierId, appHierOption.approvalName);
-      }
-
-      if (attachments)
-        setAttachmentDataSource([...attachments.map((attachment) => ({
-          ...attachment,
-          key: attachment.id,
-        }))]);
-
-      setDeletedAttachments([]);
-      setCurrent(0);
-    }
-  };
-
   const steps = [
     {
       title: "Gas Deposit",
@@ -344,12 +479,24 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
           header: "Gas Deposit Detail",
           content: (
             <GasDepositDetailTable
-              dataSource={details}
-              handleView={({ id }) => setSelectedDetailId(id)}
+              id={id}
+              parentKey={parentKey}
               key="tab-0-card-1"
             />
           )
         },
+        isBulk && {
+          header: "Gas Deposit List",
+          content: (
+            <GasDepositBulkTable
+              accountId={accountId}
+              selectedRowKeys={selectedRowKeys}
+              onSelectionChange={setSelectedRowKeys}
+              openedMemo={openedMemo}
+              onExpand={onExpand}
+            />
+          )
+        }
       ].filter(Boolean),
       disabled: false,
       key: "tab-0",
@@ -363,8 +510,8 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
             <NxApprovalInput
               form={form}
               hierarchyDetails={detail_gdApprovalHierarchy}
-              options={list_gdApprovalOptions}
-              handleSelectHiararchy={handleSelectHiararchy}
+              options={list_gdApprovalHierarchy}
+              handleSelectHierarchy={handleSelectHierarchy}
               key="tab-1-card-0"
             />
           )
@@ -383,7 +530,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
               data={attachmentDataSource}
               updateData={setAttachmentDataSource}
               setDeleted={setDeletedAttachments}
-              getAPICategory={getGdAttachmentCategory}
+              getAPICategory={getGdAttachmentCategories}
               categoryData={list_gdAttachmentCategory}
               service={accountManagementService}
               configApplication={configApp.ACCOUNT_SERVICE}
@@ -398,140 +545,16 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
     }
   ];
 
-  const navigate = useNavigate();
-
-  const next = async () => {
-    try {
-      if (current === 2) {
-        if (attachmentIsRequired && !attachmentDataSource.length) {
-          const errorBody = {
-            title: "Failed",
-            description: `Please upload at least one attachment`
-          };
-          dispatch(showModalError(errorBody));
-
-          throw new Error("There was no file attached");
-        }
-      } else {
-        await form.validateFields(formFields[current]);
-
-        const {
-          appHierId
-        } = form.getFieldsValue(true);
-
-        const body = {
-          stepNumber: current + 1,
-          type: formType.toUpperCase(),
-          id: idGd,
-          data : {
-            accountId, 
-            appHierId,
-          }
-        }
-
-        await dispatch(
-          validateCreateUpdate({
-            body,
-            services: accountManagementService,
-            endPoint: `/v1/dbs/api/gas-deposit/validate-step`,
-            type: formType
-          })
-        ).unwrap();
-      }
-    } catch (err) {
-      return;
-    }
-
-    setCurrent(current + 1);
-  };
-
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  const handleButtonNext = async () => {
-    await next();
-  };
-
-  const handleSubmitForm = () => {
-    const {
-      appHierId,
-      remark
-    } = form.getFieldsValue(true);
-
-    const attachments = nxRemoveKeys([
-      ...attachmentDataSource.filter(
-        attachment => ["exist", "draft"].includes(attachment.dataType)
-      ),
-      ...deletedAttachments
-    ]);
-
-    const body = {
-      accountId,
-      appHierId,
-      action: confirmationType,
-      remark,
-      attachments
-    };
-
-    // Filter only new attachments (not existing ones)
-    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
-
-    const navigateTarget = isStandard
-      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
-      : isOneTime
-        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME
-        : "";
-
-    if (isRecalculate)
-      dispatch(recalculateGasDeposit({ id: idGd, body, attachments: newAttachments, action: confirmationType.toUpperCase() }))
-        .unwrap()
-        .then((data) => {
-          setTimeout(() => {
-            navigate(navigateTarget, {
-              state: {
-                accountId,
-                customerId
-              }
-            });
-          }, 2000);
-        })
-        .catch((error) => {});
-    else if (isExpire)
-      dispatch(
-        expireGasDeposit({
-          id: idGd,
-          body,
-          attachments: attachmentDataSource.filter(
-            (attachment) => attachment.dataType === "new"
-          ),
-          action: confirmationType.toUpperCase()
-        })
-      )
-        .unwrap()
-        .then((data) => {
-          setTimeout(() => {
-            navigate(navigateTarget, {
-              state: {
-                accountId,
-                customerId
-              }
-            });
-          }, 2000);
-        })
-        .catch((error) => {});
-  };
-
   return (
     <div>
       <div className="flex flex-col gap-y-4">
         <NxBreadCrumb routes={routes} />
-        {!isBulk && accountId && customerId (
+        {!isBulk && accountId && customerId && (
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
-            accountId={accountId}
-            customerId={customerId}
+            idAccount={accountId}
+            idCustomer={customerId}
             type={accountType}
           />
         )}
@@ -633,11 +656,17 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk }) => {
               type={confirmationType}
               attachmentDataSource={attachmentDataSource}
               service={accountManagementService}
+              accountId={accountId}
               configApplication={configApp.ACCOUNT_SERVICE}
               loading={loading_recalculateExpireGd}
               detail={detail}
-              details={details}
+              id={id}
+              parentKey={parentKey}
               handleSubmitForm={handleSubmitForm}
+              isBulk={isBulk}
+              selectedRowKeys={selectedRowKeys}
+              openedMemo={openedMemo}
+              onExpand={onExpand}
             />
           </Form>
         </Spin>

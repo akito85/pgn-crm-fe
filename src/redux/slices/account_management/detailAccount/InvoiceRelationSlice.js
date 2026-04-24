@@ -7,55 +7,49 @@ import {
 } from "../../general_slice";
 
 const initialState = {
-  // --- Shared ---
-  loading: false,
-
   // --- List ---
   loading_listIr: false,
   list_invoiceRelation: [],
-  pagination_invoiceRelation: {
+  pagination_listIr: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
     pageSize: 10
   },
-
-  // --- Detail ---
+  
+  // --- Approval List ---
+  loading_listIrApproval: false,
+  list_invoiceRelationApproval: [],
+  pagination_listIrApproval: {
+    totalPage: 0,
+    totalElement: 0,
+    currentPage: 0,
+    pageSize: 10
+  },
   loading_detailIr: false,
   detail_invoiceRelation: {},
   loading_detailDraftIr: false,
   detailDraft_invoiceRelation: {},
+
   // --- Create / Update ---
   loading_createUpdateIr: false,
-
-  // --- Approval List ---
-  loading_listIrApproval: false,
-  list_invoiceRelationApproval: [],
-  pagination_invoiceRelationApproval: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10
-  },
 
   // --- Approve / Reject ---
   loading_approveRejectIr: false,
   loading_approveIr: false,
   loading_rejectIr: false,
-
-  // --- Inactivate ---
   loading_inactivateIr: false,
 
   // --- Form Options (approval hierarchy, attachment categories, account standard) ---
-  loading_listIrApprovalOption: false,
+  loading_listIrApprovalHierarchy: false,
   list_irApprovalHierarchy: [],
-  loading_listIrApprovalHierarchyEmployee: false,
-  loading_detailIrApprovalHierarchyDetails: false,
+  loading_detailIrApprovalHierarchy: false,
   detail_irApprovalHierarchy: [],
+  loading_listIrAttachmentCategory: false,
   list_irAttachmentCategory: [],
-  loading_listIrAccountStandard: false,
-  list_irAccountStandard: [],
-  pagination_irAccountStandard: {
+  loading_listIrAccount: false,
+  list_irAccount: [],
+  pagination_irAccount: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -63,8 +57,107 @@ const initialState = {
   },
 
   // --- History ---
-  data_irApprovalHistory: {}
+  loading_irApprovalHistory: false,
+  detail_irApprovalHistory: {}
 };
+
+/**
+ * Fetches the paginated invoice relation list for a given account.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
+export const getInvoiceRelations = createAsyncThunk(
+  "GET_INVOICE_RELATIONS",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
+      return {
+        ...response.data,
+        isLoadMore
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+/**
+ * Fetches the paginated approval list for a given account's invoice relations.
+ * Always injects `listType: "approval"` into the request body.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
+export const getInvoiceRelationApprovals = createAsyncThunk(
+  "GET_INVOICE_RELATION_APPROVALS",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      body = {
+        ...body,
+        listType: "approval"
+      }
+
+      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
+      return {
+        ...response.data,
+        isLoadMore
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+/**
+ * Fetches the current (non-draft) detail of an invoice relation record.
+ *
+ * @param {number} id - Invoice relation ID.
+ */
+export const getInvoiceRelation = createAsyncThunk(
+  "GET_INVOICE_RELATION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/invoice-relation/detail/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+/**
+ * Fetches the draft detail of an invoice relation record.
+ *
+ * @param {number} id - Invoice relation ID.
+ */
+export const getInvoiceRelationDraft = createAsyncThunk(
+  "GET_INVOICE_RELATION_DRAFT",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/invoice-relation/detail-draft/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
 
 /**
  * Creates a new invoice relation record, then uploads any attachments in parallel.
@@ -195,46 +288,10 @@ export const updateInvoiceRelation = createAsyncThunk(
 );
 
 /**
- * Fetches the current (non-draft) detail of an invoice relation record.
- *
- * @param {number} id - Invoice relation ID.
- */
-export const getDetailInvoiceRelation = createAsyncThunk(
-  "GET_DETAIL_INVOICE_RELATION",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/invoice-relation/detail/${id}`;
-      const response = await accountManagementService.getDetail(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-/**
- * Fetches the draft detail of an invoice relation record.
- *
- * @param {number} id - Invoice relation ID.
- */
-export const getDetailDraftInvoiceRelation = createAsyncThunk(
-  "GET_DETAIL_DRAFT_INVOICE_RELATION",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/invoice-relation/detail-draft/${id}`;
-      const response = await accountManagementService.getDetail(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-/**
  * Fetches the list of approval hierarchy options for invoice relations.
  */
-export const getIrApprovalHierarchy = createAsyncThunk(
-  "GET_IR_APPROVAL_HIERARCHY",
+export const getIrApprovalHierarchies = createAsyncThunk(
+  "GET_IR_APPROVAL_HIERARCHIES",
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/approval-hierarchies`;
@@ -251,8 +308,8 @@ export const getIrApprovalHierarchy = createAsyncThunk(
  *
  * @param {number} id - Approval hierarchy ID.
  */
-export const getDetailIrApprovalHierarchy = createAsyncThunk(
-  "GET_DETAIL_IR_APPROVAL_HIERARCHY",
+export const getIrApprovalHierarchy = createAsyncThunk(
+  "GET_IR_APPROVAL_HIERARCHY",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/approval-hierarchy/${id}`;
@@ -267,8 +324,8 @@ export const getDetailIrApprovalHierarchy = createAsyncThunk(
 /**
  * Fetches the list of attachment categories for invoice relations.
  */
-export const getIrAttachmentCategory = createAsyncThunk(
-  "GET_IR_ATTACHMENT_CATEGORY",
+export const getIrAttachmentCategories = createAsyncThunk(
+  "GET_IR_ATTACHMENT_CATEGORIES",
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/attachment-category`;
@@ -289,8 +346,8 @@ export const getIrAttachmentCategory = createAsyncThunk(
  * @param {object}  arg.body        - Pagination / search body.
  * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
  */
-export const getIrAccountStandard = createAsyncThunk(
-  "GET_IR_ACCOUNT_STANDARD",
+export const getIrAccounts = createAsyncThunk(
+  "GET_IR_ACCOUNTS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/invoice-relation/list-account/${id}`;
@@ -410,10 +467,61 @@ export const approveOrRejectInactiveInvoiceRelation = createAsyncThunk(
 );
 
 /**
- * Submits an inactivation request for an invoice relation record.
+ * Batch-approves or batch-rejects a mixed set of active and inactive invoice relations.
+ * Calls the active-approve and inactive-approve endpoints independently based on which arrays are populated.
  * Dispatches a success or error modal on completion.
  *
- * @param {object} arg
+ * @param {object}   arg
+ * @param {object[]} arg.body          - Active invoice relation records to process.
+ * @param {object[]} arg.inactiveBody  - Inactive invoice relation records to process.
+ * @param {string}   arg.action        - `"approved"` or `"rejected"` — drives the loading state and modal message.
+ */
+export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
+  "APPROVE_OR_REJECT_ALL_INVOICE_RELATION",
+  async ({ body, inactiveBody, action }, thunkAPI) => {
+    try {
+      const approveUrl = "/v1/dbs/api/invoice-relation/approve";
+      const approveInactiveUrl = "/v1/dbs/api/invoice-relation/approve-inactive";
+
+      await Promise.all([
+        body && body.length > 0
+          ? accountManagementService.activationWithRemark(approveUrl, body)
+          : null,
+        inactiveBody && inactiveBody.length > 0
+          ? accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody)
+          : null,
+      ].filter(Boolean));
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}.`,
+        return: false
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+
+      return { body, inactiveBody, action };
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}. ${message}.`
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+/**
+ * Submits an inactivation request for an invoice relation record.
+ * Dispatches a success or error modal on completion.
+*
+* @param {object} arg
  * @param {object} arg.body - Request body (ID, remark, hierarchy).
  */
 export const inactivateInvoiceRelation = createAsyncThunk(
@@ -459,68 +567,6 @@ export const inactivateInvoiceRelation = createAsyncThunk(
 );
 
 /**
- * Fetches the paginated approval list for a given account's invoice relations.
- * Always injects `listType: "approval"` into the request body.
- * Supports infinite-scroll load-more.
- *
- * @param {object}  arg
- * @param {number}  arg.id          - Account ID.
- * @param {object}  arg.body        - Pagination / search / sort body.
- * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
- */
-export const getInvoiceRelationApproval = createAsyncThunk(
-  "GET_INVOICE_RELATION_APPROVAL",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
-    try {
-      body = {
-        ...body,
-        listType: "approval"
-      }
-
-      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(
-        url,
-        body
-      );
-      return {
-        ...response.data,
-        isLoadMore
-      };
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-/**
- * Fetches the paginated invoice relation list for a given account.
- * Supports infinite-scroll load-more.
- *
- * @param {object}  arg
- * @param {number}  arg.id          - Account ID.
- * @param {object}  arg.body        - Pagination / search / sort body.
- * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
- */
-export const getInvoiceRelation = createAsyncThunk(
-  "GET_INVOICE_RELATION",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/invoice-relation/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(
-        url,
-        body
-      );
-      return {
-        ...response.data,
-        isLoadMore
-      };
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-/**
  * Downloads the invoice relation list as a file for a given account.
  *
  * @param {object} arg
@@ -535,57 +581,6 @@ export const downloadInvoiceRelation = createAsyncThunk(
       const response = await accountManagementService.downloadFile(url, body);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-/**
- * Batch-approves or batch-rejects a mixed set of active and inactive invoice relations.
- * Calls the active-approve and inactive-approve endpoints independently based on which arrays are populated.
- * Dispatches a success or error modal on completion.
- *
- * @param {object}   arg
- * @param {object[]} arg.body          - Active invoice relation records to process.
- * @param {object[]} arg.inactiveBody  - Inactive invoice relation records to process.
- * @param {string}   arg.action        - `"approved"` or `"rejected"` — drives the loading state and modal message.
- */
-export const approveOrRejectAllInvoiceRelation = createAsyncThunk(
-  "APPROVE_OR_REJECT_ALL_INVOICE_RELATION",
-  async ({ body, inactiveBody, action }, thunkAPI) => {
-    try {
-      // Process active invoice relations
-      if (body && body.length > 0) {
-        const approveUrl = "/v1/dbs/api/invoice-relation/approve";
-        await accountManagementService.activationWithRemark(approveUrl, body);
-      }
-
-      // Process inactive invoice relations
-      if (inactiveBody && inactiveBody.length > 0) {
-        const approveInactiveUrl = "/v1/dbs/api/invoice-relation/approve-inactive";
-        await accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody);
-      }
-
-      const successBody = {
-        title: `Successful`,
-        description: `Your data has been ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}.`,
-        return: false
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-
-      return { body, inactiveBody, action };
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Your data was not ${action === "APPROVE" ? "approved" : action === "REJECT" ? "rejected" : ""}. ${message}.`
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -616,27 +611,29 @@ const invoiceRelationSlice = createSlice({
   initialState,
   extraReducers: {
     /** Get Detail Invoice Relation */
-    [getDetailInvoiceRelation.pending]: (state) => {
+    [getInvoiceRelation.pending]: (state) => {
+      state.detail_invoiceRelation = {};
       state.loading_detailIr = true;
     },
-    [getDetailInvoiceRelation.fulfilled]: (state, action) => {
+    [getInvoiceRelation.fulfilled]: (state, action) => {
       state.detail_invoiceRelation = action.payload?.result || {};
       state.loading_detailIr = false;
     },
-    [getDetailInvoiceRelation.rejected]: (state, action) => {
+    [getInvoiceRelation.rejected]: (state, action) => {
       state.detail_invoiceRelation = {};
       state.loading_detailIr = false;
     },
 
     /** Get Detail Draft Invoice Relation */
-    [getDetailDraftInvoiceRelation.pending]: (state) => {
+    [getInvoiceRelationDraft.pending]: (state) => {
+      state.detailDraft_invoiceRelation = {};
       state.loading_detailDraftIr = true;
     },
-    [getDetailDraftInvoiceRelation.fulfilled]: (state, action) => {
+    [getInvoiceRelationDraft.fulfilled]: (state, action) => {
       state.detailDraft_invoiceRelation = action.payload?.result || {};
       state.loading_detailDraftIr = false;
     },
-    [getDetailDraftInvoiceRelation.rejected]: (state) => {
+    [getInvoiceRelationDraft.rejected]: (state) => {
       state.detailDraft_invoiceRelation = {};
       state.loading_detailDraftIr = false;
     },
@@ -664,52 +661,54 @@ const invoiceRelationSlice = createSlice({
     },
 
     /** Get Invoice Relation Approval Hierarchy */
-    [getIrApprovalHierarchy.pending]: (state) => {
-      state.loading_listIrApprovalOption = true;
-    },
-    [getIrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.list_irApprovalHierarchy = action.payload;
-      state.loading_listIrApprovalOption = false;
-    },
-    [getIrApprovalHierarchy.rejected]: (state) => {
+    [getIrApprovalHierarchies.pending]: (state) => {
       state.list_irApprovalHierarchy = [];
-      state.loading_listIrApprovalOption = false;
+      state.loading_listIrApprovalHierarchy = true;
+    },
+    [getIrApprovalHierarchies.fulfilled]: (state, action) => {
+      state.list_irApprovalHierarchy = action.payload;
+      state.loading_listIrApprovalHierarchy = false;
+    },
+    [getIrApprovalHierarchies.rejected]: (state) => {
+      state.list_irApprovalHierarchy = [];
+      state.loading_listIrApprovalHierarchy = false;
     },
 
     /** Get Invoice Relation Detail Approval Hierarchy */
-    [getDetailIrApprovalHierarchy.pending]: (state) => {
-      state.loading_listIrApprovalHierarchyEmployee = true;
-    },
-    [getDetailIrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.detail_irApprovalHierarchy = action.payload;
-      state.loading_listIrApprovalHierarchyEmployee = false;
-    },
-    [getDetailIrApprovalHierarchy.rejected]: (state) => {
+    [getIrApprovalHierarchy.pending]: (state) => {
       state.detail_irApprovalHierarchy = [];
-      state.loading_listIrApprovalHierarchyEmployee = false;
+      state.loading_detailIrApprovalHierarchy = true;
+    },
+    [getIrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.detail_irApprovalHierarchy = action.payload;
+      state.loading_detailIrApprovalHierarchy = false;
+    },
+    [getIrApprovalHierarchy.rejected]: (state) => {
+      state.detail_irApprovalHierarchy = [];
+      state.loading_detailIrApprovalHierarchy = false;
     },
 
     /** Get Invoice Relation Attachment Category */
-    [getIrAttachmentCategory.pending]: (state) => {
-      state.loading = true;
+    [getIrAttachmentCategories.pending]: (state) => {
+      state.loading_listIrAttachmentCategory = true;
     },
-    [getIrAttachmentCategory.fulfilled]: (state, action) => {
+    [getIrAttachmentCategories.fulfilled]: (state, action) => {
       state.list_irAttachmentCategory = action.payload;
-      state.loading = false;
+      state.loading_listIrAttachmentCategory = false;
     },
-    [getIrAttachmentCategory.rejected]: (state) => {
+    [getIrAttachmentCategories.rejected]: (state) => {
       state.list_irAttachmentCategory = [];
-      state.loading = false;
+      state.loading_listIrAttachmentCategory = false;
     },
 
     /** Get Invoice Relation Account Standard */
-    [getIrAccountStandard.pending]: (state, action) => {
+    [getIrAccounts.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listIrAccountStandard = true;
+        state.loading_listIrAccount = true;
       }
     },
-    [getIrAccountStandard.fulfilled]: (state, action) => {
-      state.loading_listIrAccountStandard = false;
+    [getIrAccounts.fulfilled]: (state, action) => {
+      state.loading_listIrAccount = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -720,32 +719,32 @@ const invoiceRelationSlice = createSlice({
 
         if (isLoadMore) {
           const currentIds = new Set(
-            state.list_irAccountStandard.map((item) => item.accountId)
+            state.list_irAccount.map((item) => item.accountId)
           );
           const filteredResult = resultWithIds.filter(
             (resultItem) => !currentIds.has(resultItem.accountId)
           );
 
-          state.list_irAccountStandard = [
-            ...state.list_irAccountStandard,
+          state.list_irAccount = [
+            ...state.list_irAccount,
             ...filteredResult
           ];
-        } else state.list_irAccountStandard = resultWithIds;
+        } else state.list_irAccount = resultWithIds;
       }
 
-      state.pagination_irAccountStandard = {
+      state.pagination_irAccount = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10
       };
     },
-    [getIrAccountStandard.rejected]: (state, action) => {
-      state.loading_listIrAccountStandard = false;
+    [getIrAccounts.rejected]: (state, action) => {
+      state.loading_listIrAccount = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_irAccountStandard = [];
-        state.pagination_irAccountStandard = {
+        state.list_irAccount = [];
+        state.pagination_irAccount = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -788,12 +787,12 @@ const invoiceRelationSlice = createSlice({
     },
 
     /** Get Invoice Relation Approval */
-    [getInvoiceRelationApproval.pending]: (state, action) => {
+    [getInvoiceRelationApprovals.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listIrApproval = true;
       }
     },
-    [getInvoiceRelationApproval.fulfilled]: (state, action) => {
+    [getInvoiceRelationApprovals.fulfilled]: (state, action) => {
       state.loading_listIrApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
@@ -810,19 +809,19 @@ const invoiceRelationSlice = createSlice({
         }
       }
 
-      state.pagination_invoiceRelationApproval = {
+      state.pagination_listIrApproval = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10
       };
     },
-    [getInvoiceRelationApproval.rejected]: (state, action) => {
+    [getInvoiceRelationApprovals.rejected]: (state, action) => {
       state.loading_listIrApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelationApproval = [];
-        state.pagination_invoiceRelationApproval = {
+        state.pagination_listIrApproval = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -832,12 +831,12 @@ const invoiceRelationSlice = createSlice({
     },
 
     /** Get Invoice Relation */
-    [getInvoiceRelation.pending]: (state, action) => {
+    [getInvoiceRelations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listIr = true;
       }
     },
-    [getInvoiceRelation.fulfilled]: (state, action) => {
+    [getInvoiceRelations.fulfilled]: (state, action) => {
       state.loading_listIr = false;
       const { result, page, isLoadMore } = action.payload;
 
@@ -854,36 +853,25 @@ const invoiceRelationSlice = createSlice({
         }
       }
 
-      state.pagination_invoiceRelation = {
+      state.pagination_listIr = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10
       };
     },
-    [getInvoiceRelation.rejected]: (state, action) => {
+    [getInvoiceRelations.rejected]: (state, action) => {
       state.loading_listIr = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_invoiceRelation = [];
-        state.pagination_invoiceRelation = {
+        state.pagination_listIr = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
           pageSize: 10
         };
       }
-    },
-
-    /** Download Invoice Relation */
-    [downloadInvoiceRelation.pending]: (state) => {
-      state.loading = true;
-    },
-    [downloadInvoiceRelation.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [downloadInvoiceRelation.rejected]: (state) => {
-      state.loading = false;
     },
 
     /** Approve or Reject All Invoice Relation */
@@ -908,15 +896,15 @@ const invoiceRelationSlice = createSlice({
 
     /** Get Invoice Relation Approval History */
     [getIrApprovalHistory.pending]: (state) => {
-      state.loading = true;
+      state.loading_irApprovalHistory = true;
     },
     [getIrApprovalHistory.fulfilled]: (state, action) => {
-      state.data_irApprovalHistory = action.payload;
-      state.loading = false;
+      state.detail_irApprovalHistory = action.payload;
+      state.loading_irApprovalHistory = false;
     },
     [getIrApprovalHistory.rejected]: (state) => {
-      state.data_irApprovalHistory = {};
-      state.loading = false;
+      state.detail_irApprovalHistory = {};
+      state.loading_irApprovalHistory = false;
     }
   }
 });
