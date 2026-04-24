@@ -1,4 +1,4 @@
-import { WarningOutlined } from "@ant-design/icons";
+import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { Form, Spin, message } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -46,6 +46,7 @@ import {
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import SVGIcon from "../../../../../assets/Icon/index";
 
 // ID criteria "All / Semua" dari backend — digunakan di beberapa validasi
 const CRITERIA_ALL_ID = 24;
@@ -589,29 +590,7 @@ const AccountInformation = ({ type, bankId }) => {
     }
   };
   //handle Error
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    setTabData((prevState) => {
-      const res = prevState.map((item) => {
-        if (!item.paramValue || item.paramValue.length === 0) {
-          return {
-            value: item.value,
-            paramValue: item.paramValue,
-          };
-        }
-        const errorBadge = errorFields.reduce(
-          (current, next) =>
-            item.paramValue.includes(next.name[0]) ? current + 1 : current,
-          0
-        );
-        return {
-          value: item.value,
-          paramValue: item.paramValue,
-          errorBadge,
-        };
-      });
-      return res;
-    });
-  };
+  const handleError = ({ values, errorFields, outOfDate }) => {};
 
   const handleProcessModalConfirm = async () => {
     setModalConfirm(false);
@@ -655,7 +634,7 @@ const AccountInformation = ({ type, bankId }) => {
         }
         // Remove pending-delete rows from the displayed list
         setListDataAttachment((prev) => prev.filter((item) => !item.pendingDelete));
-        dispatch(showModalSuccess(successMessage));
+        dispatch(showModalSuccess(successMessageCreate));
         setBankInfoDirty(false);
         setGlDirty(false);
         setCategoryDirty(false);
@@ -693,7 +672,7 @@ const AccountInformation = ({ type, bankId }) => {
         }
         handleCancelModalConfirm();
         handleClear();
-        dispatch(showModalSuccess(successMessage));
+        dispatch(showModalSuccess(successMessageCreate));
       })
       .catch((error) => {
         const code = error?.response?.data?.code ?? 0;
@@ -791,6 +770,12 @@ const AccountInformation = ({ type, bankId }) => {
               storedData={storedData}
               setStoredData={setStoredData}
               dataGLAccount={data_list_gl?.data || []}
+              parentRequired={parentRequired}
+              parentOptions={data_parent_options || []}
+              isVA={isVA}
+              setIsVA={setIsVA}
+              listDataGLAccountInfo={listDataGLAccountInfo}
+              setListDataGLAccountInfo={type === "update" ? handleUpdateGL : setListDataGLAccountInfo}
             />
           </div>
           <div className={`rc-bank-small${currentStepIndex !== 1 ? " hidden" : ""}`}>

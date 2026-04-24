@@ -1,4 +1,4 @@
-import { Form, Select } from "antd";
+import { Checkbox, Form, Input, Select } from "antd";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import moment from "moment";
 import React, { useState } from "react";
@@ -27,9 +27,15 @@ const AccountForm = ({
   storedData,
   setStoredData,
   dataGLAccount = [],
-  // handleSelectCriteria = () => {},
-  // handleDeselectCriteria = () => {},
-  // handleClearCriteria = () => {},
+  handleSelectCriteria = () => {},
+  handleDeselectCriteria = () => {},
+  handleClearCriteria = () => {},
+  parentRequired,
+  parentOptions = [],
+  isVA,
+  setIsVA,
+  listDataGLAccountInfo,
+  setListDataGLAccountInfo,
 }) => {
   const [categoryCollapsed, setCategoryCollapsed] = useState(false);
   const [glAccountCollapsed, setGLAccountCollapsed] = useState(false);
@@ -354,7 +360,7 @@ const AccountForm = ({
             />
           </div>
         )}
-      </div>
+      </BaseContainer>
 
       {/* Criteria Information */}
       <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
