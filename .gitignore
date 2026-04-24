@@ -44,3 +44,6 @@ docs/
 .sup*
 
 src/setupProxy.js
+
+#AI
+.gitnexus

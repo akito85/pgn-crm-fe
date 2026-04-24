@@ -24,8 +24,6 @@ import {
   getListCategory,
   createMasterBank,
   createValidasiBank,
-  getAllGLAccount,
-  getAllGLType,
   getJobContact,
   getPositionContact,
   getInputTypeContact,
@@ -33,13 +31,13 @@ import {
   getContryContact,
   getAllContactPaginate,
   getBankDetail,
-  getContactAddress // <-- 1. IMPORT FUNGSI API ADDRESS
+  getContactAddress,
+  getAllGLType,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { intToNPWP } from "../../../../../utils/npwp";
 
 import BankCreate from "./BankCreate";
-import GLAccountCreate from "./GLAccountCreate";
 import ContactSection from "./ContactSection";
 import ContentModalConfirmBank from "./ContentModalConfirmBank";
 
@@ -56,8 +54,6 @@ const BankForm = ({ type }) => {
     loading,
     dataListAppHierId,
     dataListAppHierDetail,
-    dataGLAccount,
-    dataGLType,
     data_job,
     data_position,
     data_contactType,
@@ -66,7 +62,8 @@ const BankForm = ({ type }) => {
     data_countryZone,
     data_contact,
     data_detail,
-    data_contactAddress // <-- 2. TARIK DARI REDUX STATE
+    data_contactAddress,
+    dataGLType,
   } = useSelector((state) => state.bank);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -83,12 +80,9 @@ const BankForm = ({ type }) => {
   // --- 3. BIKIN STATE UNTUK OPSI ADDRESS ---
   const [addressOptions, setAddressOptions] = useState([]);
   // -----------------------------------------
-
-  const [glAccountData, setGlAccountData] = useState([]);
-  const [contactData, setContactData] = useState([]);
-
-  const [glOptions, setGlOptions] = useState([]);
   const [glTypeOptions, setGlTypeOptions] = useState([]);
+
+  const [contactData, setContactData] = useState([]);
 
   const [selectedHierarchy, setSelectedHierarchy] = useState(null);
   const [appHierOptions, setAppHierOptions] = useState([]);
@@ -120,8 +114,6 @@ const BankForm = ({ type }) => {
   useEffect(() => {
     dispatch(getAllBankNotBranch());
     dispatch(getAllApprovalList());
-    dispatch(getAllGLAccount());
-    dispatch(getAllGLType());
     dispatch(getJobContact());
     dispatch(getPositionContact());
     dispatch(getInputTypeContact());
@@ -130,6 +122,7 @@ const BankForm = ({ type }) => {
     
     // --- 4. TEMBAK API ADDRESS ---
     dispatch(getContactAddress());
+    dispatch(getAllGLType());
     // -----------------------------
     
     if (type === "update" && idBank) {
@@ -156,17 +149,6 @@ const BankForm = ({ type }) => {
       setCodeBank(bank.bankCode);
 
       setSelectedHierarchy(bank.appHierId);
-
-      if (bank.bankglAccount?.length > 0) {
-        const mappedGL = bank.bankglAccount.map((gl, index) => ({
-          key: gl.id || Date.now() + index,
-          id: gl.id,
-          type: Number(gl.glType) || gl.glType, 
-          glNumber: gl.accountNumber,
-          glDesc: gl.accountDes,
-        }));
-        setGlAccountData(mappedGL);
-      }
 
       if (bank.bankContacts?.length > 0) {
         const mappedContacts = bank.bankContacts.map((c, idx) => ({
@@ -240,6 +222,12 @@ const BankForm = ({ type }) => {
   // -------------------------------------------------------------
 
   useEffect(() => {
+    if (dataGLType?.length > 0) {
+      setGlTypeOptions(dataGLType.map(item => ({ label: item.name, value: item.id })));
+    }
+  }, [dataGLType]);
+
+  useEffect(() => {
     if (data_job?.length > 0) setJobOptions(data_job.map(item => ({ label: item.name, value: item.id })));
   }, [data_job]);
 
@@ -261,23 +249,6 @@ const BankForm = ({ type }) => {
   useEffect(() => {
     if (data_countryCode?.length > 0) setPrefixOptions(data_countryCode.map(item => ({ label: item.name, value: item.id })));
   }, [data_countryCode]);
-
-  useEffect(() => {
-    if (dataGLAccount?.length > 0) {
-      setGlOptions(dataGLAccount.map((item) => ({
-        label: `${item.name} - ${item.desc}`,
-        value: item.id,
-        labelName: item.desc,
-        labelNumber: item.name
-      })));
-    }
-  }, [dataGLAccount]);
-
-  useEffect(() => {
-    if (dataGLType?.length > 0) {
-      setGlTypeOptions(dataGLType.map((item) => ({ label: item.name, value: item.id })));
-    }
-  }, [dataGLType]);
 
   useEffect(() => {
     if (data_countryZone?.length > 0) {
@@ -317,10 +288,6 @@ const BankForm = ({ type }) => {
           'npwp', 'phoneNumber', 'email', 'officeType', 'address'
         ]);
 
-        if (glAccountData.length === 0) {
-          message.error("GL Account Information tidak boleh kosong!");
-          return;
-        }
         if (contactData.length === 0) {
           message.error("Contact Information tidak boleh kosong!");
           return;
@@ -361,7 +328,6 @@ const BankForm = ({ type }) => {
     setCurrentStepIndex(0);
     setCodeBank("");
     setSelectedHierarchy(null);
-    setGlAccountData([]);
     setContactData([]);
     setListDataAttachment([]);
   };
@@ -410,18 +376,10 @@ const BankForm = ({ type }) => {
         }))
       }));
 
-      const formattedGLAccounts = glAccountData.map((gl) => {
-        const selectedGL = glOptions.find(opt => opt.value === gl.glNumber);
-        return {
-          id: gl.id || null,
-          glType: gl.type,           
-          accountNumber: selectedGL ? selectedGL.labelNumber : gl.glNumber, 
-          accountDes: gl.glDesc      
-        };
-      });
-
       const officeTypeVal = formValue.officeType?.toLowerCase();
       const isBranch = officeTypeVal === "branch" || officeTypeVal === "cabang";
+
+      const formattedGLAccounts = [];
 
       const dataValue = {
         id: type === "update" ? idBank : null, 
@@ -532,12 +490,6 @@ const BankForm = ({ type }) => {
                 form={form}
                 setCodeBank={setCodeBank}
                 dataBank={dataBankNotBranch}
-              />
-              <GLAccountCreate
-                data={glAccountData}
-                setData={setGlAccountData}
-                glOptions={glOptions}
-                typeOptions={glTypeOptions}
               />
               <ContactSection
                 mainData={contactData}
