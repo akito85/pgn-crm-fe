@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumbAdvanced from "../../../../../components/BreadCrumbAdvanced";
-import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import {
   createAccountInformation,
@@ -95,7 +95,6 @@ const AccountInformation = ({ type, bankId }) => {
 
   // Watch form fields for conditional logic
   const typeValue = Form.useWatch('type', form);
-  const headerCategory = Form.useWatch('category', form);
   // null = data belum diload; string kosong = tidak ditemukan
   const typeLabel = data_type_detail?.find(t => t.id === typeValue)?.name ?? null;
   const parentRequired = typeLabel !== null && typeLabel.toLowerCase() === 'pooling';
@@ -226,10 +225,6 @@ const AccountInformation = ({ type, bankId }) => {
   const handleUpdateGL = (newData) => {
     setListDataGLAccountInfo(newData);
     if (type === "update") setGlDirty(true);
-  };
-  const handleUpdateCategory = (newData) => {
-    setListDataCategoryInfo(newData);
-    if (type === "update") setCategoryDirty(true);
   };
   const handleUpdateCriteria = (newData) => {
     setListDataCriteria(newData);

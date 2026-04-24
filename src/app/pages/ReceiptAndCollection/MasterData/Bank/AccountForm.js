@@ -9,7 +9,6 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import { formMessageRequired, requiredMessage } from "../../../../../utils";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
 import FunctionalTableGLAccountInformation from "./Table/FunctionalTableGLAccountInformation";
-import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
 
 const AccountForm = ({
   listDataCriteria,
@@ -37,8 +36,7 @@ const AccountForm = ({
   listDataGLAccountInfo,
   setListDataGLAccountInfo,
 }) => {
-  const [categoryCollapsed, setCategoryCollapsed] = useState(false);
-  const [glAccountCollapsed, setGLAccountCollapsed] = useState(false);
+  const [glAccountCollapsed] = useState(false);
   const [criteriaCollapsed, setCriteriaCollapsed] = useState(false);
 
   const disabledDate = (current) => {
