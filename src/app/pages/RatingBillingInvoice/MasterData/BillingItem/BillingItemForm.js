@@ -1396,6 +1396,7 @@ const BillingItemForm = (props) => {
               checkedPaymentWarranty={checkedPaymentWarranty}
               checkedInstallmentRestructure={checkedInstallmentRestructure}
               checkedBank={checkedBank}
+              isReceiptMethodType={showMappingItemTab}
               onChangeLateCharge={handleChangesLateCharge}
               onChangePayment={handleChangesPayment}
               onChangeInstallmentRestructure={

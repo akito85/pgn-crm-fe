@@ -32,6 +32,7 @@ const BillingItemSectionForm = ({
   checkedPaymentWarranty,
   checkedInstallmentRestructure,
   checkedBank,
+  isReceiptMethodType = false,
   onChangeLateCharge = () => {},
   onChangePayment = () => {},
   onChangeInstallmentRestructure = () => {},
@@ -102,10 +103,12 @@ const BillingItemSectionForm = ({
   };
 
   const isDisabledForUpdate = type === "update" && statusDetail;
-  const isDateDisabled = isDisabledForUpdate || mappingData > 0 || criteriaData > 0;
-  const dateDisabledTooltip = isDateDisabled && !isDisabledForUpdate
-    ? "Please delete all data in Mapping Detail and Criteria Detail tables first before changing the date."
-    : undefined;
+  const isDateDisabled =
+    isDisabledForUpdate || mappingData > 0 || criteriaData > 0;
+  const dateDisabledTooltip =
+    isDateDisabled && !isDisabledForUpdate
+      ? "Please delete all data in Mapping Detail and Criteria Detail tables first before changing the date."
+      : undefined;
 
   return (
     <CardContainer header="TRANSACTION MAPPING INFORMATION">
@@ -277,10 +280,7 @@ const BillingItemSectionForm = ({
             >
               <SelectComponent placeholder="Select">
                 {data_bankAccountList?.map((account) => (
-                  <Select.Option
-                    value={account.accountNumber}
-                    key={account.id}
-                  >
+                  <Select.Option value={account.accountNumber} key={account.id}>
                     {account.accountNumber}
                   </Select.Option>
                 ))}
@@ -299,11 +299,18 @@ const BillingItemSectionForm = ({
             <InputComponent type="textarea" rows={4} />
           </Form.Item>
         </div>
+      </div>
 
+      <div className="flex gap-3 w-full">
         {/* Late Charge Checkbox */}
         <Form.Item name="lateCharge" valuePropName="checked" noStyle>
           <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-            <Checkbox checked={checkedLateCharge} onChange={onChangeLateCharge} className="font-medium">
+            <Checkbox
+              checked={checkedLateCharge}
+              onChange={onChangeLateCharge}
+              disabled={isReceiptMethodType}
+              className="font-medium"
+            >
               Late Charge Object
             </Checkbox>
             <span className="text-xs text-[#92979D] leading-tight">
@@ -318,6 +325,7 @@ const BillingItemSectionForm = ({
             <Checkbox
               checked={checkedPaymentWarranty}
               onChange={onChangePayment}
+              disabled={isReceiptMethodType}
               className="font-medium"
             >
               Payment Warranty Deduction Object
@@ -339,6 +347,7 @@ const BillingItemSectionForm = ({
             <Checkbox
               checked={checkedInstallmentRestructure}
               onChange={onChangeInstallmentRestructure}
+              disabled={isReceiptMethodType}
               className="font-medium"
             >
               Installment / Restructure
@@ -352,7 +361,11 @@ const BillingItemSectionForm = ({
 
         <Form.Item name="bank" valuePropName="checked" noStyle>
           <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-            <Checkbox checked={checkedBank} onChange={onChangeBank} className="font-medium">
+            <Checkbox
+              checked={checkedBank}
+              onChange={onChangeBank}
+              className="font-medium"
+            >
               Bank
             </Checkbox>
             <span className="text-xs text-[#92979D] leading-tight">
