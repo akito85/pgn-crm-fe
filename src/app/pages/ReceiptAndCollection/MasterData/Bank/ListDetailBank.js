@@ -14,7 +14,13 @@ import {
   getBankDetailDraft,
   getJobContact,
   getPositionContact,
-  getAllGLType // <--- TAMBAHAN: Tarik API Master GL Type
+  getAllGLType,
+  getAllGLAccount,
+  getVACategoryOptions,
+  getNomenklatur1Options,
+  getNomenklatur2Options,
+  getDisplayOptions,
+  getBillingItemOptions,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailBank from "./DetailBank";
@@ -69,11 +75,15 @@ const ListDetailBank = () => {
     dispatch(getBankDetail(id));
     dispatch(getBankDetailDraft(id));
     
-    // --- TAMBAHAN: Panggil Master Data biar Dropdown/Translate jalan ---
     dispatch(getPositionContact());
     dispatch(getJobContact());
-    dispatch(getAllGLType()); 
-    // -----------------------------------------------------------------
+    dispatch(getAllGLType());
+    dispatch(getAllGLAccount());
+    dispatch(getVACategoryOptions());
+    dispatch(getNomenklatur1Options());
+    dispatch(getNomenklatur2Options());
+    dispatch(getDisplayOptions());
+    dispatch(getBillingItemOptions());
   }, [id, dispatch]);
 
   useEffect(() => {

@@ -1,12 +1,15 @@
-import { Checkbox, Form, Input, Select } from "antd";
+import { Form, Select } from "antd";
+import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import moment from "moment";
-import React from "react";
+import React, { useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
 import DateComponent from "../../../../../components/DateComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
 import { formMessageRequired, requiredMessage } from "../../../../../utils";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
+import FunctionalTableGLAccountInformation from "./Table/FunctionalTableGLAccountInformation";
+import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
 
 const AccountForm = ({
   listDataCriteria,
@@ -18,9 +21,7 @@ const AccountForm = ({
   dataCurrency,
   dataEntity,
   typeData,
-  isVA,
   data_select_criteria,
-  setIsVA,
   formValue,
   form,
   storedData,
@@ -30,58 +31,9 @@ const AccountForm = ({
   // handleDeselectCriteria = () => {},
   // handleClearCriteria = () => {},
 }) => {
-  //dependensi kriteria
-  const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(13)) {
-      res.push(14);
-    }
-    if (res.includes(14)) {
-      res.push(39);
-    }
-    if (res.includes(39)) {
-      res.push(15);
-    }
-    if (res.includes(20)) {
-      res.push(19);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
-    setCriteriaValues(outputArray);
-    form.setFieldsValue({
-      criteria: outputArray,
-    });
-  };
-
-  const handleDeselectCriteria = (value) => {
-    let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(15)) {
-      res = res.filter((item) => item !== 39);
-    }
-    if (!res.includes(39)) {
-      res = res.filter((item) => item !== 14);
-    }
-    if (!res.includes(14)) {
-      res = res.filter((item) => item !== 13);
-    }
-    if (!res.includes(19)) {
-      res = res.filter((item) => item !== 20);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
-    setCriteriaValues(outputArray);
-    form.setFieldsValue({
-      criteria: outputArray,
-    });
-  };
-
-  const handleClearCriteria = () => {
-    setCriteriaValues([]);
-  };
-
-  const handlePage = (e) => {
-    setIsVA(e.target.checked);
-  };
+  const [categoryCollapsed, setCategoryCollapsed] = useState(false);
+  const [glAccountCollapsed, setGLAccountCollapsed] = useState(false);
+  const [criteriaCollapsed, setCriteriaCollapsed] = useState(false);
 
   const disabledDate = (current) => {
     if (
@@ -97,31 +49,23 @@ const AccountForm = ({
   return (
     <div className="w-full">
       <BaseContainer header={"BANK ACCOUNT INFORMATION"}>
-        <div>
-          <div className="w-full grid grid-cols-3 gap-3">
+        <div className="rc-bank-small">
+          {/* Row 1: Account Number, Account Name, Currency, Entity, Type */}
+          <div className="w-full grid grid-cols-5 gap-3">
             <Form.Item
-              label={"Bank Account Number"}
+              label={"Account Number"}
               name={"accountNumber"}
-              rules={formMessageRequired("Bank Account Number")}
+              rules={formMessageRequired("Account Number")}
             >
               <InputComponent />
             </Form.Item>
             <Form.Item
-              label={"Bank Account Name"}
+              label={"Account Name"}
               name={"accountName"}
-              rules={formMessageRequired("Bank Account Name")}
+              rules={formMessageRequired("Account Name")}
             >
               <InputComponent />
             </Form.Item>
-            <Form.Item
-              label={"Branch"}
-              name={"branch"}
-              rules={formMessageRequired("branch")}
-            >
-              <InputComponent />
-            </Form.Item>
-          </div>
-          <div className="w-full grid grid-cols-3 gap-3">
             <Form.Item
               label={"Currency"}
               name={"currency"}
@@ -162,12 +106,12 @@ const AccountForm = ({
               </SelectComponent>
             </Form.Item>
           </div>
-          <div className="w-full grid grid-cols-3 gap-3">
+          {/* Row 2: Category, Start Date, End Date, Parent (conditional), Criteria */}
+          <div className="w-full grid grid-cols-5 gap-3">
             <Form.Item
-              name={"criteria"}
-              rules={[{ message: requiredMessage("Criteria"), required: true }]}
-              className={"w-full no-margin-form"}
-              label={"Criteria"}
+              label={"Category"}
+              name={"category"}
+              rules={formMessageRequired("Category")}
             >
               <SelectComponent
                 mode="multiple"
@@ -183,7 +127,6 @@ const AccountForm = ({
                   ))}
               </SelectComponent>
             </Form.Item>
-
             <Form.Item
               label={"Start Date"}
               name={"startDate"}
@@ -199,8 +142,41 @@ const AccountForm = ({
             <Form.Item label={"End Date"} name={"endDate"}>
               <DateComponent dateDisable={disabledDate} />
             </Form.Item>
+            {parentRequired && (
+              <Form.Item
+                label={"Parent"}
+                name={"parent"}
+                rules={formMessageRequired("Parent")}
+              >
+                <SelectComponent
+                  allowClear
+                  options={parentOptions.map((p) => ({ value: p.id, label: p.label }))}
+                />
+              </Form.Item>
+            )}
+            <Form.Item
+              name={"criteria"}
+              rules={[{ message: requiredMessage("Criteria"), required: true }]}
+              className={"w-full no-margin-form"}
+              label={"Criteria"}
+            >
+              <SelectComponent
+                mode="multiple"
+                onSelect={handleSelectCriteria}
+                onDeselect={handleDeselectCriteria}
+                onClear={handleClearCriteria}
+              >
+                {data_select_criteria &&
+                  data_select_criteria?.map((data, index) => (
+                    <Select.Option value={data.id} key={index}>
+                      {data.text}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
           </div>
-          <div className="w-full grid grid-cols-1">
+          {/* Row 3: Description full width */}
+          <div className="w-full">
             <Form.Item label={"Description"} name={"description"}>
               <InputComponent rows={5} type="textarea" />
             </Form.Item>
@@ -251,7 +227,6 @@ const AccountForm = ({
           </div>
         </div>
       </BaseContainer>
-      {/* GL Account section */}
 
       <BaseContainer header={"GL Accounts"}>
         <div className="w-full grid grid-cols-3 gap-2">
@@ -367,25 +342,44 @@ const AccountForm = ({
             </SelectComponent>
           </Form.Item>
         </div>
-        <Form.Item label={"Description"} name={"description"}>
-          <InputComponent type={"textarea"} />
-        </Form.Item>
-      </BaseContainer>
+        {!glAccountCollapsed && (
+          <div className="mt-4 rc-bank-small">
+            <FunctionalTableGLAccountInformation
+              type={type}
+              data={listDataGLAccountInfo}
+              updateData={setListDataGLAccountInfo}
+              storedData={storedData}
+              setStoredData={setStoredData}
+              status={status}
+            />
+          </div>
+        )}
+      </div>
 
-      {/* criteria information */}
-      <BaseContainer header={"CRITERIA INFORMATION"}>
-        <FunctionalTableCriteriaPayment
-          type={type}
-          data={listDataCriteria}
-          dataCriteria={criteriaValues}
-          updateData={setListDataCriteria}
-          endDateHeader={form.getFieldValue("endDate")}
-          storedData={storedData}
-          setStoredData={setStoredData}
-          disableDate={true}
-          required={{ required: true, message: "Please input your" }}
-        />
-      </BaseContainer>
+      {/* Criteria Information */}
+      <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+        <div className="flex justify-between items-center cursor-pointer" onClick={() => setCriteriaCollapsed(!criteriaCollapsed)}>
+          <div className="text-primary text-xs font-bold uppercase">CRITERIA INFORMATION</div>
+          <div className="text-primary">
+            {criteriaCollapsed ? <DownOutlined /> : <UpOutlined />}
+          </div>
+        </div>
+        {!criteriaCollapsed && (
+          <div className="mt-4 rc-bank-small">
+            <FunctionalTableCriteriaPayment
+              type={type}
+              data={listDataCriteria}
+              dataCriteria={criteriaValues}
+              updateData={setListDataCriteria}
+              endDateHeader={form.getFieldValue("endDate")}
+              storedData={storedData}
+              setStoredData={setStoredData}
+              disableDate={true}
+              required={{ required: true, message: "Please input your" }}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
