@@ -274,7 +274,7 @@ export const useMonitoringList = (tabs, batchId) => {
     await dispatch(getListApproval({ page: 1, pageSize: 1000 })).unwrap();
 
   // columns
-  const columns = [
+ const columns = [
     {
       title: "NO",
       width: 40,
@@ -285,7 +285,6 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "RECORD ID",
       dataIndex: "recordId",
       width: 120,
-      // sorter: true,
       sorter: (a, b) => sorter("recordId", a, b),
       filteredValue: search?.["recordId"] ? [search?.["recordId"]] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
@@ -312,7 +311,6 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "BATCH ID",
       dataIndex: "batchId",
       width: 110,
-      // sorter: true,
       sorter: (a, b) => sorter("batchId", a, b),
       filteredValue: search?.["batchId"] ? [search?.["batchId"]] : null,
       ...getColumnSearchPropsUseFilteredValueFE(
@@ -339,7 +337,6 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "CUSTOMER NUMBER",
       dataIndex: "customerNumber",
       width: 180,
-      // sorter: true,
       sorter: (a, b) => sorter("customerNumber", a, b),
       filteredValue: search?.["customerNumber"]
         ? [search?.["customerNumber"]]
@@ -368,7 +365,6 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       width: 180,
-      // sorter: true
       sorter: (a, b) => sorter("customerName", a, b),
       filteredValue: search?.["customerName"]
         ? [search?.["customerName"]]
@@ -390,12 +386,10 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       width: 180,
-      // sorter: true,
       sorter: (a, b) => sorter("accountNumber", a, b),
       filteredValue: search?.["accountNumber"]
         ? [search?.["accountNumber"]]
         : null,
-      // filteredValue: [search?.accountNumber] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "accountNumber",
@@ -420,10 +414,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "ACCOUNT NAME",
       dataIndex: "accountName",
       width: 160,
-      // sorter: true,
       sorter: (a, b) => sorter("accountName", a, b),
       filteredValue: search?.["accountName"] ? [search?.["accountName"]] : null,
-      // filteredValue: [search?.accountName] || null,
       ellipsis: {
         showTitle: false,
       },
@@ -447,103 +439,13 @@ export const useMonitoringList = (tabs, batchId) => {
           search,
         ),
     },
-    // {
-    //   title: "SERVICE TYPE",
-    //   dataIndex: "serviceType",
-    //   align: "center",
-    //   // sorter: true,
-    //   sorter: (a, b) => sorter("serviceType", a, b),
-    //   filteredValue: search?.["serviceType"] ? [search?.["serviceType"]] : null,
-    //   // filteredValue: [search?.serviceType] || null,
-    //   ...getColumnSearchPropsUseFilteredValueFE(
-    //     search,
-    //     "serviceType",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //     true
-    //   ),
-    //   render: (text) =>
-    //     renderColumn(
-    //       "serviceType",
-    //       hasValue(search["serviceType"]),
-    //       searchText,
-    //       text,
-    //       false,
-    //       "input",
-    //       search
-    //     ),
-    // },
-    // {
-    //   title: "BILLING CYCLE",
-    //   dataIndex: "billingCycleValue",
-    //   // sorter: true,
-    //   sorter: (a, b) => sorter("billingCycleValue", a, b),
-    //   filteredValue: search?.["billingCycleValue"]
-    //     ? [search?.["billingCycleValue"]]
-    //     : null,
-    //   // filteredValue: [search?.billingCycleValue] || null,
-    //   align: "center",
-    //   ...getColumnSearchPropsUseFilteredValueFE(
-    //     search,
-    //     "billingCycleValue",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //     true
-    //   ),
-    //   render: (text) =>
-    //     renderColumn(
-    //       "billingCycleValue",
-    //       hasValue(search["billingCycleValue"]),
-    //       searchText,
-    //       text,
-    //       false,
-    //       "input",
-    //       search
-    //     ),
-    // },
-    // {
-    //   title: "BILLING PERIOD",
-    //   dataIndex: "billingPeriod",
-    //   // sorter: true,
-    //   sorter: (a, b) => sorter("billingPeriod", a, b),
-    //   filteredValue: search?.["billingPeriod"]
-    //     ? [search?.["billingPeriod"]]
-    //     : null,
-    //   // filteredValue: [search?.billingPeriod] || null,
-    //   align: "center",
-    //   ...getColumnSearchPropsUseFilteredValueFE(
-    //     search,
-    //     "billingPeriod",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //     true,
-    //     "datePeriod"
-    //   ),
-    //   render: (billingPeriod) =>
-    //     renderDateColumn(
-    //       "billingPeriod",
-    //       hasValue(search["billingPeriod"]),
-    //       searchText,
-    //       billingPeriod,
-    //       "datePeriod",
-    //       search
-    //     ),
-    // },
     {
       title: "SOR",
       dataIndex: "sor",
       width: 150,
       isClassification: true,
-      // sorter: true,
       sorter: (a, b) => sorter("sor", a, b),
       filteredValue: search?.["sor"] ? [search?.["sor"]] : null,
-      // filteredValue: [search?.sor] || null,
       align: "left",
       ellipsis: {
         showTitle: false,
@@ -572,10 +474,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "COST CENTER",
       dataIndex: "costCenter",
       isClassification: true,
-      // sorter: true,
       sorter: (a, b) => sorter("costCenter", a, b),
       filteredValue: search?.["costCenter"] ? [search?.["costCenter"]] : null,
-      // filteredValue: [search?.costCenter] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "costCenter",
@@ -601,12 +501,10 @@ export const useMonitoringList = (tabs, batchId) => {
       dataIndex: "meterReadingCode",
       isClassification: true,
       width: 180,
-      // sorter: true,
       sorter: (a, b) => sorter("meterReadingCode", a, b),
       filteredValue: search?.["meterReadingCode"]
         ? [search?.["meterReadingCode"]]
         : null,
-      // filteredValue: [search?.meterReadingCode] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "meterReadingCode",
@@ -632,12 +530,10 @@ export const useMonitoringList = (tabs, batchId) => {
       dataIndex: "accountSegment",
       isClassification: true,
       width: 180,
-      // sorter: true,
       sorter: (a, b) => sorter("accountSegment", a, b),
       filteredValue: search?.["accountSegment"]
         ? [search?.["accountSegment"]]
         : null,
-      // filteredValue: [search?.accountSegment] || null,
       align: "center",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -664,12 +560,10 @@ export const useMonitoringList = (tabs, batchId) => {
       dataIndex: "accountGroupType",
       isClassification: true,
       width: 190,
-      // sorter: true,
       sorter: (a, b) => sorter("accountGroupType", a, b),
       filteredValue: search?.["accountGroupType"]
         ? [search?.["accountGroupType"]]
         : null,
-      // filteredValue: [search?.accountGroupType] || null,
       align: "center",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -696,12 +590,10 @@ export const useMonitoringList = (tabs, batchId) => {
       dataIndex: "assetSerialNumber",
       isClassification: true,
       width: 200,
-      // sorter: true,
       sorter: (a, b) => sorter("assetSerialNumber", a, b),
       filteredValue: search?.["assetSerialNumber"]
         ? [search?.["assetSerialNumber"]]
         : null,
-      // filteredValue: [search?.assetSerialNumberber] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "assetSerialNumber",
@@ -727,10 +619,8 @@ export const useMonitoringList = (tabs, batchId) => {
       dataIndex: "assetType",
       isClassification: true,
       align: "center",
-      // sorter: true,
       sorter: (a, b) => sorter("assetType", a, b),
       filteredValue: search?.["assetType"] ? [search?.["assetType"]] : null,
-      // filteredValue: [search?.assetType] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "assetType",
@@ -751,15 +641,12 @@ export const useMonitoringList = (tabs, batchId) => {
           search,
         ),
     },
-
     {
       title: "RATING CODE",
       dataIndex: "ratingCode",
       isClassification: true,
-      // sorter: true,
       sorter: (a, b) => sorter("ratingCode", a, b),
       filteredValue: search?.["ratingCode"] ? [search?.["ratingCode"]] : null,
-      // filteredValue: [search?.ratingCode] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "ratingCode",
@@ -780,16 +667,13 @@ export const useMonitoringList = (tabs, batchId) => {
           search,
         ),
     },
-
     {
       title: "MEASUREMENT DATE",
       dataIndex: "measDate",
       width: 200,
       isClassification: true,
-      // sorter: true,
       sorter: (a, b) => sorter("measDate", a, b),
       filteredValue: search?.["measDate"] ? [search?.["measDate"]] : null,
-      //filteredValue: [search?.measDate] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "measDate",
@@ -811,13 +695,11 @@ export const useMonitoringList = (tabs, batchId) => {
         ),
     },
     {
-      title: " DATE",
+      title: "DATE",
       dataIndex: "fdate",
       isClassification: true,
-      // sorter: true,
       sorter: (a, b) => sorter("fdate", a, b),
       filteredValue: search?.["fdate"] ? [search?.["fdate"]] : null,
-      //filteredValue: [search?.fdate] || null,
       align: "center",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -843,10 +725,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "HOUR",
       dataIndex: "fhour",
       isClassification: true,
-      // sorter: true,
       sorter: (a, b) => sorter("fhour", a, b),
       filteredValue: search?.["fhour"] ? [search?.["fhour"]] : null,
-      //filteredValue: [search?.district] || null,
       align: "center",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -874,7 +754,6 @@ export const useMonitoringList = (tabs, batchId) => {
       isNumber: true,
       sorter: (a, b) => sorter("streamId", a, b),
       filteredValue: search?.["streamId"] ? [search?.["streamId"]] : null,
-      //filteredValue: [search?.streamId] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "streamId",
@@ -898,11 +777,9 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "BEGIN STAND",
       dataIndex: "beginStand",
-      // sorter: true,
       isNumber: true,
       sorter: (a, b) => sorter("beginStand", a, b),
       filteredValue: search?.["beginStand"] ? [search?.["beginStand"]] : null,
-      //filteredValue: [search?.beginStand] || null,
       align: "right",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -919,10 +796,11 @@ export const useMonitoringList = (tabs, batchId) => {
           "beginStand",
           hasValue(search["beginStand"]),
           searchText,
-          separatorCurrency(text, 4),
+          text,
           false,
           "input",
           search,
+          "usage",
         ),
     },
     {
@@ -930,9 +808,7 @@ export const useMonitoringList = (tabs, batchId) => {
       dataIndex: "endStand",
       isNumber: true,
       filteredValue: search?.["endStand"] ? [search?.["endStand"]] : null,
-      // sorter: true,
       sorter: (a, b) => sorter("endStand", a, b),
-      //filteredValue: [search?.endStand] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "endStand",
@@ -948,10 +824,11 @@ export const useMonitoringList = (tabs, batchId) => {
           "endStand",
           hasValue(search["endStand"]),
           searchText,
-          separatorCurrency(text, 4),
+          text,
           false,
           "input",
           search,
+          "usage",
         ),
     },
     {
@@ -963,7 +840,6 @@ export const useMonitoringList = (tabs, batchId) => {
       filteredValue: search?.["unsorrectedValue"]
         ? [search?.["unsorrectedValue"]]
         : null,
-      //filteredValue: [search?.uncorrectedValue] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "uncorrectedValue",
@@ -978,10 +854,11 @@ export const useMonitoringList = (tabs, batchId) => {
           "uncorrectedValue",
           hasValue(search["uncorrectedValue"]),
           searchText,
-          separatorCurrency(text, 2),
+          text,
           false,
           "input",
           search,
+          "volume",
         ),
     },
     {
@@ -990,7 +867,6 @@ export const useMonitoringList = (tabs, batchId) => {
       align: "right",
       sorter: (a, b) => sorter("temperature", a, b),
       filteredValue: search?.["temperature"] ? [search?.["temperature"]] : null,
-      //filteredValue: [search?.temperature] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "temperature",
@@ -1009,6 +885,7 @@ export const useMonitoringList = (tabs, batchId) => {
           false,
           "input",
           search,
+          "temperatur",
         ),
     },
     {
@@ -1017,7 +894,6 @@ export const useMonitoringList = (tabs, batchId) => {
       align: "right",
       sorter: (a, b) => sorter("pressure", a, b),
       filteredValue: search?.["pressure"] ? [search?.["pressure"]] : null,
-      //filteredValue: [search?.pressure] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "pressure",
@@ -1036,6 +912,7 @@ export const useMonitoringList = (tabs, batchId) => {
           false,
           "input",
           search,
+          "tekanan",
         ),
     },
     {
@@ -1047,7 +924,6 @@ export const useMonitoringList = (tabs, batchId) => {
       filteredValue: search?.["correctionFactor"]
         ? [search?.["correctionFactor"]]
         : null,
-      //filteredValue: [search?.correctionFactor] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "correctionFactor",
@@ -1068,16 +944,13 @@ export const useMonitoringList = (tabs, batchId) => {
           search,
         ),
     },
-
     {
       title: "VOLUME 27",
       dataIndex: "volMeasured27",
-      // sorter: true,
       sorter: (a, b) => sorter("volMeasured27", a, b),
       filteredValue: search?.["volMeasured27"]
         ? [search?.["volMeasured27"]]
         : null,
-      //filteredValue: [search?.volMeasured27] || null,
       isNumber: true,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -1094,21 +967,20 @@ export const useMonitoringList = (tabs, batchId) => {
           "volMeasured27",
           hasValue(search["volMeasured27"]),
           searchText,
-          separatorCurrency(text, 4),
+          text,
           false,
           "input",
           search,
+          "usage",
         ),
     },
     {
       title: "VOLUME 60",
       dataIndex: "volMeasured60",
-      // sorter: true,
       sorter: (a, b) => sorter("volMeasured60", a, b),
       filteredValue: search?.["volMeasured60"]
         ? [search?.["volMeasured60"]]
         : null,
-      //filteredValue: [search?.volMeasured60] || null,
       isNumber: true,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -1125,21 +997,19 @@ export const useMonitoringList = (tabs, batchId) => {
           "volMeasured60",
           hasValue(search["volMeasured60"]),
           searchText,
-          separatorCurrency(text, 4),
+          text,
           false,
           "input",
           search,
+          "usage",
         ),
     },
-
     {
       title: "VOLUME MSCF",
       dataIndex: "volMscf",
       isNumber: true,
-      // sorter: true,
       sorter: (a, b) => sorter("volMscf", a, b),
       filteredValue: search?.["volMscf"] ? [search?.["volMscf"]] : null,
-      //filteredValue: [search?.volMscf] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "volMscf",
@@ -1164,10 +1034,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "GHV",
       dataIndex: "ghv",
       align: "right",
-      // sorter: true,
       sorter: (a, b) => sorter("ghv", a, b),
       filteredValue: search?.["ghv"] ? [search?.["ghv"]] : null,
-      //filteredValue: [search?.ghv] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "ghv",
@@ -1193,10 +1061,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "CALORIE",
       dataIndex: "calorie",
       isNumber: true,
-      // sorter: true,
       sorter: (a, b) => sorter("calorie", a, b),
       filteredValue: search?.["calorie"] ? [search?.["calorie"]] : null,
-      //filteredValue: [search?.calorie] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "calorie",
@@ -1221,10 +1087,8 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "ENG MEASURED",
       dataIndex: "engMeasured",
-      // sorter: true,
       sorter: (a, b) => sorter("engMeasured", a, b),
       filteredValue: search?.["engMeasured"] ? [search?.["engMeasured"]] : null,
-      //filteredValue: [search?.engMeasured] || null,
       align: "right",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -1251,10 +1115,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "DATA SOURCE",
       dataIndex: "fileSource",
       width: 200,
-      // sorter: true,
       sorter: (a, b) => sorter("fileSource", a, b),
       filteredValue: search?.["fileSource"] ? [search?.["fileSource"]] : null,
-      //filteredValue: [search?.fileSource] || null,
       ellipsis: {
         showTitle: false,
       },
@@ -1287,7 +1149,6 @@ export const useMonitoringList = (tabs, batchId) => {
       filteredValue: search?.["taxationRowId"]
         ? [search?.["taxationRowId"]]
         : null,
-      //filteredValue: [search?.taxationRowId] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "taxationRowId",
@@ -1311,11 +1172,9 @@ export const useMonitoringList = (tabs, batchId) => {
     {
       title: "CREATION DATE",
       dataIndex: "createdDate",
-      // sorter: true,
       sorter: (a, b) => sorter("createdDate", a, b),
       align: "center",
       filteredValue: search?.["createdDate"] ? [search?.["createdDate"]] : null,
-      //filteredValue: [search?.createdDate] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "createdDate",
@@ -1340,10 +1199,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "SOURCE",
       dataIndex: "source",
       isClassification: true,
-      // sorter: true,
       sorter: (a, b) => sorter("source", a, b),
       filteredValue: search?.["source"] ? [search?.["source"]] : null,
-      //filteredValue: [search?.source] || null,
       align: "center",
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
@@ -1369,10 +1226,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "DESCRIPTION",
       dataIndex: "description",
       align: "left",
-      // sorter: true,
       sorter: (a, b) => sorter("description", a, b),
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
-      //filteredValue: [search?.description] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "description",
@@ -1385,7 +1240,6 @@ export const useMonitoringList = (tabs, batchId) => {
       ellipsis: {
         showTitle: false,
       },
-      // sorter: true,
       render: (text) =>
         renderColumn(
           "description",
@@ -1401,10 +1255,8 @@ export const useMonitoringList = (tabs, batchId) => {
       title: "Message",
       dataIndex: "logError",
       align: "left",
-      // sorter: true,
       sorter: (a, b) => sorter("logError", a, b),
       filteredValue: search?.["logError"] ? [search?.["logError"]] : null,
-      //filteredValue: [search?.description] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "logError",
@@ -1417,7 +1269,6 @@ export const useMonitoringList = (tabs, batchId) => {
       ellipsis: {
         showTitle: false,
       },
-      // sorter: true,
       render: (text) =>
         renderColumn(
           "logError",
@@ -1434,10 +1285,8 @@ export const useMonitoringList = (tabs, batchId) => {
       dataIndex: "status",
       fixed: "right",
       width: 150,
-      // sorter: true,
       sorter: (a, b) => sorter("status", a, b),
       filteredValue: search?.["status"] ? [search?.["status"]] : null,
-      //filteredValue: [search?.status] || null,
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
         "status",

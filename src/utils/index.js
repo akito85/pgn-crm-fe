@@ -10,7 +10,16 @@ import {
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import StatusComponent from "../components/StatusComponent";
-import { currencyFormatting, numberFormatting, usageFormatting} from "./formatCurrency";
+import {
+  currencyFormatting,
+  numberFormatting,
+  usageFormatting,
+  temperaturFormatting,
+  tekananFormatting,
+  volumeFormatting,
+  ghvFormatting,
+  energiFormatting,
+} from "./formatCurrency";
 
 export const tableNumbering = () => {
   const n = {
@@ -277,6 +286,21 @@ export const renderColumn = (
     if (formatType === "usage") {
       return usageFormatting(text);
     }
+    if (formatType === "temperatur") {
+      return temperaturFormatting(text);
+    }
+    if (formatType === "tekanan") {
+      return tekananFormatting(text);
+    }
+    if (formatType === "volume") {
+      return volumeFormatting(text);
+    }
+    if (formatType === "ghv") {
+      return ghvFormatting(text);
+    }
+    if (formatType === "energi") {
+      return energiFormatting(text);
+    }
 
     if (useTooltip) {
       return (
@@ -322,8 +346,8 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
     case "update":
       if (
         lowerStatusApproval === "waiting approval" ||
-        lowerStatus === "inactive"
-          || (lowerStatus === 'active' && lowerStatusApproval === 'approved')
+        lowerStatus === "inactive" ||
+        (lowerStatus === "active" && lowerStatusApproval === "approved")
       ) {
         return true;
       } else {

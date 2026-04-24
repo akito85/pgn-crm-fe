@@ -161,6 +161,7 @@ const TableRBI = ({
   const [columnWidths, setColumnWidths] = useState({});
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState([]);
+  const lastScrollTopRef = React.useRef(0);
 
   const tableRef = React.useRef(null);
 
@@ -199,6 +200,11 @@ const TableRBI = ({
       if (!target) return;
 
       const scrollTop = target.scrollTop;
+      
+      // Prevent horizontal scroll from triggering fetch
+      if (scrollTop === lastScrollTopRef.current) return;
+      lastScrollTopRef.current = scrollTop;
+
       const scrollHeight = target.scrollHeight;
       const clientHeight = target.clientHeight;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);

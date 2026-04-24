@@ -255,7 +255,7 @@ const GeneralTemplateDetail = () => {
           type={"tabs"}
           element={
             <>
-              {/* {data_detail?.inactiveApproval?.isInactive &&
+              {data_detail?.inactiveApproval?.isInactive &&
               data_detail?.isApprover ? (
                 <div className="mb-3">
                   <BaseContainer header={"Inactive Request Information"}>
@@ -272,7 +272,7 @@ const GeneralTemplateDetail = () => {
                     </div>
                   </BaseContainer>
                 </div>
-              ) : null} */}
+              ) : null}
               <Tabs
                 activeKey={tabHeader}
                 onChange={handleTabHeader}
