@@ -274,7 +274,7 @@ const RelationshipTable = ({
     }));
   }, [baseColumns, actionCols]);
 
-  const expandedRowRender = (record, index) => <RelationshipDetailTable relatedDetail={record.relatedDetail} key={index} />;
+  const expandedRowRender = (record, index) => <RelationshipDetailTable relatedDetails={record.relatedDetail} key={index} />;
 
   return (
     <div className="flex flex-col gap-y-4">
