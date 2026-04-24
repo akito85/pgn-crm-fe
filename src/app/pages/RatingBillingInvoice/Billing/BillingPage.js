@@ -227,7 +227,9 @@ const BillingPage = () => {
     setModalApprovalHistory(true);
   };
 
-  const handleCancelBilling = () => {
+  const handleCancelBilling = (e, record) => {
+    e.stopPropagation();
+    setSelectedBillingData(record);
     setModalCancel(true);
   };
 
@@ -329,9 +331,7 @@ const BillingPage = () => {
         <Tooltip title="Cancel Billing">
           <div
             onClick={(e) => {
-              e.stopPropagation();
-              setSelectedBillingData(record);
-              handleCancelBilling();
+              handleCancelBilling(e, record);
             }}
             style={{
               cursor: "pointer",
