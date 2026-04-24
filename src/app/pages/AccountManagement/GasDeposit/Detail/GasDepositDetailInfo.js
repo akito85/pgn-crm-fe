@@ -1,7 +1,7 @@
 import NxDetailText from "../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 import NxDate from "../../../../../components/Nx/NxDatePicker";
-import StatusComponent from "../../../../../components/StatusComponent";
+import NxStatusComponent from "../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Presentational info panel for a gas deposit record.
@@ -45,14 +45,14 @@ const GasDepositDetailInfo = ({
         <NxDetailText label="Balance Ammount">{balanceAmount}</NxDetailText>
         <NxDetailText label="Available Ammount">{availableAmount}</NxDetailText>
         <NxDetailText label="Status">
-          <StatusComponent colour={status} margin={false}>
+          <NxStatusComponent colour={status} margin={false}>
             {status}
-          </StatusComponent>
+          </NxStatusComponent>
         </NxDetailText>
         <NxDetailText label="Status Approval">
-          <StatusComponent colour={statusApproval} margin={false}>
+          <NxStatusComponent colour={statusApproval} margin={false}>
             {statusApproval}
-          </StatusComponent>
+          </NxStatusComponent>
         </NxDetailText>
       </div>
       <div className="w-full">

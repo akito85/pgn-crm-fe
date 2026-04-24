@@ -1,6 +1,6 @@
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
-import StatusComponent from "../../../../../../../components/StatusComponent";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Read-only summary of a single gas deposit record's key fields,
@@ -41,14 +41,14 @@ const InfoGasDeposit = ({ detail }) => {
           <NxDetailText label="Balance Ammount">{balanceAmount}</NxDetailText>
           <NxDetailText label="Available Ammount">{availableAmount}</NxDetailText>
           <NxDetailText label="Status">
-            <StatusComponent colour={status} margin={false}>
+            <NxStatusComponent colour={status} margin={false}>
               {status}
-            </StatusComponent>
+            </NxStatusComponent>
           </NxDetailText>
           <NxDetailText label="Status Approval">
-            <StatusComponent colour={statusApproval} margin={false}>
+            <NxStatusComponent colour={statusApproval} margin={false}>
               {statusApproval}
-            </StatusComponent>
+            </NxStatusComponent>
           </NxDetailText>
         </div>
         <div className="w-full">
