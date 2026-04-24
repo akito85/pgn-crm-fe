@@ -66,6 +66,7 @@ const RelatedDetailCard = ({
 			usePagination={false}
 			columns={columns}
 			tableScrolled={{ x: 3500 }}
+			totalData={relatedDetails.length}
 			useInfiniteScroll={false}
 		/>
 	)

@@ -124,6 +124,7 @@ const RelationshipDetailInfo = ({ detail = {} }) => {
           dataSource={listRelatedDetail}
           tableScrolled={{ x: listRelatedDetail.length ? "max-content" : 3000 }}
           columns={columns}
+          totalData={listRelatedDetail.length}
           usePagination={false}
           useInfiniteScroll={false}
           showAdvanceSearch={false}
