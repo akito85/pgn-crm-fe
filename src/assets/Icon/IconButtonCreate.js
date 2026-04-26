@@ -20,14 +20,14 @@ const SVG = ({
   >
     <path
       d="M12 5V19"
-      stroke="#1890ff"
+      stroke="#ffffff"
       strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M12 5V19"
-      stroke="#1890ff"
+      stroke="#ffffff"
       strokeOpacity="0.2"
       strokeWidth="1.75"
       strokeLinecap="round"
@@ -35,14 +35,14 @@ const SVG = ({
     />
     <path
       d="M5 12H19"
-      stroke="#1890ff"
+      stroke="#ffffff"
       strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M5 12H19"
-      stroke="#1890ff"
+      stroke="#ffffff"
       strokeOpacity="0.2"
       strokeWidth="1.75"
       strokeLinecap="round"
