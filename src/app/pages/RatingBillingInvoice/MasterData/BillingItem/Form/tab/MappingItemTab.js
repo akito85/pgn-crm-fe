@@ -164,7 +164,8 @@ const MappingItemTab = ({
       return;
     }
 
-    const selectedType = form?.getFieldValue("type");
+    // Read from form field first, fallback to currentTypeParam (already resolved code)
+    const selectedType = form?.getFieldValue("type") || currentTypeParam;
     if (!selectedType) {
       return;
     }
@@ -186,7 +187,7 @@ const MappingItemTab = ({
     }));
   }, [currentTypeParam, data_mappingItemTransactionMappingCode]);
 
-  const handleTypeChanged = async (selectedType, form) => {
+  const handleTypeChanged = (selectedType, form) => {
     form.setFieldsValue({
       transactionMappingCode: undefined,
       name: undefined,
@@ -195,6 +196,11 @@ const MappingItemTab = ({
 
     const nextTypeParam = resolveTypeParam(selectedType);
     setCurrentTypeParam(nextTypeParam || "");
+
+    // Pre-fetch TMC codes immediately so data is ready when user opens the dropdown
+    if (selectedType) {
+      handleFetchTransactionMappingCode(selectedType);
+    }
   };
 
   const findSelectedMappingItem = (typeValue, transactionMappingCode) => {
