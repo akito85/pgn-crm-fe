@@ -539,22 +539,11 @@ export const getAllContactPaginate = createAsyncThunk(
       const response = await accountManagementService.getPagination(url);
       return response;
     } catch (error) {
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        const errorBody = {
-          title: "Failed",
-          description: `Terdapat kesalahan saat mencoba untuk mendapatkan data kontak.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Terdapat kesalahan saat mencoba untuk mendapatkan data kontak.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+      const errorBody = {
+        title: "Failed",
+        description: error?.response?.data?.message || error?.message || error?.toString(),
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response);
     }
   }
