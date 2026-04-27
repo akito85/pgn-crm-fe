@@ -400,7 +400,7 @@ const ListPaymentPeriod = () => {
                                 className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
                             >
                                 <SVGIcon
-                                    name="IconSquareCheck"
+                                    name={record?.status?.toUpperCase() === "ACTIVE" ? "IconInactive" : "IconSquareCheck"}
                                     color={isDisabled ? "#8D91A0" : "#ACC424"}
                                     width={20}
                                 />
@@ -531,6 +531,7 @@ const ListPaymentPeriod = () => {
                 dataIndex: "startDate",
                 key: "startDate",
                 sorter: true,
+                align: "center",
                 ...getColumnSearchPropsPaging(
                     "startDate",
                     searchInput,

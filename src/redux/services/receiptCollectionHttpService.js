@@ -274,15 +274,11 @@ const deleteData = async (url) => {
 };
 
 const deleteDataWithBody = async (url, body) => {
-  try {
-    const response = await axios.delete(configApp.RATING_BILLING_SERVICE + url, {
-      headers: tokenHeader(),
-      data: body,
-    });
-    return response?.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await axios.delete(configApp.RATING_BILLING_SERVICE + url, {
+    headers: tokenHeader(),
+    data: body,
+  });
+  return response?.data;
 };
 const receiptCollectionHttpService = {
   getAll,

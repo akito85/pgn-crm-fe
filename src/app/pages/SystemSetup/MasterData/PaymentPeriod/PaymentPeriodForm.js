@@ -124,6 +124,10 @@ const PaymentPeriodForm = ({ type }) => {
             const response = await dispatch(saveDraftPaymentPeriod(dataValue)).unwrap();
             const newId = response?.id;
 
+            if (!newId) {
+                throw new Error("Failed to get Payment Period ID from server. Attachment upload cancelled.");
+            }
+
             // Delete removed attachments
             const currentExistingIdsDraft = files
                 .filter((item) => item.dataType === "exist" && item.id)
@@ -152,7 +156,6 @@ const PaymentPeriodForm = ({ type }) => {
                             const uploadResult = await dispatch(uploadAttachmentPaymentPeriod(formData)).unwrap();
                             uploadedAttachmentIds.push(uploadResult?.data?.id);
                         } catch (attError) {
-                            await rollbackAttachments(uploadedAttachmentIds);
                             throw new Error('Attachment upload failed. All data has been rolled back.');
                         }
                     }
@@ -195,8 +198,9 @@ const PaymentPeriodForm = ({ type }) => {
 
     const handleClear = () => {
         if (isEdit) {
-            if (id) dispatch(getDetailPaymentPeriod(id));
             setDeletedAttachmentIds([]);
+            setInitialAttachmentIds([]);
+            if (id) dispatch(getDetailPaymentPeriod(id));
         } else {
             form.resetFields();
             setSelectedHierarchy(null);
@@ -352,7 +356,9 @@ const PaymentPeriodForm = ({ type }) => {
                 }
             })
             .catch((error) => {
-                console.log("Validation failed:", error);
+                console.error("Validation failed:", error);
+                const msg = error?.response?.data?.message || error?.message || "Validation failed, please try again.";
+                dispatch(showModalError({ title: "Validation Failed", description: msg }));
             });
     };
 
@@ -373,6 +379,10 @@ const PaymentPeriodForm = ({ type }) => {
         try {
             const response = await dispatch(createPaymentPeriod(submitData)).unwrap();
             const newId = response?.data?.id;
+
+            if (!newId) {
+                throw new Error("Failed to get Payment Period ID from server. Attachment upload cancelled.");
+            }
 
             // Delete removed attachments
             const currentExistingIds = files
@@ -403,7 +413,6 @@ const PaymentPeriodForm = ({ type }) => {
                             uploadedAttachmentIds.push(uploadResult?.data?.id);
                         } catch (attError) {
                             // Rollback: hapus semua attachment yang sudah ter-upload
-                            await rollbackAttachments(uploadedAttachmentIds);
                             throw new Error('Attachment upload failed. All data has been rolled back.');
                         }
                     }
