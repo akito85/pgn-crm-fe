@@ -325,7 +325,7 @@ const RecalculateExpireGasDeposit = ({ formType, accountType, isBulk = false }) 
         const {
           appHierId
         } = form.getFieldsValue(true);
-
+        
         const body = {
           stepNumber: current + 1,
           type: handleType,

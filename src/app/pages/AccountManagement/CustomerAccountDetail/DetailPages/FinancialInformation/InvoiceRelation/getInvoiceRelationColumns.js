@@ -1,7 +1,8 @@
 import { toTitleCase } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import { nxColumnOptions } from "../../../../../../../utils/Nx/nxColumnsOptions";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Invoice Relation list table.
@@ -75,6 +76,8 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "dateFormal"
     ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
@@ -91,6 +94,8 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "dateFormal"
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
@@ -109,6 +114,9 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.statusApproval
     ),
     render: (status) => {
       const displayText = {
@@ -121,9 +129,9 @@ const getInvoiceRelationColumns = ({
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
     },
@@ -142,6 +150,9 @@ const getInvoiceRelationColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.status
     ),
     render: (status) => {
       const displayText = {
@@ -151,9 +162,9 @@ const getInvoiceRelationColumns = ({
 
       return (
         <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       )
     },

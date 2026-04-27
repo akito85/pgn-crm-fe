@@ -353,6 +353,9 @@ export const getColumnSearchPropsUseFilteredValue = (
           {typeFilter === "datetime" ? (
             <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
           ) : null}
+          {typeFilter === "dateFormal" ? (
+            <DatePicker onChange={onDataChange} format={dateFormatting.dateFormal} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+          ) : null}
           {typeFilter === "datePeriod" ? (
             <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
           ) : null}

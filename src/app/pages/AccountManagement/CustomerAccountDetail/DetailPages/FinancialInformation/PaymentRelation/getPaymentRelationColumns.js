@@ -1,7 +1,7 @@
 import { toTitleCase } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Payment Relation list table.
@@ -137,9 +137,9 @@ const getPaymentRelationColumns = ({
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
     },
@@ -167,9 +167,9 @@ const getPaymentRelationColumns = ({
 
       return (
         <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       )
     },

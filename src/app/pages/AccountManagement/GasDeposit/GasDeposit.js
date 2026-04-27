@@ -41,7 +41,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [showHistoryDetailModal, setShowHistoryDetailModal] = useState(false);
 
   // --- Derived values ---
   const isStandAlone = moduleType === "sa";
@@ -79,21 +78,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
-    }
-  };
-
-  /**
-   * @param {boolean} show
-   * @param {number} historyId
-   */
-  const handleHistoryDetailModal = ({ show, historyId }) => {
-    if (show) {
-      if (historyId) {
-        dispatch(getGasDepositHistory(historyId));
-        setShowHistoryDetailModal(true);
-      }
-    } else {
-      setShowHistoryDetailModal(false);
     }
   };
 
@@ -146,68 +130,12 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
           <NxBaseContainer border>
             <GasDepositHistoryTable
               accountId={accountId}
+              customerId={customerId}
               handleApprovalHistoryModal={handleApprovalHistoryModal}
-              handleDetailModal={handleHistoryDetailModal}
               refreshSignal={refreshSignal}
               moduleType={moduleType}
             />
           </NxBaseContainer>
-          
-          {/* Detail Modal */}
-          <NxModal
-            isOpen={showHistoryDetailModal}
-            title="DETAIL GAS DEPOSIT"
-            loading={loading_detailGdHistory}
-            handleCancel={(() => handleHistoryDetailModal(false))}
-          >
-            <div className="flex flex-col gap-y-4 p-4">
-
-              <NxBaseContainer border header="GAS DEPOSIT DETAIL">
-                <div className="grid grid-cols-3">
-                  <NxDetailText label="Period">
-                    {period}
-                  </NxDetailText>
-                  <NxDetailText label="Balance (M3)">
-                    {balanceM3}
-                  </NxDetailText>
-                  <NxDetailText label="Balance (MSCF)">
-                    {balanceMscf}
-                  </NxDetailText>
-                  <NxDetailText label="Balance (MMBTU)">
-                    {balanceMmbtu}
-                  </NxDetailText>
-                  <NxDetailText label="Balance Amount">
-                    {balanceAmmount}
-                  </NxDetailText>
-                  <NxDetailText label="Available Amount">
-                    {availableAmount}
-                  </NxDetailText>
-                </div>
-                <NxDetailText label="Remark">
-                  {remark}
-                </NxDetailText>
-              </NxBaseContainer>
-              <NxBaseContainer border header="HISTORY INFORMATION">
-                <div className="grid grid-cols-5">
-                  <NxDetailText label="Record ID">
-                    {id}
-                  </NxDetailText>
-                  <NxDetailText label="Created Date">
-                    {NxDate.formatDate(createdDate, "DD MMM YYYY")}
-                  </NxDetailText>
-                  <NxDetailText label="Created By">
-                    {createdBy}
-                  </NxDetailText>
-                  <NxDetailText label="Updated Date">
-                    {NxDate.formatDate(updatedDate, "DD MMM YYYY")}
-                  </NxDetailText>
-                  <NxDetailText label="Updated By">
-                    {updatedBy}
-                  </NxDetailText>
-                </div>
-              </NxBaseContainer>
-            </div>
-          </NxModal>
 
           {/* Approval History Modal */}
           <NxHistoryModal
