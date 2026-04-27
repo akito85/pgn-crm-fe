@@ -463,10 +463,10 @@ const dummyRedemPeriodOptions = [
 ];
 
 const dummyMutationTypeOptions = [
-  { label: "Deposit", value: "Deposit" },
-  { label: "Withdrawal", value: "Withdrawal" },
-  { label: "Adjustment", value: "Adjustment" },
-  { label: "Redemption", value: "Redemption" },
+  { label: "Deposit", value: "EARN" },
+  { label: "Withdrawal", value: "EXPIRE" },
+  { label: "Adjustment", value: "ADJUSTMENT" },
+  { label: "Redemption", value: "REDEEM" },
 ];
 
 const dummyTypeOptions = [
@@ -489,7 +489,9 @@ const initialState = {
   data_uom_options: [],
   data_time_unit_options: [],
   data_redem_period_options: [],
+  data_account_options: { result: [], page: {} },
   data_mutation_type_options: [],
+  data_mutation_category_options: [],
   data_type_options: [],
   dataListCategory: [],
   loading: false,
@@ -501,6 +503,7 @@ const initialState = {
   loading_history_list: false,
   loading_attachment: false,
   loading_dropdown: false,
+  loading_account_options: false,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -624,6 +627,26 @@ export const getPeriodOptions = createAsyncThunk(
   },
 );
 
+export const getAccountOptions = createAsyncThunk(
+  "GET_GAS_DEPOSIT_ACCOUNT_OPTIONS",
+  async ({ page = 1, pageSize = 20, search = "", isLoadMore = false } = {}, thunkAPI) => {
+    try {
+      const searchParams = search
+        ? encodeURIComponent(JSON.stringify({ accountNumber: search }))
+        : "";
+      const url = `/v1/dbs/api/gas-deposit/account-options?page=${page}&size=${pageSize}&sort=accountNumber~asc&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      const responseData = response?.data ?? response;
+      return { ...responseData, isLoadMore };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
+    }
+  },
+);
+
 export const getCurrencyOptions = createAsyncThunk(
   "GET_GAS_DEPOSIT_CURRENCY_OPTIONS",
   async (_, thunkAPI) => {
@@ -711,7 +734,7 @@ export const createMutationSummary = createAsyncThunk(
   "CREATE_MUTATION_SUMMARY",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create-update`;
+      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create`;
       const response = await ratingBillingHttpService.createData(url, body);
       const responseData = response?.data ?? response;
       thunkAPI.dispatch(
@@ -754,14 +777,42 @@ export const getMutationTypeOptions = createAsyncThunk(
   "GET_GAS_DEPOSIT_MUTATION_TYPE_OPTIONS",
   async (_, thunkAPI) => {
     try {
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return dummyMutationTypeOptions;
+      const url = `/v1/dbs/api/gas-deposit/mutation-type-options`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const rawData = response?.data?.data || response?.data || [];
+      return Array.isArray(rawData)
+        ? rawData.map((item) => ({
+            label: item.label || item.name,
+            value: item.value || item.id || item.name,
+          }))
+        : [];
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
-      return error;
+      return dummyMutationTypeOptions;
+    }
+  },
+);
+
+export const getMutationCategoryOptions = createAsyncThunk(
+  "GET_GAS_DEPOSIT_MUTATION_CATEGORY_OPTIONS",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/mutation-category-options`;
+      const response = await ratingBillingHttpService.getAll(url);
+      const rawData = response?.data?.data || response?.data || [];
+      return Array.isArray(rawData)
+        ? rawData.map((item) => ({
+            label: item.label || item.name,
+            value: item.value || item.id || item.name,
+          }))
+        : [];
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(error?.response?.data || error);
     }
   },
 );
@@ -840,12 +891,40 @@ export const getAttachmentList = createAsyncThunk(
 
 export const getPriceByBillingPeriod = createAsyncThunk(
   "GET_GAS_DEPOSIT_PRICE_BY_PERIOD",
-  async ({ accountNumber, billingPeriod }, thunkAPI) => {
+  async ({ accountNumber, billingPeriod, page = 1, pageSize = 20, search = "", isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit/price-by-period?accountNumber=${encodeURIComponent(accountNumber)}&billingPeriod=${encodeURIComponent(billingPeriod)}`;
+      const url = `/v1/dbs/api/gas-deposit/price-by-period?accountNumber=${encodeURIComponent(accountNumber)}&billingPeriod=${encodeURIComponent(billingPeriod)}&page=${page}&size=${pageSize}&search=${encodeURIComponent(search || "")}`;
       const response = await ratingBillingHttpService.getDetail(url);
-      const data = response?.data ?? response;
-      return data?.price ?? null;
+      const payload = response?.data ?? response;
+
+      if (Array.isArray(payload?.result)) {
+        const result = payload.result
+          .filter((item) => item?.value !== undefined && item?.value !== null && item?.value !== "")
+          .map((item) => ({
+            label:
+              item?.label ??
+              [item?.priceCode, item?.price, item?.currency, item?.uom]
+                .filter((part) => part !== undefined && part !== null && part !== "")
+                .join("/"),
+            value: item?.value ?? item?.price,
+            price: item?.price ?? item?.value,
+            priceCode: item?.priceCode,
+            currency: item?.currency,
+            uom: item?.uom,
+            id: item?.id,
+          }));
+        return {
+          result,
+          page: payload?.page || {},
+          isLoadMore,
+        };
+      }
+
+      return {
+        result: [],
+        page: payload?.page || {},
+        isLoadMore,
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -981,6 +1060,33 @@ const gasDepositSlice = createSlice({
       state.loading_dropdown = false;
     },
 
+    // Account Options
+    [getAccountOptions.pending]: (state) => {
+      state.loading_account_options = true;
+    },
+    [getAccountOptions.fulfilled]: (state, action) => {
+      state.loading_account_options = false;
+      const isLoadMore = action.payload?.isLoadMore;
+      if (isLoadMore) {
+        const existing = state.data_account_options?.result || [];
+        const newResult = action.payload?.result || [];
+        const existingIds = new Set(existing.map((item) => item.accountId));
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.accountId),
+        );
+        state.data_account_options = {
+          ...action.payload,
+          result: [...existing, ...uniqueNewData],
+        };
+      } else {
+        state.data_account_options = action.payload || { result: [], page: {} };
+      }
+    },
+    [getAccountOptions.rejected]: (state) => {
+      state.loading_account_options = false;
+      state.data_account_options = { result: [], page: {} };
+    },
+
     // Currency Options
     [getCurrencyOptions.pending]: (state) => {
       state.loading_dropdown = true;
@@ -1059,6 +1165,18 @@ const gasDepositSlice = createSlice({
       state.loading_dropdown = false;
     },
 
+    // Mutation Category Options
+    [getMutationCategoryOptions.pending]: (state) => {
+      state.loading_dropdown = true;
+    },
+    [getMutationCategoryOptions.fulfilled]: (state, action) => {
+      state.loading_dropdown = false;
+      state.data_mutation_category_options = action.payload;
+    },
+    [getMutationCategoryOptions.rejected]: (state) => {
+      state.loading_dropdown = false;
+    },
+
     // Type Options
     [getTypeOptions.pending]: (state) => {
       state.loading_dropdown = true;
@@ -1087,6 +1205,7 @@ const gasDepositSlice = createSlice({
     // Approval History
     [getApprovalHistory.pending]: (state) => {
       state.loading_history = true;
+      state.data_approval_history = {};
     },
     [getApprovalHistory.fulfilled]: (state, action) => {
       state.loading_history = false;

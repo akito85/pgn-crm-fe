@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Form, DatePicker } from "antd";
+import { Form, DatePicker, Spin } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 import { NxFormStepper, NxFormFooter } from "../../../../components/Nx/NxFormStepNavigation";
 import CardContainer from "../../../../components/CardContainer";
@@ -22,8 +23,9 @@ import {
   getAllApprovalList,
   getListApprovalById,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
+import { showModalError } from "../../../../redux/slices/general_slice";
 import {
-  getAllGasDepositPaginate,
+  getAccountOptions,
   getPeriodOptions,
   getUomOptions,
   getTimeUnitOptions,
@@ -31,6 +33,24 @@ import {
   createMutationSummary,
   getCategoryListGasDeposit,
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
+import { uploadAttachments } from "../../../../utils/uploadHelper";
+
+const toNumericOrNull = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const normalized = String(value).replace(/,/g, "").trim();
+  if (!normalized) return null;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const pickNumeric = (...candidates) => {
+  for (const value of candidates) {
+    const numeric = toNumericOrNull(value);
+    if (numeric !== null) return numeric;
+  }
+  return null;
+};
 
 const GasDepositCreatePage = () => {
   const navigate = useNavigate();
@@ -40,6 +60,7 @@ const GasDepositCreatePage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isModalCreateMutationOpen, setIsModalCreateMutationOpen] = useState(false);
   const [mutationRows, setMutationRows] = useState([]);
+  const [editingMutationIndex, setEditingMutationIndex] = useState(null);
   const [selectedAccountData, setSelectedAccountData] = useState(null);
   const isUpdateMode =
     location.pathname === RBI_ROUTES.GAS_DEPOSIT_UPDATE ||
@@ -47,11 +68,12 @@ const GasDepositCreatePage = () => {
   const selectedData = useMemo(() => location.state?.selectedData ?? null, [location.state]);
 
   const {
-    data: gasDepositList,
+    data_account_options: accountOptionsData,
     data_period_options: periodOptions,
     data_uom_options: uomOptions,
     data_time_unit_options: timeUnitOptions,
     data_type_options: typeOptions,
+    loading_account_options: loadingAccountOptions,
   } = useSelector((state) => state.gasDepositRbi);
 
   const { data_approval, data_approval_list } = useSelector((state) => state.billing);
@@ -64,19 +86,25 @@ const GasDepositCreatePage = () => {
 
   // Attachment state
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [accountSearch, setAccountSearch] = useState("");
+  const accountPageInfo = accountOptionsData?.page || {};
+  const accountList = accountOptionsData?.result || [];
+  const ACCOUNT_PAGE_SIZE = 20;
 
   const SOURCE_OPTIONS = [
     { label: "Billing", value: "Billing" },
     { label: "Manual", value: "Manual" },
   ];
 
-  // Account options derived from gas deposit list
+  // Account options derived from account master source
   const accountNumberOptions = useMemo(
-    () =>
-      (gasDepositList?.result || [])
-        .filter(Boolean)
-        .map((item) => ({ label: item.accountNumber, value: item.accountNumber })),
-    [gasDepositList],
+    () => {
+      const seen = new Set();
+      return accountList
+        .filter((item) => item?.accountNumber && !seen.has(item.accountNumber) && seen.add(item.accountNumber))
+        .map((item) => ({ label: item.accountNumber, value: item.accountNumber }));
+    },
+    [accountList],
   );
 
   const routes = [
@@ -92,7 +120,6 @@ const GasDepositCreatePage = () => {
   ];
 
   useEffect(() => {
-    dispatch(getAllGasDepositPaginate({ page: 1, pageSize: 1000, search: "", sort: "accountNumber~asc" }));
     dispatch(getPeriodOptions());
     dispatch(getUomOptions());
     dispatch(getTimeUnitOptions());
@@ -100,6 +127,21 @@ const GasDepositCreatePage = () => {
     dispatch(getAllApprovalList());
     dispatch(getConfigFileRBIData());
   }, [dispatch]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      dispatch(
+        getAccountOptions({
+          page: 1,
+          pageSize: ACCOUNT_PAGE_SIZE,
+          search: accountSearch,
+          isLoadMore: false,
+        }),
+      );
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [dispatch, accountSearch]);
 
   useEffect(() => {
     if (!isUpdateMode || !selectedData) return;
@@ -131,6 +173,7 @@ const GasDepositCreatePage = () => {
       source: selectedData.source,
       description: selectedData.description,
     });
+    setSelectedAccountData(selectedData);
   }, [form, isUpdateMode, selectedData]);
 
   // Map approval hierarchy list to options
@@ -186,12 +229,26 @@ const GasDepositCreatePage = () => {
       {
         key: "action",
         title: "ACTION",
-        width: 70,
+        width: 100,
         align: "center",
         fixed: "right",
         render: (_, __, idx) => (
           <div className="flex items-center justify-center gap-2">
-            <SVGIcon name="IconDelete" width={18} color="#ef4444" onClick={() => setMutationRows((prev) => prev.filter((_, i) => i !== idx))} />
+            <SVGIcon
+              name="IconEdit"
+              width={18}
+              color="#0075bf"
+              onClick={() => {
+                setEditingMutationIndex(idx);
+                setIsModalCreateMutationOpen(true);
+              }}
+            />
+            <SVGIcon
+              name="IconDelete"
+              width={18}
+              color="#ef4444"
+              onClick={() => setMutationRows((prev) => prev.filter((_, i) => i !== idx))}
+            />
           </div>
         ),
       },
@@ -200,9 +257,14 @@ const GasDepositCreatePage = () => {
   );
 
   const handleAccountNumberChange = (value) => {
-    const accountList = gasDepositList?.result || [];
     const selected = accountList.filter(Boolean).find((item) => item.accountNumber === value);
     setSelectedAccountData(selected || null);
+    const resolvedReceiptBalance = pickNumeric(
+      selected?.balanceVolume,
+      selected?.cashBalance,
+      selected?.balance,
+      selected?.currentPeriodVolume,
+    );
 
     form.setFieldsValue({
       accountNumber: value,
@@ -221,8 +283,29 @@ const GasDepositCreatePage = () => {
       termsRedeem: selected?.termsRedeem || "",
       timeUnit: selected?.timeUnit || "",
       uom: selected?.uom || "",
-      receiptBalance: selected?.balanceVolume || "",
+      receiptBalance: resolvedReceiptBalance ?? "",
     });
+  };
+
+  const handleAccountPopupScroll = (event) => {
+    const target = event?.target;
+    if (!target || loadingAccountOptions) return;
+
+    const isAtBottom =
+      target.scrollTop + target.offsetHeight >= target.scrollHeight - 8;
+    const currentPage = Number(accountPageInfo?.currentPage || 1);
+    const totalPages = Number(accountPageInfo?.totalPages || 1);
+
+    if (isAtBottom && currentPage < totalPages) {
+      dispatch(
+        getAccountOptions({
+          page: currentPage + 1,
+          pageSize: ACCOUNT_PAGE_SIZE,
+          search: accountSearch,
+          isLoadMore: true,
+        }),
+      );
+    }
   };
 
   const handleNext = async () => {
@@ -250,57 +333,95 @@ const GasDepositCreatePage = () => {
 
   const handleSubmit = () => {
     form.validateFields().then((values) => {
-      const accountList = gasDepositList?.result || [];
+      const accountList = accountOptionsData || [];
       const account = selectedAccountData ||
-        accountList.filter(Boolean).find((item) => item.accountNumber === values.accountNumber);
+        accountList.filter(Boolean).find((item) => item.accountNumber === values.accountNumber) ||
+        selectedData;
+      const totalMutationQuantity = mutationRows.reduce((acc, row) => acc + (Number(row?.quantity) || 0), 0);
+      const resolvedBalanceVolume = pickNumeric(
+        values.receiptBalance,
+        account?.balanceVolume,
+        account?.cashBalance,
+        account?.balance,
+        account?.currentPeriodVolume,
+        totalMutationQuantity,
+      );
+
+      if (!account?.accountId) {
+        dispatch(
+          showModalError({
+            title: "Failed",
+            description: "Account ID tidak ditemukan. Silakan pilih ulang Account Number.",
+          }),
+        );
+        return;
+      }
+
+      if (resolvedBalanceVolume === null) {
+        dispatch(
+          showModalError({
+            title: "Failed",
+            description: "Balance volume kosong. Silakan cek data account/balance terlebih dahulu.",
+          }),
+        );
+        return;
+      }
 
       const body = {
         id: isUpdateMode ? (selectedData?.id || selectedData?.gasDepositId) : undefined,
         accountId: account?.accountId,
         apphierId: values.apphierId,
-        balanceVolume: values.receiptBalance,
+        balanceVolume: resolvedBalanceVolume,
         balanceAmount: values.amount,
-        currency: values.currency || account?.currency,
+        currency: values.currency || account?.currency || selectedData?.currency || "IDR",
         uom: values.uom,
         schemeStartDate: values.periodEarn?.[0]?.format ? values.periodEarn[0].format("YYYY-MM-DD") : undefined,
         schemeEndDate: values.periodEarn?.[1]?.format ? values.periodEarn[1].format("YYYY-MM-DD") : account?.earnEndDate,
         redeemStartDate: values.periodStartRedeem?.format ? values.periodStartRedeem.format("YYYY-MM-DD") : undefined,
         redeemEndDate: values.periodEndRedeem?.format ? values.periodEndRedeem.format("YYYY-MM-DD") : undefined,
+        termsEarn: values.termsEarn ? Number(values.termsEarn) : undefined,
+        termsRedeem: values.termsRedeem ? Number(values.termsRedeem) : undefined,
+        timeUnit: values.timeUnit,
+        source: values.source,
         actionType: isUpdateMode ? "UPDATE" : "CREATE",
         description: values.description,
         sapCustId: account?.sapCustId == null ? undefined : String(account.sapCustId),
         attachments: [],
         gasDepositMutationDetailDtos: mutationRows.map(row => ({
-          billingPeriod: row.billingPeriod,
+          billPeriode: row.billingPeriod,
           mutationDate: row.mutationDate,
+          transType: row.mutationType,
+          source: "MANUAL",
           mutationType: row.mutationType,
           category: row.category,
           uom: row.uom,
-          quantity: row.quantity,
+          volumeAmount: row.quantity,
           price: row.price,
-          amount: row.amount,
+          amountValue: row.amount,
           description: row.description,
         })),
       };
 
       dispatch(createMutationSummary(body)).then(async (res) => {
         if (!res.error) {
-          const idGasDeposit = res.payload?.id || res.payload?.gasDepositId;
-          
+          const idGasDeposit =
+            res.payload?.data?.stgSumId ||
+            res.payload?.data?.id ||
+            res.payload?.id ||
+            res.payload?.gasDepositId;
+
           if (listDataAttachment.length > 0 && idGasDeposit) {
-            for (let i = 0; i < listDataAttachment.length; i++) {
-              const element = listDataAttachment[i];
-              const uploadBody = {
-                files: element.file,
-                fileCategoryId: element.fileCategoryId,
-                referensiId: idGasDeposit,
-                category: "GAS_DEPOSIT_SUMMARY",
-              };
-              await ratingBillingHttpService.uploadAttachment(
-                `/v1/dbs/api/attachment/upload/v1`,
-                uploadBody
-              );
-            }
+            await uploadAttachments(
+              listDataAttachment,
+              idGasDeposit,
+              "GAS_DEPOSIT_SUMMARY",
+              (formData) =>
+                ratingBillingHttpService.uploadAttachment(
+                  `/v1/dbs/api/attachment/upload/v1`,
+                  formData,
+                  () => {},
+                ),
+            );
           }
           navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
         }
@@ -358,6 +479,21 @@ const GasDepositCreatePage = () => {
                 onChange={handleAccountNumberChange}
                 disabled={isUpdateMode}
                 options={accountNumberOptions}
+                onPopupScroll={handleAccountPopupScroll}
+                onSearch={setAccountSearch}
+                onClear={() => setAccountSearch("")}
+                filterOption={false}
+                dropdownRender={(menu) => (
+                  <>
+                    {menu}
+                    {loadingAccountOptions && (
+                      <div className="px-3 py-2 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
+                        <Spin size="small" />
+                        <span>Loading more account...</span>
+                      </div>
+                    )}
+                  </>
+                )}
               />
             </Form.Item>
             <Form.Item name="accountName" label="Account Name" style={{ marginBottom: 0 }}>
@@ -531,30 +667,62 @@ const GasDepositCreatePage = () => {
 
       <ModalCreateMutationDetail
         isOpen={isModalCreateMutationOpen}
-        handleCancel={() => setIsModalCreateMutationOpen(false)}
+        withApprovalAndAttachment={false}
+        handleCancel={() => {
+          setIsModalCreateMutationOpen(false);
+          setEditingMutationIndex(null);
+        }}
+        accountNumber={selectedAccountData?.accountNumber || form.getFieldValue('accountNumber')}
         handleRefresh={(values) => {
           if (!values) return;
           const mutationDateValue = values.mutationDate?.format
             ? values.mutationDate.format("YYYY-MM-DD")
             : values.mutationDate || "";
+          const nextRow = {
+            source: values.source || "MANUAL",
+            billingPeriod: values.billingPeriod || "",
+            mutationDate: mutationDateValue,
+            mutationType: values.mutationType || "",
+            category: values.category || "",
+            uom: values.uom || "",
+            quantity: values.quantity || "",
+            price: values.price || "",
+            amount: values.amount || "",
+            description: values.description || "",
+          };
 
-          setMutationRows((prev) => [
-            ...prev,
-            {
-              key: prev.length + 1,
-              no: prev.length + 1,
-              billingPeriod: values.billingPeriod || "",
-              mutationDate: mutationDateValue,
-              mutationType: values.mutationType || "",
-              category: values.category || "",
-              uom: values.uom || "",
-              quantity: values.quantity || "",
-              price: values.price || "",
-              amount: values.amount || "",
-              description: values.description || "",
-            },
-          ]);
+          setMutationRows((prev) => {
+            if (editingMutationIndex !== null) {
+              return prev.map((item, index) =>
+                index === editingMutationIndex
+                  ? { ...item, ...nextRow, key: item.key, no: item.no }
+                  : item,
+              );
+            }
+
+            return [
+              ...prev,
+              {
+                ...nextRow,
+                key: prev.length + 1,
+                no: prev.length + 1,
+              },
+            ];
+          });
+          setEditingMutationIndex(null);
         }}
+        initialValues={
+          editingMutationIndex !== null
+            ? {
+                ...mutationRows[editingMutationIndex],
+                mutationDate: mutationRows[editingMutationIndex]?.mutationDate
+                  ? moment(mutationRows[editingMutationIndex].mutationDate)
+                  : null,
+              }
+            : null
+        }
+        submitLabel={editingMutationIndex !== null ? "Update" : "Submit"}
+        modalTitle={editingMutationIndex !== null ? "Edit Mutation Detail" : "Create Mutation Detail"}
         selectedData={{}}
       />
     </>

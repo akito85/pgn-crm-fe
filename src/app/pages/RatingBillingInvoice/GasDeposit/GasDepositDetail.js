@@ -9,6 +9,7 @@ import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 import DetailText from "../../../../components/DetailText";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
+import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsMutationDetail } from "./Table/TableMutationDetail";
@@ -19,6 +20,7 @@ import {
   getAllGasDepositPaginate,
   getApprovalHistory,
   getAttachmentList,
+  processGasDepositApproval,
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
 import ModalCreateMutationDetail from "./Modal/ModalCreateMutationDetail";
 import ModalViewMutationDetail from "./Modal/ModalViewMutationDetail";
@@ -85,6 +87,8 @@ const GasDepositDetail = (props) => {
   const [modalCreateMD, setModalCreateMD] = useState(false);
   const [modalViewMD, setModalViewMD] = useState(false);
   const [modalApprovalHistoryMD, setModalApprovalHistoryMD] = useState(false);
+  const [modalConfirmApprovalMD, setModalConfirmApprovalMD] = useState(false);
+  const [approveOrRejectMD, setApproveOrRejectMD] = useState("");
   const [selectedMutationDetail, setSelectedMutationDetail] = useState(null);
   const [dataApprovalHistoryFixMD, setDataApprovalHistoryFixMD] = useState({});
 
@@ -127,7 +131,6 @@ const GasDepositDetail = (props) => {
           category: "GAS_DEPOSIT_SUMMARY",
         }),
       );
-      dispatch(getApprovalHistory(selectedGasDepositId));
     }
   }, [dispatch, selectedGasDepositId]);
 
@@ -155,6 +158,30 @@ const GasDepositDetail = (props) => {
     }
   }, [data_approval_history]);
 
+  useEffect(() => {
+    if (!dataSourceMutationDetail?.length) {
+      setSelectedMutationDetail(null);
+      return;
+    }
+
+    setSelectedMutationDetail((prev) => {
+      const waitingMutation =
+        dataSourceMutationDetail.find((item) => item?.statusApproval === "Waiting Approval") ||
+        null;
+
+      if (!prev) {
+        return waitingMutation || dataSourceMutationDetail[0];
+      }
+
+      const prevId = prev?.mutationId || prev?.stgMutId || prev?.id;
+      return (
+        dataSourceMutationDetail.find(
+          (item) => (item?.mutationId || item?.stgMutId || item?.id) === prevId,
+        ) || waitingMutation || dataSourceMutationDetail[0]
+      );
+    });
+  }, [dataSourceMutationDetail]);
+
   // ===================== Mutation Detail Handlers =====================
   const handleSearchMD = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -166,8 +193,44 @@ const GasDepositDetail = (props) => {
   const onSortMD = () => {};
 
   const handleApprovalHistoryMD = (record) => {
-    dispatch(getApprovalHistory(record?.id || selectedGasDepositId));
+    dispatch(
+      getApprovalHistory(
+        record?.mutationId || record?.stgMutId || record?.id || selectedGasDepositId,
+      ),
+    );
     setModalApprovalHistoryMD(true);
+  };
+
+  const handleOpenApprovalMutation = (action) => {
+    setApproveOrRejectMD(action);
+    setModalConfirmApprovalMD(true);
+  };
+
+  const handleConfirmApprovalMutation = async (res, handleClear) => {
+    if (!approvalTarget?.referenceId || !approvalTarget?.referenceType) return;
+
+    await dispatch(
+      processGasDepositApproval({
+        referenceId: approvalTarget.referenceId,
+        referenceType: approvalTarget.referenceType,
+        action: approveOrRejectMD.toUpperCase(),
+        note: res?.remark || "",
+      }),
+    ).unwrap();
+
+    handleClear();
+    setModalConfirmApprovalMD(false);
+    setApproveOrRejectMD("");
+
+    dispatch(
+      getMutationDetailPaginate({
+        gasDepositId: selectedGasDepositId,
+        page: 1,
+        pageSize: 100,
+        search: "",
+        sort: "",
+      }),
+    );
   };
 
   const itemGrantAccessMD = [
@@ -274,7 +337,8 @@ const GasDepositDetail = (props) => {
     () =>
       dataSourceMutationDetail?.map((item) => ({
         ...item,
-        key: item.mutationId ?? item.id,
+        key: item.mutationId ?? item.stgMutId ?? item.id,
+        id: item.mutationId ?? item.stgMutId ?? item.id,
         documentNumber: item.documentNumber || null,
         source: item.source || null,
         billingPeriod: item.billingPeriod || null,
@@ -293,6 +357,45 @@ const GasDepositDetail = (props) => {
     [dataSourceMutationDetail],
   );
 
+  const waitingMutationDetail = useMemo(
+    () =>
+      dataSourceMD?.find((item) => item?.statusApproval === "Waiting Approval") || null,
+    [dataSourceMD],
+  );
+
+  const approvalTarget = useMemo(() => {
+    if (selectedData?.statusApproval === "Waiting Approval") {
+      return {
+        referenceType: "SUMMARY",
+        referenceId: selectedData?.pendingStgSumId || selectedData?.stgSumId || selectedData?.id,
+        name: selectedData?.accountNumber || selectedData?.customerNumber || "-",
+      };
+    }
+
+    const mutationTarget =
+      (selectedMutationDetail?.statusApproval === "Waiting Approval" && selectedMutationDetail) ||
+      waitingMutationDetail;
+
+    if (mutationTarget) {
+      return {
+        referenceType: "MUTATION",
+        referenceId:
+          mutationTarget?.mutationId || mutationTarget?.stgMutId || mutationTarget?.id,
+        name: mutationTarget?.documentNumber || mutationTarget?.mutationId || "-",
+      };
+    }
+
+    return null;
+  }, [selectedData, selectedMutationDetail, waitingMutationDetail]);
+
+  useEffect(() => {
+    if (approvalTarget?.referenceId) {
+      dispatch(getApprovalHistory(approvalTarget.referenceId));
+    }
+  }, [approvalTarget?.referenceId, dispatch]);
+
+  const canProcessApproval = data_approval_history?.isApprover === true;
+
   // ===================== Approval / Attachment Columns (Gas Deposit Detail tab) =====================
   const approvalColumnsGD = useMemo(() => [
     { key: "no", title: "NO", width: 50, align: "center", render: (_, __, idx) => idx + 1 },
@@ -310,10 +413,27 @@ const GasDepositDetail = (props) => {
     { key: "fileSize", title: "FILE SIZE", dataIndex: "fileSize", width: 100 },
   ], []);
 
-  const approvalDataSource = useMemo(() =>
-    (data_approval_history?.dataApprover ?? []).filter(Boolean).map((item, idx) => ({ ...item, key: item.id ?? idx })),
-    [data_approval_history]
-  );
+  const approvalDataSource = useMemo(() => {
+    const approverData = dataApprovalHistoryFixMD?.dataApprover;
+
+    if (Array.isArray(approverData)) {
+      return approverData
+        .filter(Boolean)
+        .map((item, idx) => ({ ...item, key: item.id ?? idx }));
+    }
+
+    if (approverData && typeof approverData === "object") {
+      const firstRows = Object.values(approverData).find(
+        (item) => Array.isArray(item) && item.length > 0,
+      );
+      return (firstRows || []).filter(Boolean).map((item, idx) => ({
+        ...item,
+        key: item.id ?? idx,
+      }));
+    }
+
+    return [];
+  }, [dataApprovalHistoryFixMD]);
 
   const attachmentDataSource = useMemo(() =>
     (Array.isArray(data_attachment) ? data_attachment : []).filter(Boolean).map((item, idx) => ({ ...item, key: item.id ?? idx })),
@@ -446,6 +566,14 @@ const GasDepositDetail = (props) => {
           usePagination={false}
           useInfiniteScroll={true}
           hasMore={false}
+          enableRowClick={true}
+          selectedRowKey={
+            selectedMutationDetail?.mutationId ||
+            selectedMutationDetail?.stgMutId ||
+            selectedMutationDetail?.id ||
+            null
+          }
+          onRowClick={(record) => setSelectedMutationDetail(record)}
         />
       </CollapsibleCardContainer>
 
@@ -468,9 +596,33 @@ const GasDepositDetail = (props) => {
         </div>
       </CollapsibleCardContainer>
 
+      <div className="flex my-3">
+        <ButtonComponent type={"submit"} onClick={onClose}>
+          Cancel
+        </ButtonComponent>
+
+        {approvalTarget && canProcessApproval ? (
+          <div className={"w-full flex justify-end gap-3"}>
+            <ButtonComponent
+              type="reject"
+              onClick={() => handleOpenApprovalMutation("Reject")}
+            >
+              Reject
+            </ButtonComponent>
+            <ButtonComponent
+              type="approve"
+              onClick={() => handleOpenApprovalMutation("Approve")}
+            >
+              Approve
+            </ButtonComponent>
+          </div>
+        ) : null}
+      </div>
+
       {/* ========== MODAL ========== */}
       <ModalCreateMutationDetail
         isOpen={modalCreateMD}
+        withApprovalAndAttachment={true}
         handleCancel={() => setModalCreateMD(false)}
         handleRefresh={() => {
           dispatch(getAllGasDepositPaginate({ page: 1, pageSize: 100, search: "", sort: "" }));
@@ -498,6 +650,19 @@ const GasDepositDetail = (props) => {
         dataApprover={dataApprovalHistoryFixMD?.dataApprover}
         dataHistory={dataApprovalHistoryFixMD?.dataHistory}
         loading={loading_history}
+      />
+
+      <ModalApproveOrReject
+        isOpen={modalConfirmApprovalMD}
+        handleCloseModal={() => {
+          setModalConfirmApprovalMD(false);
+          setApproveOrRejectMD("");
+        }}
+        onFinish={handleConfirmApprovalMutation}
+        header={approveOrRejectMD}
+        approveOrReject={approveOrRejectMD}
+        menu={approvalTarget?.referenceType === "SUMMARY" ? "Gas Deposit Summary" : "Gas Deposit Mutation"}
+        named={approvalTarget?.name || "-"}
       />
     </div>
   );

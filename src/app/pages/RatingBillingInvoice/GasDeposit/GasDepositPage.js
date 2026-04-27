@@ -295,7 +295,7 @@ const GasDepositPage = () => {
   }, []);
 
   const toggleDetail = useCallback((record) => {
-    const recordKey = record.gasDepositId;
+    const recordKey = record.key ?? record.stgSumId ?? record.pendingStgSumId ?? record.gasDepositId;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
@@ -319,7 +319,7 @@ const GasDepositPage = () => {
 
   const handleApprovalHistory = useCallback((record) => {
     suppressNextRowClick();
-    dispatch(getApprovalHistory(record.gasDepositId));
+    dispatch(getApprovalHistory(record.pendingStgSumId || record.stgSumId || record.gasDepositId));
     setModalApprovalHistory(true);
   }, [dispatch, suppressNextRowClick]);
 
@@ -470,8 +470,11 @@ const GasDepositPage = () => {
     () =>
       (dataSource ?? []).filter(Boolean).map((item) => ({
         ...item,
-        key: item.accountId,
-        gasDepositId: item.masterGasDepositId ?? item.accountId,
+        key: item.stgSumId ?? item.pendingStgSumId ?? item.masterGasDepositId ?? item.accountId,
+        gasDepositId:
+          item.masterGasDepositId ??
+          ((item.stgSumId ?? item.pendingStgSumId) ? -Math.abs(item.stgSumId ?? item.pendingStgSumId) : item.accountId),
+        stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
         status: item.statusMaster || null,
         statusApproval: item.statusApproval || null,
         mutationApprovalStatus: null,
@@ -499,6 +502,10 @@ const GasDepositPage = () => {
         sapCustId: item.sapCustId || null,
         classificationType: item.classificationType || null,
         source: item.source || null,
+        createdDate: item.createdDate || null,
+        createdBy: item.createdBy || null,
+        updatedDate: item.updatedDate || null,
+        updatedBy: item.updatedBy || null,
         headerType: null,
         billingPeriod: null,
       })),

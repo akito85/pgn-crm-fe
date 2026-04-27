@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form, Select } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Form, Select, Spin } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../components/InputComponent";
@@ -13,6 +12,8 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
+import { uploadAttachments } from "../../../../../utils/uploadHelper";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import {
   getAllApprovalList,
   getListApprovalById,
@@ -20,7 +21,8 @@ import {
 import {
   getUomOptions,
   getMutationTypeOptions,
-  getRedemPeriodOptions,
+  getMutationCategoryOptions,
+  getPeriodOptions,
   createMutationDetail,
   getCategoryListGasDeposit,
   getPriceByBillingPeriod,
@@ -31,6 +33,11 @@ const ModalCreateMutationDetail = ({
   handleCancel = () => {},
   handleRefresh = () => {},
   selectedData = {},
+  withApprovalAndAttachment = true,
+  accountNumber,
+  initialValues = null,
+  submitLabel = "Submit",
+  modalTitle = "Create Mutation Detail",
 }) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
@@ -42,14 +49,11 @@ const ModalCreateMutationDetail = ({
   const {
     data_uom_options: uomOptions,
     data_mutation_type_options: mutationTypeOptions,
-    data_redem_period_options: billingPeriodOptions,
-    dataListCategory,
+    data_mutation_category_options: mutationCategoryOptions,
+    data_period_options: billingPeriodOptions,
   } = useSelector((state) => state.gasDepositRbi);
 
-  const categoryOptions = useMemo(
-    () => (dataListCategory || []).map((c) => ({ label: c.text, value: c.text })),
-    [dataListCategory],
-  );
+  const categoryOptions = useMemo(() => mutationCategoryOptions || [], [mutationCategoryOptions]);
 
   // Step state
   const [currentStep, setCurrentStep] = useState(0);
@@ -63,13 +67,23 @@ const ModalCreateMutationDetail = ({
   // Attachment state
   const [listDataAttachment, setListDataAttachment] = useState([]);
 
+  // Price options state
+  const [priceOptionsData, setPriceOptionsData] = useState({ result: [], page: {} });
+  const [loadingPriceOptions, setLoadingPriceOptions] = useState(false);
+  const [priceSearch, setPriceSearch] = useState("");
+  const selectedBillingPeriod = Form.useWatch("billingPeriod", form);
+  const activeAccountNumber = accountNumber || selectedData?.accountNumber;
+  const priceOptions = priceOptionsData?.result || [];
+  const pricePageInfo = priceOptionsData?.page || {};
+  const PRICE_PAGE_SIZE = 20;
+
   // Fetch dropdown options & approval list
   useEffect(() => {
     if (isOpen) {
       dispatch(getUomOptions());
       dispatch(getMutationTypeOptions());
-      dispatch(getRedemPeriodOptions());
-      dispatch(getCategoryListGasDeposit());
+      dispatch(getMutationCategoryOptions());
+      dispatch(getPeriodOptions());
       dispatch(getAllApprovalList());
       form.setFieldsValue({
         source: "MANUAL",
@@ -77,6 +91,11 @@ const ModalCreateMutationDetail = ({
       });
     }
   }, [dispatch, isOpen, form]);
+
+  useEffect(() => {
+    if (!isOpen || !initialValues) return;
+    form.setFieldsValue(initialValues);
+  }, [form, initialValues, isOpen]);
 
   // Map approval hierarchy list to options
   useEffect(() => {
@@ -114,11 +133,13 @@ const ModalCreateMutationDetail = ({
   };
 
   // Steps definition
-  const steps = [
-    { title: "CREATE" },
-    { title: "APPROVAL" },
-    { title: "ATTACHMENT" },
-  ];
+  const steps = useMemo(() => {
+    const baseSteps = [{ title: "CREATE" }];
+    if (withApprovalAndAttachment) {
+      baseSteps.push({ title: "APPROVAL" }, { title: "ATTACHMENT" });
+    }
+    return baseSteps;
+  }, [withApprovalAndAttachment]);
 
   const handleNext = async () => {
     if (currentStep === 0) {
@@ -130,6 +151,9 @@ const ModalCreateMutationDetail = ({
           "category",
           "uom",
           "quantity",
+          "price",
+          "amount",
+          "type",
           "description",
         ]);
       } catch {
@@ -137,7 +161,7 @@ const ModalCreateMutationDetail = ({
       }
     }
 
-    if (currentStep === 1) {
+    if (withApprovalAndAttachment && currentStep === 1) {
       try {
         await form.validateFields(["apphierId"]);
       } catch {
@@ -157,7 +181,100 @@ const ModalCreateMutationDetail = ({
     setAppHierDataDetail([]);
     setBoolean(false);
     setListDataAttachment([]);
+    setPriceOptionsData({ result: [], page: {} });
+    setPriceSearch("");
     handleCancel();
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (!activeAccountNumber || !selectedBillingPeriod) {
+      setPriceOptionsData({ result: [], page: {} });
+      form.setFieldsValue({ price: null, amount: "" });
+      return;
+    }
+
+    setLoadingPriceOptions(true);
+    dispatch(
+      getPriceByBillingPeriod({
+        accountNumber: activeAccountNumber,
+        billingPeriod: selectedBillingPeriod,
+        page: 1,
+        pageSize: PRICE_PAGE_SIZE,
+        search: priceSearch,
+        isLoadMore: false,
+      }),
+    ).then((res) => {
+      const payload = res?.payload;
+      const options = Array.isArray(payload?.result) ? payload.result : [];
+
+      setPriceOptionsData({
+        result: options,
+        page: payload?.page || {},
+      });
+      setLoadingPriceOptions(false);
+
+      if (!options.length) {
+        form.setFieldsValue({ price: null, amount: "" });
+        return;
+      }
+
+      const currentPrice = form.getFieldValue("price");
+      const hasCurrentPrice = options.some((item) => item.value === currentPrice);
+      if (!hasCurrentPrice) {
+        form.setFieldsValue({
+          price: null,
+          amount: "",
+        });
+        return;
+      }
+
+      const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
+      const parsedPrice = Number.parseFloat(currentPrice) || 0;
+
+      form.setFieldsValue({
+        price: currentPrice,
+        amount: qty * parsedPrice || "",
+      });
+    });
+  }, [dispatch, form, isOpen, activeAccountNumber, selectedBillingPeriod, priceSearch]);
+
+  const handlePricePopupScroll = (event) => {
+    const target = event?.target;
+    if (!target || loadingPriceOptions) return;
+
+    const isAtBottom =
+      target.scrollTop + target.offsetHeight >= target.scrollHeight - 8;
+    const currentPage = Number(pricePageInfo?.currentPage || 1);
+    const totalPages = Number(pricePageInfo?.totalPages || 1);
+
+    if (isAtBottom && currentPage < totalPages) {
+      setLoadingPriceOptions(true);
+      dispatch(
+        getPriceByBillingPeriod({
+          accountNumber: activeAccountNumber,
+          billingPeriod: selectedBillingPeriod,
+          page: currentPage + 1,
+          pageSize: PRICE_PAGE_SIZE,
+          search: priceSearch,
+          isLoadMore: true,
+        }),
+      ).then((res) => {
+        const payload = res?.payload;
+        const nextOptions = Array.isArray(payload?.result) ? payload.result : [];
+        setPriceOptionsData((prev) => {
+          const existing = prev?.result || [];
+          const existingKeys = new Set(existing.map((item) => `${item?.id}-${item?.label}`));
+          const uniqueNext = nextOptions.filter((item) => !existingKeys.has(`${item?.id}-${item?.label}`));
+          return {
+            result: [...existing, ...uniqueNext],
+            page: payload?.page || prev?.page || {},
+          };
+        });
+        setLoadingPriceOptions(false);
+      });
+    }
   };
 
   const handleSave = () => {
@@ -170,31 +287,56 @@ const ModalCreateMutationDetail = ({
       return;
     }
 
+    if (withApprovalAndAttachment && listDataAttachment.length === 0) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Attachment is required.",
+        }),
+      );
+      return;
+    }
+
     const body = {
       gasDepositId: selectedData.gasDepositId,
       apphierId: values.apphierId,
       billPeriode: values.billingPeriod,
       mutationDate: values.mutationDate,
-      transType: values.category,
+      transType: values.mutationType,
+      source: values.source,
+      mutationType: values.mutationType,
+      category: values.category,
+      uom: values.uom,
       volumeAmount: values.quantity,
       price: values.price,
       amountValue: values.amount,
       description: values.description,
-      attachments: listDataAttachment,
+      attachments: [],
     };
 
-    dispatch(createMutationDetail(body)).then((res) => {
+    dispatch(createMutationDetail(body)).then(async (res) => {
       if (!res.error) {
+        const mutationId = res.payload?.data?.stgMutId;
+
+        if (listDataAttachment.length > 0 && mutationId) {
+          await uploadAttachments(
+            listDataAttachment,
+            mutationId,
+            "GAS_DEPOSIT_MUTATION",
+            (formData) =>
+              ratingBillingHttpService.uploadAttachment(
+                `/v1/dbs/api/attachment/upload/v1`,
+                formData,
+                () => {},
+              ),
+          );
+        }
+
         handleCancelForm();
         handleRefresh(values);
       }
     });
   };
-
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
 
   return (
     <>
@@ -216,7 +358,7 @@ const ModalCreateMutationDetail = ({
       <ModalCustom
       isOpen={isOpen}
       type="confirmation"
-      header="Create Mutation Detail"
+      header={modalTitle}
       handleCancel={handleCancelForm}
       width={1000}
       footer={
@@ -241,74 +383,13 @@ const ModalCreateMutationDetail = ({
             )}
             {currentStep === steps.length - 1 && (
               <ButtonComponent type={"submit"} onClick={handleSave}>
-                Submit
+                {submitLabel}
               </ButtonComponent>
             )}
           </div>
         </div>
       }
     >
-      {/* Stepper */}
-      <div className="flex flex-row items-center justify-center py-2">
-        <div
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            backgroundColor: currentStep > 0 ? "transparent" : "#E0E0E0",
-            border: currentStep > 0 ? "1px solid #0075BF" : "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: currentStep > 0 ? "pointer" : "not-allowed",
-            flexShrink: 0,
-          }}
-          onClick={() => currentStep > 0 && handlePrev()}
-        >
-          <LeftOutlined
-            style={{
-              fontSize: 12,
-              color: currentStep > 0 ? "#0075BF" : "#BDBDBD",
-            }}
-          />
-        </div>
-        <div className="flex-1 px-4">
-          <Steps
-            current={currentStep}
-            items={items}
-            labelPlacement="vertical"
-            size="small"
-            style={{ width: `${steps.length * 180}px`, margin: "0 auto" }}
-          />
-        </div>
-        <div
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            backgroundColor:
-              currentStep < steps.length - 1 ? "transparent" : "#E0E0E0",
-            border:
-              currentStep < steps.length - 1 ? "1px solid #0075BF" : "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor:
-              currentStep < steps.length - 1 ? "pointer" : "not-allowed",
-            flexShrink: 0,
-          }}
-          onClick={() => currentStep < steps.length - 1 && handleNext()}
-        >
-          <RightOutlined
-            style={{
-              fontSize: 12,
-              color:
-                currentStep < steps.length - 1 ? "#0075BF" : "#BDBDBD",
-            }}
-          />
-        </div>
-      </div>
-
       <Form layout="vertical" form={form} id="formMutationDetail" className="black-text-disabled">
         {/* ========== STEP 1: MUTATION DETAIL FORM ========== */}
         <div
@@ -334,16 +415,6 @@ const ModalCreateMutationDetail = ({
                 <SelectComponent
                   placeholder="Select Billing Period"
                   options={billingPeriodOptions}
-                  onChange={(val) => {
-                    if (!selectedData?.accountNumber || !val) return;
-                    dispatch(getPriceByBillingPeriod({ accountNumber: selectedData.accountNumber, billingPeriod: val }))
-                      .then((res) => {
-                        const price = res?.payload ?? "";
-                        const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
-                        const p = Number.parseFloat(price) || 0;
-                        form.setFieldsValue({ price, amount: qty * p || "" });
-                      });
-                  }}
                 />
               </Form.Item>
 
@@ -411,24 +482,67 @@ const ModalCreateMutationDetail = ({
                 />
               </Form.Item>
 
-              <Form.Item label="Price" name="price" style={{ marginBottom: 0 }}>
-                <InputComponent
-                  disabled
-                  placeholder="Auto-filled from billing period"
+              <Form.Item label="Price" name="price" style={{ marginBottom: 0 }} rules={[{ required: true, message: "Please select Price!" }]}>
+                <SelectComponent
+                  placeholder={
+                    !activeAccountNumber
+                      ? "Account Number not found"
+                      : !selectedBillingPeriod
+                        ? "Select Billing Period first"
+                        : "Select Price"
+                  }
+                  options={priceOptions}
+                  disabled={!activeAccountNumber || !selectedBillingPeriod}
+                  showSearch
+                  onSearch={setPriceSearch}
+                  onClear={() => setPriceSearch("")}
+                  onPopupScroll={handlePricePopupScroll}
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      {loadingPriceOptions && (
+                        <div className="px-3 py-2 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
+                          <Spin size="small" />
+                          <span>Loading more price...</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  onChange={(val) => {
+                    const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
+                    const p = Number.parseFloat(val) || 0;
+                    form.setFieldsValue({ amount: qty * p || "" });
+                  }}
+                  filterOption={(input, option) =>
+                    String(option?.label || "")
+                      .toLowerCase()
+                      .includes(String(input || "").toLowerCase())
+                  }
                 />
               </Form.Item>
 
-              <Form.Item label="Amount" name="amount" style={{ marginBottom: 0 }}>
+              <Form.Item
+                label="Amount"
+                name="amount"
+                rules={[{ required: true, message: "Amount is required!" }]}
+                style={{ marginBottom: 0 }}
+              >
                 <InputComponent disabled placeholder="auto" />
               </Form.Item>
 
-              <Form.Item label="Type" name="type" style={{ marginBottom: 0 }}>
+              <Form.Item
+                label="Type"
+                name="type"
+                rules={[{ required: true, message: "Type is required!" }]}
+                style={{ marginBottom: 0 }}
+              >
                 <InputComponent disabled placeholder="Adjustment" />
               </Form.Item>
 
               <Form.Item
                 label="Description"
                 name="description"
+                rules={[{ required: true, message: "Please input Description!" }]}
                 className="col-span-5"
                 style={{ marginBottom: 0 }}
               >
@@ -441,6 +555,7 @@ const ModalCreateMutationDetail = ({
         {/* ========== STEP 2: APPROVAL INFORMATION ========== */}
         <div
           className={`steps-content my-[20px] ${currentStep !== 1 ? "hidden" : ""}`}
+          style={{ display: withApprovalAndAttachment ? undefined : "none" }}
         >
           <p className="text-primary uppercase font-bold mb-4">
             Approval Information
@@ -458,6 +573,7 @@ const ModalCreateMutationDetail = ({
         {/* ========== STEP 3: ATTACHMENT ========== */}
         <div
           className={`steps-content my-[20px] ${currentStep !== 2 ? "hidden" : ""}`}
+          style={{ display: withApprovalAndAttachment ? undefined : "none" }}
         >
           <p className="text-primary uppercase font-bold mb-4">
             Attachment Information
@@ -474,6 +590,7 @@ const ModalCreateMutationDetail = ({
             configApplication={configApp.RATING_BILLING_SERVICE}
             getAPIGuard={getConfigFileRBIData}
             typeRBI="data"
+            mandatory={true}
           />
         </div>
       </Form>
