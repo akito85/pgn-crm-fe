@@ -1,6 +1,5 @@
 import NxTable from "../../../../components/Nx/NxTable";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { getGasDepositDetailColumns } from "./getGasDepositDetailColumns";
 import { useDispatch, useSelector } from "react-redux";
 import { getGasDepositDetails } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
@@ -43,11 +42,6 @@ const GasDepositDetailTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const fixedColumns = {
-    right: ["status"],
-    left: [],
-  };
 
   // --- Handlers ---
   /**
@@ -159,19 +153,15 @@ const GasDepositDetailTable = ({
   }, [sort, search, filters, filterRules, parentKey]);
 
   // --- Column configuration ---
-  const columnDefinitions = useMemo(() =>
-    getGasDepositDetailColumns(
+  const columns = useMemo(() =>
+    getGasDepositDetailColumns({
       search,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
-    ),
-  [search, searchText, searchedColumn]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions]);
+    }),
+  [search, searchInput, searchText, searchedColumn]);
 
   /**
    * Renders the expanded child row for a gas deposit detail record.
@@ -189,28 +179,25 @@ const GasDepositDetailTable = ({
   );
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <NxTable
-        idTable="gas-deposit-detail-table"
-        dataSource={dataSource}
-        totalData={totalElement}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 1500 }}
-        onSort={onSort}
-        columns={columns}
-        usePagination={false}
-        useInfiniteScroll
-        hasMore={hasMore}
-        loadMoreThreshold={20}
-        onLoadMore={handleLoadMore}
-        loading={loading}
-        expandable={{ expandedRowRender }}
-        onRefresh={handleRefresh}
-        columnDefinitions={columnDefinitions}
-        showAdvanceSearch={false}
-        showSearchBar={false}
-        useSelect={false}
-      />
-    </div>
+    <NxTable
+      idTable="gas-deposit-detail-table"
+      dataSource={dataSource}
+      totalData={totalElement}
+      tableScrolled={{ x: dataSource.length ? "max-content" : 1500 }}
+      onSort={onSort}
+      columns={columns}
+      usePagination={false}
+      useInfiniteScroll
+      hasMore={hasMore}
+      loadMoreThreshold={20}
+      onLoadMore={handleLoadMore}
+      loading={loading}
+      expandable={{ expandedRowRender }}
+      onRefresh={handleRefresh}
+      showAdvanceSearch={false}
+      showSearchBar={false}
+      useSelect={false}
+    />
   );
 };
 

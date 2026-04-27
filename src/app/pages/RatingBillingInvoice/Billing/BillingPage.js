@@ -6,7 +6,9 @@ import React, {
   useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Tooltip } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Tooltip, Dropdown, Menu } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
@@ -20,15 +22,19 @@ import {
   getApprovalHistory,
   setBillingFilters,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
+import { checkAccountingExists } from "../../../../redux/slices/rating_billing_invoice/accounting";
+import { showModalError } from "../../../../redux/slices/general_slice";
 import { columnsBilling } from "./Table/TableViewBilling";
 import BillingDetail from "./Detail/BillingDetail";
 import ModalRequestApproval from "./ModalRequestApproval";
 import ModalApprovalBilling from "./ModalApprovalBilling";
+import ModalCancelBilling from "./ModalCancelBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
+import { CloseSquareOutlined } from "@ant-design/icons";
 
 const BillingPage = () => {
   const { data, loadingList, loadingHistory, data_approval_history, filters } = useSelector(
@@ -36,6 +42,7 @@ const BillingPage = () => {
   );
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
   const dataSource = data?.result;
   const detailRef = useRef(null);
@@ -51,6 +58,7 @@ const BillingPage = () => {
   const [modalRequest, setModalRequest] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [modalApproval, setModalApproval] = useState(false);
+  const [modalCancel, setModalCancel] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [billingCode, setBillingCode] = useState("");
   const [billHeaderId, setBillHeaderId] = useState("");
@@ -60,10 +68,23 @@ const BillingPage = () => {
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedBillingData, setSelectedBillingData] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["statusApproval", "action"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("billingFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["statusApproval", "action"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("billingFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   // Simpan filters ke Redux
   useEffect(() => {
@@ -106,8 +127,16 @@ const BillingPage = () => {
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
       const temp = {
-        dataApprover: data_approval_history?.dataApprover?.BILLING || [],
-        dataHistory: data_approval_history?.dataHistory?.BILLING || [],
+        dataApprover: {
+          billing: data_approval_history?.dataApprover?.BILLING || [],
+          canceled_billing:
+            data_approval_history?.dataApprover?.CANCELED_BILLING || [],
+        },
+        dataHistory: {
+          billing: data_approval_history?.dataHistory?.BILLING || [],
+          canceled_billing:
+            data_approval_history?.dataHistory?.CANCELED_BILLING || [],
+        },
       };
       setDataApprovalHistory(temp);
     } else {
@@ -203,6 +232,12 @@ const BillingPage = () => {
     setModalApprovalHistory(true);
   };
 
+  const handleCancelBilling = (e, record) => {
+    e.stopPropagation();
+    setSelectedBillingData(record);
+    setModalCancel(true);
+  };
+
   const handleRefresh = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
 
@@ -276,12 +311,79 @@ const BillingPage = () => {
     {
       action: "History",
       type: "table",
+      render: (record) => {
+        const menu = (
+          <Menu>
+            <Menu.Item
+              key="approval-history"
+              icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                handleApprovalHistory(record);
+              }}
+            >
+              Approval History
+            </Menu.Item>
+            <Menu.Item
+              key="create-accounting"
+              icon={<SVGIcon name="IconButtonCreate" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                dispatch(checkAccountingExists(record.invoiceNumber))
+                  .unwrap()
+                  .then((result) => {
+                    if (result?.exists) {
+                      dispatch(
+                        showModalError({
+                          title: "Accounting Already Exists",
+                          description: `An accounting journal already exists for this billing (Status: ${result.status || "-"}). Please use View Accounting to review it.`,
+                        })
+                      );
+                    } else {
+                      navigate(RBI_ROUTES.ACCOUNTING_CREATE, {
+                        state: { billingData: record },
+                      });
+                    }
+                  })
+                  .catch(() => {});
+              }}
+            >
+              Create Accounting
+            </Menu.Item>
+            <Menu.Item
+              key="view-accounting"
+              icon={<SVGIcon name="IconReport" color={"#0075bf"} width={16} />}
+              onClick={(e) => {
+                e.domEvent.stopPropagation();
+                navigate(RBI_ROUTES.ACCOUNTING_VIEW, {
+                  state: { billingData: record },
+                });
+              }}
+            >
+              View Accounting
+            </Menu.Item>
+          </Menu>
+        );
+        return (
+          <Dropdown overlay={menu} trigger={["click"]} placement="bottomRight">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{ cursor: "pointer", display: "inline-flex", alignItems: "center" }}
+            >
+              <MoreOutlined className="text-xl text-[#0075bf] cursor-pointer" />
+            </div>
+          </Dropdown>
+        );
+      },
+    },
+    {
+      action: "Cancel",
+      type: "table",
       render: (record) => (
-        <Tooltip title="Approval Hierarchy">
+        <Tooltip title="Cancel Billing">
           <div
             onClick={(e) => {
-              e.stopPropagation();
-              handleApprovalHistory(record);
+              handleCancelBilling(e, record);
             }}
             style={{
               cursor: "pointer",
@@ -289,7 +391,10 @@ const BillingPage = () => {
               lineHeight: 0,
             }}
           >
-            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+            <CloseSquareOutlined
+              width={20}
+              style={{ color: "#0075BF" }}
+            />
           </div>
         </Tooltip>
       ),
@@ -297,7 +402,7 @@ const BillingPage = () => {
   ];
 
   const actionCols = useColumnActionPermission(
-    ["view", "history"],
+    ["view", "history", "cancel"],
     itemGrantAccess,
   ).map((col) => ({
     ...col,
@@ -412,6 +517,10 @@ const BillingPage = () => {
         handleClose={() => setModalApprovalHistory(false)}
         header={"Approval History"}
         width={1000}
+        tabOptions={[
+          { value: "billing", label: "Request" },
+          { value: "canceled_billing", label: "Cancel" },
+        ]}
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
         loading={loadingHistory}
@@ -429,6 +538,14 @@ const BillingPage = () => {
         handleCancel={() => setModalApproval(false)}
         handleRefresh={handleRefresh}
         handleOpenModal={() => setModalApproval(true)}
+      />
+
+      <ModalCancelBilling
+        isOpen={modalCancel}
+        handleCancel={() => setModalCancel(false)}
+        handleRefresh={handleRefresh}
+        handleOpenModal={() => setModalCancel(true)}
+        selectedBilling={selectedBillingData}
       />
     </>
   );

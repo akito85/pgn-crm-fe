@@ -24,6 +24,7 @@ const initialState = {
   data_condition_name: [],
   data_condition_operator: [],
   data_condition_type: [],
+  data_gl_account_list: [],
   dataForm: [],
   dataListCategory: [],
 };
@@ -220,6 +221,32 @@ export const getConditionType = createAsyncThunk(
       const url = "/v1/dbs/api/tax-code/get-conditon-type";
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  },
+);
+
+export const getGlAccountList = createAsyncThunk(
+  "GET_GL_ACCOUNT_LIST_TAX_CODE",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/tax-code/list-gl-account";
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data?.data || response.data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -461,6 +488,46 @@ export const inactiveTaxCode = createAsyncThunk(
   },
 );
 
+export const requestActivateTaxCode = createAsyncThunk(
+  "REQUEST_ACTIVATE_TAX_CODE",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/tax-code/request-activate`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const successBody = {
+        title: "Successful",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not submitted. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+    }
+  },
+);
+
 export const createTaxCode = createAsyncThunk(
   "CREATE_TAX_CODE",
   async ({ body }, thunkAPI) => {
@@ -469,9 +536,8 @@ export const createTaxCode = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "DRAFT" ? "created" : "submitted"
-        }.`,
+        description: `Your data has been ${body.action === "DRAFT" ? "created" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -488,9 +554,8 @@ export const createTaxCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "DRAFT" ? "created" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "DRAFT" ? "created" : "submitted"
+              }. ${message}.`,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -508,9 +573,8 @@ export const updateTaxCode = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "DRAFT" ? "updated" : "submitted"
-        }.`,
+        description: `Your data has been ${body.action === "DRAFT" ? "updated" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -527,9 +591,8 @@ export const updateTaxCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "DRAFT" ? "updated" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "DRAFT" ? "updated" : "submitted"
+              }. ${message}.`,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -550,9 +613,8 @@ export const approvalInactiveTaxCode = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -571,9 +633,8 @@ export const approvalInactiveTaxCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -595,9 +656,8 @@ export const approvalRejectTaxCode = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -614,9 +674,8 @@ export const approvalRejectTaxCode = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -626,6 +685,49 @@ export const approvalRejectTaxCode = createAsyncThunk(
     }
   },
 );
+
+export const approvalActivatedTaxCode = createAsyncThunk(
+  "APPROVAL_ACTIVATED_TAX_CODE",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/tax-code/approve-activated`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const successBody = {
+        title: "Successful",
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+    }
+  },
+);
+
+
 
 const taxCodeSlice = createSlice({
   name: "tax_code",
@@ -849,6 +951,20 @@ const taxCodeSlice = createSlice({
       state.message = action.payload;
     },
 
+    // Request Activate Tax Code
+    [requestActivateTaxCode.pending]: (state) => {
+      state.loading = true;
+    },
+    [requestActivateTaxCode.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [requestActivateTaxCode.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
     // Create Tax Code
     [createTaxCode.pending]: (state) => {
       state.loading = true;
@@ -872,6 +988,33 @@ const taxCodeSlice = createSlice({
     [updateTaxCode.rejected]: (state) => {
       state.loading = false;
     },
+
+    // Approval Activated Tax Code
+    [approvalActivatedTaxCode.pending]: (state) => {
+      state.loading = true;
+    },
+    [approvalActivatedTaxCode.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approvalActivatedTaxCode.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    // Get GL Account List
+    [getGlAccountList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getGlAccountList.fulfilled]: (state, action) => {
+      state.data_gl_account_list = action.payload || [];
+      state.loading = false;
+    },
+    [getGlAccountList.rejected]: (state) => {
+      state.loading = false;
+    },
+
   },
 });
 

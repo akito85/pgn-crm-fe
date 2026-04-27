@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
+import { Alert, Button, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined, DownloadOutlined } from "@ant-design/icons";
 import {
   addDeletedData,
   addUpdatedData,
@@ -15,6 +15,7 @@ import {
   getListApprovalById,
   updateSingleUsage,
   deleteSingleUsage,
+  clearDetailData,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../components/CardContainer";
@@ -105,6 +106,10 @@ const DetailMonitoringUsage = () => {
       dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
       setPage(1);
     }
+    
+    return () => {
+      dispatch(clearDetailData());
+    };
   }, [location, dispatch]);
 
   useEffect(() => {
@@ -238,15 +243,8 @@ const DetailMonitoringUsage = () => {
         costCenter: formValue?.costCenter || null,
         assetSerialNum: formValue?.assetSerialNum || null,
         assetType: formValue?.assetType || null,
-        fdate:
-          formValue?.fdate === false
-            ? null
-            : moment(formValue?.fdate).format(dateFormatting.dateFormal),
-        fhour: hasValue(formValue?.fhour)
-          ? moment(formValue?.fhour).format(dateFormatting.fhour)
-          : null,
         measDate: formValue?.measDate
-          ? moment(formValue?.measDate).toISOString()
+          ? moment(formValue?.measDate).format("YYYY-MM-DDTHH:mm:ss")
           : null,
         streamId: parseNumericValue(formValue?.streamId),
         temperature: parseNumericValue(formValue?.temperature),
@@ -286,9 +284,13 @@ const DetailMonitoringUsage = () => {
           const updatedRow = {
             ...item,
             ...formValue,
-            fdate: requestBody.fdate,
-            fhour: requestBody.fhour,
             measDate: requestBody.measDate,
+            fdate: requestBody.measDate
+              ? moment(requestBody.measDate).format(dateFormatting.dateFormal)
+              : null,
+            fhour: requestBody.measDate
+              ? moment(requestBody.measDate).format(dateFormatting.fhour)
+              : null,
             streamId: requestBody.streamId,
             temperature: requestBody.temperature,
             pressure: requestBody.pressure,
@@ -536,6 +538,26 @@ const DetailMonitoringUsage = () => {
                       </StatusComponent>
                     </DetailText>
                   </div>
+                  {detail_batch?.batchInformation?.totalFailed > 0 && (
+                    <div className="mt-1 mb-3 flex justify-start">
+                      <Button
+                        type="link"
+                        onClick={handleDownloadFailed}
+                        style={{
+                          color: "#0075BF",
+                          fontSize: "13px",
+                          padding: "0 4px",
+                          height: "auto",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <DownloadOutlined style={{ fontSize: "16px" }} />
+                        Download Failed Data
+                      </Button>
+                    </div>
+                  )}
                 </CollapsibleContainer>
 
                 <CollapsibleContainer header={"Usage List"} border className="mt-1">
@@ -608,21 +630,68 @@ const DetailMonitoringUsage = () => {
                 </CardContainer>
 
           {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
-            <FormFooter
-              onCancel={handleBack}
-              onClear={handleClear}
-              onSaveDraft={() => {
-                setFlag(2);
-                form.submit();
-              }}
-              saveDraftLabel="Save & Submit"
-              saveDraftStyle={{
-                backgroundColor: "#388E3C",
-                borderColor: "#388E3C",
-                color: "#fff",
-              }}
-              useNavigation={false}
-            />
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+              <div className="flex w-full justify-between items-center">
+                <Button
+                  onClick={handleBack}
+                  className="!border-[#0075BF] !text-[#0075BF]"
+                >
+                  Cancel
+                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    icon={<SVGIcon name="IconButtonClear" width={18} />}
+                    onClick={handleClear}
+                    style={{
+                      backgroundColor: "#BE3036",
+                      borderColor: "#BE3036",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      height: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Clear Data
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setFlag(1);
+                      form.submit();
+                    }}
+                    style={{
+                      backgroundColor: "#E6F1F9",
+                      borderColor: "#E6F1F9",
+                      color: "#0075BF",
+                      borderRadius: "6px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setFlag(2);
+                      form.submit();
+                    }}
+                    loading={loading}
+                    disabled={loading}
+                    style={{
+                      backgroundColor: "#388E3C",
+                      borderColor: "#388E3C",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <FormFooter
               onCancel={handleBack}

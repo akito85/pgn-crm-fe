@@ -1,15 +1,15 @@
 import React from "react";
 import { Form, Select } from "antd";
-import BaseContainer from "../../../../../../components/BaseContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import { formMessageRequired } from "../../../../../../utils";
 import DateComponent from "../../../../../../components/DateComponent";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DailyRateCreate = ({ dataCurrency, dataRateType }) => {
   return (
-    <BaseContainer header={"DAILY RATES INFORMATION"}>
-      <div className="w-full grid grid-cols-3 gap-5">
+    <CardContainer header={"DAILY RATES INFORMATION"}>
+      <div className="w-full grid grid-cols-3 gap-2">
         <Form.Item
           label={"Rate Type"}
           name={"rateType"}
@@ -56,12 +56,6 @@ const DailyRateCreate = ({ dataCurrency, dataRateType }) => {
           name={"rateDate"}
           rules={formMessageRequired("Rate Date")}
         >
-          {/* <DatePicker
-            disabledDate={(current) => {
-              return current && current < moment().add(-1, "days");
-            }}
-            className={"w-full"}
-          /> */}
           <DateComponent />
         </Form.Item>
 
@@ -88,7 +82,7 @@ const DailyRateCreate = ({ dataCurrency, dataRateType }) => {
           <InputComponent rows={5} type="textarea" />
         </Form.Item>
       </div>
-    </BaseContainer>
+    </CardContainer>
   );
 };
 

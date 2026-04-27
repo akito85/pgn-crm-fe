@@ -48,6 +48,7 @@ import itemReducer from "../slices/receipt_collection/paymentItem";
 import billingReducer from "../slices/rating_billing_invoice/billing";
 import adjustmentBillingReducer from "../slices/rating_billing_invoice/adjustmentBilling";
 import adjustmentInvoiceReducer from "../slices/rating_billing_invoice/adjustmentInvoice";
+import rbiAccountingReducer from "../slices/rating_billing_invoice/accounting";
 import accountReducer from "../slices/account_management/Account/accountSlice";
 import cycleReducer from "../slices/receipt_collection/transactionCalender";
 import financialInformationReducer from "../slices/account_management/detailAccount/FinancialInformationSlice";
@@ -62,6 +63,7 @@ import postOfSalesReducer from "../slices/rating_billing_invoice/PointOfSales";
 import tosSubmissionReducer from "../slices/account_management/detailAccount/tosSubmissionSlice";
 import saWarrantyReducer from "../slices/account_management/detailAccount/warrantySlice";
 import invoiceReducer from "../slices/rating_billing_invoice/invoice";
+import proformaInvoiceReducer from "../slices/rating_billing_invoice/proformaInvoice";
 import attachmentReducer from "../slices/attachmentSlice";
 import locationReducer from "../slices/account_management/MasterData/location_slice";
 import addressesReducer from "../slices/account_management/MasterData/addresses_slice";
@@ -248,9 +250,11 @@ const reducer = combineReducers({
   billing: billingReducer,
   adjustmentBilling: adjustmentBillingReducer,
   adjustmentInvoice: adjustmentInvoiceReducer,
+  rbiAccounting: rbiAccountingReducer,
   rating: ratingReducer,
   pointOfSales: postOfSalesReducer,
   invoice: invoiceReducer,
+  proformaInvoice: proformaInvoiceReducer,
   late_charge: lateChargeReducer,
   general_template: generalTemplateReducer,
   billing_item: billingItemReducer,

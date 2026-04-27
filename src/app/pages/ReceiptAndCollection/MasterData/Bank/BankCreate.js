@@ -40,8 +40,12 @@ const BankCreate = ({
   };
 
   const validateNPWP = (_, value) => {
-    if (!value || value.length <= 16) {
-      return Promise.reject("Input number must be 16 digits!");
+    if (!value) {
+      return Promise.reject("NPWP wajib diisi!");
+    }
+    const digitsOnly = value.replace(/\D/g, "");
+    if (digitsOnly.length !== 16) {
+      return Promise.reject("NPWP harus terdiri dari 16 digit!");
     }
     return Promise.resolve();
   };
@@ -166,6 +170,10 @@ const BankCreate = ({
           <Form.Item
             label="Telephone Number"
             name="phoneNumber"
+            rules={[
+              { required: true, message: "Phone number is required!" },
+              { pattern: /^[0-9]{5,13}$/, message: "Phone number must be 5-13 digits!" },
+            ]}
           >
             <InputComponent
               allowClear
@@ -179,7 +187,8 @@ const BankCreate = ({
             label="Email"
             name="email"
             rules={[
-              { type: "email", message: "Invalid E-mail!" },
+              { required: true, message: "Email is required!" },
+              { type: "email", message: "Invalid email format! Example: name@domain.com" },
             ]}
           >
             <InputComponent placeholder="Input Email" />

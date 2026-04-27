@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs } from "antd";
 import TableRBI from "../../../../../components/TableRBI";
@@ -306,7 +306,7 @@ const ServiceAgreementSection = ({
     }
   }, [pageDetail, prabillSaId]);
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
@@ -319,7 +319,7 @@ const ServiceAgreementSection = ({
         [dataIndex]: selectedKeys[0],
       };
     });
-  };
+  }, []);
 
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -334,12 +334,12 @@ const ServiceAgreementSection = ({
     setSort(dataSort);
   };
 
-  const handleDetail = (record) => {
+  const handleDetail = useCallback((record) => {
     setPageDetail(true);
     setPrabillSaId(record.prabillSaId);
     setSaNumber(record.saNumber);
     setTabSection("Detail");
-  };
+  }, []);
 
   const serviceTabItems = [
     {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Form, Spin, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { WarningOutlined } from "@ant-design/icons";
@@ -24,8 +24,6 @@ import {
   getListCategory,
   createMasterBank,
   createValidasiBank,
-  getAllGLAccount,
-  getAllGLType,
   getJobContact,
   getPositionContact,
   getInputTypeContact,
@@ -33,13 +31,13 @@ import {
   getContryContact,
   getAllContactPaginate,
   getBankDetail,
-  getContactAddress // <-- 1. IMPORT FUNGSI API ADDRESS
+  getContactAddress,
+  getAllGLType,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { intToNPWP } from "../../../../../utils/npwp";
 
 import BankCreate from "./BankCreate";
-import GLAccountCreate from "./GLAccountCreate";
 import ContactSection from "./ContactSection";
 import ContentModalConfirmBank from "./ContentModalConfirmBank";
 
@@ -56,8 +54,6 @@ const BankForm = ({ type }) => {
     loading,
     dataListAppHierId,
     dataListAppHierDetail,
-    dataGLAccount,
-    dataGLType,
     data_job,
     data_position,
     data_contactType,
@@ -66,7 +62,8 @@ const BankForm = ({ type }) => {
     data_countryZone,
     data_contact,
     data_detail,
-    data_contactAddress // <-- 2. TARIK DARI REDUX STATE
+    data_contactAddress,
+    dataGLType,
   } = useSelector((state) => state.bank);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -83,19 +80,19 @@ const BankForm = ({ type }) => {
   // --- 3. BIKIN STATE UNTUK OPSI ADDRESS ---
   const [addressOptions, setAddressOptions] = useState([]);
   // -----------------------------------------
-
-  const [glAccountData, setGlAccountData] = useState([]);
-  const [contactData, setContactData] = useState([]);
-
-  const [glOptions, setGlOptions] = useState([]);
   const [glTypeOptions, setGlTypeOptions] = useState([]);
+
+  const [contactData, setContactData] = useState([]);
 
   const [selectedHierarchy, setSelectedHierarchy] = useState(null);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
+  const [initialAttachmentIds, setInitialAttachmentIds] = useState([]);
 
+  const [flag, setFlag] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [kirimBody, setKirimBody] = useState({});
   const [codeBank, setCodeBank] = useState("");
@@ -103,8 +100,9 @@ const BankForm = ({ type }) => {
   const [contactPage, setContactPage] = useState(1); 
   const [contactPageSize, setContactPageSize] = useState(10);
 
+  const stepTitleMap = { create: "CREATE", update: "UPDATE", view: "VIEW" };
   const steps = [
-    { title: 'BANK' },
+    { title: stepTitleMap[type] || type?.toUpperCase() || "DETAIL" },
     { title: 'APPROVAL' },
     { title: 'ATTACHMENT' }
   ];
@@ -113,14 +111,12 @@ const BankForm = ({ type }) => {
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
     { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK, breadcrumbName: "Bank" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK, breadcrumbName: type === "create" ? "Create" : "Update" },
+    { path: type === "create" ? RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK : RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK, breadcrumbName: type === "create" ? "Create" : "Update" },
   ];
 
   useEffect(() => {
     dispatch(getAllBankNotBranch());
     dispatch(getAllApprovalList());
-    dispatch(getAllGLAccount());
-    dispatch(getAllGLType());
     dispatch(getJobContact());
     dispatch(getPositionContact());
     dispatch(getInputTypeContact());
@@ -129,6 +125,7 @@ const BankForm = ({ type }) => {
     
     // --- 4. TEMBAK API ADDRESS ---
     dispatch(getContactAddress());
+    dispatch(getAllGLType());
     // -----------------------------
     
     if (type === "update" && idBank) {
@@ -150,21 +147,11 @@ const BankForm = ({ type }) => {
         phoneNumber: bank.phoneNumber,
         email: bank.email,
         address: bank.address,
+        apphierId: bank.appHierId,
       });
       setCodeBank(bank.bankCode);
 
       setSelectedHierarchy(bank.appHierId);
-
-      if (bank.bankglAccount?.length > 0) {
-        const mappedGL = bank.bankglAccount.map((gl, index) => ({
-          key: gl.id || Date.now() + index,
-          id: gl.id,
-          type: Number(gl.glType) || gl.glType, 
-          glNumber: gl.accountNumber,
-          glDesc: gl.accountDes,
-        }));
-        setGlAccountData(mappedGL);
-      }
 
       if (bank.bankContacts?.length > 0) {
         const mappedContacts = bank.bankContacts.map((c, idx) => ({
@@ -195,7 +182,8 @@ const BankForm = ({ type }) => {
       }
 
       if (data_detail.attachmentDtoList?.length > 0) {
-        const mappedAtt = data_detail.attachmentDtoList.map((att) => ({
+        const mappedAtt = data_detail.attachmentDtoList.map((att, index) => ({
+          key: index + 1,
           id: att.id,
           uid: att.id,
           name: att.fileName,
@@ -212,6 +200,11 @@ const BankForm = ({ type }) => {
           file: null 
         }));
         setListDataAttachment(mappedAtt);
+        setInitialAttachmentIds(
+          mappedAtt
+            .filter((item) => item.dataType === "exist" && item.id)
+            .map((item) => item.id)
+        );
       }
     }
   }, [data_detail, type, idBank, form]);
@@ -237,6 +230,12 @@ const BankForm = ({ type }) => {
   // -------------------------------------------------------------
 
   useEffect(() => {
+    if (dataGLType?.length > 0) {
+      setGlTypeOptions(dataGLType.map(item => ({ label: item.name, value: item.id })));
+    }
+  }, [dataGLType]);
+
+  useEffect(() => {
     if (data_job?.length > 0) setJobOptions(data_job.map(item => ({ label: item.name, value: item.id })));
   }, [data_job]);
 
@@ -258,23 +257,6 @@ const BankForm = ({ type }) => {
   useEffect(() => {
     if (data_countryCode?.length > 0) setPrefixOptions(data_countryCode.map(item => ({ label: item.name, value: item.id })));
   }, [data_countryCode]);
-
-  useEffect(() => {
-    if (dataGLAccount?.length > 0) {
-      setGlOptions(dataGLAccount.map((item) => ({
-        label: `${item.name} - ${item.desc}`,
-        value: item.id,
-        labelName: item.desc,
-        labelNumber: item.name
-      })));
-    }
-  }, [dataGLAccount]);
-
-  useEffect(() => {
-    if (dataGLType?.length > 0) {
-      setGlTypeOptions(dataGLType.map((item) => ({ label: item.name, value: item.id })));
-    }
-  }, [dataGLType]);
 
   useEffect(() => {
     if (data_countryZone?.length > 0) {
@@ -314,10 +296,6 @@ const BankForm = ({ type }) => {
           'npwp', 'phoneNumber', 'email', 'officeType', 'address'
         ]);
 
-        if (glAccountData.length === 0) {
-          message.error("GL Account Information tidak boleh kosong!");
-          return;
-        }
         if (contactData.length === 0) {
           message.error("Contact Information tidak boleh kosong!");
           return;
@@ -358,12 +336,23 @@ const BankForm = ({ type }) => {
     setCurrentStepIndex(0);
     setCodeBank("");
     setSelectedHierarchy(null);
-    setGlAccountData([]);
     setContactData([]);
     setListDataAttachment([]);
+    setDeletedAttachmentIds([]);
+    setInitialAttachmentIds([]);
   };
 
-  const handleSaveSubmit = async () => {
+  const handleSubmit = () => {
+    setFlag(true);
+    handleSaveSubmit(true);
+  };
+
+  const handleSaveDraft = () => {
+    setFlag(false);
+    handleSaveSubmit(false);
+  };
+
+  const handleSaveSubmit = async (isSubmit = true) => {
     try {
       if (listDataAttachment.length === 0) {
         message.error("Attachment wajib diupload minimal 1 dokumen!");
@@ -397,18 +386,10 @@ const BankForm = ({ type }) => {
         }))
       }));
 
-      const formattedGLAccounts = glAccountData.map((gl) => {
-        const selectedGL = glOptions.find(opt => opt.value === gl.glNumber);
-        return {
-          id: gl.id || null,
-          glType: gl.type,           
-          accountNumber: selectedGL ? selectedGL.labelNumber : gl.glNumber, 
-          accountDes: gl.glDesc      
-        };
-      });
-
       const officeTypeVal = formValue.officeType?.toLowerCase();
       const isBranch = officeTypeVal === "branch" || officeTypeVal === "cabang";
+
+      const formattedGLAccounts = [];
 
       const dataValue = {
         id: type === "update" ? idBank : null, 
@@ -424,6 +405,7 @@ const BankForm = ({ type }) => {
         bankShortName: formValue.bankShortName,
         bankContacts: formattedContacts,
         glAccounts: formattedGLAccounts,
+        isSubmit,
       };
 
       setKirimBody(dataValue);
@@ -445,52 +427,104 @@ const BankForm = ({ type }) => {
     }
   };
 
-  const handleProcessModalConfirm = () => {
+  const rollbackAttachments = async (attachmentIds) => {
+    for (const attId of attachmentIds) {
+      try {
+        await receiptCollectionHttpService.deleteData(`/v1/dbs/api/attachment/delete/${attId}`);
+      } catch (err) {
+        console.error(`Rollback attachment ${attId} gagal:`, err);
+      }
+    }
+  };
+
+  const handleProcessModalConfirm = async () => {
     setLoadingForm(true);
+    const uploadedAttachmentIds = [];
 
     const finalPayload = JSON.parse(JSON.stringify(kirimBody));
 
     if (finalPayload.bankContacts?.length > 0) {
       finalPayload.bankContacts.forEach(contact => {
-        // delete contact.address; // <-- Ini aku komen ya, kalau address mau disave ke backend, jangan di-delete dari payload!
         delete contact.additionalNote;
       });
     }
 
-    dispatch(createMasterBank(finalPayload))
-      .unwrap()
-      .then(async (data) => {
-        let bankId = data.id;
+    try {
+      const data = await dispatch(createMasterBank(finalPayload)).unwrap();
+      const bankId = data.id;
 
-        for (let icon = 0; icon < listDataAttachment.length; icon++) {
-          const element = listDataAttachment[icon];
-          
-          if (element.dataType !== "exist") { 
+      // Delete removed existing attachments
+      const currentExistingIds = listDataAttachment
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      const calculatedDeletedIds = initialAttachmentIds.filter(
+        (idAttachment) => !currentExistingIds.includes(idAttachment)
+      );
+      const fileIdsToDelete = [...new Set([...deletedAttachmentIds, ...calculatedDeletedIds])];
+      if (fileIdsToDelete.length > 0) {
+        await receiptCollectionHttpService.deleteDataWithBody(
+          `/v1/dbs/api/attachment/delete-attachment`,
+          { fileId: fileIdsToDelete }
+        );
+      }
+
+      for (let i = 0; i < listDataAttachment.length; i++) {
+        const element = listDataAttachment[i];
+        if (element.dataType !== "exist") {
+          try {
             const body = {
               files: element.file,
               fileCategoryId: element.fileCategoryId,
               referensiId: bankId,
               category: "BANK",
             };
-            await receiptCollectionHttpService.uploadImage(
+            const uploadResult = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
               body
             );
+            if (uploadResult?.data?.id) uploadedAttachmentIds.push(uploadResult.data.id);
+          } catch (attError) {
+            throw new Error('Attachment upload failed. Bank data has been saved, but some attachments were not uploaded.');
           }
         }
+      }
 
-        setLoadingForm(false);
-        setModalConfirm(false);
-        handleClear();
-        dispatch(showModalSuccess({ title: "Successful", description: "Your data has been submitted" }));
-        navigate(-1);
-      })
-      .catch((error) => {
-        setLoadingForm(false);
-        const errorMsg = error.response?.data?.message || error.message || error.toString();
-        dispatch(showModalError({ title: "Failed", description: `Your data was not created. ${errorMsg}` }));
-      });
+      setLoadingForm(false);
+      setModalConfirm(false);
+      handleClear();
+      dispatch(showModalSuccess({
+        title: "Successful",
+        description: `Your data has been ${kirimBody.isSubmit ? "submitted" : "saved as draft"}.`,
+        return: false,
+      }));
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK);
+    } catch (error) {
+      if (uploadedAttachmentIds.length > 0) {
+        await rollbackAttachments(uploadedAttachmentIds);
+      }
+      setLoadingForm(false);
+      const errorMsg = error?.message || error?.response?.data?.message || error.toString();
+      dispatch(showModalError({ title: "Failed", description: errorMsg }));
+    }
   };
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState = typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some(
+          (newItem) => (newItem.key ?? newItem.id) === (item.key ?? item.id)
+        )
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...new Set([...prev, ...removedExistingIds])]);
+      }
+      return newState;
+    });
+  }, []);
 
   return (
     <>
@@ -514,12 +548,6 @@ const BankForm = ({ type }) => {
                 form={form}
                 setCodeBank={setCodeBank}
                 dataBank={dataBankNotBranch}
-              />
-              <GLAccountCreate
-                data={glAccountData}
-                setData={setGlAccountData}
-                glOptions={glOptions}
-                typeOptions={glTypeOptions}
               />
               <ContactSection
                 mainData={contactData}
@@ -562,7 +590,7 @@ const BankForm = ({ type }) => {
                 <AttachmentComponent
                   type={type}
                   data={listDataAttachment}
-                  updateData={setListDataAttachment}
+                  updateData={handleUpdateAttachment}
                   dispatch={dispatch}
                   getAPICategory={getListCategory}
                   typeSelector="bank"
@@ -581,7 +609,8 @@ const BankForm = ({ type }) => {
               onNext={handleNext}
               onCancel={handleBack}
               onClear={handleClear}
-              onSubmit={handleSaveSubmit}
+              onSaveDraft={handleSaveDraft}
+              onSubmit={handleSubmit}
               type={type}
             />
           </Form>
@@ -613,6 +642,10 @@ const BankForm = ({ type }) => {
             listDataAppHierDetail={appHierDataDetail}
             dataOption={appHierOptions}
             selectedHierarchy={selectedHierarchy}
+            glTypeOptions={glTypeOptions}
+            jobOptions={jobOptions}
+            positionOptions={positionOptions}
+            addressOptions={addressOptions}
           />
         </ModalCustom>
 

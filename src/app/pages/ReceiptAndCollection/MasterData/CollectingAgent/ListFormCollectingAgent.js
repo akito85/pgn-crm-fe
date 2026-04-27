@@ -503,6 +503,7 @@ const ListFormCollectingAgent = (props) => {
                         >
                             <AttachmentComponent
                                 type={type}
+                                mandatory={true}
                                 data={listDataAttachment}
                                 updateData={setListDataAttachment}
                                 typeSelector="collectingAgent"

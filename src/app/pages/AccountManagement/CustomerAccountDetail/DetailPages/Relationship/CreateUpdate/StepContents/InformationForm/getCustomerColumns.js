@@ -2,6 +2,18 @@ import { Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
+/**
+ * Builds Ant Design column definitions for the customer selection table.
+ *
+ * @param {object}   search          - Active search filters keyed by dataIndex.
+ * @param {object}   searchInput     - Ref attached to the search input element.
+ * @param {string}   searchedColumn  - dataIndex of the currently searched column.
+ * @param {string}   searchText      - Current search text value.
+ * @param {Function} handleSearch    - Column search submit handler.
+ * @param {Function} [handleSelect]  - Called with the selected row record.
+ * @param {Function} [handleCancel]  - Closes the parent modal.
+ * @returns {object[]} Array of Ant Design column definition objects.
+ */
 const getCustomerColumns = (
   search,
   searchInput,
@@ -24,7 +36,6 @@ const getCustomerColumns = (
     dataIndex: "customerNumber",
     width: 220,
     sorter: true,
-    filteredValue: [search?.customerNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerNumber",
@@ -32,7 +43,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -41,7 +51,6 @@ const getCustomerColumns = (
     dataIndex: "partyType",
     width: 231,
     sorter: true,
-    filteredValue: [search?.partyType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "partyType",
@@ -49,7 +58,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -58,7 +66,6 @@ const getCustomerColumns = (
     dataIndex: "customerIdentificationNumber",
     width: 343,
     sorter: true,
-    filteredValue: [search?.customerIdentificationNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerIdentificationNumber",
@@ -66,7 +73,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -75,7 +81,6 @@ const getCustomerColumns = (
     dataIndex: "customerName",
     width: 200,
     sorter: true,
-    filteredValue: [search?.customerName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerName",
@@ -83,7 +88,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -92,7 +96,6 @@ const getCustomerColumns = (
     dataIndex: "customerType",
     width: 194,
     sorter: true,
-    filteredValue: [search?.customerType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "customerType",
@@ -100,7 +103,6 @@ const getCustomerColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {

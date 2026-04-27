@@ -1,0 +1,34 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Approval History",
+    "data": {
+        "dataApprover": [
+            { "name": "Dedi Suwandi", "role": "Requester", "status": "SUBMIT" },
+            { "name": "Manager A", "role": "Approver 1", "status": "APPROVE" },
+            { "name": "Manager B", "role": "Approver 2", "status": "PENDING" }
+        ],
+        "dataHistory": [
+            { 
+                "id": 1, 
+                "status": "SUBMIT", 
+                "hierarchy": 1, 
+                "name": "Dedi Suwandi", 
+                "role": "Requester", 
+                "taskDate": "2026-04-10T08:00:00Z", 
+                "actionDate": "2026-04-10T08:00:00Z", 
+                "description": "Initial submission for processing" 
+            },
+            { 
+                "id": 2, 
+                "status": "APPROVE", 
+                "hierarchy": 2, 
+                "name": "Manager A", 
+                "role": "Approver 1", 
+                "taskDate": "2026-04-10T08:00:00Z", 
+                "actionDate": "2026-04-10T10:30:00Z", 
+                "description": "Verified and approved" 
+            }
+        ]
+    }
+}

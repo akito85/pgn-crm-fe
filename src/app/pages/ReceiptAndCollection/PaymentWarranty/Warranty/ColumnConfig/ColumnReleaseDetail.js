@@ -18,7 +18,7 @@ export const getReleaseDetailColumns = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     { 
-      title: "PAYMENT GUARANTEE CODE", 
+      title: "PAYMENT GUARANTEE", 
       dataIndex: "warrantyCode", 
       width: 220,
       sorter: true,
@@ -85,7 +85,7 @@ export const getReleaseDetailColumns = (
       ...getColumnSearchPropsPaging("warrantyType", searchInput, searchedColumn, searchText, handleSearch),
     },
     { 
-      title: "ISSUER BANK", 
+      title: "ISSUER", 
       dataIndex: "issuerBank",
       sorter: true,
       ...getColumnSearchPropsPaging("issuerBank", searchInput, searchedColumn, searchText, handleSearch),
@@ -109,7 +109,7 @@ export const getReleaseDetailColumns = (
       ...getColumnSearchPropsPaging("currency", searchInput, searchedColumn, searchText, handleSearch),
     },
     {
-      title: "CURRENCY BALANCE",
+      title: "BALANCE",
       dataIndex: "currencyBalance",
       align: "right",
       sorter: true,
@@ -135,7 +135,7 @@ export const getReleaseDetailColumns = (
       render: (text) => text?.toLocaleString(),
     },
     {
-      title: "EQV. AMOUNT",
+      title: "EQV. BALANCE",
       dataIndex: "equivalent",
       align: "right",
       sorter: true,

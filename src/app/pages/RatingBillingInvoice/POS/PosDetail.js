@@ -21,7 +21,7 @@ const PosDetail = ({ id, dispatch = () => {} }) => {
   const renderSection = () => {
     switch (detailPage) {
       case listDetailPage[0].value:
-        return <PointOfSales id={id?.posNumber} dispatch={dispatch} />;
+        return <PointOfSales id={id?.posNumber} customerType={id?.customerType} dispatch={dispatch} />;
       case listDetailPage[1].value:
         return <Promo id={id} />;
       case listDetailPage[2].value:

@@ -17,13 +17,13 @@ const GLAccountSection = ({ dataDetailGLAccount = {}, dataHistory = {} }) => {
       >
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
           <DetailText label={"GL Account Number"}>
-            {dataDetailGLAccount?.glAccount || "-"}
+            {dataDetailGLAccount?.glAccount || " "}
           </DetailText>
           <DetailText label={"GL Account Description"}>
-            {dataDetailGLAccount?.glAccountDesc || "-"}
+            {dataDetailGLAccount?.glAccountDesc || " "}
           </DetailText>
           <DetailText label={"Description"}>
-            {dataDetailGLAccount?.remark || "-"}
+            {dataDetailGLAccount?.remark || " "}
           </DetailText>
         </div>
       </CardContainer>
@@ -38,23 +38,23 @@ const GLAccountSection = ({ dataDetailGLAccount = {}, dataHistory = {} }) => {
       >
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2">
           <DetailText label={"Record ID"}>
-            {dataHistory?.recordId || "-"}
+            {dataHistory?.recordId || " "}
           </DetailText>
           <DetailText label={"Created Date"}>
             {dataHistory?.createdDate
               ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)
-              : "-"}
+              : " "}
           </DetailText>
           <DetailText label={"Created By"}>
-            {dataHistory?.createdBy || "-"}
+            {dataHistory?.createdBy || " "}
           </DetailText>
           <DetailText label={"Updated Date"}>
             {dataHistory?.updatedDate
               ? moment(dataHistory.updatedDate).format(dateFormatting.dateTime)
-              : "-"}
+              : " "}
           </DetailText>
           <DetailText label={"Updated By"}>
-            {dataHistory?.updatedBy || "-"}
+            {dataHistory?.updatedBy || " "}
           </DetailText>
         </div>
       </CardContainer>

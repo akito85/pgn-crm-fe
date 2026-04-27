@@ -7,6 +7,7 @@ import BillingBucketInfo from "../Utils/BillingBucketInfo";
 import FunctionalCriteriaBillingBucket from "../Form/FunctionalCriteriaBillingBucket";
 import BillingBucketDetailSectionForm from "../Modal/BillingBucketDetailSectionForm";
 import RadioTabs from "../../../../../../components/RadioTabs";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DetailSection = ({
   dataBillingBucket,
@@ -27,11 +28,11 @@ const DetailSection = ({
 
   return (
     <div>
-      <BaseContainer header={"Billing Bucket Information"}>
+      <CardContainer header={"Billing Bucket Information"}>
         <BillingBucketInfo data={dataBillingBucket} preview="detail" />
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer
+      <CardContainer
         header={"Billing Bucket Detail Information"}
         type={"tabs"}
         element={
@@ -45,6 +46,9 @@ const DetailSection = ({
         {valuePage === "Detail" ? (
           <BillingBucketDetailSectionForm
             listDataBI={listDataBI}
+            billingBucketCategory={
+              dataBillingBucket?.information?.category || dataBillingBucket?.category
+            }
             type={"show"}
             showAction="show"
           />
@@ -56,9 +60,9 @@ const DetailSection = ({
             showAction={"show"}
           />
         )}
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"history log information"}>
+      <CardContainer header={"history log information"}>
         <div className="w-full grid grid-cols-5 gap-3">
           <DetailText label={"Record ID"}>{dataHistory?.recordId}</DetailText>
           <DetailText label="Created Date">
@@ -74,7 +78,7 @@ const DetailSection = ({
           </DetailText>
           <DetailText label="Updated By">{dataHistory?.updatedBy}</DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

@@ -40,11 +40,14 @@ const EditableCell = ({
   required,
   disableDate,
   onCellClicked,
+  onDropdownVisibleChange,
+  selectLoading,
   onInput,
   maxLength,
   form,
   startDateLock,
   endDateLock,
+  disabledColumns = [],
   ...restProps
 }) => {
   const key = record?.key || 0;
@@ -103,6 +106,7 @@ const EditableCell = ({
   };
 
   const handleDisabledColumn = (dataIndex, record = null) => {
+    if (disabledColumns.includes(dataIndex)) return true;
     if (dataIndex === "categoryName" || dataIndex === "itemName") {
       return record?.dataType === "exist" ? true : false;
     } else {
@@ -153,7 +157,11 @@ const EditableCell = ({
         return (
           <Select
             disabled={handleDisabledColumn(dataIndex, record)}
+            loading={selectLoading}
             onChange={(val) => onCellClicked && onCellClicked(val, form)}
+            onDropdownVisibleChange={(open) =>
+              onDropdownVisibleChange && onDropdownVisibleChange(open, form)
+            }
             showSearch
             optionFilterProp="children"
             allowClear
@@ -203,7 +211,17 @@ const EditableCell = ({
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
       case "description_readonly":
-        return <Input.TextArea rows={1} disabled style={{ backgroundColor: "#f5f5f5", color: "#595959", cursor: "not-allowed" }} />;
+        return (
+          <Input.TextArea
+            rows={1}
+            disabled
+            style={{
+              backgroundColor: "#f5f5f5",
+              color: "#595959",
+              cursor: "not-allowed",
+            }}
+          />
+        );
       default:
         return <InputComponent />;
     }
@@ -290,6 +308,9 @@ const DynamicTableInlineBilling = ({
   setModalRequired = () => {},
   handleValidateUpdate = () => {},
   onCancelEdit = null,
+  defaultNewRowValues = {},
+  disabledColumns = [],
+  allowDeleteExisting = false,
 }) => {
   const [form] = Form.useForm();
   const [editingKey, setEditingKey] = useState("");
@@ -401,12 +422,14 @@ const DynamicTableInlineBilling = ({
 
   const save = async (key) => {
     const requiredHiddenCols = cols.filter(
-      (col) => col.required === true && optionSelectedCol.includes(col.title)
+      (col) => col.required === true && optionSelectedCol.includes(col.title),
     );
 
     if (requiredHiddenCols.length > 0) {
       setOptionSelectedCol((prev) =>
-        prev.filter((title) => !requiredHiddenCols.some((col) => col.title === title))
+        prev.filter(
+          (title) => !requiredHiddenCols.some((col) => col.title === title),
+        ),
       );
       setTimeout(() => {
         executeSave(key);
@@ -418,6 +441,9 @@ const DynamicTableInlineBilling = ({
 
   const addRow = () => {
     form.resetFields();
+    if (Object.keys(defaultNewRowValues).length > 0) {
+      form.setFieldsValue(defaultNewRowValues);
+    }
     setStoredData(true);
     setIsInsert(true);
     setStatusAction("add");
@@ -459,7 +485,7 @@ const DynamicTableInlineBilling = ({
           className={`flex justify-center${
             editingKey !== "" ||
             isDynamicEditable ||
-            record?.dataType === "exist"
+            (!allowDeleteExisting && record?.dataType === "exist")
               ? " cursor-not-allowed"
               : ""
           }`}
@@ -469,21 +495,21 @@ const DynamicTableInlineBilling = ({
             color={
               editingKey !== "" ||
               isDynamicEditable ||
-              record?.dataType === "exist"
+              (!allowDeleteExisting && record?.dataType === "exist")
                 ? "#8D91A0"
                 : "#D90000"
             }
             className={
               editingKey !== "" ||
               isDynamicEditable ||
-              record?.dataType === "exist"
+              (!allowDeleteExisting && record?.dataType === "exist")
                 ? "disabled"
                 : undefined
             }
             width={24}
             onClick={
               (editingKey === "" || !isDynamicEditable) &&
-              record?.dataType !== "exist"
+              (allowDeleteExisting || record?.dataType !== "exist")
                 ? () => deleteRow(record.key)
                 : undefined
             }
@@ -769,6 +795,8 @@ const DynamicTableInlineBilling = ({
                   editing: isEditing(record),
                   options: col.options,
                   onCellClicked: col.onClick,
+                  onDropdownVisibleChange: col.onDropdownVisibleChange,
+                  selectLoading: col.loading,
                   showPassword: visiblePassword,
                   handlePassword: handleVisiblePassword,
                   regex: regex,
@@ -779,6 +807,7 @@ const DynamicTableInlineBilling = ({
                   maxLength: col.maxLength,
                   startDateLock,
                   endDateLock,
+                  disabledColumns,
                 }),
               };
             }),
@@ -893,6 +922,7 @@ const DynamicTableInlineBilling = ({
                   onInput: col.onInput,
                   maxLength: col.maxLength,
                   startDateLock,
+                  disabledColumns,
                 }),
               };
             }),

@@ -3,13 +3,10 @@ import accountManagementService from "../../../services/account_management/accou
 import { setBodyError, showModalError, showModalSuccess } from "../../general_slice";
 
 const initialState = {
-  // --- Shared ---
-  loading: false,
-
   // --- List ---
   loading_listPr: false,
   list_paymentRelation: [],
-  pagination_paymentRelation: {
+  pagination_listPr: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -28,7 +25,7 @@ const initialState = {
   // --- Approval List ---
   loading_listPrApproval: false,
   list_paymentRelationApproval: [],
-  pagination_paymentRelationApproval: {
+  pagination_listPrApproval: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -44,14 +41,15 @@ const initialState = {
   loading_inactivatePr: false,
 
   // --- Form Options (approval hierarchy, attachment categories, account standard) ---
-  loading_listPrApprovalOption: false,
-  list_prApprovalOptions: [],
-  loading_detailPrApprovalHierarchyDetails: false,
-  list_prApprovalHierarchyDetail: [],
-  data_prAttachmentCategory: [],
-  loading_listPrAccountStandard: false,
-  list_prAccountStandard: [],
-  pagination_prAccountStandard: {
+  loading_listPrApprovalHierarchy: false,
+  list_prApprovalHierarchy: [],
+  loading_detailPrApprovalHierarchy: false,
+  detail_prApprovalHierarchy: [],
+  loading_listPrAttachmentCategory: false,
+  list_prAttachmentCategory: [],
+  loading_listPrAccount: false,
+  list_prAccount: [],
+  pagination_prAccount: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
@@ -59,7 +57,11 @@ const initialState = {
   },
 
   // --- History ---
-  data_prApprovalHistory: {},
+  loading_prApprovalHistory: false,
+  detail_prApprovalHistory: {},
+
+  // --- Download ---
+  loading_downloadPr: false,
 };
 
 /**
@@ -188,8 +190,8 @@ export const updatePaymentRelation = createAsyncThunk(
  *
  * @param {number} id - Payment relation ID.
  */
-export const getDetailPaymentRelation = createAsyncThunk(
-  "GET_DETAIL_PAYMENT_RELATION",
+export const getPaymentRelation = createAsyncThunk(
+  "GET_PAYMENT_RELATION",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/detail/${id}`;
@@ -206,8 +208,8 @@ export const getDetailPaymentRelation = createAsyncThunk(
  *
  * @param {number} id - Payment relation ID.
  */
-export const getDetailDraftPaymentRelation = createAsyncThunk(
-  "GET_DETAIL_DRAFT_PAYMENT_RELATION",
+export const getPaymentRelationDraft = createAsyncThunk(
+  "GET_PAYMENT_RELATION_DRAFT",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/detail-draft/${id}`;
@@ -222,8 +224,8 @@ export const getDetailDraftPaymentRelation = createAsyncThunk(
 /**
  * Fetches the list of approval hierarchy options for payment relations.
  */
-export const getPrApprovalHierarchy = createAsyncThunk(
-  "GET_PR_APPROVAL_HIERARCHY",
+export const getPrApprovalHierarchies = createAsyncThunk(
+  "GET_PR_APPROVAL_HIERARCHIES",
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/approval-hierarchies`;
@@ -240,8 +242,8 @@ export const getPrApprovalHierarchy = createAsyncThunk(
  *
  * @param {number} id - Approval hierarchy ID.
  */
-export const getDetailPrApprovalHierarchy = createAsyncThunk(
-  "GET_DETAIL_PR_APPROVAL_HIERARCHY",
+export const getPrApprovalHierarchy = createAsyncThunk(
+  "GET_PR_APPROVAL_HIERARCHY",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/approval-hierarchy/${id}`;
@@ -256,8 +258,8 @@ export const getDetailPrApprovalHierarchy = createAsyncThunk(
 /**
  * Fetches the list of attachment categories for payment relations.
  */
-export const getPrAttachmentCategory = createAsyncThunk(
-  "GET_PR_ATTACHMENT_CATEGORY",
+export const getPrAttachmentCategories = createAsyncThunk(
+  "GET_PR_ATTACHMENT_CATEGORIES",
   async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/attachment-category`;
@@ -278,8 +280,8 @@ export const getPrAttachmentCategory = createAsyncThunk(
  * @param {object}  arg.body        - Pagination / search body.
  * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
  */
-export const getPrAccountStandard = createAsyncThunk(
-  "GET_PR_ACCOUNT_STANDARD",
+export const getPrAccounts = createAsyncThunk(
+  "GET_PR_ACCOUNTS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/list-account/${id}`;
@@ -443,8 +445,8 @@ export const inactivatePaymentRelation = createAsyncThunk(
  * @param {object}  arg.body        - Pagination / search / sort body.
  * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
  */
-export const getPaymentRelation = createAsyncThunk(
-  "GET_PAYMENT_RELATION",
+export const getPaymentRelations = createAsyncThunk(
+  "GET_PAYMENT_RELATIONS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/list/${id}`;
@@ -471,8 +473,8 @@ export const getPaymentRelation = createAsyncThunk(
  * @param {object}  arg.body        - Pagination / search / sort body.
  * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
  */
-export const getPaymentRelationApproval = createAsyncThunk(
-  "GET_PAYMENT_RELATION_APPROVAL",
+export const getPaymentRelationApprovals = createAsyncThunk(
+  "GET_PAYMENT_RELATION_APPROVALS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       body = {
@@ -502,7 +504,7 @@ export const getPaymentRelationApproval = createAsyncThunk(
  * @param {object}   arg
  * @param {object[]} arg.body          - Active payment relation records to process.
  * @param {object[]} arg.inactiveBody  - Inactive payment relation records to process.
- * @param {string}   arg.action        - `"approved"` or `"rejected"` — drives the loading state and modal message.
+ * @param {string}   arg.action        - `"APPROVE"` or `"REJECT"` — drives the loading state and modal message.
  */
 export const approveOrRejectAllPaymentRelation = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_PAYMENT_RELATION",
@@ -599,28 +601,28 @@ const paymentRelationSlice = createSlice({
   name: "paymentRelation",
   initialState,
   extraReducers: {
-    /** Get Detail Payment Relation */
-    [getDetailPaymentRelation.pending]: (state) => {
+    /** Get Payment Relation (detail) */
+    [getPaymentRelation.pending]: (state) => {
       state.loading_detailPr = true;
     },
-    [getDetailPaymentRelation.fulfilled]: (state, action) => {
+    [getPaymentRelation.fulfilled]: (state, action) => {
       state.detail_paymentRelation = action.payload?.result || {};
       state.loading_detailPr = false;
     },
-    [getDetailPaymentRelation.rejected]: (state) => {
+    [getPaymentRelation.rejected]: (state) => {
       state.detail_paymentRelation = {};
       state.loading_detailPr = false;
     },
 
-    /** Get Detail Draft Payment Relation */
-    [getDetailDraftPaymentRelation.pending]: (state) => {
+    /** Get Payment Relation Draft */
+    [getPaymentRelationDraft.pending]: (state) => {
       state.loading_detailDraftPr = true;
     },
-    [getDetailDraftPaymentRelation.fulfilled]: (state, action) => {
+    [getPaymentRelationDraft.fulfilled]: (state, action) => {
       state.detailDraft_paymentRelation = action.payload?.result || {};
       state.loading_detailDraftPr = false;
     },
-    [getDetailDraftPaymentRelation.rejected]: (state) => {
+    [getPaymentRelationDraft.rejected]: (state) => {
       state.detailDraft_paymentRelation = {};
       state.loading_detailDraftPr = false;
     },
@@ -647,84 +649,84 @@ const paymentRelationSlice = createSlice({
       state.loading_createUpdatePr = false;
     },
 
-    /** Get Payment Relation Approval Hierarchy */
+    /** Get Payment Relation Approval Hierarchies */
+    [getPrApprovalHierarchies.pending]: (state) => {
+      state.list_prApprovalHierarchy = [];
+      state.loading_listPrApprovalHierarchy = true;
+    },
+    [getPrApprovalHierarchies.fulfilled]: (state, action) => {
+      state.list_prApprovalHierarchy = action.payload;
+      state.loading_listPrApprovalHierarchy = false;
+    },
+    [getPrApprovalHierarchies.rejected]: (state) => {
+      state.list_prApprovalHierarchy = [];
+      state.loading_listPrApprovalHierarchy = false;
+    },
+
+    /** Get Payment Relation Approval Hierarchy (detail) */
     [getPrApprovalHierarchy.pending]: (state) => {
-      state.list_prApprovalOptions = [];
-      state.loading_listPrApprovalOption = true;
+      state.detail_prApprovalHierarchy = [];
+      state.loading_detailPrApprovalHierarchy = true;
     },
     [getPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.list_prApprovalOptions = action.payload;
-      state.loading_listPrApprovalOption = false;
+      state.detail_prApprovalHierarchy = action.payload;
+      state.loading_detailPrApprovalHierarchy = false;
     },
     [getPrApprovalHierarchy.rejected]: (state) => {
-      state.list_prApprovalOptions = [];
-      state.loading_listPrApprovalOption = false;
+      state.detail_prApprovalHierarchy = [];
+      state.loading_detailPrApprovalHierarchy = false;
     },
 
-    /** Get Payment Relation Detail Approval Hierarchy */
-    [getDetailPrApprovalHierarchy.pending]: (state) => {
-      state.list_prApprovalHierarchyDetail = [];
-      state.loading_detailPrApprovalHierarchyDetails = true;
+    /** Get Payment Relation Attachment Categories */
+    [getPrAttachmentCategories.pending]: (state) => {
+      state.loading_listPrAttachmentCategory = true;
     },
-    [getDetailPrApprovalHierarchy.fulfilled]: (state, action) => {
-      state.list_prApprovalHierarchyDetail = action.payload;
-      state.loading_detailPrApprovalHierarchyDetails = false;
+    [getPrAttachmentCategories.fulfilled]: (state, action) => {
+      state.list_prAttachmentCategory = action.payload;
+      state.loading_listPrAttachmentCategory = false;
     },
-    [getDetailPrApprovalHierarchy.rejected]: (state) => {
-      state.list_prApprovalHierarchyDetail = [];
-      state.loading_detailPrApprovalHierarchyDetails = false;
-    },
-
-    /** Get Payment Relation Attachment Category */
-    [getPrAttachmentCategory.pending]: (state) => {
-      state.loading = true;
-    },
-    [getPrAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_prAttachmentCategory = action.payload;
-      state.loading = false;
-    },
-    [getPrAttachmentCategory.rejected]: (state) => {
-      state.data_prAttachmentCategory = [];
-      state.loading = false;
+    [getPrAttachmentCategories.rejected]: (state) => {
+      state.list_prAttachmentCategory = [];
+      state.loading_listPrAttachmentCategory = false;
     },
 
-    /** Get Payment Relation Account Standard */
-    [getPrAccountStandard.pending]: (state, action) => {
+    /** Get Payment Relation Accounts */
+    [getPrAccounts.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading_listPrAccountStandard = true;
+        state.loading_listPrAccount = true;
       }
     },
-    [getPrAccountStandard.fulfilled]: (state, action) => {
-      state.loading_listPrAccountStandard = false;
+    [getPrAccounts.fulfilled]: (state, action) => {
+      state.loading_listPrAccount = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_prAccountStandard.map((item) => item.accountId));
+          const currentIds = new Set(state.list_prAccount.map((item) => item.accountId));
           const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
 
-          state.list_prAccountStandard = [
-            ...state.list_prAccountStandard,
+          state.list_prAccount = [
+            ...state.list_prAccount,
             ...filteredResult,
           ];
         }
         else
-          state.list_prAccountStandard = result;
+          state.list_prAccount = result;
       }
 
-      state.pagination_prAccountStandard = {
+      state.pagination_prAccount = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getPrAccountStandard.rejected]: (state, action) => {
-      state.loading_listPrAccountStandard = false;
+    [getPrAccounts.rejected]: (state, action) => {
+      state.loading_listPrAccount = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_prAccountStandard = [];
-        state.pagination_prAccountStandard = {
+        state.list_prAccount = [];
+        state.pagination_prAccount = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -766,13 +768,13 @@ const paymentRelationSlice = createSlice({
       state.loading_inactivatePr = false;
     },
 
-    /** Get Payment Relation List */
-    [getPaymentRelation.pending]: (state, action) => {
+    /** Get Payment Relations (list) */
+    [getPaymentRelations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listPr = true;
       }
     },
-    [getPaymentRelation.fulfilled]: (state, action) => {
+    [getPaymentRelations.fulfilled]: (state, action) => {
       state.loading_listPr = false;
       const { result, page, isLoadMore } = action.payload;
 
@@ -790,19 +792,19 @@ const paymentRelationSlice = createSlice({
           state.list_paymentRelation = result;
       }
 
-      state.pagination_paymentRelation = {
+      state.pagination_listPr = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getPaymentRelation.rejected]: (state, action) => {
+    [getPaymentRelations.rejected]: (state, action) => {
       state.loading_listPr = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_paymentRelation = [];
-        state.pagination_paymentRelation = {
+        state.pagination_listPr = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -811,13 +813,13 @@ const paymentRelationSlice = createSlice({
       }
     },
 
-    /** Get Payment Relation Approval List */
-    [getPaymentRelationApproval.pending]: (state, action) => {
+    /** Get Payment Relation Approvals (list) */
+    [getPaymentRelationApprovals.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listPrApproval = true;
       }
     },
-    [getPaymentRelationApproval.fulfilled]: (state, action) => {
+    [getPaymentRelationApprovals.fulfilled]: (state, action) => {
       state.loading_listPrApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
@@ -835,19 +837,19 @@ const paymentRelationSlice = createSlice({
           state.list_paymentRelationApproval = result;
       }
 
-      state.pagination_paymentRelationApproval = {
+      state.pagination_listPrApproval = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getPaymentRelationApproval.rejected]: (state, action) => {
+    [getPaymentRelationApprovals.rejected]: (state, action) => {
       state.loading_listPrApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_paymentRelationApproval = [];
-        state.pagination_paymentRelationApproval = {
+        state.pagination_listPrApproval = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
@@ -858,45 +860,45 @@ const paymentRelationSlice = createSlice({
 
     /** Approve or Reject All Payment Relation */
     [approveOrRejectAllPaymentRelation.pending]: (state, action) => {
-      if (action.meta.arg?.action === "approved")
+      if (action.meta.arg?.action === "APPROVE")
         state.loading_approvePr = true;
-      else if (action.meta.arg?.action === "rejected")
+      else if (action.meta.arg?.action === "REJECT")
         state.loading_rejectPr = true;
     },
     [approveOrRejectAllPaymentRelation.fulfilled]: (state, action) => {
-      if (action.meta.arg?.action === "approved")
+      if (action.meta.arg?.action === "APPROVE")
         state.loading_approvePr = false;
-      else if (action.meta.arg?.action === "rejected")
+      else if (action.meta.arg?.action === "REJECT")
         state.loading_rejectPr = false;
     },
     [approveOrRejectAllPaymentRelation.rejected]: (state, action) => {
-      if (action.meta.arg?.action === "approved")
+      if (action.meta.arg?.action === "APPROVE")
         state.loading_approvePr = false;
-      else if (action.meta.arg?.action === "rejected")
+      else if (action.meta.arg?.action === "REJECT")
         state.loading_rejectPr = false;
     },
 
     /** Download Payment Relation */
     [downloadPaymentRelation.pending]: (state) => {
-      state.loading = true;
+      state.loading_downloadPr = true;
     },
     [downloadPaymentRelation.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_downloadPr = false;
     },
     [downloadPaymentRelation.rejected]: (state) => {
-      state.loading = false;
+      state.loading_downloadPr = false;
     },
 
     /** Get Payment Relation Approval History */
     [getPrApprovalHistory.pending]: (state) => {
-      state.loading = true;
+      state.loading_prApprovalHistory = true;
     },
     [getPrApprovalHistory.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_prApprovalHistory = action.payload;
+      state.loading_prApprovalHistory = false;
+      state.detail_prApprovalHistory = action.payload;
     },
     [getPrApprovalHistory.rejected]: (state) => {
-      state.loading = false;
+      state.loading_prApprovalHistory = false;
     },
   },
 });

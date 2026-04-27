@@ -1,32 +1,44 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import accountManagementService from "../../../services/account_management/accountManagementService";
-import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
+import {
+  setBodyError,
+  showModalError,
+  showModalSuccess,
+  validateError
+} from "../../general_slice";
 
 const initialState = {
+  // --- List ---
   loading_listGd: false,
   list_gasDeposit: [],
   pagination_listGd: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
-    pageSize: 10,
+    pageSize: 10
   },
+
+  // --- Approval List ---
   loading_listGdApproval: false,
   list_gasDepositApproval: [],
   pagination_listGdApproval: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
-    pageSize: 10,
+    pageSize: 10
   },
+
+  // --- Request History List ---
   loading_listGdHistory: false,
   list_gasDepositHistory: [],
   pagination_listGdHistory: {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
-    pageSize: 10,
+    pageSize: 10
   },
+
+  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
   loading_listGdApprovalHierarchy: false,
   list_gdApprovalHierarchy: [],
   loading_detailGdApprovalHierarchy: false,
@@ -39,21 +51,42 @@ const initialState = {
     totalPage: 0,
     totalElement: 0,
     currentPage: 0,
-    pageSize: 10,
+    pageSize: 10
   },
+
+  // --- Detail ---
   loading_detailGd: false,
   detail_gasDeposit: {},
   loading_detailDraftGd: false,
   detailDraft_gasDeposit: {},
+
+  // --- History Detail ---
   loading_detailGdHistory: false,
   detail_gasDepositHistory: {},
+
+  // --- History ---
   loading_gdApprovalHistory: false,
   detail_gdApprovalHistory: {},
+
+  // --- Approve / Reject ---
   loading_approveRejectGd: false,
-  loading_inactivateGd: false,
-  loading_recalculateExpireGd: false,
+  loading_approveGd: false,
+  loading_rejectGd: false,
+
+  // --- Recalculate / Expire ---
+  loading_recalculateExpireGd: false
 };
 
+/**
+ * Fetches a paginated list of gas deposits, optionally scoped to an account.
+ * Always injects `listType: "all"` into the request body.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  [arg.accountId]  - Account ID to scope the list. Omit to fetch all.
+ * @param {object}  arg.body         - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore   - If true, appends results; otherwise replaces the list.
+ */
 export const getGasDeposits = createAsyncThunk(
   "GET_GAS_DEPOSITS",
   async ({ accountId, body, isLoadMore }, thunkAPI) => {
@@ -63,11 +96,15 @@ export const getGasDeposits = createAsyncThunk(
         listType: "all"
       };
 
-      const url = "/v1/dbs/api/gas-deposit/list" + (accountId ? `/${accountId}` : "");
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const url =
+        "/v1/dbs/api/gas-deposit/list" + (accountId ? `/${accountId}` : "");
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
       return {
         ...response.data,
-        isLoadMore,
+        isLoadMore
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -75,6 +112,16 @@ export const getGasDeposits = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated approval list for a given account's gas deposits.
+ * Always injects `listType: "approval"` into the request body.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getGasDepositApprovals = createAsyncThunk(
   "GET_GAS_DEPOSIT_APPROVALS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
@@ -82,15 +129,19 @@ export const getGasDepositApprovals = createAsyncThunk(
       body = {
         ...body,
         listType: "approval"
-      }
+      };
 
       const url = `/v1/dbs/api/gas-deposit/list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body,
+        {
           headers: { "Accept": "application/json, text/plain, */*" }
-        });
+        }
+      );
       return {
         ...response.data,
-        isLoadMore,
+        isLoadMore
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -98,18 +149,37 @@ export const getGasDepositApprovals = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated detail list nested under a gas deposit record.
+ * Results are stored at `state[listKey][index]` or `state[parentKey]` when `parentKey` is provided.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id                              - Gas deposit ID.
+ * @param {number}  [arg.index]                         - Position of the parent record in `listKey`.
+ * @param {object}  arg.body                            - Pagination body.
+ * @param {boolean} arg.isLoadMore                      - If true, appends results; otherwise replaces.
+ * @param {string}  [arg.listKey="list_gasDeposit"]     - Redux state key of the parent list.
+ * @param {string}  [arg.parentKey]                     - Redux state key if parent is a top-level record (e.g. `"detail_gasDeposit"`).
+ */
 export const getGasDepositDetails = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAILS",
-  async ({ id, index, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
+  async (
+    { id, index, body, isLoadMore, listKey = "list_gasDeposit", parentKey },
+    thunkAPI
+  ) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/detail-list/${id}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
       return {
         ...response.data,
         index,
         isLoadMore,
         listKey,
-        parentKey,
+        parentKey
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -117,19 +187,47 @@ export const getGasDepositDetails = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the paginated mutation list nested under a gas deposit detail record.
+ * Results are stored at `state[listKey][index].list_gasDepositDetail[detailIndex]`.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.detailId                        - Gas deposit detail ID.
+ * @param {number}  [arg.index]                         - Position of the parent gas deposit in `listKey`.
+ * @param {number}  arg.detailIndex                     - Position of the detail record in `list_gasDepositDetail`.
+ * @param {object}  arg.body                            - Pagination body.
+ * @param {boolean} arg.isLoadMore                      - If true, appends results; otherwise replaces.
+ * @param {string}  [arg.listKey="list_gasDeposit"]     - Redux state key of the parent list.
+ * @param {string}  [arg.parentKey]                     - Redux state key if parent is a top-level record.
+ */
 export const getGasDepositDetailMutations = createAsyncThunk(
   "GET_GAS_DEPOSIT_DETAIL_MUTATIONS",
-  async ({ detailId, index, detailIndex, body, isLoadMore, listKey = "list_gasDeposit", parentKey }, thunkAPI) => {
+  async (
+    {
+      detailId,
+      index,
+      detailIndex,
+      body,
+      isLoadMore,
+      listKey = "list_gasDeposit",
+      parentKey
+    },
+    thunkAPI
+  ) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/detail-mutation-list/${detailId}`;
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
       return {
         ...response.data,
         index,
         detailIndex,
         isLoadMore,
         listKey,
-        parentKey,
+        parentKey
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -137,15 +235,30 @@ export const getGasDepositDetailMutations = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches a paginated list of gas deposit recalculate / expire request history.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  [arg.accountId]  - Account ID to scope the list. Omit to fetch all.
+ * @param {object}  arg.body         - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore   - If true, appends results; otherwise replaces the list.
+ */
 export const getGasDepositHistories = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORIES",
   async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/gas-deposit/request-history" + (accountId ? `/${accountId}` : "");
+      const queryParams = new URLSearchParams();
+
+      if (accountId) queryParams.append("subjectId", accountId);
+
+      let url = "/v1/dbs/api/gas-deposit/request-history";
+      if (queryParams.toString().length) url += `?${queryParams.toString()}`;
+
       const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,
-        isLoadMore,
+        isLoadMore
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -153,6 +266,12 @@ export const getGasDepositHistories = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the current (non-draft) detail of a gas deposit record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id - Gas deposit ID.
+ */
 export const getGasDeposit = createAsyncThunk(
   "GET_GAS_DEPOSIT",
   async ({ id }, thunkAPI) => {
@@ -167,6 +286,12 @@ export const getGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the draft detail of a gas deposit record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id - Gas deposit ID.
+ */
 export const getGasDepositDraft = createAsyncThunk(
   "GET_GAS_DEPOSIT_DRAFT",
   async ({ id }, thunkAPI) => {
@@ -181,6 +306,12 @@ export const getGasDepositDraft = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the detail of a single gas deposit history record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id - Gas deposit history ID.
+ */
 export const getGasDepositHistory = createAsyncThunk(
   "GET_GAS_DEPOSIT_HISTORY",
   async ({ id }, thunkAPI) => {
@@ -196,11 +327,16 @@ export const getGasDepositHistory = createAsyncThunk(
 );
 
 /**
- * Recalculate a gas deposit and uploads any provided attachments.
- * @param {{ body: object, attachments: Array, action: string }} args
+ * Submits a recalculate request for a gas deposit, then uploads any new attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object}   arg.body                - Request body for the recalculate API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after submission.
+ * @param {string}   arg.action              - `"draft"` or `"submit"` — used in the upload payload.
  */
 export const recalculateGasDeposit = createAsyncThunk(
-  "RECALCULATE_GAS_DEEPOSIT",
+  "RECALCULATE_GAS_DEPOSIT",
   async ({ body: recalculateBody, attachments = [], action }, thunkAPI) => {
     try {
       const recalculateUrl = "/v1/dbs/api/gas-deposit/recalculate";
@@ -239,7 +375,7 @@ export const recalculateGasDeposit = createAsyncThunk(
         error.message ||
         error.toString();
 
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured";
 
       const errorBody = {
@@ -255,11 +391,16 @@ export const recalculateGasDeposit = createAsyncThunk(
 );
 
 /**
- * Expire a gas deposit and uploads any provided attachments.
- * @param {{ body: object, attachments: Array, action: string }} args
+ * Submits an expire request for a gas deposit, then uploads any new attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object}   arg.body                - Request body for the expire API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after submission.
+ * @param {string}   arg.action              - `"draft"` or `"submit"` — used in the upload payload.
  */
 export const expireGasDeposit = createAsyncThunk(
-  "EXPIRE_GAS_DEEPOSIT",
+  "EXPIRE_GAS_DEPOSIT",
   async ({ body: expireBody, attachments = [], action }, thunkAPI) => {
     try {
       const expireUrl = "/v1/dbs/api/gas-deposit/expire";
@@ -298,7 +439,7 @@ export const expireGasDeposit = createAsyncThunk(
         error.message ||
         error.toString();
 
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured";
 
       const errorBody = {
@@ -313,6 +454,9 @@ export const expireGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches the list of approval hierarchy options for gas deposits.
+ */
 export const getGdApprovalHierarchies = createAsyncThunk(
   "GET_GD_APPROVAL_HIERARCHIES",
   async (_, thunkAPI) => {
@@ -324,8 +468,13 @@ export const getGdApprovalHierarchies = createAsyncThunk(
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
-)
+);
 
+/**
+ * Fetches the employee list for a specific approval hierarchy.
+ *
+ * @param {number} id - Approval hierarchy ID.
+ */
 export const getGdApprovalHierarchy = createAsyncThunk(
   "GET_GD_APPROVAL_HIERARCHY",
   async (id, thunkAPI) => {
@@ -337,8 +486,11 @@ export const getGdApprovalHierarchy = createAsyncThunk(
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
-)
+);
 
+/**
+ * Fetches the list of attachment categories for gas deposits.
+ */
 export const getGdAttachmentCategories = createAsyncThunk(
   "GET_GD_ATTACHMENT_CATEGORY",
   async (_, thunkAPI) => {
@@ -350,18 +502,30 @@ export const getGdAttachmentCategories = createAsyncThunk(
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
-)
+);
 
+/**
+ * Fetches a paginated list of accounts eligible for gas deposit.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID used to scope the list.
+ * @param {object}  arg.body        - Pagination / search body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
 export const getGdAccounts = createAsyncThunk(
   "GET_GD_ACCOUNTS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/list-account/${id}`;
-      
-      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
       return {
         ...response.data,
-        isLoadMore,
+        isLoadMore
       };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response);
@@ -369,19 +533,30 @@ export const getGdAccounts = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an active gas deposit record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_GAS_DEPOSIT",
   async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/gas-deposit/approve";
-      const response = await accountManagementService.activationWithRemark(url, body);
+      const response = await accountManagementService.activationWithRemark(
+        url,
+        body
+      );
 
       const successBody = {
         title: `Successful`,
         description: `Your data has been ${action === "approve" ? "approved" : "rejected"}.`,
-        return: false,
+        return: false
       };
-      thunkAPI.dispatch(showModalSuccess(successBody))
+      thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
       const message =
@@ -390,17 +565,17 @@ export const approveOrRejectGasDeposit = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
+          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`
         };
         thunkAPI.dispatch(showModalError(errorBody));
       } else {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. An unknown error occured.`
-        }
+        };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error?.response);
@@ -408,19 +583,30 @@ export const approveOrRejectGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an inactive gas deposit record (inactivation request).
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_GAS_DEPOSIT",
   async ({ body, action }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/gas-deposit/approve-inactive";
-      const response = await accountManagementService.activationWithRemark(url, body);
+      const response = await accountManagementService.activationWithRemark(
+        url,
+        body
+      );
 
       const successBody = {
         title: `Successful`,
         description: `Your data has been ${action === "approve" ? "approved" : "rejected"}.`,
-        return: false,
+        return: false
       };
-      thunkAPI.dispatch(showModalSuccess(successBody))
+      thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
       const message =
@@ -429,17 +615,17 @@ export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
+          description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`
         };
         thunkAPI.dispatch(showModalError(errorBody));
       } else {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. An unknown error occured.`
-        }
+        };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error?.response);
@@ -447,6 +633,16 @@ export const approveOrRejectInactiveGasDeposit = createAsyncThunk(
   }
 );
 
+/**
+ * Batch-approves or batch-rejects a mixed set of recalculate and expire gas deposits.
+ * Calls the recalculate-approve and expire-approve endpoints in parallel based on which bodies are provided.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object[]} [arg.recalculateBody]  - Recalculate gas deposit records to process.
+ * @param {object[]} [arg.expireBody]       - Expire gas deposit records to process.
+ * @param {string}   arg.action             - `"APPROVE"` or `"REJECT"` — drives the loading state and modal message.
+ */
 export const approveOrRejectAllGasDeposit = createAsyncThunk(
   "APPROVE_OR_REJECT_ALL_GAS_DEPOSIT",
   async ({ recalculateBody, expireBody, action }, thunkAPI) => {
@@ -454,26 +650,40 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
       const recalculateUrl = "/v1/dbs/api/gas-deposit/approve";
       const expireUrl = "/v1/dbs/api/gas-deposit/approve-expire";
 
-      await Promise.all([
-        recalculateBody ? accountManagementService.activationWithRemark(recalculateUrl, recalculateBody, {
-          headers: {
-            "Accept": "application/json"
-          }
-        }) : null,
-        expireBody ? accountManagementService.activationWithRemark(expireUrl, expireBody, {
-          headers: {
-            "Accept": "application/json"
-          }
-        }) : null,
-      ]);
+      await Promise.all(
+        [
+          recalculateBody
+            ? accountManagementService.activationWithRemark(
+                recalculateUrl,
+                recalculateBody,
+                {
+                  headers: {
+                    "Accept": "application/json"
+                  }
+                }
+              )
+            : null,
+          expireBody
+            ? accountManagementService.activationWithRemark(
+                expireUrl,
+                expireBody,
+                {
+                  headers: {
+                    "Accept": "application/json"
+                  }
+                }
+              )
+            : null
+        ].filter(Boolean)
+      );
 
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${action === "APPROVE" ? 'approved' : 'rejected'}.`,
-        return: false,
+        description: `Your data has been ${action === "APPROVE" ? "approved" : "rejected"}.`,
+        return: false
       };
 
-      thunkAPI.dispatch(showModalSuccess(successBody))
+      thunkAPI.dispatch(showModalSuccess(successBody));
       return null;
     } catch (error) {
       let message =
@@ -482,12 +692,12 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
-        message = "An unknown error occured"
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
 
       const errorBody = {
         title: "Failed",
-        description: `Your data was not ${action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+        description: `Your data was not ${action === "APPROVE" ? "approved" : "rejected"}. ${message}.`
       };
 
       thunkAPI.dispatch(showModalError(errorBody));
@@ -497,59 +707,43 @@ export const approveOrRejectAllGasDeposit = createAsyncThunk(
   }
 );
 
-export const inactivateGasDeposit = createAsyncThunk(
-  "INACTIVATE_GAS_DEPOSIT",
-  async ({ body }, thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/gas-deposit/inactive";
-      const response = await accountManagementService.activationWithRemark(url, body);
-
-      const successBody = {
-        title: `Successful`,
-        description: `Your data has been submitted`,
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody))
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not submitted. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not submitted. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
+/**
+ * Downloads the gas deposit list as an Excel file for a given record.
+ *
+ * @param {object} arg
+ * @param {number} arg.id   - Gas deposit ID.
+ * @param {object} arg.body - Search / sort / filter body.
+ */
 export const downloadGasDeposit = createAsyncThunk(
   "DOWNLOAD_GAS_DEPOSIT",
-  async ({ body, id, }, thunkAPI) => {
+  async ({ body, id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/export-excel/${id}`;
-      const response = await accountManagementService.downloadDataAdvanced(url, body);
+      const response = await accountManagementService.downloadDataAdvanced(
+        url,
+        body
+      );
       return response;
     } catch (response) {
-      thunkAPI.dispatch(validateError({ error: response, action: "DOWNLOAD_GAS_DEPOSIT", back: false }));
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_GAS_DEPOSIT",
+          back: false
+        })
+      );
       return thunkAPI.rejectWithValue(response.response.data);
     }
   }
 );
 
+/**
+ * Fetches the approval history for a given gas deposit record.
+ * Returns `null` if the API response is an array (no history available).
+ * Handles HTTP 419 by dispatching `setBodyError`.
+ *
+ * @param {number} id - Gas deposit ID.
+ */
 export const getGdApprovalHistory = createAsyncThunk(
   "GET_GD_APPROVAL_HISTORY",
   async (id, thunkAPI) => {
@@ -558,7 +752,7 @@ export const getGdApprovalHistory = createAsyncThunk(
       const response = await accountManagementService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
-      if (error.response.data.code === 419) {
+      if (error.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
       return thunkAPI.rejectWithValue(error?.response);
@@ -582,34 +776,34 @@ const gasDepositSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_gasDeposit.map((item) => item.id));
-          const filteredResult = result.filter((item) => !currentIds.has(item.id));
-          const mappedResult = filteredResult.map(item => ({
+          const currentIds = new Set(
+            state.list_gasDeposit.map((item) => item.id)
+          );
+          const filteredResult = result.filter(
+            (item) => !currentIds.has(item.id)
+          );
+          const mappedResult = filteredResult.map((item) => ({
             ...item,
             list_gasDepositDetail: [],
             pagination_listGdDetail: {
               totalPage: 0,
               totalElement: 0,
               currentPage: 0,
-              pageSize: 10,
+              pageSize: 10
             },
             loading_listGdDetail: false
           }));
 
-          state.list_gasDeposit = [
-            ...state.list_gasDeposit,
-            ...mappedResult,
-          ];
-        }
-        else
-          state.list_gasDeposit = result.map(item => ({
+          state.list_gasDeposit = [...state.list_gasDeposit, ...mappedResult];
+        } else
+          state.list_gasDeposit = result.map((item) => ({
             ...item,
             list_gasDepositDetail: [],
             pagination_listGdDetail: {
               totalPage: 0,
               totalElement: 0,
               currentPage: 0,
-              pageSize: 10,
+              pageSize: 10
             },
             loading_listGdDetail: false
           }));
@@ -619,8 +813,8 @@ const gasDepositSlice = createSlice({
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
+        pageSize: page?.size || 10
+      };
     },
     [getGasDeposits.rejected]: (state, action) => {
       if (action.meta.aborted) return;
@@ -632,8 +826,8 @@ const gasDepositSlice = createSlice({
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
-          pageSize: 10,
-        }
+          pageSize: 10
+        };
       }
     },
 
@@ -651,29 +845,36 @@ const gasDepositSlice = createSlice({
         const withNested = (item) => ({
           ...item,
           list_gasDepositDetail: [],
-          pagination_listGdDetail: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
-          loading_listGdDetail: false,
+          pagination_listGdDetail: {
+            totalPage: 0,
+            totalElement: 0,
+            currentPage: 0,
+            pageSize: 10
+          },
+          loading_listGdDetail: false
         });
 
         if (isLoadMore) {
-          const currentIds = new Set(state.list_gasDepositApproval.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          const currentIds = new Set(
+            state.list_gasDepositApproval.map((item) => item.id)
+          );
+          const filteredResult = result.filter(
+            (resultItem) => !currentIds.has(resultItem.id)
+          );
 
           state.list_gasDepositApproval = [
             ...state.list_gasDepositApproval,
-            ...filteredResult.map(withNested),
+            ...filteredResult.map(withNested)
           ];
-        }
-        else
-          state.list_gasDepositApproval = result.map(withNested);
+        } else state.list_gasDepositApproval = result.map(withNested);
       }
 
       state.pagination_listGdApproval = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
+        pageSize: page?.size || 10
+      };
     },
     [getGasDepositApprovals.rejected]: (state, action) => {
       state.loading_listGdApproval = false;
@@ -684,21 +885,32 @@ const gasDepositSlice = createSlice({
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
-          pageSize: 10,
-        }
+          pageSize: 10
+        };
       }
     },
 
     /** Get Gas Deposit Details */
     [getGasDepositDetails.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        const { parentKey, listKey = "list_gasDeposit", index } = action.meta.arg || {};
+        const {
+          parentKey,
+          listKey = "list_gasDeposit",
+          index
+        } = action.meta.arg || {};
         const parent = parentKey ? state[parentKey] : state[listKey][index];
         parent.loading_listGdDetail = true;
       }
     },
     [getGasDepositDetails.fulfilled]: (state, action) => {
-      const { result, page, isLoadMore, index, listKey = "list_gasDeposit", parentKey } = action.payload;
+      const {
+        result,
+        page,
+        isLoadMore,
+        index,
+        listKey = "list_gasDeposit",
+        parentKey
+      } = action.payload;
 
       const parent = parentKey ? state[parentKey] : state[listKey][index];
       const gasDeposit = parent;
@@ -706,35 +918,37 @@ const gasDepositSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(gasDeposit.list_gasDepositDetail.map((item) => item.id));
-          const filteredResult = result.filter((item) => !currentIds.has(item.id));
-          const mappedResult = filteredResult.map(item => ({
+          const currentIds = new Set(
+            gasDeposit.list_gasDepositDetail.map((item) => item.id)
+          );
+          const filteredResult = result.filter(
+            (item) => !currentIds.has(item.id)
+          );
+          const mappedResult = filteredResult.map((item) => ({
             ...item,
             list_gasDepositDetailMutation: [],
             pagination_listGdDetailMutation: {
               totalPage: 0,
               totalElement: 0,
               currentPage: 0,
-              pageSize: 10,
+              pageSize: 10
             },
             loading_listGdDetailMutation: false
           }));
-          
 
           gasDeposit.list_gasDepositDetail = [
             ...gasDeposit.list_gasDepositDetail,
-            ...mappedResult,
+            ...mappedResult
           ];
-        }
-        else
-          gasDeposit.list_gasDepositDetail = result.map(item => ({
+        } else
+          gasDeposit.list_gasDepositDetail = result.map((item) => ({
             ...item,
             list_gasDepositDetailMutation: [],
             pagination_listGdDetailMutation: {
               totalPage: 0,
               totalElement: 0,
               currentPage: 0,
-              pageSize: 10,
+              pageSize: 10
             },
             loading_listGdDetailMutation: false
           }));
@@ -744,11 +958,15 @@ const gasDepositSlice = createSlice({
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
+        pageSize: page?.size || 10
+      };
     },
     [getGasDepositDetails.rejected]: (state, action) => {
-      const { parentKey, listKey = "list_gasDeposit", index } = action.meta.arg || {};
+      const {
+        parentKey,
+        listKey = "list_gasDeposit",
+        index
+      } = action.meta.arg || {};
       const gasDeposit = parentKey ? state[parentKey] : state[listKey][index];
       gasDeposit.loading_listGdDetail = false;
 
@@ -758,49 +976,71 @@ const gasDepositSlice = createSlice({
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
-          pageSize: 10,
-        }
+          pageSize: 10
+        };
       }
     },
 
     /** Get Gas Deposit Detail Mutations */
     [getGasDepositDetailMutations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        const { parentKey, listKey = "list_gasDeposit", index, detailIndex } = action.meta.arg || {};
+        const {
+          parentKey,
+          listKey = "list_gasDeposit",
+          index,
+          detailIndex
+        } = action.meta.arg || {};
         const parent = parentKey ? state[parentKey] : state[listKey][index];
         const gasDepositDetail = parent.list_gasDepositDetail[detailIndex];
         gasDepositDetail.loading_listGdDetailMutation = true;
       }
     },
     [getGasDepositDetailMutations.fulfilled]: (state, action) => {
-      const { result, page, isLoadMore, index, detailIndex, listKey = "list_gasDeposit", parentKey } = action.payload;
-      const gasDeposit = parentKey ? state[parentKey] : state[listKey][index]
+      const {
+        result,
+        page,
+        isLoadMore,
+        index,
+        detailIndex,
+        listKey = "list_gasDeposit",
+        parentKey
+      } = action.payload;
+      const gasDeposit = parentKey ? state[parentKey] : state[listKey][index];
       const gasDepositDetail = gasDeposit.list_gasDepositDetail[detailIndex];
       gasDepositDetail.loading_listGdDetailMutation = false;
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(gasDepositDetail.list_gasDepositDetailMutation.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          const currentIds = new Set(
+            gasDepositDetail.list_gasDepositDetailMutation.map(
+              (item) => item.id
+            )
+          );
+          const filteredResult = result.filter(
+            (resultItem) => !currentIds.has(resultItem.id)
+          );
 
           gasDepositDetail.list_gasDepositDetailMutation = [
             ...gasDepositDetail.list_gasDepositDetailMutation,
-            ...filteredResult,
+            ...filteredResult
           ];
-        }
-        else
-          gasDepositDetail.list_gasDepositDetailMutation = result;
+        } else gasDepositDetail.list_gasDepositDetailMutation = result;
       }
 
       gasDepositDetail.pagination_listGdDetailMutation = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
+        pageSize: page?.size || 10
+      };
     },
     [getGasDepositDetailMutations.rejected]: (state, action) => {
-      const { parentKey, listKey = "list_gasDeposit", index, detailIndex } = action.meta.arg || {};
+      const {
+        parentKey,
+        listKey = "list_gasDeposit",
+        index,
+        detailIndex
+      } = action.meta.arg || {};
       const gasDeposit = parentKey ? state[parentKey] : state[listKey][index];
       const gasDepositDetail = gasDeposit.list_gasDepositDetail[detailIndex];
       gasDepositDetail.loading_listGdDetailMutation = false;
@@ -811,8 +1051,8 @@ const gasDepositSlice = createSlice({
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
-          pageSize: 10,
-        }
+          pageSize: 10
+        };
       }
     },
 
@@ -828,24 +1068,26 @@ const gasDepositSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_gasDepositHistory.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+          const currentIds = new Set(
+            state.list_gasDepositHistory.map((item) => item.id)
+          );
+          const filteredResult = result.filter(
+            (resultItem) => !currentIds.has(resultItem.id)
+          );
 
           state.list_gasDepositHistory = [
             ...state.list_gasDepositHistory,
-            ...filteredResult,
+            ...filteredResult
           ];
-        }
-        else
-          state.list_gasDepositHistory = result;
+        } else state.list_gasDepositHistory = result;
       }
 
       state.pagination_listGdHistory = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
+        pageSize: page?.size || 10
+      };
     },
     [getGasDepositHistories.rejected]: (state, action) => {
       if (action.meta.aborted) return;
@@ -857,8 +1099,8 @@ const gasDepositSlice = createSlice({
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
-          pageSize: 10,
-        }
+          pageSize: 10
+        };
       }
     },
 
@@ -870,9 +1112,17 @@ const gasDepositSlice = createSlice({
     [getGasDeposit.fulfilled]: (state, action) => {
       state.detail_gasDeposit = {
         ...(action.payload.result || {}),
-        list_gasDepositDetail: state.detail_gasDeposit.list_gasDepositDetail ?? [],
-        pagination_listGdDetail: state.detail_gasDeposit.pagination_listGdDetail ?? { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
-        loading_listGdDetail: state.detail_gasDeposit.loading_listGdDetail ?? false,
+        list_gasDepositDetail:
+          state.detail_gasDeposit.list_gasDepositDetail ?? [],
+        pagination_listGdDetail: state.detail_gasDeposit
+          .pagination_listGdDetail ?? {
+          totalPage: 0,
+          totalElement: 0,
+          currentPage: 0,
+          pageSize: 10
+        },
+        loading_listGdDetail:
+          state.detail_gasDeposit.loading_listGdDetail ?? false
       };
       state.loading_detailGd = false;
     },
@@ -889,9 +1139,17 @@ const gasDepositSlice = createSlice({
     [getGasDepositDraft.fulfilled]: (state, action) => {
       state.detailDraft_gasDeposit = {
         ...(action.payload.result || {}),
-        list_gasDepositDetail: state.detailDraft_gasDeposit.list_gasDepositDetail ?? [],
-        pagination_listGdDetail: state.detailDraft_gasDeposit.pagination_listGdDetail ?? { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
-        loading_listGdDetail: state.detailDraft_gasDeposit.loading_listGdDetail ?? false,
+        list_gasDepositDetail:
+          state.detailDraft_gasDeposit.list_gasDepositDetail ?? [],
+        pagination_listGdDetail: state.detailDraft_gasDeposit
+          .pagination_listGdDetail ?? {
+          totalPage: 0,
+          totalElement: 0,
+          currentPage: 0,
+          pageSize: 10
+        },
+        loading_listGdDetail:
+          state.detailDraft_gasDeposit.loading_listGdDetail ?? false
       };
       state.loading_detailDraftGd = false;
     },
@@ -987,24 +1245,26 @@ const gasDepositSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_gdAccountStandard.map((item) => item.accountId));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
+          const currentIds = new Set(
+            state.list_gdAccountStandard.map((item) => item.accountId)
+          );
+          const filteredResult = result.filter(
+            (resultItem) => !currentIds.has(resultItem.accountId)
+          );
 
           state.list_gdAccountStandard = [
             ...state.list_gdAccountStandard,
-            ...filteredResult,
+            ...filteredResult
           ];
-        }
-        else
-          state.list_gdAccountStandard = result;
+        } else state.list_gdAccountStandard = result;
       }
 
       state.pagination_listGdAccount = {
         totalPage: page?.totalPages || 0,
         totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
+        pageSize: page?.size || 10
+      };
     },
     [getGdAccounts.rejected]: (state, action) => {
       state.loading_listGdAccountStandard = false;
@@ -1015,8 +1275,8 @@ const gasDepositSlice = createSlice({
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,
-          pageSize: 10,
-        }
+          pageSize: 10
+        };
       }
     },
 
@@ -1043,25 +1303,23 @@ const gasDepositSlice = createSlice({
     },
 
     /** Approve or Reject All Inactive Gas Deposit */
-    [approveOrRejectAllGasDeposit.pending]: (state) => {
-      state.loading_approveRejectGd = true;
+    [approveOrRejectAllGasDeposit.pending]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveGd = true;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectGd = true;
     },
-    [approveOrRejectAllGasDeposit.fulfilled]: (state) => {
-      state.loading_approveRejectGd = false;
+    [approveOrRejectAllGasDeposit.fulfilled]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveGd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectGd = false;
     },
-    [approveOrRejectAllGasDeposit.rejected]: (state) => {
-      state.loading_approveRejectGd = false;
-    },
-
-    /** Inactivate Gas Deposit Attachment */
-    [inactivateGasDeposit.pending]: (state) => {
-      state.loading_inactivateGd = true;
-    },
-    [inactivateGasDeposit.fulfilled]: (state) => {
-      state.loading_inactivateGd = false;
-    },
-    [inactivateGasDeposit.rejected]: (state) => {
-      state.loading_inactivateGd = false;
+    [approveOrRejectAllGasDeposit.rejected]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveGd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectGd = false;
     },
 
     /** Get Gas Deposit Approval History */
@@ -1074,8 +1332,8 @@ const gasDepositSlice = createSlice({
     },
     [getGdApprovalHistory.rejected]: (state) => {
       state.loading_gdApprovalHistory = false;
-    },
-  },
+    }
+  }
 });
 const { reducer } = gasDepositSlice;
 export default reducer;

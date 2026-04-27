@@ -3,7 +3,6 @@ import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadGasDeposit, getGasDepositHistories } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { getGasDepositHistoryColumns } from "./getGasDepositHistoryColumns";
@@ -39,11 +38,6 @@ const GasDepositHistoryTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "action"],
-    left: [],
-  }));
 
   // --- Handlers ---
   /**
@@ -171,7 +165,7 @@ const GasDepositHistoryTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => handleDetailModal({ show: true, historyId: id }),
+    handleView: ({ gasDepositId }) => handleDetailModal({ show: true, historyId: gasDepositId }),
     handleApprovalHistory: ({ gasDepositId }) => handleApprovalHistoryModal({ show: true, historyId: gasDepositId }),
     handleDownload,
   });
@@ -196,11 +190,7 @@ const GasDepositHistoryTable = ({
     }),
   [search, searchInput, searchText, searchedColumn]);
 
-  const columnDefinitions = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
-
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
+  const columns = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -218,9 +208,6 @@ const GasDepositHistoryTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
       />
     </div>

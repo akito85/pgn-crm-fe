@@ -20,7 +20,9 @@ import {
   getAllBillingBucketPaginate,
   getListApprovalHierarchy,
   inactiveBillingBucket,
+  requestActivateBillingBucket,
   getListApprovalHierarchyDetail,
+  getSelectedApproval,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -43,7 +45,8 @@ const BillingBucketView = () => {
 
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
@@ -66,10 +69,13 @@ const BillingBucketView = () => {
     return saved
       ? JSON.parse(saved)
       : {
-          left: ["no"],
-          right: ["action"],
-        };
+        left: ["no"],
+        right: ["action"],
+      };
   });
+
+  const normalizeStatus = (value) =>
+    (value || "").toString().trim().toUpperCase();
 
   useEffect(() => {
     localStorage.setItem(
@@ -83,24 +89,28 @@ const BillingBucketView = () => {
     dispatch(
       getAllBillingBucketPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
       }),
     );
-  }, [search, sort, page, pageSize, dispatch, refreshKey]);
+  }, [search, sort, dispatch, refreshKey]);
 
   // Accumulate data for infinite scroll
   useEffect(() => {
     if (data?.result) {
-      if (shouldResetRef.current) {
+      if (shouldResetRef.current || page === 1) {
         setAllData(data.result);
         shouldResetRef.current = false;
       } else {
-        setAllData((prev) => [...prev, ...data.result]);
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.id));
+          const newItems = data.result.filter((item) => !ids.has(item.id));
+          return [...prev, ...newItems];
+        });
       }
     }
-  }, [data]);
+  }, [data, page]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -109,11 +119,15 @@ const BillingBucketView = () => {
           create: data_approval_history?.dataApprover?.BILLING_BUCKET || [],
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_BILLING_BUCKET || [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_BILLING_BUCKET || [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.BILLING_BUCKET || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_BILLING_BUCKET || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_BILLING_BUCKET || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -156,10 +170,8 @@ const BillingBucketView = () => {
   };
 
   // Handle Change Page Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
   };
 
   const handleRetry = () => {
@@ -185,12 +197,26 @@ const BillingBucketView = () => {
   };
 
   // Handle Load More (infinite scroll)
-  const handleLoadMore = useCallback(() => {
-    return new Promise((resolve) => {
-      setPage((prev) => prev + 1);
-      resolve();
-    });
-  }, []);
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getAllBillingBucketPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      }),
+    );
+  }, [
+    allData.length,
+    data?.page?.totalElements,
+    search,
+    sort,
+    dispatch,
+    loadMoreSize,
+  ]);
 
   // Handle Refresh
   const handleRefresh = useCallback(() => {
@@ -211,12 +237,23 @@ const BillingBucketView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isApprovedStatus = ["APPROVED", "APPROVE"].includes(
+      selectedStatusApproval,
+    );
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" && isApprovedStatus;
     const dataValue = {
       billingBucketCode: chooseId.billingBucketCode,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveBillingBucket(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateBillingBucket : inactiveBillingBucket)(
+        dataValue
+      )
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -234,8 +271,8 @@ const BillingBucketView = () => {
         dispatch(
           getAllBillingBucketPaginate({
             search: tempSearch,
-            page,
-            pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             sort,
           }),
         );
@@ -248,7 +285,12 @@ const BillingBucketView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -287,7 +329,7 @@ const BillingBucketView = () => {
     dispatch(
       downloadBillingBucket({
         page,
-        pageSize,
+        pageSize: initialPageSize,
         sort,
         search: tempSearch,
       }),
@@ -301,7 +343,9 @@ const BillingBucketView = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           onClick={() => handleDownload()}
         >
           Download List
@@ -313,7 +357,9 @@ const BillingBucketView = () => {
       render: (
         <NavLink to={RBI_ROUTES.BILLING_BUCKET_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Billing Bucket
@@ -342,8 +388,7 @@ const BillingBucketView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -360,9 +405,8 @@ const BillingBucketView = () => {
               type={"action"}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -401,14 +445,18 @@ const BillingBucketView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const isApprovedStatus = ["APPROVED", "APPROVE"].includes(
+          rowStatusApproval,
+        );
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate = rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -417,8 +465,8 @@ const BillingBucketView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               border={false}
@@ -432,14 +480,14 @@ const BillingBucketView = () => {
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -496,7 +544,7 @@ const BillingBucketView = () => {
       ...columnsBillingBucket(
         search,
         page,
-        pageSize,
+        initialPageSize,
         searchInput,
         searchedColumn,
         searchText,
@@ -512,7 +560,7 @@ const BillingBucketView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, page, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -578,7 +626,7 @@ const BillingBucketView = () => {
               dataSource={allData}
               columns={columns}
               current={page}
-              pageSize={pageSize}
+              pageSize={initialPageSize}
               onChange={handleChange}
               onSizeChanger={handleChange}
               totalData={data?.page?.totalElements || 0}
@@ -617,9 +665,10 @@ const BillingBucketView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Billing Bucket with name ${
-            chooseId?.billingBucketCode || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+            ? "activate"
+            : "inactivate"
+            } this Billing Bucket with name ${chooseId?.billingBucketCode || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -637,7 +686,8 @@ const BillingBucketView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

@@ -82,30 +82,45 @@ const EditableCell = ({
   };
 
   const handleDisableDateBetween = (current) => {
-    if (
-      dataIndex === "endDate" &&
-      hasValue(formTableCriteria.getFieldValue("startDate")) &&
-      hasValue(validateEndDate)
-    ) {
-      return (
-        moment(formTableCriteria.getFieldValue("startDate")) > current ||
-        current > moment(validateEndDate).add(1, "days")
-      );
-    } else if (validateStartDate && validateEndDate) {
-      const startDate = moment(validateStartDate).startOf("day");
-      const endDate = moment(validateEndDate).endOf("day");
-      return current.isBefore(startDate) || current.isAfter(endDate);
-    } else {
-      return true; // Disable all dates if start or end date is not defined
+    if (!current) return false;
+
+    const tableStartDate = formTableCriteria.getFieldValue("startDate");
+    const headerStartDate = validateStartDate
+      ? moment(validateStartDate).startOf("day")
+      : null;
+    const headerEndDate = validateEndDate
+      ? moment(validateEndDate).endOf("day")
+      : null;
+
+    // Disable if before table row start date
+    if (dataIndex === "endDate" && hasValue(tableStartDate)) {
+      if (current.isBefore(moment(tableStartDate).startOf("day"))) {
+        return true;
+      }
     }
+
+    // Disable if outside header range
+    if (headerStartDate && current.isBefore(headerStartDate)) {
+      return true;
+    }
+    if (headerEndDate && current.isAfter(headerEndDate)) {
+      return true;
+    }
+
+    return false;
   };
 
   // Validation Handle Start Date from Header Data
   const handleDisableDateBefore = (current) => {
-    if (validateStartDate !== null) {
-      return moment(validateStartDate) > current;
+    if (!current) return false;
+    const headerStartDate = validateStartDate
+      ? moment(validateStartDate).startOf("day")
+      : null;
+
+    if (headerStartDate) {
+      return current.isBefore(headerStartDate);
     }
-    return moment().add(-1, "days") >= current;
+    return current.isBefore(moment().startOf("day"));
   };
 
   const getInputNode = (inputType) => {
@@ -598,11 +613,11 @@ const FunctionalCriteriaInvoiceTemplate = ({
   // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
     dataTable?.forEach((item) => {
       if (
         moment(item?.startDate) < moment(formHeader?.startDate) ||
-        moment(item?.endDate) > moment(formHeader?.endDate)
+        (hasValue(item?.endDate) &&
+          moment(item?.endDate) > moment(formHeader?.endDate))
       ) {
         dataOverlap?.push(item);
       }
@@ -613,9 +628,8 @@ const FunctionalCriteriaInvoiceTemplate = ({
     } else {
       return false;
     }
-    // }
   }, []);
-  
+
 
   // Function Add Row Data
   const addRow = () => {

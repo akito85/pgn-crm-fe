@@ -142,6 +142,7 @@ const GasDepositBulkTable = ({
       columnDefinitions={columnDefinitions}
       fixedColumns={fixedColumns}
       setFixedColumns={readOnly ? undefined : setFixedColumns}
+      useSelect={!readOnly}
       loading={readOnly ? false : loading_listGd}
       usePagination={false}
       useInfiniteScroll={!readOnly}

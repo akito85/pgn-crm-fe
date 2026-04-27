@@ -60,6 +60,8 @@ const CalculationUsageSection = ({ calculationCode, ratingCode, accountNumber, s
         >
           <CalculationSummary 
             ratingCode={ratingCode}
+            calculationCode={calculationCode}
+            saType={saType}
           />
         </Panel>
 

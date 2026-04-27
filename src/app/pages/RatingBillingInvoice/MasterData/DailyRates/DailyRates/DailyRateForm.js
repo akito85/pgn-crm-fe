@@ -41,6 +41,7 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../../../components/Modal/ModalPopUp";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DailyRateForm = ({ type }) => {
   const {
@@ -91,6 +92,7 @@ const DailyRateForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [kirimBody, setKirimBody] = useState({});
   const [bodyError, setBodyError] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
@@ -105,6 +107,23 @@ const DailyRateForm = ({ type }) => {
   const [modalError, setModalError] = useState(false);
 
   const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   // Stepper navigation handlers
   useEffect(() => {
@@ -197,25 +216,28 @@ const DailyRateForm = ({ type }) => {
   const asserDataDetail = useCallback(
     (data_detail) => {
       const appHier = data_detail?.appHierId || [];
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
-        return {
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          createdBy: item.createdBy,
-          createdDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        };
-      });
+      const dataAttachment = (data_detail?.mattachments || []).map(
+        (item, index) => {
+          return {
+            key: index + 1,
+            id: item.id,
+            size: item.size,
+            fileName: item.fileName,
+            fileSize: item.fileSize,
+            fileType: item.fileType,
+            fileCategoryId: item.fileCategoryId,
+            fileCategoryName: item.fileCategoryName,
+            pathFile: item.pathFile,
+            urlFile1: item.urlFile1,
+            urlFile2: item.urlFile2,
+            createdBy: item.createdBy,
+            createdDate: item.createdDate
+              ? moment(item.createdDate).format("DD MMM YYYY")
+              : "",
+            dataType: "exist",
+          };
+        },
+      );
       setSelectedHierarchy(appHier);
       setListDataAttachment(dataAttachment);
       form.setFieldsValue({
@@ -239,25 +261,28 @@ const DailyRateForm = ({ type }) => {
     (data_detail_draft, data_detail) => {
       const appHier = data_detail_draft?.appHierId || [];
       setSelectedHierarchy(appHier);
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
-        return {
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          createdBy: item.createdBy,
-          createdDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        };
-      });
+      const dataAttachment = (data_detail?.mattachments || []).map(
+        (item, index) => {
+          return {
+            key: index + 1,
+            id: item.id,
+            size: item.size,
+            fileName: item.fileName,
+            fileSize: item.fileSize,
+            fileType: item.fileType,
+            fileCategoryId: item.fileCategoryId,
+            fileCategoryName: item.fileCategoryName,
+            pathFile: item.pathFile,
+            urlFile1: item.urlFile1,
+            urlFile2: item.urlFile2,
+            createdBy: item.createdBy,
+            createdDate: item.createdDate
+              ? moment(item.createdDate).format("DD MMM YYYY")
+              : "",
+            dataType: "exist",
+          };
+        },
+      );
       setListDataAttachment(dataAttachment);
       form.setFieldsValue({
         id: data_detail_draft?.ratesId,
@@ -327,8 +352,11 @@ const DailyRateForm = ({ type }) => {
       breadcrumbName: "Daily Rate",
     },
     {
-      path: RBI_ROUTES.DAILY_RATE_CREATE,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      path:
+        type === "create"
+          ? RBI_ROUTES.DAILY_RATE_CREATE
+          : RBI_ROUTES.DAILY_RATE_UPDATE,
+      breadcrumbName: `${type === "create" ? "Create Daily Rate" : "Update Daily Rate"}`,
     },
   ];
 
@@ -420,12 +448,14 @@ const DailyRateForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setKirimBody({});
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setTabData([
         {
           value: "Daily Rate",
@@ -525,6 +555,12 @@ const DailyRateForm = ({ type }) => {
         .then(async (data) => {
           let dailyRate = data?.id;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const body = {
@@ -561,6 +597,12 @@ const DailyRateForm = ({ type }) => {
         .unwrap()
         .then(async () => {
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist",
           );
@@ -657,23 +699,23 @@ const DailyRateForm = ({ type }) => {
 
           {/* Step 2: Approval - Conditional Rendering */}
           {valuePage === tabData[1].value && (
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+            <CardContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* Step 3: Attachment - Conditional Rendering */}
           {valuePage === tabData[2].value && (
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+            <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 typeSelector={"daily_rate"}
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
@@ -683,7 +725,7 @@ const DailyRateForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           )}
 
           {/* FormFooter menggantikan tombol manual */}

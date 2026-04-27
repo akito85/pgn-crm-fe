@@ -187,7 +187,7 @@ const NxAdvanceSearch = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       footer={null}
       onCancel={onClose}
       width={modalWidth}

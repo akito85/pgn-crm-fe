@@ -378,8 +378,9 @@ const ListBillingItemCategory = () => {
                 <ButtonComponent
                   icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
                   border={false}
+                  type={"action"}
                 >
-                  <span className="text-black ml-3">Update</span>
+                  <span className="text-black ml-0">Update</span>
                 </ButtonComponent>
               </Link>
             ) : (
@@ -387,7 +388,7 @@ const ListBillingItemCategory = () => {
                 <span className="pointer-events-none">
                   <SVGIcon name="IconEdit" color="#8D91A0" width={24} />
                 </span>
-                <span className="text-gray-400 ml-4 pointer-events-none">
+                <span className="text-gray-400 ml-2 pointer-events-none">
                   Update
                 </span>
               </div>
@@ -439,10 +440,11 @@ const ListBillingItemCategory = () => {
                     checked={false}
                   />
                 }
+                type={"action"}
                 border={false}
                 onClick={() => handleInactive(record)}
               >
-                <span className="ml-5 text-black">Inactivate</span>
+                <span className="ml-1 text-black">Inactivate</span>
               </ButtonComponent>
             ) : (
               <div className="flex items-center px-2 py-1">
@@ -451,7 +453,7 @@ const ListBillingItemCategory = () => {
                   disabled={true}
                   checked={false}
                 />
-                <span className="text-gray-400 ml-6">Inactivate</span>
+                <span className="text-gray-400 ml-4">Inactivate</span>
               </div>
             )
           ) : (
@@ -480,12 +482,13 @@ const ListBillingItemCategory = () => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">

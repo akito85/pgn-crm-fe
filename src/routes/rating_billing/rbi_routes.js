@@ -37,6 +37,12 @@ export const RBI_ROUTES = {
   MONITORING_USAGE_DETAIL: "/rating-billing/monitoring-usage/view",
   MONITORING_USAGE_LIST_UPDATE: "/rating-billing/monitoring-usage/update",
 
+  // accounting routes
+  ACCOUNTING_VIEW: "/accounting/view",
+  ACCOUNTING_CREATE: "/accounting/create",
+  ACCOUNTING_UPDATE: "/accounting/update",
+  ACCOUNTING_DETAIL: "/accounting/detail",
+
   // adjustment billing
   ADJUSTMENT_BILLING_VIEW: "/rating-billing/adjustment-billing",
   ADJUSTMENT_BILLING_DETAIL: "/rating-billing/adjustment-billing/view",
@@ -67,10 +73,10 @@ export const RBI_ROUTES = {
   TERMS_OF_PAYMENT_DETAIL: "/system-setup/terms-of-payment/view",
 
   // BILLING ITEM
-  BILLING_ITEM_VIEW: "/system-setup/billing-item",
-  BILLING_ITEM_DETAIL: "/system-setup/billing-item/view",
-  BILLING_ITEM_CREATE: "/system-setup/billing-item/create",
-  BILLING_ITEM_UPDATE: "/system-setup/billing-item/update",
+  BILLING_ITEM_VIEW: "/system-setup/transaction-mapping",
+  BILLING_ITEM_DETAIL: "/system-setup/transaction-mapping/view",
+  BILLING_ITEM_CREATE: "/system-setup/transaction-mapping/create",
+  BILLING_ITEM_UPDATE: "/system-setup/transaction-mapping/update",
 
   // Billing Cycle
   BILLING_CYCLE_VIEW: "/system-setup/billing-cycle",

@@ -44,6 +44,7 @@ export const dateFormatting = {
   dateFormal: "YYYY-MM-DD",
   datePeriod: "MMM YYYY",
   meas_date: "DD-MM-YYYY HH:mm:ss",
+  meas_date_input: "MM/DD/YYYY HH:mm:ss",
   hour_format: "HH:mm",
   f_date: "DD-MM-yyyy",
   year_only: "YYYY",
@@ -310,7 +311,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
     case "activate":
       if (
         lowerStatusApproval === "waiting approval" ||
-        lowerStatus === "inactive" ||
+        lowerStatusApproval === "draft" ||
         lowerStatus === "draft"
       ) {
         return true;
@@ -322,6 +323,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
       if (
         lowerStatusApproval === "waiting approval" ||
         lowerStatus === "inactive"
+          || (lowerStatus === 'active' && lowerStatusApproval === 'approved')
       ) {
         return true;
       } else {

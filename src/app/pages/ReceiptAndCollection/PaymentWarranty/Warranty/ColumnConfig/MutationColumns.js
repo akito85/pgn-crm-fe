@@ -3,7 +3,7 @@ import React from 'react';
 import moment from "moment";
 import { Tooltip, Popover, Space } from "antd";
 import { dateFormatting, renderColumn } from "../../../../../../utils";
-import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import { MoreOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { WARRANTY_STATUS, WARRANTY_APPROVAL_STATUS } from "../../../../../../constants/warranty";
@@ -40,7 +40,7 @@ export const columnMutation = (
       title: "REFF. DOCUMENT NUMBER",
       dataIndex: "documentNumber",
       sorter: true,
-      ...getColumnSearchPropsPaging("documentNumber", searchInput, searchedColumn, searchText, handleSearch),
+      ...getColumnSearchPropsUseFilteredValue(search, "documentNumber", searchInput, searchedColumn, searchText, handleSearch),
       render: (text, record) => DOMPurify.sanitize(text || record.noDocumentMutation || record.mutationNumber || ""),
     },
     {
@@ -48,15 +48,19 @@ export const columnMutation = (
       title: "SOURCE",
       dataIndex: "source",
       sorter: true,
-      ...getColumnSearchPropsPaging("source", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => DOMPurify.sanitize(text || record?.payWarranty?.documentNumber || ""),
+      ...getColumnSearchPropsUseFilteredValue(search, "source", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => {
+        const sourceData = text || record?.payWarranty?.documentNumber || record?.mutationSource || "";
+        return DOMPurify.sanitize(sourceData.toUpperCase());
+      },
     },
     {
       key: "type",
       title: "TYPE",
       dataIndex: "type",
       sorter: true,
-      ...getColumnSearchPropsPaging("type", searchInput, searchedColumn, searchText, handleSearch),
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(search, "type", searchInput, searchedColumn, searchText, handleSearch),
       render: (text, record) => DOMPurify.sanitize(text || record?.type || ""),
     },
     {
@@ -64,7 +68,7 @@ export const columnMutation = (
       title: "CATEGORY",
       dataIndex: "category",
       sorter: true,
-      ...getColumnSearchPropsPaging("category", searchInput, searchedColumn, searchText, handleSearch),
+      ...getColumnSearchPropsUseFilteredValue(search, "category", searchInput, searchedColumn, searchText, handleSearch),
       render: (text, record) => DOMPurify.sanitize(record?.category || ""),
     },
     {
@@ -92,7 +96,7 @@ export const columnMutation = (
       title: "CONVERTED CURRENCY",
       dataIndex: "convertedCurrency",
       sorter: true,
-      ...getColumnSearchPropsPaging("convertedCurrency", searchInput, searchedColumn, searchText, handleSearch),
+      ...getColumnSearchPropsUseFilteredValue(search, "convertedCurrency", searchInput, searchedColumn, searchText, handleSearch),
       render: (text, record) => DOMPurify.sanitize(record.convertedCurrencyName || record.currency || (typeof text === 'string' && isNaN(Number(text)) ? text : "") || ""),
     },
     {
@@ -105,7 +109,7 @@ export const columnMutation = (
     },
     {
       key: "equivalentAmount",
-      title: "EQV AMOUNT",
+      title: "EQV. BALANCE",
       dataIndex: "equivalentAmount",
       align: "right",
       sorter: true,
@@ -118,7 +122,7 @@ export const columnMutation = (
         title: "DESCRIPTION",
         dataIndex: "description",
         sorter: true,
-        ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch),
+        ...getColumnSearchPropsUseFilteredValue(search, "description", searchInput, searchedColumn, searchText, handleSearch),
         render: (text) => (
             <div 
                 ref={(el) => {
@@ -174,49 +178,62 @@ export const columnMutation = (
 
         return (
           <div className="w-full flex justify-center items-center py-1 gap-2">
-            <Tooltip title={isDisabled ? tooltipEdit : "Update"}>
-              <div
-                className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
-                onClick={() => !isDisabled && handleEdit(record)}
-              >
-                <SVGIcon name="IconEdit" width={18} color="#ACC424" />
-              </div>
-            </Tooltip>
-            <Tooltip title={isDisabled ? tooltipDelete : "Delete"}>
-              <div
-                className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
-                onClick={() => !isDisabled && handleDelete(record)}
-              >
-                <SVGIcon name="IconDelete" width={18} color="#D90000" />
-              </div>
-            </Tooltip>
-            {!isCreate && (
-              <Popover
-                trigger="click"
-                placement="bottomRight"
-                content={
-                  <Space direction="vertical" style={{ width: 150 }}>
-                    <div 
-                      className="cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"
-                      onClick={() => handleHistory(record)}
-                    >
-                      <SVGIcon name="IconLogHistory" width={20} color="#000000" />
-                      <span className="text-sm">Approval History</span>
-                    </div>
-                  </Space>
-                }
-              >
-                <div>
-                  <MoreOutlined
-                    style={{
-                      fontSize: "20px",
-                      color: "#0075bf",
-                      cursor: "pointer",
-                      transform: "rotate(90deg)",
-                    }}
-                  />
-                </div>
-              </Popover>
+            {isCreate ? (
+              <>
+                <Tooltip title={tooltipEdit}>
+                  <div
+                    className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                    onClick={() => !isDisabled && handleEdit(record)}
+                  >
+                    <SVGIcon name="IconEdit" width={24} color={isDisabled ? "#C8CDD4" : "#0075BF"} />
+                  </div>
+                </Tooltip>
+                <Tooltip title={tooltipDelete}>
+                  <div
+                    className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                    onClick={() => !isDisabled && handleDelete(record)}
+                  >
+                    <SVGIcon name="IconDelete" width={24} color={isDisabled ? "#C8CDD4" : "#BE3036"} />
+                  </div>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Popover
+                  trigger="click"
+                  placement="bottomRight"
+                  content={
+                    <Space direction="vertical" style={{ width: 120 }}>
+                      <div
+                        className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
+                        onClick={() => !isDisabled && handleEdit(record)}
+                      >
+                        <SVGIcon name="IconEdit" width={18} color="#ACC424" />
+                        <span className="text-sm">Update</span>
+                      </div>
+                      <div
+                        className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
+                        onClick={() => !isDisabled && handleDelete(record)}
+                      >
+                        <SVGIcon name="IconDelete" width={18} color="#BE3036" />
+                        <span className="text-sm text-[#BE3036]">Delete</span>
+                      </div>
+                    </Space>
+                  }
+                >
+                  <div className="cursor-pointer">
+                    <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                  </div>
+                </Popover>
+                <Tooltip title="Approval History">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => handleHistory(record)}
+                  >
+                    <SVGIcon name="IconLogHistory" width={24} color="#0075bf" />
+                  </div>
+                </Tooltip>
+              </>
             )}
           </div>
         );
@@ -262,7 +279,7 @@ export const columnMutation = (
                 className="cursor-pointer"
                 onClick={() => handleHistory(record)}
               >
-                <SVGIcon name="IconLogHistory" width={20} color="#000000" />
+                <SVGIcon name="IconLogHistory" width={24} color="#0075bf" />
               </div>
             </Tooltip>
           </div>

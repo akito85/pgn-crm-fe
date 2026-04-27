@@ -149,7 +149,7 @@ const LayoutMenu = ({ children }) => {
   // const config =
   //   localStorage.getItem("config") || window.sessionStorage.getItem("config");
   // const configParsed = parseInt(
-  //   JSON.parse(config)?.find((item) => item?.name === "SESSION_TIME")?.vale
+  //   JSON.parse(config)?.find((item) => item?.name === "SESSION_TIME")?.value
   // );
   // const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [isTimedout, setIsTimedout] = useState(false);

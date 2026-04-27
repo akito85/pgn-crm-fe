@@ -28,6 +28,8 @@ const initialState = {
   data_budget: [],
   data_customer: [],
   data_detail: [],
+  data_bucket_currency: [],
+  data_bucket_category: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   data_AttachmentTable: [],
@@ -775,6 +777,45 @@ export const inactiveBillingBucket = createAsyncThunk(
   }
 );
 
+export const requestActivateBillingBucket = createAsyncThunk(
+  "REQUEST_ACTIVATE_BILLING_BUCKET",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/billing-bucket/request-activate`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      const successBody = {
+        title: "Successful",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not submitted. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+    }
+  }
+);
+
 export const approveRejectBillingBucket = createAsyncThunk(
   "APPROVE_REJECT_BILLING_BUCKET",
   async ({ body }, thunkAPI) => {
@@ -786,9 +827,8 @@ export const approveRejectBillingBucket = createAsyncThunk(
       );
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -805,9 +845,8 @@ export const approveRejectBillingBucket = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -829,9 +868,8 @@ export const approveRejectInactiveBillingBucket = createAsyncThunk(
       );
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -848,9 +886,49 @@ export const approveRejectInactiveBillingBucket = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+    }
+  }
+);
+
+export const approveRejectActivatedBillingBucket = createAsyncThunk(
+  "APPROVE_REJECT_ACTIVATED_BILLING_BUCKET",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/billing-bucket/approval-activated";
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      const successApprove = {
+        title: `Successful`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successApprove));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -869,9 +947,8 @@ export const updateBillingBucket = createAsyncThunk(
       const response = await ratingBillingHttpService.updateData(url, body);
       const successMessage = {
         title: "Successful",
-        description: `Your data has been ${
-          body.isSubmit === false ? "updated" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "updated" : "submitted"
+          }.`,
       };
       thunkApi.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -888,9 +965,8 @@ export const updateBillingBucket = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "updated" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "updated" : "submitted"
+              }. ${message}.`,
           };
           thunkApi.dispatch(showModalError(errorBody));
         }
@@ -923,6 +999,52 @@ export const downloadBillingBucket = createAsyncThunk(
   }
 );
 
+export const getBillingBucketCurrency = createAsyncThunk(
+  "GET_BILLING_BUCKET_CURRENCY",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/billing-bucket/currency`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response?.data || [];
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getBillingBucketCategory = createAsyncThunk(
+  "GET_BILLING_BUCKET_CATEGORY",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/billing-bucket/category`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response?.data || [];
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const createBillingBucket = createAsyncThunk(
   "CREATE_BILLING_BUCKET",
   async ({ body }, thunkAPI) => {
@@ -931,9 +1053,8 @@ export const createBillingBucket = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.isSubmit === false ? "created" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "created" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -950,9 +1071,8 @@ export const createBillingBucket = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "created" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "created" : "submitted"
+              }. ${message}.`,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -1357,6 +1477,41 @@ const billingBucketSlice = createSlice({
       state.loading = false;
     },
     [approveRejectInactiveBillingBucket.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+    // get billing bucket currency
+    [getBillingBucketCurrency.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBillingBucketCurrency.fulfilled]: (state, action) => {
+      state.data_bucket_currency = action.payload;
+      state.loading = false;
+    },
+    [getBillingBucketCurrency.rejected]: (state) => {
+      state.loading = false;
+    },
+    // get billing bucket category
+    [getBillingBucketCategory.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBillingBucketCategory.fulfilled]: (state, action) => {
+      state.data_bucket_category = action.payload;
+      state.loading = false;
+    },
+    [getBillingBucketCategory.rejected]: (state) => {
+      state.loading = false;
+    },
+    // approve reject activated billing bucket
+    [approveRejectActivatedBillingBucket.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveRejectActivatedBillingBucket.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveRejectActivatedBillingBucket.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;

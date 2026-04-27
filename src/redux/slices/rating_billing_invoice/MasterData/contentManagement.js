@@ -54,6 +54,34 @@ const initialState = {
   loading: false,
 };
 
+// Get List Attachment Content Management
+export const getContentAttachmentList = createAsyncThunk(
+  "GET_CONTENT_ATTACHMENT_LIST",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/content/list-attachment/${id}`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return response.data?.result || response.data?.data || response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  },
+);
+
 // Get Detail Draft Content Management
 export const getDetailDraftContentManagement = createAsyncThunk(
   "GET_DETAIL_DRAFT_CONTENT_MANAGEMENT",
@@ -94,6 +122,29 @@ export const getAllContentManagementPaginate = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
+    }
+  },
+);
+
+export const downloadContentManagementList = createAsyncThunk(
+  "DOWNLOAD_CONTENT_MANAGEMENT_LIST",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/content/download-list?page=${page}&size=${pageSize}&search=${searchParams}&sort=${sortParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_CONTENT_MANAGEMENT_LIST",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response.response?.data || response);
     }
   },
 );
@@ -366,9 +417,8 @@ export const updateContentManagement = createAsyncThunk(
       const response = await ratingBillingHttpService.updateData(url, body);
       const successMessage = {
         title: "Successful",
-        description: `Your data has been ${
-          body.type === "DRAFT" ? "updated" : "submitted"
-        }.`,
+        description: `Your data has been ${body.type === "DRAFT" ? "updated" : "submitted"
+          }.`,
       };
       thunkApi.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -385,9 +435,8 @@ export const updateContentManagement = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.type === "DRAFT" ? "updated" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.type === "DRAFT" ? "updated" : "submitted"
+              }. ${message}.`,
           };
           thunkApi.dispatch(showModalError(errorBody));
         }
@@ -877,6 +926,46 @@ export const inactiveContentManagement = createAsyncThunk(
   },
 );
 
+//activate 
+export const activateContentManagement = createAsyncThunk(
+  "ACTIVATE_CONTENT_MANAGEMENT",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/content/request-activate`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const successBody = {
+        title: "Successful",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not submitted. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+    }
+  },
+);
+
 // Approve or Reject Content Management
 export const approveRejectContentManagement = createAsyncThunk(
   "APPROVE_REJECT_CONTENT_MANAGEMENT",
@@ -889,9 +978,8 @@ export const approveRejectContentManagement = createAsyncThunk(
       );
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -908,9 +996,50 @@ export const approveRejectContentManagement = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error.response.data);
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// Approve or Reject Activate Content Management
+export const approveRejectActivateContentManagement = createAsyncThunk(
+  "APPROVE_REJECT_ACTIVATE_CONTENT_MANAGEMENT",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/content/approval-activated";
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const successMessage = {
+        title: `Successful`,
+        description: `Activate request has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          } successfully.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Activate request failed. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -934,9 +1063,8 @@ export const approveRejectInactiveContentManagement = createAsyncThunk(
       );
       const successMessage = {
         title: `Successful`,
-        description: `Inactive request has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        } successfully.`,
+        description: `Inactive request has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          } successfully.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -973,9 +1101,8 @@ export const createContentManagement = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.type === "DRAFT" ? "created" : "submitted"
-        }.`,
+        description: `Your data has been ${body.type === "DRAFT" ? "created" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -992,9 +1119,8 @@ export const createContentManagement = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.type === "DRAFT" ? "created" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.type === "DRAFT" ? "created" : "submitted"
+              }. ${message}.`,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -1027,6 +1153,17 @@ const contentManagementSlice = createSlice({
       state.content_pagination = action.payload?.page || null;
     },
     [getAllContentManagementPaginate.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    // downloadContentManagementList
+    [downloadContentManagementList.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadContentManagementList.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadContentManagementList.rejected]: (state) => {
       state.loading = false;
     },
 
@@ -1425,6 +1562,19 @@ const contentManagementSlice = createSlice({
       state.loading = false;
       state.message = action.payload;
     },
+    // approve reject activate content management
+    [approveRejectActivateContentManagement.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveRejectActivateContentManagement.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveRejectActivateContentManagement.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
     // approve reject inactive content management
     [approveRejectInactiveContentManagement.pending]: (state) => {
       state.loading = true;
@@ -1448,6 +1598,18 @@ const contentManagementSlice = createSlice({
     },
     [getDetailDraftContentManagement.rejected]: (state) => {
       state.loading = false;
+    },
+    // get content attachment list
+    [getContentAttachmentList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getContentAttachmentList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_AttachmentTable = action.payload;
+    },
+    [getContentAttachmentList.rejected]: (state) => {
+      state.loading = false;
+      state.data_AttachmentTable = [];
     },
   },
 });

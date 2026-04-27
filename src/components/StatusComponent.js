@@ -42,7 +42,7 @@ const StatusComponent = ({
       case "sent":
       case "approved":
       case "success_upload":
-      case "standard": // ✅ E-Faktur: Generated successfully
+      case "standard": 
         bgColor = "status-active";
         tColor = "text-white";
         break;
@@ -300,15 +300,15 @@ const StatusComponent = ({
       case "generating":
       case "in progress":
       case "inprogress":
-      case "processing": // ✅ E-Faktur processing
-      case "submitted": // ✅ E-Faktur submitted
+      case "processing":
+      case "submitted":
       case "waiting approval":
       case "waiting_approval":
       case "awaiting_approval":
       case "awaiting approval":
-      case "waiting_cancellation_approval": // ✅ E-Faktur
+      case "waiting_cancellation_approval":
       case "waiting cancellation approval":
-      case "waiting_upload_approval": // ✅ E-Faktur
+      case "waiting_upload_approval":
       case "waiting upload approval":
         return <Loading3QuartersOutlined style={{ fontSize: "13px" }} />;
 

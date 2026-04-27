@@ -11,11 +11,13 @@ import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import RadioTabs from "../../../../../../components/RadioTabs";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../../components/FormStepNavigation";
 import { configApp } from "../../../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
-import {
-  getConfigFileRBIGeneralTemplate,
-} from "../../../../../../redux/slices/attachmentSlice";
+import { getConfigFileRBIGeneralTemplate } from "../../../../../../redux/slices/attachmentSlice";
 import {
   showModalError,
   validateCreateUpdate,
@@ -38,6 +40,7 @@ import { columnsTableCriteriaTOP } from "../TableCriteria/TableCriteriaTOP";
 import CreateTOP from "./CreateTOP";
 import ModalConfirmationTOPS from "./ModalConfirmationTOPS";
 import ModalBack from "../../../../../../components/Modal/ModalBack";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const ListCreateForm = ({ type }) => {
   const {
@@ -68,6 +71,7 @@ const ListCreateForm = ({ type }) => {
   const [criteriaOptions, setCriteriaOptions] = useState([]);
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [list, setList] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
   const [storedData, setStoredData] = useState(false);
@@ -112,6 +116,11 @@ const ListCreateForm = ({ type }) => {
   }, [id, type, data_detail, data_detail_draft]);
 
   //handle Tab
+  const STEPS = [
+    { title: "TERMS OF PAYMENT", value: "Terms of Payment" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
   const [tabData, setTabData] = useState([
     {
       value: "Terms of Payment",
@@ -120,9 +129,49 @@ const ListCreateForm = ({ type }) => {
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  const [current, setCurrent] = useState(0);
+  const [valuePage, setValuePage] = useState(STEPS[0].value);
+
+  const next = () => {
+    const fieldsToValidate = tabData[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (list.length === 0 && !formData?.criteria?.includes(24)) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                }),
+              );
+              return;
+            }
+          }
+          if (current < STEPS.length - 1) {
+            setCurrent(current + 1);
+            setValuePage(STEPS[current + 1].value);
+            window.scrollTo(0, 0);
+          }
+        })
+        .catch((error) => {
+          handleMandatory(setTabData, listDataAttachment, error.errorFields);
+        });
+    } else if (current < STEPS.length - 1) {
+      setCurrent(current + 1);
+      setValuePage(STEPS[current + 1].value);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+      setValuePage(STEPS[current - 1].value);
+      window.scrollTo(0, 0);
+    }
   };
 
   const routes = [
@@ -139,8 +188,8 @@ const ListCreateForm = ({ type }) => {
       breadcrumbName: "Terms of Payment",
     },
     {
-      path: RBI_ROUTES.TERMS_OF_PAYMENT_CREATE,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      path: "",
+      breadcrumbName: `${type === "create" ? "Create Terms of Payment" : "Update Terms of Payment"}`,
     },
   ];
 
@@ -189,7 +238,7 @@ const ListCreateForm = ({ type }) => {
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -200,11 +249,11 @@ const ListCreateForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -220,6 +269,23 @@ const ListCreateForm = ({ type }) => {
     handleMandatory(setTabData, listDataAttachment, errorFields);
   };
 
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
+
   // untuk upadate
 
   const asserData = useCallback(
@@ -234,8 +300,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail?.information?.apphierId);
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -252,7 +319,7 @@ const ListCreateForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataAttachment);
       form.setFieldsValue({
@@ -272,6 +339,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail?.information?.startDate));
+      setEndDate(
+        data_detail?.information?.endDate
+          ? moment(data_detail?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)
@@ -288,10 +360,10 @@ const ListCreateForm = ({ type }) => {
               }
             }
             return obj;
-          })
+          }),
       );
     },
-    [form]
+    [form],
   );
 
   const asserDataDraft = useCallback(
@@ -306,8 +378,9 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues(mappingCriteria);
       setSelectedHierarchy(data_detail_draft?.information?.apphierId);
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -324,7 +397,7 @@ const ListCreateForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
       setListDataAttachment(dataDraftAttachment);
       form.setFieldsValue({
@@ -344,6 +417,11 @@ const ListCreateForm = ({ type }) => {
         isSubmit: flag,
       });
       setStartDate(moment(data_detail_draft?.information?.startDate));
+      setEndDate(
+        data_detail_draft?.information?.endDate
+          ? moment(data_detail_draft?.information?.endDate)
+          : undefined,
+      );
       setList(
         (data_detail_draft?.criteriaData || [])
           .filter((data) => data?.allCriteria !== true)
@@ -360,10 +438,10 @@ const ListCreateForm = ({ type }) => {
               }
             }
             return obj;
-          })
+          }),
       );
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -403,6 +481,7 @@ const ListCreateForm = ({ type }) => {
       form.resetFields();
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setAppHierDataDetail([]);
       setIsC(false);
       setIsSat(false);
@@ -411,6 +490,8 @@ const ListCreateForm = ({ type }) => {
       setCriteriaValues([]);
       // setAppHierOptions([]);
       setKirimBody({});
+      setCurrent(0);
+      setValuePage(STEPS[0].value);
       setTabData([
         {
           value: "Terms of Payment",
@@ -422,6 +503,8 @@ const ListCreateForm = ({ type }) => {
     } else {
       dispatch(getDetailTOP(id));
       dispatch(getDetailDraftTOP(id));
+      setCurrent(0);
+      setValuePage(STEPS[0].value);
     }
   };
 
@@ -439,7 +522,7 @@ const ListCreateForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -504,14 +587,14 @@ const ListCreateForm = ({ type }) => {
     dataCriteria,
     listDataCriteria = [],
     setMissingColumn = () => {},
-    minimumData = 0
+    minimumData = 0,
   ) => {
     console.log(listDataCriteria);
     console.log(criteriaValues);
 
     let missingColumn = [];
     const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
+      dataCriteria?.includes(item.value),
     );
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
@@ -538,21 +621,28 @@ const ListCreateForm = ({ type }) => {
   };
   // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
-    const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
-        dataOverlap?.push(item)
-      }
+    const headerStart = formHeader?.startDate
+      ? moment(formHeader.startDate).startOf("day")
+      : null;
+    const headerEnd = formHeader?.endDate
+      ? moment(formHeader.endDate).startOf("day")
+      : null;
+
+    const dataOverlap = dataTable?.filter((item) => {
+      const itemStart = item?.startDate
+        ? moment(item.startDate).startOf("day")
+        : null;
+      const itemEnd = item?.endDate
+        ? moment(item.endDate).startOf("day")
+        : null;
+
+      if (headerStart && itemStart && itemStart.isBefore(headerStart))
+        return true;
+      if (headerEnd && itemEnd && itemEnd.isAfter(headerEnd)) return true;
+      return false;
     });
 
-    if (dataOverlap?.length > 0) {
-      return true
-    } else {
-      return false
-    }
-    // }
-
+    return (dataOverlap?.length || 0) > 0;
   }, []);
 
   //handle submit setelah muncul modal
@@ -561,16 +651,21 @@ const ListCreateForm = ({ type }) => {
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabData, listDataAttachment);
     } else {
-      const isOverlapping = checkOverlappingData({startDate: formValue?.startDate, endDate: formValue?.endDate}, list)
+      const isOverlapping = checkOverlappingData(
+        { startDate: formValue?.startDate, endDate: formValue?.endDate },
+        list,
+      );
       // It seems like handleMandatory is called regardless of the condition
       handleMandatory(setTabData, listDataAttachment);
       if (list.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
       } else if (storedData) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description:
@@ -583,21 +678,23 @@ const ListCreateForm = ({ type }) => {
           formValue?.criteria,
           list,
           () => {},
-          0
+          0,
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
       } else if (isOverlapping) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
-       } else {
+      } else {
         // Assuming dispatch and setModalConfirm are defined somewhere
 
         let Object = list.map((item) => {
@@ -647,7 +744,7 @@ const ListCreateForm = ({ type }) => {
         const filteredCriteria = columnsTableCriteriaTOP().filter(
           (item) =>
             !formValue.criteria?.includes(item.indexValue) &&
-            formValue.criteria.includes(item.indexValue) === 1
+            formValue.criteria.includes(item.indexValue) === 1,
         );
 
         //Modifying Object based on filtered criteria
@@ -721,6 +818,12 @@ const ListCreateForm = ({ type }) => {
         .then(async (data) => {
           let id = data?.termsOfPaymentId;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const body = {
@@ -730,7 +833,7 @@ const ListCreateForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/top/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -756,8 +859,14 @@ const ListCreateForm = ({ type }) => {
         .unwrap()
         .then(async () => {
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -768,7 +877,7 @@ const ListCreateForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/top/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -802,23 +911,29 @@ const ListCreateForm = ({ type }) => {
     return value;
   };
 
-
   const isDisabledDate = useMemo(() => {
-    if (hasValue(form?.getFieldsValue()?.endDate) === true && list?.map(item => ({ startDate: item?.startDate, endDate: item?.endDate }))?.length > 0) {
+    if (
+      hasValue(form?.getFieldsValue()?.endDate) === true &&
+      list?.map((item) => ({
+        startDate: item?.startDate,
+        endDate: item?.endDate,
+      }))?.length > 0
+    ) {
       return true;
     } else {
-      return false
+      return false;
     }
   }, [form, list]);
-  
+
   return (
     <>
       <BreadCrumb routes={routes} />
       <Spin spinning={false}>
-        <RadioTabs
-          data={tabData}
-          onChange={onChange}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={STEPS}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
         <Form
           layout="vertical"
@@ -864,7 +979,7 @@ const ListCreateForm = ({ type }) => {
               display: valuePage !== tabData[1].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+            <CardContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -872,7 +987,7 @@ const ListCreateForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           <div
@@ -880,11 +995,11 @@ const ListCreateForm = ({ type }) => {
               display: valuePage !== tabData[2].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+            <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
                 typeSelector="top"
@@ -894,71 +1009,28 @@ const ListCreateForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedData}
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  disabled={storedData ? true : false}
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(false)}
-                  disabled={storedData}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(true)}
-                  disabled={storedData}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={STEPS.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={() => setModalBack(true)}
+            onClear={handleClear}
+            onSaveDraft={() => {
+              setFlag(false);
+              setTimeout(() => form.submit(), 0);
+            }}
+            onSubmit={() => {
+              setFlag(true);
+              setTimeout(() => form.submit(), 0);
+            }}
+            type={type}
+            disabled={storedData}
+            saveDraftLabel={"Save as Draft"}
+          />
         </Form>
       </Spin>
 
@@ -977,7 +1049,7 @@ const ListCreateForm = ({ type }) => {
         width={1000}
         type={"confirmation"}
         footer={
-          <div className="w-full flex justify-end gap-5 p-4">
+          <div className="w-full flex justify-end gap-2 p-4">
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>

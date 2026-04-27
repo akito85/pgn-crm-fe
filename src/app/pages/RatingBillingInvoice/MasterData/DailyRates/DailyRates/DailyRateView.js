@@ -23,6 +23,7 @@ import {
   getDowloadDailyRate,
   getListApprovalById,
   inactiveDailyRates,
+  requestActivateDailyRates,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/dailyrate";
 import {
   hasValue,
@@ -57,6 +58,7 @@ export const columnDailyRate = (
     key: "rateType",
     sorter: true,
     align: "left",
+    width: 120,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateType",
@@ -82,6 +84,7 @@ export const columnDailyRate = (
     key: "fromCurrencyName",
     sorter: true,
     align: "center",
+    width: 160,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "fromCurrencyName",
@@ -107,6 +110,7 @@ export const columnDailyRate = (
     key: "toCurrencyName",
     sorter: true,
     align: "center",
+    width: 150,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "toCurrencyName",
@@ -132,6 +136,7 @@ export const columnDailyRate = (
     key: "rateDate",
     sorter: true,
     align: "center",
+    width: 140,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "rateDate",
@@ -158,6 +163,7 @@ export const columnDailyRate = (
     key: "convertedRate",
     sorter: true,
     align: "right",
+    width: 170,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "convertedRate",
@@ -198,6 +204,7 @@ export const columnDailyRate = (
     dataIndex: "description",
     key: "description",
     sorter: true,
+    width: 250,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "description",
@@ -224,7 +231,7 @@ export const columnDailyRate = (
     title: "STATUS",
     dataIndex: "status",
     key: "status",
-    width: 150,
+    width: 130,
     sorter: true,
     align: "left",
     ...getColumnSearchPropsUseFilteredValue(
@@ -266,7 +273,7 @@ export const columnDailyRate = (
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
     key: "statusApproval",
-    width: 200,
+    width: 180,
     sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValue(
@@ -392,11 +399,15 @@ const DailyRateView = ({ dispatch }) => {
           create: dataApprovalHistory?.dataApprover?.DAILY_RATES || [],
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_DAILY_RATES || [],
+          activate:
+            dataApprovalHistory?.dataApprover?.ACTIVATED_DAILY_RATES || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.DAILY_RATES || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_DAILY_RATES || [],
+          activate:
+            dataApprovalHistory?.dataHistory?.ACTIVATED_DAILY_RATES || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -424,6 +435,7 @@ const DailyRateView = ({ dispatch }) => {
   //handle inactive
   const handleInactive = (r) => {
     setRatesId(r?.ratesId);
+    setDataInactivate(r || {});
     setOpenModalInactivate(true);
   };
   const handleCancelModalInactivate = () => {
@@ -467,12 +479,20 @@ const DailyRateView = ({ dispatch }) => {
   }, [dispatch, search, sort]);
 
   const handleSubmitModalInactivate = (res, handleClear) => {
+    const selectedStatus = (dataInactivate?.status || "").toUpperCase();
+    const isActivateRequest = selectedStatus === "INACTIVE";
+
     const body = {
       ratesId: ratesId,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveDailyRates({ body }))
+
+    const activationAction = isActivateRequest
+      ? requestActivateDailyRates({ body })
+      : inactiveDailyRates({ body });
+
+    dispatch(activationAction)
       .unwrap()
       .then(() => {
         handleClear();
@@ -516,7 +536,9 @@ const DailyRateView = ({ dispatch }) => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20" }} />
+          }
           type="submit"
           onClick={handleDownload}
         >
@@ -529,7 +551,9 @@ const DailyRateView = ({ dispatch }) => {
       render: (
         <NavLink to={RBI_ROUTES.DAILY_RATE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={20} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20" }} />
+            }
             type="submit"
           >
             Create Daily Rates
@@ -550,7 +574,7 @@ const DailyRateView = ({ dispatch }) => {
           >
             <Tooltip title="Detail">
               <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -574,7 +598,7 @@ const DailyRateView = ({ dispatch }) => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               type={"action"}
@@ -586,7 +610,6 @@ const DailyRateView = ({ dispatch }) => {
                   isEditable ? "text-black " : "text-[#8D91A0]"
                 }`}
               >
-                {" "}
                 Update
               </span>
             </ButtonComponent>
@@ -623,7 +646,10 @@ const DailyRateView = ({ dispatch }) => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
+        const normalizedStatus = (record.status || "").toUpperCase();
+        const isActivateRequest = normalizedStatus === "INACTIVE";
+
+        const isInactivateRequest =
           (record.statusApproval === "APPROVED" &&
             record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
@@ -633,6 +659,9 @@ const DailyRateView = ({ dispatch }) => {
             record.status === "ACTIVE") ||
           moment(record?.rateDate).isBefore(moment(), "day");
 
+        const isActivateOrInactivate = isActivateRequest || isInactivateRequest;
+        const actionText = isActivateRequest ? "Activate" : "Inactivate";
+
         const Content =
           data > 3 ? (
             <ButtonComponent
@@ -640,7 +669,7 @@ const DailyRateView = ({ dispatch }) => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
@@ -649,19 +678,15 @@ const DailyRateView = ({ dispatch }) => {
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-1">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-              </span>
+              <span className="text-black ml-1">{actionText}</span>
             </ButtonComponent>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title={actionText}>
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               </div>
@@ -709,7 +734,11 @@ const DailyRateView = ({ dispatch }) => {
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
     itemGrantAccess,
-  );
+  ).map((col) => ({
+    ...col,
+    width: 60,
+    align: "center",
+  }));
 
   // ✅ Get base columns with key property
   const baseColumns = useMemo(() => {
@@ -787,6 +816,9 @@ const DailyRateView = ({ dispatch }) => {
     });
   }, [baseColumns, fixedColumns]);
 
+  const selectedStatus = (dataInactivate?.status || "").toUpperCase();
+  const isActivateFlow = selectedStatus === "INACTIVE";
+
   return (
     <div>
       <Spin spinning={loading}>
@@ -806,7 +838,7 @@ const DailyRateView = ({ dispatch }) => {
             totalData={daily_rate_pagination?.totalElements || 0}
             onSort={onSort}
             tableScrolled={{
-              x: 2500,
+              x: "max-content",
               y: 525,
             }}
             handleDownload={handleDownload}
@@ -829,7 +861,9 @@ const DailyRateView = ({ dispatch }) => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"daily_rate"}
-          alertMessage={`Are you sure you want to inactivate `}
+          alertMessage={`Are you sure you want to ${
+            isActivateFlow ? "activate" : "inactivate"
+          } `}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}

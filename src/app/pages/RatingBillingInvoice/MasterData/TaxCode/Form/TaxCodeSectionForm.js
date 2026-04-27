@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Select } from "antd";
 import moment from "moment";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import DateComponent from "../../../../../../components/DateComponent";
@@ -28,7 +28,8 @@ const TaxCodeSectionForm = ({
   statusApproval,
   handleStartDate = () => {},
   handleEndDate = () => { },
-  disabledDate = false
+  disabledDate = false,
+  data_gl_account_list = [],
 }) => {
   // Selector
   const { data_category, data_criteria } = useSelector(
@@ -128,7 +129,7 @@ const TaxCodeSectionForm = ({
 
   return (
     <div>
-      <BaseContainer header={"Tax Code Information"}>
+      <CardContainer header={"Tax Code Information"}>
         <div className="w-full grid grid-cols-4 gap-4">
           <Form.Item
             label={"Tax Code"}
@@ -169,6 +170,14 @@ const TaxCodeSectionForm = ({
               {
                 required: true,
                 message: "Please input your Tax Rate!",
+              },
+              {
+                validator: (_, value) => {
+                  if (value !== undefined && value !== null && value > 100) {
+                    return Promise.reject("Tax Rate must not exceed 100%.");
+                  }
+                  return Promise.resolve();
+                },
               },
             ]}
             getValueFromEvent={(e) => {
@@ -216,14 +225,20 @@ const TaxCodeSectionForm = ({
           <Form.Item
             label={"GL Account"}
             name={"glAccount"}
-            // rules={[
-            //   {
-            //     required: true,
-            //     message: "Please input your GL Account!",
-            //   },
-            // ]}
+            rules={[
+              {
+                required: true,
+                message: "Please input your GL Account!",
+              },
+            ]}
           >
-            <SelectComponent disabled={true} />
+            <SelectComponent showSearch optionFilterProp="children">
+              {data_gl_account_list?.map((item) => (
+                <Select.Option value={item.id} key={item.id}>
+                  {item.glAccount}
+                </Select.Option>
+              ))}
+            </SelectComponent>
           </Form.Item>
 
           <Form.Item
@@ -300,9 +315,9 @@ const TaxCodeSectionForm = ({
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer
+      <CardContainer
         header={"CRITERIA INFORMATION"}
         type={"tabs"}
         element={
@@ -342,7 +357,7 @@ const TaxCodeSectionForm = ({
             />
           )}
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

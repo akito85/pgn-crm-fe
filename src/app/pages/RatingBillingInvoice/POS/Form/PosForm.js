@@ -37,6 +37,7 @@ import {
   getUomCodes,
   getAccountTypeList,
   getClassificationTypeList,
+  resetPOSFormState,
 } from "../../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import PointOfSalesPageAttachment from "./Page/PointOfSalesPageAttachment";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -311,11 +312,13 @@ const PosForm = ({ type }) => {
   );
 
   const handleSetFormUpdate = useCallback(
-    (data_detailPos, data_globalCurrency) => {
+    (data_detailPos, data_globalCurrency, data_globalBillingCycle) => {
       const costCenterValue =
         data_detailPos?.costcenter || data_detailPos?.costCenter || "";
       form.setFieldsValue({
         ...data_detailPos,
+        genProInv: !!data_detailPos?.isGenerateProforma,
+        remark: data_detailPos?.remark ?? "",
         currency: data_globalCurrency?.find(
           (item) => item.text === data_detailPos?.currency,
         )?.Id,
@@ -323,6 +326,11 @@ const PosForm = ({ type }) => {
         transactionDate: moment(data_detailPos?.transactionDate),
         invoiceDate: moment(data_detailPos?.invoiceDate),
         costcenter: costCenterValue,
+        billingCycle: data_globalBillingCycle?.find(
+          (item) =>
+            String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+            item.name === data_detailPos?.billingCycle,
+        )?.id,
       });
     },
     [form],
@@ -406,6 +414,40 @@ const PosForm = ({ type }) => {
   }, [type, customerType, data_detailPos, mergedArrayMrc, form, idUpdate]);
 
   useEffect(() => {
+    if (
+      type === "update" &&
+      customerType === "prospective" &&
+      data_detailPos &&
+      data_detailPos.id === idUpdate &&
+      data_classification_type &&
+      data_classification_type.length > 0
+    ) {
+      const classificationTypeId = data_classification_type?.find(
+        (item) =>
+          item.name ===
+          (data_detailPos?.classificationType || data_detailPos?.clasificationType),
+      )?.id;
+      const accountTypeId = data_account_type?.find(
+        (item) => item.name === data_detailPos?.accountType,
+      )?.id;
+      if (classificationTypeId || accountTypeId) {
+        form.setFieldsValue({
+          ...(classificationTypeId && { clasificationType: classificationTypeId }),
+          ...(accountTypeId && { accountType: accountTypeId }),
+        });
+      }
+    }
+  }, [
+    type,
+    customerType,
+    data_detailPos,
+    data_classification_type,
+    data_account_type,
+    form,
+    idUpdate,
+  ]);
+
+  useEffect(() => {
     if (data_rate === null || data_rate?.success === false) {
       setInvoiceDate(null);
       form.resetFields(["invoiceDate"]);
@@ -442,6 +484,12 @@ const PosForm = ({ type }) => {
     dispatch(getGlobalProductItem());
     dispatch(getGlobalBillingItem());
     dispatch(getUomCodes());
+  }, [dispatch]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetPOSFormState());
+    };
   }, [dispatch]);
 
   useEffect(() => {
@@ -518,7 +566,8 @@ const PosForm = ({ type }) => {
         const sorId = data_sor_list?.find(
           (item) => item.name === data_detailPos?.sor,
         )?.id;
-        const costCenterString = data_detailPos?.costcenter || "";
+        const costCenterString =
+          data_detailPos?.costcenter || data_detailPos?.costCenter || "";
         const costCenterCode = costCenterString.split(" - ")[0]?.trim();
         const ccId = data_cost_center_list?.find(
           (item) =>
@@ -569,10 +618,13 @@ const PosForm = ({ type }) => {
           email: data_detailPos?.email,
           address: data_detailPos?.address,
           billingCycle: data_globalBillingCycle?.find(
-            (item) => item.name === data_detailPos?.billingCycle,
+            (item) =>
+              String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+              item.name === data_detailPos?.billingCycle,
           )?.id,
-          billingPeriod: data_detailPos?.billingPeriod,
-          remark: data_detailPos?.remark,
+          billingPeriod: data_detailPos?.billingPeriodId || data_detailPos?.billingPeriod,
+          remark: data_detailPos?.remark ?? "",
+          genProInv: !!data_detailPos?.isGenerateProforma,
           sor: sorId,
           costcenter: ccId,
           accountSegment: accountSegmentId,
@@ -595,7 +647,7 @@ const PosForm = ({ type }) => {
           dispatch(getAccountGroupTypeList([accountSegmentId]));
         }
       } else {
-        handleSetFormUpdate(data_detailPos, data_globalCurrency);
+        handleSetFormUpdate(data_detailPos, data_globalCurrency, data_globalBillingCycle);
         setAccountNumber(data_detailPos?.accountNumber);
       }
 
@@ -607,7 +659,9 @@ const PosForm = ({ type }) => {
       setInvoiceDate(moment(data_detailPos?.invoiceDate));
       setDataBillingCycle(
         data_globalBillingCycle?.find(
-          (item) => item.name === data_detailPos?.billingCycle,
+          (item) =>
+            String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+            item.name === data_detailPos?.billingCycle,
         )?.id,
       );
       setDataDynamic({
@@ -621,22 +675,26 @@ const PosForm = ({ type }) => {
       });
 
       setData(
-        data_detailPos?.mrbiPosDetails?.map((item) => ({
-          ...item,
-          price: item?.price || 0,
-          amount: item?.amount || 0,
-          totalAmountEqv: item?.totalAmountEqv || 0,
-          convertedCurrency: item?.convertedCurrency || null,
+        data_detailPos?.mrbiPosDetails?.map((detail) => ({
+          ...detail,
+          typeId: detail?.typeId ?? detail?.type,
+          itemId: detail?.itemId || detail?.item || null,
+          item: detail?.itemId || detail?.item || null,
+          itemName: detail?.item || detail?.itemName || null,
+          price: detail?.price || 0,
+          amount: detail?.amount || 0,
+          totalAmountEqv: detail?.totalAmountEqv || 0,
+          convertedCurrency: detail?.convertedCurrency || null,
           amountEqvUsd:
-            item?.amountEqvUsd != null
-              ? Number(item.amountEqvUsd.toFixed(2))
+            detail?.amountEqvUsd != null
+              ? Number(detail.amountEqvUsd.toFixed(2))
               : 0,
-          amountEqvIdr: item?.amountEqvIdr || 0,
-          eqvIdr: item?.eqvIdr || 0,
-          totalEqvIdr: item?.totalEqvIdr || 0,
+          amountEqvIdr: detail?.amountEqvIdr || 0,
+          eqvIdr: detail?.eqvIdr || 0,
+          totalEqvIdr: detail?.totalEqvIdr || 0,
           totalEqvUsd:
-            item?.totalEqvUsd != null
-              ? Number(item.totalEqvUsd.toFixed(2))
+            detail?.totalEqvUsd != null
+              ? Number(detail.totalEqvUsd.toFixed(2))
               : 0,
         })),
       );
@@ -660,6 +718,8 @@ const PosForm = ({ type }) => {
     data_cost_center_list,
     data_account_segment,
     data_account_group_type,
+    data_account_type,
+    data_classification_type,
     form,
     dispatch,
   ]);
@@ -686,8 +746,12 @@ const PosForm = ({ type }) => {
 
   useEffect(() => {
     if (!data) return;
+    if (isUpdatingFromMaterai.current) {
+      isUpdatingFromMaterai.current = false;
+      return;
+    }
     const filteredData = data.filter(
-      (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+      (item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== 297,
     );
     const newDataDynamic = filteredData.reduce(
       (sums, item) => {
@@ -754,12 +818,12 @@ const PosForm = ({ type }) => {
     if (filteredData.length === 0) {
       setData((prev) => {
         const hasMaterai = prev.some(
-          (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+          (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C006",
         );
         if (hasMaterai) {
           isUpdatingFromMaterai.current = true;
           return prev
-            .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+            .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C006")
             .map((items, index) => ({ ...items, lineNumber: index + 1 }));
         }
         return prev;
@@ -808,11 +872,11 @@ const PosForm = ({ type }) => {
             isUpdatingFromMaterai.current = true;
             setData((prev) => {
               const hasMaterai = prev.some(
-                (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+                (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C006",
               );
               if (!hasMaterai) return prev;
               return prev
-                .filter((item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297)
+                .filter((item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C006")
                 .map((items, index) => ({ ...items, lineNumber: index + 1 }));
             });
             return;
@@ -822,8 +886,11 @@ const PosForm = ({ type }) => {
             typeId: dataRes?.type,
             type: dataRes?.typeName,
             typeValueName: dataRes?.typeValueName || null,
-            itemId: parseInt(dataRes?.item),
-            item: dataRes?.itemName,
+            itemId: dataRes?.item || null,
+            item: dataRes?.item || null,
+            itemName: dataRes?.itemName || null,
+            source: dataRes?.source || null,
+            priceCode: dataRes?.priceCode || null,
             price: dataRes?.price,
             quantity: dataRes?.quantity,
             uom: dataRes?.uom,
@@ -845,10 +912,10 @@ const PosForm = ({ type }) => {
           isUpdatingFromMaterai.current = true;
           setData((prev) => {
             const baseData = prev.some(
-              (item) => item.item === "Meterai" || parseInt(item.itemId) === 297,
+              (item) => item.item === "Meterai" || item.itemName === "Meterai" || parseInt(item.itemId) === "C006",
             )
               ? prev.filter(
-                  (item) => item.item !== "Meterai" && parseInt(item.itemId) !== 297,
+                  (item) => item.item !== "Meterai" && item.itemName !== "Meterai" && parseInt(item.itemId) !== "C006",
                 )
               : prev;
             return [...baseData, newMaterai].map((items, index) => ({
@@ -932,83 +999,141 @@ const PosForm = ({ type }) => {
 
   const onFinish = (e) => {
     let errorBody = {};
-    if (dataAttachment.length === 0) {
-      handleMandatory(setDataTabs, dataAttachment);
-    } else {
-      handleMandatory(setDataTabs, dataAttachment);
-      if (data.length === 0 && dataAttachment.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: `Your data was not created. Point of Sales Item and Attachment are Mandatory. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (data.length === 0) {
+
+    // Untuk Save as Draft (typeSubmit = false), skip validasi attachment dan approval
+    // Tapi tetap validasi POS items dan field form lainnya
+    if (!typeSubmit) {
+      // Validasi POS items tetap dilakukan untuk save as draft
+      if (data.length === 0) {
         errorBody = {
           title: "Failed",
           description:
             "Your data was not created. Point of Sales Item is Mandatory. Please try again.",
         };
         dispatch(showModalError(errorBody));
-      } else if (dataAttachment.length === 0) {
-        errorBody = {
-          title: "Failed",
-          description: "Attachment Mandatory. Please insert data.",
-        };
-        dispatch(showModalError(errorBody));
-      } else {
-        const findBillingCycle = data_globalBillingCycle?.find(
-          (item) => item.id === e?.billingCycle,
-        )?.name;
-        const findBillingPeriod = data_globalBillingPeriod?.find(
-          (item) => item.id === e?.billingPeriod,
-        )?.name;
-        setDataSend({
-          ...e,
-          billingCycle:
-            findBillingCycle === undefined
-              ? e?.billingCycle
-              : findBillingCycle,
-          billingPeriod:
-            findBillingPeriod === undefined
-              ? e?.billingPeriod
-              : findBillingPeriod,
-          currency: data_globalCurrency?.find(
-            (item) => item.Id === e?.currency,
-          )?.text,
-          transactionDate: moment(e?.transactionDate).format(
-            dateFormatting.date,
-          ),
-          invoiceDate: moment(e?.invoiceDate).format(dateFormatting.date),
-          termsOfPayment: moment.isMoment(e?.termType?.termValue)
+        return;
+      }
+
+      const findBillingCycle = data_globalBillingCycle?.find(
+        (item) => item.id === e?.billingCycle,
+      )?.name;
+      const findBillingPeriod = data_globalBillingPeriod?.find(
+        (item) => item.id === e?.billingPeriod,
+      )?.name;
+      setDataSend({
+        ...e,
+        billingCycle:
+          findBillingCycle === undefined
+            ? e?.billingCycle
+            : findBillingCycle,
+        billingPeriod:
+          findBillingPeriod === undefined
+            ? e?.billingPeriod
+            : findBillingPeriod,
+        currency: data_globalCurrency?.find(
+          (item) => item.Id === e?.currency,
+        )?.text,
+        transactionDate: e?.transactionDate
+          ? moment(e?.transactionDate).format(dateFormatting.date)
+          : null,
+        invoiceDate: e?.invoiceDate
+          ? moment(e?.invoiceDate).format(dateFormatting.date)
+          : null,
+        termsOfPayment: e?.termType?.termValue
+          ? moment.isMoment(e?.termType?.termValue)
             ? moment(e?.termType?.termValue).format(dateFormatting.date)
             : data_globalTermsOfPaymentValue?.find(
                 (item) => item.Id === e?.termType?.termValue,
-              )?.text,
-          remark: e?.remark,
-          genProInv: e?.genProInv ? "Y" : "N",
-          submit: typeSubmit,
-          topId: e.termType.termValueDdl,
-        });
-        setModalConfirm(true);
-        setDataTabs([
-          {
-            value: "Point of Sales",
-            paramValue: [
-              "accountNumber",
-              "billingCycle",
-              "period",
-              "currency",
-              "transactionDate",
-              "invoiceDate",
-              "termType",
-              "termValue",
-              "remark",
-            ],
-          },
-          { value: "Approval", paramValue: ["apphierId"] },
-          { value: "Attachment" },
-        ]);
-      }
+              )?.text
+          : null,
+        remark: e?.remark,
+        genProInv: e?.genProInv ? "Y" : "N",
+        submit: typeSubmit,
+        topId: e?.termType?.termValueDdl,
+      });
+      setModalConfirm(true);
+      return;
+    }
+
+    // Untuk Submit (typeSubmit = true), lakukan validasi lengkap termasuk attachment
+    if (dataAttachment.length === 0) {
+      handleMandatory(setDataTabs, dataAttachment);
+    } else {
+      handleMandatory(setDataTabs, dataAttachment);
+    }
+
+    if (data.length === 0 && dataAttachment.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: `Your data was not created. Point of Sales Item and Attachment are Mandatory. Please try again.`,
+      };
+      dispatch(showModalError(errorBody));
+    } else if (data.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description:
+          "Your data was not created. Point of Sales Item is Mandatory. Please try again.",
+      };
+      dispatch(showModalError(errorBody));
+    } else if (dataAttachment.length === 0) {
+      errorBody = {
+        title: "Failed",
+        description: "Attachment Mandatory. Please insert data.",
+      };
+      dispatch(showModalError(errorBody));
+    } else {
+      const findBillingCycle = data_globalBillingCycle?.find(
+        (item) => item.id === e?.billingCycle,
+      )?.name;
+      const findBillingPeriod = data_globalBillingPeriod?.find(
+        (item) => item.id === e?.billingPeriod,
+      )?.name;
+      setDataSend({
+        ...e,
+        billingCycle:
+          findBillingCycle === undefined
+            ? e?.billingCycle
+            : findBillingCycle,
+        billingPeriod:
+          findBillingPeriod === undefined
+            ? e?.billingPeriod
+            : findBillingPeriod,
+        currency: data_globalCurrency?.find(
+          (item) => item.Id === e?.currency,
+        )?.text,
+        transactionDate: moment(e?.transactionDate).format(
+          dateFormatting.date,
+        ),
+        invoiceDate: moment(e?.invoiceDate).format(dateFormatting.date),
+        termsOfPayment: moment.isMoment(e?.termType?.termValue)
+          ? moment(e?.termType?.termValue).format(dateFormatting.date)
+          : data_globalTermsOfPaymentValue?.find(
+              (item) => item.Id === e?.termType?.termValue,
+            )?.text,
+        remark: e?.remark,
+        genProInv: e?.genProInv ? "Y" : "N",
+        submit: typeSubmit,
+        topId: e.termType.termValueDdl,
+      });
+      setModalConfirm(true);
+      setDataTabs([
+        {
+          value: "Point of Sales",
+          paramValue: [
+            "accountNumber",
+            "billingCycle",
+            "period",
+            "currency",
+            "transactionDate",
+            "invoiceDate",
+            "termType",
+            "termValue",
+            "remark",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
     }
   };
 
@@ -1206,15 +1331,36 @@ const PosForm = ({ type }) => {
         posNumber: item?.posNumber,
         lineNumber: item?.lineNumber || 0,
         type: item?.typeId,
-        item: String(item?.itemId),
+        typeValueName: item?.typeValueName || null,
+        item: String(item?.item ?? item?.itemId ?? ""),
+        itemName: item?.itemName || null,
+        source: item?.source || null,
+        priceCode: item?.priceCode || null,
         price: item?.price || 0,
         reference: item?.reference || null,
         quantity: item?.quantity,
         uom: item?.uom || null,
         currency: item?.currency || null,
         amount: item?.amount || 0,
+        totalAmount: item?.totalAmount || item?.total || 0,
         totalAmountEqv: item?.totalAmountEqv || 0,
+        productId: item?.productId ?? null,
         convertedCurrency: item?.convertedCurrency || null,
+        vatBasis: item?.vatBasis ?? 0,
+        vatBasisEqv: item?.vatBasisEqv ?? 0,
+        vatRate: item?.vatRate ?? null,
+        vatCode: item?.vatCode ?? null,
+        vat: item?.vat ?? 0,
+        vatEqv: item?.vatEqv ?? 0,
+        witholdingVatCode: item?.witholdingVatCode ?? null,
+        witholdingVatRate: item?.witholdingVatRate ?? null,
+        witholdingTax: item?.witholdingTax ?? 0,
+        vatExchangeRateType: item?.vatExchangeRateType ?? null,
+        vatExchangeRateDate: item?.vatExchangeRateDate ?? null,
+        vatExchangeRate: item?.vatExchangeRate ?? null,
+        rateType: item?.rateType ?? null,
+        rateDate: item?.rateDate ?? null,
+        rate: item?.rate ?? null,
         amountEqvIdr: item?.amountEqvIdr || 0,
         amountEqvUsd: item?.amountEqvUsd || 0,
         eqvIdr: item?.eqvIdr || 0,
@@ -1356,8 +1502,10 @@ const PosForm = ({ type }) => {
           const sorId = data_sor_list?.find(
             (item) => item.name === data_detailPos?.sor,
           )?.id;
-          const costCenterNames = data_detailPos?.costcenter
-            ? data_detailPos.costcenter.split(",").map((name) => name.trim())
+          const costCenterValue =
+            data_detailPos?.costcenter || data_detailPos?.costCenter || "";
+          const costCenterNames = costCenterValue
+            ? costCenterValue.split(",").map((name) => name.trim())
             : [];
           const costCenterIds =
             costCenterNames.length > 0
@@ -1373,6 +1521,14 @@ const PosForm = ({ type }) => {
               (item.glbValue || item.name) ===
               data_detailPos?.accountGroupType,
           )?.glbTypeValId;
+          const classificationTypeId = data_classification_type?.find(
+            (item) =>
+              item.name ===
+              (data_detailPos?.classificationType || data_detailPos?.clasificationType),
+          )?.id;
+          const accountTypeId = data_account_type?.find(
+            (item) => item.name === data_detailPos?.accountType,
+          )?.id;
           form.setFieldsValue({
             customerName: data_detailPos?.customerName,
             registrationNumber: data_detailPos?.registrationNumber,
@@ -1386,39 +1542,48 @@ const PosForm = ({ type }) => {
             email: data_detailPos?.email,
             address: data_detailPos?.address,
             billingCycle: data_globalBillingCycle?.find(
-              (item) => item.name === data_detailPos?.billingCycle,
+              (item) =>
+                String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+                item.name === data_detailPos?.billingCycle,
             )?.id,
-            billingPeriod: data_detailPos?.billingPeriod,
-            remark: data_detailPos?.remark,
+            billingPeriod: data_detailPos?.billingPeriodId || data_detailPos?.billingPeriod,
+            remark: data_detailPos?.remark ?? "",
+            genProInv: !!data_detailPos?.isGenerateProforma,
             sor: sorId,
             costcenter:
               costCenterIds.length > 0 ? costCenterIds[0] : undefined,
             accountSegment: accountSegmentId,
             accountGroupType: accountGroupTypeId,
+            clasificationType: classificationTypeId,
+            accountType: accountTypeId,
           });
           setAccountNumber(data_detailPos?.registrationNumber);
         } else {
-          handleSetFormUpdate(data_detailPos, data_globalCurrency);
+          handleSetFormUpdate(data_detailPos, data_globalCurrency, data_globalBillingCycle);
           setAccountNumber(data_detailPos?.accountNumber);
         }
 
         setData(
-          data_detailPos?.mrbiPosDetails?.map((item) => ({
-            ...item,
-            price: item?.price || 0,
-            amount: item?.amount || 0,
-            totalAmountEqv: item?.totalAmountEqv || 0,
-            convertedCurrency: item?.convertedCurrency || null,
+          data_detailPos?.mrbiPosDetails?.map((detail) => ({
+            ...detail,
+            typeId: detail?.typeId ?? detail?.type,
+            itemId: detail?.itemId || detail?.item || null,
+            item: detail?.itemId || detail?.item || null,
+            itemName: detail?.item || detail?.itemName || null,
+            price: detail?.price || 0,
+            amount: detail?.amount || 0,
+            totalAmountEqv: detail?.totalAmountEqv || 0,
+            convertedCurrency: detail?.convertedCurrency || null,
             amountEqvUsd:
-              item?.amountEqvUsd != null
-                ? Number(item.amountEqvUsd.toFixed(2))
+              detail?.amountEqvUsd != null
+                ? Number(detail.amountEqvUsd.toFixed(2))
                 : 0,
-            amountEqvIdr: item?.amountEqvIdr || 0,
-            eqvIdr: item?.eqvIdr || 0,
-            totalEqvIdr: item?.totalEqvIdr || 0,
+            amountEqvIdr: detail?.amountEqvIdr || 0,
+            eqvIdr: detail?.eqvIdr || 0,
+            totalEqvIdr: detail?.totalEqvIdr || 0,
             totalEqvUsd:
-              item?.totalEqvUsd != null
-                ? Number(item.totalEqvUsd.toFixed(2))
+              detail?.totalEqvUsd != null
+                ? Number(detail.totalEqvUsd.toFixed(2))
                 : 0,
           })),
         );
@@ -1431,7 +1596,9 @@ const PosForm = ({ type }) => {
         setInvoiceDate(moment(data_detailPos?.invoiceDate));
         setDataBillingCycle(
           data_globalBillingCycle?.find(
-            (item) => item.name === data_detailPos?.billingCycle,
+            (item) =>
+              String(item.id) === String(data_detailPos?.billingCycleId || data_detailPos?.billingCycle) ||
+              item.name === data_detailPos?.billingCycle,
           )?.id,
         );
         setDataAttachment(

@@ -17,6 +17,7 @@ const ModalApproveOrReject = ({
   children,
   customMessage,
   width = 1000,
+  loading = false,
 }) => {
   const [form] = Form.useForm();
   const [remark, setRemark] = useState("");
@@ -50,15 +51,15 @@ const ModalApproveOrReject = ({
       type={"confirmation"}
       footer={
         <div className="w-full flex justify-end gap-2 p-4">
-          <ButtonComponent onClick={handleCancelModalFinal} type="default" disabled={isSubmitting}>
+          <ButtonComponent onClick={handleCancelModalFinal} type="default" disabled={isSubmitting || loading}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             form="formApproveReject"
             type="submit"
             htmlType="submit"
-            disabled={isSubmitting}
-            loading={isSubmitting}
+            disabled={isSubmitting || loading}
+            loading={isSubmitting || loading}
           >
             Confirm
           </ButtonComponent>
@@ -86,7 +87,7 @@ const ModalApproveOrReject = ({
             }
             type={"warning"}
             showIcon
-            className="p-0 m-0"
+            className="p-0 m-0 break-all"
           />
 
           {children}

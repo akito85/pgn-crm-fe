@@ -24,7 +24,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "action",
     width: 100,
     align: "center",
-    filteredValue: [search?.action] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "action",
@@ -32,7 +31,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -41,7 +39,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "requestBy",
     width: 120,
     align: "center",
-    filteredValue: [search?.requestBy] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "requestBy",
@@ -49,7 +46,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true,
     ),
   },
   {
@@ -58,7 +54,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "requestDate",
     width: 120,
     align: "center",
-    filteredValue: [search?.requestDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "requestDate",
@@ -77,7 +72,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "objectAccountNumber",
     width: 180,
     sorter: true,
-    filteredValue: [search?.objectAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "objectAccountNumber",
@@ -85,7 +79,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -94,7 +87,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "objectAccountName",
     width: 180,
     sorter: true,
-    filteredValue: [search?.objectAccountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "objectAccountName",
@@ -102,7 +94,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -111,7 +102,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "earnPeriodStart",
     width: 120,
     align: "center",
-    filteredValue: [search?.earnPeriodStart] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "earnPeriodStart",
@@ -130,7 +120,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "earnPeriodEnd",
     width: 120,
     align: "center",
-    filteredValue: [search?.earnPeriodEnd] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "earnPeriodEnd",
@@ -149,7 +138,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "redeemPeriodStart",
     width: 120,
     align: "center",
-    filteredValue: [search?.redeemPeriodStart] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "redeemPeriodStart",
@@ -168,7 +156,6 @@ const getGasDepositHistoryColumns = ({
     dataIndex: "redeemPeriodEnd",
     width: 120,
     align: "center",
-    filteredValue: [search?.redeemPeriodEnd] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "redeemPeriodEnd",
@@ -188,7 +175,6 @@ const getGasDepositHistoryColumns = ({
     width: 120,
     sorter: true,
     align: "center",
-    filteredValue: [search?.currency] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "currency",
@@ -196,7 +182,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -206,7 +191,6 @@ const getGasDepositHistoryColumns = ({
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceM3] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "balanceM3",
@@ -214,7 +198,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -224,7 +207,6 @@ const getGasDepositHistoryColumns = ({
     width: 160,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceMscf] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "balanceMscf",
@@ -232,7 +214,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -242,7 +223,6 @@ const getGasDepositHistoryColumns = ({
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceMmbtu] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "balanceMmbtu",
@@ -250,7 +230,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -260,7 +239,6 @@ const getGasDepositHistoryColumns = ({
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceAmount] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "balanceAmount",
@@ -268,7 +246,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -278,7 +255,6 @@ const getGasDepositHistoryColumns = ({
     width: 180,
     sorter: true,
     align: "center",
-    filteredValue: [search?.availableAmount] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "availableAmount",
@@ -286,7 +262,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -296,7 +271,6 @@ const getGasDepositHistoryColumns = ({
     width: 200,
     sorter: true,
     align: "center",
-    filteredValue: [search?.remark] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "remark",
@@ -304,7 +278,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -314,7 +287,6 @@ const getGasDepositHistoryColumns = ({
     width: 170,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "statusApproval",
@@ -322,7 +294,6 @@ const getGasDepositHistoryColumns = ({
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (status) => {
       const displayText = {
