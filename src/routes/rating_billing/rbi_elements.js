@@ -1,4 +1,5 @@
 import BillingPage from "../../app/pages/RatingBillingInvoice/Billing/BillingPage";
+import BillingCreateAccountingForm from "../../app/pages/RatingBillingInvoice/Accounting/Form/AccountingCreateForm";
 import PrabillingPage from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingPage";
 import PrabillingForm from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingForm";
 import PrabillingDetailLog from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetailLog";
@@ -10,6 +11,8 @@ import MonitoringUsagePage from "../../app/pages/RatingBillingInvoice/Monitoring
 import MonitoringUsageUpdate from "../../app/pages/RatingBillingInvoice/MonitoringUsage/MonitoringUsageUpdate";
 import UploadPage from "../../app/pages/RatingBillingInvoice/MonitoringUsage/Upload/UploadPage";
 import AdjustmentBillingPage from "../../app/pages/RatingBillingInvoice/AdjustmentBilling/AdjustmentBillingPage";
+import AccountingPage from "../../app/pages/RatingBillingInvoice/Accounting/AccountingPage";
+import AccountingDetailPage from "../../app/pages/RatingBillingInvoice/Accounting/AccountingDetailPage";
 import PosPage from "../../app/pages/RatingBillingInvoice/POS/PosPage";
 import PosDetail from "../../app/pages/RatingBillingInvoice/POS/PosDetail";
 import PosForm from "../../app/pages/RatingBillingInvoice/POS/Form/PosForm";
@@ -79,6 +82,7 @@ export const RBI_ELEMENTS = {
 
   // billing elements render
   BILLING_VIEW_PAGE: <BillingPage />,
+  ACCOUNTING_CREATE_ELEMENT: <BillingCreateAccountingForm />,
 
   // monitoring usage
   MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
@@ -89,6 +93,10 @@ export const RBI_ELEMENTS = {
   // MONITORING_USAGE_DETAIL_ELEMENTS: <DetailPage />,
   MONITORING_USAGE_DETAIL_ELEMENTS: <DetailMonitoringUsage />,
   MONITORING_USAGE_UPDATE_ELEMENTS: <MonitoringUsageUpdate />,
+
+  // accounting
+  ACCOUNTING_VIEW_ELEMENT: <AccountingPage />,
+  ACCOUNTING_DETAIL_ELEMENT: <AccountingDetailPage />,
 
   // adjustment billing
   ADJUSTMENT_BILLING_VIEW_ELEMENT: <AdjustmentBillingPage />,

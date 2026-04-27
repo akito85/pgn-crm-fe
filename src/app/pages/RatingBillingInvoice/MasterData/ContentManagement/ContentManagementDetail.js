@@ -22,6 +22,7 @@ import {
   getDetailDraftContentManagement,
   approveRejectContentManagement,
   approveRejectInactiveContentManagement,
+  approveRejectActivateContentManagement,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -703,11 +704,16 @@ const ContentManagementDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
-      bodyApproval.approvalType === "INACTIVE_CONTENT_TEMPLATE"
-        ? approveRejectInactiveContentManagement({ body: data })
-        : approveRejectContentManagement({ body: data }),
-    )
+    let dispatchAction;
+    if (bodyApproval.approvalType === "INACTIVE_CONTENT_TEMPLATE") {
+      dispatchAction = approveRejectInactiveContentManagement({ body: data });
+    } else if (bodyApproval.approvalType === "ACTIVE_CONTENT_TEMPLATE") {
+      dispatchAction = approveRejectActivateContentManagement({ body: data });
+    } else {
+      dispatchAction = approveRejectContentManagement({ body: data });
+    }
+
+    dispatch(dispatchAction)
       .unwrap()
       .then(() => {
         handleClear();
@@ -743,6 +749,29 @@ const ContentManagementDetail = () => {
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_CONTENT_TEMPLATE" && (
               <CardContainer header={"INACTIVE REQUEST INFORMATION"}>
+                <div className="w-full grid grid-cols-4 gap-3">
+                  <DetailText label={"Requested Date"}>
+                    {bodyApproval.approvalDetail.requestedDate
+                      ? moment(
+                          bodyApproval.approvalDetail.requestedDate,
+                        ).format(dateFormatting.date)
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Requested By"}>
+                    {bodyApproval.approvalDetail.requestedBy}
+                  </DetailText>
+                  <DetailText label={"Remark"}>
+                    {bodyApproval.approvalDetail.remarks}
+                  </DetailText>
+                </div>
+              </CardContainer>
+            )}
+
+          {/* Activate Request Information */}
+          {bodyApproval.isApprover &&
+            bodyApproval.approvalType &&
+            bodyApproval.approvalType === "ACTIVE_CONTENT_TEMPLATE" && (
+              <CardContainer header={"ACTIVATE REQUEST INFORMATION"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate

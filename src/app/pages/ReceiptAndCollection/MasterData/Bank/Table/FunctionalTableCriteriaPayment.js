@@ -774,7 +774,7 @@ const FunctionalTableCriteriaPayment = ({
             record.type !== "exist";
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="gap-2">
               {editable ? (
                 <>
                   <ButtonComponent
@@ -856,7 +856,7 @@ const FunctionalTableCriteriaPayment = ({
         col.title !== "ACTION" &&
         col.title !== "START DATE" &&
         col.title !== "END DATE"
-        ? dataCriteria.includes(col.indexValue)
+        ? dataCriteria.some((v) => Number(v) === col.indexValue)
         : true
     );
   };
@@ -956,7 +956,7 @@ const FunctionalTableCriteriaPayment = ({
   //   }
   //   return result.slice((page - 1) * pageSize, page * pageSize);
   // };
-  return dataCriteria && dataCriteria.length > 0 && dataCriteria[0] !== 24 ? (
+  return dataCriteria && dataCriteria.length > 0 && Number(dataCriteria[0]) !== 24 ? (
     <div className="flex flex-col w-full gap-4">
       {type !== "detail" && type !== "preview" && type !== "show" ? (
         <div className="flex w-full justify-end">
@@ -1014,6 +1014,7 @@ const FunctionalTableCriteriaPayment = ({
         <div className="w-full">
           <Table
             bordered
+            size="small"
             dataSource={filterDataByPage()}
             columns={filterColumn(
               columns().map((col) => ({

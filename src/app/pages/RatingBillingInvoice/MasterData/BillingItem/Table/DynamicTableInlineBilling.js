@@ -40,6 +40,8 @@ const EditableCell = ({
   required,
   disableDate,
   onCellClicked,
+  onDropdownVisibleChange,
+  selectLoading,
   onInput,
   maxLength,
   form,
@@ -155,7 +157,11 @@ const EditableCell = ({
         return (
           <Select
             disabled={handleDisabledColumn(dataIndex, record)}
+            loading={selectLoading}
             onChange={(val) => onCellClicked && onCellClicked(val, form)}
+            onDropdownVisibleChange={(open) =>
+              onDropdownVisibleChange && onDropdownVisibleChange(open, form)
+            }
             showSearch
             optionFilterProp="children"
             allowClear
@@ -205,7 +211,17 @@ const EditableCell = ({
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
       case "description_readonly":
-        return <Input.TextArea rows={1} disabled style={{ backgroundColor: "#f5f5f5", color: "#595959", cursor: "not-allowed" }} />;
+        return (
+          <Input.TextArea
+            rows={1}
+            disabled
+            style={{
+              backgroundColor: "#f5f5f5",
+              color: "#595959",
+              cursor: "not-allowed",
+            }}
+          />
+        );
       default:
         return <InputComponent />;
     }
@@ -406,12 +422,14 @@ const DynamicTableInlineBilling = ({
 
   const save = async (key) => {
     const requiredHiddenCols = cols.filter(
-      (col) => col.required === true && optionSelectedCol.includes(col.title)
+      (col) => col.required === true && optionSelectedCol.includes(col.title),
     );
 
     if (requiredHiddenCols.length > 0) {
       setOptionSelectedCol((prev) =>
-        prev.filter((title) => !requiredHiddenCols.some((col) => col.title === title))
+        prev.filter(
+          (title) => !requiredHiddenCols.some((col) => col.title === title),
+        ),
       );
       setTimeout(() => {
         executeSave(key);
@@ -777,6 +795,8 @@ const DynamicTableInlineBilling = ({
                   editing: isEditing(record),
                   options: col.options,
                   onCellClicked: col.onClick,
+                  onDropdownVisibleChange: col.onDropdownVisibleChange,
+                  selectLoading: col.loading,
                   showPassword: visiblePassword,
                   handlePassword: handleVisiblePassword,
                   regex: regex,
