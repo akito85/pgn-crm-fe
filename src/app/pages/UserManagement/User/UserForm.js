@@ -55,7 +55,7 @@ const UserForm = (props) => {
   const [employeeType, setEmployeeType] = useState("");
   const dataDetail = data_user?.data;
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
+  const formValue = Form.useWatch([], form);
   const id = location?.state?.id;
   const [levelId, setLevelId] = useState();
   const [mandatoryFieldType, setMandatoryFieldType] = useState(false);
@@ -68,7 +68,7 @@ const UserForm = (props) => {
         username: data?.username,
         employeeId: data?.employeeId,
         email: data?.email,
-        phone: data?.phone !== null ? data?.phone?.substring(2) : 0,
+        phone: data?.phone !== null ? data?.phone?.substring(2) : "",
         startDateUser: data?.startDate === null ? moment() : moment(data?.startDate).clone(),
         endDateUser: data?.endDate === null ? "" : moment(data?.endDate).clone(),
         authType: data?.authTypeId,
@@ -233,7 +233,7 @@ const UserForm = (props) => {
   };
 
 
-  const RenderPreview = () => (
+  const renderPreview = () => (
     <div className="w-full">
       <span className="text-primary uppercase">User Information</span>
       <div className="w-full grid grid-cols-3 gap-5 mt-5 pl-5">
@@ -559,7 +559,7 @@ const UserForm = (props) => {
       >
         <div className={"w-full flex flex-col"}>
           <div className={"w-full px-9"}>
-            <RenderPreview />
+            {renderPreview()}
           </div>
         </div>
       </ModalCustom>
