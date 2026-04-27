@@ -1,7 +1,7 @@
 import { Form, Spin } from "antd";
 import PropTypes from "prop-types";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
@@ -52,6 +52,8 @@ const PaymentPeriodForm = ({ type }) => {
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [modalConfirm, setModalConfirm] = useState(false);
     const [submitData, setSubmitData] = useState(null);
+    const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
+    const [initialAttachmentIds, setInitialAttachmentIds] = useState([]);
 
     // Stepper State
     const [current, setCurrent] = useState(0);
@@ -105,7 +107,7 @@ const PaymentPeriodForm = ({ type }) => {
         }
     };
 
-    const handleSaveDraft = () => {
+    const handleSaveDraft = async () => {
         const values = form.getFieldsValue();
         const dataValue = {
             id: isEdit ? id : null,
@@ -116,29 +118,91 @@ const PaymentPeriodForm = ({ type }) => {
             appHierId: values.apphierId || selectedHierarchy,
         };
 
-        dispatch(saveDraftPaymentPeriod(dataValue))
-            .unwrap()
-            .then(() => {
-                dispatch(showModalSuccess({
-                    title: "Success",
-                    description: "Draft saved successfully",
-                    return: false
-                }));
-                navigate("/system-setup/payment-period");
-            })
-            .catch((error) => {
-                const message = error?.message || "Failed to save draft";
-                dispatch(showModalError({ title: "Error", description: message }));
-            });
+        const uploadedAttachmentIds = [];
+
+        try {
+            const response = await dispatch(saveDraftPaymentPeriod(dataValue)).unwrap();
+            const newId = response?.id;
+
+            // Delete removed attachments
+            const currentExistingIdsDraft = files
+                .filter((item) => item.dataType === "exist" && item.id)
+                .map((item) => item.id);
+            const calculatedDeletedIdsDraft = initialAttachmentIds.filter(
+                (idAttachment) => !currentExistingIdsDraft.includes(idAttachment)
+            );
+            const fileIdsToDeleteDraft = [...new Set([...deletedAttachmentIds, ...calculatedDeletedIdsDraft])];
+            if (fileIdsToDeleteDraft.length > 0) {
+                await receiptCollectionHttpService.deleteDataWithBody(
+                    `/v1/dbs/api/attachment/delete-attachment`,
+                    { fileId: fileIdsToDeleteDraft }
+                );
+            }
+
+            if (files && files.length > 0) {
+                for (const file of files) {
+                    if (file.dataType !== 'exist' && file.file) {
+                        try {
+                            const formData = new FormData();
+                            formData.append("files", file.file);
+                            formData.append("fileCategoryId", file.fileCategoryId);
+                            formData.append("referensiId", newId);
+                            formData.append("category", "PAYMENT_PERIOD");
+
+                            const uploadResult = await dispatch(uploadAttachmentPaymentPeriod(formData)).unwrap();
+                            uploadedAttachmentIds.push(uploadResult?.data?.id);
+                        } catch (attError) {
+                            await rollbackAttachments(uploadedAttachmentIds);
+                            throw new Error('Attachment upload failed. All data has been rolled back.');
+                        }
+                    }
+                }
+            }
+
+            dispatch(showModalSuccess({
+                title: "Success",
+                description: "Draft saved successfully",
+                return: false
+            }));
+            navigate("/system-setup/payment-period");
+        } catch (error) {
+            if (uploadedAttachmentIds.length > 0) {
+                await rollbackAttachments(uploadedAttachmentIds);
+            }
+            console.error("Save draft failed:", error);
+            const errorMessage = error?.message || "Failed to save draft";
+            dispatch(showModalError({ title: "Error", description: errorMessage }));
+        }
     };
+
+    const handleUpdateAttachment = useCallback((updater) => {
+        setFiles((prevState) => {
+            const newState = typeof updater === "function" ? updater(prevState) : updater;
+            const removedItems = prevState.filter(
+                (item) => !newState.some(
+                    (newItem) => (newItem.key ?? newItem.id) === (item.key ?? item.id)
+                )
+            );
+            const removedExistingIds = removedItems
+                .filter((item) => item.dataType === "exist" && item.id)
+                .map((item) => item.id);
+            if (removedExistingIds.length > 0) {
+                setDeletedAttachmentIds((prev) => [...new Set([...prev, ...removedExistingIds])]);
+            }
+            return newState;
+        });
+    }, []);
 
     const handleClear = () => {
         if (isEdit) {
             if (id) dispatch(getDetailPaymentPeriod(id));
+            setDeletedAttachmentIds([]);
         } else {
             form.resetFields();
             setSelectedHierarchy(null);
             setFiles([]);
+            setDeletedAttachmentIds([]);
+            setInitialAttachmentIds([]);
         }
     };
 
@@ -172,13 +236,19 @@ const PaymentPeriodForm = ({ type }) => {
 
             // Handle Attachments
             if (data_detail?.attachmentList) {
-                const mappedFiles = data_detail.attachmentList.map(item => ({
-                    ...item,
-                    fileName: item.fileName,
-                    fileSize: item.fileSize,
+                const mappedFiles = data_detail.attachmentList.map((att, index) => ({
+                    key: index + 1,
+                    ...att,
+                    fileName: att.fileName,
+                    fileSize: att.fileSize,
                     dataType: "exist"
                 }));
                 setFiles(mappedFiles);
+                setInitialAttachmentIds(
+                    mappedFiles
+                        .filter((item) => item.dataType === "exist" && item.id)
+                        .map((item) => item.id)
+                );
             }
         }
     }, [data_detail, isEdit, form]);
@@ -303,6 +373,21 @@ const PaymentPeriodForm = ({ type }) => {
         try {
             const response = await dispatch(createPaymentPeriod(submitData)).unwrap();
             const newId = response?.data?.id;
+
+            // Delete removed attachments
+            const currentExistingIds = files
+                .filter((item) => item.dataType === "exist" && item.id)
+                .map((item) => item.id);
+            const calculatedDeletedIds = initialAttachmentIds.filter(
+                (idAttachment) => !currentExistingIds.includes(idAttachment)
+            );
+            const fileIdsToDelete = [...new Set([...deletedAttachmentIds, ...calculatedDeletedIds])];
+            if (fileIdsToDelete.length > 0) {
+                await receiptCollectionHttpService.deleteDataWithBody(
+                    `/v1/dbs/api/attachment/delete-attachment`,
+                    { fileId: fileIdsToDelete }
+                );
+            }
 
             if (files && files.length > 0) {
                 for (const file of files) {
@@ -462,7 +547,7 @@ const PaymentPeriodForm = ({ type }) => {
                             <AttachmentComponent
                                 type="create"
                                 data={files}
-                                updateData={setFiles}
+                                updateData={handleUpdateAttachment}
                                 typeSelector="paymentPeriod"
                                 dispatch={dispatch}
                                 mandatory={true}

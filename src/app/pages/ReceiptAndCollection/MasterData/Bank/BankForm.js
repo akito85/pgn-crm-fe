@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Form, Spin, message } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { WarningOutlined } from "@ant-design/icons";
@@ -95,6 +95,8 @@ const BankForm = ({ type }) => {
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
+  const [initialAttachmentIds, setInitialAttachmentIds] = useState([]);
 
   const [flag, setFlag] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -105,7 +107,7 @@ const BankForm = ({ type }) => {
   const [contactPageSize, setContactPageSize] = useState(10);
 
   const steps = [
-    { title: 'BANK' },
+    { title: type === "create" ? "CREATE" : "UPDATE" },
     { title: 'APPROVAL' },
     { title: 'ATTACHMENT' }
   ];
@@ -215,6 +217,11 @@ const BankForm = ({ type }) => {
           file: null 
         }));
         setListDataAttachment(mappedAtt);
+        setInitialAttachmentIds(
+          mappedAtt
+            .filter((item) => item.dataType === "exist" && item.id)
+            .map((item) => item.id)
+        );
       }
     }
   }, [data_detail, type, idBank, form]);
@@ -364,6 +371,8 @@ const BankForm = ({ type }) => {
     setGlAccountData([]);
     setContactData([]);
     setListDataAttachment([]);
+    setDeletedAttachmentIds([]);
+    setInitialAttachmentIds([]);
   };
 
   const handleSubmit = () => {
@@ -476,6 +485,21 @@ const BankForm = ({ type }) => {
       .then(async (data) => {
         let bankId = data.id;
 
+        // Delete removed existing attachments
+        const currentExistingIds = listDataAttachment
+          .filter((item) => item.dataType === "exist" && item.id)
+          .map((item) => item.id);
+        const calculatedDeletedIds = initialAttachmentIds.filter(
+          (idAttachment) => !currentExistingIds.includes(idAttachment)
+        );
+        const fileIdsToDelete = [...new Set([...deletedAttachmentIds, ...calculatedDeletedIds])];
+        if (fileIdsToDelete.length > 0) {
+          await receiptCollectionHttpService.deleteDataWithBody(
+            `/v1/dbs/api/attachment/delete-attachment`,
+            { fileId: fileIdsToDelete }
+          );
+        }
+
         for (let icon = 0; icon < listDataAttachment.length; icon++) {
           const element = listDataAttachment[icon];
           
@@ -509,6 +533,24 @@ const BankForm = ({ type }) => {
         dispatch(showModalError({ title: "Failed", description: `Your data was not created. ${errorMsg}` }));
       });
   };
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState = typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some(
+          (newItem) => (newItem.key ?? newItem.id) === (item.key ?? item.id)
+        )
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...new Set([...prev, ...removedExistingIds])]);
+      }
+      return newState;
+    });
+  }, []);
 
   return (
     <>
@@ -580,7 +622,7 @@ const BankForm = ({ type }) => {
                 <AttachmentComponent
                   type={type}
                   data={listDataAttachment}
-                  updateData={setListDataAttachment}
+                  updateData={handleUpdateAttachment}
                   dispatch={dispatch}
                   getAPICategory={getListCategory}
                   typeSelector="bank"
