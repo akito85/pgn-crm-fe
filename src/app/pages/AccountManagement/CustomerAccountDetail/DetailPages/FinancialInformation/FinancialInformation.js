@@ -168,8 +168,8 @@ const FinancialInformation = ({
   };
 
   const headerStyle = {
-    fontSize: 15,
-    fontWeight: 500,
+    fontSize: 16,
+    fontWeight: 400,
     color: "#0075bf",
     textTransform: "uppercase",
   };
