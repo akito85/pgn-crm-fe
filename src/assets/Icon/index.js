@@ -73,6 +73,7 @@ import IconSquareX from "./IconSquareX";
 import IconSquareCheck from "./IconSquareCheck";
 import IconTripleDot from "./IconTripleDot";
 import IconChevronLeft from "./IconChevronLeft";
+import IconChevronDown from "./IconChevronDown";
 import IconAddTable from "./IconAddTable";
 import { FileOutlined } from "@ant-design/icons";
 
@@ -233,6 +234,8 @@ const Icon = (props) => {
       return <IconTripleDot {...props} />;
     case "IconChevronLeft":
       return <IconChevronLeft {...props} />;
+    case "IconChevronDown":
+      return <IconChevronDown {...props} />;
     case "IconAddTable":
       return <IconAddTable {...props} />;
     default:
