@@ -28,7 +28,7 @@ const getPaymentRelationColumns = ({
     title: "NO",
     align: "center",  
     dataIndex: "no",
-    width: 40,
+    width: 50,
     fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
@@ -36,7 +36,7 @@ const getPaymentRelationColumns = ({
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
-    width: 200,
+    width: 210,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -51,7 +51,7 @@ const getPaymentRelationColumns = ({
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
-    width: 200,
+    width: 210,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -66,7 +66,7 @@ const getPaymentRelationColumns = ({
     key: "priority",
     title: "PRIORITY",
     dataIndex: "priority",
-    width: 150,
+    width: 130,
     align: "center",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -84,6 +84,7 @@ const getPaymentRelationColumns = ({
     dataIndex: "startDate",
     width: 140,
     align: "center",
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -100,6 +101,7 @@ const getPaymentRelationColumns = ({
     dataIndex: "endDate",
     width: 140,
     align: "center",
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -110,22 +112,34 @@ const getPaymentRelationColumns = ({
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 100,
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        "active": "Active",
+        "inactive": "Inactive",
+      };
+      
+      return (
+        <div className={" flex justify-center"}>
+          <NxStatusComponent colour={status}>
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </NxStatusComponent>
+        </div>
+      )
+    },
+  },
   !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 170,
-    sorter: true,
+    width: 140,
     align: "center",
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
     render: (status) => {
       const displayText = {
         "approved": "Approved",
@@ -142,36 +156,6 @@ const getPaymentRelationColumns = ({
           </NxStatusComponent>
         </div>
       );
-    },
-  },
-  {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 120,
-    sorter: true,
-    fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (status) => {
-      const displayText = {
-        "active": "Active",
-        "inactive": "Inactive",
-      };
-
-      return (
-        <div className={" flex justify-center"}>
-          <NxStatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </NxStatusComponent>
-        </div>
-      )
     },
   },
 ].filter(Boolean);
