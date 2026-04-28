@@ -1397,7 +1397,7 @@ span.ant-tree-title {
 
 /* Collapse arrow icon */
 .ant-collapse-header .ant-collapse-arrow {
-  color: #0075bf !important;
+  color: black !important;
   font-size: 14px !important;
 }
 
@@ -1409,7 +1409,7 @@ span.ant-tree-title {
 
 /* Collapse Content Body */
 .ant-collapse-content-box {
-  padding: 20px !important;
+  padding: 16px;
 }
 
 /* Remove extra border on last item */
