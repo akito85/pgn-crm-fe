@@ -78,11 +78,55 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
   };
 };
 
+const normalizeGasDepositDetailData = (item) => {
+  if (!item) return item;
+
+  return {
+    ...item,
+    key: item.key ?? item.stgSumId ?? item.pendingStgSumId ?? item.masterGasDepositId ?? item.accountId,
+    gasDepositId:
+      item.gasDepositId ??
+      item.masterGasDepositId ??
+      ((item.stgSumId ?? item.pendingStgSumId)
+        ? -Math.abs(item.stgSumId ?? item.pendingStgSumId)
+        : item.accountId),
+    stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
+    pendingStgSumId: item.pendingStgSumId ?? item.stgSumId ?? null,
+    status: item.status ?? item.statusMaster ?? null,
+    statusApproval: item.statusApproval || null,
+    period: item.period || (item.earnStartDate && item.earnEndDate
+      ? `${item.earnStartDate} - ${item.earnEndDate}`
+      : item.earnStartDate || null),
+    periodEarn: item.periodEarn || item.earnStartDate || null,
+    periodRedeemStart: item.periodRedeemStart || item.redeemStartDate || null,
+    periodRedeemEnd: item.periodRedeemEnd || item.redeemEndDate || null,
+    amount: item.amount ?? item.balanceAmount ?? null,
+    cashBalance: item.cashBalance ?? item.balanceVolume ?? item.receiptBalance ?? null,
+    type: item.type ?? item.pendingActionType ?? null,
+  };
+};
+
 const GasDepositDetail = (props) => {
   const { selectedData, onClose } = props;
   const detailRef = useRef(null);
   const dispatch = useDispatch();
-  const selectedGasDepositId = selectedData?.gasDepositId || selectedData?.id;
+  const [currentSelectedData, setCurrentSelectedData] = useState(() =>
+    normalizeGasDepositDetailData(selectedData),
+  );
+  const selectedGasDepositId = currentSelectedData?.gasDepositId || currentSelectedData?.id;
+  const selectedSummaryReferenceId = useMemo(() => {
+    const explicitSummaryId = currentSelectedData?.pendingStgSumId || currentSelectedData?.stgSumId;
+    if (explicitSummaryId !== undefined && explicitSummaryId !== null) {
+      return explicitSummaryId;
+    }
+
+    const parsedId = Number(selectedGasDepositId);
+    if (!Number.isNaN(parsedId) && parsedId < 0) {
+      return Math.abs(parsedId);
+    }
+
+    return selectedGasDepositId;
+  }, [currentSelectedData?.pendingStgSumId, currentSelectedData?.stgSumId, selectedGasDepositId]);
 
   const [modalCreateMD, setModalCreateMD] = useState(false);
   const [modalViewMD, setModalViewMD] = useState(false);
@@ -93,13 +137,54 @@ const GasDepositDetail = (props) => {
   const [dataApprovalHistoryFixMD, setDataApprovalHistoryFixMD] = useState({});
 
   const {
+    data,
     data_mutation_detail,
     loading_mutation_detail,
     data_approval_history,
     loading_history,
     data_attachment,
     loading_attachment,
+    filters,
   } = useSelector((state) => state.gasDepositRbi);
+
+  useEffect(() => {
+    setCurrentSelectedData(normalizeGasDepositDetailData(selectedData));
+  }, [selectedData]);
+
+  useEffect(() => {
+    const refreshedRows = data?.result;
+    if (!Array.isArray(refreshedRows) || !refreshedRows.length) return;
+
+    const currentIds = [
+      currentSelectedData?.stgSumId,
+      currentSelectedData?.pendingStgSumId,
+      currentSelectedData?.masterGasDepositId,
+      currentSelectedData?.gasDepositId,
+      currentSelectedData?.id,
+    ]
+      .filter((value) => value !== undefined && value !== null)
+      .map((value) => String(value));
+
+    const matchedRow = refreshedRows.find((item) => {
+      const candidateIds = [
+        item?.stgSumId,
+        item?.pendingStgSumId,
+        item?.masterGasDepositId,
+        item?.gasDepositId,
+        item?.id,
+      ]
+        .filter((value) => value !== undefined && value !== null)
+        .map((value) => String(value));
+
+      return candidateIds.some((value) => currentIds.includes(value));
+    }) || refreshedRows.find((item) => (
+      item?.accountNumber && currentSelectedData?.accountNumber && item.accountNumber === currentSelectedData.accountNumber
+    ));
+
+    if (matchedRow) {
+      setCurrentSelectedData(normalizeGasDepositDetailData(matchedRow));
+    }
+  }, [currentSelectedData?.accountNumber, currentSelectedData?.gasDepositId, currentSelectedData?.id, currentSelectedData?.masterGasDepositId, currentSelectedData?.pendingStgSumId, currentSelectedData?.stgSumId, data]);
 
   const dataSourceMutationDetail = data_mutation_detail?.result;
 
@@ -125,14 +210,17 @@ const GasDepositDetail = (props) => {
           sort: "",
         }),
       );
+    }
+
+    if (selectedSummaryReferenceId) {
       dispatch(
         getAttachmentList({
-          referenceId: selectedGasDepositId,
+          referenceId: selectedSummaryReferenceId,
           category: "GAS_DEPOSIT_SUMMARY",
         }),
       );
     }
-  }, [dispatch, selectedGasDepositId]);
+  }, [dispatch, selectedGasDepositId, selectedSummaryReferenceId]);
 
   useEffect(() => {
     if (selectedGasDepositId && detailRef.current) {
@@ -209,26 +297,54 @@ const GasDepositDetail = (props) => {
   const handleConfirmApprovalMutation = async (res, handleClear) => {
     if (!approvalTarget?.referenceId || !approvalTarget?.referenceType) return;
 
+    const actionUpper = approveOrRejectMD.toUpperCase();
+
     await dispatch(
       processGasDepositApproval({
         referenceId: approvalTarget.referenceId,
         referenceType: approvalTarget.referenceType,
-        action: approveOrRejectMD.toUpperCase(),
+        action: actionUpper,
         note: res?.remark || "",
       }),
     ).unwrap();
+
+    if (approvalTarget.referenceType === "SUMMARY") {
+      setCurrentSelectedData((prev) => ({
+        ...prev,
+        statusApproval: actionUpper === "APPROVE" ? "Approved" : "Rejected",
+        status: actionUpper === "APPROVE" ? "Active" : prev?.status,
+      }));
+    }
+
+    if (approvalTarget.referenceType === "MUTATION") {
+      setSelectedMutationDetail((prev) => prev ? ({
+        ...prev,
+        statusApproval: actionUpper === "APPROVE" ? "Approved" : "Rejected",
+        status: actionUpper === "APPROVE" ? "Active" : prev?.status,
+      }) : prev);
+    }
 
     handleClear();
     setModalConfirmApprovalMD(false);
     setApproveOrRejectMD("");
 
-    dispatch(
+    await dispatch(
       getMutationDetailPaginate({
         gasDepositId: selectedGasDepositId,
         page: 1,
         pageSize: 100,
         search: "",
         sort: "",
+      }),
+    );
+
+    await dispatch(
+      getAllGasDepositPaginate({
+        search: encodeURIComponent(JSON.stringify(filters?.search || {})),
+        page: filters?.page || 1,
+        pageSize: 100,
+        sort: filters?.sort || "",
+        isLoadMore: false,
       }),
     );
   };
@@ -364,11 +480,11 @@ const GasDepositDetail = (props) => {
   );
 
   const approvalTarget = useMemo(() => {
-    if (selectedData?.statusApproval === "Waiting Approval") {
+    if (currentSelectedData?.statusApproval === "Waiting Approval") {
       return {
         referenceType: "SUMMARY",
-        referenceId: selectedData?.pendingStgSumId || selectedData?.stgSumId || selectedData?.id,
-        name: selectedData?.accountNumber || selectedData?.customerNumber || "-",
+        referenceId: currentSelectedData?.pendingStgSumId || currentSelectedData?.stgSumId || currentSelectedData?.id,
+        name: currentSelectedData?.accountNumber || currentSelectedData?.customerNumber || "-",
       };
     }
 
@@ -386,7 +502,7 @@ const GasDepositDetail = (props) => {
     }
 
     return null;
-  }, [selectedData, selectedMutationDetail, waitingMutationDetail]);
+  }, [currentSelectedData, selectedMutationDetail, waitingMutationDetail]);
 
   useEffect(() => {
     if (approvalTarget?.referenceId) {
@@ -447,36 +563,36 @@ const GasDepositDetail = (props) => {
       <CollapsibleContainer header="Account Information" border className="mt-4">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
           <DetailText label="Customer Number">{selectedData?.customerNumber || "-"}</DetailText>
-          <DetailText label="Customer Name">{selectedData?.customerName || "-"}</DetailText>
-          <DetailText label="Account Number">{selectedData?.accountNumber || "-"}</DetailText>
-          <DetailText label="Account Name">{selectedData?.accountName || "-"}</DetailText>
-          <DetailText label="Account Group Type">{selectedData?.accountGroupType || "-"}</DetailText>
-          <DetailText label="SOR">{selectedData?.sor || "-"}</DetailText>
-          <DetailText label="Cost Center">{selectedData?.costCenter || "-"}</DetailText>
-          <DetailText label="Account Segment">{selectedData?.accountSegment || "-"}</DetailText>
-          <DetailText label="Meter Reading Code">{selectedData?.meterReadingCode || "-"}</DetailText>
-          <DetailText label="Account Type">{selectedData?.accountType || "-"}</DetailText>
-          <DetailText label="Classification Type">{selectedData?.classificationType || "-"}</DetailText>
-          <DetailText label="SAP CUST ID">{selectedData?.sapCustId || "-"}</DetailText>
+          <DetailText label="Customer Name">{currentSelectedData?.customerName || "-"}</DetailText>
+          <DetailText label="Account Number">{currentSelectedData?.accountNumber || "-"}</DetailText>
+          <DetailText label="Account Name">{currentSelectedData?.accountName || "-"}</DetailText>
+          <DetailText label="Account Group Type">{currentSelectedData?.accountGroupType || "-"}</DetailText>
+          <DetailText label="SOR">{currentSelectedData?.sor || "-"}</DetailText>
+          <DetailText label="Cost Center">{currentSelectedData?.costCenter || "-"}</DetailText>
+          <DetailText label="Account Segment">{currentSelectedData?.accountSegment || "-"}</DetailText>
+          <DetailText label="Meter Reading Code">{currentSelectedData?.meterReadingCode || "-"}</DetailText>
+          <DetailText label="Account Type">{currentSelectedData?.accountType || "-"}</DetailText>
+          <DetailText label="Classification Type">{currentSelectedData?.classificationType || "-"}</DetailText>
+          <DetailText label="SAP CUST ID">{currentSelectedData?.sapCustId || "-"}</DetailText>
         </div>
       </CollapsibleContainer>
 
       {/* GAS DEPOSIT INFORMATION */}
       <CollapsibleContainer header="Gas Deposit Information" border className="mt-4">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-          <DetailText label="Terms Earn">{selectedData?.termsEarn ?? "-"}</DetailText>
-          <DetailText label="Terms Redeem">{selectedData?.termsRedeem ?? "-"}</DetailText>
-          <DetailText label="Period Earn">{selectedData?.periodEarn || selectedData?.earnPeriod || "-"}</DetailText>
-          <DetailText label="Period Start Redeem">{selectedData?.periodRedeemStart || "-"}</DetailText>
-          <DetailText label="Period End Redeem">{selectedData?.periodRedeemEnd || "-"}</DetailText>
-          <DetailText label="Period">{selectedData?.period || "-"}</DetailText>
-          <DetailText label="Time Unit">{selectedData?.timeUnit || "-"}</DetailText>
-          <DetailText label="UOM">{selectedData?.uom || "-"}</DetailText>
-          <DetailText label="Amount">{selectedData?.amount ?? "-"}</DetailText>
-          <DetailText label="Receipt Balance">{selectedData?.cashBalance ?? selectedData?.receiptBalance ?? "-"}</DetailText>
-          <DetailText label="Type">{selectedData?.type || "-"}</DetailText>
-          <DetailText label="Source">{selectedData?.source || "-"}</DetailText>
-          <DetailText label="Description" className="sm:col-span-2 lg:col-span-5">{selectedData?.description || "-"}</DetailText>
+          <DetailText label="Terms Earn">{currentSelectedData?.termsEarn ?? "-"}</DetailText>
+          <DetailText label="Terms Redeem">{currentSelectedData?.termsRedeem ?? "-"}</DetailText>
+          <DetailText label="Period Earn">{currentSelectedData?.periodEarn || currentSelectedData?.earnPeriod || "-"}</DetailText>
+          <DetailText label="Period Start Redeem">{currentSelectedData?.periodRedeemStart || "-"}</DetailText>
+          <DetailText label="Period End Redeem">{currentSelectedData?.periodRedeemEnd || "-"}</DetailText>
+          <DetailText label="Period">{currentSelectedData?.period || "-"}</DetailText>
+          <DetailText label="Time Unit">{currentSelectedData?.timeUnit || "-"}</DetailText>
+          <DetailText label="UOM">{currentSelectedData?.uom || "-"}</DetailText>
+          <DetailText label="Amount">{currentSelectedData?.amount ?? "-"}</DetailText>
+          <DetailText label="Receipt Balance">{currentSelectedData?.cashBalance ?? currentSelectedData?.receiptBalance ?? "-"}</DetailText>
+          <DetailText label="Type">{currentSelectedData?.type || "-"}</DetailText>
+          <DetailText label="Source">{currentSelectedData?.source || "-"}</DetailText>
+          <DetailText label="Description" className="sm:col-span-2 lg:col-span-5">{currentSelectedData?.description || "-"}</DetailText>
         </div>
       </CollapsibleContainer>
     </div>
@@ -580,19 +696,19 @@ const GasDepositDetail = (props) => {
       {/* ========== HISTORY LOG INFORMATION ========== */}
       <CollapsibleCardContainer header="HISTORY LOG INFORMATION" defaultOpen={true}>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-3">
-          <DetailText label="Record ID">{selectedData?.id || selectedData?.gasDepositId || "-"}</DetailText>
+          <DetailText label="Record ID">{currentSelectedData?.id || currentSelectedData?.gasDepositId || "-"}</DetailText>
           <DetailText label="Created Date">
-            {selectedData?.createdDate
-              ? moment(selectedData.createdDate).format("DD MMM YYYY HH:mm:ss")
+            {currentSelectedData?.createdDate
+              ? moment(currentSelectedData.createdDate).format("DD MMM YYYY HH:mm:ss")
               : "-"}
           </DetailText>
-          <DetailText label="Created By">{selectedData?.createdBy || "-"}</DetailText>
+          <DetailText label="Created By">{currentSelectedData?.createdBy || "-"}</DetailText>
           <DetailText label="Updated Date">
-            {selectedData?.updatedDate
-              ? moment(selectedData.updatedDate).format("DD MMM YYYY HH:mm:ss")
+            {currentSelectedData?.updatedDate
+              ? moment(currentSelectedData.updatedDate).format("DD MMM YYYY HH:mm:ss")
               : "-"}
           </DetailText>
-          <DetailText label="Updated By">{selectedData?.updatedBy || "-"}</DetailText>
+          <DetailText label="Updated By">{currentSelectedData?.updatedBy || "-"}</DetailText>
         </div>
       </CollapsibleCardContainer>
 
@@ -628,7 +744,7 @@ const GasDepositDetail = (props) => {
           dispatch(getAllGasDepositPaginate({ page: 1, pageSize: 100, search: "", sort: "" }));
           onClose();
         }}
-        selectedData={selectedData}
+        selectedData={currentSelectedData}
       />
 
       <ModalViewMutationDetail
@@ -637,7 +753,7 @@ const GasDepositDetail = (props) => {
           setModalViewMD(false);
           setSelectedMutationDetail(null);
         }}
-        selectedData={selectedData}
+        selectedData={currentSelectedData}
         selectedMutationDetail={selectedMutationDetail}
       />
 

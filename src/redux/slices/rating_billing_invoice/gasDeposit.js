@@ -734,13 +734,15 @@ export const createMutationSummary = createAsyncThunk(
   "CREATE_MUTATION_SUMMARY",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create`;
+      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create-update`;
       const response = await ratingBillingHttpService.createData(url, body);
       const responseData = response?.data ?? response;
       thunkAPI.dispatch(
         showModalSuccess({
           title: "Success",
-          description: "Mutation Summary created successfully",
+          description: body.id && body.id > 0 
+            ? "Mutation Summary updated successfully"
+            : "Mutation Summary created successfully",
           return: false,
         }),
       );

@@ -88,12 +88,14 @@ export const NxFormFooter = ({
   onSaveDraft,
   type,
   onSubmit,
+  loading = false,
 }) => {
   return (
     <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
       <div className="flex w-full justify-between items-center">
         <ButtonComponent
           onClick={onCancel}
+          disabled={loading}
           className="!border-[#0075BF] !text-[#0075BF]"
         >
           Cancel
@@ -107,6 +109,7 @@ export const NxFormFooter = ({
               />
             }
             onClick={onClear}
+            disabled={loading}
             style={{
               backgroundColor: "#BE3036",
               borderColor: "#BE3036",
@@ -122,6 +125,7 @@ export const NxFormFooter = ({
         </Button>
         <Button
           onClick={onSaveDraft}
+          disabled={loading}
           style={{
             backgroundColor: "#E6F1F9",
             borderColor: "#E6F1F9",
@@ -134,7 +138,7 @@ export const NxFormFooter = ({
           Save as Draft
         </Button>
         <Button
-          disabled={current === 0}
+          disabled={current === 0 || loading}
           onClick={onPrev}
           style={{
             backgroundColor: current === 0 ? "#E0E3E9" : "#fff",
@@ -154,6 +158,7 @@ export const NxFormFooter = ({
             htmlType="button"
             onClick={onNext}
             type="primary"
+            disabled={loading}
             style={{
               backgroundColor: "#0075BF",
               borderColor: "#0075BF",
@@ -171,6 +176,8 @@ export const NxFormFooter = ({
             htmlType="button"
             onClick={onSubmit}
             type="primary"
+            loading={loading}
+            disabled={loading}
             style={{
                 backgroundColor: "#388E3C",
                 borderColor: "#388E3C",

@@ -329,6 +329,8 @@ const GasDepositPage = () => {
         action: "View",
         type: "table",
         render: (record) => {
+          const isEditable = record.statusApproval === "Draft" || record.statusApproval === "Rejected";
+          
           const menuItems = [
             {
               key: "update",
@@ -345,6 +347,7 @@ const GasDepositPage = () => {
                     selectedData: record,
                   },
                 }),
+              disabled: !isEditable,
             },
             {
               key: "approvalHistory",
