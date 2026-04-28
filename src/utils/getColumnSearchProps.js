@@ -5,7 +5,7 @@ import { dateFormatting, hasValue } from ".";
 import moment from "moment";
 // import InputComponent from "../components/InputComponent";
 // import { format } from "react-number-format/types/numeric_format";
-
+import SVGIcon from "../assets/Icon/index";
 
 // BE
 export const getColumnSearchPropsPaging = (
@@ -458,10 +458,10 @@ export const getColumnSearchPropsUseFilteredValue = (
       );
     },
     filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
-        }}
+      <SVGIcon
+        name="IconFilter"
+        width={15}
+        className={filtered && hasValue(search[dataIndex]) === true ? "text-[#1890ff]" : "text-white"}
       />
     ),
     onFilterDropdownOpenChange: (visible) => {

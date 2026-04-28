@@ -68,6 +68,7 @@ const getInvoiceRelationColumns = ({
     title: "START DATE",
     dataIndex: "startDate",
     width: 140,
+    sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -86,6 +87,7 @@ const getInvoiceRelationColumns = ({
     title: "END DATE",
     dataIndex: "endDate",
     width: 140,
+    sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
