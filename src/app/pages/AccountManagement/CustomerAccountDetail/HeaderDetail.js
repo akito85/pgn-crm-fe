@@ -26,7 +26,7 @@ const HeaderDetail = ({
 
   const collapseStyle = { borderRadius: 5 };
   const panelStyle = { border: "1px solid #d9d9d9", borderRadius: 4, overflow: "hidden" };
-  const headerStyle = { fontSize: 15, fontWeight: 500, color: "#0075bf", textTransform: "uppercase" };
+  const headerStyle = { fontSize: 16, fontWeight: 400, color: "#0075bf", textTransform: "uppercase" };
   const { data_accountDetail } = useSelector(
     (state) => state.accountManagement
   );
