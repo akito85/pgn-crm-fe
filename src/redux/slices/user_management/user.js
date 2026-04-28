@@ -16,6 +16,10 @@ const initialState = {
   loading: false,
   data_employee_id: [],
   data_list_upload: null,
+  data_generate_link: null,
+  data_download: null,
+  data_template: null,
+  data_final_upload: null,
 };
 
 export const getListUser = createAsyncThunk(
@@ -54,7 +58,7 @@ export const getDetailUser = createAsyncThunk(
   }
 );
 export const getDetailUpdateUser = createAsyncThunk(
-  "GET_DETAIL_USER",
+  "GET_DETAIL_UPDATE_USER",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/mu/view-update/${id}`;
@@ -463,7 +467,7 @@ export const getUserPositionTo = createAsyncThunk(
         })
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error?.response?.data?.code === 419 ? null : error?.response?.data
       );
     }
   }
@@ -489,7 +493,7 @@ export const forwardTaskUser = createAsyncThunk(
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -692,11 +696,11 @@ const userSlice = createSlice({
     },
     // generate link password
     [generatePasswordLink.pending]: (state, action) => {
-      state.data = action.payload;
+      state.data_generate_link = action.payload;
       state.loading = true;
     },
     [generatePasswordLink.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      state.data_generate_link = action.payload;
       state.isSuccess = true;
       state.loading = false;
     },
@@ -705,11 +709,11 @@ const userSlice = createSlice({
     },
     // downlaod template
     [downloadTemplate.pending]: (state, action) => {
-      state.data = action.payload;
+      state.data_template = action.payload;
       state.loading = true;
     },
     [downloadTemplate.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      state.data_template = action.payload;
       state.loading = false;
     },
     [downloadTemplate.rejected]: (state) => {
@@ -717,11 +721,11 @@ const userSlice = createSlice({
     },
     // final upload user
     [finalUploadUser.pending]: (state, action) => {
-      state.data = action.payload;
+      state.data_final_upload = action.payload;
       state.loading = true;
     },
     [finalUploadUser.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      state.data_final_upload = action.payload;
       state.loading = false;
     },
     [finalUploadUser.rejected]: (state) => {

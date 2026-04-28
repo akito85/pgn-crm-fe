@@ -595,12 +595,19 @@ export const uploadMonitoringUsage = createAsyncThunk(
       const url = "/v1/dbs/api/usage/upload-validation";
       const onProgress = payload.onProgress;
       const formData = new FormData();
-      formData.append("document", payload?.document);
+
+      // Support multiple files — field name is 'documents' (plural)
+      const files = Array.isArray(payload?.documents)
+        ? payload.documents
+        : [payload?.documents];
+      files.forEach((file) => {
+        formData.append("documents", file);
+      });
+
       formData.append("calculationType", payload?.calculationType);
-      const dataRequest = formData;
       const data = await ratingBillingHttpService.uploadAttachment(
         url,
-        dataRequest,
+        formData,
         onProgress,
       );
       const successMessage = {

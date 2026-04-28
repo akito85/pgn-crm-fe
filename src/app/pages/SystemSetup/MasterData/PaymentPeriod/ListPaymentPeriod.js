@@ -365,46 +365,44 @@ const ListPaymentPeriod = () => {
             action: "Activate",
             type: "table",
             render: (record, data_length) => {
-                const statusLowerCase = record?.status?.toLowerCase();
+                const isDisabled = disabledActionByStatus("activate", record?.status, record?.statusApproval);
+                const label = record?.status?.toUpperCase() === "ACTIVE" ? "Inactivate" : "Activate";
                 return (
                     data_length > 3 ? (
-                        <div className="w-full">
-                            <ButtonComponent
-                                border={false}
-                                className={"gap-5"}
-                                onClick={() => {
-                                    setDataInactivate(record?.idPaymentPeriod);
-                                    setModalActiveInactive(true);
-                                    setStatus(record?.status);
-                                }}
-                                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
-                                type="action"
-                            >
-                                <Checkbox
-                                    onClick={() => {
-                                        setDataInactivate(record?.idPaymentPeriod);
-                                        setModalActiveInactive(true);
-                                        setStatus(record?.status);
-                                    }}
-                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
-                                    disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
-                                />
-                                <span className={"text-black ml-6 gap-2 text-center"}>
-                                    {record?.status?.toUpperCase() === "ACTIVE" ? "Inactivate" : "Activate"}
-                                </span>
-                            </ButtonComponent>
-                        </div>
+                        <ButtonComponent
+                            className="gap-5"
+                            icon={
+                                <SVGIcon name={record?.status?.toUpperCase() === "ACTIVE" ? "IconInactive" : "IconSquareCheck"} width={24} color={isDisabled ? "#8D91A0" : "#0075bf"} />
+                            }
+                            border={false}
+                            disabled={isDisabled}
+                            onClick={() => {
+                                setDataInactivate(record?.idPaymentPeriod);
+                                setModalActiveInactive(true);
+                                setStatus(record?.status);
+                            }}
+                            type="action"
+                        >
+                            <span className={"text-black gap-2 text-center"}>
+                                {label}
+                            </span>
+                        </ButtonComponent>
                     ) : (
-                        <Tooltip title={statusLowerCase === "active" ? "Inactivate" : "Activate"}>
-                            <div>
-                                <Checkbox
-                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
-                                    onClick={() => {
+                        <Tooltip title={label}>
+                            <div
+                                onClick={() => {
+                                    if (!isDisabled) {
                                         setDataInactivate(record?.idPaymentPeriod);
                                         setModalActiveInactive(true);
                                         setStatus(record?.status);
-                                    }}
-                                    disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+                                    }
+                                }}
+                                className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                            >
+                                <SVGIcon
+                                    name={record?.status?.toUpperCase() === "ACTIVE" ? "IconInactive" : "IconSquareCheck"}
+                                    color={isDisabled ? "#8D91A0" : "#ACC424"}
+                                    width={20}
                                 />
                             </div>
                         </Tooltip>

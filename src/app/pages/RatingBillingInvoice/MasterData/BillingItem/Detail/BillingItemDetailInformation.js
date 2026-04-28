@@ -178,10 +178,24 @@ const BillingItemDetailInformation = ({
         )?.category,
       );
       setCategory(e.categoryId);
-      const detailMappingInfo = dataBillingItem?.mappingInformation?.find(
+      const detailInfo = dataBillingItem?.mappingInformation?.find(
         (item) => item.categoryId === e.categoryId,
       )?.detailMappingInfo;
-      setDataDetailTable(detailMappingInfo || []);
+      
+      const mappedDetail = (detailInfo || []).map((detail, idx) => ({
+          key: `${idx + 1}`,
+          rMappingId: detail?.rMappingId,
+          item: detail?.item,
+          itemName: detail?.itemName,
+          startDate: detail?.startDate
+            ? moment(detail?.startDate).format(dateFormatting.date)
+            : null,
+          endDate: detail?.endDate
+            ? moment(detail?.endDate).format(dateFormatting.date)
+            : null,
+          description: detail?.description,
+      }));
+      setDataDetailTable(mappedDetail);
       setIsDetailMapShown(true);
     }
   };

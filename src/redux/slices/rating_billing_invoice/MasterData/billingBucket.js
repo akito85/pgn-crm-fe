@@ -28,6 +28,8 @@ const initialState = {
   data_budget: [],
   data_customer: [],
   data_detail: [],
+  data_bucket_currency: [],
+  data_bucket_category: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   data_AttachmentTable: [],
@@ -997,6 +999,52 @@ export const downloadBillingBucket = createAsyncThunk(
   }
 );
 
+export const getBillingBucketCurrency = createAsyncThunk(
+  "GET_BILLING_BUCKET_CURRENCY",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/billing-bucket/currency`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response?.data || [];
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getBillingBucketCategory = createAsyncThunk(
+  "GET_BILLING_BUCKET_CATEGORY",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/billing-bucket/category`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response?.data || [];
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const createBillingBucket = createAsyncThunk(
   "CREATE_BILLING_BUCKET",
   async ({ body }, thunkAPI) => {
@@ -1432,6 +1480,28 @@ const billingBucketSlice = createSlice({
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;
+    },
+    // get billing bucket currency
+    [getBillingBucketCurrency.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBillingBucketCurrency.fulfilled]: (state, action) => {
+      state.data_bucket_currency = action.payload;
+      state.loading = false;
+    },
+    [getBillingBucketCurrency.rejected]: (state) => {
+      state.loading = false;
+    },
+    // get billing bucket category
+    [getBillingBucketCategory.pending]: (state) => {
+      state.loading = true;
+    },
+    [getBillingBucketCategory.fulfilled]: (state, action) => {
+      state.data_bucket_category = action.payload;
+      state.loading = false;
+    },
+    [getBillingBucketCategory.rejected]: (state) => {
+      state.loading = false;
     },
     // approve reject activated billing bucket
     [approveRejectActivatedBillingBucket.pending]: (state) => {

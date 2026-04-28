@@ -397,24 +397,15 @@ const CreateJobPage = () => {
               <Form.Item
                 label="Task Queue"
                 name="taskQueueId"
-                tooltip="Assigns this job to a specific worker queue. Workers in that queue will exclusively pick up and process this job. Leave blank to use the default queue."
+                tooltip="Physical queue routing requires JobRunr Pro. Currently all jobs use the default shared queue."
                 {...formItemProps}
               >
-                <Select
-                  placeholder="Default queue (leave blank)"
-                  style={fieldStyle}
-                  loading={taskQueuesLoading}
-                  allowClear
-                >
-                  {taskQueues.map((q) => (
-                    <Option key={q.queueId} value={q.queueId}>
-                      {q.queueName}
-                      {q.priority != null && (
-                        <span className="ml-2 text-xs text-gray-400">(priority {q.priority})</span>
-                      )}
-                    </Option>
-                  ))}
-                </Select>
+                <Input
+                  value="Default"
+                  disabled
+                  style={{ ...fieldStyle, color: "#666", background: "#fafafa", cursor: "not-allowed" }}
+                  suffix={<span style={{ fontSize: 11, color: "#aaa" }}>JobRunr OSS</span>}
+                />
               </Form.Item>
 
               {executeType === "STORED_PROCEDURE" && (<>

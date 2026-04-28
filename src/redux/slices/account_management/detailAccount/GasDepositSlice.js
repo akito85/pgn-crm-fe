@@ -63,7 +63,7 @@ const initialState = {
   // --- History Detail ---
   loading_detailGdHistory: false,
   detail_gasDepositHistory: {},
-  
+
   // --- History ---
   loading_gdApprovalHistory: false,
   detail_gdApprovalHistory: {},
@@ -254,7 +254,7 @@ export const getGasDepositHistories = createAsyncThunk(
 
       let url = "/v1/dbs/api/gas-deposit/request-history";
       if (queryParams.toString().length) url += `?${queryParams.toString()}`;
-      
+
       const response = await accountManagementService.getPagination(url, body);
       return {
         ...response.data,

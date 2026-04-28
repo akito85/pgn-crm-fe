@@ -1,12 +1,15 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";import InputComponent from "../../../../components/InputComponent";
+import { Steps, Form, Select } from "antd";
+import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
 import DetailText from "../../../../components/DetailText";
 import {
   approvedBilling,
+  cancelApprovalBilling,
   getAllBillingApprovePaginate,
+  getAllBillingCancelTaskPaginate,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
@@ -16,9 +19,9 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ModalApprovalBilling = ({
   isOpen,
-  handleCancel = () => {},
-  handleRefresh = () => {},
-  handleOpenModal = () => {},
+  handleCancel = () => { },
+  handleRefresh = () => { },
+  handleOpenModal = () => { },
 }) => {
   // Selector
   const { data_list_billing_approval, loadingApproval } = useSelector(
@@ -44,6 +47,7 @@ const ModalApprovalBilling = ({
   const [remark, setRemark] = useState("");
   const [generateInvoice, setGenerateInvoice] = useState(false);
   const [action, setAction] = useState("");
+  const [approvalType, setApprovalType] = useState("APPROVAL_BILLING");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataTableSelect, setDataTableSelect] = useState([]);
@@ -55,21 +59,31 @@ const ModalApprovalBilling = ({
     right: [],
   });
 
+  const approvalTypeOptions = [
+    { value: "APPROVAL_BILLING", label: "Approval Billing" },
+    { value: "CANCEL_LIST_APPROVAL", label: "Cancel List Approval" },
+  ];
+
   // Initial fetch - Load 100 data pertama
   useEffect(() => {
     if (isOpen) {
-      dispatch(
-        getAllBillingApprovePaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: 100,
-          sort,
-          isLoadMore: false,
-        })
-      );
+      const payload = {
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      };
+
+      if (approvalType === "CANCEL_LIST_APPROVAL") {
+        dispatch(getAllBillingCancelTaskPaginate(payload));
+      } else {
+        dispatch(getAllBillingApprovePaginate(payload));
+      }
+
       setPage(1);
     }
-  }, [dispatch, isOpen, search, sort]);
+  }, [dispatch, isOpen, search, sort, approvalType]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -93,15 +107,20 @@ const ModalApprovalBilling = ({
     const totalPages = data_list_billing_approval?.page?.totalPages || 0;
 
     if (nextPage <= totalPages) {
-      await dispatch(
-        getAllBillingApprovePaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          isLoadMore: true,
-        })
-      );
+      const payload = {
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      };
+
+      if (approvalType === "CANCEL_LIST_APPROVAL") {
+        await dispatch(getAllBillingCancelTaskPaginate(payload));
+      } else {
+        await dispatch(getAllBillingApprovePaginate(payload));
+      }
+
       setPage(nextPage);
     }
   };
@@ -178,6 +197,7 @@ const ModalApprovalBilling = ({
     setSort("");
     setSearchText("");
     setSearchedColumn("");
+    setApprovalType("APPROVAL_BILLING");
     form.resetFields();
   };
 
@@ -197,11 +217,16 @@ const ModalApprovalBilling = ({
       description: formValue.remark,
     };
 
+    const submitThunk =
+      approvalType === "CANCEL_LIST_APPROVAL"
+        ? cancelApprovalBilling
+        : approvedBilling;
+
     dispatch(
-      approvedBilling({
+      submitThunk({
         body: body,
         action: action === "APPROVE" ? "approved" : "rejected",
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -219,6 +244,7 @@ const ModalApprovalBilling = ({
         setSort("");
         setSearchText("");
         setSearchedColumn("");
+        setApprovalType("APPROVAL_BILLING");
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
@@ -374,9 +400,27 @@ const ModalApprovalBilling = ({
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
               <div className="flex justify-between items-center mb-4">
-                <p className="text-primary uppercase font-bold">
-                  Billing List - Ready to Approve
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-primary uppercase font-bold m-0">
+                    Billing List
+                  </p>
+                  <div className="w-[240px]">
+                    <Select
+                      value={approvalType}
+                      onChange={(value) => {
+                        setApprovalType(value);
+                        setSelectedRowKeys([]);
+                        setDataTableSelect([]);
+                        setPage(1);
+                        setSearch({});
+                        setSort("");
+                        setSearchText("");
+                        setSearchedColumn("");
+                      }}
+                      options={approvalTypeOptions}
+                    />
+                  </div>
+                </div>
                 {selectedRowKeys.length > 0 && (
                   <p className="text-sm font-semibold text-blue-600">
                     {selectedRowKeys.length}{" "}
@@ -436,8 +480,8 @@ const ModalApprovalBilling = ({
                 {action === "APPROVE"
                   ? "approved"
                   : action === "REJECT"
-                  ? "rejected"
-                  : "processed"}
+                    ? "rejected"
+                    : "processed"}
               </p>
             </div>
             <TableRBI
@@ -476,9 +520,8 @@ const ModalApprovalBilling = ({
               : IconModal["icon_error_default"]}
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            action === "APPROVE" ? "approved" : "rejected"
-          }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${action === "APPROVE" ? "approved" : "rejected"
+            }. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

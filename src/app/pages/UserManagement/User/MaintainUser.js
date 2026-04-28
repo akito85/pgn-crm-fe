@@ -142,16 +142,15 @@ const MaintainUser = ({ dataTable }) => {
   };
 
   const rowSelection = {
+    selectedRowKeys,
     fixed: true,
     type: "checkbox",
     preserveSelectedRowKeys: true,
-    onChange: (selectedRowKeys, selectedRows) => {
-      setSelecetedKeyDataTable(selectedRowKeys);
+    onChange: (newSelectedRowKeys, selectedRows) => {
+      setSelectedRowKeys(newSelectedRowKeys);
       setDataTableSelect(selectedRows);
     },
     getCheckboxProps: (record) => ({
-      // disabled: existData.includes(record.id),
-      // Column configuration not to be checked
       name: record.id,
     }),
   };

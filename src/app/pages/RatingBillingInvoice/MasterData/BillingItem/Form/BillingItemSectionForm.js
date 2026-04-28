@@ -1,11 +1,21 @@
 import { Checkbox, Form, Select } from "antd";
 import moment from "moment";
+import { useCallback, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 
 // Components
 import SelectComponent from "../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../components/DateComponent";
 import CardContainer from "../../../../../../components/CardContainer";
+
+// Redux
+import {
+  getBillType,
+  getBillingItemCategoryList,
+  getBillingItemCriteriaList,
+  getBillingItemTypeList,
+} from "../../../../../../redux/slices/rating_billing_invoice/billingItem";
 
 // Utils
 import { formMessageRequired } from "../../../../../../utils";
@@ -22,6 +32,7 @@ const BillingItemSectionForm = ({
   checkedPaymentWarranty,
   checkedInstallmentRestructure,
   checkedBank,
+  isReceiptMethodType = false,
   onChangeLateCharge = () => {},
   onChangePayment = () => {},
   onChangeInstallmentRestructure = () => {},
@@ -31,11 +42,44 @@ const BillingItemSectionForm = ({
   handleStartDate = () => {},
   handleEndDate = () => {},
   mappingData = 0,
+  criteriaData = 0,
   isCriteriaDisabled = false,
   data_bankList = [],
   data_bankAccountList = [],
   onChangeBankValue = () => {},
 }) => {
+  const dispatch = useDispatch();
+
+  // Lazy loading state per-dropdown
+  const [dropdownLoading, setDropdownLoading] = useState({
+    category: false,
+    type: false,
+    billType: false,
+    criteria: false,
+  });
+  const fetchedRef = useRef({
+    category: false,
+    type: false,
+    billType: false,
+    criteria: false,
+  });
+
+  const runLazyFetch = useCallback(
+    async (key, thunk) => {
+      if (fetchedRef.current[key] || dropdownLoading[key]) return;
+      setDropdownLoading((prev) => ({ ...prev, [key]: true }));
+      try {
+        await dispatch(thunk()).unwrap();
+        fetchedRef.current[key] = true;
+      } catch (_err) {
+        // Keep retryable — don't set fetchedRef on failure
+      } finally {
+        setDropdownLoading((prev) => ({ ...prev, [key]: false }));
+      }
+    },
+    [dispatch, dropdownLoading],
+  );
+
   const disabledStartDate = (current) => {
     return current && current < moment().startOf("day");
   };
@@ -59,6 +103,12 @@ const BillingItemSectionForm = ({
   };
 
   const isDisabledForUpdate = type === "update" && statusDetail;
+  const isDateDisabled =
+    isDisabledForUpdate || mappingData > 0 || criteriaData > 0;
+  const dateDisabledTooltip =
+    isDateDisabled && !isDisabledForUpdate
+      ? "Please delete all data in Mapping Detail and Criteria Detail tables first before changing the date."
+      : undefined;
 
   return (
     <CardContainer header="TRANSACTION MAPPING INFORMATION">
@@ -73,6 +123,10 @@ const BillingItemSectionForm = ({
             disabled={isDisabledForUpdate}
             placeholder="Select"
             onChange={onCategoryChange}
+            loading={dropdownLoading.category}
+            onDropdownVisibleChange={(open) => {
+              if (open) runLazyFetch("category", getBillingItemCategoryList);
+            }}
           >
             {data_billingItemCategory?.map((data, index) => (
               <Select.Option value={data.categoryId} key={index}>
@@ -84,7 +138,14 @@ const BillingItemSectionForm = ({
 
         {/* Type */}
         <Form.Item label="Type" name="type" rules={formMessageRequired("Type")}>
-          <SelectComponent disabled={isDisabledForUpdate} placeholder="Select">
+          <SelectComponent
+            disabled={isDisabledForUpdate}
+            placeholder="Select"
+            loading={dropdownLoading.type}
+            onDropdownVisibleChange={(open) => {
+              if (open) runLazyFetch("type", getBillingItemTypeList);
+            }}
+          >
             {data_typeOptions?.map((data, index) => (
               <Select.Option value={data.id} key={index}>
                 {data.name}
@@ -121,7 +182,14 @@ const BillingItemSectionForm = ({
           name="billType"
           rules={formMessageRequired("Bill Type")}
         >
-          <SelectComponent disabled={isDisabledForUpdate} placeholder="Select">
+          <SelectComponent
+            disabled={isDisabledForUpdate}
+            placeholder="Select"
+            loading={dropdownLoading.billType}
+            onDropdownVisibleChange={(open) => {
+              if (open) runLazyFetch("billType", getBillType);
+            }}
+          >
             {data_billType?.map((data, index) => (
               <Select.Option value={data.id} key={index}>
                 {data.name}
@@ -143,6 +211,10 @@ const BillingItemSectionForm = ({
           <SelectComponent
             placeholder="Select"
             disabled={isCriteriaDisabled}
+            loading={dropdownLoading.criteria}
+            onDropdownVisibleChange={(open) => {
+              if (open) runLazyFetch("criteria", getBillingItemCriteriaList);
+            }}
           >
             {data_criteriaOptions?.map((data, index) => (
               <Select.Option value={data.id} key={index}>
@@ -157,11 +229,12 @@ const BillingItemSectionForm = ({
           label="Start Date"
           name="startDate"
           rules={formMessageRequired("Start Date")}
+          tooltip={dateDisabledTooltip}
         >
           <DateComponent
             dateDisable={disabledStartDate}
             onChange={handleStartDate}
-            disabled={isDisabledForUpdate || mappingData > 0}
+            disabled={isDateDisabled}
             placeholder="Select Start Date"
           />
         </Form.Item>
@@ -171,9 +244,10 @@ const BillingItemSectionForm = ({
           label="End Date"
           name="endDate"
           rules={[{ validator: validateEndDate }]}
+          tooltip={dateDisabledTooltip}
         >
           <DateComponent
-            disabled={mappingData > 0}
+            disabled={isDateDisabled}
             dateDisable={disabledEndDate}
             onChange={handleEndDate}
             placeholder="Select End Date"
@@ -206,10 +280,7 @@ const BillingItemSectionForm = ({
             >
               <SelectComponent placeholder="Select">
                 {data_bankAccountList?.map((account) => (
-                  <Select.Option
-                    value={account.accountNumber}
-                    key={account.id}
-                  >
+                  <Select.Option value={account.accountNumber} key={account.id}>
                     {account.accountNumber}
                   </Select.Option>
                 ))}
@@ -228,11 +299,18 @@ const BillingItemSectionForm = ({
             <InputComponent type="textarea" rows={4} />
           </Form.Item>
         </div>
+      </div>
 
+      <div className="flex gap-3 w-full">
         {/* Late Charge Checkbox */}
         <Form.Item name="lateCharge" valuePropName="checked" noStyle>
           <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-            <Checkbox checked={checkedLateCharge} onChange={onChangeLateCharge} className="font-medium">
+            <Checkbox
+              checked={checkedLateCharge}
+              onChange={onChangeLateCharge}
+              disabled={isReceiptMethodType}
+              className="font-medium"
+            >
               Late Charge Object
             </Checkbox>
             <span className="text-xs text-[#92979D] leading-tight">
@@ -247,6 +325,7 @@ const BillingItemSectionForm = ({
             <Checkbox
               checked={checkedPaymentWarranty}
               onChange={onChangePayment}
+              disabled={isReceiptMethodType}
               className="font-medium"
             >
               Payment Warranty Deduction Object
@@ -268,6 +347,7 @@ const BillingItemSectionForm = ({
             <Checkbox
               checked={checkedInstallmentRestructure}
               onChange={onChangeInstallmentRestructure}
+              disabled={isReceiptMethodType}
               className="font-medium"
             >
               Installment / Restructure
@@ -281,7 +361,11 @@ const BillingItemSectionForm = ({
 
         <Form.Item name="bank" valuePropName="checked" noStyle>
           <div className="col-span-1 flex flex-col gap-1 pt-1 pb-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-            <Checkbox checked={checkedBank} onChange={onChangeBank} className="font-medium">
+            <Checkbox
+              checked={checkedBank}
+              onChange={onChangeBank}
+              className="font-medium"
+            >
               Bank
             </Checkbox>
             <span className="text-xs text-[#92979D] leading-tight">

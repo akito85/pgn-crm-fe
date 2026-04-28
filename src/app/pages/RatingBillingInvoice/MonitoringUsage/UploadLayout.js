@@ -1,18 +1,17 @@
 import React, { useEffect, useRef } from "react";
 import DetailText from "../../../../components/DetailText";
 import { useState } from "react";
-import { Alert, Form, Progress, Select, Spin, Tooltip, Typography, message } from "antd";
+import { Alert, Form, Progress, Select, message } from "antd";
 import SelectComponent from "../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import SVGIcon from "../../../../assets/Icon/index";
-import InputComponent from "../../../../components/InputComponent";
+
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
   CloseOutlined,
   FileOutlined,
   UndoOutlined,
-  UploadOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
@@ -21,8 +20,6 @@ import {
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
 import {
   ModalAttention,
@@ -39,16 +36,12 @@ const UploadLayout = ({
   refreshData = () => {},
 }) => {
   const [format, setFormat] = useState();
-  const [urlLink, setUrlLink] = useState("");
   const [fileList, setFileList] = useState([]);
-  const [fileName, setFileName] = useState("");
   const [fileProgress, setFileProgress] = useState(0);
-  const [recordId, setRecordId] = useState("");
+  const [recordId] = useState("");
   const [isFileUploadEnabled, setFileUploadEnabled] = useState(false);
   const [isLinkModalVisible, setLinkModalVisible] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [uploadedFileName, setUploadedFileName] = useState("");
   const [modalDelete, setModalDelete] = useState(false);
   const [showRecalculateModal, setShowRecalculateModal] = useState(false);
 
@@ -95,54 +88,11 @@ const UploadLayout = ({
     return labelStr.toUpperCase() === "NEED";
   };
 
-  const handleUpdate = (record, values) => {};
-
   const handleDeleteOk = () => {
     const newData = dataTable.filter((item) => item.recordId !== recordId);
     setDataTable(newData);
     setModalDelete(false);
   };
-
-  const action = [
-    {
-      title: "ACTION",
-      dataIndex: "accountId",
-      align: "center",
-      fixed: "right",
-      render: (id, record, index) => {
-        return (
-          <div className="flex w-full justify-center gap-6">
-            <Tooltip title="Update">
-              <Link
-                to={RBI_ROUTES.MONITORING_USAGE_LIST_UPDATE}
-                state={{ id: id, record: record }}
-              >
-                <div className="pt-1">
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    onClick={() => handleUpdate(record)}
-                  />
-                </div>
-              </Link>
-            </Tooltip>
-            <Tooltip title="Delete">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconDelete"
-                  width={24}
-                  onClick={() => {
-                    setModalDelete(true);
-                    setRecordId(record?.recordId);
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ];
 
   const updateDataPagination = (page, pageSize) => {
     return dataTable?.slice((page - 1) * pageSize, page * pageSize);
@@ -168,40 +118,48 @@ const UploadLayout = ({
     form.resetFields(['format_usage_type']);
   };
 
-  const handleFileChange = ({ fileList }) => {
-    setFileList(fileList);
-  };
 
   const property = {
-    name: "file",
-    multiple: false,
+    name: "documents",
+    multiple: true,
     fileList: fileList,
     showUploadList: false,
     accept: ".xlsx, .xls",
-    maxCount: 1,
-    beforeUpload: (file) => {
+    beforeUpload: (file, newFiles) => {
       if (!format) {
         form.validateFields(['format_usage_type']).catch(() => {});
         return false;
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        message.error('File size exceeds 5 MB limit');
-        return false;
+        message.error(`${file.name} exceeds 5 MB limit`);
       }
 
-      setFileName(file);
-      
+      // Only add files not already in list (by name+size)
+      setFileList((prev) => {
+        const exists = prev.some(
+          (f) => f.name === file.name && f.size === file.size
+        );
+        if (exists) return prev;
+        return [...prev, {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          originFileObj: file,
+          _status: 'pending',
+        }];
+      });
+
       setTimeout(() => {
         filePreviewRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'nearest' 
         });
       }, 100);
-      
+
       return false;
     },
-    onChange: handleFileChange,
+    onChange: ({ fileList: newList }) => {},
   };
 
   const handleUploadButtonClick = () => {
@@ -211,81 +169,94 @@ const UploadLayout = ({
   };
 
   const handleUpload = async () => {
-    try {
-      setFileProgress(0);
-      const body = {
-        document: fileName,
-        calculationType: format.value,
-        onProgress: (progress) => setFileProgress(progress),
-      };
-      setLoadingUpload(true);
-      await dispatch(uploadMonitoringUsage(body)).unwrap();
-
-      setUploadedFileName(fileName.name);
-      setShowSuccessModal(true);
-
-      if (refreshData && typeof refreshData === "function") {
-        refreshData();
-      }
-      
-      setFileList([]);
-      setFileName("");
-      
-    } catch (error) {
-      setFileList((prevFileList) =>
-        prevFileList.map((file) => {
-          if (file.name === fileName.name) {
-            return { ...file, status: "error" };
-          }
-          return file;
-        })
-      );
-      message.error('Upload failed. Please try again.');
+    const validFiles = fileList.filter((f) => f.size <= MAX_FILE_SIZE);
+    if (validFiles.length === 0) {
+      message.error('No valid files to upload.');
+      return;
     }
-    setLoadingUpload(false);
-  };
-
-  const handleUploadLink = async (e) => {
-    e.stopPropagation();
 
     if (!format) {
       form.validateFields(['format_usage_type']).catch(() => {});
       return;
     }
 
-    if (!urlLink || urlLink.trim() === "") {
-      setLinkModalVisible(true);
-      return;
-    }
-
     try {
       setFileProgress(0);
-      const body = {
-        document: urlLink,
-        calculationType: format.value,
-        onProgress: (progress) => setFileProgress(progress),
-      };
-      
+      // Mark all as uploading
+      setFileList((prev) =>
+        prev.map((f) =>
+          f.size <= MAX_FILE_SIZE ? { ...f, _status: 'uploading' } : f
+        )
+      );
       setLoadingUpload(true);
-      await dispatch(uploadMonitoringUsage(body)).unwrap();
 
-      const linkFileName = urlLink.split('/').pop() || 'File from link';
-      setUploadedFileName(linkFileName);
-      
-      setShowSuccessModal(true);
+      const rawFiles = validFiles.map((f) => f.originFileObj || f);
+      await dispatch(
+        uploadMonitoringUsage({
+          documents: rawFiles,
+          calculationType: format.value,
+          onProgress: (progress) => setFileProgress(progress),
+        })
+      ).unwrap();
 
+      setFileList((prev) =>
+        prev.map((f) =>
+          f.size <= MAX_FILE_SIZE ? { ...f, _status: 'done' } : f
+        )
+      );
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
 
-      setUrlLink("");
-      
+      setFileList([]);
     } catch (error) {
-      console.error("Upload error:", error);
+      setFileList((prev) =>
+        prev.map((f) =>
+          f.size <= MAX_FILE_SIZE ? { ...f, _status: 'error' } : f
+        )
+      );
       message.error('Upload failed. Please try again.');
-    } finally {
-      setLoadingUpload(false);
     }
+    setLoadingUpload(false);
+  };
+
+  const handleRetryFile = async (index) => {
+    const file = fileList[index];
+    if (!file || file.size > MAX_FILE_SIZE) return;
+    if (!format) {
+      form.validateFields(['format_usage_type']).catch(() => {});
+      return;
+    }
+
+    setFileList((prev) =>
+      prev.map((f, i) => (i === index ? { ...f, _status: 'uploading' } : f))
+    );
+    setLoadingUpload(true);
+    setFileProgress(0);
+
+    try {
+      const rawFile = file.originFileObj || file;
+      await dispatch(
+        uploadMonitoringUsage({
+          documents: [rawFile],
+          calculationType: format.value,
+          onProgress: (progress) => setFileProgress(progress),
+        })
+      ).unwrap();
+
+      setFileList((prev) =>
+        prev.map((f, i) => (i === index ? { ...f, _status: 'done' } : f))
+      );
+      if (refreshData && typeof refreshData === "function") {
+        refreshData();
+      }
+    } catch (error) {
+      setFileList((prev) =>
+        prev.map((f, i) => (i === index ? { ...f, _status: 'error' } : f))
+      );
+      message.error(`Retry failed for ${file.name}. Please try again.`);
+    }
+    setLoadingUpload(false);
   };
 
   const handleChangePage = (page, pageSizeChange) => {
@@ -294,29 +265,12 @@ const UploadLayout = ({
     setPageSize(pageSizeChange);
   };
 
-  const updateLink = (e) => {
-    e.stopPropagation();
-    setUrlLink(e.target.value);
-  };
-
-  const reUploadImage = async () => {
-    setFileList((prevFileList) =>
-      prevFileList.map((file) => ({
-        ...file,
-        percent: 0,
-        status: "uploading",
-      }))
-    );
-    handleUpload();
-  };
-
   const handleRemove = (index) => {
-    setFileList((prevFileList) => {
-      const updatedFileList = [...prevFileList];
-      updatedFileList.splice(index, 1);
-      return updatedFileList;
+    setFileList((prev) => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
     });
-    setFileName("");
   };
 
   const handleDraggerClick = (e) => {
@@ -418,139 +372,147 @@ const UploadLayout = ({
             
             <Form.Item 
               name={"file"}
-              rules={[
-                {
-                  validator: async (_, value) => {
-                    return Promise.resolve();
-                  },
-                },
-              ]}
+              rules={[{ validator: async () => Promise.resolve() }]}
               validateTrigger={['onChange', 'onBlur']}
             >
               <div className="w-full">
-                <Spin spinning={loadingUpload}>
-                  <div onClick={handleDraggerClick}>
-                    <Dragger {...property} disabled={!isFileUploadEnabled}>
-                      <p className="ant-upload-drag-icon">
-                        <SVGIcon
-                          name={"IconUploadAttachment"}
-                          onClick={handleUploadButtonClick}
-                        />
-                      </p>
-                      <p className="ant-upload-text text-bold">
-                        Drag and drop your file here or{" "}
-                        <span className="underline"> click for upload</span>
-                      </p>
-                      <p className="ant-upload-hint">
-                        The maximum file size is limited to 5 MB
-                      </p>
-                      <div className="flex items-center justify-center my-3 gap-x-3">
-                        <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
-                        <span>or</span>
-                        <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
-                      </div>
-                      <p className="ant-upload-text">
-                        Put Google Drive link or local file
-                      </p>
-                      <div
-                        className="flex my-5 justify-center items-center"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex gap-3 justify-center items-center">
-                          <InputComponent
-                            onChange={updateLink}
-                            disabled={!isFileUploadEnabled}
-                            onClick={(e) => e.stopPropagation()}
-                            value={urlLink}
-                            placeholder="Paste your link here"
-                          />
-                          <ButtonComponent
-                            icon={<UploadOutlined />}
-                            type={"submit"}
-                            border={false}
-                            onClick={handleUploadLink}
-                            disabled={!isFileUploadEnabled}
-                          />
-                        </div>
-                      </div>
-                    </Dragger>
-                  </div>
-                </Spin>
+                <div onClick={handleDraggerClick}>
+                  <Dragger {...property} disabled={!isFileUploadEnabled}>
+                    <p className="ant-upload-drag-icon">
+                      <SVGIcon
+                        name={"IconUploadAttachment"}
+                        onClick={handleUploadButtonClick}
+                      />
+                    </p>
+                    <p className="ant-upload-text text-bold">
+                      Drag and drop your files here or{" "}
+                      <span className="underline">click for upload</span>
+                    </p>
+                    <p className="ant-upload-hint">
+                      The maximum file size is limited to 5 MB per file. You can upload multiple files.
+                    </p>
+                  </Dragger>
+                </div>
               </div>
             </Form.Item>
-            
-            <div ref={filePreviewRef}>
-              {fileList.map((file, index) => (
-                <div
-                  className="border-solid border-[0.12rem] border-black rounded-[0.5rem] my-4 py-2 px-3 flex gap-4 items-center"
-                  key={index}
-                >
-                  <div>
-                    <FileOutlined style={{ fontSize: "20px" }} />
-                  </div>
-                  <div className="flex flex-col w-full">
-                    <div className="flex w-full justify-between">
-                      <Typography className={"text-red-500"}>
-                        {file.name || file.fileName}
-                      </Typography>
-                      <ButtonComponent
-                        icon={<CloseOutlined style={{ color: "#58804D" }} />}
-                        border={false}
-                        onClick={() => handleRemove(index)}
-                      />
-                    </div>
-                    <Typography>{bytesConverter(file.size)}</Typography>
-                    {file.fileStatus === "error" ? (
-                      <div className="flex w-full justify-between">
-                        <span className={"text-red-700"}>Failed to Upload</span>
-                        <ButtonComponent border={false}>
-                          <span className={"text-green-800 mr-2"}>Re-upload</span>
-                          <UndoOutlined style={{ color: "#58804D" }} />
-                        </ButtonComponent>
-                      </div>
-                    ) : file.size <= MAX_FILE_SIZE ? (
-                      loadingUpload ? (
-                        <Progress
-                          percent={fileProgress}
-                          format={(percent) => `${percent}%`}
-                        />
-                      ) : (
-                        <div className="flex gap-2 mt-2">
-                          <ButtonComponent
-                            type="primary"
-                            size={"middle"}
-                            onClick={handleUpload}
-                          >
-                            Upload
-                          </ButtonComponent>
-                        </div>
-                      )
-                    ) : (
-                      <span className={"text-red-700"}>
-                        File is bigger than 5MB
-                      </span>
-                    )}
-                  </div>
-                  {file.status === "error" && (
-                    <div className={"flex flex-col justify-end items-end"}>
-                      <ButtonComponent border={false}>
-                        <span
-                          className={"text-green-800 mr-2"}
-                          onClick={reUploadImage}
-                        >
-                          Re-upload
-                        </span>
-                        <UndoOutlined style={{ color: "#58804D" }} />
-                      </ButtonComponent>
-                    </div>
-                  )}
+
+            {/* Multi-file list — styled like reference */}
+            {fileList.length > 0 && (
+              <div ref={filePreviewRef} className="border border-solid border-[#D9E8F5] rounded-lg overflow-hidden">
+                <div className="bg-[#EBF4FB] px-4 py-2 border-b border-solid border-[#D9E8F5]">
+                  <span className="text-[#0075BF] text-xs font-bold uppercase tracking-wide">
+                    Files Upload
+                  </span>
                 </div>
-              ))}
-            </div>
+                <div className="divide-y divide-solid divide-[#F0F0F0]">
+                  {fileList.map((file, index) => {
+                    const isError = file._status === "error";
+                    const isUploading = file._status === "uploading";
+                    const isTooBig = file.size > MAX_FILE_SIZE;
+
+                    return (
+                      <div
+                        key={index}
+                        className={`flex items-start gap-3 px-4 py-3 ${isError ? "bg-red-50" : "bg-white"}`}
+                      >
+                        {/* File Icon */}
+                        <div className="mt-1">
+                          <FileOutlined style={{ fontSize: "18px", color: "#0075BF" }} />
+                        </div>
+
+                        {/* File Info */}
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-medium text-gray-800 truncate">
+                              {file.name}
+                            </span>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {isError && (
+                                <ButtonComponent
+                                  size="small"
+                                  border={false}
+                                  onClick={() => handleRetryFile(index)}
+                                  style={{
+                                    backgroundColor: "#0075BF",
+                                    color: "#fff",
+                                    borderRadius: "4px",
+                                    fontSize: "11px",
+                                    height: "24px",
+                                    padding: "0 8px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                  }}
+                                >
+                                  <UndoOutlined style={{ fontSize: "11px" }} />
+                                  Try Again
+                                </ButtonComponent>
+                              )}
+                              {!isUploading && (
+                                <CloseOutlined
+                                  onClick={() => handleRemove(index)}
+                                  style={{
+                                    fontSize: "12px",
+                                    color: isError ? "#BE3036" : "#8c8c8c",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-xs text-gray-400 mt-0.5">
+                            {bytesConverter(file.size)}
+                          </span>
+                          {isTooBig && (
+                            <span className="text-xs text-red-500 mt-1">
+                              File exceeds 5 MB limit
+                            </span>
+                          )}
+                          {isUploading && (
+                            <Progress
+                              percent={fileProgress}
+                              size="small"
+                              className="mt-1"
+                              format={(p) => `${p}%`}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Footer buttons */}
+            {fileList.length > 0 && (
+              <div className="flex justify-between items-center mt-4">
+                <ButtonComponent
+                  className="bg-[#fff]"
+                  onClick={() => {
+                    setFileList([]);
+                    setFileProgress(0);
+                  }}
+                >
+                  Cancel
+                </ButtonComponent>
+                <ButtonComponent
+                  type="submit"
+                  onClick={handleUpload}
+                  disabled={
+                    loadingUpload ||
+                    fileList.every((f) => f.size > MAX_FILE_SIZE)
+                  }
+                >
+                  Upload
+                </ButtonComponent>
+              </div>
+            )}
           </div>
         </Form>
       );
     }
+
   };
 
   return (
