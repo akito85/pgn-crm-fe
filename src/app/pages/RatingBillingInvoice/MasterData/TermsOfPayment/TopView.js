@@ -522,14 +522,14 @@ const TopView = () => {
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_TERMS_OF_PAYMENT || [],
           activate:
-            dataApprovalHistory?.dataApprover?.ACTIVATED_TERMS_OF_PAYMENT || [],
+            dataApprovalHistory?.dataApprover?.ACTIVATE_TERMS_OF_PAYMENT || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.TERMS_OF_PAYMENT || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_TERMS_OF_PAYMENT || [],
           activate:
-            dataApprovalHistory?.dataHistory?.ACTIVATED_TERMS_OF_PAYMENT || [],
+            dataApprovalHistory?.dataHistory?.ACTIVATE_TERMS_OF_PAYMENT || [],
         },
       };
       setDataApprovalHistoryFix(temp);

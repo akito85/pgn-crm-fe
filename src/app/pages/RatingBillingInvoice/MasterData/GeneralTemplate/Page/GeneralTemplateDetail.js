@@ -184,6 +184,7 @@ const GeneralTemplateDetail = () => {
   const onFinish = (e, handleClear = () => { }) => {
     const approvalType =
       data_detail?.approvalType ||
+      data_detail?.approvalDetail?.approvalType ||
       data_detail?.inactiveApproval?.approvalType ||
       data_detail?.activateApproval?.approvalType ||
       data_detail?.activatedApproval?.approvalType;
