@@ -76,6 +76,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
         "startDate",
         "endDate",
         "description",
+        "uploadTemplate",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -595,6 +596,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
             "startDate",
             "endDate",
             "description",
+            "uploadTemplate",
           ],
         },
         { value: "Approval", paramValue: ["apphierId"] },
@@ -729,7 +731,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSaveSubmit}
             type={type}
-            loading={loadingSave}
+            isLoading={loadingSave}
           />
         </Form>
 
@@ -794,6 +796,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
                     setModalConfirm(false);
                     setTypeSubmit(false);
                   }}
+                  disabled={loadingSave}
                 >
                   Cancel
                 </ButtonComponent>
@@ -802,8 +805,8 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
                   onClick={() => {
                     handleSendData(dataConfirm);
                   }}
-                  loading={loadingSave}
-                  disabled={loading || loadingForm}
+                  isLoading={loadingSave}
+                  disabled={loading || loadingForm || loadingSave}
                 >
                   Confirm
                 </ButtonComponent>

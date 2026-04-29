@@ -1,15 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import DetailText from "../../../../components/DetailText";
 import { useState } from "react";
-import { Alert, Form, Progress, Select, message } from "antd";
+import { Alert, Form, Progress, Select, message, Tooltip } from "antd";
 import SelectComponent from "../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import SVGIcon from "../../../../assets/Icon/index";
+import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
-  CloseOutlined,
+  CloseCircleFilled,
   FileOutlined,
   UndoOutlined,
   WarningOutlined,
@@ -396,91 +397,115 @@ const UploadLayout = ({
               </div>
             </Form.Item>
 
-            {/* Multi-file list — styled like reference */}
+            {/* Multi-file list — Collapsible */}
             {fileList.length > 0 && (
-              <div ref={filePreviewRef} className="border border-solid border-[#D9E8F5] rounded-lg overflow-hidden">
-                <div className="bg-[#EBF4FB] px-4 py-2 border-b border-solid border-[#D9E8F5]">
-                  <span className="text-[#0075BF] text-xs font-bold uppercase tracking-wide">
-                    Files Upload
-                  </span>
-                </div>
-                <div className="divide-y divide-solid divide-[#F0F0F0]">
-                  {fileList.map((file, index) => {
-                    const isError = file._status === "error";
-                    const isUploading = file._status === "uploading";
-                    const isTooBig = file.size > MAX_FILE_SIZE;
+              <div ref={filePreviewRef}>
+                <CollapsibleContainer
+                  header={"Files Upload"}
+                  border
+                  defaultOpen
+                >
+                  <div className="flex flex-col gap-3 pt-3 pb-2">
+                    {fileList.map((file, index) => {
+                      const isError = file._status === "error";
+                      const isUploading = file._status === "uploading";
+                      const isDone = file._status === "done";
+                      const isTooBig = file.size > MAX_FILE_SIZE;
 
-                    return (
-                      <div
-                        key={index}
-                        className={`flex items-start gap-3 px-4 py-3 ${isError ? "bg-red-50" : "bg-white"}`}
-                      >
-                        {/* File Icon */}
-                        <div className="mt-1">
-                          <FileOutlined style={{ fontSize: "18px", color: "#0075BF" }} />
-                        </div>
+                      return (
+                        <div
+                          key={index}
+                          className={`border border-solid rounded-lg px-4 py-3 ${
+                            isError
+                              ? "bg-[#FFF1F0] border-[#FFA39E]"
+                              : "bg-white border-[#E5E7EB]"
+                          }`}
+                        >
+                          {/* Row: icon + name + size + action */}
+                          <div className="flex items-center gap-3">
+                            {/* File Icon */}
+                            <div className="flex-shrink-0">
+                              <FileOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+                            </div>
 
-                        {/* File Info */}
-                        <div className="flex flex-col flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-gray-800 truncate">
-                              {file.name}
-                            </span>
+                            {/* Name + size inline */}
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-sm font-medium text-gray-800 truncate">
+                                {file.name}
+                              </span>
+                              <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
+                                {bytesConverter(file.size)}
+                              </span>
+                            </div>
+
+                            {/* Right-side action per status */}
                             <div className="flex items-center gap-2 flex-shrink-0">
+                              {isTooBig && (
+                                <span className="text-xs text-red-500">Exceeds 5 MB</span>
+                              )}
                               {isError && (
                                 <ButtonComponent
                                   size="small"
                                   border={false}
                                   onClick={() => handleRetryFile(index)}
                                   style={{
-                                    backgroundColor: "#0075BF",
+                                    backgroundColor: "#1E293B",
                                     color: "#fff",
-                                    borderRadius: "4px",
-                                    fontSize: "11px",
-                                    height: "24px",
-                                    padding: "0 8px",
+                                    borderRadius: "20px",
+                                    fontSize: "12px",
+                                    height: "28px",
+                                    padding: "0 14px",
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: "4px",
+                                    gap: "6px",
+                                    border: "none",
                                   }}
                                 >
-                                  <UndoOutlined style={{ fontSize: "11px" }} />
+                                  <UndoOutlined style={{ fontSize: "12px" }} />
                                   Try Again
                                 </ButtonComponent>
                               )}
-                              {!isUploading && (
-                                <CloseOutlined
-                                  onClick={() => handleRemove(index)}
-                                  style={{
-                                    fontSize: "12px",
-                                    color: isError ? "#BE3036" : "#8c8c8c",
-                                    cursor: "pointer",
-                                  }}
-                                />
+                              {isUploading && (
+                                <Tooltip title="Cancel upload">
+                                  <CloseCircleFilled
+                                    onClick={() => handleRemove(index)}
+                                    style={{
+                                      fontSize: "20px",
+                                      color: "#BE3036",
+                                      cursor: "pointer",
+                                    }}
+                                  />
+                                </Tooltip>
+                              )}
+                              {(isDone || (!isUploading && !isError)) && (
+                                <Tooltip title="Remove">
+                                  <SVGIcon
+                                    name="IconDelete"
+                                    width={20}
+                                    color="#BE3036"
+                                    onClick={() => handleRemove(index)}
+                                  />
+                                </Tooltip>
                               )}
                             </div>
                           </div>
-                          <span className="text-xs text-gray-400 mt-0.5">
-                            {bytesConverter(file.size)}
-                          </span>
-                          {isTooBig && (
-                            <span className="text-xs text-red-500 mt-1">
-                              File exceeds 5 MB limit
-                            </span>
-                          )}
+
+                          {/* Progress bar — full width, below filename row */}
                           {isUploading && (
-                            <Progress
-                              percent={fileProgress}
-                              size="small"
-                              className="mt-1"
-                              format={(p) => `${p}%`}
-                            />
+                            <div className="mt-2">
+                              <Progress
+                                percent={fileProgress}
+                                size="small"
+                                strokeColor="#0075BF"
+                                format={(p) => `${p}%`}
+                              />
+                            </div>
                           )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContainer>
               </div>
             )}
 

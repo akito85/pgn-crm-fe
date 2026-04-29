@@ -33,6 +33,7 @@ import CardContainer from "../../../../../../components/CardContainer";
 const BillingCycleView = ({ type }) => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
+  const initialPageSize = 100;
   const loadMoreSize = 20;
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -142,7 +143,7 @@ const BillingCycleView = ({ type }) => {
       getBillingCycleList({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -226,7 +227,7 @@ const BillingCycleView = ({ type }) => {
           getBillingCycleList({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: loadMoreSize,
+            pageSize: initialPageSize,
             sort,
             isLoadMore: false,
           }),
@@ -280,7 +281,7 @@ const BillingCycleView = ({ type }) => {
       getBillingCycleList({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),

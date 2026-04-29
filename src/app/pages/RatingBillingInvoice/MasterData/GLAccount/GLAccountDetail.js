@@ -137,7 +137,6 @@ const GLAccountDetail = () => {
   };
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       remark: res.remark,
       action: approveOrReject.toUpperCase(),
@@ -148,11 +147,12 @@ const GLAccountDetail = () => {
       : isActivatedApproval
         ? approveRejectActivatedGLAccount({ id, body: data })
         : approveRejectGLAccount({ id, body: data });
-    dispatch(
+    return dispatch(
       approvalAction,
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         if (handleClear) handleClear();
         dispatch(getDetailGLAccount(id));
       })
@@ -180,6 +180,37 @@ const GLAccountDetail = () => {
             </div>
           }
         >
+          {bodyApproval.isApprover && (
+              <div className="border border-[#D6E1F0] rounded-lg mb-4">
+                <div className="px-4 py-3 border-b border-[#D6E1F0]">
+                  <p className="font-semibold text-primary">
+                    {isActivatedApproval
+                      ? "ACTIVATE REQUEST INFORMATION"
+                      : isInactiveApproval
+                      ? "INACTIVE REQUEST INFORMATION"
+                      : "APPROVAL REQUEST INFORMATION"}
+                  </p>
+                </div>
+                <div className="p-4">
+                  <div className="w-full grid grid-cols-4 gap-x-8 gap-y-2">
+                    <DetailText label={"Requested Date"}>
+                      {bodyApproval.approvalDetail?.requestedDate
+                        ? moment(
+                          bodyApproval.approvalDetail.requestedDate,
+                        ).format(dateFormatting.date)
+                        : "-"}
+                    </DetailText>
+                    <DetailText label={"Requested By"}>
+                      {bodyApproval.approvalDetail?.requestedBy ||
+                        "-"}
+                    </DetailText>
+                    <DetailText label={"Remark"}>
+                      {bodyApproval.approvalDetail?.remarks || "-"}
+                    </DetailText>
+                  </div>
+                </div>
+              </div>
+            )}
           <Tabs
             activeKey={activeTab}
             onChange={setActiveTab}
@@ -189,36 +220,6 @@ const GLAccountDetail = () => {
                 label: "Content Setup",
                 children: (
                   <div className="flex flex-col gap-3">
-                    {bodyApproval.isApprover &&
-                      (isInactiveApproval || isActivatedApproval) && (
-                        <div className="border border-[#D6E1F0] rounded-lg">
-                          <div className="px-4 py-3 border-b border-[#D6E1F0]">
-                            <p className="font-semibold text-primary">
-                              {isActivatedApproval
-                                ? "ACTIVATE REQUEST INFORMATION"
-                                : "INACTIVE REQUEST INFORMATION"}
-                            </p>
-                          </div>
-                          <div className="p-4">
-                            <div className="w-full grid grid-cols-4 gap-x-8 gap-y-2">
-                              <DetailText label={"Requested Date"}>
-                                {bodyApproval.approvalDetail?.requestedDate
-                                  ? moment(
-                                    bodyApproval.approvalDetail.requestedDate,
-                                  ).format(dateFormatting.date)
-                                  : "-"}
-                              </DetailText>
-                              <DetailText label={"Requested By"}>
-                                {bodyApproval.approvalDetail?.requestedBy ||
-                                  "-"}
-                              </DetailText>
-                              <DetailText label={"Remark"}>
-                                {bodyApproval.approvalDetail?.remarks || "-"}
-                              </DetailText>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     <div
                       style={{
                         border: "1px solid #D6E1F0",

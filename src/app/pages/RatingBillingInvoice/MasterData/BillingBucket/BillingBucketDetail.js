@@ -373,7 +373,6 @@ const BillingBucketDetail = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       description: res.remark,
@@ -391,11 +390,12 @@ const BillingBucketDetail = () => {
         : approveRejectBillingBucket({
           body: data,
         });
-    dispatch(
+    return dispatch(
       approvalAction
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftBillingBucket(id));
         dispatch(getDetailBillingBucket(id));

@@ -203,7 +203,7 @@ const GeneralTemplateDetail = () => {
           ? approveInactiveGeneralTemplate(data)
           : approveGeneralTemplate(data);
 
-    dispatch(
+    return dispatch(
       approveAction
     )
       .unwrap()
@@ -269,7 +269,7 @@ const GeneralTemplateDetail = () => {
           type={"tabs"}
           element={
             <>
-              {/* {data_detail?.inactiveApproval?.isInactive &&
+              {data_detail?.inactiveApproval?.isInactive &&
               data_detail?.isApprover ? (
                 <div className="mb-3">
                   <BaseContainer header={"Inactive Request Information"}>
@@ -286,7 +286,7 @@ const GeneralTemplateDetail = () => {
                     </div>
                   </BaseContainer>
                 </div>
-              ) : null} */}
+              ) : null}
               {(data_detail?.isApprover || data_detail?.inactiveApproval?.isInactive) &&
                 (data_detail?.approvalType === "INACTIVE_GENERAL_TEMPLATE" ||
                   data_detail?.inactiveApproval?.isInactive) ? (
