@@ -8,6 +8,7 @@ import moment from "moment";
 // Components
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import {
@@ -24,6 +25,7 @@ import BillingItemSectionForm from "./Form/BillingItemSectionForm";
 import MappingInformation from "./Form/tab/MappingInformation";
 import BillingItemConfirmation from "./Form/BillingItemConfirmation";
 import AttachmentSectionComponent from "./Form/tab/AttachmentSectionComponent";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
 // Services & Redux
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
@@ -416,7 +418,7 @@ const BillingItemForm = (props) => {
             (g) =>
               (g.glAccountDesc ?? g.name) === item.glAccount ||
               `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}` ===
-                item.glAccount,
+              item.glAccount,
           );
           return found
             ? `${found.glAccount ?? found.account} - ${found.glAccountDesc ?? found.name}`
@@ -462,7 +464,7 @@ const BillingItemForm = (props) => {
       const isBankChecked = dataDetail?.isBank || dataDetail?.bank || false;
       const resolvedBankId = isBankChecked
         ? (data_bankList?.find((b) => b.bankName === dataDetail?.bankValue)
-            ?.bankId ?? null)
+          ?.bankId ?? null)
         : null;
 
       form.setFieldsValue({
@@ -875,11 +877,11 @@ const BillingItemForm = (props) => {
         ...item,
         ...(hasValue(item.categoryName)
           ? {
-              category:
-                data_billingItemCategory
-                  ?.filter((category) => category?.name === item.categoryName)
-                  .find((item) => item?.id)?.id || item?.category,
-            }
+            category:
+              data_billingItemCategory
+                ?.filter((category) => category?.name === item.categoryName)
+                .find((item) => item?.id)?.id || item?.category,
+          }
           : {}),
       }));
 
@@ -899,11 +901,11 @@ const BillingItemForm = (props) => {
       ...item,
       ...(hasValue(item.itemName)
         ? {
-            item:
-              detail_mapping_category
-                ?.filter((category) => category?.name === item.itemName)
-                .find((item) => item?.id)?.id || item?.item,
-          }
+          item:
+            detail_mapping_category
+              ?.filter((category) => category?.name === item.itemName)
+              .find((item) => item?.id)?.id || item?.item,
+        }
         : {}),
     }));
     handleChangesCreateButtonDetail(category, "", temp);
@@ -954,9 +956,9 @@ const BillingItemForm = (props) => {
 
     const temp =
       allDataDetailTable[
-        data_billingItemCategory?.find(
-          (item) => bodyData?.categoryName === item?.name,
-        )?.id
+      data_billingItemCategory?.find(
+        (item) => bodyData?.categoryName === item?.name,
+      )?.id
       ] || [];
 
     const dataConflict = temp?.filter(
@@ -1032,7 +1034,7 @@ const BillingItemForm = (props) => {
         const found = data_glAccountList?.find(
           (g) =>
             `${g.glAccount ?? g.account} - ${g.glAccountDesc ?? g.name}` ===
-              item.glAccountId || g.id === item.glAccountId,
+            item.glAccountId || g.id === item.glAccountId,
         );
         return found ? (found.glAccount ?? found.account) : item.glAccountId;
       })();
@@ -1195,13 +1197,12 @@ const BillingItemForm = (props) => {
 
   const handleDescriptionSuccess = useCallback(
     (data, type) => {
-      const text = `Your data has been ${
-        data.action === "DRAFT"
-          ? type === "create"
-            ? "created"
-            : "updated"
-          : "submitted"
-      }.`;
+      const text = `Your data has been ${data.action === "DRAFT"
+        ? type === "create"
+          ? "created"
+          : "updated"
+        : "submitted"
+        }.`;
       const successMessage = {
         title: "Successful",
         description: text,
@@ -1488,8 +1489,8 @@ const BillingItemForm = (props) => {
                 valuePage !== listSectionInfo[2].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header="Attachment Information">
-              <AttachmentSectionComponent
+            <CardContainer header={"Attachment Information"}>
+              <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
                 updateData={handleUpdateAttachment}
@@ -1502,7 +1503,7 @@ const BillingItemForm = (props) => {
                 typeRBI="standalone"
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
           <FormFooter
@@ -1570,9 +1571,8 @@ const BillingItemForm = (props) => {
                 <SVGIcon name="IconFailed" width={48} />
                 <p className="text-[18px] font-bold">Failed</p>
               </div>
-              <p className="pl-[70px]">{`Your data was not ${
-                type === "create" ? "Created." : "Updated."
-              } ${bodyError?.message}`}</p>
+              <p className="pl-[70px]">{`Your data was not ${type === "create" ? "Created." : "Updated."
+                } ${bodyError?.message}`}</p>
               <p className="pl-[70px]">Please try again.</p>
             </div>
           </ModalError>
