@@ -203,7 +203,7 @@ const GeneralTemplateDetail = () => {
           ? approveInactiveGeneralTemplate(data)
           : approveGeneralTemplate(data);
 
-    dispatch(
+    return dispatch(
       approveAction
     )
       .unwrap()

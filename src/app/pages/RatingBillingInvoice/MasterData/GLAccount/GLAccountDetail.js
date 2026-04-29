@@ -137,7 +137,6 @@ const GLAccountDetail = () => {
   };
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       remark: res.remark,
       action: approveOrReject.toUpperCase(),
@@ -148,11 +147,12 @@ const GLAccountDetail = () => {
       : isActivatedApproval
         ? approveRejectActivatedGLAccount({ id, body: data })
         : approveRejectGLAccount({ id, body: data });
-    dispatch(
+    return dispatch(
       approvalAction,
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         if (handleClear) handleClear();
         dispatch(getDetailGLAccount(id));
       })

@@ -1324,6 +1324,7 @@ const BillingBucketForm = ({ type }) => {
             onSubmit={handleSubmit}
             type={type}
             disabled={storedDataInline}
+            isLoading={loadingForm}
           />
         </Form>
 
@@ -1342,6 +1343,7 @@ const BillingBucketForm = ({ type }) => {
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}
+          isLoading={loadingForm}
         />
 
         {/* Modal Back */}

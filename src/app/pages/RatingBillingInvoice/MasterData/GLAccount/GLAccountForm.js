@@ -298,8 +298,6 @@ const GLAccountForm = ({ type }) => {
   };
 
   const handleConfirm = () => {
-    setModalConfirm(false);
-
     const jsonData = {
       ...(type === "update" && { glAccountId: id }),
       glAccount: bodyData.glAccount,
@@ -322,6 +320,7 @@ const GLAccountForm = ({ type }) => {
             }));
           }
           setLoadingForm(false);
+          setModalConfirm(false);
           dispatch(showModalSuccess({
             title: "Successful",
             description: `Your data has been ${flag ? "submitted" : "created"}.`,
@@ -329,6 +328,7 @@ const GLAccountForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               error.response?.data?.message || error.message || error.toString();
@@ -356,6 +356,7 @@ const GLAccountForm = ({ type }) => {
             }));
           }
           setLoadingForm(false);
+          setModalConfirm(false);
           dispatch(showModalSuccess({
             title: "Successful",
             description: `Your data has been ${flag ? "submitted" : "updated"}.`,
@@ -363,6 +364,7 @@ const GLAccountForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               error.response?.data?.message || error.message || error.toString();
@@ -499,6 +501,7 @@ const GLAccountForm = ({ type }) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             type={type}
+            isLoading={isLoading}
           />
         </Form>
 
@@ -511,6 +514,7 @@ const GLAccountForm = ({ type }) => {
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}
+          isLoading={isLoading}
         />
 
         <ModalError
