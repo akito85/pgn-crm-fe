@@ -30,11 +30,6 @@ export const RBI_ROUTES = {
   MONITORING_CUSTOMER_UPLOAD: "/rating-billing/monitoring-customer/upload",
   MONITORING_CUSTOMER_DETAIL: "/rating-billing/monitoring-customer/view",
   MONITORING_CUSTOMER_LIST_UPDATE: "/rating-billing/monitoring-customer/update",
-  MONITORING_CUSTOMER_PRA_BILLING_VS_RATING: "/rating-billing/monitoring-customer/detail-pra-billing-vs-rating",
-  MONITORING_CUSTOMER_RATING_VS_BILLING: "/rating-billing/monitoring-customer/detail-rating-vs-billing",
-  MONITORING_CUSTOMER_DETAIL_PENDING_TRANSACTIONS: "/rating-billing/monitoring-customer/detail-pending-transactions",
-  MONITORING_CUSTOMER_DETAIL_PENDING_APPROVALS: "/rating-billing/monitoring-customer/detail-pending-approvals",
-  MONITORING_CUSTOMER_DETAIL_GAP_PRA_BILLING_MASTER: "/rating-billing/monitoring-customer/detail-gap-pra-billing-master",
 
   // monitoring usage
   MONITORING_USAGE_VIEW: "/rating-billing/monitoring-usage",

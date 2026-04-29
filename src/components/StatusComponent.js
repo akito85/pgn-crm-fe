@@ -5,11 +5,9 @@ import {
   CloseCircleFilled,
   Loading3QuartersOutlined,
   ExclamationCircleFilled,
-  MinusCircleFilled,
   SyncOutlined,
   FileTextOutlined,
   StopOutlined,
-  HourglassOutlined,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
@@ -49,6 +47,17 @@ const StatusComponent = ({
 
       case "open":
         bgColor = "bg-gray-600";
+        tColor = "text-white";
+        break;
+
+      // ===== OK / NOT OK STATUSES =====
+      case "ok":
+        bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "not ok":
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -246,6 +255,7 @@ const StatusComponent = ({
     return { bgcolor: bgColor, textColor: tColor };
   }, [colour]);
 
+  // eslint-disable-next-line no-unused-vars
   const renderIconStatus = () => {
     if (!colour || typeof colour !== "string") return null;
 

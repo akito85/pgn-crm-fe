@@ -46,11 +46,7 @@ import ManagementBillingInstallmentPage from "../../app/pages/RatingBillingInvoi
 import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/CreateBillingInstallmentPage";
 import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
 import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
-import DetailPraBillingVsRating from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/DetailPraBillingVsRating";
-import DetailRatingVsBilling from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/DetailRatingVsBilling";
-import DetailPendingTransactionsTop from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/DetailPendingTransactionsTop";
-import DetailPendingApprovalsTop from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/DetailPendingApprovalsTop";
-import DetailGapPraBillingMasterTop from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/DetailGapPraBillingMasterTop";
+
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
 import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementView";
@@ -87,11 +83,6 @@ export const RBI_ELEMENTS = {
 
   // monitoring customer
   MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
-  MONITORING_CUSTOMER_PRA_BILLING_VS_RATING_ELEMENT: <DetailPraBillingVsRating />,
-  MONITORING_CUSTOMER_RATING_VS_BILLING_ELEMENT: <DetailRatingVsBilling />,
-  MONITORING_CUSTOMER_DETAIL_PENDING_TRANSACTIONS_ELEMENT: <DetailPendingTransactionsTop />,
-  MONITORING_CUSTOMER_DETAIL_PENDING_APPROVALS_ELEMENT: <DetailPendingApprovalsTop />,
-  MONITORING_CUSTOMER_DETAIL_GAP_PRA_BILLING_MASTER_ELEMENT: <DetailGapPraBillingMasterTop />,
 
   // monitoring usage
   MONITORING_USAGE_VIEW_ELEMENTS: <MonitoringUsagePage />,
