@@ -27,6 +27,7 @@ import NxApproveOrRejectModal from "../../../../../components/Nx/NxApproveOrReje
 import NxTabs from "../../../../../components/Nx/NxTabs";
 import HeaderDetail from "../../CustomerAccountDetail/HeaderDetail";
 import GasDepositDetailTable from "../GasDepositDetailTable";
+import SVGIcon from "../../../../../assets/Icon/index";
 
 /**
  * Gas deposit detail view (container + presentational component).
@@ -266,19 +267,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
               />
             </NxBaseContainer>
           )}
-          <GasDepositDetailTabs detail={detail} />
-
-          <NxCardContainer header={"GAS DEPOSIT DETAIL"}>
-            <NxBaseContainer border>
-              {activeKey === originalKey ? (
-                <GasDepositDetailTable id={id} parentKey="detail_gasDeposit" />
-              ) : (
-                <GasDepositDetailTable id={id} parentKey="detailDraft_gasDeposit" />
-              )}
-            </NxBaseContainer>
-          </NxCardContainer>
-
-          {/* Detail mutation table — rendered only when a row is selected */}
+          
+          <GasDepositDetailTabs id={id} detail={detail} versionActiveKey={activeKey} versionOriginalKey={originalKey} />
 
           <NxCardContainer header={"HISTORY LOG INFORMATION"}>
             <NxBaseContainer border>
@@ -297,29 +287,34 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
             </NxBaseContainer>
           </NxCardContainer>
 
-          {isApproval && (
-            <NxBaseContainer border>
-              <div className="flex justify-between">
-                <Button type={"menu"} onClick={() => navigate(-1)}>
-                  Cancel
-                </Button>
-                <div className={"w-full flex justify-end gap-5"}>
-                  <Button
-                    type="reject"
-                    onClick={() => handleApprovalModal(true, "reject")}
-                  >
-                    Reject
+          <NxBaseContainer border>
+            <div className="flex justify-between">
+              {isApproval ? (
+                <>
+                  <Button type={"menu"} onClick={() => navigate(-1)}>
+                    Cancel
                   </Button>
-                  <Button
-                    type="approve"
-                    onClick={() => handleApprovalModal(true, "approve")}
-                  >
-                    Approve
-                  </Button>
-                </div>
-              </div>
-            </NxBaseContainer>
-          )}
+                  <div className={"w-full flex justify-end gap-x-2"}>
+                    <Button
+                      type="reject"
+                      onClick={() => handleApprovalModal(true, "reject")}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      type="approve"
+                      onClick={() => handleApprovalModal(true, "approve")}
+                    >
+                      Approve
+                    </Button>
+                  </div>
+                </>
+              ) :
+              <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                Back      
+              </Button>}
+            </div>
+          </NxBaseContainer>
         </div>
       </Spin>
       <NxApproveOrRejectModal

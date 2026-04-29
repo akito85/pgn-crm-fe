@@ -19,6 +19,7 @@ import { dateFormatting } from "../../../../../../utils";
 import GeneralTemplateDetailForm from "../Form/GeneralTemplateDetailForm";
 import GeneralTempalteAttachment from "../Form/GeneralTemplateAttachment";
 import {
+  approveActivateGeneralTemplate,
   approveGeneralTemplate,
   approveInactiveGeneralTemplate,
   getDetailDraftGeneralTemplate,
@@ -93,7 +94,7 @@ const GeneralTemplateDetail = () => {
   useEffect(() => {
     if (id && data_detail && id === data_detail.templateId) {
       handleSetData(data_detail);
-       if (
+      if (
         data_detail_draft &&
         data_detail_draft.templateId &&
         data_detail.templateId === data_detail_draft.templateId &&
@@ -129,11 +130,11 @@ const GeneralTemplateDetail = () => {
             data_templateType={
               data_detail?.fileTemplate
                 ? [
-                    {
-                      ...data_detail?.fileTemplate,
-                      dataType: "exist",
-                    },
-                  ]
+                  {
+                    ...data_detail?.fileTemplate,
+                    dataType: "exist",
+                  },
+                ]
                 : []
             }
           />
@@ -155,11 +156,11 @@ const GeneralTemplateDetail = () => {
             data_templateType={
               data_detail_draft?.fileTemplate
                 ? [
-                    {
-                      ...data_detail_draft?.fileTemplate,
-                      dataType: "exist",
-                    },
-                  ]
+                  {
+                    ...data_detail_draft?.fileTemplate,
+                    dataType: "exist",
+                  },
+                ]
                 : []
             }
           />
@@ -180,17 +181,30 @@ const GeneralTemplateDetail = () => {
     }
   };
 
-  const onFinish = (e, handleClear = () => {}) => {
+  const onFinish = (e, handleClear = () => { }) => {
+    const approvalType =
+      data_detail?.approvalType ||
+      data_detail?.inactiveApproval?.approvalType ||
+      data_detail?.activateApproval?.approvalType ||
+      data_detail?.activatedApproval?.approvalType;
+
     const data = {
       templateId: id,
       description: e?.remark,
       apphierId: data_detail?.tappId ? data_detail?.tappId : null,
       action: typeSubmit ? "APPROVE" : "REJECT",
     };
+
+    const approveAction =
+      approvalType === "ACTIVATED_GENERAL_TEMPLATE"
+        ? approveActivateGeneralTemplate(data)
+        : approvalType === "INACTIVE_GENERAL_TEMPLATE" ||
+          data_detail?.inactiveApproval?.isInactive
+          ? approveInactiveGeneralTemplate(data)
+          : approveGeneralTemplate(data);
+
     dispatch(
-      data_detail?.inactiveApproval?.isInactive
-        ? approveInactiveGeneralTemplate(data)
-        : approveGeneralTemplate(data)
+      approveAction
     )
       .unwrap()
       .then(async (data) => {
@@ -272,6 +286,51 @@ const GeneralTemplateDetail = () => {
                     </div>
                   </BaseContainer>
                 </div>
+              ) : null} */}
+              {(data_detail?.isApprover || data_detail?.inactiveApproval?.isInactive) &&
+                (data_detail?.approvalType === "INACTIVE_GENERAL_TEMPLATE" ||
+                  data_detail?.inactiveApproval?.isInactive) ? (
+                <div className="mb-3">
+                  <BaseContainer header={"Inactive Request Information"}>
+                    <div className="w-full grid grid-cols-4 gap-5">
+                      <DetailText label="Requested Date">
+                        {renderDateTime(data_detail?.inactiveApproval?.requestDate)}
+                      </DetailText>
+                      <DetailText label="Requested By">
+                        {data_detail?.inactiveApproval?.requestBy}
+                      </DetailText>
+                      <DetailText label="Remark">
+                        {data_detail?.inactiveApproval?.remark}
+                      </DetailText>
+                    </div>
+                  </BaseContainer>
+                </div>
+              ) : null}
+
+              {(data_detail?.isApprover ||
+                data_detail?.activateApproval?.isActivated ||
+                data_detail?.activatedApproval?.isActivated) &&
+                data_detail?.approvalType === "ACTIVATED_GENERAL_TEMPLATE" ? (
+                <div className="mb-3">
+                  <BaseContainer header={"Activate Request Information"}>
+                    <div className="w-full grid grid-cols-4 gap-5">
+                      <DetailText label="Requested Date">
+                        {renderDateTime(
+                          data_detail?.activateApproval?.requestDate ||
+                          data_detail?.activatedApproval?.requestDate
+                        )}
+                      </DetailText>
+                      <DetailText label="Requested By">
+                        {data_detail?.activateApproval?.requestBy ||
+                          data_detail?.activatedApproval?.requestBy}
+                      </DetailText>
+                      <DetailText label="Remark">
+                        {data_detail?.activateApproval?.remark ||
+                          data_detail?.activatedApproval?.remark}
+                      </DetailText>
+                    </div>
+                  </BaseContainer>
+                </div>
               ) : null}
               <Tabs
                 activeKey={tabHeader}
@@ -323,8 +382,8 @@ const GeneralTemplateDetail = () => {
 
           {/* btn approve or reject shown */}
           {data_detail?.isApprover &&
-          (data_detail?.statusApproval === "WAITING_APPROVAL" ||
-            data_detail?.statusApproval === "WAITING APPROVAL") ? (
+            (data_detail?.statusApproval === "WAITING_APPROVAL" ||
+              data_detail?.statusApproval === "WAITING APPROVAL") ? (
             <div className="flex align-middle gap-3">
               <ButtonComponent
                 type="reject"
@@ -352,29 +411,29 @@ const GeneralTemplateDetail = () => {
             approveOrReject={typeSubmit ? "Approved" : "Reject"}
             menu={"General Template"}
             named={`${data_detail?.templateName}`}
-            // message={`Are you sure you want to ${
-            //   typeSubmit ? "Approved" : "Reject"
-            // } this General Template with the name ${data_detail.templateName}?`}
-            // width={1000}
-            // handleCloseCancel={handleCloseModalApproveReject}
-            // footer={
-            //   <div className={"w-full flex justify-end gap-5"}>
-            //     <ButtonComponent
-            //       type={"default"}
-            //       onClick={handleCloseModalApproveReject}
-            //     >
-            //       Cancel
-            //     </ButtonComponent>
-            //     <ButtonComponent
-            //       form={"form"}
-            //       type={"submit"}
-            //       htmlType={"submit"}
-            //       border={false}
-            //     >
-            //       Confirm
-            //     </ButtonComponent>
-            //   </div>
-            // }
+          // message={`Are you sure you want to ${
+          //   typeSubmit ? "Approved" : "Reject"
+          // } this General Template with the name ${data_detail.templateName}?`}
+          // width={1000}
+          // handleCloseCancel={handleCloseModalApproveReject}
+          // footer={
+          //   <div className={"w-full flex justify-end gap-5"}>
+          //     <ButtonComponent
+          //       type={"default"}
+          //       onClick={handleCloseModalApproveReject}
+          //     >
+          //       Cancel
+          //     </ButtonComponent>
+          //     <ButtonComponent
+          //       form={"form"}
+          //       type={"submit"}
+          //       htmlType={"submit"}
+          //       border={false}
+          //     >
+          //       Confirm
+          //     </ButtonComponent>
+          //   </div>
+          // }
           />
           //   <Form
           //     id={"form"}

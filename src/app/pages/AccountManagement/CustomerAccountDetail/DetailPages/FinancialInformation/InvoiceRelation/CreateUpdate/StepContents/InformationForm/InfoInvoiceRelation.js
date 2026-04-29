@@ -160,94 +160,93 @@ export default function InfoInvoiceRelation({
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <div className="w-full grid grid-cols-2 gap-4">
-        <div className="flex gap-2 items-end">
+    <>
+      <div className="flex flex-col gap-y-4">
+        <div className="w-full grid grid-cols-2 gap-4">
+          <div className="flex gap-2 items-end">
+            <Form.Item
+              label={"Account Number"}
+              required
+              className="no-margin-form w-full"
+            >
+              <div className="flex gap-x-1">
+                <Form.Item
+                  key="accountNumber"
+                  name={"accountNumber"}
+                  rules={[
+                    {
+                      message: requiredMessage("Account Number"),
+                      required: true
+                    }
+                  ]}
+                  noStyle
+                >
+                  <InputComponent disabled />
+                </Form.Item>
+                <Button
+                  type="submit"
+                  className="min-w-[120px]"
+                  onClick={() => {
+                    setIsOpen(true);
+                  }}
+                  disabled={!isDraft && isUpdate}
+                >
+                  Select
+                </Button>
+              </div>
+            </Form.Item>
+          </div>
+
           <Form.Item
-            label={"Account Number"}
-            required
-            className="no-margin-form w-full"
+            key="accountName"
+            name={"accountName"}
+            label={"Account Name"}
+            className="no-margin-form"
           >
-            <div className="flex gap-x-1">
-              <Form.Item
-                key="accountNumber"
-                name={"accountNumber"}
-                rules={[
-                  {
-                    message: requiredMessage("Account Number"),
-                    required: true
-                  }
-                ]}
-                noStyle
-              >
-                <InputComponent disabled />
-              </Form.Item>
-              <Button
-                type="submit"
-                className="min-w-[120px]"
-                onClick={() => {
-                  setIsOpen(true);
-                }}
-                disabled={!isDraft && isUpdate}
-              >
-                Select
-              </Button>
-            </div>
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="startDate"
+            name={"startDate"}
+            label={"Start Date"}
+            rules={[
+              {
+                message: requiredMessage("Start Date"),
+                required: true
+              }
+            ]}
+            getValueProps={(value) => ({
+              value: value && moment(value)
+            })}
+            className="no-margin-form"
+          >
+            <NxDate
+              disabled={!isDraft && isUpdate}
+              onChange={date => {
+                if (date && endDate && date.isAfter(endDate, "day"))
+                  form.resetFields(["endDate"])
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            key="endDate"
+            name={"endDate"}
+            label={"End Date"}
+            getValueProps={(value) => ({
+              value: value && moment(value)
+            })}
+            className="no-margin-form"
+          >
+            <NxDate
+              dateDisable={(current) => {
+                if (!moment.isMoment(current)) return false;
+                return current.isBefore(startDate, "day");
+              }}
+            />
           </Form.Item>
         </div>
-
-        <Form.Item
-          key="accountName"
-          name={"accountName"}
-          label={"Account Name"}
-          className="no-margin-form"
-        >
-          <InputComponent disabled />
-        </Form.Item>
-
-        <Form.Item
-          key="startDate"
-          name={"startDate"}
-          label={"Start Date"}
-          rules={[
-            {
-              message: requiredMessage("Start Date"),
-              required: true
-            }
-          ]}
-          getValueProps={(value) => ({
-            value: value && moment(value)
-          })}
-          className="no-margin-form"
-        >
-          <NxDate
-            disabled={!isDraft && isUpdate}
-            onChange={date => {
-              if (date && endDate && date.isAfter(endDate, "day"))
-                form.resetFields(["endDate"])
-            }}
-          />
-        </Form.Item>
-
-        <Form.Item
-          key="endDate"
-          name={"endDate"}
-          label={"End Date"}
-          getValueProps={(value) => ({
-            value: value && moment(value)
-          })}
-          className="no-margin-form"
-        >
-          <NxDate
-            dateDisable={(current) => {
-              if (!moment.isMoment(current)) return false;
-              return current.isBefore(startDate, "day");
-            }}
-          />
-        </Form.Item>
-      </div>
-
-      <div className="w-full my-5">
         <Form.Item
           key="description"
           name={"description"}
@@ -262,7 +261,6 @@ export default function InfoInvoiceRelation({
           />
         </Form.Item>
       </div>
-
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
@@ -296,6 +294,6 @@ export default function InfoInvoiceRelation({
           </NxBaseContainer>
         </div>
       </NxModal>
-    </div>
+    </>
   );
 }

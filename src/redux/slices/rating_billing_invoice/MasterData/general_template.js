@@ -297,9 +297,8 @@ export const approveInactiveGeneralTemplate = createAsyncThunk(
       );
       const successMessage = {
         title: "Successful",
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -333,6 +332,53 @@ export const approveInactiveGeneralTemplate = createAsyncThunk(
   }
 );
 
+
+export const approveActivateGeneralTemplate = createAsyncThunk(
+  "APPROVE_ACTIVATE_GENERAL_TEMPLATE",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/template/approval-activated`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      const successMessage = {
+        title: "Successful",
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      //if error code for with validation
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(
+            validateError({
+              error,
+              action: "APPROVE_ACTIVATE_GENERAL_TEMPLATE",
+            })
+          );
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not submitted. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
 export const approveGeneralTemplate = createAsyncThunk(
   "APPROVE_GENERAL_TEMPLATE",
   async (body, thunkAPI) => {
@@ -344,9 +390,8 @@ export const approveGeneralTemplate = createAsyncThunk(
       );
       const successMessage = {
         title: "Successful",
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -415,7 +460,53 @@ export const activationGeneralTemplate = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not inactivate. ${message}.`,
+            description: `Your data was not activated. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const activateRequestGneralTemplate = createAsyncThunk(
+  "ACTIVATE_GENERAL_TEMPLATE",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/invoice/template/request-activate`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body
+      );
+      const successMessage = {
+        title: "Successful",
+        description: `Your data has been submitted.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response?.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      //if error code for with validation
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(
+            validateError({
+              error,
+              action: "ACTIVATION_GENERAL_TEMPLATE",
+            })
+          );
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not activated. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -611,6 +702,33 @@ const generalTemplateSlice = createSlice({
     [getApprovalListDetail.rejected]: (state, action) => {
       state.loading = false;
       state.dataListAppHierDetail = action.payload;
+    },
+
+    // approve reject activate content management
+    [approveActivateGeneralTemplate.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveActivateGeneralTemplate.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveActivateGeneralTemplate.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    [activateRequestGneralTemplate.pending]: (state) => {
+      state.loading = true;
+    },
+    [activateRequestGneralTemplate.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [activateRequestGneralTemplate.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
     },
 
     [getConfigFileRBIDataGeneralTemplate.pending]: (state, action) => {

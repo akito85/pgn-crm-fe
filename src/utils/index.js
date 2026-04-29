@@ -217,7 +217,7 @@ export const renderColumn = (
   if (searchedColumn) {
     if (type === "status") {
       return (
-        <div className={"flex px-0 my-0"}>
+        <div className={"flex justify-center px-0 my-0"}>
           <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>
         </div>
       );
@@ -364,7 +364,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
 };
 
 export const countBadgeFieldsErrorMandatory = (
-  setListSectionInfo = () => {},
+  setListSectionInfo = () => { },
   listDataAttachment,
   errorFields,
 ) => {
@@ -373,10 +373,10 @@ export const countBadgeFieldsErrorMandatory = (
       const errorBadge =
         item.value !== "Attachment"
           ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue.includes(next.name[0]) ? current + 1 : current,
-              0,
-            )
+            (current, next) =>
+              item.paramValue.includes(next.name[0]) ? current + 1 : current,
+            0,
+          )
           : listDataAttachment.length < 1
             ? 1
             : 0;

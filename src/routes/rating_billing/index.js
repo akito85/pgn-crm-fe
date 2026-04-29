@@ -50,6 +50,10 @@ export const rating_billing = [
     path: RBI_ROUTES.BILLING_CREATE,
     element: RBI_ELEMENTS.BILLING_VIEW_PAGE,
   },
+  {
+    path: RBI_ROUTES.ACCOUNTING_CREATE,
+    element: RBI_ELEMENTS.ACCOUNTING_CREATE_ELEMENT,
+  },
 
   // rating
   {
@@ -78,6 +82,16 @@ export const rating_billing = [
   {
     path: RBI_ROUTES.MONITORING_USAGE_LIST_UPDATE,
     element: RBI_ELEMENTS.MONITORING_USAGE_UPDATE_ELEMENTS,
+  },
+
+  // accounting
+  {
+    path: RBI_ROUTES.ACCOUNTING_VIEW,
+    element: RBI_ELEMENTS.ACCOUNTING_VIEW_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.ACCOUNTING_DETAIL,
+    element: RBI_ELEMENTS.ACCOUNTING_DETAIL_ELEMENT,
   },
 
   // adjustment billing

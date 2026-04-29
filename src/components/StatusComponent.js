@@ -42,7 +42,7 @@ const StatusComponent = ({
       case "sent":
       case "approved":
       case "success_upload":
-      case "standard": 
+      case "standard":
         bgColor = "status-active";
         tColor = "text-white";
         break;

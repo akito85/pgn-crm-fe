@@ -1,0 +1,19 @@
+import React from "react";
+
+const SVG = ({
+  width = "100%",
+  color,
+  ...otherProps
+}) => (
+  <svg
+    width={width}
+    height={width}
+    viewBox="0 0 14 14"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...otherProps}>
+    <path d="M8.75 10.5L5.25 7L8.75 3.5" stroke={color || "currentColor"} strokeWidth="1.16667" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export default SVG;

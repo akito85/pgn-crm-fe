@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import moment from "moment";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +13,6 @@ import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import ModalAttachment from "./ModalAttachment";
-import TablePagination from "../../../../../../../../components/TablePagination";
 // import { getSelectCategory } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import SVGIcon from "../.././../../../../../../assets/Icon/index"
 import { getListCategoryAttachment, getGlobalPropertiesAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
@@ -31,17 +30,19 @@ const columnAttachment = (
   searchText,
   handleSearch = () => {},
   handleDelete = () => {},
-  previewFileAttachment = () => {},
-  previewFile = () => {},
   handleShow = () => {},
-  type
+  type,
+  saStatus
 ) => {
+  const isExistingAttachment = (record) =>
+    record?.dataType === "exist" || record?.type === "exist";
+
   const res = [
     {
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
       sorter: true,
@@ -112,7 +113,7 @@ const columnAttachment = (
         searchText,
         handleSearch
       ),
-      render: (fileSize, r, i) => (
+      render: (fileSize, r) => (
         <span>{r?.type === "new" ? fileSize : bytesConverter(fileSize)}
         </span>
       ),
@@ -120,11 +121,14 @@ const columnAttachment = (
     {
       title: "ACTION",
       align: "center",
-      width: 120,
+      width: 100,
       fixed: "right",
-      render: (v, r, i) => {
+      render: (_, r) => {
+        const isExisting = isExistingAttachment(r);
+        const shouldHideDelete = saStatus === "ACTIVE" && isExisting;
+
         return (
-          <div className="flex w-full justify-center gap-6">
+          <div className="flex w-full justify-center gap-2">
             <Tooltip title="Preview">
               <EyeOutlined
                 // onClick={
@@ -137,16 +141,19 @@ const columnAttachment = (
               />
             </Tooltip>
 
-            <Tooltip title="Delete">
-              <SVGIcon
-                name="IconDelete"
-                width={24}
-                className={
-                  r.type === "exist" ? "disabled cursor-not-allowed" : undefined
-                }
-                onClick={r.type !== "exist" ? () => handleDelete(r) : undefined}
-              />
-            </Tooltip>
+            {!shouldHideDelete && (
+              <Tooltip title="Delete">
+                <SVGIcon
+                  name="IconDelete"
+                  width={24}
+                  color="#1976D2"
+                  className={
+                    isExisting ? "disabled cursor-not-allowed" : undefined
+                  }
+                  onClick={!isExisting ? () => handleDelete(r) : undefined}
+                />
+              </Tooltip>
+            )}
           </div>
         );
       },
@@ -161,7 +168,7 @@ const columnAttachment = (
     : res;
 };
 
-const Attachment = ({ data = [], updateData = () => {}, type }) => {
+const Attachment = ({ data = [], updateData = () => {}, type, saStatus }) => {
 
   // Declaration
   const searchInput = useRef(null);
@@ -171,13 +178,12 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
 
   // State
   const [modalUpload, setModalUpload] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const page = 1;
+  const pageSize = 20;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
-  const [loadingDownload, setLoadingDownload] = useState(false);
 
   // Selector
   const { data_category_attachment, dataGlobalPropAttachment } = useSelector((state) => state.accountServiceAgreement);
@@ -192,11 +198,6 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-  };
-
-  const handleChangeAttachment = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
   };
 
   const handleDelete = (record) => {
@@ -216,11 +217,12 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     const handleDataSort = (obj) => {
       switch (fieldSort) {
         case "startDate":
-        case "endDate":
+        case "endDate": {
           const date = obj[fieldSort]
             ? moment(obj[fieldSort]).format("DD MMM YYYY")
             : "";
           return date.toString().toLowerCase();
+        }
         default:
           return obj[fieldSort].toString().toLowerCase();
       }
@@ -251,10 +253,6 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     }
   };
 
-  const previewFile = (urlFile) => {
-    window.open("http://" + urlFile);
-  };
-
   const handleShow = async (r) => {
     if (r.dataType !== "exist") {
       if (r.fileType.includes("application/vnd")) {
@@ -266,13 +264,11 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
       if ((r.fileType || r.type).includes("application/vnd")) {
         dispatch(service.downloadData(r.urlFile1));
       } else {
-        setLoadingDownload(true);
         const response = await axios.get(configApplication + r.urlFile1, {
           headers: tokenHeader(),
           responseType: "blob",
         });
         const base64 = await getBase64(response.data);
-        setLoadingDownload(false);
         previewFileAttachment(base64);
       }
     }
@@ -319,10 +315,9 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
                 searchText,
                 handleSearch,
                 handleDelete,
-                previewFileAttachment,
-                previewFile,
                 handleShow,
-                type
+                type,
+                saStatus
               )
             }
             dataSource={filterDataByPage()}
