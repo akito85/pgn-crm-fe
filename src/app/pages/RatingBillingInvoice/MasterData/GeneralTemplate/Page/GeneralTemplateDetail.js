@@ -286,7 +286,7 @@ const GeneralTemplateDetail = () => {
                     </div>
                   </BaseContainer>
                 </div>
-              ) : null} */}
+              ) : null}
               {(data_detail?.isApprover || data_detail?.inactiveApproval?.isInactive) &&
                 (data_detail?.approvalType === "INACTIVE_GENERAL_TEMPLATE" ||
                   data_detail?.inactiveApproval?.isInactive) ? (
