@@ -268,17 +268,19 @@ const activationRemarkWithPut = async (url, body) => {
 };
 
 //upload attachment
-const uploadAttachment = async (url, body, onProgress, customBaseUrl) => {
+const uploadAttachment = async (url, body, onProgress = () => {}, customBaseUrl) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
 
     const response = await axios.post(baseUrl + url, body, {
       headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
       onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total,
-        );
-        onProgress(percentCompleted);
+        if (onProgress && typeof onProgress === "function") {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+          onProgress(percentCompleted);
+        }
       },
     });
     return response?.data;

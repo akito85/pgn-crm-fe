@@ -113,6 +113,12 @@ export const RBI_ROUTES = {
     "/rating-billing/management-billing-installment",
   MANAGEMENT_BILLING_INSTALLMENT_CREATE:
     "/rating-billing/management-billing-installment/create",
+  MANAGEMENT_BILLING_INSTALLMENT_UPDATE:
+    "/rating-billing/management-billing-installment/update",
+  MANAGEMENT_BILLING_INSTALLMENT_DETAIL:
+    "/rating-billing/management-billing-installment/detail",
+  MANAGEMENT_BILLING_INSTALLMENT_EARLY_REPAYMENT:
+    "/rating-billing/management-billing-installment/early-repayment",
 
   EFAKTUR_CODE: "/system-setup/efaktur-code",
   EFAKTUR_CODE_CREATE: "/system-setup/efaktur-code/create",
