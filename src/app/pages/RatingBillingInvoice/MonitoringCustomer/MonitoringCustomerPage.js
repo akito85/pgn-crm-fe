@@ -245,7 +245,7 @@ const MonitoringCustomerPage = () => {
               placeholder="Select Period"
               value={filterPeriod}
               onChange={(value) => setFilterPeriod(value)}
-              style={{ width: 200 }}
+              style={{ width: 200, fontSize: "12px" }}
               size="small"
               showSearch
               filterOption={(input, option) =>
@@ -343,8 +343,10 @@ const MonitoringCustomerPage = () => {
                   key: tab.key,
                   label: tab.label,
                   children: (
-                    <div className="py-8 text-center" style={{ color: "#9E9E9E" }}>
-                      Data Billing Vs Late Charge belum tersedia.
+                    <div style={{ fontSize: "12px" }}>
+                      <div className="py-8 text-center" style={{ color: "#9E9E9E" }}>
+                        Data Billing Vs Late Charge belum tersedia.
+                      </div>
                     </div>
                   ),
                 };
@@ -354,6 +356,7 @@ const MonitoringCustomerPage = () => {
                 key: tab.key,
                 label: tab.label,
                 children: (
+                  <div style={{ fontSize: "12px" }}>
                   <div className="pb-3">
                     <TableRBI
                       idTable={`table-step-${tab.key}`}
@@ -370,6 +373,7 @@ const MonitoringCustomerPage = () => {
                       showSearchBar={false}
                       onChange={tabOnChange}
                     />
+                  </div>
                   </div>
                 ),
               };
