@@ -19,6 +19,7 @@ const ModalUpdateUsage = ({
     handleBack = () => { },
 }) => {
     const { data_asset_type, data_account_number, data_source, loading } = useSelector((state) => state.monitoring_usage);
+    const config = useSelector((state) => state.globalProp.globalProp);
     const dispatch = useDispatch();
     const [selectedAccount, setSelectedAccount] = useState(null);
     const [form] = Form.useForm();
@@ -235,32 +236,50 @@ const ModalUpdateUsage = ({
                 />
               </Form.Item>
               <Form.Item label={"Stream Id"} name={"streamId"}>
-                <Input
-                  onInput={(e) =>
-                    (e.target.value = e.target.value.replace(/[^\d.]/g, ""))
-                  }
+                <InputComponent
+                  type="numeric"
+                  decimalScale={0}
+                  thousandSeparator={false}
+                  getValueFromEvent={(e) => {
+                    return e.floatValue;
+                  }}
                 />
               </Form.Item>
               <Form.Item label={"Temperature"} name={"temperature"}>
                 <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
+                  type="numeric"
+                  decimalScale={config?.DECIMAL_SCALE_TEMPERATUR ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_TEMPERATUR ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_TEMPERATUR ?? "."}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_TEMPERATUR ?? true}
+                  getValueFromEvent={(e) => {
+                    return e.floatValue;
+                  }}
                 />
               </Form.Item>
               <Form.Item label={"Pressure"} name={"pressure"}>
                 <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
+                  type="numeric"
+                  decimalScale={config?.DECIMAL_SCALE_TEKANAN ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_TEKANAN ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_TEKANAN ?? "."}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_TEKANAN ?? true}
+                  getValueFromEvent={(e) => {
+                    return e.floatValue;
+                  }}
                 />
               </Form.Item>
               <Form.Item label={"Correction Factor"} name={"correctionFactor"}>
-                <InputComponent />
+                <InputComponent
+                  type="numeric"
+                  decimalScale={config?.DECIMAL_SCALE_USAGE ?? 4}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_USAGE ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_USAGE ?? "."}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_USAGE ?? true}
+                  getValueFromEvent={(e) => {
+                    return e.floatValue;
+                  }}
+                />
               </Form.Item>
               <Form.Item
                 label={"Calorie"}
@@ -271,11 +290,11 @@ const ModalUpdateUsage = ({
                 }}
               >
                 <InputComponent
-                  decimalScale={4}
-                  thousandSeparator={","}
-                  decimalSeparator={"."}
+                  decimalScale={config?.DECIMAL_SCALE_GHV ?? 4}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_GHV ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_GHV ?? "."}
                   type="numeric"
-                  fixedDecimalScale={true}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_GHV ?? true}
                 />
               </Form.Item>
               <Form.Item
@@ -289,11 +308,11 @@ const ModalUpdateUsage = ({
                 }}
               >
                 <InputComponent
-                  decimalScale={4}
-                  thousandSeparator={","}
-                  decimalSeparator={"."}
+                  decimalScale={config?.DECIMAL_SCALE_USAGE ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_USAGE ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_USAGE ?? "."}
                   type="numeric"
-                  fixedDecimalScale={true}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_USAGE ?? true}
                 />
               </Form.Item>
               <Form.Item
@@ -305,11 +324,11 @@ const ModalUpdateUsage = ({
                 }}
               >
                 <InputComponent
-                  decimalScale={4}
-                  thousandSeparator={","}
-                  decimalSeparator={"."}
+                  decimalScale={config?.DECIMAL_SCALE_USAGE ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_USAGE ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_USAGE ?? "."}
                   type="numeric"
-                  fixedDecimalScale={true}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_USAGE ?? true}
                 />
               </Form.Item>
               <Form.Item
@@ -323,11 +342,11 @@ const ModalUpdateUsage = ({
                 }}
               >
                 <InputComponent
-                  decimalScale={4}
-                  thousandSeparator={","}
-                  decimalSeparator={"."}
+                  decimalScale={config?.DECIMAL_SCALE_VOLUME ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_VOLUME ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_VOLUME ?? "."}
                   type="numeric"
-                  fixedDecimalScale={true}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_VOLUME ?? true}
                 />
               </Form.Item>
               <Form.Item
@@ -341,11 +360,11 @@ const ModalUpdateUsage = ({
                 }}
               >
                 <InputComponent
-                  decimalScale={4}
-                  thousandSeparator={","}
-                  decimalSeparator={"."}
+                  decimalScale={config?.DECIMAL_SCALE_VOLUME ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_VOLUME ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_VOLUME ?? "."}
                   type="numeric"
-                  fixedDecimalScale={true}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_VOLUME ?? true}
                 />
               </Form.Item>
               <Form.Item
@@ -359,11 +378,11 @@ const ModalUpdateUsage = ({
                 }}
               >
                 <InputComponent
-                  decimalScale={12}
-                  thousandSeparator={","}
-                  decimalSeparator={"."}
+                  decimalScale={config?.DECIMAL_SCALE_ENERGI ?? 4}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_ENERGI ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_ENERGI ?? "."}
                   type="numeric"
-                  fixedDecimalScale={true}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_ENERGI ?? true}
                 />
               </Form.Item>
               <Form.Item
@@ -374,38 +393,45 @@ const ModalUpdateUsage = ({
                 }}
               >
                 <InputComponent
-                  decimalScale={7}
-                  thousandSeparator={","}
-                  decimalSeparator={"."}
+                  decimalScale={config?.DECIMAL_SCALE_GHV ?? 4}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_GHV ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_GHV ?? "."}
                   type="numeric"
-                  fixedDecimalScale={true}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_GHV ?? true}
                 />
               </Form.Item>
               <Form.Item label={"Volume MSCF"} name={"volMscf"}>
                 <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
+                  type="numeric"
+                  decimalScale={config?.DECIMAL_SCALE_VOLUME ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_VOLUME ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_VOLUME ?? "."}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_VOLUME ?? true}
+                  getValueFromEvent={(e) => {
+                    return e.floatValue;
+                  }}
                 />
               </Form.Item>
               <Form.Item label={"Uncorrected Volume"} name={"uncorrectedValue"}>
                 <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
+                  type="numeric"
+                  decimalScale={config?.DECIMAL_SCALE_VOLUME ?? 2}
+                  thousandSeparator={config?.THOUSAND_SEPARATOR_VOLUME ?? ","}
+                  decimalSeparator={config?.DECIMAL_SEPARATOR_VOLUME ?? "."}
+                  fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_VOLUME ?? true}
+                  getValueFromEvent={(e) => {
+                    return e.floatValue;
+                  }}
                 />
               </Form.Item>
               <Form.Item label={"Source Row ID"} name={"sourceRowId"}>
                 <InputComponent
-                  onInput={(e) =>
-                    (e.target.value = e.target.value
-                      .replace(/[^\d.]/g, "")
-                      .replace(/(\..*)\./g, "$1"))
-                  }
+                  type="numeric"
+                  decimalScale={0}
+                  thousandSeparator={false}
+                  getValueFromEvent={(e) => {
+                    return e.floatValue;
+                  }}
                 />
               </Form.Item>
               <Form.Item label={"Source Name"} name={"sourceName"}>

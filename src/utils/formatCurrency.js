@@ -66,7 +66,7 @@ export const UsageFormatting = ({ value }) => {
     <NumericFormat
       value={value || 0}
       displayType="text"
-      decimalScale={config.DECIMAL_SCALE_USAGE ?? 7}
+      decimalScale={config.DECIMAL_SCALE_USAGE ?? 2}
       fixedDecimalScale={config.FIXED_DECIMAL_SCALE_USAGE ?? true}
       thousandsGroupStyle={config.THOUSAND_GROUP_STYLE_USAGE ?? "thousand"}
       thousandSeparator={config.THOUSAND_SEPARATOR_USAGE ?? ","}

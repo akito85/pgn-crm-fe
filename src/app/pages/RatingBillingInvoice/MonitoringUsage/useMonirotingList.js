@@ -682,7 +682,7 @@ export const useMonitoringList = (tabs, batchId) => {
         searchText,
         handleSearch,
         true,
-        "datetime",
+        "meas_date_input",
       ),
       render: (text) =>
         renderDateColumn(
@@ -690,7 +690,7 @@ export const useMonitoringList = (tabs, batchId) => {
           hasValue(search["measDate"]),
           searchText,
           text,
-          "datetime",
+          "meas_date_input",
           search,
         ),
     },

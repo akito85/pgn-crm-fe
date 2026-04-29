@@ -124,6 +124,10 @@ export const renderDateConverter = (data, type = "date") => {
       return moment(data)?.format(dateFormatting?.month);
     case "hour":
       return moment(data)?.format(dateFormatting?.hour_format);
+    case "meas_date":
+      return moment(data)?.format(dateFormatting?.meas_date);
+    case "meas_date_input":
+      return moment(data)?.format(dateFormatting?.meas_date_input);
     default:
       return moment(data)?.format(dateFormatting?.date);
   }
