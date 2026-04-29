@@ -361,7 +361,6 @@ const TaxCodeDetail = () => {
   };
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       description: res.remark,
@@ -369,7 +368,7 @@ const TaxCodeDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
+    return dispatch(
       bodyApproval.approvalType === "INACTIVE_TAX_CODE"
         ? approvalInactiveTaxCode({
             body: data,
@@ -384,6 +383,7 @@ const TaxCodeDetail = () => {
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftTaxCode(id));
         dispatch(getDetailTaxCode(id));
@@ -400,7 +400,6 @@ const TaxCodeDetail = () => {
           setModalErrorServer(true);
         }
       });
-    console.log(data);
   };
 
   return (

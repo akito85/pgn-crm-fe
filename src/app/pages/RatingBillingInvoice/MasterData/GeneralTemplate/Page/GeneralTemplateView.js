@@ -54,10 +54,10 @@ const GeneralTemplateView = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
-      const saved = localStorage.getItem("generalTemplateFixedColumns");
-      return saved ? JSON.parse(saved) : { left: ["no"], right: ["statusApproval", "action"] };
+      const saved = localStorage.getItem("generalTemplateFixedColumns_v2");
+      return saved ? JSON.parse(saved) : { left: ["NO"], right: ["status", "statusApproval", "action"] };
     } catch (e) {
-      return { left: ["no"], right: ["statusApproval", "action"] };
+      return { left: ["NO"], right: ["status", "statusApproval", "action"] };
     }
   });
 
@@ -80,7 +80,7 @@ const GeneralTemplateView = () => {
   // Save fixedColumns to localStorage when changed
   useEffect(() => {
     try {
-      localStorage.setItem("generalTemplateFixedColumns", JSON.stringify(fixedColumns));
+      localStorage.setItem("generalTemplateFixedColumns_v2", JSON.stringify(fixedColumns));
     } catch (e) {
       // ignore storage errors
     }

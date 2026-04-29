@@ -475,7 +475,6 @@ const BillingCycleForm = ({ type }) => {
 
   const handleSave = async () => {
     setLoadingSave(true);
-    setModalConfirm(false);
 
     const payload = buildProcessData(bodyData);
 
@@ -500,9 +499,11 @@ const BillingCycleForm = ({ type }) => {
           setLoadingForm(false);
           handleClear();
           setLoadingSave(false);
+          setModalConfirm(false);
         })
         .catch((error) => {
           setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error?.response?.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -544,9 +545,11 @@ const BillingCycleForm = ({ type }) => {
           setLoadingForm(false);
           handleClear();
           setLoadingSave(false);
+          setModalConfirm(false);
         })
         .catch((error) => {
           setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error?.response?.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -684,6 +687,7 @@ const BillingCycleForm = ({ type }) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             type={type}
+            isLoading={loadingSave || loadingForm}
           />
         </Form>
 
@@ -698,6 +702,7 @@ const BillingCycleForm = ({ type }) => {
             dataOption={appHierOptions}
             selectedHierarchy={selectedHierarchy}
             apiTimeUnit={list_time_unit}
+            isLoading={loadingSave || loadingForm}
           />
 
         <ModalConfirm

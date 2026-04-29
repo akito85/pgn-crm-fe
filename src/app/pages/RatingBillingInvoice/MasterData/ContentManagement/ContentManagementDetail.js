@@ -696,7 +696,6 @@ const ContentManagementDetail = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       description: res.remark,
@@ -713,9 +712,10 @@ const ContentManagementDetail = () => {
       dispatchAction = approveRejectContentManagement({ body: data });
     }
 
-    dispatch(dispatchAction)
+    return dispatch(dispatchAction)
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailContentManagement(id));
         dispatch(getDetailDraftContentManagement(id));
