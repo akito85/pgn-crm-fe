@@ -34,20 +34,26 @@ const okCol = (title, dataIndex) => ({
   key: dataIndex,
   width: 130,
   align: "center",
-  render: (text) => (
-    <div style={{ display: "flex", justifyContent: "center" }}>
-      <StatusComponent colour={text ?? "Ok"}>{text ?? "Ok"}</StatusComponent>
-    </div>
-  ),
+  render: (text) => {
+    const val = text ?? "Ok";
+    return (
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <StatusComponent colour={val}>{val.toUpperCase()}</StatusComponent>
+      </div>
+    );
+  },
 });
 
-const noCol = {
+// Placeholder sentinel — diganti saat render dengan makeNoCol(currentPage, pageSize)
+const noCol = { key: "no" };
+
+const makeNoCol = (currentPage, pageSize) => ({
   title: "NO",
   key: "no",
   width: 60,
   align: "center",
-  render: (_, __, index) => index + 1,
-};
+  render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
+});
 
 const accountNumberCol = {
   title: "ACCOUNT NUMBER",
@@ -149,22 +155,22 @@ const MonitoringCustomerPage = () => {
   const [visitedTabs, setVisitedTabs] = useState(new Set(["1"]));
   const [tab1Page, setTab1Page] = useState(0);
   const tab1Size = 10;
-  const [tab1Search] = useState("");
+  const tab1Search = "";
   const [tab2Page, setTab2Page] = useState(0);
   const tab2Size = 10;
-  const [tab2Search] = useState("");
+  const tab2Search = "";
   const [tab3Page, setTab3Page] = useState(0);
   const tab3Size = 10;
-  const [tab3Search] = useState("");
+  const tab3Search = "";
   const [tab4Page, setTab4Page] = useState(0);
   const tab4Size = 10;
-  const [tab4Search] = useState("");
+  const tab4Search = "";
   const [tab5Page, setTab5Page] = useState(0);
   const tab5Size = 10;
-  const [tab5Search] = useState("");
+  const tab5Search = "";
   const [tab7Page, setTab7Page] = useState(0);
   const tab7Size = 10;
-  const [tab7Search] = useState("");
+  const tab7Search = "";
 
   useEffect(() => {
     dispatch(getParameters());
@@ -189,7 +195,7 @@ const MonitoringCustomerPage = () => {
       setActiveTab("1");
       setVisitedTabs(new Set(["1"]));
     }
-  }, [filterPeriod, dispatch, tab1Size, tab1Search]);
+  }, [filterPeriod, dispatch]); // tab1Size dan tab1Search adalah konstanta
 
   const handleTabChange = (key) => {
     setActiveTab(key);
@@ -243,7 +249,7 @@ const MonitoringCustomerPage = () => {
               size="small"
               showSearch
               filterOption={(input, option) =>
-                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                String(option.children).toLowerCase().includes(input.toLowerCase())
               }
             >
               {(periods || []).map((p) => (
@@ -282,6 +288,7 @@ const MonitoringCustomerPage = () => {
               const isTab3 = tab.key === "3";
               const isTab4 = tab.key === "4";
               const isTab5 = tab.key === "5";
+              const isTab6 = tab.key === "6";
               const isTab7 = tab.key === "7";
 
               const dataSource =
@@ -321,8 +328,27 @@ const MonitoringCustomerPage = () => {
                 isTab3 ? (p) => { setTab3Page(p - 1); dispatch(getRatingVsBilling({ period: filterPeriod, page: p - 1, size: tab3Size, search: tab3Search })); } :
                 isTab4 ? (p) => { setTab4Page(p - 1); dispatch(getBillingVsInvoice({ period: filterPeriod, page: p - 1, size: tab4Size, search: tab4Search })); } :
                 isTab5 ? (p) => { setTab5Page(p - 1); dispatch(getBillingVsApproval({ period: filterPeriod, page: p - 1, size: tab5Size, search: tab5Search })); } :
+                isTab6 ? () => {} :
                 isTab7 ? (p) => { setTab7Page(p - 1); dispatch(getBillingVsAdjustment({ period: filterPeriod, page: p - 1, size: tab7Size, search: tab7Search })); } :
                 undefined;
+
+              // Inject noCol dengan konteks pagination yang tepat
+              const columns = tab.columns.map((col) =>
+                col.key === "no" ? makeNoCol(tabCurrent, tabPageSize) : col
+              );
+
+              // Tab 6 (Billing Vs Late Charge) belum memiliki API — tampilkan placeholder
+              if (isTab6) {
+                return {
+                  key: tab.key,
+                  label: tab.label,
+                  children: (
+                    <div className="py-8 text-center" style={{ color: "#9E9E9E" }}>
+                      Data Billing Vs Late Charge belum tersedia.
+                    </div>
+                  ),
+                };
+              }
 
               return {
                 key: tab.key,
@@ -332,7 +358,7 @@ const MonitoringCustomerPage = () => {
                     <TableRBI
                       idTable={`table-step-${tab.key}`}
                       dataSource={dataSource}
-                      columns={tab.columns}
+                      columns={columns}
                       pageSize={tabPageSize}
                       current={tabCurrent}
                       loading={tabLoading}
@@ -340,8 +366,8 @@ const MonitoringCustomerPage = () => {
                       tableScrolled={{ x: "max-content" }}
                       usePagination={true}
                       useSelect={true}
-                      showAdvanceSearch={true}
-                      showSearchBar={true}
+                      showAdvanceSearch={false}
+                      showSearchBar={false}
                       onChange={tabOnChange}
                     />
                   </div>

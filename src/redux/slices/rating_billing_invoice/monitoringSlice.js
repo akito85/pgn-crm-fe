@@ -33,22 +33,6 @@ const initialState = {
   loadingTab7: false,
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const getParameters = createAsyncThunk(
   "GET_MONITORING_PARAMETERS",
   async (_, thunkAPI) => {
@@ -221,89 +205,90 @@ const monitoringSlice = createSlice({
   name: "monitoring",
   initialState,
   reducers: {},
-  extraReducers: {
+  extraReducers: (builder) => {
     // Get Parameters (period LOV)
-    [getParameters.pending]: (state) => {
-      state.loading = true;
-    },
-    [getParameters.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.periods = action.payload;
-    },
-    [getParameters.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+    builder
+      .addCase(getParameters.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getParameters.fulfilled, (state, action) => {
+        state.loading = false;
+        state.periods = action.payload;
+      })
+      .addCase(getParameters.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
-    // Get Header Summary
-    [getHeaderSummary.pending]: (state) => {
-      state.loadingHeader = true;
-    },
-    [getHeaderSummary.fulfilled]: (state, action) => {
-      state.loadingHeader = false;
-      if (action.payload) {
-        state.headerSummary = action.payload;
-      }
-    },
-    [getHeaderSummary.rejected]: (state) => {
-      state.loadingHeader = false;
-    },
+      // Get Header Summary
+      .addCase(getHeaderSummary.pending, (state) => {
+        state.loadingHeader = true;
+      })
+      .addCase(getHeaderSummary.fulfilled, (state, action) => {
+        state.loadingHeader = false;
+        if (action.payload) {
+          state.headerSummary = action.payload;
+        }
+      })
+      .addCase(getHeaderSummary.rejected, (state) => {
+        state.loadingHeader = false;
+      })
 
-    // Get Master vs Pra-Billing
-    [getMasterVsPraBilling.pending]: (state) => {
-      state.loadingTab1 = true;
-    },
-    [getMasterVsPraBilling.fulfilled]: (state, action) => {
-      state.loadingTab1 = false;
-      if (action.payload) state.masterVsPraBilling = action.payload;
-    },
-    [getMasterVsPraBilling.rejected]: (state) => {
-      state.loadingTab1 = false;
-    },
+      // Get Master vs Pra-Billing
+      .addCase(getMasterVsPraBilling.pending, (state) => {
+        state.loadingTab1 = true;
+      })
+      .addCase(getMasterVsPraBilling.fulfilled, (state, action) => {
+        state.loadingTab1 = false;
+        if (action.payload) state.masterVsPraBilling = action.payload;
+      })
+      .addCase(getMasterVsPraBilling.rejected, (state) => {
+        state.loadingTab1 = false;
+      })
 
-    // Get Pra-Billing vs Rating
-    [getPraBillingVsRating.pending]: (state) => {
-      state.loadingTab2 = true;
-    },
-    [getPraBillingVsRating.fulfilled]: (state, action) => {
-      state.loadingTab2 = false;
-      if (action.payload) state.praBillingVsRating = action.payload;
-    },
-    [getPraBillingVsRating.rejected]: (state) => {
-      state.loadingTab2 = false;
-    },
+      // Get Pra-Billing vs Rating
+      .addCase(getPraBillingVsRating.pending, (state) => {
+        state.loadingTab2 = true;
+      })
+      .addCase(getPraBillingVsRating.fulfilled, (state, action) => {
+        state.loadingTab2 = false;
+        if (action.payload) state.praBillingVsRating = action.payload;
+      })
+      .addCase(getPraBillingVsRating.rejected, (state) => {
+        state.loadingTab2 = false;
+      })
 
-    // Get Rating vs Billing
-    [getRatingVsBilling.pending]: (state) => { state.loadingTab3 = true; },
-    [getRatingVsBilling.fulfilled]: (state, action) => {
-      state.loadingTab3 = false;
-      if (action.payload) state.ratingVsBilling = action.payload;
-    },
-    [getRatingVsBilling.rejected]: (state) => { state.loadingTab3 = false; },
+      // Get Rating vs Billing
+      .addCase(getRatingVsBilling.pending, (state) => { state.loadingTab3 = true; })
+      .addCase(getRatingVsBilling.fulfilled, (state, action) => {
+        state.loadingTab3 = false;
+        if (action.payload) state.ratingVsBilling = action.payload;
+      })
+      .addCase(getRatingVsBilling.rejected, (state) => { state.loadingTab3 = false; })
 
-    // Get Billing vs Invoice
-    [getBillingVsInvoice.pending]: (state) => { state.loadingTab4 = true; },
-    [getBillingVsInvoice.fulfilled]: (state, action) => {
-      state.loadingTab4 = false;
-      if (action.payload) state.billingVsInvoice = action.payload;
-    },
-    [getBillingVsInvoice.rejected]: (state) => { state.loadingTab4 = false; },
+      // Get Billing vs Invoice
+      .addCase(getBillingVsInvoice.pending, (state) => { state.loadingTab4 = true; })
+      .addCase(getBillingVsInvoice.fulfilled, (state, action) => {
+        state.loadingTab4 = false;
+        if (action.payload) state.billingVsInvoice = action.payload;
+      })
+      .addCase(getBillingVsInvoice.rejected, (state) => { state.loadingTab4 = false; })
 
-    // Get Billing vs Approval
-    [getBillingVsApproval.pending]: (state) => { state.loadingTab5 = true; },
-    [getBillingVsApproval.fulfilled]: (state, action) => {
-      state.loadingTab5 = false;
-      if (action.payload) state.billingVsApproval = action.payload;
-    },
-    [getBillingVsApproval.rejected]: (state) => { state.loadingTab5 = false; },
+      // Get Billing vs Approval
+      .addCase(getBillingVsApproval.pending, (state) => { state.loadingTab5 = true; })
+      .addCase(getBillingVsApproval.fulfilled, (state, action) => {
+        state.loadingTab5 = false;
+        if (action.payload) state.billingVsApproval = action.payload;
+      })
+      .addCase(getBillingVsApproval.rejected, (state) => { state.loadingTab5 = false; })
 
-    // Get Billing vs Adjustment
-    [getBillingVsAdjustment.pending]: (state) => { state.loadingTab7 = true; },
-    [getBillingVsAdjustment.fulfilled]: (state, action) => {
-      state.loadingTab7 = false;
-      if (action.payload) state.billingVsAdjustment = action.payload;
-    },
-    [getBillingVsAdjustment.rejected]: (state) => { state.loadingTab7 = false; },
+      // Get Billing vs Adjustment
+      .addCase(getBillingVsAdjustment.pending, (state) => { state.loadingTab7 = true; })
+      .addCase(getBillingVsAdjustment.fulfilled, (state, action) => {
+        state.loadingTab7 = false;
+        if (action.payload) state.billingVsAdjustment = action.payload;
+      })
+      .addCase(getBillingVsAdjustment.rejected, (state) => { state.loadingTab7 = false; });
   },
 });
 
