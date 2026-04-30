@@ -105,7 +105,7 @@ const StatusComponent = ({
       // ===== WAITING/PENDING STATUSES =====
       case "partial payment":
       case "waiting to release":
-      case "need review": // ✅ Billing status
+      case "need review":
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
