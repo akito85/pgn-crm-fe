@@ -517,7 +517,7 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Upload Date">
                       {detail_batch?.batchInformation?.uploadDate}
                     </DetailText>
-                    <DetailText label="Total Usage">
+                    <DetailText label="Total Data">
                       {detail_batch?.batchInformation?.totalUsage}
                     </DetailText>
                     <DetailText label="Total Succeed">
