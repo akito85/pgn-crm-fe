@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Spin, Tooltip, Tabs, Modal } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,6 +39,7 @@ const MonitoringUsagePage = () => {
 
   // Declaration
   const dispatch = useDispatch();
+  const location = useLocation();
   const { path } = usePrevLocContext();
   const searchInput = useRef(null);
   const [tabHeader, setTabHeader] = useState("Usage List");
@@ -91,6 +92,11 @@ const MonitoringUsagePage = () => {
   }, [fixedColumns]);
 
   useEffect(() => {
+    if (location?.state?.defaultTab) {
+      setTabHeader(location.state.defaultTab);
+      return;
+    }
+
     if (
       path &&
       path?.pathname?.includes("/rating-billing/monitoring-usage/view")
@@ -99,7 +105,7 @@ const MonitoringUsagePage = () => {
     } else {
       setTabHeader("Usage List");
     }
-  }, [path]);
+  }, [path, location]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -250,7 +256,7 @@ const MonitoringUsagePage = () => {
       },
     ];
   }, [tabHeader, handleDownload, handleDownloadBatch]);
-  
+
   const grantAccessUsage = [
     {
       action: "History",
