@@ -47,6 +47,7 @@ const GLAccountView = () => {
   const lastRequestedPage = useRef(1);
 
   // State
+  const initialPageSize = 100;
   const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -98,7 +99,7 @@ const GLAccountView = () => {
       getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -198,7 +199,7 @@ const GLAccountView = () => {
       getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
