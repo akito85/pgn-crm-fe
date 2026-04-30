@@ -98,6 +98,7 @@ const StatusComponent = ({
       case "not_paid":
       case "cancelled":
       case "CANCELLED":
+      case "broken":
         bgColor = "status-inactive";
         tColor = "text-white";
         break;
@@ -140,6 +141,11 @@ const StatusComponent = ({
 
       case "main":
         bgColor = "status-active";
+        tColor = "text-white";
+        break;
+      
+      case "break":
+        bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 

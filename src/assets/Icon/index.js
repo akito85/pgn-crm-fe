@@ -14,6 +14,7 @@ import IconDelete from "./IconDelete";
 import IconDetail from "./IconDetail";
 import IconDownload from "./IconDownload";
 import IconDropdown from "./IconDropdown";
+import IconEarlyRepayment from "./IconEarlyRepayment";
 import IconEdit from "./IconEdit";
 import IconEditTable from "./IconEditTable";
 import IconEraserTable from "./IconEraserTable";
@@ -235,6 +236,8 @@ const Icon = (props) => {
       return <IconChevronLeft {...props} />;
     case "IconAddTable":
       return <IconAddTable {...props} />;
+    case "IconEarlyRepayment":
+      return <IconEarlyRepayment {...iconProps} />;
     default:
       return;
   }

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { EyeOutlined } from "@ant-design/icons";
-import { Spin, Tooltip, Alert, message, Input } from "antd";
-import { Link } from "react-router-dom";
+import { EyeOutlined, UnorderedListOutlined, DownloadOutlined } from "@ant-design/icons";
+import { Spin, Tooltip, Alert, message, Input, Popover } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 
 // Routes
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
@@ -13,7 +13,9 @@ import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
+import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import useGrantAccessHooks from "../../../../../components/useGrantAccessHooks";
 
 // Column Configuration
 import { columns as columnRestructure } from "./Columns";
@@ -26,6 +28,7 @@ import {
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 
 const ViewRestructure = () => {
+    const navigate = useNavigate();
     const { data, loading } = useSelector(
         (state) => state.restructure
     );
@@ -40,9 +43,6 @@ const ViewRestructure = () => {
     const [searchText, setSearchText] = useState("");
     const [sort, setSort] = useState("");
     const [search, setSearch] = useState({});
-    const [modalDelete, setModalDelete] = useState(false);
-    const [recordToDelete, setRecordToDelete] = useState(null);
-    const [remark, setRemark] = useState("");
 
     useEffect(() => {
         dispatch(
@@ -103,25 +103,6 @@ const ViewRestructure = () => {
         // Implement download logic
     };
 
-    const handleDeleteOk = () => {
-        if (recordToDelete) {
-            dispatch(deleteRestructure(recordToDelete.id)).then((res) => {
-                if (!res.error) {
-                    message.success("Successfully deleted!");
-                    setModalDelete(false);
-                    setRemark("");
-                    dispatch(
-                        getAllRestructureListPaginate({
-                            search: encodeURIComponent(JSON.stringify(search)),
-                            page,
-                            pageSize,
-                            sort,
-                        })
-                    );
-                }
-            });
-        }
-    };
 
     const baseColumns = useMemo(() => {
         return columnRestructure(
@@ -165,12 +146,15 @@ const ViewRestructure = () => {
             render: (record) => {
                 return (
                     <Tooltip title={"Detail"}>
-                        <Link
-                            to={DEBT_AND_COLLECTION_ROUTES.DETAIL_RESTRUCTURE}
-                            state={{ id: record?.id }}
+                        <div
+                            className="cursor-pointer"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(DEBT_AND_COLLECTION_ROUTES.DETAIL_RESTRUCTURE, { state: { id: record?.id } });
+                            }}
                         >
-                            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
-                        </Link>
+                            <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
+                        </div>
                     </Tooltip>
                 );
             },
@@ -179,41 +163,171 @@ const ViewRestructure = () => {
             action: "Update",
             type: "table",
             render: (record) => {
+                const status = record?.status?.toUpperCase();
+                const disabled = (status !== "DRAFT" && status !== "REJECTED");
+                
                 return (
-                    <Tooltip title={"Update"}>
-                        <Link
-                            to={DEBT_AND_COLLECTION_ROUTES.UPDATE_RESTRUCTURE}
-                            state={{ id: record?.id }}
-                        >
-                            <SVGIcon name="IconEdit" width={24} color={"#ACC424"} />
-                        </Link>
-                    </Tooltip>
+                    <ButtonComponent
+                        border={false}
+                        className="gap-2 !justify-start hover:bg-gray-100"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!disabled) {
+                                navigate(DEBT_AND_COLLECTION_ROUTES.UPDATE_RESTRUCTURE, { state: { id: record?.id } });
+                            }
+                        }}
+                        type="text"
+                        disabled={disabled}
+                        icon={<SVGIcon name="IconEdit" width={16} color={disabled ? "#D3D3D3" : "#000"} />}
+                    >
+                        <span className={disabled ? "text-gray-400" : "text-black"}>Update</span>
+                    </ButtonComponent>
                 );
             },
         },
-
         {
-            action: "Delete",
+            action: "early-repayment",
             type: "table",
             render: (record) => {
                 return (
-                    <Tooltip title={"Delete"}>
-                        <div onClick={() => {
-                            setRecordToDelete(record);
-                            setModalDelete(true);
-                        }} style={{ cursor: 'pointer' }}>
-                            <SVGIcon name="IconDelete" width={24} />
-                        </div>
-                    </Tooltip>
+                    <ButtonComponent
+                        border={false}
+                        className="gap-2 !justify-start hover:bg-gray-100"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                        }}
+                        type="text"
+                        icon={<SVGIcon name="IconEarlyRepayment" width={16} color={"#000"} />}
+                    >
+                        <span className="text-black">Early Repayment</span>
+                    </ButtonComponent>
                 );
             },
+        },
+        {
+            action: "History",
+            type: "table",
+            render: (record) => {
+                return (
+                    <ButtonComponent
+                        border={false}
+                        className="gap-2 !justify-start hover:bg-gray-100"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                        }}
+                        type="text"
+                        icon={<SVGIcon name="IconLogHistory" width={16} color={"#000"} />}
+                    >
+                        <span className="text-black">Approval History</span>
+                    </ButtonComponent>
+                );
+            },
+        },
+        {
+            action: "Download",
+            render: (
+                <ButtonComponent
+                    icon={<DownloadOutlined style={{ fontSize: "16px" }} />}
+                    type="primary"
+                    onClick={handleDownload}
+                >
+                    Download List
+                </ButtonComponent>
+            )
+        },
+        {
+            action: "Approval",
+            render: (
+                <ButtonComponent
+                    icon={<SVGIcon name="IconRequestApproval" width={24} />}
+                    type="primary"
+                >
+                    Approval
+                </ButtonComponent>
+            )
+        },
+        {
+            action: "Upload",
+            render: (
+                <ButtonComponent
+                    icon={<SVGIcon name="IconUpload" width={17} color={"#FFFFFF"} />}
+                    type="primary"
+                >
+                    Upload
+                </ButtonComponent>
+            )
+        },
+        {
+            action: "Create",
+            render: (
+                <Link to={DEBT_AND_COLLECTION_ROUTES.CREATE_RESTRUCTURE}>
+                    <ButtonComponent
+                        icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                        type="primary"
+                    >
+                        Create Payment Plan
+                    </ButtonComponent>
+                </Link>
+            )
         }
     ];
 
-    const actionCols = useColumnActionPermission(
-        ["view", "update", "delete"],
-        itemActions
-    );
+    const { actions: accessList } = useGrantAccessHooks("page");
+    const permissions = accessList?.map(a => a.toLowerCase()) || [];
+    const hasCreate = permissions.includes("create");
+    const hasDownload = permissions.includes("download");
+    const hasApproval = permissions.includes("approval");
+    const hasUpload = permissions.includes("upload");
+
+    const actionCols = useMemo(() => {
+        const tableActions = itemActions.filter(item => item.type === "table" && permissions.includes(item.action.toLowerCase()));
+
+        if (tableActions.length === 0) return [];
+
+        return [
+            {
+                key: "action",
+                title: "ACTION",
+                fixed: "right",
+                width: 150,
+                align: "center",
+                render: (_, record) => {
+                    const viewAction = tableActions.find(a => a.action.toLowerCase() === "view");
+                    const otherActions = tableActions.filter(a => a.action.toLowerCase() !== "view");
+
+                    return (
+                        <div className="flex justify-center items-center gap-4">
+                            {otherActions.length > 0 && (
+                                <Popover
+                                    trigger="click"
+                                    placement="bottomRight"
+                                    showArrow={false}
+                                    content={
+                                        <div className="flex flex-col">
+                                            {otherActions.map(action => (
+                                                <div key={action.action} onClick={(e) => e.stopPropagation()} className="w-full">
+                                                    {action.render(record)}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    }
+                                >
+                                    <div className="cursor-pointer p-2 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                                        <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                                    </div>
+                                </Popover>
+                            )}
+                            {viewAction && (
+                                <div onClick={(e) => e.stopPropagation()}>
+                                    {viewAction.render(record)}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+            }
+        ];
+    }, [accessList, itemActions]);
 
     return (
         <>
@@ -221,16 +335,11 @@ const ViewRestructure = () => {
                 <BreadCrumb routes={routes} />
                 <CardContainer header={
                     <div className="flex -my-4 justify-between items-center w-full">
-                        <p className="mt-[15px] font-bold">RESTRUCTURE LIST</p>
+                        <p className="mt-[15px] font-bold uppercase text-[#0075BF]">
+                            Restructure list
+                        </p>
                         <div className="flex gap-2">
-                            <Link to={DEBT_AND_COLLECTION_ROUTES.CREATE_RESTRUCTURE}>
-                                <ButtonComponent
-                                    icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                                    type="primary"
-                                >
-                                    Create Restructure
-                                </ButtonComponent>
-                            </Link>
+                            <Toolbar items={itemActions} />
                         </div>
                     </div>
                 }>
@@ -246,64 +355,13 @@ const ViewRestructure = () => {
                         totalData={data?.page?.totalElements || 0}
                         onSort={onSort}
                         tableScrolled={{
-                            x: 2000,
+                            x: 6500,
                             y: 525,
                         }}
                     />
                 </CardContainer>
             </Spin>
 
-            <ModalCustom
-                isOpen={modalDelete}
-                handleCancel={() => {
-                    setModalDelete(false);
-                    setRemark("");
-                }}
-                header={"Delete Information"}
-                width={1000}
-                type={"confirmation"}
-                footer={
-                    <div className="w-full flex justify-end gap-3 p-4">
-                        <ButtonComponent
-                            onClick={() => {
-                                setModalDelete(false);
-                                setRemark("");
-                            }}
-                            type="default"
-                            className="border-primary text-primary"
-                        >
-                            Cancel
-                        </ButtonComponent>
-                        <ButtonComponent
-                            type="primary"
-                            onClick={handleDeleteOk}
-                        >
-                            Confirm
-                        </ButtonComponent>
-                    </div>
-                }
-            >
-                <div className="flex flex-col gap-4">
-                    <Alert
-                        message="Warning! if you delete this data, it will be permanently."
-                        type={"error"}
-                        showIcon={false}
-                        className="bg-red-50 border-red-200 text-red-600 text-center"
-                    />
-                    <div className="flex flex-col gap-1">
-                        <Input.TextArea
-                            placeholder="Type your remark"
-                            rows={4}
-                            value={remark}
-                            onChange={(e) => setRemark(e.target.value)}
-                            maxLength={255}
-                        />
-                        <div className="text-gray-400 text-[12px]">
-                            You have {remark.length} of 255 characters remaining
-                        </div>
-                    </div>
-                </div>
-            </ModalCustom>
         </>
     );
 };
