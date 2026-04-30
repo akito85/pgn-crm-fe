@@ -1,4 +1,5 @@
 import SVGIcon from "../assets/Icon/index";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 export const IconModal = {
   // Success
@@ -11,6 +12,9 @@ export const IconModal = {
   ),
   icon_success_activate: (
     <SVGIcon name="IconActiveSuccess" width={48} color={"#A4BE37"} />
+  ),
+  icon_warning_default: (
+    <ExclamationCircleOutlined style={{ fontSize: 48, color: "#FAAD14" }} />
   ),
 
   // Error
