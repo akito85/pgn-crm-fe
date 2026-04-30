@@ -235,50 +235,62 @@ const ModalUpdateUsage = ({
                   disabled
                 />
               </Form.Item>
-              <Form.Item label={"Stream Id"} name={"streamId"}>
+              <Form.Item
+                label={"Stream Id"}
+                name={"streamId"}
+                getValueFromEvent={(e) => {
+                  return e.floatValue;
+                }}
+              >
                 <InputComponent
                   type="numeric"
                   decimalScale={0}
                   thousandSeparator={false}
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
                 />
               </Form.Item>
-              <Form.Item label={"Temperature"} name={"temperature"}>
+              <Form.Item
+                label={"Temperature"}
+                name={"temperature"}
+                getValueFromEvent={(e) => {
+                  return e.floatValue;
+                }}
+              >
                 <InputComponent
                   type="numeric"
                   decimalScale={config?.DECIMAL_SCALE_TEMPERATUR ?? 2}
                   thousandSeparator={config?.THOUSAND_SEPARATOR_TEMPERATUR ?? ","}
                   decimalSeparator={config?.DECIMAL_SEPARATOR_TEMPERATUR ?? "."}
                   fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_TEMPERATUR ?? true}
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
                 />
               </Form.Item>
-              <Form.Item label={"Pressure"} name={"pressure"}>
+              <Form.Item
+                label={"Pressure"}
+                name={"pressure"}
+                getValueFromEvent={(e) => {
+                  return e.floatValue;
+                }}
+              >
                 <InputComponent
                   type="numeric"
                   decimalScale={config?.DECIMAL_SCALE_TEKANAN ?? 2}
                   thousandSeparator={config?.THOUSAND_SEPARATOR_TEKANAN ?? ","}
                   decimalSeparator={config?.DECIMAL_SEPARATOR_TEKANAN ?? "."}
                   fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_TEKANAN ?? true}
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
                 />
               </Form.Item>
-              <Form.Item label={"Correction Factor"} name={"correctionFactor"}>
+              <Form.Item
+                label={"Correction Factor"}
+                name={"correctionFactor"}
+                getValueFromEvent={(e) => {
+                  return e.floatValue;
+                }}
+              >
                 <InputComponent
                   type="numeric"
                   decimalScale={config?.DECIMAL_SCALE_USAGE ?? 4}
                   thousandSeparator={config?.THOUSAND_SEPARATOR_USAGE ?? ","}
                   decimalSeparator={config?.DECIMAL_SEPARATOR_USAGE ?? "."}
                   fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_USAGE ?? true}
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
                 />
               </Form.Item>
               <Form.Item
@@ -400,38 +412,47 @@ const ModalUpdateUsage = ({
                   fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_GHV ?? true}
                 />
               </Form.Item>
-              <Form.Item label={"Volume MSCF"} name={"volMscf"}>
+              <Form.Item
+                label={"Volume MSCF"}
+                name={"volMscf"}
+                getValueFromEvent={(e) => {
+                  return e.floatValue;
+                }}
+              >
                 <InputComponent
                   type="numeric"
                   decimalScale={config?.DECIMAL_SCALE_VOLUME ?? 2}
                   thousandSeparator={config?.THOUSAND_SEPARATOR_VOLUME ?? ","}
                   decimalSeparator={config?.DECIMAL_SEPARATOR_VOLUME ?? "."}
                   fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_VOLUME ?? true}
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
                 />
               </Form.Item>
-              <Form.Item label={"Uncorrected Volume"} name={"uncorrectedValue"}>
+              <Form.Item
+                label={"Uncorrected Volume"}
+                name={"uncorrectedValue"}
+                getValueFromEvent={(e) => {
+                  return e.floatValue;
+                }}
+              >
                 <InputComponent
                   type="numeric"
                   decimalScale={config?.DECIMAL_SCALE_VOLUME ?? 2}
                   thousandSeparator={config?.THOUSAND_SEPARATOR_VOLUME ?? ","}
                   decimalSeparator={config?.DECIMAL_SEPARATOR_VOLUME ?? "."}
                   fixedDecimalScale={config?.FIXED_DECIMAL_SCALE_VOLUME ?? true}
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
                 />
               </Form.Item>
-              <Form.Item label={"Source Row ID"} name={"sourceRowId"}>
+              <Form.Item
+                label={"Source Row ID"}
+                name={"sourceRowId"}
+                getValueFromEvent={(e) => {
+                  return e.floatValue;
+                }}
+              >
                 <InputComponent
                   type="numeric"
                   decimalScale={0}
                   thousandSeparator={false}
-                  getValueFromEvent={(e) => {
-                    return e.floatValue;
-                  }}
                 />
               </Form.Item>
               <Form.Item label={"Source Name"} name={"sourceName"}>
