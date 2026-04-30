@@ -9,7 +9,7 @@ import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
 import DOMPurify from "dompurify";
 
-const ContentModalConfirmRestructure = ({
+const ContentModalConfirmEarlyRepayment = ({
     formValues = {},
     contacts = [],
     openItems = [],
@@ -19,7 +19,7 @@ const ContentModalConfirmRestructure = ({
     appHierDataDetail = [],
     selectedHierarchy,
 }) => {
-    const [valuePage, setValuePage] = useState("Payment Plan");
+    const [valuePage, setValuePage] = useState("Early Repayment");
 
     const contactColumns = [
         { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
@@ -133,7 +133,7 @@ const ContentModalConfirmRestructure = ({
         });
     };
 
-    const renderPaymentPlanDetail = () => {
+    const renderEarlyPaymentCalculation = () => {
         const currencies = Object.keys(installmentsByCurrency);
         if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
 
@@ -151,6 +151,16 @@ const ContentModalConfirmRestructure = ({
                     align: "right",
                     render: (val) => parseFloat(val).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
                 },
+                {
+                    title: "STATUS",
+                    dataIndex: "status",
+                    align: "center",
+                    render: () => (
+                        <div className="flex justify-center">
+                            <StatusComponent colour="success">Open</StatusComponent>
+                        </div>
+                    )
+                }
             ];
 
             return (
@@ -164,8 +174,8 @@ const ContentModalConfirmRestructure = ({
                         showSearchBar={false}
                     />
                     <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                        <div className="flex-[2] text-center">TOTAL</div>
-                        <div className="flex-1 text-right pr-4">
+                        <div className="flex-[3] text-center">TOTAL</div>
+                        <div className="flex-1 text-right pr-[150px]">
                             {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
                         </div>
                     </div>
@@ -176,38 +186,42 @@ const ContentModalConfirmRestructure = ({
 
     const items = [
         {
-            key: "Payment Plan",
-            label: "Payment Plan",
+            key: "Early Repayment",
+            label: "Early Repayment",
             children: (
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Account Number">{formValues?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{formValues?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{formValues?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{formValues?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{formValues?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{formValues?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{formValues?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{formValues?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{formValues?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{formValues?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{formValues?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Customer Number">{formValues?.customerNumber || "CUS001"}</DetailText>
+                            <DetailText label="Customer Name">{formValues?.customerName || "PLN (PERSERO), PT"}</DetailText>
+                            <DetailText label="Account Number">{formValues?.accountNumber || "130252597"}</DetailText>
+                            <DetailText label="Account Name">{formValues?.accountName || "PLN (PERSERO), PT"}</DetailText>
+                            <DetailText label="Account Group Type">{formValues?.accountGroupType || "{value}"}</DetailText>
+                            <DetailText label="SOR">{formValues?.sor || "{value}"}</DetailText>
+                            <DetailText label="Cost Center">{formValues?.costCenter || "{value}"}</DetailText>
+                            <DetailText label="Account Segment">{formValues?.accountSegment || "{value}"}</DetailText>
+                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || "{value}"}</DetailText>
+                            <DetailText label="Account Type">{formValues?.accountType || "{value}"}</DetailText>
+                            <DetailText label="Classification Type">{formValues?.classificationType || "{value}"}</DetailText>
+                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || "{value}"}</DetailText>
+                            <DetailText label="Account Status">{formValues?.accountStatus || "{value}"}</DetailText>
                         </div>
                     </SectionCard>
 
-                    <SectionCard title="SERVICE AGREEMENT INFORMATION">
+                    <SectionCard title="INSTALLMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Service Agreement Number">{formValues?.saNumber || "-"}</DetailText>
-                            <DetailText label="Service Agreement Name">{formValues?.saName || "-"}</DetailText>
-                            <DetailText label="Service Agreement Date">{formValues?.saDate ? moment(formValues.saDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Start Date">{formValues?.startDate ? moment(formValues.startDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="End Date">{formValues?.endDate ? moment(formValues.endDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Minimum Contract">{formValues?.minContract || "-"}</DetailText>
-                            <DetailText label="Maximum Contract">{formValues?.maxContract || "-"}</DetailText>
-                            <DetailText label="UOM">{formValues?.uom || "-"}</DetailText>
+                            <DetailText label="Type">{formValues?.type || "{value}"}</DetailText>
+                            <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "{value}"}</DetailText>
+                            <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "{value}"}</DetailText>
+                            <DetailText label="Source">{formValues?.source || "{value}"}</DetailText>
+                            <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "{value}"}</DetailText>
+                            <DetailText label="Early Repayment Date">{formValues?.earlyRepaymentDate ? moment(formValues.earlyRepaymentDate).format("DD MMM YYYY") : "-"}</DetailText>
+                            <div className="col-span-5">
+                                <DetailText label="Remark">{formValues?.remark || "{value}"}</DetailText>
+                            </div>
+                            <div className="col-span-5">
+                                <DetailText label="Early Repayment Reason">{formValues?.earlyRepaymentReason || "-"}</DetailText>
+                            </div>
                         </div>
                     </SectionCard>
 
@@ -223,25 +237,12 @@ const ContentModalConfirmRestructure = ({
                         />
                     </SectionCard>
 
-                    <SectionCard title="PAYMENT PLAN INFORMATION">
-                        <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{formValues?.type || "-"}</DetailText>
-                            <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
-                            <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{formValues?.source || "SAP FSCD"}</DetailText>
-                            <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <div className="col-span-5">
-                                <DetailText label="Description">{DOMPurify.sanitize(formValues?.description) || "-"}</DetailText>
-                            </div>
-                        </div>
-                    </SectionCard>
-
                     <SectionCard title="OPEN ITEM INFORMATION">
                         {renderOpenItems()}
                     </SectionCard>
 
-                    <SectionCard title="PAYMENT PLAN DETAIL">
-                        {renderPaymentPlanDetail()}
+                    <SectionCard title="EARLY PAYMENT CALCULATION">
+                        {renderEarlyPaymentCalculation()}
                     </SectionCard>
                 </div>
             )
@@ -304,4 +305,4 @@ const ContentModalConfirmRestructure = ({
     );
 };
 
-export default ContentModalConfirmRestructure;
+export default ContentModalConfirmEarlyRepayment;

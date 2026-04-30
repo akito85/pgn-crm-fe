@@ -22,6 +22,7 @@ const initialState = {
     dataListAppHierDetail: [],
     dataListCategory: [],
     data_detail: null,
+    dataApprovalHistory: null,
     loading: false,
     isFailed: false,
     isSuccess: false,
@@ -45,7 +46,6 @@ export const getBadDebtByAccount = createAsyncThunk(
     "GET_BAD_DEBT_BY_ACCOUNT",
     async (accountNumber, thunkAPI) => {
         try {
-            // Simulate API filter by account number
             const response = hc_bad_debt_list;
             await new Promise((resolve) => setTimeout(resolve, 500));
             const total = response.reduce((acc, curr) => acc + curr.totalAmount, 0);
@@ -73,7 +73,6 @@ export const getAllRestructureListPaginate = createAsyncThunk(
     "GET_ALL_RESTRUCTURE_LIST_PAGINATE",
     async ({ page, pageSize, search, sort }, thunkAPI) => {
         try {
-            // Simulate fetch
             const response = hc_restructure_list;
             await new Promise(resolve => setTimeout(resolve, 500));
             return response.data;
@@ -161,13 +160,25 @@ export const getListCategory = createAsyncThunk(
     }
 );
 
+export const getApprovalHistory = createAsyncThunk(
+    "GET_APPROVAL_HISTORY_RESTRUCTURE",
+    async ({ id }, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/get-approval-history/${id}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
 export const getDetailRestructure = createAsyncThunk(
     "GET_DETAIL_RESTRUCTURE",
     async (id, thunkAPI) => {
         try {
-            // Simulate API call
             const response = hc_restructure_detail;
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 0));
             return response.data;
         } catch (error) {
             const message =
@@ -307,6 +318,18 @@ const restructureSlice = createSlice({
         // Get List Approval By Id
         [getListApprovalById.fulfilled]: (state, action) => {
             state.dataListAppHierDetail = action.payload;
+        },
+
+        // Get Approval History
+        [getApprovalHistory.pending]: (state) => {
+            state.loading = true;
+        },
+        [getApprovalHistory.fulfilled]: (state, action) => {
+            state.loading = false;
+            state.dataApprovalHistory = action.payload;
+        },
+        [getApprovalHistory.rejected]: (state) => {
+            state.loading = false;
         },
 
         // Get List Category

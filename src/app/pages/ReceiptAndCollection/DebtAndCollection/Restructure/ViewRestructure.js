@@ -23,13 +23,16 @@ import { columns as columnRestructure } from "./Columns";
 // Redux / Service
 import {
     getAllRestructureListPaginate,
-    deleteRestructure
+    deleteRestructure,
+    getApprovalHistory
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import ListDetailRestructure from "./ListDetailRestructure";
 
 const ViewRestructure = () => {
     const navigate = useNavigate();
-    const { data, loading } = useSelector(
+    const { data, loading, dataApprovalHistory } = useSelector(
         (state) => state.restructure
     );
 
@@ -42,6 +45,8 @@ const ViewRestructure = () => {
     const [searchedColumn, setSearchedColumn] = useState("");
     const [searchText, setSearchText] = useState("");
     const [sort, setSort] = useState("");
+    const [selectedId, setSelectedId] = useState(null);
+    const [modalHistory, setModalHistory] = useState(false);
     const [search, setSearch] = useState({});
 
     useEffect(() => {
@@ -66,7 +71,7 @@ const ViewRestructure = () => {
         },
         {
             path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE,
-            breadcrumbName: "Restructure",
+            breadcrumbName: "Payment Plan",
         },
     ];
 
@@ -124,20 +129,6 @@ const ViewRestructure = () => {
     ]);
 
     const itemActions = [
-        // toolbar items
-        {
-            action: "Create",
-            render: (
-                <Link to={DEBT_AND_COLLECTION_ROUTES.CREATE_RESTRUCTURE}>
-                    <ButtonComponent
-                        icon={<SVGIcon name="IconButtonCreate" width={24} />}
-                        type="submit"
-                    >
-                        Create Restructure
-                    </ButtonComponent>
-                </Link>
-            ),
-        },
 
         // column action
         {
@@ -150,7 +141,7 @@ const ViewRestructure = () => {
                             className="cursor-pointer"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(DEBT_AND_COLLECTION_ROUTES.DETAIL_RESTRUCTURE, { state: { id: record?.id } });
+                                setSelectedId(record?.id === selectedId ? null : record?.id);
                             }}
                         >
                             <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
@@ -195,6 +186,7 @@ const ViewRestructure = () => {
                         className="gap-2 !justify-start hover:bg-gray-100"
                         onClick={(e) => {
                             e.stopPropagation();
+                            navigate(DEBT_AND_COLLECTION_ROUTES.CREATE_EARLY_REPAYMENT, { state: { id: record?.id } });
                         }}
                         type="text"
                         icon={<SVGIcon name="IconEarlyRepayment" width={16} color={"#000"} />}
@@ -214,6 +206,8 @@ const ViewRestructure = () => {
                         className="gap-2 !justify-start hover:bg-gray-100"
                         onClick={(e) => {
                             e.stopPropagation();
+                            dispatch(getApprovalHistory({ id: record.id }));
+                            setModalHistory(true);
                         }}
                         type="text"
                         icon={<SVGIcon name="IconLogHistory" width={16} color={"#000"} />}
@@ -336,7 +330,7 @@ const ViewRestructure = () => {
                 <CardContainer header={
                     <div className="flex -my-4 justify-between items-center w-full">
                         <p className="mt-[15px] font-bold uppercase text-[#0075BF]">
-                            Restructure list
+                            Payment Plan List
                         </p>
                         <div className="flex gap-2">
                             <Toolbar items={itemActions} />
@@ -354,14 +348,43 @@ const ViewRestructure = () => {
                         onSizeChanger={handleChangePage}
                         totalData={data?.page?.totalElements || 0}
                         onSort={onSort}
+                        onRow={(record) => ({
+                            onClick: () => setSelectedId(record?.id === selectedId ? null : record?.id),
+                        })}
                         tableScrolled={{
                             x: 6500,
                             y: 525,
                         }}
                     />
                 </CardContainer>
-            </Spin>
 
+                {selectedId && (
+                    <div className="mt-8">
+                        <ListDetailRestructure 
+                            selectedId={selectedId} 
+                            onClose={() => setSelectedId(null)} 
+                        />
+                    </div>
+                )}
+
+                <ModalHistory
+                    isOpen={modalHistory}
+                    handleClose={() => setModalHistory(false)}
+                    header="APPROVAL HISTORY"
+                    tabOptions={[
+                        { label: "Payment Plan", value: "payment_plan" },
+                        { label: "Early Repayment", value: "early_repayment" },
+                    ]}
+                    dataApprover={{
+                        payment_plan: dataApprovalHistory?.payment_plan?.dataApprover || [],
+                        early_repayment: dataApprovalHistory?.early_repayment?.dataApprover || []
+                    }}
+                    dataHistory={{
+                        payment_plan: dataApprovalHistory?.payment_plan?.dataHistory || [],
+                        early_repayment: dataApprovalHistory?.early_repayment?.dataHistory || []
+                    }}
+                />
+            </Spin>
         </>
     );
 };

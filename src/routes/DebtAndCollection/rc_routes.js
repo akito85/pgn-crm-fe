@@ -53,6 +53,9 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   DETAIL_RESTRUCTURE: "/debt-and-collection/restructure/view",
   UPDATE_RESTRUCTURE: "/debt-and-collection/restructure/update",
 
+  // Early Repayment
+  CREATE_EARLY_REPAYMENT: "/debt-and-collection/restructure/early-repayment",
+
   // Offset
   VIEW_OFFSET: "/debt-and-collection/offset",
   CREATE_OFFSET: "/debt-and-collection/offset/create",
