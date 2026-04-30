@@ -100,12 +100,11 @@ const BillingBucketDetail = () => {
         (item) => {
           return {
             billingItem: item.billingItem.value,
-            currency: item.currency.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
             startDate: item.startDate,
             endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
             id: item.id,
             createdDate: item.createdDate,
             createdBy: item.createdBy,
@@ -268,12 +267,11 @@ const BillingBucketDetail = () => {
         data_detail_draft?.billingBucketDetail?.map((item) => {
           return {
             billingItem: item.billingItem.value,
-            currency: item.currency.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
             startDate: item.startDate,
             endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
           };
         });
 
