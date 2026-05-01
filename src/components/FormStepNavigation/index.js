@@ -187,6 +187,7 @@ export const FormFooter = ({
           {!isApprover && useSaveDraft && (
             <Button
               onClick={onSaveDraft}
+              disabled={disableSaveDraft}
               style={{
                 backgroundColor: "#E6F1F9",
                 borderColor: "#E6F1F9",
@@ -243,7 +244,7 @@ export const FormFooter = ({
                     onClick={onSubmit}
                     type="primary"
                     loading={isLoading}
-                    disabled={isLoading}
+                    disabled={isLoading || disableSubmit}
                     style={{
                       backgroundColor: "#388E3C",
                       borderColor: "#388E3C",

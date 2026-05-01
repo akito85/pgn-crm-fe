@@ -26,12 +26,12 @@ import {
   getDownloadList,
   getDetailInstallment,
   getAccountDetail,
-  getContactsByAccount,
   getOpenItems,
   getApprovalHierarchyDetail,
   getApprovalHierarchyHeader,
   clearDetailInstallment,
   getAttachmentList,
+  getEarlyRepaymentByInstallmentId,
 } from "../../../../redux/slices/rating_billing_invoice/installment";
 import ApprovalInstallment from "./Modal/ApprovalInstallment";
 import { columnsInstallment } from "./Table/TableInstallment";
@@ -50,7 +50,7 @@ const ManagementBillingInstallmentPage = () => {
   const searchInput = useRef(null);
   const detailContainerRef = useRef(null);
 
-  const { data, loading, data_detail, data_account_detail, data_contacts, data_open_items, data_approval_detail, data_approval_header, data_attachments } = useSelector((state) => state.installment || {});
+  const { data, loading, data_detail, data_account_detail, data_open_items, data_approval_detail, data_approval_header, data_attachments, data_early_repayment } = useSelector((state) => state.installment || {});
   const dataSource = data?.result || [];
   const totalData = data?.page?.totalElements;
 
@@ -169,6 +169,7 @@ const ManagementBillingInstallmentPage = () => {
   useEffect(() => {
     if (openDetail && selectedInstallmentId) {
       dispatch(getDetailInstallment(selectedInstallmentId));
+      dispatch(getEarlyRepaymentByInstallmentId(selectedInstallmentId));
       dispatch(
         getAttachmentList({
           installmentId: selectedInstallmentId,
@@ -182,10 +183,10 @@ const ManagementBillingInstallmentPage = () => {
   useEffect(() => {
     if (data_detail && Object.keys(data_detail).length > 0 && openDetail) {
       setInstallmentData(data_detail);
+      setContactsData(data_detail.contacts || []);
 
       if (data_detail.accountNumber) {
         dispatch(getAccountDetail(data_detail.accountNumber));
-        dispatch(getContactsByAccount(data_detail.accountNumber));
         dispatch(getOpenItems(data_detail.accountNumber));
       }
 
@@ -216,11 +217,6 @@ const ManagementBillingInstallmentPage = () => {
     }
   }, [data_account_detail]);
 
-  useEffect(() => {
-    if (data_contacts && Array.isArray(data_contacts)) {
-      setContactsData(data_contacts);
-    }
-  }, [data_contacts]);
 
   useEffect(() => {
     if (data_approval_detail && Array.isArray(data_approval_detail)) {
@@ -257,6 +253,10 @@ const ManagementBillingInstallmentPage = () => {
       setAttachmentData(formattedAttachments);
     }
   }, [data_attachments]);
+
+  const earlyRepaymentData = data_early_repayment || {};
+  const hasEarlyRepayment = Boolean(earlyRepaymentData?.repaymentId || earlyRepaymentData?.id);
+  const isEarlyRepaymentApproval = approvalStatus.hasApprovalEarlyRepayment && !approvalStatus.hasApprovalNormal;
 
   const routes = [
     {
@@ -876,6 +876,35 @@ const ManagementBillingInstallmentPage = () => {
     </SectionCard>
   );
 
+  const renderEarlyRepaymentInformation = () => (
+    <SectionCard title="EARLY REPAYMENT INFORMATION">
+      <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
+        <DetailText label="Source">
+          {earlyRepaymentData.source || "-"}
+        </DetailText>
+        <DetailText label="Request Date">
+          {earlyRepaymentData.repaymentDate
+            ? moment(earlyRepaymentData.repaymentDate).format("DD MMM YYYY")
+            : "-"}
+        </DetailText>
+        <DetailText label="Status Approval">
+          {earlyRepaymentData.statusApproval ? (
+            <StatusComponent colour={earlyRepaymentData.statusApproval}>
+              {earlyRepaymentData.statusApproval}
+            </StatusComponent>
+          ) : (
+            "-"
+          )}
+        </DetailText>
+        <div className="col-span-5">
+          <DetailText label="Reason">
+            {earlyRepaymentData.reason || "-"}
+          </DetailText>
+        </div>
+      </div>
+    </SectionCard>
+  );
+
   const renderOpenItemInformation = () => {
     const selectedOpenItems = data_detail?.selectedOpenItems || [];
 
@@ -1012,15 +1041,16 @@ const ManagementBillingInstallmentPage = () => {
         dataIndex: "status",
         key: "status",
         width: 120,
+        align: "center",
         sorter: (a, b) => (a.status || "").localeCompare(b.status || ""),
         filters: [
-          { text: "Pending", value: "Pending" },
-          { text: "Active", value: "Active" },
+          { text: "Draft", value: "Draft" },
+          { text: "Open", value: "Open" },
           { text: "Paid", value: "Paid" },
         ],
-        onFilter: (value, record) => (record.status || "Pending") === value,
+        onFilter: (value, record) => (record.status || "Draft") === value,
         render: (status) => (
-          <StatusComponent colour={status || "P"}>{status || "Pending"}</StatusComponent>
+          <StatusComponent colour={status || "P"}>{status || "Draft"}</StatusComponent>
         ),
       },
     ];
@@ -1065,6 +1095,7 @@ const ManagementBillingInstallmentPage = () => {
         <div className="space-y-4 p-5">
           {renderAccountInformation()}
           {renderInstallmentInformation()}
+          {hasEarlyRepayment && renderEarlyRepaymentInformation()}
           {renderContactInformation()}
           {renderOpenItemInformation()}
           {renderInstallmentSchedule()}
@@ -1473,7 +1504,7 @@ const ManagementBillingInstallmentPage = () => {
                       border={false}
                       onClick={() => handleOpenApprovalModal("approve")}
                     >
-                      Approve
+                      {isEarlyRepaymentApproval ? "Approve Early Repayment" : "Approve"}
                     </ButtonComponent>
                     <ButtonComponent
                       type="default"
@@ -1496,23 +1527,33 @@ const ManagementBillingInstallmentPage = () => {
       />
 
       <Modal
-        title={`${approvalActionType === "approve" ? "Approve" : "Reject"} Installment`}
+        title={
+          approvalActionType === "approve"
+            ? `${isEarlyRepaymentApproval ? "Approve Early Repayment" : "Approve"} Installment`
+            : "Reject Installment"
+        }
         open={modalApprovalAction}
         onCancel={handleCloseApprovalModal}
-        footer={[
-          <Button key="cancel" onClick={handleCloseApprovalModal}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type={approvalActionType === "approve" ? "primary" : "default"}
-            danger={approvalActionType === "reject"}
-            onClick={handleConfirmApproval}
-            disabled={!approvalDescription.trim()}
-          >
-            {approvalActionType === "approve" ? "Approve" : "Reject"}
-          </Button>,
-        ]}
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <Button key="cancel" onClick={handleCloseApprovalModal}>
+              Cancel
+            </Button>
+            <Button
+              key="submit"
+              type={approvalActionType === "approve" ? "primary" : "default"}
+              danger={approvalActionType === "reject"}
+              onClick={handleConfirmApproval}
+              disabled={!approvalDescription.trim()}
+            >
+              {approvalActionType === "approve"
+                ? isEarlyRepaymentApproval
+                  ? "Approve Early Repayment"
+                  : "Approve"
+                : "Reject"}
+            </Button>
+          </div>
+        }
       >
         <Input.TextArea
           rows={4}

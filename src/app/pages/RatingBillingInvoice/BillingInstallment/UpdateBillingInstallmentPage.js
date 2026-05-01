@@ -105,6 +105,14 @@ const UpdateBillingInstallmentPage = () => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
+  const [loadingTypes, setLoadingTypes] = useState(false);
+  const [loadingSources, setLoadingSources] = useState(false);
+  const [loadingAccountDetail, setLoadingAccountDetail] = useState(false);
+  const [loadingOpenItems, setLoadingOpenItems] = useState(false);
+  const [loadingApprovalList, setLoadingApprovalList] = useState(false);
+  const [loadingApprovalDetail, setLoadingApprovalDetail] = useState(false);
+  const [loadingCreateContact, setLoadingCreateContact] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
@@ -131,6 +139,11 @@ const UpdateBillingInstallmentPage = () => {
   const [detailSearchedColumn, setDetailSearchedColumn] = useState("");
   const detailSearchInput = useRef(null);
 
+  const dispatchWithLoading = (action, setLoading) => {
+    setLoading(true);
+    return dispatch(action).finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     if (id) {
       dispatch(getDetailInstallment(id));
@@ -138,20 +151,21 @@ const UpdateBillingInstallmentPage = () => {
   }, [id, dispatch]);
 
   useEffect(() => {
-    dispatch(getActiveAccounts());
-    dispatch(getInstallmentTypes());
-    dispatch(getInstallmentSources());
+    dispatchWithLoading(getActiveAccounts(), setLoadingAccounts);
+    dispatchWithLoading(getInstallmentTypes(), setLoadingTypes);
+    dispatchWithLoading(getInstallmentSources(), setLoadingSources);
     dispatch(getContactType());
     dispatch(getInputType());
     dispatch(getCountryCode());
     dispatch(getJob());
     dispatch(getPosition());
-    dispatch(
+    dispatchWithLoading(
       getApprovalHierarchy({
         page: 0,
         pageSize: 50,
         sort: "createdDate~desc",
       }),
+      setLoadingApprovalList,
     );
   }, [dispatch]);
 
@@ -181,7 +195,10 @@ const UpdateBillingInstallmentPage = () => {
 
   useEffect(() => {
     if (selectedApprovalHierarchy) {
-      dispatch(getApprovalHierarchyDetail(selectedApprovalHierarchy));
+      dispatchWithLoading(
+        getApprovalHierarchyDetail(selectedApprovalHierarchy),
+        setLoadingApprovalDetail,
+      );
     }
   }, [selectedApprovalHierarchy, dispatch]);
 
@@ -381,8 +398,8 @@ const UpdateBillingInstallmentPage = () => {
     setInstallmentDetails({});
     setInstallmentValidationError({});
     if (value) {
-      dispatch(getAccountDetail(value));
-      dispatch(getOpenItems(value));
+      dispatchWithLoading(getAccountDetail(value), setLoadingAccountDetail);
+      dispatchWithLoading(getOpenItems(value), setLoadingOpenItems);
     }
   };
 
@@ -455,42 +472,45 @@ const UpdateBillingInstallmentPage = () => {
           sufix: cd.sufix,
         })),
       };
-      dispatch(createContact(body)).then((response) => {
-        setModalCreateNewContact(false);
-        setDataCreateNew({});
-        handleResetDataDetail();
-        if (response?.payload) {
-          const contactDetailDtos = (dataCreateNew.contactDetail || []).map((cd) => {
-            const typeName = data_contact_type?.find((t) => t.id === cd.typeId)?.text || null;
-            let displayValue = cd.value || "";
-            if (cd.prefix1) {
-              const prefix1Name = data_country_code?.find((c) => c.id === cd.prefix1)?.text;
-              if (prefix1Name) displayValue = `(${prefix1Name}) ${displayValue}`;
-            }
-            if (cd.prefix2) {
-              const prefix2Name = data_country_zone?.find((z) => z.id === cd.prefix2)?.text;
-              if (prefix2Name) displayValue = displayValue ? `(${prefix2Name}) ${displayValue}` : `(${prefix2Name})`;
-            }
-            if (cd.sufix) {
-              displayValue = `${displayValue} Ext ${cd.sufix}`;
-            }
-            return {
-              type: typeName,
-              value: displayValue,
+      setLoadingCreateContact(true);
+      dispatch(createContact(body))
+        .then((response) => {
+          setModalCreateNewContact(false);
+          setDataCreateNew({});
+          handleResetDataDetail();
+          if (response?.payload) {
+            const contactDetailDtos = (dataCreateNew.contactDetail || []).map((cd) => {
+              const typeName = data_contact_type?.find((t) => t.id === cd.typeId)?.text || null;
+              let displayValue = cd.value || "";
+              if (cd.prefix1) {
+                const prefix1Name = data_country_code?.find((c) => c.id === cd.prefix1)?.text;
+                if (prefix1Name) displayValue = `(${prefix1Name}) ${displayValue}`;
+              }
+              if (cd.prefix2) {
+                const prefix2Name = data_country_zone?.find((z) => z.id === cd.prefix2)?.text;
+                if (prefix2Name) displayValue = displayValue ? `(${prefix2Name}) ${displayValue}` : `(${prefix2Name})`;
+              }
+              if (cd.sufix) {
+                displayValue = `${displayValue} Ext ${cd.sufix}`;
+              }
+              return {
+                type: typeName,
+                value: displayValue,
+              };
+            });
+            const newContact = {
+              contactId: response.payload,
+              contactName: [dataCreateNew.firstName, dataCreateNew.middleName, dataCreateNew.lastName].filter(Boolean).join(" "),
+              job: data_job?.find((j) => j.id === dataCreateNew.job)?.text || null,
+              position: data_position?.find((p) => p.id === dataCreateNew.position)?.text || null,
+              address: null,
+              isPrimary: dataCreateNew.primaryFlag || false,
+              contactDetails: contactDetailDtos,
             };
-          });
-          const newContact = {
-            contactId: response.payload,
-            contactName: [dataCreateNew.firstName, dataCreateNew.middleName, dataCreateNew.lastName].filter(Boolean).join(" "),
-            job: data_job?.find((j) => j.id === dataCreateNew.job)?.text || null,
-            position: data_position?.find((p) => p.id === dataCreateNew.position)?.text || null,
-            address: null,
-            isPrimary: dataCreateNew.primaryFlag || false,
-            contactDetails: contactDetailDtos,
-          };
-          setSelectedContacts((prev) => [...prev, newContact]);
-        }
-      });
+            setSelectedContacts((prev) => [...prev, newContact]);
+          }
+        })
+        .finally(() => setLoadingCreateContact(false));
     }
   };
 
@@ -688,9 +708,23 @@ const UpdateBillingInstallmentPage = () => {
       const openItem = (data_open_items || []).find((g) => g.currency === item.currency)?.items?.find((i) => i.billItemId === item.billItemId);
       return {
         billingItemId: item.billItemId,
+        billingItemName: openItem?.billingItemName || "",
         invoiceNumber: openItem?.invoiceNumber || "",
+        billingPeriod: openItem?.billPeriod || "",
         allocatedAmount: openItem?.amount || 0,
         currency: item.currency,
+      };
+    });
+
+    const selectedContactsPayload = (selectedContacts || []).map((contact) => {
+      const primaryDetail = contact.contactDetails?.[0];
+      return {
+        contactId: contact.contactId,
+        contactName: contact.contactName || "-",
+        job: contact.job || "-",
+        position: contact.position || "-",
+        contactType: primaryDetail?.type || "-",
+        contactValue: primaryDetail?.value || "-",
       };
     });
 
@@ -706,6 +740,7 @@ const UpdateBillingInstallmentPage = () => {
       currency: details[0]?.currency || "IDR",
       openItems: selectedOpenItemsPayload,
       details: details[0]?.items || [],
+      contacts: selectedContactsPayload,
     });
 
     setIsSubmitAction(isSubmit);
@@ -835,79 +870,81 @@ const UpdateBillingInstallmentPage = () => {
 
   const renderAccountInformation = () => (
     <BaseContainer header="ACCOUNT INFORMATION">
-      <div className="w-full grid grid-cols-4 gap-1">
-        <Form.Item
-          name="accountNumber"
-          label="Account Number"
-          rules={[{ required: true, message: "Field ini wajib diisi" }]}
-          style={{ marginBottom: 0 }}
-        >
-          <Select
-            showSearch
-            placeholder="Pilih Account Number"
-            optionFilterProp="label"
-            onChange={handleAccountChange}
-            options={accountOptions}
-            loading={loading}
-          />
-        </Form.Item>
+      <Spin spinning={loadingAccountDetail}>
+        <div className="w-full grid grid-cols-5 gap-1">
+          <Form.Item
+            name="accountNumber"
+            label="Account Number"
+            rules={[{ required: true, message: "Field ini wajib diisi" }]}
+            style={{ marginBottom: 0 }}
+          >
+            <Select
+              showSearch
+              placeholder="Pilih Account Number"
+              optionFilterProp="label"
+              onChange={handleAccountChange}
+              options={accountOptions}
+              loading={loadingAccounts}
+            />
+          </Form.Item>
 
-        <Form.Item name="accountName" label="Account Name" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountName" label="Account Name" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="customerNumber" label="Customer Number" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="customerNumber" label="Customer Number" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="customerName" label="Customer Name" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="customerName" label="Customer Name" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountGroupType" label="Account Group Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountGroupType" label="Account Group Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountType" label="Account Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountType" label="Account Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="classificationType" label="Classification Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="classificationType" label="Classification Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="serviceType" label="Service Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="serviceType" label="Service Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="sor" label="SOR" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="sor" label="SOR" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="costCenter" label="Cost Center" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="costCenter" label="Cost Center" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountSegment" label="Account Segment" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountSegment" label="Account Segment" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="meterReadingCode" label="Meter Reading Code" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="meterReadingCode" label="Meter Reading Code" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item
-          name="accountRegistrationNumber"
-          label="Account Registration Number"
-          style={{ marginBottom: 0 }}
-        >
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item
+            name="accountRegistrationNumber"
+            label="Account Registration Number"
+            style={{ marginBottom: 0 }}
+          >
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountStatus" label="Account Status" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
-      </div>
+          <Form.Item name="accountStatus" label="Account Status" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
+        </div>
+      </Spin>
     </BaseContainer>
   );
 
@@ -995,14 +1032,6 @@ const UpdateBillingInstallmentPage = () => {
             icon={<SVGIcon name="IconButtonCreate" width={18} />}
             type="submit"
             border={false}
-            onClick={handleOpenChooseContactModal}
-          >
-            Choose Contact
-          </ButtonComponent>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={18} />}
-            type="submit"
-            border={false}
             onClick={handleOpenContactModal}
           >
             Create Contact
@@ -1065,14 +1094,14 @@ const UpdateBillingInstallmentPage = () => {
 
   const renderInstallmentInformation = () => (
     <BaseContainer header="INSTALLMENT INFORMATION">
-      <div className="w-full grid grid-cols-4 gap-1">
+      <div className="w-full grid grid-cols-5 gap-1">
         <Form.Item
           name="installmentType"
           label="Type"
           rules={[{ required: true, message: "Field ini wajib diisi" }]}
           style={{ marginBottom: 0 }}
         >
-          <Select placeholder="Pilih Type" options={typeOptions} />
+          <Select placeholder="Pilih Type" options={typeOptions} loading={loadingTypes} />
         </Form.Item>
 
         <Form.Item
@@ -1104,7 +1133,7 @@ const UpdateBillingInstallmentPage = () => {
           rules={[{ required: true, message: "Field ini wajib diisi" }]}
           style={{ marginBottom: 0 }}
         >
-          <Select placeholder="Pilih Source" options={sourceOptions} />
+          <Select placeholder="Pilih Source" options={sourceOptions} loading={loadingSources} />
         </Form.Item>
 
         <Form.Item
@@ -1120,7 +1149,7 @@ const UpdateBillingInstallmentPage = () => {
           />
         </Form.Item>
 
-        <Form.Item name="remark" label="Remark" style={{ marginBottom: 0 }}>
+        <Form.Item name="remark" label="Remark" className="col-span-5" style={{ marginBottom: 0 }}>
           <TextArea placeholder="Optional remark" rows={3} maxLength={500} />
         </Form.Item>
       </div>
@@ -1204,6 +1233,7 @@ const UpdateBillingInstallmentPage = () => {
                     key: `${currencyGroup.currency}-${item.billItemId}`,
                     currency: currencyGroup.currency,
                   }))}
+                  loading={loadingOpenItems}
                   pagination={false}
                   size="small"
                   bordered={true}
@@ -1292,8 +1322,9 @@ const UpdateBillingInstallmentPage = () => {
                   dataIndex: "status",
                   key: "status",
                   width: 120,
+                  align: "center",
                   render: () => (
-                    <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">Pending</span>
+                    <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">Draft</span>
                   ),
                 },
               ];
@@ -1341,12 +1372,14 @@ const UpdateBillingInstallmentPage = () => {
 
   const renderApproval = () => (
     <BaseContainer header="APPROVAL INFORMATION">
-      <ApprovalComponentGeneral
-        dataTable={data_approval_detail || []}
-        dataOption={approvalHierarchyOptions}
-        selectedHierarchy={selectedApprovalHierarchy}
-        updateSelectedHierarchy={setSelectedApprovalHierarchy}
-      />
+      <Spin spinning={loadingApprovalList || loadingApprovalDetail}>
+        <ApprovalComponentGeneral
+          dataTable={data_approval_detail || []}
+          dataOption={approvalHierarchyOptions}
+          selectedHierarchy={selectedApprovalHierarchy}
+          updateSelectedHierarchy={setSelectedApprovalHierarchy}
+        />
+      </Spin>
     </BaseContainer>
   );
 
@@ -1418,6 +1451,7 @@ const UpdateBillingInstallmentPage = () => {
         listDataAttachment={listDataAttachment}
         listDataOpenItems={confirmationData.openItems || []}
         listDataDetails={confirmationData.details || []}
+        listDataContacts={confirmationData.contacts || []}
         handleCancel={() => setModalConfirmation(false)}
         handleConfirm={handleConfirmModal}
         dataOption={approvalHierarchyOptions}
@@ -1476,40 +1510,42 @@ const UpdateBillingInstallmentPage = () => {
         />
       </Form>
 
-      <ModalCreateNewContact
-        key={keyModal}
-        isOpen={modalCreateNewContact}
-        setModalCreateNewContact={setModalCreateNewContact}
-        dataJob={data_job || []}
-        dataPosition={data_position || []}
-        dataContactType={data_contact_type || []}
-        dataInputType={data_input_type || []}
-        dataCountryCode={data_country_code || []}
-        dataCountryZone={data_country_zone || []}
-        getCountryZone={(countryId) => dispatch(getCountryZone(countryId))}
-        keyModal={keyModal}
-        setDataCreateNew={setDataCreateNew}
-        setModalChooseContact={() => {}}
-        handleResetDataDetail={handleResetDataDetail}
-        prefix1={prefix1}
-        setPrefix1={setPrefix1}
-        prefix2={prefix2}
-        setPrefix2={setPrefix2}
-        suffix={suffix}
-        setSuffix={setSuffix}
-        value={value}
-        setValue={setValue}
-        setEmptyValueValidate={setEmptyValueValidate}
-        setIsEditing={setIsEditing}
-        isEditing={isEditing}
-        setModalValidate={setModalValidate}
-      />
+      <Spin spinning={loadingCreateContact}>
+        <ModalCreateNewContact
+          key={keyModal}
+          isOpen={modalCreateNewContact}
+          setModalCreateNewContact={setModalCreateNewContact}
+          dataJob={data_job || []}
+          dataPosition={data_position || []}
+          dataContactType={data_contact_type || []}
+          dataInputType={data_input_type || []}
+          dataCountryCode={data_country_code || []}
+          dataCountryZone={data_country_zone || []}
+          getCountryZone={(countryId) => dispatch(getCountryZone(countryId))}
+          keyModal={keyModal}
+          setDataCreateNew={setDataCreateNew}
+          setModalChooseContact={setModalChooseContact}
+          showChooseContactAction={true}
+          handleResetDataDetail={handleResetDataDetail}
+          prefix1={prefix1}
+          setPrefix1={setPrefix1}
+          prefix2={prefix2}
+          setPrefix2={setPrefix2}
+          suffix={suffix}
+          setSuffix={setSuffix}
+          value={value}
+          setValue={setValue}
+          setEmptyValueValidate={setEmptyValueValidate}
+          setIsEditing={setIsEditing}
+          isEditing={isEditing}
+          setModalValidate={setModalValidate}
+        />
+      </Spin>
 
       <ModalChooseContact
         isOpen={modalChooseContact}
         setModalChooseContact={setModalChooseContact}
         onChooseContact={handleChooseContact}
-        onOpenCreateContact={handleOpenContactModal}
       />
     </Spin>
   );

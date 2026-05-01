@@ -16,6 +16,7 @@ const ConfirmationInstallment = ({
   listDataAttachment = [],
   listDataOpenItems = [],
   listDataDetails = [],
+  listDataContacts = [],
   handleCancel = () => {},
   handleConfirm = () => {},
   dataOption = [],
@@ -37,7 +38,7 @@ const ConfirmationInstallment = ({
       title: "Invoice Number",
       dataIndex: "invoiceNumber",
       key: "invoiceNumber",
-      width: 200,
+      width: 180,
     },
     {
       title: "Billing Period",
@@ -53,8 +54,8 @@ const ConfirmationInstallment = ({
     },
     {
       title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
+      dataIndex: "allocatedAmount",
+      key: "allocatedAmount",
       width: 150,
       align: "right",
       render: (amount, record) => formatCurrency(amount, record.currency),
@@ -89,11 +90,45 @@ const ConfirmationInstallment = ({
       dataIndex: "status",
       key: "status",
       width: 100,
+      align: "center",
       render: () => (
         <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">
-          Pending
+          Draft
         </span>
       ),
+    },
+  ];
+
+  const contactColumns = [
+    {
+      title: "Contact Name",
+      dataIndex: "contactName",
+      key: "contactName",
+      width: 200,
+    },
+    {
+      title: "Job",
+      dataIndex: "job",
+      key: "job",
+      width: 150,
+    },
+    {
+      title: "Position",
+      dataIndex: "position",
+      key: "position",
+      width: 150,
+    },
+    {
+      title: "Contact Type",
+      dataIndex: "contactType",
+      key: "contactType",
+      width: 120,
+    },
+    {
+      title: "Contact Value",
+      dataIndex: "contactValue",
+      key: "contactValue",
+      width: 200,
     },
   ];
 
@@ -170,6 +205,23 @@ const ConfirmationInstallment = ({
                   {data.remark || "-"}
                 </p>
               </div>
+            </div>
+
+            <p className="text-primary text-xs font-bold uppercase pt-[30px]">
+              {"CONTACTS"}
+            </p>
+            <div className="pt-4">
+              <Table
+                columns={contactColumns}
+                dataSource={(listDataContacts || []).map((item, idx) => ({
+                  ...item,
+                  key: idx,
+                }))}
+                pagination={false}
+                size="small"
+                bordered={true}
+                scroll={{ y: 200 }}
+              />
             </div>
 
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">

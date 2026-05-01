@@ -28,6 +28,7 @@ const ModalCreateNewContact = ({
   keyModal,
   setDataCreateNew,
   setModalChooseContact,
+  showChooseContactAction = false,
   handleResetDataDetail,
   prefix1,
   setPrefix1,
@@ -401,6 +402,21 @@ const ModalCreateNewContact = ({
           // : ""
           } 
         form={form} id="formContactNew">
+          {showChooseContactAction && (
+            <div className="flex w-full justify-end pb-4">
+              <ButtonComponent
+                type="submit"
+                onClick={() => {
+                  setModalCreateNewContact(false);
+                  if (setModalChooseContact) {
+                    setModalChooseContact(true);
+                  }
+                }}
+              >
+                Choose Contact
+              </ButtonComponent>
+            </div>
+          )}
           <div>
             <div className='text-primary text-xs font-bold uppercase'> 
               <p>CONTACT INFORMATION</p>

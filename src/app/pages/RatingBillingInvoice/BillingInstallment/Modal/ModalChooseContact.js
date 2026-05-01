@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Input, Table, Tooltip, Space, Button } from "antd";
-import { SearchOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -221,20 +221,6 @@ const ModalChooseContact = ({
         </div>
       }
     >
-      <div className="flex w-full justify-end gap-x-2 pb-6">
-        <ButtonComponent
-          type="submit"
-          onClick={() => {
-            setModalChooseContact(false);
-            if (onOpenCreateContact) {
-              onOpenCreateContact();
-            }
-          }}
-          icon={<PlusOutlined style={{ fontSize: "14px" }} />}
-        >
-          Create Contact
-        </ButtonComponent>
-      </div>
       <div className="flex flex-col gap-y-4">
         <Table
           className="custom-table-small"

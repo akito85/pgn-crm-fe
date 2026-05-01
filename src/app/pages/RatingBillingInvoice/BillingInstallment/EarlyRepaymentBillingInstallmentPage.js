@@ -64,11 +64,26 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
+  const [loadingInstallmentDetail, setLoadingInstallmentDetail] = useState(false);
+  const [loadingAccountDetail, setLoadingAccountDetail] = useState(false);
+  const [loadingOpenItems, setLoadingOpenItems] = useState(false);
+  const [loadingSources, setLoadingSources] = useState(false);
+  const [loadingApprovalList, setLoadingApprovalList] = useState(false);
+  const [loadingApprovalDetail, setLoadingApprovalDetail] = useState(false);
+  const [loadingEarlyRepaymentDetail, setLoadingEarlyRepaymentDetail] = useState(false);
+
+  const dispatchWithLoading = (action, setLoading) => {
+    setLoading(true);
+    return dispatch(action).finally(() => setLoading(false));
+  };
 
   // Confirmation modal state
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const [confirmationData, setConfirmationData] = useState({});
   const [isSubmitAction, setIsSubmitAction] = useState(false);
+  const isReadonlyEarlyRepayment = ["WAITING_APPROVAL", "APPROVED"].includes(
+    data_early_repayment?.statusApproval,
+  );
 
   // Search state for tables
   const [contactSearchText, setContactSearchText] = useState("");
@@ -85,20 +100,21 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   useEffect(() => {
     if (id) {
-      dispatch(getDetailInstallment(id));
-      dispatch(getEarlyRepaymentByInstallmentId(id));
+      dispatchWithLoading(getDetailInstallment(id), setLoadingInstallmentDetail);
+      dispatchWithLoading(getEarlyRepaymentByInstallmentId(id), setLoadingEarlyRepaymentDetail);
     }
   }, [id, dispatch]);
 
   useEffect(() => {
-    dispatch(
+    dispatchWithLoading(
       getApprovalHierarchy({
         page: 0,
         pageSize: 50,
         sort: "createdDate~desc",
       }),
+      setLoadingApprovalList,
     );
-    dispatch(getInstallmentSources());
+    dispatchWithLoading(getInstallmentSources(), setLoadingSources);
   }, [dispatch]);
 
   useEffect(() => {
@@ -126,7 +142,10 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   useEffect(() => {
     if (selectedApprovalHierarchy) {
-      dispatch(getApprovalHierarchyDetail(selectedApprovalHierarchy));
+      dispatchWithLoading(
+        getApprovalHierarchyDetail(selectedApprovalHierarchy),
+        setLoadingApprovalDetail,
+      );
     }
   }, [selectedApprovalHierarchy, dispatch]);
 
@@ -167,8 +186,8 @@ const EarlyRepaymentBillingInstallmentPage = () => {
         remark: detail.remark,
       });
 
-      dispatch(getAccountDetail(detail.accountNumber));
-      dispatch(getOpenItems(detail.accountNumber));
+      dispatchWithLoading(getAccountDetail(detail.accountNumber), setLoadingAccountDetail);
+      dispatchWithLoading(getOpenItems(detail.accountNumber), setLoadingOpenItems);
 
       if (detail.contacts && detail.contacts.length > 0) {
         setSelectedContacts(detail.contacts.map((c) => ({ ...c, key: c.contactId })));
@@ -474,77 +493,79 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   const renderAccountInformation = () => (
     <BaseContainer header="ACCOUNT INFORMATION">
-      <div className="w-full grid grid-cols-4 gap-1">
-        <Form.Item
-          name="accountNumber"
-          label="Account Number"
-          style={{ marginBottom: 0 }}
-        >
-          <Select
-            showSearch
-            placeholder="Pilih Account Number"
-            optionFilterProp="label"
-            options={accountOptions}
-            disabled
-          />
-        </Form.Item>
+      <Spin spinning={loadingAccountDetail || loadingInstallmentDetail}>
+        <div className="w-full grid grid-cols-4 gap-1">
+          <Form.Item
+            name="accountNumber"
+            label="Account Number"
+            style={{ marginBottom: 0 }}
+          >
+            <Select
+              showSearch
+              placeholder="Pilih Account Number"
+              optionFilterProp="label"
+              options={accountOptions}
+              disabled
+            />
+          </Form.Item>
 
-        <Form.Item name="accountName" label="Account Name" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountName" label="Account Name" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="customerNumber" label="Customer Number" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="customerNumber" label="Customer Number" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="customerName" label="Customer Name" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="customerName" label="Customer Name" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountGroupType" label="Account Group Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountGroupType" label="Account Group Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountType" label="Account Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountType" label="Account Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="classificationType" label="Classification Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="classificationType" label="Classification Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="serviceType" label="Service Type" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="serviceType" label="Service Type" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="sor" label="SOR" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="sor" label="SOR" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="costCenter" label="Cost Center" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="costCenter" label="Cost Center" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountSegment" label="Account Segment" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="accountSegment" label="Account Segment" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="meterReadingCode" label="Meter Reading Code" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item name="meterReadingCode" label="Meter Reading Code" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item
-          name="accountRegistrationNumber"
-          label="Account Registration Number"
-          style={{ marginBottom: 0 }}
-        >
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
+          <Form.Item
+            name="accountRegistrationNumber"
+            label="Account Registration Number"
+            style={{ marginBottom: 0 }}
+          >
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
 
-        <Form.Item name="accountStatus" label="Account Status" style={{ marginBottom: 0 }}>
-          <Input disabled placeholder="Terisi otomatis" />
-        </Form.Item>
-      </div>
+          <Form.Item name="accountStatus" label="Account Status" style={{ marginBottom: 0 }}>
+            <Input disabled placeholder="Terisi otomatis" />
+          </Form.Item>
+        </div>
+      </Spin>
     </BaseContainer>
   );
 
@@ -667,7 +688,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   const renderInstallmentInformation = () => (
     <BaseContainer header="INSTALLMENT INFORMATION">
-      <div className="w-full grid grid-cols-4 gap-1">
+      <div className="w-full grid grid-cols-5 gap-1">
         <Form.Item
           name="installmentNumber"
           label="Installment Number"
@@ -727,7 +748,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
           />
         </Form.Item>
 
-        <Form.Item name="remark" label="Remark" style={{ marginBottom: 0 }}>
+        <Form.Item name="remark" label="Remark" className="col-span-5" style={{ marginBottom: 0 }}>
           <Input.TextArea placeholder="Optional remark" rows={3} maxLength={500} disabled />
         </Form.Item>
       </div>
@@ -736,7 +757,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   const renderEarlyRepaymentInformation = () => (
     <BaseContainer header="EARLY REPAYMENT INFORMATION">
-      <div className="w-full grid grid-cols-4 gap-1">
+      <div className="w-full grid grid-cols-5 gap-1">
         <Form.Item
           name="earlyRepaymentSource"
           label="Source"
@@ -748,6 +769,8 @@ const EarlyRepaymentBillingInstallmentPage = () => {
             options={sourceOptions}
             showSearch
             optionFilterProp="label"
+            loading={loadingSources}
+            disabled={isReadonlyEarlyRepayment}
           />
         </Form.Item>
 
@@ -761,6 +784,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
             placeholder="Pilih Request Date"
             format="YYYY-MM-DD"
             style={{ width: "100%" }}
+            disabled={isReadonlyEarlyRepayment}
           />
         </Form.Item>
 
@@ -771,7 +795,12 @@ const EarlyRepaymentBillingInstallmentPage = () => {
           className="col-span-2"
           style={{ marginBottom: 0 }}
         >
-          <Input.TextArea placeholder="Masukkan alasan early repayment" rows={3} maxLength={500} />
+          <Input.TextArea
+            placeholder="Masukkan alasan early repayment"
+            rows={3}
+            maxLength={500}
+            disabled={isReadonlyEarlyRepayment}
+          />
         </Form.Item>
       </div>
     </BaseContainer>
@@ -846,6 +875,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
                   key: `${currencyGroup.currency}-${item.billItemId || idx}`,
                   currency: currencyGroup.currency,
                 }))}
+                loading={loadingOpenItems}
                 pagination={false}
                 size="small"
                 bordered={true}
@@ -960,12 +990,14 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   const renderApproval = () => (
     <BaseContainer header="APPROVAL INFORMATION">
-      <ApprovalComponentGeneral
-        dataTable={data_approval_detail || []}
-        dataOption={approvalHierarchyOptions}
-        selectedHierarchy={selectedApprovalHierarchy}
-        updateSelectedHierarchy={setSelectedApprovalHierarchy}
-      />
+      <Spin spinning={loadingApprovalList || loadingApprovalDetail}>
+        <ApprovalComponentGeneral
+          dataTable={data_approval_detail || []}
+          dataOption={approvalHierarchyOptions}
+          selectedHierarchy={selectedApprovalHierarchy}
+          updateSelectedHierarchy={setSelectedApprovalHierarchy}
+        />
+      </Spin>
     </BaseContainer>
   );
 
@@ -1083,8 +1115,9 @@ const EarlyRepaymentBillingInstallmentPage = () => {
           onClear={handleClear}
           onSaveDraft={handleSaveDraft}
           onSubmit={handleSubmit}
+          disableSaveDraft={isReadonlyEarlyRepayment}
           disableSubmit={
-            currentStep === 1 && !selectedApprovalHierarchy
+            isReadonlyEarlyRepayment || (currentStep === 1 && !selectedApprovalHierarchy)
           }
         />
       </Form>
