@@ -1315,7 +1315,27 @@ const ManagementBillingInstallmentPage = () => {
                     cancelText: "Cancel",
                     centered: true,
                     onOk: () => {
-                      // TODO: Implement delete action
+                      ratingBillingHttpService
+                        .deleteData(`/v1/dbs/api/installment/delete/${record.id}`)
+                        .then(() => {
+                          Modal.success({
+                            title: "Success",
+                            content: "Installment deleted successfully.",
+                            onOk: () => {
+                              handleRefresh();
+                            },
+                          });
+                        })
+                        .catch((error) => {
+                          const message =
+                            error?.response?.data?.message ||
+                            error?.message ||
+                            "Failed to delete installment";
+                          Modal.error({
+                            title: "Error",
+                            content: message,
+                          });
+                        });
                     },
                   });
                 }
