@@ -32,6 +32,7 @@ const initialState = {
   data_job: [],
   data_position: [],
   data_early_repayment: {},
+  data_approval_history_installment: {},
   data_all_contacts: { result: [], page: {} },
 };
 
@@ -486,6 +487,26 @@ export const getEarlyRepaymentByInstallmentId = createAsyncThunk(
   },
 );
 
+export const getApprovalHistoryInstallment = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_INSTALLMENT",
+  async (installmentId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/installment/approval-history/${installmentId}`;
+      const response = await ratingBillingHttpService.getDetail(url);
+      return response?.data || {};
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      const errorBody = {
+        title: "Failed",
+        description: `${message}`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
+
 export const getContactType = createAsyncThunk(
   "GET_INSTALLMENT_CONTACT_TYPE",
   async (_, thunkAPI) => {
@@ -601,13 +622,14 @@ const installmentSlice = createSlice({
     clearContacts: (state) => {
       state.data_contacts = [];
     },
-    clearOpenItems: (state) => {
-      state.data_open_items = [];
-    },
-    clearDetailInstallment: (state) => {
-      state.data_detail = {};
-      state.data_approval_header = {};
-    },
+  clearOpenItems: (state) => {
+    state.data_open_items = [];
+  },
+  clearDetailInstallment: (state) => {
+    state.data_detail = {};
+    state.data_approval_header = {};
+    state.data_approval_history_installment = {};
+  },
   },
   extraReducers: (builder) => {
     builder
@@ -897,6 +919,19 @@ const installmentSlice = createSlice({
       })
       .addCase(getEarlyRepaymentByInstallmentId.rejected, (state) => {
         state.data_early_repayment = {};
+      });
+
+    builder
+      .addCase(getApprovalHistoryInstallment.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getApprovalHistoryInstallment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data_approval_history_installment = action.payload || {};
+      })
+      .addCase(getApprovalHistoryInstallment.rejected, (state) => {
+        state.loading = false;
+        state.data_approval_history_installment = {};
       });
 
     builder

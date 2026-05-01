@@ -32,10 +32,12 @@ import {
   clearDetailInstallment,
   getAttachmentList,
   getEarlyRepaymentByInstallmentId,
+  getApprovalHistoryInstallment,
 } from "../../../../redux/slices/rating_billing_invoice/installment";
 import ApprovalInstallment from "./Modal/ApprovalInstallment";
 import { columnsInstallment } from "./Table/TableInstallment";
 import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
+import ModalHistory from "../../../../components/Modal/ModalHistory";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
@@ -50,7 +52,18 @@ const ManagementBillingInstallmentPage = () => {
   const searchInput = useRef(null);
   const detailContainerRef = useRef(null);
 
-  const { data, loading, data_detail, data_account_detail, data_open_items, data_approval_detail, data_approval_header, data_attachments, data_early_repayment } = useSelector((state) => state.installment || {});
+  const {
+    data,
+    loading,
+    data_detail,
+    data_account_detail,
+    data_open_items,
+    data_approval_detail,
+    data_approval_header,
+    data_attachments,
+    data_early_repayment,
+    data_approval_history_installment,
+  } = useSelector((state) => state.installment || {});
   const dataSource = data?.result || [];
   const totalData = data?.page?.totalElements;
 
@@ -99,6 +112,9 @@ const ManagementBillingInstallmentPage = () => {
   const [modalApprovalAction, setModalApprovalAction] = useState(false);
   const [approvalActionType, setApprovalActionType] = useState("");
   const [approvalDescription, setApprovalDescription] = useState("");
+  const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
+  const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+  const [loadingApprovalHistory, setLoadingApprovalHistory] = useState(false);
 
   // Loading state for detail
   const [detailLoading, setDetailLoading] = useState(false);
@@ -433,6 +449,43 @@ const ManagementBillingInstallmentPage = () => {
     setApprovalActionType("");
     setApprovalDescription("");
   };
+
+  const handleApprovalHistory = (record) => {
+    setLoadingApprovalHistory(true);
+    dispatch(getApprovalHistoryInstallment(record.id)).finally(() => {
+      setLoadingApprovalHistory(false);
+    });
+    setModalApprovalHistory(true);
+  };
+
+  const handleApprovalHistoryOptions = (approvalData) => {
+    const data = approvalData?.dataApprover || {};
+    const keyData = Object.keys(data);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
+    }));
+  };
+
+  useEffect(() => {
+    if (data_approval_history_installment && Object.keys(data_approval_history_installment).length > 0) {
+      const installmentHistory = data_approval_history_installment.installment || {};
+      const earlyRepaymentHistory = data_approval_history_installment.earlyRepayment || {};
+
+      const dataApprover = {
+        installment: installmentHistory?.dataApprover?.INSTALLMENT || [],
+        early_repayment: earlyRepaymentHistory?.dataApprover?.INSTALLMENT_EARLY_REPAYMENT || [],
+      };
+
+      const dataHistory = {
+        installment: installmentHistory?.dataHistory?.INSTALLMENT || [],
+        early_repayment: earlyRepaymentHistory?.dataHistory?.INSTALLMENT_EARLY_REPAYMENT || [],
+      };
+
+      setDataApprovalHistory({ dataApprover, dataHistory });
+    } else {
+      setDataApprovalHistory({});
+    }
+  }, [data_approval_history_installment]);
 
   const handleConfirmApproval = async () => {
     try {
@@ -1229,6 +1282,18 @@ const ManagementBillingInstallmentPage = () => {
               disabled: !isActive,
             },
             {
+              key: "history",
+              label: "Approval History",
+              icon: (
+                <SVGIcon
+                  name="IconLogHistory"
+                  color="#0075BF"
+                  width={16}
+                />
+              ),
+              onClick: () => handleApprovalHistory(record),
+            },
+            {
               key: "delete",
               label: isDraft ? "Delete" : "Cannot Delete",
               icon: (
@@ -1562,6 +1627,17 @@ const ManagementBillingInstallmentPage = () => {
           onChange={(e) => setApprovalDescription(e.target.value)}
         />
       </Modal>
+
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header="Approval History"
+        width={1000}
+        tabOptions={handleApprovalHistoryOptions(dataApprovalHistory)}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+        loading={loadingApprovalHistory}
+      />
     </>
   );
 };
