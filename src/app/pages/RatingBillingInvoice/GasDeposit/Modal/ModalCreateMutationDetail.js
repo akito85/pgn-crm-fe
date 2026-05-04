@@ -77,6 +77,9 @@ const ModalCreateMutationDetail = ({
   const pricePageInfo = priceOptionsData?.page || {};
   const PRICE_PAGE_SIZE = 20;
 
+  const getSelectedPriceOption = (priceValue) =>
+    priceOptions.find((item) => String(item?.value) === String(priceValue));
+
   // Fetch dropdown options & approval list
   useEffect(() => {
     if (isOpen) {
@@ -221,17 +224,25 @@ const ModalCreateMutationDetail = ({
       }
 
       const currentPrice = form.getFieldValue("price");
-      const hasCurrentPrice = options.some((item) => item.value === currentPrice);
+      const hasCurrentPrice = options.some(
+        (item) => String(item?.value) === String(currentPrice),
+      );
       if (!hasCurrentPrice) {
+        const defaultPriceOption = options[0];
+        const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
+        const parsedDefaultPrice = Number.parseFloat(defaultPriceOption?.price) || 0;
         form.setFieldsValue({
-          price: null,
-          amount: "",
+          price: defaultPriceOption?.value ?? null,
+          amount: qty * parsedDefaultPrice || "",
         });
         return;
       }
 
       const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
-      const parsedPrice = Number.parseFloat(currentPrice) || 0;
+      const selectedPriceOption = options.find(
+        (item) => String(item?.value) === String(currentPrice),
+      );
+      const parsedPrice = Number.parseFloat(selectedPriceOption?.price) || 0;
 
       form.setFieldsValue({
         price: currentPrice,
@@ -277,8 +288,26 @@ const ModalCreateMutationDetail = ({
     }
   };
 
-  const handleSave = () => {
-    const values = form.getFieldsValue();
+  const handleSave = async () => {
+    let values;
+    try {
+      values = await form.validateFields([
+        "source",
+        "billingPeriod",
+        "mutationDate",
+        "mutationType",
+        "category",
+        "uom",
+        "quantity",
+        "price",
+        "amount",
+        "type",
+        "description",
+        ...(withApprovalAndAttachment ? ["apphierId"] : []),
+      ]);
+    } catch {
+      return;
+    }
 
     // Used in create page slicing before gasDepositId exists
     if (!selectedData?.gasDepositId) {
@@ -308,7 +337,7 @@ const ModalCreateMutationDetail = ({
       category: values.category,
       uom: values.uom,
       volumeAmount: values.quantity,
-      price: values.price,
+      price: getSelectedPriceOption(values.price)?.price ?? values.price,
       amountValue: values.amount,
       description: values.description,
       attachments: [],
@@ -476,7 +505,10 @@ const ModalCreateMutationDetail = ({
                   placeholder="Input.."
                   onChange={(e) => {
                     const qty = Number.parseFloat(e.target.value) || 0;
-                    const price = Number.parseFloat(form.getFieldValue("price")) || 0;
+                    const selectedPriceOption = getSelectedPriceOption(
+                      form.getFieldValue("price"),
+                    );
+                    const price = Number.parseFloat(selectedPriceOption?.price) || 0;
                     form.setFieldsValue({ amount: qty * price || "" });
                   }}
                 />
@@ -510,7 +542,8 @@ const ModalCreateMutationDetail = ({
                   )}
                   onChange={(val) => {
                     const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
-                    const p = Number.parseFloat(val) || 0;
+                    const selectedPriceOption = getSelectedPriceOption(val);
+                    const p = Number.parseFloat(selectedPriceOption?.price) || 0;
                     form.setFieldsValue({ amount: qty * p || "" });
                   }}
                   filterOption={(input, option) =>

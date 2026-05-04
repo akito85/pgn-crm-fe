@@ -5,6 +5,7 @@ import { Tooltip, Tabs, Dropdown } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
@@ -23,10 +24,21 @@ import Toolbar from "../../../../components/Toolbar";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
+const getDisplayStatus = (item, isExpiredFlow = false) => {
+  const statusApproval = String(item?.statusApproval || "");
+  const rawStatus = item?.statusMaster || item?.status || null;
+
+  if (!isExpiredFlow) return rawStatus;
+  if (statusApproval === "Waiting Approval" || statusApproval === "Draft") return "Draft";
+  if (statusApproval === "Approved" || statusApproval === "Rejected") return "Expired";
+  return rawStatus;
+};
+
 const formatApprovalHistoryLabel = (key) => {
   const normalizedKey = key.toUpperCase();
 
   if (normalizedKey === "GAS_DEPOSIT") return "Gas Deposit";
+  if (normalizedKey === "EXPIRED_GAS_DEPOSIT") return "Expired";
   if (normalizedKey === "INACTIVE_GAS_DEPOSIT") return "Inactive";
 
   return key
@@ -79,6 +91,7 @@ const GasDepositPage = () => {
   const { data, loading, loading_history, loading_mutation_summary, loading_history_list, data_history, data_approval_history, data_mutation_summary, filters } = useSelector(
     (state) => state.gasDepositRbi,
   );
+  const { currentPosition, token } = useSelector((state) => state.auth || {});
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -91,7 +104,7 @@ const GasDepositPage = () => {
   const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState(filters?.sort || "");
+  const [sort, setSort] = useState(filters?.sort || "createdDate~desc");
   const [search, setSearch] = useState(filters?.search || {});
 
   const [pageDetail, setPageDetail] = useState(false);
@@ -125,7 +138,7 @@ const GasDepositPage = () => {
   // Reset filters saat unmount
   useEffect(() => {
     return () => {
-      dispatch(setGasDepositFilters({ search: {}, sort: "", page: 1 }));
+      dispatch(setGasDepositFilters({ search: {}, sort: "createdDate~desc", page: 1 }));
     };
   }, [dispatch]);
 
@@ -182,7 +195,7 @@ const GasDepositPage = () => {
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
       setDataApprovalHistoryFix(
-        mapApprovalHistoryData(data_approval_history, ["GAS_DEPOSIT", "INACTIVE_GAS_DEPOSIT"]),
+        mapApprovalHistoryData(data_approval_history, ["GAS_DEPOSIT", "EXPIRED_GAS_DEPOSIT", "INACTIVE_GAS_DEPOSIT"]),
       );
     } else {
       setDataApprovalHistoryFix({});
@@ -369,7 +382,14 @@ const GasDepositPage = () => {
               ),
               onClick: () => {
                 suppressNextRowClick();
-                toggleDetail(record);
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+                  state: {
+                    idAccount: record?.accountId,
+                    idCustomer: record?.customerId,
+                    type: "standard",
+                    section: "Gas Deposit",
+                  },
+                });
               },
             },
             {
@@ -478,7 +498,8 @@ const GasDepositPage = () => {
           item.masterGasDepositId ??
           ((item.stgSumId ?? item.pendingStgSumId) ? -Math.abs(item.stgSumId ?? item.pendingStgSumId) : item.accountId),
         stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
-        status: item.statusMaster || null,
+        expiredFlow: Boolean(item.expiredFlow),
+        status: getDisplayStatus(item, Boolean(item.expiredFlow)),
         statusApproval: item.statusApproval || null,
         mutationApprovalStatus: null,
         mutationStatus: null,
@@ -489,6 +510,7 @@ const GasDepositPage = () => {
         termsEarn: item.termsEarn ?? null,
         termsRedeem: item.termsRedeem ?? null,
         periodEarn: item.earnStartDate || null,
+        periodEarnEnd: item.earnEndDate || null,
         period: item.earnStartDate && item.earnEndDate
           ? `${item.earnStartDate} - ${item.earnEndDate}`
           : item.earnStartDate || null,
@@ -497,6 +519,7 @@ const GasDepositPage = () => {
         timeUnit: item.timeUnit || null,
         currency: item.currency || null,
         uom: item.uom || null,
+        quantity: item.quantity ?? item.balanceVolume ?? null,
         amount: item.balanceAmount ?? null,
         cashBalance: item.balanceVolume ?? null,
         accountType: item.accountType || null,
@@ -584,11 +607,14 @@ const GasDepositPage = () => {
     () =>
       (data_history?.result ?? []).map((item) => ({
         ...item,
-        key: item.accountNumber,
-        gasDepositId: item.accountNumber,
-        status: item.status || null,
+        key: item.referenceId || item.accountNumber,
+        gasDepositId: item.gasDepositId || item.accountNumber,
+        expiredFlow: true,
+        status: getDisplayStatus(item, true),
         statusApproval: item.statusApproval || null,
+        quantity: item.quantity ?? item.balanceVolume ?? null,
         periodEarn: item.earnStartDate || null,
+        periodEarnEnd: item.earnEndDate || null,
         period: item.period || (item.earnStartDate && item.earnEndDate
           ? `${item.earnStartDate} - ${item.earnEndDate}`
           : item.earnStartDate || null),
@@ -620,11 +646,45 @@ const GasDepositPage = () => {
     [historyColumns],
   );
 
+  const authToken = useMemo(() => {
+    try {
+      return token ? JSON.parse(token) : null;
+    } catch (error) {
+      return null;
+    }
+  }, [token]);
+
+  const positionRoleHints = useMemo(
+    () =>
+      [
+        currentPosition,
+        currentPosition?.currentPosition,
+        currentPosition?.approvalRole,
+        currentPosition?.roleName,
+        currentPosition?.positionName,
+        authToken?.currentPosition,
+        authToken?.approvalRole,
+        authToken?.roleName,
+        authToken?.positionName,
+        authToken?.position,
+        authToken?.primaryPosition?.positionName,
+      ]
+        .filter(Boolean)
+        .map((item) => String(item).toLowerCase()),
+    [authToken, currentPosition],
+  );
+
   const tabItems = [
     { key: "gasDeposit", label: "Gas Deposit", children: null },
     { key: "summaryBalance", label: "Summary Balance", children: null },
     { key: "history", label: "History", children: null },
   ];
+
+  const canShowApprovalExpiredButton = useMemo(() => {
+    const isSubmitterPosition = positionRoleHints.some((item) => item.includes("submitter"));
+    if (isSubmitterPosition) return false;
+    return true;
+  }, [positionRoleHints]);
 
   return (
     <>
@@ -635,14 +695,16 @@ const GasDepositPage = () => {
           <div className="flex -my-4 justify-between items-center">
             <p className="w-full mt-[15px] text-primary">GAS DEPOSIT LIST</p>
             <div className="flex items-center gap-2">
-              <ButtonComponent
-                icon={<SVGIcon name="IconRequestApproval" width={16} color="#FFF" />}
-                type="submit"
-                border={false}
-                onClick={() => setModalApprovalExpired(true)}
-              >
-                Approval Expired
-              </ButtonComponent>
+              {canShowApprovalExpiredButton && (
+                <ButtonComponent
+                  icon={<SVGIcon name="IconRequestApproval" width={16} color="#FFF" />}
+                  type="submit"
+                  border={false}
+                  onClick={() => setModalApprovalExpired(true)}
+                >
+                  Approval Expired
+                </ButtonComponent>
+              )}
               <ButtonComponent
                 icon={<SVGIcon name="IconCalendarEvent" width={16} />}
                 type="submit"
@@ -710,7 +772,7 @@ const GasDepositPage = () => {
             idTable="gas-deposit-history-table"
             dataSource={historyDataSource}
             columns={processedHistoryColumns}
-            totalData={data_history?.page?.totalElements || 0}
+            totalData={historyDataSource.length}
             tableScrolled={{ x: 5000, y: 525 }}
             onSort={onSort}
             columnDefinitions={historyColumnDefinitions}
@@ -721,7 +783,7 @@ const GasDepositPage = () => {
             usePagination={false}
             useInfiniteScroll={true}
             onLoadMore={handleHistoryLoadMore}
-            hasMore={(historyDataSource.length) < (data_history?.page?.totalElements || 0)}
+            hasMore={((data_history?.result?.length || 0) < (data_history?.page?.totalElements || 0))}
             showRefresh={true}
             onRefresh={() => dispatch(getHistoryGasDepositPaginate({ page: 1, pageSize: loadMoreSize, search: encodeURIComponent(JSON.stringify(search)), sort }))}
             loadMoreThreshold={15}

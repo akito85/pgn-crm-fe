@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Form, Tabs } from "antd";
 import PropTypes from "prop-types";
+import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 import { NxFormFooter, NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
@@ -12,33 +14,33 @@ import DateComponent from "../../../../components/DateComponent";
 import SelectComponent from "../../../../components/SelectComponent";
 import InputComponent from "../../../../components/InputComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
+import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
+import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
+import { columnsGasDeposit } from "./Table/TableViewGasDeposit";
+import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
+import { configApp } from "../../../../constants/configApp";
+import { getConfigFileRBIData } from "../../../../redux/slices/attachmentSlice";
+import {
+  showModalError,
+  showModalSuccess,
+} from "../../../../redux/slices/general_slice";
+import {
+  getAllApprovalList,
+  getListApprovalById,
+} from "../../../../redux/slices/rating_billing_invoice/billing";
+import {
+  createMutationSummary,
+  getCategoryListGasDeposit,
+  getAllGasDepositPaginate,
+} from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
 
 const CURRENCY_OPTIONS = [
   { label: "IDR", value: "IDR" },
   { label: "USD", value: "USD" },
 ];
 
-const INITIAL_SEARCH_ROWS = [
-  { key: 1, no: 1, customerNumber: "CUS001", customerName: "PLN (PERSERO), PT", accountNumber: "130252597", accountName: "PLN (PERSERO), PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 2, no: 2, customerNumber: "CUS002", customerName: "PLN (PERSERO), PT", accountNumber: "130252597", accountName: "PLN (PERSERO), PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 3, no: 3, customerNumber: "CUS003", customerName: "PT. JAYA MOTOR", accountNumber: "31668828", accountName: "PATIMURA (RESTAURAN SEDERHANA), CV", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 4, no: 4, customerNumber: "CUS004", customerName: "PT. JAYA MOTOR", accountNumber: "31668828", accountName: "PATIMURA (RESTAURAN SEDERHANA), CV", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 5, no: 5, customerNumber: "CUS005", customerName: "KAO INDONESIA, PT", accountNumber: "206971", accountName: "BLESSING INDONESIA JAYA PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 6, no: 6, customerNumber: "CUS006", customerName: "KAO INDONESIA, PT", accountNumber: "11009950", accountName: "PT. JAYA MOTOR", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 7, no: 7, customerNumber: "CUS007", customerName: "SAMPOERNA LAND, PT", accountNumber: "130252577", accountName: "KAO INDONESIA, PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 8, no: 8, customerNumber: "CUS008", customerName: "SAMPOERNA LAND, PT", accountNumber: "22514869", accountName: "TUNAS BARU LAMPUNG PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 9, no: 9, customerNumber: "CUS009", customerName: "BHIRAWA STEEL PT", accountNumber: "21533206", accountName: "ANUGRAH ARTACITRA SEMESTA", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 10, no: 10, customerNumber: "CUS010", customerName: "BHIRAWA STEEL PT", accountNumber: "110025881", accountName: "HUME SAKTI INDONESIA, PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-];
-
-const APPROVAL_ROWS = [
-  { key: 1, no: 1, approver: "Approver 1", role: "Supervisor", status: "Waiting Approval" },
-  { key: 2, no: 2, approver: "Approver 2", role: "Manager", status: "Pending" },
-];
-
-const ATTACHMENT_ROWS = [
-  { key: 1, no: 1, fileName: "expired-gas-deposit.xlsx", uploadedBy: "maker", uploadDate: "15 Apr 2026" },
-];
+const SUMMARY_SOURCE_OPTIONS = new Set(["Billing", "Adjustment"]);
 
 const parseAmount = (amount = "") => {
   if (!amount) return 0;
@@ -55,33 +57,159 @@ const formatAmount = (amount = 0) => {
   }).format(safeAmount);
 };
 
-const ExpiredGasDepositSummary = ({ values, selectedRows }) => {
+const normalizeWholeNumberString = (value) => {
+  const digitsOnly = String(value ?? "").replace(/\D/g, "");
+  const normalized = digitsOnly.replace(/^0+(?=\d)/, "");
+  return normalized || "0";
+};
+
+const parseDate = (value) => {
+  if (!value) return null;
+  if (moment.isMoment(value)) return value.clone();
+
+  const candidate = moment(value, [
+    "YYYY-MM-DD",
+    "DD MMM YYYY",
+    "DD MMMM YYYY",
+    moment.ISO_8601,
+  ], true);
+
+  if (candidate.isValid()) return candidate;
+
+  const fallback = moment(value);
+  return fallback.isValid() ? fallback : null;
+};
+
+const resolveExpiredBillingPeriod = (row, expiredDate) => {
+  const rawBillingPeriod = row?.billingPeriod;
+  if (rawBillingPeriod && String(rawBillingPeriod).length <= 10) {
+    return rawBillingPeriod;
+  }
+
+  const candidateDate =
+    parseDate(row?.earnEndDate) ||
+    parseDate(row?.periodRedeemEnd) ||
+    parseDate(expiredDate);
+
+  if (candidateDate) {
+    return candidateDate.format("MMM YYYY");
+  }
+
+  return undefined;
+};
+
+const mapGasDepositRow = (item) => ({
+  ...item,
+  key: item.stgSumId ?? item.pendingStgSumId ?? item.masterGasDepositId ?? item.accountId ?? item.accountNumber,
+  gasDepositId:
+    item.masterGasDepositId ??
+    ((item.stgSumId ?? item.pendingStgSumId) ? -Math.abs(item.stgSumId ?? item.pendingStgSumId) : item.accountId),
+  stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
+  status: item.statusMaster || item.status || null,
+  statusApproval: item.statusApproval || null,
+  mutationApprovalStatus: null,
+  mutationStatus: null,
+  sor: item.sor || null,
+  costCenter: item.costCenter || null,
+  accountSegment: item.accountSegment || null,
+  meterReadingCode: item.meterReadingCode || null,
+  termsEarn: item.termsEarn ?? null,
+  termsRedeem: item.termsRedeem ?? null,
+  periodEarn: item.earnStartDate || null,
+  period: item.earnStartDate && item.earnEndDate
+    ? `${item.earnStartDate} - ${item.earnEndDate}`
+    : item.earnStartDate || item.period || null,
+  periodRedeemStart: item.redeemStartDate || item.periodRedeemStart || null,
+  periodRedeemEnd: item.redeemEndDate || item.periodRedeemEnd || null,
+  timeUnit: item.timeUnit || null,
+  currency: item.currency || null,
+  uom: item.uom || null,
+  quantity: item.quantity ?? item.balanceVolume ?? null,
+  amount: item.balanceAmount ?? item.amount ?? null,
+  cashBalance: item.balanceVolume ?? item.cashBalance ?? null,
+  accountType: item.accountType || null,
+  type: item.pendingActionType || item.type || null,
+  description: item.description || null,
+  sapCustId: item.sapCustId || null,
+  classificationType: item.classificationType || null,
+  source: item.source || null,
+  createdDate: item.createdDate || null,
+  createdBy: item.createdBy || null,
+  updatedDate: item.updatedDate || null,
+  updatedBy: item.updatedBy || null,
+  headerType: null,
+  billingPeriod: null,
+});
+
+const GAS_DEPOSIT_COLUMN_WIDTHS = {
+  no: 60,
+  customerNumber: 180,
+  customerName: 260,
+  accountNumber: 170,
+  accountName: 260,
+  accountGroupType: 190,
+  sor: 180,
+  costCenter: 180,
+  accountSegment: 170,
+  meterReadingCode: 180,
+  currency: 100,
+  uom: 100,
+  termsEarn: 120,
+  termsRedeem: 130,
+  periodEarn: 170,
+  periodRedeemStart: 160,
+  periodRedeemEnd: 160,
+  period: 120,
+  timeUnit: 130,
+  quantity: 150,
+  amount: 170,
+  type: 140,
+  accountType: 140,
+  classificationType: 190,
+  source: 140,
+  description: 240,
+  status: 140,
+  statusApproval: 190,
+  balanceQuantity: 190,
+  balanceAmount: 190,
+  expiredQuantity: 210,
+  expiredAmount: 210,
+};
+
+const applyGasDepositColumnWidths = (columns = []) =>
+  columns.map((column) => {
+    if (column.children?.length) {
+      return {
+        ...column,
+        children: applyGasDepositColumnWidths(column.children),
+      };
+    }
+
+    const key = column.key || column.dataIndex;
+    const width = GAS_DEPOSIT_COLUMN_WIDTHS[key];
+
+    return width ? { ...column, width } : column;
+  });
+
+const ExpiredGasDepositSummary = ({ values, selectedRows, infoColumns }) => {
   const infoItems = [
     {
       label: "Expired Date",
-      value: values.expiredDate?.format ? values.expiredDate.format("DD MMM YYYY") : "{value}",
+      value: values.expiredDate?.format ? values.expiredDate.format("DD MMM YYYY") : values.expiredDate || "-",
     },
-    { label: "Currency", value: values.currency || "{value}" },
-    { label: "Total Amount", value: values.totalAmount || "{value}" },
-    { label: "Description", value: values.description || "{value}", fullWidth: true },
-  ];
-
-  const infoColumns = [
-    { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-    { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 80 },
-    { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 120 },
-    { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 80 },
-    { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 140 },
-    { key: "accountGroupType", title: "ACCOUNT GROUP TYPE", dataIndex: "accountGroupType", width: 80 },
-    { key: "expiredAmount", title: "EXPIRED AMOUNT", dataIndex: "expiredAmount", width: 70, align: "right" },
+    { label: "Currency", value: values.currency || "-" },
+    { label: "Total Amount", value: values.totalAmount || "-" },
+    { label: "Expired Quantity", value: values.expiredQuantity || "-" },
+    { label: "Expired Amount", value: values.expiredAmount || "-" },
+    { label: "Description", value: values.description || "-", fullWidth: true },
   ];
 
   return (
     <div className="space-y-4">
       <CardContainer header={<p className="mt-[15px] text-primary">EXPIRED GAS DEPOSIT INFORMATION</p>}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-[12px]">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5 text-[12px]">
           {infoItems.map((item) => (
-            <div key={item.label} className={item.fullWidth ? "md:col-span-3" : ""}>
+            <div key={item.label} className={item.fullWidth ? "md:col-span-4" : ""}>
               <p className="mb-1 font-semibold text-[#4B465C]">{item.label}</p>
               <p className="text-[#4B465C]">{item.value}</p>
             </div>
@@ -95,7 +223,7 @@ const ExpiredGasDepositSummary = ({ values, selectedRows }) => {
           dataSource={selectedRows}
           columns={infoColumns}
           totalData={selectedRows.length}
-          tableScrolled={{ x: 1800, y: 300 }}
+          tableScrolled={{ x: 5200, y: 300 }}
           showExport={false}
           usePagination={false}
           showRefresh={false}
@@ -107,23 +235,48 @@ const ExpiredGasDepositSummary = ({ values, selectedRows }) => {
 
 ExpiredGasDepositSummary.propTypes = {
   values: PropTypes.shape({
-    expiredDate: PropTypes.shape({ format: PropTypes.func }),
+    expiredDate: PropTypes.oneOfType([
+      PropTypes.shape({ format: PropTypes.func }),
+      PropTypes.string,
+    ]),
     currency: PropTypes.string,
     totalAmount: PropTypes.string,
+    expiredQuantity: PropTypes.string,
+    expiredAmount: PropTypes.string,
     description: PropTypes.string,
   }).isRequired,
   selectedRows: PropTypes.arrayOf(PropTypes.object).isRequired,
+  infoColumns: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 const GasDepositExpiredCreatePage = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const searchInput = useRef(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [searchRows, setSearchRows] = useState(INITIAL_SEARCH_ROWS);
-  const [selectedSearchRowKey, setSelectedSearchRowKey] = useState(INITIAL_SEARCH_ROWS[0].key);
   const [selectedDepositRows, setSelectedDepositRows] = useState([]);
+  const [selectedSearchRowKeys, setSelectedSearchRowKeys] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState(undefined);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [boolApproval, setBoolApproval] = useState(false);
+  const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [confirmationValues, setConfirmationValues] = useState({});
+  const [expiredQuantityOverrides, setExpiredQuantityOverrides] = useState({});
+  const [expiredAmountOverrides, setExpiredAmountOverrides] = useState({});
+  const [fixedSearchColumns, setFixedSearchColumns] = useState(() => ({
+    left: ["no"],
+    right: ["balanceQuantity", "balanceAmount", "expiredQuantity", "expiredAmount"],
+  }));
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchFilters, setSearchFilters] = useState({});
+
+  const { data, loading } = useSelector((state) => state.gasDepositRbi);
+  const { data_approval, data_approval_list } = useSelector((state) => state.billing);
 
   const routes = [
     { path: "", breadcrumbName: "Rating & Billing" },
@@ -137,93 +290,273 @@ const GasDepositExpiredCreatePage = () => {
     { title: "ATTACHMENT" },
   ];
 
-  const selectedSearchRow = useMemo(
-    () => searchRows.find((row) => row.key === selectedSearchRowKey) || null,
-    [searchRows, selectedSearchRowKey],
-  );
+  React.useEffect(() => {
+    dispatch(getAllApprovalList());
+    dispatch(getConfigFileRBIData());
+    dispatch(getCategoryListGasDeposit());
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (data_approval && data_approval.length > 0) {
+      setAppHierOptions(data_approval.map((item) => ({ name: item.approvalName, value: item.appHierId })));
+    } else {
+      setAppHierOptions([]);
+    }
+  }, [data_approval]);
+
+  React.useEffect(() => {
+    if (boolApproval && data_approval_list && data_approval_list.length > 0) {
+      setAppHierDataDetail(
+        data_approval_list.map((item, index) => ({
+          ...item,
+          key: index + 1,
+          employeeDetail: (item.employeeDetail || []).map((employee, employeeIndex) => ({
+            ...employee,
+            key: employeeIndex + 1,
+          })),
+        })),
+      );
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [boolApproval, data_approval_list]);
 
   const selectedTotalAmount = useMemo(
+    () => formatAmount(selectedDepositRows.reduce((sum, row) => sum + parseAmount(row.balanceAmount), 0)),
+    [selectedDepositRows],
+  );
+
+  const selectedExpiredQuantity = useMemo(
+    () => formatAmount(selectedDepositRows.reduce((sum, row) => sum + parseAmount(row.expiredQuantity), 0)),
+    [selectedDepositRows],
+  );
+
+  const selectedExpiredAmount = useMemo(
     () => formatAmount(selectedDepositRows.reduce((sum, row) => sum + parseAmount(row.expiredAmount), 0)),
     [selectedDepositRows],
   );
 
+  const gasDepositRows = useMemo(
+    () => (data?.result ?? []).filter(Boolean).map(mapGasDepositRow),
+    [data],
+  );
+
+  const filteredSearchRows = useMemo(() => {
+    const expiredDate = parseDate(form.getFieldValue("expiredDate"));
+    const selectedCurrency = form.getFieldValue("currency");
+    if (!expiredDate) return [];
+
+    return gasDepositRows
+      .filter((row) => {
+        const periodEarnEnd = parseDate(row.earnEndDate || row.periodEarnEnd);
+        const status = String(row.status || "").trim().toLowerCase();
+        const currency = String(row.currency || "").trim().toUpperCase();
+        const amount = parseAmount(row.amount);
+        return periodEarnEnd
+          && periodEarnEnd.isSame(expiredDate, "day")
+          && status === "inactive"
+          && (!selectedCurrency || currency === String(selectedCurrency).trim().toUpperCase())
+          && amount > 0;
+      })
+      .map((row) => {
+        const defaultExpiredQuantity = normalizeWholeNumberString(parseAmount(row.quantity ?? row.cashBalance));
+        const defaultExpiredAmount = normalizeWholeNumberString(parseAmount(row.amount));
+        const expiredQuantity = expiredQuantityOverrides[row.key] ?? defaultExpiredQuantity;
+        const expiredAmount = expiredAmountOverrides[row.key] ?? defaultExpiredAmount;
+
+        return {
+          ...row,
+          balanceQuantity: row.quantity ?? row.cashBalance ?? null,
+          balanceAmount: row.amount ?? null,
+          expiredQuantity,
+          expiredAmount,
+        };
+      });
+  }, [expiredAmountOverrides, expiredQuantityOverrides, form, gasDepositRows]);
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearchFilters((prevState) => ({ ...prevState, [dataIndex]: selectedKeys[0] }));
+  };
+
+  const handleExpiredQuantityChange = (recordKey, nextValue) => {
+    setExpiredQuantityOverrides((prevState) => ({
+      ...prevState,
+      [recordKey]: normalizeWholeNumberString(nextValue),
+    }));
+  };
+
   const handleExpiredAmountChange = (recordKey, nextValue) => {
-    setSearchRows((prev) =>
-      prev.map((row) =>
-        row.key === recordKey ? { ...row, expiredAmount: nextValue } : row,
-      ),
-    );
+    setExpiredAmountOverrides((prevState) => ({
+      ...prevState,
+      [recordKey]: normalizeWholeNumberString(nextValue),
+    }));
   };
 
   const searchColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 30, align: "center" },
-      { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 100 },
-      { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 150 },
-      { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 100 },
-      { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 180 },
-      {
-        key: "expiredAmount",
-        title: "EXPIRED AMOUNT",
-        dataIndex: "expiredAmount",
-        width: 120,
-        render: (_, record) => (
-          <InputComponent
-            value={record.expiredAmount}
-            onClick={(event) => event.stopPropagation()}
-            onChange={(event) => handleExpiredAmountChange(record.key, event.target.value)}
-            placeholder="Input Amount"
-          />
-        ),
-      },
-      {
-        key: "totalExpiredAmount",
-        title: "TOTAL EXPIRED AMOUNT",
-        dataIndex: "expiredAmount",
-        width: 120,
-        render: (text) => (
-          <InputComponent
-            value={text}
-            disabled
-            placeholder="0"
-          />
-        ),
-      },
-    ],
-    [],
+    () => {
+      const baseColumns = applyGasDepositColumnWidths(columnsGasDeposit(
+        0,
+        0,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        searchFilters,
+      ))
+        .filter((column) => !["cashBalance"].includes(column.key || column.dataIndex));
+
+      return [
+        ...baseColumns,
+        {
+          key: "balanceQuantity",
+          title: "BALANCE QUANTITY",
+          dataIndex: "balanceQuantity",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.balanceQuantity,
+          align: "right",
+          render: (text) => (
+            <InputComponent
+              value={text}
+              type="numeric"
+              decimalScale={0}
+              suffix=",00"
+              disabled
+              placeholder="0"
+            />
+          ),
+        },
+        {
+          key: "balanceAmount",
+          title: "BALANCE AMOUNT",
+          dataIndex: "balanceAmount",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.balanceAmount,
+          align: "right",
+          render: (text) => (
+            <InputComponent
+              value={text}
+              type="numeric"
+              decimalScale={0}
+              suffix=",00"
+              disabled
+              placeholder="0"
+            />
+          ),
+        },
+        {
+          key: "expiredQuantity",
+          title: "EXPIRED QUANTITY",
+          dataIndex: "expiredQuantity",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.expiredQuantity,
+          align: "right",
+          render: (_, record) => (
+            <InputComponent
+              value={record.expiredQuantity}
+              type="numeric"
+              decimalScale={0}
+              suffix=",00"
+              onClick={(event) => event.stopPropagation()}
+              onChange={({ value }) => handleExpiredQuantityChange(record.key, value)}
+              placeholder="0"
+            />
+          ),
+        },
+        {
+          key: "expiredAmount",
+          title: "EXPIRED AMOUNT",
+          dataIndex: "expiredAmount",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.expiredAmount,
+          align: "right",
+          render: (_, record) => (
+            <InputComponent
+              value={record.expiredAmount}
+              type="numeric"
+              decimalScale={0}
+              suffix=",00"
+              onClick={(event) => event.stopPropagation()}
+              onChange={({ value }) => handleExpiredAmountChange(record.key, value)}
+              placeholder="0"
+            />
+          ),
+        },
+      ];
+    },
+    [searchedColumn, searchText, searchFilters],
+  );
+
+  const processedSearchColumns = useMemo(
+    () => applyFixedColumns(searchColumns, fixedSearchColumns),
+    [searchColumns, fixedSearchColumns],
+  );
+
+  const searchColumnDefinitions = useMemo(
+    () =>
+      searchColumns.map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+      })),
+    [searchColumns],
   );
 
   const infoColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 80 },
-      { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 120 },
-      { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 80 },
-      { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 140 },
-      { key: "accountGroupType", title: "ACCOUNT GROUP TYPE", dataIndex: "accountGroupType", width: 80 },
-    ],
-    [],
+    () => {
+      const baseColumns = applyGasDepositColumnWidths(columnsGasDeposit(
+        0,
+        0,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        searchFilters,
+      ))
+        .filter((column) => !["cashBalance"].includes(column.key || column.dataIndex));
+
+      return [
+        ...baseColumns,
+        {
+          key: "balanceQuantity",
+          title: "BALANCE QUANTITY",
+          dataIndex: "balanceQuantity",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.balanceQuantity,
+          align: "right",
+          render: (text) => text ?? "-",
+        },
+        {
+          key: "balanceAmount",
+          title: "BALANCE AMOUNT",
+          dataIndex: "balanceAmount",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.balanceAmount,
+          align: "right",
+          render: (text) => text ?? "-",
+        },
+        {
+          key: "expiredQuantity",
+          title: "EXPIRED QUANTITY",
+          dataIndex: "expiredQuantity",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.expiredQuantity,
+          align: "right",
+          render: (text) => text ?? "-",
+        },
+        {
+          key: "expiredAmount",
+          title: "EXPIRED AMOUNT",
+          dataIndex: "expiredAmount",
+          width: GAS_DEPOSIT_COLUMN_WIDTHS.expiredAmount,
+          align: "right",
+          render: (text) => text ?? "-",
+        },
+      ];
+    },
+    [handleSearch, searchFilters, searchedColumn, searchText],
   );
 
-  const approvalColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "approver", title: "APPROVER", dataIndex: "approver", width: 100 },
-      { key: "role", title: "ROLE", dataIndex: "role", width: 80 },
-      { key: "status", title: "STATUS", dataIndex: "status", width: 100 },
-    ],
-    [],
-  );
-
-  const attachmentColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "fileName", title: "FILE NAME", dataIndex: "fileName", width: 150 },
-      { key: "uploadedBy", title: "UPLOADED BY", dataIndex: "uploadedBy", width: 80 },
-      { key: "uploadDate", title: "UPLOAD DATE", dataIndex: "uploadDate", width: 80 },
-    ],
-    [],
-  );
+  const handleSelectHierarchy = (value) => {
+    setSelectedHierarchy(value);
+    form.setFieldsValue({ apphierId: value });
+    dispatch(getListApprovalById(value));
+    setBoolApproval(true);
+  };
 
   const confirmationItems = [
     {
@@ -231,8 +564,9 @@ const GasDepositExpiredCreatePage = () => {
       label: "Expired Gas Deposit",
       children: (
         <ExpiredGasDepositSummary
-          values={form.getFieldsValue()}
+          values={confirmationValues}
           selectedRows={selectedDepositRows}
+          infoColumns={infoColumns}
         />
       ),
     },
@@ -241,14 +575,13 @@ const GasDepositExpiredCreatePage = () => {
       label: "Approval",
       children: (
         <CardContainer header={<p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>}>
-          <TableRBI
-            idTable="expired-gd-confirm-approval-table"
-            dataSource={APPROVAL_ROWS}
-            columns={approvalColumns}
-            totalData={APPROVAL_ROWS.length}
-            tableScrolled={{ x: 1000, y: 250 }}
-            showExport={false}
-            usePagination={false}
+          <ApprovalComponentGeneral
+            type="confirmation"
+            dataTable={appHierDataDetail}
+            dataOption={appHierOptions}
+            selectedHierarchy={selectedHierarchy}
+            updateSelectedHierarchy={handleSelectHierarchy}
+            showSelect={false}
           />
         </CardContainer>
       ),
@@ -258,14 +591,18 @@ const GasDepositExpiredCreatePage = () => {
       label: "Attachment",
       children: (
         <CardContainer header={<p className="mt-[15px] text-primary">ATTACHMENT</p>}>
-          <TableRBI
-            idTable="expired-gd-confirm-attachment-table"
-            dataSource={ATTACHMENT_ROWS}
-            columns={attachmentColumns}
-            totalData={ATTACHMENT_ROWS.length}
-            tableScrolled={{ x: 1000, y: 250 }}
-            showExport={false}
-            usePagination={false}
+          <AttachmentComponent
+            type="confirmation"
+            data={listDataAttachment}
+            updateData={setListDataAttachment}
+            dispatch={dispatch}
+            getAPICategory={getCategoryListGasDeposit}
+            typeSelector="gasDepositRbi"
+            service={ratingBillingHttpService}
+            configApplication={configApp.RATING_BILLING_SERVICE}
+            getAPIGuard={getConfigFileRBIData}
+            typeRBI="data"
+            mandatory={true}
           />
         </CardContainer>
       ),
@@ -274,20 +611,77 @@ const GasDepositExpiredCreatePage = () => {
 
   const handleOpenSearch = async () => {
     await form.validateFields(["expiredDate", "currency"]);
+    setSelectedSearchRowKeys([]);
+    setExpiredQuantityOverrides({});
+    setExpiredAmountOverrides({});
+    const expiredDate = form.getFieldValue("expiredDate");
+    const currency = form.getFieldValue("currency");
+    const formattedExpiredDate = expiredDate?.format ? expiredDate.format("YYYY-MM-DD") : expiredDate;
+    dispatch(
+      getAllGasDepositPaginate({
+        search: encodeURIComponent(JSON.stringify({
+          ...searchFilters,
+          status: "Inactive",
+          currency,
+          schemeEndDate: formattedExpiredDate,
+          positiveAmountOnly: true,
+        })),
+        page: 1,
+        pageSize: 100,
+        sort: "accountNumber~asc",
+        isLoadMore: false,
+      }),
+    );
     setIsSearchModalOpen(true);
   };
 
   const handleConfirmSearch = () => {
-    if (!selectedSearchRow) return;
+    if (!selectedSearchRowKeys.length) return;
 
-    setSelectedDepositRows([{ ...selectedSearchRow, no: 1 }]);
-    form.setFieldsValue({ totalAmount: selectedSearchRow.expiredAmount });
+    const selectedRows = filteredSearchRows.filter((row) => selectedSearchRowKeys.includes(row.key));
+    const invalidQuantityRow = selectedRows.find(
+      (row) => parseAmount(row.expiredQuantity) <= 0 || parseAmount(row.expiredQuantity) > parseAmount(row.balanceQuantity),
+    );
+    if (invalidQuantityRow) {
+      dispatch(showModalError({ title: "Failed", description: "Expired Quantity must be greater than 0 and cannot be greater than Balance Quantity" }));
+      return;
+    }
+
+    const invalidAmountRow = selectedRows.find(
+      (row) => parseAmount(row.expiredAmount) <= 0 || parseAmount(row.expiredAmount) > parseAmount(row.balanceAmount),
+    );
+    if (invalidAmountRow) {
+      dispatch(showModalError({ title: "Failed", description: "Expired Amount must be greater than 0 and cannot be greater than Balance Amount" }));
+      return;
+    }
+
+    const nextSelectedRows = filteredSearchRows
+      .filter((row) => selectedSearchRowKeys.includes(row.key))
+      .map((row, index) => ({
+        ...row,
+        no: index + 1,
+        balanceQuantity: formatAmount(parseAmount(row.balanceQuantity)),
+        balanceAmount: formatAmount(parseAmount(row.balanceAmount)),
+        expiredQuantity: formatAmount(parseAmount(row.expiredQuantity)),
+        expiredAmount: formatAmount(parseAmount(row.expiredAmount)),
+      }));
+
+    setSelectedDepositRows(nextSelectedRows);
+    form.setFieldsValue({
+      totalAmount: formatAmount(nextSelectedRows.reduce((sum, row) => sum + parseAmount(row.balanceAmount), 0)),
+      expiredQuantity: formatAmount(nextSelectedRows.reduce((sum, row) => sum + parseAmount(row.expiredQuantity), 0)),
+      expiredAmount: formatAmount(nextSelectedRows.reduce((sum, row) => sum + parseAmount(row.expiredAmount), 0)),
+    });
     setIsSearchModalOpen(false);
   };
 
   const handleNext = async () => {
     if (currentStep === 0) {
       await form.validateFields(["expiredDate", "currency", "description"]);
+      if (!selectedDepositRows.length) {
+        dispatch(showModalError({ title: "Failed", description: "Please select gas deposit data first" }));
+        return;
+      }
     }
 
     setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
@@ -295,14 +689,132 @@ const GasDepositExpiredCreatePage = () => {
 
   const handleSubmit = async () => {
     await form.validateFields();
+    setConfirmationValues(form.getFieldsValue(true));
     setIsConfirmationModalOpen(true);
+  };
+
+  const persistExpiredEntries = async () => {
+    const values = form.getFieldsValue();
+
+    if (!selectedDepositRows.length) return;
+
+    const pendingAttachments = (listDataAttachment || []).filter(
+      (item) => item?.dataType !== "exist" && item?.file,
+    );
+
+    for (const row of selectedDepositRows) {
+      const expiredAmount = parseAmount(row.expiredAmount);
+      const resolvedCurrency = row.currency || values.currency;
+      const resolvedSource = SUMMARY_SOURCE_OPTIONS.has(row.source)
+        ? row.source
+        : SUMMARY_SOURCE_OPTIONS.has(row.type)
+          ? row.type
+          : "Adjustment";
+
+      if (!resolvedCurrency) {
+        dispatch(showModalError({ title: "Failed", description: "Currency is required" }));
+        return;
+      }
+
+      const body = {
+        accountId: row.accountId,
+        apphierId: selectedHierarchy,
+        balanceVolume: parseAmount(row.expiredQuantity),
+        balanceAmount: expiredAmount,
+        currency: resolvedCurrency,
+        uom: row.uom,
+        schemeStartDate: row.periodEarn || row.earnStartDate || undefined,
+        schemeEndDate: row.earnEndDate || undefined,
+        redeemStartDate: row.periodRedeemStart || undefined,
+        redeemEndDate: values.expiredDate?.format
+          ? values.expiredDate.format("YYYY-MM-DD")
+          : values.expiredDate,
+        termsEarn: row.termsEarn ?? undefined,
+        termsRedeem: row.termsRedeem ?? undefined,
+        timeUnit: row.timeUnit || undefined,
+        source: resolvedSource,
+        actionType: "CREATE",
+        isDraft: false,
+        description: values.description,
+        sapCustId: row.sapCustId ?? undefined,
+        attachments: [],
+        silentSuccess: true,
+        gasDepositMutationDetailDtos: [
+          {
+            gasDepositId: row.masterGasDepositId ?? undefined,
+            billPeriode: resolveExpiredBillingPeriod(row, values.expiredDate),
+            mutationDate: values.expiredDate?.format
+              ? values.expiredDate.format("YYYY-MM-DD")
+              : values.expiredDate,
+            transType: "EXPIRE",
+            volumeAmount: parseAmount(row.expiredQuantity),
+            price: null,
+            amountValue: expiredAmount,
+            source: "Expired Gas Deposit",
+            mutationType: "EXPIRE",
+            category: "Expired",
+            uom: row.uom,
+            description: values.description,
+          },
+        ],
+      };
+
+      const res = await dispatch(createMutationSummary(body)).unwrap();
+      const responseData = res?.data || res || {};
+      const referenceId =
+        responseData?.stgSumId ||
+        responseData?.id ||
+        responseData?.gasDepositId ||
+        responseData?.pendingStgSumId;
+
+      if (pendingAttachments.length > 0 && referenceId) {
+        for (const element of pendingAttachments) {
+          await ratingBillingHttpService.uploadAttachment(
+            `/v1/dbs/api/gas-deposit/upload-attachment`,
+            {
+              files: element.file,
+              fileCategoryId: element.fileCategoryId,
+              referenceId,
+              referensiId: referenceId,
+              category: "GAS_DEPOSIT_SUMMARY",
+            },
+            () => {},
+          );
+        }
+      }
+    }
+
+    setIsConfirmationModalOpen(false);
+    dispatch(
+      showModalSuccess({
+        title: "Success",
+        description: "Expired Gas Deposit created successfully",
+        return: false,
+      }),
+    );
+    navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
+  };
+
+  const handleConfirmCreateExpired = async () => {
+    try {
+      await persistExpiredEntries();
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      dispatch(showModalError({ title: "Failed", description: message }));
+    }
   };
 
   const handleReset = () => {
     form.resetFields();
     setSelectedDepositRows([]);
-    setSearchRows(INITIAL_SEARCH_ROWS);
-    setSelectedSearchRowKey(INITIAL_SEARCH_ROWS[0].key);
+    setSelectedSearchRowKeys([]);
+    setSelectedHierarchy(undefined);
+    setAppHierDataDetail([]);
+    setBoolApproval(false);
+    setListDataAttachment([]);
+    setExpiredQuantityOverrides({});
+    setExpiredAmountOverrides({});
   };
 
   return (
@@ -333,7 +845,7 @@ const GasDepositExpiredCreatePage = () => {
                 <Form.Item
                   name="expiredDate"
                   label="Expired Date"
-                  rules={[{ required: true }]}
+                  rules={[{ required: true, message: "Expired Date is required" }]}
                   style={{ marginBottom: 0 }}
                 >
                   <DateComponent placeholder="Select Expired Date" dateDisable={() => false} />
@@ -342,7 +854,7 @@ const GasDepositExpiredCreatePage = () => {
                 <Form.Item
                   name="currency"
                   label="Currency"
-                  rules={[{ required: true }]}
+                  rules={[{ required: true, message: "Currency is required" }]}
                   style={{ marginBottom: 0 }}
                 >
                   <SelectComponent placeholder="Select Currency" options={CURRENCY_OPTIONS} />
@@ -351,16 +863,34 @@ const GasDepositExpiredCreatePage = () => {
                 <Form.Item
                   name="totalAmount"
                   label="Total Amount"
-                  rules={[{ required: true }]}
+                  rules={[{ required: true, message: "Total Amount is required" }]}
                   style={{ marginBottom: 0 }}
                 >
                   <InputComponent disabled placeholder={selectedTotalAmount || "0,00"} />
                 </Form.Item>
 
                 <Form.Item
+                  name="expiredQuantity"
+                  label="Expired Quantity"
+                  rules={[{ required: true, message: "Expired Quantity is required" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <InputComponent disabled placeholder={selectedExpiredQuantity || "0,00"} />
+                </Form.Item>
+
+                <Form.Item
+                  name="expiredAmount"
+                  label="Expired Amount"
+                  rules={[{ required: true, message: "Expired Amount is required" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <InputComponent disabled placeholder={selectedExpiredAmount || "0,00"} />
+                </Form.Item>
+
+                <Form.Item
                   name="description"
                   label="Description"
-                  rules={[{ required: true }]}
+                  rules={[{ required: true, message: "Description is required" }]}
                   style={{ marginBottom: 0 }}
                   className="md:col-span-3"
                 >
@@ -378,7 +908,7 @@ const GasDepositExpiredCreatePage = () => {
                 dataSource={selectedDepositRows}
                 columns={infoColumns}
                 totalData={selectedDepositRows.length}
-                tableScrolled={{ x: 1800, y: 420 }}
+                tableScrolled={{ x: 5200, y: 420 }}
                 showExport={false}
                 usePagination={false}
                 showRefresh={false}
@@ -392,14 +922,12 @@ const GasDepositExpiredCreatePage = () => {
             header={<p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>}
             className="mt-2"
           >
-            <TableRBI
-              idTable="expired-gd-approval-table"
-              dataSource={APPROVAL_ROWS}
-              columns={approvalColumns}
-              totalData={APPROVAL_ROWS.length}
-              tableScrolled={{ x: 1000, y: 420 }}
-              showExport={false}
-              usePagination={false}
+            <ApprovalComponentGeneral
+              type="create"
+              dataTable={appHierDataDetail}
+              dataOption={appHierOptions}
+              selectedHierarchy={selectedHierarchy}
+              updateSelectedHierarchy={handleSelectHierarchy}
             />
           </CardContainer>
         )}
@@ -409,14 +937,18 @@ const GasDepositExpiredCreatePage = () => {
             header={<p className="mt-[15px] text-primary">ATTACHMENT</p>}
             className="mt-2"
           >
-            <TableRBI
-              idTable="expired-gd-attachment-table"
-              dataSource={ATTACHMENT_ROWS}
-              columns={attachmentColumns}
-              totalData={ATTACHMENT_ROWS.length}
-              tableScrolled={{ x: 1000, y: 420 }}
-              showExport={false}
-              usePagination={false}
+            <AttachmentComponent
+              type="create"
+              data={listDataAttachment}
+              updateData={setListDataAttachment}
+              dispatch={dispatch}
+              getAPICategory={getCategoryListGasDeposit}
+              typeSelector="gasDepositRbi"
+              service={ratingBillingHttpService}
+              configApplication={configApp.RATING_BILLING_SERVICE}
+              getAPIGuard={getConfigFileRBIData}
+              typeRBI="data"
+              mandatory={true}
             />
           </CardContainer>
         )}
@@ -428,7 +960,7 @@ const GasDepositExpiredCreatePage = () => {
           onNext={handleNext}
           onCancel={() => navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW)}
           onClear={handleReset}
-          onSaveDraft={() => {}}
+          showSaveDraft={false}
           onSubmit={handleSubmit}
         />
       </Form>
@@ -438,7 +970,7 @@ const GasDepositExpiredCreatePage = () => {
         isOpen={isSearchModalOpen}
         handleCancel={() => setIsSearchModalOpen(false)}
         header="SEARCH GAS DEPOSIT"
-        width={1200}
+        width={1400}
         footer={
           <div className="flex justify-end gap-2 px-2">
             <ButtonComponent key="cancel" className="!w-auto !px-6" onClick={() => setIsSearchModalOpen(false)}>
@@ -453,18 +985,23 @@ const GasDepositExpiredCreatePage = () => {
         <CardContainer className="!mt-0">
           <TableRBI
             idTable="expired-gd-search-table"
-            dataSource={searchRows}
-            columns={searchColumns}
-            totalData={searchRows.length}
-            tableScrolled={{ x: 1200, y: 360 }}
+            dataSource={filteredSearchRows}
+            columns={processedSearchColumns}
+            rowSelection={{
+              fixed: true,
+              selectedRowKeys: selectedSearchRowKeys,
+              onChange: (newSelectedRowKeys) => setSelectedSearchRowKeys(newSelectedRowKeys),
+            }}
+            totalData={filteredSearchRows.length}
+            tableScrolled={{ x: 5200, y: 360 }}
             showExport={false}
             usePagination={false}
             useInfiniteScroll={true}
             hasMore={false}
-            fixedColumns={{ left: [], right: ["expiredAmount", "totalExpiredAmount"] }}
-            enableRowClick={true}
-            selectedRowKey={selectedSearchRowKey}
-            onRowClick={(record) => setSelectedSearchRowKey(record.key)}
+            fixedColumns={fixedSearchColumns}
+            setFixedColumns={setFixedSearchColumns}
+            columnDefinitions={searchColumnDefinitions}
+            loading={loading}
           />
         </CardContainer>
       </ModalCustom>
@@ -475,18 +1012,23 @@ const GasDepositExpiredCreatePage = () => {
         handleCancel={() => setIsConfirmationModalOpen(false)}
         header="CONFIRMATION"
         type="confirmation"
-        width={1200}
+        width={1500}
         hidePadding={{ top: true }}
-        footer={[
-          <ButtonComponent key="cancel" onClick={() => setIsConfirmationModalOpen(false)}>
-            cancel
-          </ButtonComponent>,
-          <ButtonComponent key="confirm" type="primary" border={false} onClick={() => setIsConfirmationModalOpen(false)}>
-            Confirm
-          </ButtonComponent>,
-        ]}
+        footer={(
+          <div className="flex w-full items-center justify-between">
+            <ButtonComponent key="cancel" className="!w-auto !px-6" onClick={() => setIsConfirmationModalOpen(false)}>
+              cancel
+            </ButtonComponent>
+            <ButtonComponent key="confirm" type="primary" border={false} className="!w-auto !px-6" onClick={handleConfirmCreateExpired}>
+              Confirm
+            </ButtonComponent>
+          </div>
+        )}
       >
-        <Tabs items={confirmationItems} className="[&_.ant-tabs-nav]:mb-4" />
+        <Tabs
+          items={confirmationItems}
+          className="[&_.ant-tabs-nav]:mb-4 [&_.ant-tabs-tab]:pb-3 [&_.ant-tabs-content-holder]:pt-2"
+        />
       </ModalCustom>
     </>
   );

@@ -1,8 +1,46 @@
 import React from "react";
+import moment from "moment";
 import { hasValue, renderColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { numberFormatting } from "../../../../../utils/formatCurrency";
 import StatusComponent from "../../../../../components/StatusComponent";
+
+const toMoment = (value) => {
+  if (!value) return null;
+  const parsed = moment(value);
+  return parsed.isValid() ? parsed : null;
+};
+
+const formatShortDate = (value) => {
+  const parsed = toMoment(value);
+  return parsed ? parsed.format("D-MMM-YY") : "-";
+};
+
+const formatShortPeriod = (value) => {
+  if (typeof value === "string" && value.includes(" - ")) {
+    const [startValue] = value.split(" - ");
+    const parsedStart = toMoment(startValue);
+    return parsedStart ? parsedStart.format("MMM YY") : value;
+  }
+  const parsed = toMoment(value);
+  return parsed ? parsed.format("MMM YY") : "-";
+};
+
+const formatPeriodEarnRange = (startValue, endValue) => {
+  const start = toMoment(startValue);
+  const end = toMoment(endValue);
+
+  if (start && end) {
+    if (start.year() === end.year()) {
+      return `${start.format("MMM")}-${end.format("MMM YYYY")}`;
+    }
+    return `${start.format("MMM YYYY")} - ${end.format("MMM YYYY")}`;
+  }
+
+  if (start) return start.format("MMM YYYY");
+  if (end) return end.format("MMM YYYY");
+  return "-";
+};
 
 export const columnsGasDeposit = (
   page = 0,
@@ -373,7 +411,10 @@ export const columnsGasDeposit = (
       handleSearch,
       true,
     ),
-    render: (text) => text ?? "-",
+    render: (_, record) => formatPeriodEarnRange(
+      record?.periodEarn || record?.earnStartDate,
+      record?.periodEarnEnd || record?.earnEndDate,
+    ),
   },
   {
     key: "periodRedeem",
@@ -385,7 +426,7 @@ export const columnsGasDeposit = (
         dataIndex: "periodRedeemStart",
         isClassification: true,
         width: 70,
-        render: (text) => text ?? "-",
+        render: (text) => formatShortDate(text),
       },
       {
         key: "periodRedeemEnd",
@@ -393,7 +434,7 @@ export const columnsGasDeposit = (
         dataIndex: "periodRedeemEnd",
         isClassification: true,
         width: 70,
-        render: (text) => text ?? "-",
+        render: (text) => formatShortDate(text),
       },
     ],
   },
@@ -413,7 +454,7 @@ export const columnsGasDeposit = (
       handleSearch,
       true,
     ),
-    render: (text) => text ?? "-",
+    render: (text) => formatShortPeriod(text),
   },
   {
     key: "timeUnit",
@@ -432,6 +473,25 @@ export const columnsGasDeposit = (
       true,
     ),
     render: (text) => text ?? "-",
+  },
+  {
+    key: "quantity",
+    title: "QUANTITY",
+    dataIndex: "quantity",
+    isClassification: true,
+    width: 90,
+    sorter: true,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "quantity",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) => (text !== null && text !== undefined ? numberFormatting(text) : "-"),
   },
   {
     key: "amount",

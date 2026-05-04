@@ -2,16 +2,69 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Form, Steps } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
+import moment from "moment";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../components/InputComponent";
 import DetailText from "../../../../../components/DetailText";
 import TableRBI from "../../../../../components/TableRBI";
+import StatusComponent from "../../../../../components/StatusComponent";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import { numberFormatting } from "../../../../../utils/formatCurrency";
 import {
   getApprovalExpiredList,
   processGasDepositApproval,
 } from "../../../../../redux/slices/rating_billing_invoice/gasDeposit";
+import { showModalSuccess } from "../../../../../redux/slices/general_slice";
+
+const formatShortDate = (value) => {
+  if (!value) return "-";
+  const parsed = moment(value);
+  return parsed.isValid() ? parsed.format("D-MMM-YY") : "-";
+};
+
+const formatShortPeriod = (value) => {
+  if (!value) return "-";
+  if (typeof value === "string" && value.includes(" - ")) {
+    const [startValue] = value.split(" - ");
+    const parsedStart = moment(startValue);
+    return parsedStart.isValid() ? parsedStart.format("MMM YY") : value;
+  }
+  const parsed = moment(value);
+  return parsed.isValid() ? parsed.format("MMM YY") : value;
+};
+
+const formatPeriodEarnRange = (startValue, endValue) => {
+  const start = startValue ? moment(startValue) : null;
+  const end = endValue ? moment(endValue) : null;
+
+  if (start?.isValid() && end?.isValid()) {
+    if (start.year() === end.year()) {
+      return `${start.format("MMM")}-${end.format("MMM YYYY")}`;
+    }
+    return `${start.format("MMM YYYY")} - ${end.format("MMM YYYY")}`;
+  }
+
+  if (start?.isValid()) return start.format("MMM YYYY");
+  if (end?.isValid()) return end.format("MMM YYYY");
+  return "-";
+};
+
+const renderFormattedNumber = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+  return numberFormatting(value);
+};
+
+const renderStatus = (value, isApproval = false) => {
+  if (!value) return "-";
+  return (
+    <div className="flex justify-center">
+      <StatusComponent colour={String(value).toLowerCase().replaceAll(" ", isApproval ? "_" : " ")}>
+        {value}
+      </StatusComponent>
+    </div>
+  );
+};
 
 const ModalApprovalExpired = ({
   isOpen,
@@ -25,7 +78,6 @@ const ModalApprovalExpired = ({
   const {
     data_approval_expired_list,
     loading_approval_expired_list,
-    loading_process_approval,
   } = useSelector((state) => state.gasDepositRbi);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -36,31 +88,119 @@ const ModalApprovalExpired = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    dispatch(getApprovalExpiredList({ page: 1, pageSize: 100, search: "", sort: "createdDate~desc" }));
     setCurrent(0);
     setAction("");
     setSelectedRowKeys([]);
     setSelectedRows([]);
     form.resetFields();
+    dispatch(
+      getApprovalExpiredList({
+        page: 1,
+        pageSize: 100,
+        search: "",
+        sort: "createdDate~desc",
+      }),
+    );
   }, [dispatch, isOpen]);
 
   const dataSource = useMemo(() => {
-    return (data_approval_expired_list?.result || []).map((item) => ({
-      ...item,
-      key: item.referenceId,
-    }));
+    return (data_approval_expired_list?.result || [])
+      .map((item) => ({
+        ...item,
+        key: item.referenceId,
+        amount: item.amount ?? item.balanceAmount ?? null,
+        cashBalance: item.cashBalance ?? item.balanceAmount ?? null,
+        quantity: item.quantity ?? item.balanceVolume ?? null,
+      }));
   }, [data_approval_expired_list]);
 
   const baseColumns = useMemo(
     () => [
       { key: "no", title: "NO", width: 60, align: "center", render: (_, __, index) => index + 1 },
-      { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 160 },
-      { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 180 },
-      { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 160 },
-      { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 180 },
-      { key: "accountGroupType", title: "ACCOUNT GROUP TYPE", dataIndex: "accountGroupType", width: 160 },
-      { key: "balanceAmount", title: "AMOUNT", dataIndex: "balanceAmount", width: 120, align: "right" },
-      { key: "statusApproval", title: "STATUS APPROVAL", dataIndex: "statusApproval", width: 160, align: "center" },
+      { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 180 },
+      { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 260 },
+      { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 180 },
+      { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 260 },
+      { key: "accountGroupType", title: "ACCOUNT GROUP TYPE", dataIndex: "accountGroupType", width: 180 },
+      { key: "sor", title: "SOR", dataIndex: "sor", width: 90, align: "center" },
+      { key: "costCenter", title: "COST CENTER", dataIndex: "costCenter", width: 120 },
+      { key: "accountSegment", title: "ACCOUNT SEGMENT", dataIndex: "accountSegment", width: 150 },
+      { key: "meterReadingCode", title: "METER READING CODE", dataIndex: "meterReadingCode", width: 160 },
+      { key: "currency", title: "CURRENCY", dataIndex: "currency", width: 110, align: "center" },
+      { key: "uom", title: "UOM", dataIndex: "uom", width: 90, align: "center" },
+      { key: "termsEarn", title: "TERMS EARN", dataIndex: "termsEarn", width: 110, align: "center" },
+      { key: "termsRedeem", title: "TERMS REDEEM", dataIndex: "termsRedeem", width: 130, align: "center" },
+      {
+        key: "periodEarn",
+        title: "PERIOD EARN",
+        width: 180,
+        render: (_, record) => formatPeriodEarnRange(record?.periodEarn || record?.earnStartDate, record?.periodEarnEnd || record?.earnEndDate),
+      },
+      {
+        key: "periodRedeemStart",
+        title: "PERIOD REDEEM START",
+        dataIndex: "periodRedeemStart",
+        width: 160,
+        render: (value) => formatShortDate(value),
+      },
+      {
+        key: "periodRedeemEnd",
+        title: "PERIOD REDEEM END",
+        dataIndex: "periodRedeemEnd",
+        width: 160,
+        render: (value) => formatShortDate(value),
+      },
+      {
+        key: "period",
+        title: "PERIOD",
+        dataIndex: "period",
+        width: 120,
+        render: (value) => formatShortPeriod(value),
+      },
+      { key: "timeUnit", title: "TIME UNIT", dataIndex: "timeUnit", width: 120, align: "center" },
+      {
+        key: "quantity",
+        title: "QUANTITY",
+        dataIndex: "quantity",
+        width: 140,
+        align: "right",
+        render: (value) => renderFormattedNumber(value),
+      },
+      {
+        key: "amount",
+        title: "AMOUNT",
+        dataIndex: "amount",
+        width: 160,
+        align: "right",
+        render: (value) => renderFormattedNumber(value),
+      },
+      {
+        key: "cashBalance",
+        title: "CASH BALANCE",
+        dataIndex: "cashBalance",
+        width: 160,
+        align: "right",
+        render: (value) => renderFormattedNumber(value),
+      },
+      { key: "type", title: "TYPE", dataIndex: "type", width: 130 },
+      { key: "source", title: "SOURCE", dataIndex: "source", width: 140 },
+      { key: "description", title: "DESCRIPTION", dataIndex: "description", width: 220 },
+      {
+        key: "status",
+        title: "STATUS",
+        dataIndex: "status",
+        width: 140,
+        align: "center",
+        render: (value) => renderStatus(value, false),
+      },
+      {
+        key: "statusApproval",
+        title: "STATUS APPROVAL",
+        dataIndex: "statusApproval",
+        width: 180,
+        align: "center",
+        render: (value) => renderStatus(value, true),
+      },
     ],
     [],
   );
@@ -116,17 +256,25 @@ const ModalApprovalExpired = ({
 
     const note = formValue?.remark || "";
 
-    await Promise.all(
-      selectedRows.map((row) =>
-        dispatch(
-          processGasDepositApproval({
-            referenceId: row.referenceId,
-            referenceType: "SUMMARY",
-            action,
-            note,
-          }),
-        ).unwrap(),
-      ),
+    for (const row of selectedRows) {
+      // eslint-disable-next-line no-await-in-loop
+      await dispatch(
+        processGasDepositApproval({
+          referenceId: row.referenceId,
+          referenceType: "SUMMARY",
+          action,
+          note,
+          silentSuccess: true,
+        }),
+      ).unwrap();
+    }
+
+    dispatch(
+      showModalSuccess({
+        title: "Success",
+        description: `Expired Gas Deposit ${String(action || "").toLowerCase()} successfully`,
+        return: false,
+      }),
     );
 
     handleRefresh();
@@ -140,7 +288,7 @@ const ModalApprovalExpired = ({
       header="Approval Expired Gas Deposit Information"
       handleCancel={handleClose}
       onFinish={handleSave}
-      width={1100}
+      width={1600}
       footer={
         <div className="flex w-full justify-between items-center">
           <ButtonComponent type="default" onClick={handleClose}>Cancel</ButtonComponent>
@@ -162,7 +310,7 @@ const ModalApprovalExpired = ({
                   htmlType="submit"
                   form="formApproveExpired"
                   onClick={() => setAction("REJECT")}
-                  loading={loading_process_approval}
+                  loading={false}
                 >
                   Reject
                 </ButtonComponent>
@@ -171,7 +319,7 @@ const ModalApprovalExpired = ({
                   htmlType="submit"
                   form="formApproveExpired"
                   onClick={() => setAction("APPROVE")}
-                  loading={loading_process_approval}
+                  loading={false}
                 >
                   Approve
                 </ButtonComponent>
@@ -204,8 +352,8 @@ const ModalApprovalExpired = ({
               dataSource={dataSource}
               columns={processedColumns}
               rowSelection={rowSelection}
-              totalData={data_approval_expired_list?.page?.totalElements || 0}
-              tableScrolled={{ x: 1800, y: 450 }}
+              totalData={dataSource.length}
+              tableScrolled={{ x: 4200, y: 450 }}
               onSort={() => {}}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
@@ -216,7 +364,16 @@ const ModalApprovalExpired = ({
               useInfiniteScroll={true}
               hasMore={false}
               showRefresh={true}
-              onRefresh={() => dispatch(getApprovalExpiredList({ page: 1, pageSize: 100, search: "", sort: "createdDate~desc" }))}
+              onRefresh={() => {
+                dispatch(
+                  getApprovalExpiredList({
+                    page: 1,
+                    pageSize: 100,
+                    search: "",
+                    sort: "createdDate~desc",
+                  }),
+                );
+              }}
             />
 
             <div className="pt-[30px]">
@@ -246,12 +403,12 @@ const ModalApprovalExpired = ({
             dataSource={selectedRows}
             columns={processedColumns}
             totalData={selectedRows.length}
-            tableScrolled={{ x: 1800, y: 450 }}
+            tableScrolled={{ x: 4200, y: 450 }}
             onSort={() => {}}
             columnDefinitions={columnDefinitions}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
-            loading={false}
+            loading={loading_approval_expired_list}
             showExport={false}
             usePagination={false}
             useInfiniteScroll={false}

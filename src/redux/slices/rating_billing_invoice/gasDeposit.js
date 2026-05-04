@@ -522,7 +522,7 @@ export const getAllGasDepositPaginate = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "accountNumber~asc" : sort;
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/gas-deposit/list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response?.data ?? response;
@@ -737,15 +737,19 @@ export const createMutationSummary = createAsyncThunk(
       const url = `/v1/dbs/api/gas-deposit/mutation-summary/create-update`;
       const response = await ratingBillingHttpService.createData(url, body);
       const responseData = response?.data ?? response;
-      thunkAPI.dispatch(
-        showModalSuccess({
-          title: "Success",
-          description: body.id && body.id > 0 
-            ? "Mutation Summary updated successfully"
-            : "Mutation Summary created successfully",
-          return: false,
-        }),
-      );
+      if (!body?.silentSuccess) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: body?.isDraft === true
+              ? "Gas Deposit draft saved successfully"
+              : body.id && body.id > 0
+                ? "Gas Deposit updated successfully"
+                : "Gas Deposit created successfully",
+            return: false,
+          }),
+        );
+      }
       return responseData;
     } catch (error) {
       const message =
@@ -901,18 +905,20 @@ export const getPriceByBillingPeriod = createAsyncThunk(
 
       if (Array.isArray(payload?.result)) {
         const result = payload.result
-          .filter((item) => item?.value !== undefined && item?.value !== null && item?.value !== "")
+          .filter((item) => item?.id !== undefined && item?.id !== null && item?.id !== "")
           .map((item) => ({
             label:
               item?.label ??
-              [item?.priceCode, item?.price, item?.currency, item?.uom]
+              [item?.saType, item?.priceCode, item?.price, item?.currency, item?.uom]
                 .filter((part) => part !== undefined && part !== null && part !== "")
                 .join("/"),
-            value: item?.value ?? item?.price,
+            value: item?.id ?? item?.value,
             price: item?.price ?? item?.value,
+            saType: item?.saType,
             priceCode: item?.priceCode,
             currency: item?.currency,
             uom: item?.uom,
+            transactionDate: item?.transactionDate,
             id: item?.id,
           }));
         return {
@@ -961,13 +967,15 @@ export const processGasDepositApproval = createAsyncThunk(
       const url = `/v1/dbs/api/gas-deposit/approval`;
       const response = await ratingBillingHttpService.createData(url, body);
       const responseData = response?.data ?? response;
-      thunkAPI.dispatch(
-        showModalSuccess({
-          title: "Success",
-          description: `Gas Deposit ${String(body?.action || "").toLowerCase()} successfully`,
-          return: false,
-        }),
-      );
+      if (!body?.silentSuccess) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: `Gas Deposit ${String(body?.action || "").toLowerCase()} successfully`,
+            return: false,
+          }),
+        );
+      }
       return responseData;
     } catch (error) {
       const message =
@@ -1286,6 +1294,9 @@ const gasDepositSlice = createSlice({
   },
 });
 
-export const { setGasDepositFilters, resetGasDepositData } =
+export const {
+  setGasDepositFilters,
+  resetGasDepositData,
+} =
   gasDepositSlice.actions;
 export default gasDepositSlice.reducer;

@@ -22,7 +22,7 @@ import {
   getAllApprovalList,
   getListApprovalById,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
-import { showModalError, showModalSuccess } from "../../../../redux/slices/general_slice";
+import { showModalError } from "../../../../redux/slices/general_slice";
 import {
   getAccountOptions,
   getPeriodOptions,
@@ -425,11 +425,28 @@ const GasDepositCreatePage = () => {
     setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
   };
 
-  const handleSubmit = async () => {
+  const handlePersist = async (isDraft = false) => {
     setLoadingSubmit(true);
 
     try {
-      const values = await form.validateFields();
+      let values;
+      if (isDraft) {
+        await form.validateFields([
+          "accountNumber",
+          "periodEarn",
+          "periodStartRedeem",
+          "periodEndRedeem",
+          "period",
+          "timeUnit",
+          "uom",
+          "type",
+          "source",
+          "description",
+        ]);
+        values = form.getFieldsValue(true);
+      } else {
+        values = await form.validateFields();
+      }
 
       const accountList = accountOptionsData || [];
       const account = selectedAccountData ||
@@ -476,7 +493,7 @@ const GasDepositCreatePage = () => {
       const body = {
         id: resolvedId,
         accountId: account?.accountId,
-        apphierId: values.apphierId,
+        apphierId: isDraft ? (values.apphierId || selectedHierarchy) : values.apphierId,
         period: values.period,
         type: values.type,
         balanceVolume: resolvedBalanceVolume,
@@ -493,6 +510,7 @@ const GasDepositCreatePage = () => {
         // Backend summary currently persists SOURCE; mirror Type so it is retained after save.
         source: values.type || values.source,
         actionType: isUpdateMode ? "UPDATE" : "CREATE",
+        isDraft,
         description: values.description,
         sapCustId: account?.sapCustId == null ? undefined : String(account.sapCustId),
         attachments: [],
@@ -541,14 +559,6 @@ const GasDepositCreatePage = () => {
         }
       }
 
-      dispatch(
-        showModalSuccess({
-          title: "Success",
-          description: `Gas Deposit ${isUpdateMode ? "updated" : "created"} successfully`,
-          return: false,
-        }),
-      );
-
       // Navigate after a short delay to show success message
       setTimeout(() => {
         navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
@@ -558,6 +568,14 @@ const GasDepositCreatePage = () => {
     } finally {
       setLoadingSubmit(false);
     }
+  };
+
+  const handleSubmit = async () => {
+    await handlePersist(false);
+  };
+
+  const handleSaveDraft = async () => {
+    await handlePersist(true);
   };
 
   return (
@@ -602,7 +620,7 @@ const GasDepositCreatePage = () => {
             <Form.Item
               name="accountNumber"
               label="Account Number"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Account Number is required" }]}
               style={{ marginBottom: 0 }}
             >
               <SelectComponent
@@ -678,40 +696,40 @@ const GasDepositCreatePage = () => {
             <Form.Item name="termsRedeem" label="Terms Redeem" style={{ marginBottom: 0 }}>
               <InputComponent disabled={!isUpdateMode} placeholder="Select Terms Redeem" />
             </Form.Item>
-            <Form.Item name="periodEarn" label="Period Earn" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="periodEarn" label="Period Earn" rules={[{ required: true, message: "Period Earn is required" }]} style={{ marginBottom: 0 }}>
               <DatePicker.RangePicker className="w-full" picker="month" format="MMM YY" placeholder={["Start Date", "End Date"]} />
             </Form.Item>
-            <Form.Item name="periodStartRedeem" label="Period Start Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="periodStartRedeem" label="Period Start Redeem" rules={[{ required: true, message: "Period Start Redeem is required" }]} style={{ marginBottom: 0 }}>
               <DatePicker className="w-full" placeholder="Select Period Start Redeem" />
             </Form.Item>
-            <Form.Item name="periodEndRedeem" label="Period End Redeem" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="periodEndRedeem" label="Period End Redeem" rules={[{ required: true, message: "Period End Redeem is required" }]} style={{ marginBottom: 0 }}>
               <DatePicker className="w-full" placeholder="Select Period End Redeem" />
             </Form.Item>
-            <Form.Item name="period" label="Period" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="period" label="Period" rules={[{ required: true, message: "Period is required" }]} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select Period" options={periodOptions} />
             </Form.Item>
-            <Form.Item name="timeUnit" label="Time Unit" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="timeUnit" label="Time Unit" rules={[{ required: true, message: "Time Unit is required" }]} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select Time Unit" options={timeUnitOptions} />
             </Form.Item>
-            <Form.Item name="uom" label="UOM" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="uom" label="UOM" rules={[{ required: true, message: "UOM is required" }]} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select UOM" options={uomOptions} />
             </Form.Item>
             <Form.Item name="amount" label="Amount" style={{ marginBottom: 0 }}>
               <InputComponent disabled={true} placeholder="Input Amount" />
             </Form.Item>
-            <Form.Item name="type" label="Type" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="type" label="Type" rules={[{ required: true, message: "Type is required" }]} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select Type" options={[
                 { label: "Billing", value: "Billing" },
                 { label: "Adjustment", value: "Adjustment" },
               ]} />
             </Form.Item>
-            <Form.Item name="source" label="Source" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+            <Form.Item name="source" label="Source" rules={[{ required: true, message: "Source is required" }]} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Input Source" options={SOURCE_OPTIONS} />
             </Form.Item>
             <Form.Item
               name="description"
               label="Description"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Description is required" }]}
               style={{ marginBottom: 0 }}
               className="lg:col-span-5"
             >
@@ -791,7 +809,7 @@ const GasDepositCreatePage = () => {
           onNext={handleNext}
           onCancel={() => navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW)}
           onClear={() => form.resetFields()}
-          onSaveDraft={() => {}}
+          onSaveDraft={handleSaveDraft}
           onSubmit={handleSubmit}
           loading={loadingSubmit}
         />

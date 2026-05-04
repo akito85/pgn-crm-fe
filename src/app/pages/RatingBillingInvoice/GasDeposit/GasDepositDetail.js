@@ -24,18 +24,30 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
 import ModalCreateMutationDetail from "./Modal/ModalCreateMutationDetail";
 import ModalViewMutationDetail from "./Modal/ModalViewMutationDetail";
+import { numberFormatting } from "../../../../utils/formatCurrency";
 
 const formatApprovalHistoryLabel = (key) => {
   const normalizedKey = key.toUpperCase();
 
   if (normalizedKey === "GAS_DEPOSIT_MUTATION") return "Mutation";
   if (normalizedKey === "GAS_DEPOSIT") return "Gas Deposit";
+  if (normalizedKey === "EXPIRED_GAS_DEPOSIT") return "Expired";
   if (normalizedKey === "INACTIVE_GAS_DEPOSIT") return "Inactive";
 
   return key
     .toLowerCase()
     .replaceAll("_", " ")
     .replaceAll(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const getDisplayStatus = (item, isExpiredFlow = false) => {
+  const statusApproval = String(item?.statusApproval || "");
+  const rawStatus = item?.status ?? item?.statusMaster ?? null;
+
+  if (!isExpiredFlow) return rawStatus;
+  if (statusApproval === "Waiting Approval" || statusApproval === "Draft") return "Draft";
+  if (statusApproval === "Approved" || statusApproval === "Rejected") return "Expired";
+  return rawStatus;
 };
 
 const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
@@ -81,29 +93,86 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
 const normalizeGasDepositDetailData = (item) => {
   if (!item) return item;
 
+  const normalizedGasDepositId =
+    item.gasDepositId ??
+    item.masterGasDepositId ??
+    ((item.stgSumId ?? item.pendingStgSumId)
+      ? -Math.abs(item.stgSumId ?? item.pendingStgSumId)
+      : item.accountId);
+
+  const normalizedRecordId =
+    item.recordId ??
+    item.referenceId ??
+    item.stgSumId ??
+    item.pendingStgSumId ??
+    item.masterGasDepositId ??
+    item.id ??
+    (Number(normalizedGasDepositId) > 0 ? normalizedGasDepositId : null);
+
   return {
     ...item,
     key: item.key ?? item.stgSumId ?? item.pendingStgSumId ?? item.masterGasDepositId ?? item.accountId,
-    gasDepositId:
-      item.gasDepositId ??
-      item.masterGasDepositId ??
-      ((item.stgSumId ?? item.pendingStgSumId)
-        ? -Math.abs(item.stgSumId ?? item.pendingStgSumId)
-        : item.accountId),
+    gasDepositId: normalizedGasDepositId,
+    recordId: normalizedRecordId,
     stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
     pendingStgSumId: item.pendingStgSumId ?? item.stgSumId ?? null,
-    status: item.status ?? item.statusMaster ?? null,
+    expiredFlow: Boolean(item.expiredFlow),
+    status: getDisplayStatus(item, Boolean(item.expiredFlow)),
     statusApproval: item.statusApproval || null,
     period: item.period || (item.earnStartDate && item.earnEndDate
       ? `${item.earnStartDate} - ${item.earnEndDate}`
       : item.earnStartDate || null),
     periodEarn: item.periodEarn || item.earnStartDate || null,
+    periodEarnEnd: item.periodEarnEnd || item.earnEndDate || null,
     periodRedeemStart: item.periodRedeemStart || item.redeemStartDate || null,
     periodRedeemEnd: item.periodRedeemEnd || item.redeemEndDate || null,
+    quantity: item.quantity ?? item.balanceVolume ?? null,
     amount: item.amount ?? item.balanceAmount ?? null,
     cashBalance: item.cashBalance ?? item.balanceVolume ?? item.receiptBalance ?? null,
     type: item.type ?? item.pendingActionType ?? null,
   };
+};
+
+const renderFormattedNumber = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+  return numberFormatting(value);
+};
+
+const toMomentValue = (value) => {
+  if (!value) return null;
+  const parsed = moment(value);
+  return parsed.isValid() ? parsed : null;
+};
+
+const formatShortDate = (value) => {
+  const parsed = toMomentValue(value);
+  return parsed ? parsed.format("D-MMM-YY") : "-";
+};
+
+const formatShortPeriod = (value) => {
+  if (typeof value === "string" && value.includes(" - ")) {
+    const [startValue] = value.split(" - ");
+    const parsedStart = toMomentValue(startValue);
+    return parsedStart ? parsedStart.format("MMM YY") : value;
+  }
+  const parsed = toMomentValue(value);
+  return parsed ? parsed.format("MMM YY") : (value || "-");
+};
+
+const formatPeriodEarnRange = (startValue, endValue) => {
+  const start = toMomentValue(startValue);
+  const end = toMomentValue(endValue);
+
+  if (start && end) {
+    if (start.year() === end.year()) {
+      return `${start.format("MMM")}-${end.format("MMM YYYY")}`;
+    }
+    return `${start.format("MMM YYYY")} - ${end.format("MMM YYYY")}`;
+  }
+
+  if (start) return start.format("MMM YYYY");
+  if (end) return end.format("MMM YYYY");
+  return "-";
 };
 
 const GasDepositDetail = (props) => {
@@ -146,6 +215,7 @@ const GasDepositDetail = (props) => {
     loading_attachment,
     filters,
   } = useSelector((state) => state.gasDepositRbi);
+  const { currentPosition, token } = useSelector((state) => state.auth || {});
 
   useEffect(() => {
     setCurrentSelectedData(normalizeGasDepositDetailData(selectedData));
@@ -155,9 +225,28 @@ const GasDepositDetail = (props) => {
     const refreshedRows = data?.result;
     if (!Array.isArray(refreshedRows) || !refreshedRows.length) return;
 
+    const sameAccountRows = refreshedRows.filter((item) => (
+      item?.accountNumber && currentSelectedData?.accountNumber && item.accountNumber === currentSelectedData.accountNumber
+    ));
+
+    const approvedActiveRow = sameAccountRows.find((item) => (
+      String(item?.statusApproval || "").toLowerCase() === "approved"
+      && String(item?.status || item?.statusMaster || "").toLowerCase() === "active"
+    ));
+
+    if (approvedActiveRow && (
+      currentSelectedData?.statusApproval === "Approved"
+      || currentSelectedData?.status === "Active"
+    )) {
+      setCurrentSelectedData(normalizeGasDepositDetailData(approvedActiveRow));
+      return;
+    }
+
     const currentIds = [
       currentSelectedData?.stgSumId,
       currentSelectedData?.pendingStgSumId,
+      currentSelectedData?.referenceId,
+      currentSelectedData?.recordId,
       currentSelectedData?.masterGasDepositId,
       currentSelectedData?.gasDepositId,
       currentSelectedData?.id,
@@ -169,6 +258,8 @@ const GasDepositDetail = (props) => {
       const candidateIds = [
         item?.stgSumId,
         item?.pendingStgSumId,
+        item?.referenceId,
+        item?.recordId,
         item?.masterGasDepositId,
         item?.gasDepositId,
         item?.id,
@@ -177,16 +268,27 @@ const GasDepositDetail = (props) => {
         .map((value) => String(value));
 
       return candidateIds.some((value) => currentIds.includes(value));
-    }) || refreshedRows.find((item) => (
-      item?.accountNumber && currentSelectedData?.accountNumber && item.accountNumber === currentSelectedData.accountNumber
-    ));
+    });
 
     if (matchedRow) {
       setCurrentSelectedData(normalizeGasDepositDetailData(matchedRow));
+      return;
+    }
+
+    if (
+      sameAccountRows[0]
+      && (
+        currentSelectedData?.statusApproval === "Approved"
+        || currentSelectedData?.status === "Active"
+      )
+    ) {
+      setCurrentSelectedData(normalizeGasDepositDetailData(sameAccountRows[0]));
     }
   }, [currentSelectedData?.accountNumber, currentSelectedData?.gasDepositId, currentSelectedData?.id, currentSelectedData?.masterGasDepositId, currentSelectedData?.pendingStgSumId, currentSelectedData?.stgSumId, data]);
 
-  const dataSourceMutationDetail = data_mutation_detail?.result;
+  const dataSourceMutationDetail = useMemo(() => {
+    return data_mutation_detail?.result || [];
+  }, [data_mutation_detail?.result]);
 
   // ===================== Mutation Detail State =====================
   const searchInputMD = useRef(null);
@@ -238,6 +340,7 @@ const GasDepositDetail = (props) => {
         mapApprovalHistoryData(data_approval_history, [
           "GAS_DEPOSIT_MUTATION",
           "GAS_DEPOSIT",
+          "EXPIRED_GAS_DEPOSIT",
           "INACTIVE_GAS_DEPOSIT",
         ]),
       );
@@ -298,6 +401,7 @@ const GasDepositDetail = (props) => {
     if (!approvalTarget?.referenceId || !approvalTarget?.referenceType) return;
 
     const actionUpper = approveOrRejectMD.toUpperCase();
+    const isSummaryApproval = approvalTarget.referenceType === "SUMMARY";
 
     await dispatch(
       processGasDepositApproval({
@@ -308,12 +412,13 @@ const GasDepositDetail = (props) => {
       }),
     ).unwrap();
 
-    if (approvalTarget.referenceType === "SUMMARY") {
+    if (isSummaryApproval) {
       setCurrentSelectedData((prev) => ({
         ...prev,
         statusApproval: actionUpper === "APPROVE" ? "Approved" : "Rejected",
         status: actionUpper === "APPROVE" ? "Active" : prev?.status,
       }));
+      setSelectedMutationDetail(null);
     }
 
     if (approvalTarget.referenceType === "MUTATION") {
@@ -329,16 +434,6 @@ const GasDepositDetail = (props) => {
     setApproveOrRejectMD("");
 
     await dispatch(
-      getMutationDetailPaginate({
-        gasDepositId: selectedGasDepositId,
-        page: 1,
-        pageSize: 100,
-        search: "",
-        sort: "",
-      }),
-    );
-
-    await dispatch(
       getAllGasDepositPaginate({
         search: encodeURIComponent(JSON.stringify(filters?.search || {})),
         page: filters?.page || 1,
@@ -347,6 +442,31 @@ const GasDepositDetail = (props) => {
         isLoadMore: false,
       }),
     );
+
+    if (!isSummaryApproval) {
+      await dispatch(
+        getMutationDetailPaginate({
+          gasDepositId: selectedGasDepositId,
+          page: 1,
+          pageSize: 100,
+          search: "",
+          sort: "",
+        }),
+      );
+      return;
+    }
+
+    setTimeout(() => {
+      dispatch(
+        getAllGasDepositPaginate({
+          search: encodeURIComponent(JSON.stringify(filters?.search || {})),
+          page: filters?.page || 1,
+          pageSize: 100,
+          sort: filters?.sort || "",
+          isLoadMore: false,
+        }),
+      );
+    }, 1000);
   };
 
   const itemGrantAccessMD = [
@@ -354,12 +474,14 @@ const GasDepositDetail = (props) => {
       action: "View",
       type: "table",
       render: (record) => {
+        const isEditable = record?.statusApproval === "Draft" || record?.statusApproval === "Rejected";
         const menuItems = [
           {
             key: "update",
+            disabled: !isEditable,
             label: (
               <span className="flex items-center gap-2">
-                <SVGIcon name="IconUpdateAction" width={16} />
+                <SVGIcon name="IconUpdateAction" width={16} color={isEditable ? undefined : "#9ca3af"} />
                 <span>Update</span>
               </span>
             ),
@@ -479,7 +601,37 @@ const GasDepositDetail = (props) => {
     [dataSourceMD],
   );
 
+  const authToken = useMemo(() => {
+    try {
+      return token ? JSON.parse(token) : null;
+    } catch {
+      return null;
+    }
+  }, [token]);
+
+  const positionRoleHints = useMemo(
+    () =>
+      [
+        currentPosition?.approvalRole,
+        currentPosition?.roleName,
+        currentPosition?.positionName,
+        authToken?.approvalRole,
+        authToken?.roleName,
+        authToken?.positionName,
+        authToken?.position,
+      ]
+        .filter(Boolean)
+        .map((item) => String(item).toLowerCase()),
+    [authToken, currentPosition],
+  );
+
   const approvalTarget = useMemo(() => {
+    const hasPendingSummaryContext = Boolean(
+      currentSelectedData?.pendingStgSumId
+      || currentSelectedData?.stgSumId
+      || Number(currentSelectedData?.gasDepositId) < 0,
+    );
+
     if (currentSelectedData?.statusApproval === "Waiting Approval") {
       return {
         referenceType: "SUMMARY",
@@ -492,7 +644,7 @@ const GasDepositDetail = (props) => {
       (selectedMutationDetail?.statusApproval === "Waiting Approval" && selectedMutationDetail) ||
       waitingMutationDetail;
 
-    if (mutationTarget) {
+    if (mutationTarget && !hasPendingSummaryContext) {
       return {
         referenceType: "MUTATION",
         referenceId:
@@ -510,7 +662,25 @@ const GasDepositDetail = (props) => {
     }
   }, [approvalTarget?.referenceId, dispatch]);
 
-  const canProcessApproval = data_approval_history?.isApprover === true;
+  const canProcessApproval = useMemo(() => {
+    const isSubmitterPosition = positionRoleHints.some((item) => item.includes("submitter"));
+    const headerWaitingApproval = currentSelectedData?.statusApproval === "Waiting Approval";
+    const mutationWaitingApproval = Boolean(
+      selectedMutationDetail?.statusApproval === "Waiting Approval" || waitingMutationDetail,
+    );
+
+    return Boolean(
+      !isSubmitterPosition
+      && (headerWaitingApproval || mutationWaitingApproval)
+      && approvalTarget,
+    );
+  }, [
+    approvalTarget,
+    currentSelectedData?.statusApproval,
+    positionRoleHints,
+    selectedMutationDetail?.statusApproval,
+    waitingMutationDetail,
+  ]);
 
   // ===================== Approval / Attachment Columns (Gas Deposit Detail tab) =====================
   const approvalColumnsGD = useMemo(() => [
@@ -582,14 +752,20 @@ const GasDepositDetail = (props) => {
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
           <DetailText label="Terms Earn">{currentSelectedData?.termsEarn ?? "-"}</DetailText>
           <DetailText label="Terms Redeem">{currentSelectedData?.termsRedeem ?? "-"}</DetailText>
-          <DetailText label="Period Earn">{currentSelectedData?.periodEarn || currentSelectedData?.earnPeriod || "-"}</DetailText>
-          <DetailText label="Period Start Redeem">{currentSelectedData?.periodRedeemStart || "-"}</DetailText>
-          <DetailText label="Period End Redeem">{currentSelectedData?.periodRedeemEnd || "-"}</DetailText>
-          <DetailText label="Period">{currentSelectedData?.period || "-"}</DetailText>
+          <DetailText label="Period Earn">
+            {formatPeriodEarnRange(
+              currentSelectedData?.periodEarn || currentSelectedData?.earnStartDate,
+              currentSelectedData?.periodEarnEnd || currentSelectedData?.earnEndDate,
+            )}
+          </DetailText>
+          <DetailText label="Period Start Redeem">{formatShortDate(currentSelectedData?.periodRedeemStart)}</DetailText>
+          <DetailText label="Period End Redeem">{formatShortDate(currentSelectedData?.periodRedeemEnd)}</DetailText>
+          <DetailText label="Period">{formatShortPeriod(currentSelectedData?.period)}</DetailText>
           <DetailText label="Time Unit">{currentSelectedData?.timeUnit || "-"}</DetailText>
           <DetailText label="UOM">{currentSelectedData?.uom || "-"}</DetailText>
-          <DetailText label="Amount">{currentSelectedData?.amount ?? "-"}</DetailText>
-          <DetailText label="Receipt Balance">{currentSelectedData?.cashBalance ?? currentSelectedData?.receiptBalance ?? "-"}</DetailText>
+          <DetailText label="Quantity">{renderFormattedNumber(currentSelectedData?.quantity)}</DetailText>
+          <DetailText label="Amount">{renderFormattedNumber(currentSelectedData?.amount)}</DetailText>
+          <DetailText label="Cash Balance">{renderFormattedNumber(currentSelectedData?.cashBalance ?? currentSelectedData?.receiptBalance)}</DetailText>
           <DetailText label="Type">{currentSelectedData?.type || "-"}</DetailText>
           <DetailText label="Source">{currentSelectedData?.source || "-"}</DetailText>
           <DetailText label="Description" className="sm:col-span-2 lg:col-span-5">{currentSelectedData?.description || "-"}</DetailText>
@@ -658,15 +834,17 @@ const GasDepositDetail = (props) => {
 
       {/* ========== MUTATION DETAIL ========== */}
       <CollapsibleCardContainer header="MUTATION DETAIL" defaultOpen={true}>
-        <div className="flex justify-end mb-3">
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={20} />}
-            type="submit"
-            onClick={() => setModalCreateMD(true)}
-          >
-            Create
-          </ButtonComponent>
-        </div>
+        {!waitingMutationDetail && (
+          <div className="flex justify-end mb-3">
+            <ButtonComponent
+              icon={<SVGIcon name="IconButtonCreate" width={20} />}
+              type="submit"
+              onClick={() => setModalCreateMD(true)}
+            >
+              Create
+            </ButtonComponent>
+          </div>
+        )}
         <TableRBI
           idTable="mutation-detail-table"
           dataSource={dataSourceMD}
@@ -696,7 +874,7 @@ const GasDepositDetail = (props) => {
       {/* ========== HISTORY LOG INFORMATION ========== */}
       <CollapsibleCardContainer header="HISTORY LOG INFORMATION" defaultOpen={true}>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-3">
-          <DetailText label="Record ID">{currentSelectedData?.id || currentSelectedData?.gasDepositId || "-"}</DetailText>
+          <DetailText label="Record ID">{currentSelectedData?.recordId || "-"}</DetailText>
           <DetailText label="Created Date">
             {currentSelectedData?.createdDate
               ? moment(currentSelectedData.createdDate).format("DD MMM YYYY HH:mm:ss")

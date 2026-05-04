@@ -89,6 +89,7 @@ export const NxFormFooter = ({
   type,
   onSubmit,
   loading = false,
+  showSaveDraft = true,
 }) => {
   return (
     <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
@@ -123,20 +124,22 @@ export const NxFormFooter = ({
         >
           {type === "update" ? "Reset Data" : "Clear Data"}
         </Button>
-        <Button
-          onClick={onSaveDraft}
-          disabled={loading}
-          style={{
-            backgroundColor: "#E6F1F9",
-            borderColor: "#E6F1F9",
-            color: "#0075BF",
-            borderRadius: "6px",
-            height: "32px",
-            fontSize: "12px",
-          }}
-        >
-          Save as Draft
-        </Button>
+        {showSaveDraft ? (
+          <Button
+            onClick={onSaveDraft}
+            disabled={loading}
+            style={{
+              backgroundColor: "#E6F1F9",
+              borderColor: "#E6F1F9",
+              color: "#0075BF",
+              borderRadius: "6px",
+              height: "32px",
+              fontSize: "12px",
+            }}
+          >
+            Save as Draft
+          </Button>
+        ) : null}
         <Button
           disabled={current === 0 || loading}
           onClick={onPrev}
