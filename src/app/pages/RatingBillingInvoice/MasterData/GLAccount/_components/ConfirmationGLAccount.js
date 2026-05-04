@@ -15,6 +15,7 @@ const ConfirmationGLAccount = ({
   handleCancel = () => {},
   handleConfirm = () => {},
   dataOption = [],
+  isLoading = false,
 }) => {
   // State
   const [valuePage, setValuePage] = useState("GL Account");
@@ -91,13 +92,15 @@ const ConfirmationGLAccount = ({
       handleConfirm={handleConfirm}
       footer={
         <div className={"w-full flex justify-end gap-5"}>
-          <ButtonComponent type={"default"} onClick={handleCancel}>
+          <ButtonComponent type={"default"} onClick={handleCancel} disabled={isLoading}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             type={"submit"}
             border={false}
             onClick={handleConfirm}
+            isLoading={isLoading}
+            disabled={isLoading}
           >
             Confirm
           </ButtonComponent>

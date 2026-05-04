@@ -852,8 +852,6 @@ const InvoiceTemplateForm = ({ type }) => {
   };
 
   const handleConfirm = () => {
-    setModalConfirm(false);
-
     const body = processData({
       listDataCriteria,
       bodyData,
@@ -889,6 +887,7 @@ const InvoiceTemplateForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -932,6 +931,7 @@ const InvoiceTemplateForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -1115,6 +1115,7 @@ const InvoiceTemplateForm = ({ type }) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             type={type}
+            isLoading={isLoading}
           />
         </Form>
 
@@ -1137,6 +1138,7 @@ const InvoiceTemplateForm = ({ type }) => {
           apiSignature={data_signature}
           apiTemplate={data_template}
           apiCriteria={data_criteria}
+          isLoading={isLoading}
         />
 
         {/* Modal Back */}

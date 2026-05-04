@@ -5,8 +5,8 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { PlusOutlined, MoreOutlined } from "@ant-design/icons";
-import { Checkbox, Spin, Tooltip, Dropdown, Menu } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -394,18 +394,40 @@ const ContentManagementView = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
-        const linkContent = (
-          <div className="flex items-center gap-2">
-            <SVGIcon
-              name="IconEdit"
-              color={isEditable ? "#0075bf" : "#8D91A0"}
-              width={20}
-            />
-            <span className={isEditable ? "text-black" : "text-[#8D91A0]"}>
-              Update
-            </span>
-          </div>
-        );
+        const linkContent =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={20}
+                />
+              }
+              border={false}
+              disabled={!isEditable}
+              type={"action"}
+            >
+              <span
+                className={`ml-0 ${isEditable ? "text-black" : "text-[#8D91A0]"
+                  }`}
+              >
+                {" "}
+                Update
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Update">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconEdit"
+                  width={20}
+                  color={!isEditable ? "#8D91A0" : "#ACC424"}
+                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                />
+              </div>
+            </Tooltip>
+          );
 
         return isEditable ? (
           <Link
@@ -419,7 +441,7 @@ const ContentManagementView = () => {
             {linkContent}
           </Link>
         ) : (
-          <div className={!isEditable ? "cursor-not-allowed" : ""}>
+          <div>
             {linkContent}
           </div>
         );
@@ -480,18 +502,40 @@ const ContentManagementView = () => {
       action: "History",
       type: "table",
       render: (record, data) => {
-        return (
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => handleApprovalHistory(record.id)}
-          >
-            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
-            <span className="text-black">Approval History</span>
-          </div>
-        );
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+              }
+              type={"action"}
+              border={false}
+              onClick={() => handleApprovalHistory(record)}
+            >
+              <span className={"text-black ml-0"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconLogHistory"
+                  color={"#0075bf"}
+                  width={20}
+                  onClick={() => handleApprovalHistory(record)}
+                />
+              </div>
+            </Tooltip>
+          );
+
+        return Content;
       },
     },
   ];
+
+  const actionCols = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess,
+  );
 
   const baseColumns = useMemo(() => {
     const contentManagementCols = [
@@ -504,53 +548,7 @@ const ContentManagementView = () => {
         searchText,
         handleSearch,
       ),
-      // ✅ Definisikan manual action column dengan Detail icon + Dropdown Menu
-      {
-        title: "ACTION",
-        key: "action",
-        dataIndex: "action",
-        fixed: "right",
-        width: 100,
-        align: "center",
-        render: (_, record) => {
-          // Filter action table selain "View" untuk dropdown
-          const dropdownActions = itemGrantAccess.filter(
-            (item) => item.type === "table" && item.action !== "View",
-          );
-
-          // Ambil action "View" untuk icon detail
-          const viewAction = itemGrantAccess.find(
-            (item) => item.type === "table" && item.action === "View",
-          );
-
-          // Buat menu items untuk dropdown
-          const menuItems = dropdownActions.map((item, idx) => ({
-            key: idx,
-            label: item.render(record, 5),
-          }));
-
-          const menu = <Menu items={menuItems} />;
-
-          return (
-            <div className="flex items-center justify-center gap-2">
-              <Dropdown
-                overlay={menu}
-                trigger={["click"]}
-                placement="bottomRight"
-              >
-                <MoreOutlined
-                  style={{
-                    fontSize: "20px",
-                    cursor: "pointer",
-                    color: "#0075bf",
-                  }}
-                />
-              </Dropdown>
-              {viewAction && viewAction.render(record)}
-            </div>
-          );
-        },
-      },
+      ...actionCols,
     ];
 
     // Add 'key' property to columns that don't have it
@@ -560,7 +558,7 @@ const ContentManagementView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, searchedColumn, searchText]);
+  }, [search, searchedColumn, searchText, actionCols]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
