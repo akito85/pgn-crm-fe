@@ -47,6 +47,8 @@ import TaxCodeDetail from "../../app/pages/RatingBillingInvoice/MasterData/TaxCo
 import TaxCodeForm from "../../app/pages/RatingBillingInvoice/MasterData/TaxCode/TaxCodeForm";
 import ManagementBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/ManagementBillingInstallmentPage";
 import CreateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/CreateBillingInstallmentPage";
+import UpdateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/UpdateBillingInstallmentPage";
+import EarlyRepaymentBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/EarlyRepaymentBillingInstallmentPage";
 import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
 import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
@@ -172,6 +174,12 @@ export const RBI_ELEMENTS = {
   ),
   MANAGEMENT_BILLING_INSTALLMENT_CREATE_ELEMENT: (
     <CreateBillingInstallmentPage />
+  ),
+  MANAGEMENT_BILLING_INSTALLMENT_UPDATE_ELEMENT: (
+    <UpdateBillingInstallmentPage />
+  ),
+  MANAGEMENT_BILLING_INSTALLMENT_EARLY_REPAYMENT_ELEMENT: (
+    <EarlyRepaymentBillingInstallmentPage />
   ),
 
   // efaktur-code

@@ -29,22 +29,22 @@ export const FormStepper = ({ steps, current, onPrev, onNext, disabled = false }
             width: "28px",
             height: "28px",
             borderRadius: "50%",
-          backgroundColor: current > 0 && !disabled ? "transparent" : "#E0E0E0",
-          border: current > 0 && !disabled ? "1px solid #0075BF" : "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: current > 0 && !disabled ? "pointer" : "not-allowed",
-          opacity: disabled ? 0.6 : 1,
-        }}
-        onClick={() => current > 0 && !disabled && onPrev && onPrev()}
-      >
-        <LeftOutlined
-          style={{
-            fontSize: "12px",
-            color: current > 0 && !disabled ? "#0075BF" : "#BDBDBD",
+            backgroundColor: current > 0 && !disabled ? "transparent" : "#E0E0E0",
+            border: current > 0 && !disabled ? "1px solid #0075BF" : "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: current > 0 && !disabled ? "pointer" : "not-allowed",
+            opacity: disabled ? 0.6 : 1,
           }}
-        />
+          onClick={() => current > 0 && !disabled && onPrev && onPrev()}
+        >
+          <LeftOutlined
+            style={{
+              fontSize: "12px",
+              color: current > 0 && !disabled ? "#0075BF" : "#BDBDBD",
+            }}
+          />
         </div>
         <div
           ref={scrollContainerRef}
@@ -102,30 +102,30 @@ export const FormStepper = ({ steps, current, onPrev, onNext, disabled = false }
             width: "28px",
             height: "28px",
             borderRadius: "50%",
-          backgroundColor:
-            current < steps.length - 1 && !disabled ? "transparent" : "#E0E0E0",
-          border:
-            current < steps.length - 1 && !disabled
-              ? "1px solid #0075BF"
-              : "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor:
-            current < steps.length - 1 && !disabled ? "pointer" : "not-allowed",
-          opacity: disabled ? 0.6 : 1,
-        }}
-        onClick={() =>
-          current < steps.length - 1 && !disabled && onNext && onNext()
-        }
-      >
-        <RightOutlined
-          style={{
-            fontSize: "12px",
-            color:
-              current < steps.length - 1 && !disabled ? "#0075BF" : "#BDBDBD",
+            backgroundColor:
+              current < steps.length - 1 && !disabled ? "transparent" : "#E0E0E0",
+            border:
+              current < steps.length - 1 && !disabled
+                ? "1px solid #0075BF"
+                : "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor:
+              current < steps.length - 1 && !disabled ? "pointer" : "not-allowed",
+            opacity: disabled ? 0.6 : 1,
           }}
-        />
+          onClick={() =>
+            current < steps.length - 1 && !disabled && onNext && onNext()
+          }
+        >
+          <RightOutlined
+            style={{
+              fontSize: "12px",
+              color:
+                current < steps.length - 1 && !disabled ? "#0075BF" : "#BDBDBD",
+            }}
+          />
         </div>
       </div>
     </div>
@@ -213,7 +213,7 @@ export const FormFooter = ({
               {saveDraftLabel}
             </Button>
           )}
-          
+
           {useNavigation && (
             <>
               <Button
