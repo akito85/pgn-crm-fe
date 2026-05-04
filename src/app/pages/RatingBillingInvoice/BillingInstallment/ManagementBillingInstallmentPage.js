@@ -410,22 +410,23 @@ const ManagementBillingInstallmentPage = () => {
   }, [page]);
 
   const handleDownload = () => {
-    let tempSearch = "";
+    let tempSearch = {};
     for (const dataIndex in search) {
       if (Object.hasOwnProperty.call(search, dataIndex)) {
         const tempSearchText = search[dataIndex];
         if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
+          tempSearch[dataIndex] = tempSearchText;
         }
       }
     }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+    const searchString = Object.keys(tempSearch).length > 0 ? JSON.stringify(tempSearch) : "";
+    
     dispatch(
       getDownloadList({
         page,
         pageSize: initialPageSize,
         sort,
-        search: tempSearch,
+        search: searchString,
       }),
     );
   };
@@ -473,12 +474,12 @@ const ManagementBillingInstallmentPage = () => {
 
       const dataApprover = {
         installment: installmentHistory?.dataApprover?.INSTALLMENT || [],
-        early_repayment: earlyRepaymentHistory?.dataApprover?.INSTALLMENT_EARLY_REPAYMENT || [],
+        "early repayment": earlyRepaymentHistory?.dataApprover?.INSTALLMENT_EARLY_REPAYMENT || [],
       };
 
       const dataHistory = {
         installment: installmentHistory?.dataHistory?.INSTALLMENT || [],
-        early_repayment: earlyRepaymentHistory?.dataHistory?.INSTALLMENT_EARLY_REPAYMENT || [],
+        "early repayment": earlyRepaymentHistory?.dataHistory?.INSTALLMENT_EARLY_REPAYMENT || [],
       };
 
       setDataApprovalHistory({ dataApprover, dataHistory });
@@ -1103,7 +1104,9 @@ const ManagementBillingInstallmentPage = () => {
         ],
         onFilter: (value, record) => (record.status || "Draft") === value,
         render: (status) => (
-          <StatusComponent colour={status || "P"}>{status || "Draft"}</StatusComponent>
+          <div className="flex justify-center">
+            <StatusComponent colour={status || "P"}>{status || "Draft"}</StatusComponent>
+          </div>
         ),
       },
     ];

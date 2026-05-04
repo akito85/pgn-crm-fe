@@ -76,7 +76,7 @@ export const getDownloadList = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/installment/download-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/installment/download-list?searchs=${encodeURIComponent(searchParams)}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
