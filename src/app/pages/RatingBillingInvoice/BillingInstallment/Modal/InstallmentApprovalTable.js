@@ -1,8 +1,39 @@
-import React from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Table } from "antd";
+import StatusComponent from "../../../../../components/StatusComponent";
+import {
+  hasValue,
+  renderColumn,
+} from "../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 
 const InstallmentApprovalTable = ({ data = [], rowSelection, type = false }) => {
-  const columns = [
+  const searchInput = useRef(null);
+  const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
+  };
+
+  const handleReset = (clearFilters, dataIndex) => {
+    clearFilters?.();
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: "",
+    }));
+    setSearchText("");
+    setSearchedColumn("");
+  };
+
+  const columns = useMemo(() => [
     {
       title: "NO",
       key: "no",
@@ -15,18 +46,99 @@ const InstallmentApprovalTable = ({ data = [], rowSelection, type = false }) => 
       dataIndex: "installmentNumber",
       key: "installmentNumber",
       width: 180,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "installmentNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+        [],
+        handleReset,
+      ),
+      onFilter: (value, record) =>
+        String(record.installmentNumber || "")
+          .toLowerCase()
+          .includes(String(value || "").toLowerCase()),
+      render: (text) =>
+        renderColumn(
+          "installmentNumber",
+          hasValue(search["installmentNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       key: "accountNumber",
       width: 150,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "accountNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+        [],
+        handleReset,
+      ),
+      onFilter: (value, record) =>
+        String(record.accountNumber || "")
+          .toLowerCase()
+          .includes(String(value || "").toLowerCase()),
+      render: (text) =>
+        renderColumn(
+          "accountNumber",
+          hasValue(search["accountNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "CUSTOMER NAME",
       dataIndex: "customerName",
       key: "customerName",
       width: 180,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "customerName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+        [],
+        handleReset,
+      ),
+      onFilter: (value, record) =>
+        String(record.customerName || "")
+          .toLowerCase()
+          .includes(String(value || "").toLowerCase()),
+      render: (text) =>
+        renderColumn(
+          "customerName",
+          hasValue(search["customerName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TENOR",
@@ -41,6 +153,33 @@ const InstallmentApprovalTable = ({ data = [], rowSelection, type = false }) => 
       dataIndex: "startPeriod",
       key: "startPeriod",
       width: 120,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "startPeriod",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+        [],
+        handleReset,
+      ),
+      onFilter: (value, record) =>
+        String(record.startPeriod || "")
+          .toLowerCase()
+          .includes(String(value || "").toLowerCase()),
+      render: (text) =>
+        renderColumn(
+          "startPeriod",
+          hasValue(search["startPeriod"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TOTAL AMOUNT",
@@ -58,25 +197,73 @@ const InstallmentApprovalTable = ({ data = [], rowSelection, type = false }) => 
       dataIndex: "statusApproval",
       key: "statusApproval",
       width: 140,
-      render: (status) => {
-        const statusLower = status?.toLowerCase();
-        if (statusLower === "waiting_approval") {
-          return <span style={{ color: "#faad14", fontWeight: 500 }}>{status}</span>;
-        }
-        return <span>{status}</span>;
-      },
+      align: "center",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusApproval",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "status",
+        [],
+        handleReset,
+      ),
+      onFilter: (value, record) =>
+        String(record.statusApproval || "")
+          .toLowerCase()
+          .includes(String(value || "").toLowerCase()),
+      render: (status) =>
+        status ? (
+          <div className="flex justify-center whitespace-nowrap">
+            <StatusComponent colour={status} size="small">
+              {status}
+            </StatusComponent>
+          </div>
+        ) : (
+          "-"
+        ),
     },
     {
       title: "REQUEST DATE",
       dataIndex: "requestDate",
       key: "requestDate",
       width: 150,
-      render: (date) => (date ? new Date(date).toLocaleString("id-ID") : "-"),
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "requestDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+        [],
+        handleReset,
+      ),
+      onFilter: (value, record) =>
+        String(record.requestDate || "")
+          .toLowerCase()
+          .includes(String(value || "").toLowerCase()),
+      render: (date) =>
+        renderColumn(
+          "requestDate",
+          hasValue(search["requestDate"]),
+          searchText,
+          date ? new Date(date).toLocaleString("id-ID") : "-",
+          false,
+          "input",
+          search,
+        ),
     },
-  ];
+  ], [search, searchText, searchedColumn]);
 
   return (
     <Table
+      className="nx-table"
       columns={columns}
       dataSource={data}
       rowKey="id"

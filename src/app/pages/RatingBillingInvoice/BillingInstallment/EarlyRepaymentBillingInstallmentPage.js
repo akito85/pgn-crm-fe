@@ -4,13 +4,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
 import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
+import StatusComponent from "../../../../components/StatusComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
@@ -328,7 +329,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
         </Space>
       </div>
     ),
-    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
+    filterIcon: (filtered) => <FilterOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : false,
     onFilterDropdownVisibleChange: (visible) => {
@@ -617,6 +618,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
       key: "isPrimary",
       width: 80,
       sorter: (a, b) => (a.isPrimary === b.isPrimary ? 0 : a.isPrimary ? -1 : 1),
+      ...getColumnSearchProps("isPrimary", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
       filters: [
         { text: "Yes", value: true },
         { text: "No", value: false },
@@ -633,6 +635,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
       key: "type",
       width: 120,
       sorter: (a, b) => (a.type || "").localeCompare(b.type || ""),
+      ...getColumnSearchProps("type", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
     },
     {
       title: "Value",
@@ -640,6 +643,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
       key: "value",
       width: 250,
       sorter: (a, b) => (a.value || "").localeCompare(b.value || ""),
+      ...getColumnSearchProps("value", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
     },
   ];
 
@@ -757,7 +761,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
 
   const renderEarlyRepaymentInformation = () => (
     <BaseContainer header="EARLY REPAYMENT INFORMATION">
-      <div className="w-full grid grid-cols-5 gap-1">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
         <Form.Item
           name="earlyRepaymentSource"
           label="Source"
@@ -792,7 +796,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
           name="reason"
           label="Reason"
           rules={[{ required: true, message: "Field ini wajib diisi" }]}
-          className="col-span-2"
+          className="md:col-span-2"
           style={{ marginBottom: 0 }}
         >
           <Input.TextArea
@@ -824,18 +828,24 @@ const EarlyRepaymentBillingInstallmentPage = () => {
         dataIndex: "invoiceNumber",
         key: "invoiceNumber",
         width: 150,
+        sorter: (a, b) => (a.invoiceNumber || "").localeCompare(b.invoiceNumber || ""),
+        ...getColumnSearchProps("invoiceNumber", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       },
       {
         title: "Billing Period",
         dataIndex: "billingPeriod",
         key: "billingPeriod",
         width: 120,
+        sorter: (a, b) => (a.billingPeriod || "").localeCompare(b.billingPeriod || ""),
+        ...getColumnSearchProps("billingPeriod", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       },
       {
         title: "Billing Item Name",
         dataIndex: "billingItemName",
         key: "billingItemName",
         width: 200,
+        sorter: (a, b) => (a.billingItemName || "").localeCompare(b.billingItemName || ""),
+        ...getColumnSearchProps("billingItemName", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       },
       {
         title: "Amount",
@@ -843,6 +853,8 @@ const EarlyRepaymentBillingInstallmentPage = () => {
         key: "amount",
         width: 150,
         align: "right",
+        sorter: (a, b) => (a.amount || 0) - (b.amount || 0),
+        ...getColumnSearchProps("amount", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
         render: (amount) => new Intl.NumberFormat("id-ID").format(amount || 0),
       },
     ];
@@ -913,6 +925,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
         width: 100,
         align: "center",
         sorter: (a, b) => (a.sequenceNo || 0) - (b.sequenceNo || 0),
+        ...getColumnSearchProps("sequenceNo", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
       },
       {
         title: "Period",
@@ -929,6 +942,7 @@ const EarlyRepaymentBillingInstallmentPage = () => {
         width: 200,
         align: "right",
         sorter: (a, b) => (a.amount || 0) - (b.amount || 0),
+        ...getColumnSearchProps("amount", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
         render: (amount) => new Intl.NumberFormat("id-ID").format(amount || 0),
       },
       {
@@ -936,13 +950,20 @@ const EarlyRepaymentBillingInstallmentPage = () => {
         dataIndex: "status",
         key: "status",
         width: 120,
+        align: "center",
         sorter: (a, b) => (a.status || "").localeCompare(b.status || ""),
+        ...getColumnSearchProps("status", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
         filters: [
           { text: "Pending", value: "Pending" },
           { text: "Active", value: "Active" },
           { text: "Paid", value: "Paid" },
         ],
         onFilter: (value, record) => (record.status || "Pending") === value,
+        render: (status) => (
+          <div className="flex justify-center">
+            <StatusComponent colour={status || "pending"}>{status || "Pending"}</StatusComponent>
+          </div>
+        ),
       },
     ];
 

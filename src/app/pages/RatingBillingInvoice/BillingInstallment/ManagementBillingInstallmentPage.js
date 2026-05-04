@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { Spin, Tooltip, Modal, Dropdown, Descriptions, Table, Tabs, Input, Button, Space } from "antd";
-import { WarningOutlined, MoreOutlined, SearchOutlined } from "@ant-design/icons";
+import { WarningOutlined, MoreOutlined, SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import StatusComponent from "../../../../components/StatusComponent";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -356,7 +356,7 @@ const ManagementBillingInstallmentPage = () => {
         </Space>
       </div>
     ),
-    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
+    filterIcon: (filtered) => <FilterOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : false,
     onFilterDropdownVisibleChange: (visible) => {
@@ -659,6 +659,7 @@ const ManagementBillingInstallmentPage = () => {
       key: "isPrimary",
       width: 80,
       sorter: (a, b) => (a.isPrimary === b.isPrimary ? 0 : a.isPrimary ? -1 : 1),
+      ...getColumnSearchProps("isPrimary", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
       filters: [
         { text: "Yes", value: true },
         { text: "No", value: false },
@@ -675,6 +676,7 @@ const ManagementBillingInstallmentPage = () => {
       key: "type",
       width: 120,
       sorter: (a, b) => (a.type || "").localeCompare(b.type || ""),
+      ...getColumnSearchProps("type", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
     },
     {
       title: "Value",
@@ -682,6 +684,7 @@ const ManagementBillingInstallmentPage = () => {
       key: "value",
       width: 250,
       sorter: (a, b) => (a.value || "").localeCompare(b.value || ""),
+      ...getColumnSearchProps("value", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
     },
   ];
 
@@ -717,6 +720,7 @@ const ManagementBillingInstallmentPage = () => {
       width: 150,
       align: "right",
       sorter: (a, b) => (a.amount || 0) - (b.amount || 0),
+      ...getColumnSearchProps("amount", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       render: (amount) => new Intl.NumberFormat("id-ID").format(amount || 0),
     },
   ];
@@ -977,18 +981,24 @@ const ManagementBillingInstallmentPage = () => {
         dataIndex: "invoiceNumber",
         key: "invoiceNumber",
         width: 150,
+        sorter: (a, b) => (a.invoiceNumber || "").localeCompare(b.invoiceNumber || ""),
+        ...getColumnSearchProps("invoiceNumber", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       },
       {
         title: "Billing Period",
         dataIndex: "billingPeriod",
         key: "billingPeriod",
         width: 120,
+        sorter: (a, b) => (a.billingPeriod || "").localeCompare(b.billingPeriod || ""),
+        ...getColumnSearchProps("billingPeriod", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       },
       {
         title: "Billing Item Name",
         dataIndex: "billingItemName",
         key: "billingItemName",
         width: 200,
+        sorter: (a, b) => (a.billingItemName || "").localeCompare(b.billingItemName || ""),
+        ...getColumnSearchProps("billingItemName", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       },
       {
         title: "Amount",
@@ -996,6 +1006,8 @@ const ManagementBillingInstallmentPage = () => {
         key: "amount",
         width: 150,
         align: "right",
+        sorter: (a, b) => (a.amount || 0) - (b.amount || 0),
+        ...getColumnSearchProps("amount", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
         render: (amount) => new Intl.NumberFormat("id-ID").format(amount || 0),
       },
     ];
@@ -1087,6 +1099,7 @@ const ManagementBillingInstallmentPage = () => {
         width: 150,
         align: "right",
         sorter: (a, b) => (a.amount || 0) - (b.amount || 0),
+        ...getColumnSearchProps("amount", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
         render: (amount) =>
           `${installmentData.currency || ""} ${new Intl.NumberFormat("id-ID").format(amount || 0)}`,
       },
@@ -1097,6 +1110,7 @@ const ManagementBillingInstallmentPage = () => {
         width: 120,
         align: "center",
         sorter: (a, b) => (a.status || "").localeCompare(b.status || ""),
+        ...getColumnSearchProps("status", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
         filters: [
           { text: "Draft", value: "Draft" },
           { text: "Open", value: "Open" },

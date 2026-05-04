@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Form, Select, Input, DatePicker, Spin, Table, Modal, Button, Checkbox, Tooltip, Space } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -260,7 +260,7 @@ const CreateBillingInstallmentPage = () => {
         </Space>
       </div>
     ),
-    filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
+    filterIcon: (filtered) => <FilterOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
     onFilter: (value, record) =>
       record[dataIndex] ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()) : false,
     onFilterDropdownVisibleChange: (visible) => {
@@ -891,6 +891,7 @@ const CreateBillingInstallmentPage = () => {
       key: "isPrimary",
       width: 80,
       sorter: (a, b) => (a.isPrimary === b.isPrimary ? 0 : a.isPrimary ? -1 : 1),
+      ...getColumnSearchProps("isPrimary", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
       filters: [
         { text: "Yes", value: true },
         { text: "No", value: false },
@@ -923,6 +924,7 @@ const CreateBillingInstallmentPage = () => {
       key: "type",
       width: 120,
       sorter: (a, b) => (a.type || "").localeCompare(b.type || ""),
+      ...getColumnSearchProps("type", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
     },
     {
       title: "Value",
@@ -930,6 +932,7 @@ const CreateBillingInstallmentPage = () => {
       key: "value",
       width: 250,
       sorter: (a, b) => (a.value || "").localeCompare(b.value || ""),
+      ...getColumnSearchProps("value", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
     },
   ];
 
@@ -1095,6 +1098,7 @@ const CreateBillingInstallmentPage = () => {
       width: 150,
       align: "right",
       sorter: (a, b) => (a.amount || 0) - (b.amount || 0),
+      ...getColumnSearchProps("amount", openItemSearchText, setOpenItemSearchText, openItemSearchedColumn, setOpenItemSearchedColumn, openItemSearchInput),
       render: (amount) => new Intl.NumberFormat("id-ID").format(amount || 0),
     },
   ];
@@ -1180,6 +1184,7 @@ const CreateBillingInstallmentPage = () => {
                   key: "sequenceNo",
                   width: 100,
                   align: "center",
+                  ...getColumnSearchProps("sequenceNo", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
                   render: (_, __, index) => index + 1,
                 },
                 {
@@ -1197,6 +1202,7 @@ const CreateBillingInstallmentPage = () => {
                   width: 150,
                   align: "right",
                   sorter: (a, b) => (a.amount || 0) - (b.amount || 0),
+                  ...getColumnSearchProps("amount", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
                   render: (amount, record, index) => {
                     if (installmentType === "AUTOMATIC") {
                       return new Intl.NumberFormat("id-ID").format(amount || 0);
@@ -1218,6 +1224,7 @@ const CreateBillingInstallmentPage = () => {
                   key: "status",
                   width: 120,
                   align: "center",
+                  ...getColumnSearchProps("status", detailSearchText, setDetailSearchText, detailSearchedColumn, setDetailSearchedColumn, detailSearchInput),
                   render: () => (
                     <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">Draft</span>
                   ),
