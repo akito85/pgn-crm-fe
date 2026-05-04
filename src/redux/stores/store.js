@@ -119,6 +119,7 @@ import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData
 import settingReducer from "../slices/receipt_collection/setting";
 import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
+import installmentReducer from "../slices/rating_billing_invoice/installment";
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
@@ -272,6 +273,7 @@ const reducer = combineReducers({
   digitalSignature: digitalSignatureReducer,
   glAccount: glAccountReducer,
   contentManagement: contentManagementReducer,
+  installment: installmentReducer,
 
   //receipt and collection
   receipt: receiptReducer,
