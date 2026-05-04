@@ -99,7 +99,7 @@ export const columnsRating = (
   },
   {
     key: "timeUnit",
-    title: "CONTRACT TIME UNIT",
+    title: "TIME UNIT",
     dataIndex: "timeUnit",
     width: 190,
     sorter: true,
