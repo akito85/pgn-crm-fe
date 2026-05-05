@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Dropdown, Select, Spin } from "antd";
+import { Dropdown, Skeleton, Spin } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -37,19 +37,6 @@ const formatDate = (val) => {
   return `${date} ${hh}:${mm}:${ss}`;
 };
 
-const STATUS_OPTIONS = [
-  { value: "",         label: "ALL" },
-  { value: "DRAFT",    label: "DRAFT" },
-  { value: "ACTIVE",   label: "ACTIVE" },
-  { value: "INACTIVE", label: "INACTIVE" },
-];
-
-const PAUSED_OPTIONS = [
-  { value: "",      label: "ALL" },
-  { value: "true",  label: "Yes" },
-  { value: "false", label: "No" },
-];
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const JobSchedulePage = () => {
@@ -67,9 +54,9 @@ const JobSchedulePage = () => {
 
   const { loading: permissionsLoading } = useGrantAccessHooks();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filterStatus, setFilterStatus] = useState(null);
-  const [filterIsPaused, setFilterIsPaused] = useState(null);
+  const [page, setPage] = useState(1);
+  const [accumulatedData, setAccumulatedData] = useState([]);
+  const [refreshToken, setRefreshToken] = useState(0);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
 
   // Delete modal state
@@ -77,39 +64,36 @@ const JobSchedulePage = () => {
   const [scheduleToDelete, setScheduleToDelete] = useState(null);
 
   const fetchList = useCallback(() => {
-    dispatch(getAllSchedulesPaginate({
-      status: filterStatus,
-      isPaused: filterIsPaused,
-      page: currentPage,
-      pageSize: PAGE_SIZE,
-    }));
-  }, [dispatch, filterStatus, filterIsPaused, currentPage]);
+    dispatch(getAllSchedulesPaginate({ page, pageSize: PAGE_SIZE }));
+  }, [dispatch, page, refreshToken]);
 
   useEffect(() => { fetchList(); }, [fetchList]);
 
-  const handleStatusChange = (value) => {
-    setFilterStatus(value === "" ? null : value);
-    setCurrentPage(1);
-  };
-
-  const handlePausedChange = (value) => {
-    if (value === "") {
-      setFilterIsPaused(null);
-    } else if (value === "true") {
-      setFilterIsPaused(true);
-    } else if (value === "false") {
-      setFilterIsPaused(false);
+  useEffect(() => {
+    if (!data?.content) return;
+    if (page === 1) {
+      setAccumulatedData(data.content);
+    } else {
+      setAccumulatedData((prev) => {
+        const existingIds = new Set(prev.map((item) => item.scheduleId));
+        const newItems = data.content.filter((item) => !existingIds.has(item.scheduleId));
+        return [...prev, ...newItems];
+      });
     }
-    setCurrentPage(1);
+  }, [data?.content, page]);
+
+  const handleLoadMore = () => {
+    const totalPages = data?.totalPages || 0;
+    if (page < totalPages) setPage((prev) => prev + 1);
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
+  const hasMore = accumulatedData.length < (data?.totalElements || 0);
 
   const afterAction = useCallback(() => {
-    fetchList();
-  }, [fetchList]);
+    setPage(1);
+    setAccumulatedData([]);
+    setRefreshToken((n) => n + 1);
+  }, []);
 
   const handleDeleteConfirm = async () => {
     if (!scheduleToDelete) return;
@@ -140,7 +124,11 @@ const JobSchedulePage = () => {
     fixed: "right",
     render: (_, record) => {
       if (permissionsLoading) {
-        return <span>—</span>;
+        return (
+          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
+            <Skeleton.Button active size="small" shape="round" block />
+          </div>
+        );
       }
       if (!record || !record.scheduleId) return <span>—</span>;
 
@@ -196,7 +184,6 @@ const JobSchedulePage = () => {
               style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
               onClick={(e) => e.stopPropagation()}
               type="button"
-              disabled={actionLoading}
             >
               <IconThreeDots />
             </button>
@@ -204,7 +191,7 @@ const JobSchedulePage = () => {
         </div>
       );
     },
-  }), [permissionsLoading, handleAction, navigate, actionLoading]);
+  }), [permissionsLoading, handleAction, navigate]);
 
   // ─── Columns ─────────────────────────────────────────────────────────────────
 
@@ -214,7 +201,7 @@ const JobSchedulePage = () => {
       key: "no",
       width: 60,
       align: "center",
-      render: (_, __, index) => (currentPage - 1) * PAGE_SIZE + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "SCHEDULE NAME",
@@ -310,7 +297,7 @@ const JobSchedulePage = () => {
       render: (val) => formatDate(val),
     },
     actionColumn,
-  ], [actionColumn, currentPage]);
+  ], [actionColumn]);
 
   const allColumns = useMemo(() =>
     baseColumns.map((col) => ({
@@ -343,39 +330,23 @@ const JobSchedulePage = () => {
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-          <Select
-            style={{ width: 160 }}
-            value={filterStatus ?? ""}
-            onChange={handleStatusChange}
-            options={STATUS_OPTIONS}
-            placeholder="Status"
-          />
-          <Select
-            style={{ width: 140 }}
-            value={filterIsPaused === null ? "" : String(filterIsPaused)}
-            onChange={handlePausedChange}
-            options={PAUSED_OPTIONS}
-            placeholder="Paused"
-          />
-        </div>
-
         <NxTable
           idTable="job-schedule-list-table"
           userId={userId}
-          dataSource={data?.content || []}
-          totalData={data?.totalElements || 0}
-          current={currentPage}
-          pageSize={PAGE_SIZE}
+          dataSource={accumulatedData}
+          totalData={data?.totalElements}
+          current={page}
           loading={loading}
           columns={processedColumns}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
           tableScrolled={{ y: 500, x: "max-content" }}
-          usePagination={true}
-          useInfiniteScroll={false}
-          onChange={handlePageChange}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={20}
           showExport={false}
         />
       </NxCardContainer>
