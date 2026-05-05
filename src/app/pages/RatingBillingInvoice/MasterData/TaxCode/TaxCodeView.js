@@ -63,9 +63,9 @@ const TaxCodeView = () => {
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
       const saved = localStorage.getItem("taxCodeFixedColumns");
-      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+      return saved ? JSON.parse(saved) : { left: ["NO"], right: ["status", "statusApproval", "action"] };
     } catch (e) {
-      return { left: ["no"], right: ["action"] };
+      return { left: ["NO"], right: ["status", "statusApproval", "action"] };
     }
   });
 

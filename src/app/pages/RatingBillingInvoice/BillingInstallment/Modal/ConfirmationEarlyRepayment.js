@@ -1,41 +1,60 @@
 import React, { useState } from "react";
-import GLAccountInfo from "./GLAccountInfo";
-import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
-import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
-import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../../components/RadioTabs";
+import { Form, Input, Table } from "antd";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import RadioTabs from "../../../../../components/RadioTabs";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 
-const ConfirmationGLAccount = ({
-  isOpen,
-  data,
+const { TextArea } = Input;
+
+const ConfirmationEarlyRepayment = ({
+  visible = false,
+  data = {},
   selectedHierarchy,
   listDataAppHierDetail = [],
   listDataAttachment = [],
   handleCancel = () => {},
   handleConfirm = () => {},
   dataOption = [],
-  isLoading = false,
+  isSubmit = false,
 }) => {
-  // State
-  const [valuePage, setValuePage] = useState("GL Account");
+  const [valuePage, setValuePage] = useState("Early Repayment");
 
   const [tabPages, setTabPages] = useState([
-    { value: "GL Account" },
+    { value: "Early Repayment" },
     { value: "Approval" },
     { value: "Attachment" },
   ]);
 
-  // Rendering Section
   const renderSection = (valuePage) => {
     switch (valuePage) {
-      case "GL Account":
+      case "Early Repayment":
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"GL ACCOUNT INFORMATION"}
+              {"EARLY REPAYMENT INFORMATION"}
             </p>
-            <GLAccountInfo data={data} />
+            <div className="w-full grid grid-cols-2 gap-4 pt-4">
+              <div>
+                <p className="text-gray-500 text-xs">Source</p>
+                <p className="text-gray-800 text-sm font-medium">
+                  {data.source || "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-500 text-xs">Request Date</p>
+                <p className="text-gray-800 text-sm font-medium">
+                  {data.requestDate || "-"}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-gray-500 text-xs">Reason</p>
+                <p className="text-gray-800 text-sm font-medium">
+                  {data.reason || "-"}
+                </p>
+              </div>
+            </div>
           </div>
         );
       case "Approval":
@@ -50,10 +69,10 @@ const ConfirmationGLAccount = ({
               approvalName={
                 (dataOption || []).filter(
                   (data) => data.value === selectedHierarchy
-                )?.[0]?.name || ""
+                )?.[0].name || ""
               }
               dataTable={listDataAppHierDetail}
-              selectedHierarchy={selectedHierarchy}
+              selectedHierarchy
             />
           </>
         );
@@ -66,7 +85,7 @@ const ConfirmationGLAccount = ({
             <AttachmentComponent
               type={"preview"}
               data={listDataAttachment}
-              typeSelector="billing_bucket"
+              typeSelector="installment"
             />
           </>
         );
@@ -74,9 +93,8 @@ const ConfirmationGLAccount = ({
         return (
           <div>
             <p className="text-primary text-xs font-bold uppercase pt-[30px]">
-              {"GL ACCOUNT INFORMATION"}
+              {"EARLY REPAYMENT INFORMATION"}
             </p>
-            <GLAccountInfo data={data} />
           </div>
         );
     }
@@ -84,23 +102,21 @@ const ConfirmationGLAccount = ({
 
   return (
     <ModalCustom
-      isOpen={isOpen}
+      isOpen={visible}
       type={"confirmation"}
       header={"confirmation"}
-      width={1000}
+      width={800}
       handleCancel={handleCancel}
       handleConfirm={handleConfirm}
       footer={
-        <div className={"w-full flex justify-end gap-5"}>
-          <ButtonComponent type={"default"} onClick={handleCancel} disabled={isLoading}>
+        <div className={"w-full flex justify-end gap-2"}>
+          <ButtonComponent type={"default"} onClick={handleCancel}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             type={"submit"}
             border={false}
             onClick={handleConfirm}
-            isLoading={isLoading}
-            disabled={isLoading}
           >
             Confirm
           </ButtonComponent>
@@ -117,4 +133,4 @@ const ConfirmationGLAccount = ({
   );
 };
 
-export default ConfirmationGLAccount;
+export default ConfirmationEarlyRepayment;

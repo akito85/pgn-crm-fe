@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Form, Select, Input, DatePicker, Spin, Table, Modal, Button, Checkbox, Tooltip, Space } from "antd";
 import { PlusOutlined, SearchOutlined, FilterOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import Highlighter from "react-highlight-words";
@@ -17,24 +17,26 @@ import AttachmentComponent from "../../../../components/Attachment/AttachmentCom
 import { configApp } from "../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
 import {
+  getDetailInstallment,
   getActiveAccounts,
   getAccountDetail,
   getInstallmentTypes,
   getInstallmentSources,
   createContact,
   getOpenItems,
-  createInstallment,
+  updateInstallment,
   getApprovalHierarchy,
   getApprovalHierarchyDetail,
   getAttachmentCategory,
+  getAttachmentList,
+  clearDetailInstallment,
   getContactType,
   getInputType,
   getCountryCode,
   getCountryZone,
   getJob,
   getPosition,
-  clearAccountDetail,
-  clearOpenItems,
+  getAllContacts,
 } from "../../../../redux/slices/rating_billing_invoice/installment";
 import ModalCreateNewContact from "../../AccountManagement/CustomerAccountDetail/DetailPages/AccountContact/FormAccountContact/ModalCreateNewContact";
 import ModalChooseContact from "./Modal/ModalChooseContact";
@@ -42,20 +44,26 @@ import ConfirmationInstallment from "./Modal/ConfirmationInstallment";
 
 const { TextArea } = Input;
 
-const CreateBillingInstallmentPage = () => {
+const UpdateBillingInstallmentPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form] = Form.useForm();
+  const [formLoaded, setFormLoaded] = useState(false);
+
+  const { id } = location?.state || {};
 
   const {
     data_account,
     data_account_detail,
     data_types,
     data_sources,
-    data_contacts,
+    data_all_contacts,
     data_open_items,
     data_approval,
     data_approval_detail,
+    data_detail,
+    data_attachments,
     data_contact_type,
     data_input_type,
     data_country_code,
@@ -137,6 +145,12 @@ const CreateBillingInstallmentPage = () => {
   };
 
   useEffect(() => {
+    if (id) {
+      dispatch(getDetailInstallment(id));
+    }
+  }, [id, dispatch]);
+
+  useEffect(() => {
     dispatchWithLoading(getActiveAccounts(), setLoadingAccounts);
     dispatchWithLoading(getInstallmentTypes(), setLoadingTypes);
     dispatchWithLoading(getInstallmentSources(), setLoadingSources);
@@ -168,6 +182,18 @@ const CreateBillingInstallmentPage = () => {
   }, [data_approval]);
 
   useEffect(() => {
+    if (data_detail && Object.keys(data_detail).length > 0 && data_approval && data_approval.length > 0) {
+      const detail = data_detail;
+      if (detail.appHierId && !selectedApprovalHierarchy) {
+        setSelectedApprovalHierarchy(detail.appHierId);
+        form.setFieldsValue({
+          apphierId: detail.appHierId,
+        });
+      }
+    }
+  }, [data_approval, data_detail]);
+
+  useEffect(() => {
     if (selectedApprovalHierarchy) {
       dispatchWithLoading(
         getApprovalHierarchyDetail(selectedApprovalHierarchy),
@@ -197,25 +223,109 @@ const CreateBillingInstallmentPage = () => {
   }, [data_account_detail, form]);
 
   useEffect(() => {
-    const values = form.getFieldsValue();
-    if (values.installmentType && values.tenor && values.startPeriod && selectedOpenItems.length > 0) {
-      calculateInstallmentDetails();
+    if (data_detail && Object.keys(data_detail).length > 0 && !formLoaded) {
+      const detail = data_detail;
+      
+      setSelectedAccount(detail.accountNumber);
+      
+      const formattedRequestDate = detail.createdDate ? moment(detail.createdDate) : null;
+      const formattedStartPeriod = detail.startPeriod ? moment(detail.startPeriod, "MM-YYYY") : null;
+
+      form.setFieldsValue({
+        accountNumber: detail.accountNumber,
+        installmentType: detail.installmentType || "CUSTOM",
+        tenor: detail.tenor,
+        startPeriod: formattedStartPeriod,
+        source: detail.source,
+        requestDate: formattedRequestDate,
+        remark: detail.remark,
+      });
+
+      if (detail.details && detail.details.length > 0) {
+        const detailsByCurrency = {};
+        detail.details.forEach((d) => {
+          if (!detailsByCurrency[detail.currency]) {
+            detailsByCurrency[detail.currency] = [];
+          }
+          detailsByCurrency[detail.currency].push({
+            period: d.period,
+            amount: d.amount,
+          });
+        });
+        setInstallmentDetails(detailsByCurrency);
+      }
+
+      if (detail.selectedOpenItems && detail.selectedOpenItems.length > 0) {
+        const selectedItems = detail.selectedOpenItems.map((item) => ({
+          currency: item.currency,
+          billItemId: item.billingItemId,
+        }));
+        setSelectedOpenItems(selectedItems);
+      }
+
+      dispatch(getAccountDetail(detail.accountNumber));
+      dispatch(getOpenItems(detail.accountNumber));
+
+      if (detail.contacts && detail.contacts.length > 0) {
+        setSelectedContacts(detail.contacts.map((c) => ({ ...c, key: c.contactId })));
+      }
+
+      setFormLoaded(true);
     }
-  }, [selectedOpenItems]);
+  }, [data_detail, form, formLoaded, dispatch]);
+
+  useEffect(() => {
+    if (selectedOpenItems.length > 0 && data_open_items && data_open_items.length > 0) {
+      setTimeout(() => {
+        calculateInstallmentDetails();
+      }, 100);
+    }
+  }, [selectedOpenItems, data_open_items]);
+
+  useEffect(() => {
+    if (formLoaded && id) {
+      dispatch(
+        getAttachmentList({
+          installmentId: id,
+          page: 0,
+          pageSize: 100,
+        }),
+      );
+    }
+  }, [formLoaded, id, dispatch]);
+
+  useEffect(() => {
+    if (data_attachments && data_attachments.result && data_attachments.result.length > 0 && formLoaded) {
+      const attachments = data_attachments.result.map((item) => ({
+        key: item.id,
+        id: item.id,
+        fileName: item.fileName,
+        fileType: item.fileType,
+        fileSize: item.fileSize,
+        fileCategoryId: item.fileCategoryId,
+        fileCategoryName: item.fileCategoryName,
+        pathFile: item.pathFile,
+        urlFile1: item.urlFile1,
+        createdDate: item.createdDate,
+        createdBy: item.createdBy,
+        dataType: "exist",
+      }));
+      setListDataAttachment(attachments);
+    }
+  }, [data_attachments, formLoaded]);
 
   const routes = [
     { path: "", breadcrumbName: "Rating & Billing" },
     { path: RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_VIEW, breadcrumbName: "Management Billing Installment" },
-    { path: "", breadcrumbName: "Create" },
+    { path: "", breadcrumbName: "Update" },
   ];
 
   const steps = [
-    { title: "Create" },
+    { title: "Update" },
     { title: "Approval" },
     { title: "Attachment" },
   ];
 
-  // Helper function for client-side table search
   const getColumnSearchProps = (dataIndex, searchText, setSearchText, searchedColumn, setSearchedColumn, searchInputRef) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -282,25 +392,11 @@ const CreateBillingInstallmentPage = () => {
   });
 
   const handleAccountChange = (value) => {
-    form.resetFields([
-      "accountName",
-      "customerNumber",
-      "customerName",
-      "accountGroupType",
-      "accountType",
-      "classificationType",
-      "serviceType",
-      "sor",
-      "costCenter",
-      "accountSegment",
-      "meterReadingCode",
-      "accountRegistrationNumber",
-      "accountStatus",
-    ]);
-    dispatch(clearAccountDetail());
-    dispatch(clearOpenItems());
     setSelectedAccount(value);
     setSelectedContacts([]);
+    setSelectedOpenItems([]);
+    setInstallmentDetails({});
+    setInstallmentValidationError({});
     if (value) {
       dispatchWithLoading(getAccountDetail(value), setLoadingAccountDetail);
       dispatchWithLoading(getOpenItems(value), setLoadingOpenItems);
@@ -309,12 +405,6 @@ const CreateBillingInstallmentPage = () => {
 
   const handleTenorChange = (value) => {
     form.setFieldsValue({ tenor: value });
-  };
-
-  const handleDateChange = (field) => (date) => {
-    if (date) {
-      form.setFieldsValue({ [field]: date });
-    }
   };
 
   const handleStartPeriodChange = (date) => {
@@ -434,7 +524,9 @@ const CreateBillingInstallmentPage = () => {
     if (checked) {
       setSelectedOpenItems((prev) => [...prev, { currency, billItemId }]);
     } else {
-      setSelectedOpenItems((prev) => prev.filter((item) => !(item.currency === currency && item.billItemId === billItemId)));
+      setSelectedOpenItems((prev) =>
+        prev.filter((item) => !(item.currency === currency && item.billItemId === billItemId)),
+      );
     }
   };
 
@@ -472,7 +564,9 @@ const CreateBillingInstallmentPage = () => {
     selectedCurrencies.forEach((currency) => {
       const currencyItems = selectedOpenItems.filter((item) => item.currency === currency);
       const totalAmount = currencyItems.reduce((sum, item) => {
-        const openItem = (data_open_items || []).find((g) => g.currency === currency)?.items?.find((i) => i.billItemId === item.billItemId);
+        const openItem = (data_open_items || []).find((g) => g.currency === currency)?.items?.find(
+          (i) => i.billItemId === item.billItemId,
+        );
         return sum + (openItem?.amount || 0);
       }, 0);
 
@@ -512,7 +606,9 @@ const CreateBillingInstallmentPage = () => {
     selectedCurrencies.forEach((currency) => {
       const currencyItems = selectedOpenItems.filter((item) => item.currency === currency);
       const expectedTotal = currencyItems.reduce((sum, item) => {
-        const openItem = (data_open_items || []).find((g) => g.currency === currency)?.items?.find((i) => i.billItemId === item.billItemId);
+        const openItem = (data_open_items || []).find((g) => g.currency === currency)?.items?.find(
+          (i) => i.billItemId === item.billItemId,
+        );
         return sum + (openItem?.amount || 0);
       }, 0);
 
@@ -521,9 +617,13 @@ const CreateBillingInstallmentPage = () => {
       if (currentTotal !== expectedTotal) {
         const diff = expectedTotal - currentTotal;
         if (diff > 0) {
-          errors[currency] = `Kurang ${new Intl.NumberFormat("id-ID").format(diff)} dari total ${new Intl.NumberFormat("id-ID").format(expectedTotal)}`;
+          errors[currency] = `Kurang ${new Intl.NumberFormat("id-ID").format(diff)} dari total ${new Intl.NumberFormat(
+            "id-ID",
+          ).format(expectedTotal)}`;
         } else {
-          errors[currency] = `Lebih ${new Intl.NumberFormat("id-ID").format(Math.abs(diff))} dari total ${new Intl.NumberFormat("id-ID").format(expectedTotal)}`;
+          errors[currency] = `Lebih ${new Intl.NumberFormat("id-ID").format(
+            Math.abs(diff),
+          )} dari total ${new Intl.NumberFormat("id-ID").format(expectedTotal)}`;
         }
       } else {
         errors[currency] = null;
@@ -538,7 +638,7 @@ const CreateBillingInstallmentPage = () => {
       const updated = { ...prev };
       if (updated[currency]) {
         updated[currency] = updated[currency].map((item, idx) =>
-          idx === index ? { ...item, amount: parseFloat(value) || 0 } : item
+          idx === index ? { ...item, amount: parseFloat(value) || 0 } : item,
         );
       }
       validateCustomAmounts(updated);
@@ -547,6 +647,7 @@ const CreateBillingInstallmentPage = () => {
   };
 
   const handleCancel = () => {
+    dispatch(clearDetailInstallment());
     navigate(RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_VIEW);
   };
 
@@ -671,35 +772,46 @@ const CreateBillingInstallmentPage = () => {
       selectedOpenItems: confirmationData.openItems,
     };
 
-    dispatch(createInstallment(body))
+    dispatch(updateInstallment({ installmentId: id, body }))
       .unwrap()
       .then(async (response) => {
-        const installmentIds = Array.isArray(response) ? response : (response?.data || []);
-        if (installmentIds.length > 0) {
-          const installmentId = installmentIds[0];
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
+        const installmentId = id;
 
-          if (filterDataAttach.length > 0) {
-            try {
-              for (let icon = 0; icon < filterDataAttach.length; icon++) {
-                const element = filterDataAttach[icon];
-                const formData = new FormData();
-                formData.append("files", element.file);
-                formData.append("category", element.fileCategoryId);
-                formData.append("referenceId", String(installmentId));
-                await ratingBillingHttpService.uploadAttachment(
-                  `/v1/dbs/api/installment/upload-attachment`,
-                  formData,
-                );
-              }
-            } catch (uploadError) {
-              console.error("Error uploading attachments:", uploadError);
-            }
+        if (deletedAttachmentIds.length > 0) {
+          try {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          } catch (deleteError) {
+            console.error("Error deleting attachments:", deleteError);
           }
         }
+
+        const filterDataAttach = listDataAttachment.filter(
+          (item) => item.dataType !== "exist"
+        );
+
+        if (filterDataAttach.length > 0) {
+          try {
+            for (let icon = 0; icon < filterDataAttach.length; icon++) {
+              const element = filterDataAttach[icon];
+              const formData = new FormData();
+              formData.append("files", element.file);
+              formData.append("category", element.fileCategoryId);
+              formData.append("referenceId", String(installmentId));
+              await ratingBillingHttpService.uploadAttachment(
+                `/v1/dbs/api/installment/upload-attachment`,
+                formData,
+              );
+            }
+          } catch (uploadError) {
+            console.error("Error uploading attachments:", uploadError);
+          }
+        }
+
         setLoadingForm(false);
+        dispatch(clearDetailInstallment());
         navigate(RBI_ROUTES.MANAGEMENT_BILLING_INSTALLMENT_VIEW);
       })
       .catch((error) => {
@@ -719,14 +831,7 @@ const CreateBillingInstallmentPage = () => {
 
   const handleNext = () => {
     form
-      .validateFields([
-        "accountNumber",
-        "installmentType",
-        "tenor",
-        "startPeriod",
-        "source",
-        "requestDate",
-      ])
+      .validateFields(["accountNumber", "installmentType", "tenor", "startPeriod", "source", "requestDate"])
       .then(() => {
         setCurrentStep(1);
       })
@@ -827,7 +932,11 @@ const CreateBillingInstallmentPage = () => {
             <Input disabled placeholder="Terisi otomatis" />
           </Form.Item>
 
-          <Form.Item name="accountRegistrationNumber" label="Account Registration Number" style={{ marginBottom: 0 }}>
+          <Form.Item
+            name="accountRegistrationNumber"
+            label="Account Registration Number"
+            style={{ marginBottom: 0 }}
+          >
             <Input disabled placeholder="Terisi otomatis" />
           </Form.Item>
 
@@ -855,7 +964,6 @@ const CreateBillingInstallmentPage = () => {
       width: 150,
       sorter: (a, b) => (a.job || "").localeCompare(b.job || ""),
       ...getColumnSearchProps("job", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
-      render: (text) => text || "-",
     },
     {
       title: "Position",
@@ -864,7 +972,6 @@ const CreateBillingInstallmentPage = () => {
       width: 150,
       sorter: (a, b) => (a.position || "").localeCompare(b.position || ""),
       ...getColumnSearchProps("position", contactSearchText, setContactSearchText, contactSearchedColumn, setContactSearchedColumn, contactSearchInput),
-      render: (text) => text || "-",
     },
     {
       title: "Address",
@@ -898,22 +1005,6 @@ const CreateBillingInstallmentPage = () => {
       ],
       onFilter: (value, record) => record.isPrimary === value,
       render: (val) => (val ? "Yes" : "No"),
-    },
-    {
-      title: "Action",
-      key: "action",
-      width: 80,
-      align: "center",
-      render: (_, record) => (
-        <Button
-          type="link"
-          danger
-          size="small"
-          onClick={() => handleRemoveContact(record.contactId)}
-        >
-          Remove
-        </Button>
-      ),
     },
   ];
 
@@ -955,7 +1046,22 @@ const CreateBillingInstallmentPage = () => {
       ) : (
         <Table
           className="custom-table-small"
-          columns={contactColumns}
+          columns={[...contactColumns, {
+            title: "Action",
+            key: "action",
+            width: 80,
+            align: "center",
+            render: (_, record) => (
+              <Button
+                type="link"
+                danger
+                size="small"
+                onClick={() => handleRemoveContact(record.contactId)}
+              >
+                Remove
+              </Button>
+            ),
+          }]}
           dataSource={selectedContacts.map((item, idx) => ({
             ...item,
             key: item.contactId || idx,
@@ -1061,9 +1167,10 @@ const CreateBillingInstallmentPage = () => {
       render: (_, record) => (
         <Checkbox
           checked={selectedOpenItems.some(
-            (item) => item.currency === record.currency && item.billItemId === record.billItemId
+            (item) => item.currency === record.currency && item.billItemId === record.billItemId,
           )}
           onChange={(e) => handleOpenItemSelect(record.currency, record.billItemId, e.target.checked)}
+          disabled
         />
       ),
     },
@@ -1114,16 +1221,14 @@ const CreateBillingInstallmentPage = () => {
           {(data_open_items || []).map((currencyGroup) => {
             const selectedItems = (currencyGroup.items || []).filter((item) =>
               selectedOpenItems.some(
-                (sel) => sel.currency === currencyGroup.currency && sel.billItemId === item.billItemId
-              )
+                (sel) => sel.currency === currencyGroup.currency && sel.billItemId === item.billItemId,
+              ),
             );
             const totalAmount = selectedItems.reduce((sum, item) => sum + (item.amount || 0), 0);
 
             return (
               <div key={currencyGroup.currency} className="border border-gray-200 rounded-lg p-3">
-                <p className="text-sm font-semibold text-primary mb-2">
-                  Currency: {currencyGroup.currency}
-                </p>
+                <p className="text-sm font-semibold text-primary mb-2">Currency: {currencyGroup.currency}</p>
                 <Table
                   className="custom-table-small"
                   columns={openItemColumns}
@@ -1233,9 +1338,7 @@ const CreateBillingInstallmentPage = () => {
 
               return (
                 <div key={currency} className="border border-gray-200 rounded-lg p-3">
-                  <p className="text-sm font-semibold text-primary mb-2">
-                    Currency: {currency}
-                  </p>
+                  <p className="text-sm font-semibold text-primary mb-2">Currency: {currency}</p>
                   <Table
                     className="custom-table-small"
                     columns={columns}
@@ -1263,9 +1366,7 @@ const CreateBillingInstallmentPage = () => {
                     )}
                   />
                   {installmentValidationError[currency] && (
-                    <p className="text-xs text-red-500 mt-2">
-                      {installmentValidationError[currency]}
-                    </p>
+                    <p className="text-xs text-red-500 mt-2">{installmentValidationError[currency]}</p>
                   )}
                 </div>
               );
@@ -1308,7 +1409,7 @@ const CreateBillingInstallmentPage = () => {
       <AttachmentComponent
         data={listDataAttachment}
         updateData={handleUpdateAttachment}
-        type="create"
+        type="update"
         typeSelector="installment"
         dispatch={dispatch}
         getAPICategory={getAttachmentCategory}
@@ -1392,13 +1493,9 @@ const CreateBillingInstallmentPage = () => {
           {renderInstallmentCalculationDetail()}
         </div>
 
-        <div style={{ display: currentStep !== 1 ? "none" : undefined }}>
-          {renderApproval()}
-        </div>
+        <div style={{ display: currentStep !== 1 ? "none" : undefined }}>{renderApproval()}</div>
 
-        <div style={{ display: currentStep !== 2 ? "none" : undefined }}>
-          {renderAttachment()}
-        </div>
+        <div style={{ display: currentStep !== 2 ? "none" : undefined }}>{renderAttachment()}</div>
 
         <FormFooter
           current={currentStep}
@@ -1456,10 +1553,9 @@ const CreateBillingInstallmentPage = () => {
         isOpen={modalChooseContact}
         setModalChooseContact={setModalChooseContact}
         onChooseContact={handleChooseContact}
-        onOpenCreateContact={handleOpenContactModal}
       />
     </Spin>
   );
 };
 
-export default CreateBillingInstallmentPage;
+export default UpdateBillingInstallmentPage;

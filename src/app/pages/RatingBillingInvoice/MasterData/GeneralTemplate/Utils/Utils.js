@@ -37,7 +37,7 @@ export const handleMandatory = (
               (current, next) =>
                 item.paramValue.includes(next.name[0]) ? current + 1 : current,
               0
-            ) + (listDataUploadTemplate.length < 1 ? 1 : 0);
+            );
           break;
         default:
           errorBadge = (errorFields || []).reduce(

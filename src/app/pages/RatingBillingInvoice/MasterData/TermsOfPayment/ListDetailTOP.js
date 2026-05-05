@@ -287,7 +287,7 @@ const ListDetailTOP = () => {
       handleClear();
     } else if (
       data_detail?.approvalInformation?.approvalType ===
-      "ACTIVATED_TERMS_OF_PAYMENT"
+      "ACTIVATE_TERMS_OF_PAYMENT"
     ) {
       const data = {
         id: id,

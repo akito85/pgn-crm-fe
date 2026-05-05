@@ -74,6 +74,7 @@ const CalendarForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
@@ -102,6 +103,23 @@ const CalendarForm = ({ type }) => {
   const steps = STEPS;
 
   const [valuePage, setValuePage] = useState(steps[0].value);
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   useEffect(() => {
     setValuePage(steps[current].value);
@@ -222,10 +240,10 @@ const CalendarForm = ({ type }) => {
     const criteriaSelect = allCriteria
       ? [24]
       : Object.entries(CRITERIA_FIELD_TO_ID)
-          .filter(([field]) =>
-            criterias.some((row) => row[field]?.label != null),
-          )
-          .map(([, criteriaId]) => criteriaId);
+        .filter(([field]) =>
+          criterias.some((row) => row[field]?.label != null),
+        )
+        .map(([, criteriaId]) => criteriaId);
 
     const dataCriteriaList = criterias
       .filter((item) => !item.allCriteria)
@@ -550,12 +568,12 @@ const CalendarForm = ({ type }) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-                (current, next) =>
-                  item.paramValue?.includes(next.name[0])
-                    ? current + 1
-                    : current,
-                0,
-              )
+              (current, next) =>
+                item.paramValue?.includes(next.name[0])
+                  ? current + 1
+                  : current,
+              0,
+            )
             : listDataAttachment.length < 1
               ? 1
               : 0;
@@ -667,7 +685,7 @@ const CalendarForm = ({ type }) => {
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/calendar/create-attachment?categoryId=${element.fileCategoryId}&referenceId=${referenceId}`,
               formData,
-              () => {},
+              () => { },
             );
           }
           setLoadingForm(false);
@@ -692,6 +710,12 @@ const CalendarForm = ({ type }) => {
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist",
           );
+          if (type === "update" && deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           setLoadingForm(true);
           for (let i = 0; i < filterDataAttach.length; i++) {
             const element = filterDataAttach[i];
@@ -700,7 +724,7 @@ const CalendarForm = ({ type }) => {
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/calendar/create-attachment?categoryId=${element.fileCategoryId}&referenceId=${referenceId}`,
               formData,
-              () => {},
+              () => { },
             );
           }
           setLoadingForm(false);
@@ -825,8 +849,8 @@ const CalendarForm = ({ type }) => {
                         (value && moment(startDate) <= moment(value)) || !value
                           ? Promise.resolve()
                           : Promise.reject(
-                              new Error("End date must be after Start date"),
-                            ),
+                            new Error("End date must be after Start date"),
+                          ),
                     },
                   ]}
                 >
@@ -946,7 +970,7 @@ const CalendarForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategoryCalendar}
                 typeSelector="calendar"
@@ -1016,9 +1040,8 @@ const CalendarForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag ? "submitted" : "saved"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "saved"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
