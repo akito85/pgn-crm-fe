@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Tooltip, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -68,6 +68,24 @@ const PosPage = () => {
   const [modalDelete, setModalDelete] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
+
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("posFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          left: ["no"],
+          right: ["ACTION", "action", "Action"],
+        };
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("posFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   const resolveCustomerTypeForNav = (customerType) => {
     if (customerType === 2) return "prospective";
@@ -588,6 +606,72 @@ const PosPage = () => {
     },
   ];
 
+  const actionColumns = useColumnActionPermission(
+    ["view", "update"],
+    itemGrantAccess,
+    "View",
+  );
+
+  const baseColumns = useMemo(() => {
+    const posCols = [
+      ...PosTableView(
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search,
+      ),
+      ...actionColumns,
+    ];
+
+    return posCols.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title || "ACTION",
+    }));
+  }, [searchedColumn, searchText, search, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title || "ACTION",
+      title: col.title || "ACTION",
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title || "ACTION";
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title || "ACTION";
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
+
   return (
     <>
       <BreadCrumb routes={routes} />
@@ -608,20 +692,10 @@ const PosPage = () => {
             dataSource={dataSource}
             showExport={false}
             loading={loading || tableLoading}
-            columns={[
-              ...PosTableView(
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                search,
-              ),
-              ...useColumnActionPermission(
-                ["view", "update"],
-                itemGrantAccess,
-                "View",
-              ),
-            ]}
+            columns={columns}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
             totalData={data_view?.page?.totalElements || 0}
             onSort={onSort}
             tableScrolled={{ y: 525, x: 2000 }}
