@@ -208,25 +208,25 @@ export const columns = (
       ),
       render: (text) => renderColumn('installment', hasValue(search['installment']), searchText, text, false, 'input', search)
     },
-    // {
-    //   key: "criteria",
-    //   title: "CRITERIA",
-    //   dataIndex: "criteria",
-    //   sorter: true,
-    //   align: "center",
-    //   width: 200,
-    //   filteredValue: [search?.criteria] || null,
-    //   ...getColumnSearchPropsUseFilteredValue(
-    //     search,
-    //     "criteria",
-    //     searchInput,
-    //     searchedColumn,
-    //     searchText,
-    //     handleSearch,
-    //     true
-    //   ),
-    //   render: (text) => renderColumn('criteria', hasValue(search['criteria']), searchText, text, false, 'input', search)
-    // },
+    {
+      key: "criteria",
+      title: "CRITERIA",
+      dataIndex: "criteria",
+      sorter: true,
+      align: "center",
+      width: 200,
+      filteredValue: [search?.criteria] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "criteria",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('criteria', hasValue(search['criteria']), searchText, text, false, 'input', search)
+    },
     {
       key: "description",
       title: "DESCRIPTION",
