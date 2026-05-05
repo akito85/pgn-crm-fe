@@ -18,7 +18,6 @@ import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
 
 const PAGE_SIZE = 20;
-const VIEW_JOB_SCHEDULE_DETAIL = "/job-scheduler-management/schedule-list/view";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const formatDate = (val) => {
@@ -139,7 +138,7 @@ const JobSchedulePage = () => {
         {
           key: "view",
           label: "View",
-          onClick: () => navigate(VIEW_JOB_SCHEDULE_DETAIL, { state: { id: record.scheduleId } }),
+          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULE_DETAIL, { state: { id: record.scheduleId } }),
         },
         {
           key: "delete",

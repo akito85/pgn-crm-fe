@@ -82,7 +82,7 @@ const ViewJobSchedulePage = () => {
 
   const breadcrumbRoutes = [
     { path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT, breadcrumbName: "Job Scheduler Management" },
-    { path: "/job-scheduler-management/schedule-list",      breadcrumbName: "Schedule List" },
+    { path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULE,              breadcrumbName: "Schedule List" },
     { path: "",                                             breadcrumbName: "View" },
   ];
 
