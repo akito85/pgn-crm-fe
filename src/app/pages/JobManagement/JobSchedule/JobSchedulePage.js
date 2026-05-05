@@ -33,16 +33,16 @@ const formatDate = (val) => {
 };
 
 const STATUS_OPTIONS = [
-  { value: null,       label: "ALL" },
+  { value: "",         label: "ALL" },
   { value: "DRAFT",    label: "DRAFT" },
   { value: "ACTIVE",   label: "ACTIVE" },
   { value: "INACTIVE", label: "INACTIVE" },
 ];
 
 const PAUSED_OPTIONS = [
-  { value: null,  label: "ALL" },
-  { value: true,  label: "Yes" },
-  { value: false, label: "No" },
+  { value: "",      label: "ALL" },
+  { value: "true",  label: "Yes" },
+  { value: "false", label: "No" },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -79,12 +79,18 @@ const JobSchedulePage = () => {
   useEffect(() => { fetchList(); }, [fetchList]);
 
   const handleStatusChange = (value) => {
-    setFilterStatus(value);
+    setFilterStatus(value === "" ? null : value);
     setCurrentPage(1);
   };
 
   const handlePausedChange = (value) => {
-    setFilterIsPaused(value);
+    if (value === "") {
+      setFilterIsPaused(null);
+    } else if (value === "true") {
+      setFilterIsPaused(true);
+    } else if (value === "false") {
+      setFilterIsPaused(false);
+    }
     setCurrentPage(1);
   };
 
@@ -153,6 +159,7 @@ const JobSchedulePage = () => {
               style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
               onClick={(e) => e.stopPropagation()}
               type="button"
+              disabled={actionLoading}
             >
               <IconThreeDots />
             </button>
@@ -160,7 +167,7 @@ const JobSchedulePage = () => {
         </div>
       );
     },
-  }), [permissionsLoading, handleAction, navigate]);
+  }), [permissionsLoading, handleAction, navigate, actionLoading]);
 
   // ─── Columns ─────────────────────────────────────────────────────────────────
 
@@ -302,14 +309,14 @@ const JobSchedulePage = () => {
         <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
           <Select
             style={{ width: 160 }}
-            value={filterStatus}
+            value={filterStatus ?? ""}
             onChange={handleStatusChange}
             options={STATUS_OPTIONS}
             placeholder="Status"
           />
           <Select
             style={{ width: 140 }}
-            value={filterIsPaused}
+            value={filterIsPaused === null ? "" : String(filterIsPaused)}
             onChange={handlePausedChange}
             options={PAUSED_OPTIONS}
             placeholder="Paused"
