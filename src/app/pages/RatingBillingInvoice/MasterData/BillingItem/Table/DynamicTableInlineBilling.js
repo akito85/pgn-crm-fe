@@ -67,41 +67,37 @@ const EditableCell = ({
   };
 
   const handleDisableDate = (current) => {
+    if (!current) return false;
+    const currentStart = current.clone().startOf("day");
+
     if (dataIndex === "endDate") {
-      if (
-        hasValue(startDateLock) &&
-        hasValue(endDateLock) &&
-        hasValue(form.getFieldValue("startDate")) === false
-      ) {
-        return (
-          current < moment(startDateLock) ||
-          current > moment(endDateLock).add(1, "days")
-        );
-      } else if (
-        hasValue(form.getFieldValue("startDate")) &&
-        hasValue(endDateLock)
-      ) {
-        return (
-          current &&
-          (moment(form.getFieldValue("startDate")) > current ||
-            current > moment(endDateLock).add(1, "days"))
-        );
-      } else if (hasValue(form.getFieldValue("startDate"))) {
-        return moment(form.getFieldValue().startDate) > current;
-      } else {
-        return null;
-      }
+      const selectedStartDate = form.getFieldValue("startDate");
+      const limitStart = hasValue(selectedStartDate)
+        ? moment(selectedStartDate).startOf("day")
+        : hasValue(startDateLock)
+        ? moment(startDateLock).startOf("day")
+        : null;
+
+      const limitEnd = hasValue(endDateLock)
+        ? moment(endDateLock).startOf("day")
+        : null;
+
+      if (limitStart && currentStart.isBefore(limitStart)) return true;
+      if (limitEnd && currentStart.isAfter(limitEnd)) return true;
+      return false;
     } else if (dataIndex === "startDate") {
-      if (hasValue(endDateLock)) {
-        return (
-          moment(startDateLock) >= current ||
-          current > moment(endDateLock).add(1, "days")
-        );
-      } else {
-        return moment(startDateLock) > current;
-      }
+      const limitStart = hasValue(startDateLock)
+        ? moment(startDateLock).startOf("day")
+        : null;
+      const limitEnd = hasValue(endDateLock)
+        ? moment(endDateLock).startOf("day")
+        : null;
+
+      if (limitStart && currentStart.isBefore(limitStart)) return true;
+      if (limitEnd && currentStart.isAfter(limitEnd)) return true;
+      return false;
     } else {
-      return moment().add(-1, "days") >= current;
+      return currentStart.isBefore(moment().startOf("day"));
     }
   };
 
