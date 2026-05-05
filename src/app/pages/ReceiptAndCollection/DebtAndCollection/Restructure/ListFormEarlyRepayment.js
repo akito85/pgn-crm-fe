@@ -208,7 +208,7 @@ const ListFormEarlyRepayment = (props) => {
     };
 
     const buildERRequestBody = (values, isDraft) => ({
-        installmentId: id,
+        restructureId: id,
         earlyRepaymentDate: values.earlyRepaymentDate
             ? moment(values.earlyRepaymentDate).format("YYYY-MM-DD")
             : null,
@@ -379,10 +379,10 @@ const ListFormEarlyRepayment = (props) => {
                     </div>
                 }
             >
-                <ContentModalConfirmEarlyRepayment 
+                <ContentModalConfirmEarlyRepayment
                     formValues={formValues}
                     contacts={contacts}
-                    openItems={openItems}
+                    openItems={badDebtList}
                     installmentsByCurrency={installmentsByCurrency}
                     listDataAttachment={listDataAttachment}
                     appHierOptions={appHierOptions}
