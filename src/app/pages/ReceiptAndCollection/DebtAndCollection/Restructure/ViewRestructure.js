@@ -28,6 +28,7 @@ import {
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import ModalApprovalRestructure from "./Modal/ModalApprovalRestructure";
 import ListDetailRestructure from "./ListDetailRestructure";
 
 const ViewRestructure = () => {
@@ -47,9 +48,10 @@ const ViewRestructure = () => {
     const [sort, setSort] = useState("");
     const [selectedId, setSelectedId] = useState(null);
     const [modalHistory, setModalHistory] = useState(false);
+    const [modalApproval, setModalApproval] = useState(false);
     const [search, setSearch] = useState({});
 
-    useEffect(() => {
+    const handleRefresh = () => {
         dispatch(
             getAllRestructureListPaginate({
                 search: encodeURIComponent(JSON.stringify(search)),
@@ -58,6 +60,10 @@ const ViewRestructure = () => {
                 sort,
             })
         );
+    };
+
+    useEffect(() => {
+        handleRefresh();
     }, [search, page, pageSize, sort, dispatch]);
 
     const routes = [
@@ -74,6 +80,10 @@ const ViewRestructure = () => {
             breadcrumbName: "Payment Plan",
         },
     ];
+
+    const handleApproval = () => {
+        setModalApproval(true);
+    };
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -235,6 +245,7 @@ const ViewRestructure = () => {
                 <ButtonComponent
                     icon={<SVGIcon name="IconRequestApproval" width={24} />}
                     type="primary"
+                    onClick={handleApproval}
                 >
                     Approval
                 </ButtonComponent>
@@ -243,12 +254,14 @@ const ViewRestructure = () => {
         {
             action: "Upload",
             render: (
-                <ButtonComponent
-                    icon={<SVGIcon name="IconUpload" width={17} color={"#FFFFFF"} />}
-                    type="primary"
-                >
-                    Upload
-                </ButtonComponent>
+                <Link to={DEBT_AND_COLLECTION_ROUTES.UPLOAD_RESTRUCTURE}>
+                    <ButtonComponent
+                        icon={<SVGIcon name="IconUpload" width={17} color={"#FFFFFF"} />}
+                        type="primary"
+                    >
+                        Upload
+                    </ButtonComponent>
+                </Link>
             )
         },
         {
@@ -268,10 +281,6 @@ const ViewRestructure = () => {
 
     const { actions: accessList } = useGrantAccessHooks("page");
     const permissions = accessList?.map(a => a.toLowerCase()) || [];
-    const hasCreate = permissions.includes("create");
-    const hasDownload = permissions.includes("download");
-    const hasApproval = permissions.includes("approval");
-    const hasUpload = permissions.includes("upload");
 
     const actionCols = useMemo(() => {
         const tableActions = itemActions.filter(item => item.type === "table" && permissions.includes(item.action.toLowerCase()));
@@ -321,7 +330,7 @@ const ViewRestructure = () => {
                 }
             }
         ];
-    }, [accessList, itemActions]);
+    }, [accessList, itemActions, permissions]);
 
     return (
         <>
@@ -383,6 +392,12 @@ const ViewRestructure = () => {
                         payment_plan: dataApprovalHistory?.payment_plan?.dataHistory || [],
                         early_repayment: dataApprovalHistory?.early_repayment?.dataHistory || []
                     }}
+                />
+
+                <ModalApprovalRestructure
+                    isOpen={modalApproval}
+                    handleCancel={() => setModalApproval(false)}
+                    handleListRefresh={handleRefresh}
                 />
             </Spin>
         </>

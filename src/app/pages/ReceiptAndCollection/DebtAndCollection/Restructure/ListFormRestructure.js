@@ -409,7 +409,7 @@ const ListFormRestructure = (props) => {
                 <ContentModalConfirmRestructure 
                     formValues={formValues}
                     contacts={contacts}
-                    openItems={openItems}
+                    openItems={badDebtList}
                     installmentsByCurrency={installmentsByCurrency}
                     listDataAttachment={listDataAttachment}
                     appHierOptions={appHierOptions}
