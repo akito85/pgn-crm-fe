@@ -11,7 +11,7 @@ import ButtonComponent from '../../../../../../../components/ButtonComponent'
 import ModalCustom from '../../../../../../../components/Modal/ModalCustom'
 import { FilterOutlined } from '@ant-design/icons';
 import TableInlineAccount from './TableInlineContact';
-import { getCountryZone } from '../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice';
+import { getCountryZone as getCountryZoneAction } from '../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice';
 import { onInputUpperCase } from '../../../../Utils';
 
 
@@ -24,9 +24,11 @@ const ModalCreateNewContact = ({
   dataInputType = [],
   dataCountryCode = [],
   dataCountryZone = [],
+  getCountryZone,
   keyModal,
   setDataCreateNew,
   setModalChooseContact,
+  showChooseContactAction = false,
   handleResetDataDetail,
   prefix1,
   setPrefix1,
@@ -199,23 +201,6 @@ const ModalCreateNewContact = ({
       ),
     },
     {
-      title: "INPUT TYPE",
-      dataIndex: "inputType",
-      editable: true,
-      sorter: true,
-      inputType: "select",
-      options: dataInputTypeRes,
-      ...getColumnSearchProps("inputType"),
-      render: (inpuType) => (
-        <span>
-          {dataInputType &&
-            dataInputType
-              .filter((a) => a.id === inpuType)
-              .find((b) => b.text)?.text}
-        </span>
-      ),
-    },
-    {
       title: "VALUE",
       dataIndex: "value",
       inputType: "input",
@@ -365,8 +350,12 @@ const ModalCreateNewContact = ({
     }, 1000);
   }
   const getCountryZoneByIdCountryCode = (e) => {
-    if(e !== undefined){
-      dispatch(getCountryZone(e))
+    if (e !== undefined) {
+      if (getCountryZone) {
+        dispatch(getCountryZone(e));
+      } else {
+        dispatch(getCountryZoneAction(e));
+      }
     }
   }
 
@@ -413,6 +402,21 @@ const ModalCreateNewContact = ({
           // : ""
           } 
         form={form} id="formContactNew">
+          {showChooseContactAction && (
+            <div className="flex w-full justify-end pb-4">
+              <ButtonComponent
+                type="submit"
+                onClick={() => {
+                  setModalCreateNewContact(false);
+                  if (setModalChooseContact) {
+                    setModalChooseContact(true);
+                  }
+                }}
+              >
+                Choose Contact
+              </ButtonComponent>
+            </div>
+          )}
           <div>
             <div className='text-primary text-xs font-bold uppercase'> 
               <p>CONTACT INFORMATION</p>

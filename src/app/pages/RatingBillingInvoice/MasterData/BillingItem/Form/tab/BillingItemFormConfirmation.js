@@ -2,9 +2,9 @@ import { Fragment } from "react";
 import React, { useRef } from "react";
 import moment from "moment";
 import DetailText from "../../../../../../../components/DetailText";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { dateFormatting, hasValue } from "../../../../../../../utils";
-import TablePaginationNew from "../../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../../components/TableRBI";
 import columnsMapping from "../../Table/TableMappingInformation";
 import columnsDetail from "../../Table/TableDetailMappingInformation";
 import { useSelector } from "react-redux";
@@ -117,6 +117,8 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
   const [searchTextDetail, setSearchTextDetail] = useState("");
   const searchInputDetail = useRef(null);
   const [searchDetail, setSearchDetail] = useState({});
+  const [sort, setSort] = useState("");
+  const [sortDetail, setSortDetail] = useState("");
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -144,8 +146,26 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
   };
 
   const handleChangeDetail = (pageChange, pageSizeChange) => {
-    setPageDetail(pageSize !== pageSizeChange ? 1 : pageChange);
+    setPageDetail(pageSizeDetail !== pageSizeChange ? 1 : pageChange);
     setPageSizeDetail(pageSizeChange);
+  };
+
+  const onSortMapping = (_, __, sorter) => {
+    setSort(
+      sorter.order
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : ""
+    );
+    setPage(1);
+  };
+
+  const onSortDetail = (_, __, sorter) => {
+    setSortDetail(
+      sorter.order
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : ""
+    );
+    setPageDetail(1);
   };
 
   const handleSearchDetail = (selectedKeys, confirm, dataIndex) => {
@@ -186,6 +206,101 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
       setDetailMapping(true);
     }
   };
+
+  const [fixedColumns, setFixedColumns] = useState({ left: ["NO"], right: ["ACTION"] });
+  const [fixedColumnsDetail, setFixedColumnsDetail] = useState({ left: ["NO"], right: [] });
+
+  const mappingColumns = useMemo(() => columnsMapping(
+    search,
+    false,
+    "detail",
+    page,
+    pageSize,
+    searchInput,
+    searchedColumn,
+    searchText,
+    handleSearch,
+    handleDetail,
+    onFilter,
+    sorter
+  ), [search, page, pageSize, searchedColumn, searchText]);
+
+  const detailCols = useMemo(() => columnsDetail(
+    searchDetail,
+    false,
+    "detail",
+    pageDetail,
+    pageSizeDetail,
+    searchInputDetail,
+    searchedColumnDetail,
+    searchTextDetail,
+    handleSearchDetail,
+    onFilter,
+    sorterDetail
+  )?.filter((item) => !(item.title === "ACTION")), [searchDetail, pageDetail, pageSizeDetail, searchedColumnDetail, searchTextDetail]);
+
+  const columnDefinitionsMapping = useMemo(() => mappingColumns.map(col => ({
+    key: col.key || col.dataIndex || col.title,
+    title: col.title
+  })), [mappingColumns]);
+
+  const columnDefinitionsDetail = useMemo(() => detailCols.map(col => ({
+    key: col.key || col.dataIndex || col.title,
+    title: col.title
+  })), [detailCols]);
+
+  // Sliced data for FE pagination in TableRBI
+  const processedMappingData = useMemo(() => {
+    let filtered = (dataConfirm?.mappingInfo || []);
+    
+    // Filter
+    Object.keys(search).forEach(key => {
+      if (search[key]) {
+        filtered = filtered.filter(item => onFilter(key, search[key], item));
+      }
+    });
+
+    // Sort
+    if (sort) {
+      const [field, order] = sort.split("~");
+      filtered = [...filtered].sort((a, b) => {
+        const result = sorter(field, a, b);
+        return order === "asc" ? result : -result;
+      });
+    }
+
+    return filtered;
+  }, [dataConfirm?.mappingInfo, search, sort]);
+
+  const processedDetailData = useMemo(() => {
+    let filtered = (dataDetailTable || []);
+    
+    // Filter
+    Object.keys(searchDetail).forEach(key => {
+      if (searchDetail[key]) {
+        filtered = filtered.filter(item => onFilter(key, searchDetail[key], item));
+      }
+    });
+
+    // Sort
+    if (sortDetail) {
+      const [field, order] = sortDetail.split("~");
+      filtered = [...filtered].sort((a, b) => {
+        const result = sorterDetail(field, a, b);
+        return order === "asc" ? result : -result;
+      });
+    }
+
+    return filtered;
+  }, [dataDetailTable, searchDetail, sortDetail]);
+
+  const slicedMappingData = useMemo(() => {
+    return processedMappingData.slice((page - 1) * pageSize, page * pageSize);
+  }, [processedMappingData, page, pageSize]);
+
+  const slicedDetailData = useMemo(() => {
+    return processedDetailData.slice((pageDetail - 1) * pageSizeDetail, pageDetail * pageSizeDetail);
+  }, [processedDetailData, pageDetail, pageSizeDetail]);
 
   return (
     <Fragment>
@@ -271,28 +386,23 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
       </div>
 
       <div className="w-full">
-        <TablePaginationNew
-          type="FE"
-          dataSource={dataConfirm?.mappingInfo || []}
-          totalData={dataConfirm?.mappingInfo.length}
+        <TableRBI
+          idTable="mappingInfoTable"
+          dataSource={slicedMappingData}
+          columns={mappingColumns}
+          totalData={processedMappingData?.length || 0}
           current={page}
           pageSize={pageSize}
           onChange={handleChange}
+          onSizeChanger={handleChange}
+          onSort={onSortMapping}
           tableScrolled={{ y: 525, x: 2000 }}
-          columns={columnsMapping(
-            search,
-            false,
-            "detail",
-            page,
-            pageSize,
-            searchInput,
-            searchedColumn,
-            searchText,
-            handleSearch,
-            handleDetail,
-            onFilter,
-            sorter
-          )}
+          columnDefinitions={columnDefinitionsMapping}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          showAdvanceSearch={false}
+          showSearchBar={false}
+          showExport={false}
         />
       </div>
 
@@ -304,27 +414,23 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
           <div className="text-primary text-xs font-bold mt-3">
             {`Category: ${subHeader || ""}`}
           </div>
-          <TablePaginationNew
-            type="FE"
-            dataSource={dataDetailTable || []}
-            totalData={dataDetailTable?.length || 0}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChange}
+          <TableRBI
+            idTable="detailMappingInfoTable"
+            dataSource={slicedDetailData}
+            columns={detailCols}
+            totalData={processedDetailData?.length || 0}
+            current={pageDetail}
+            pageSize={pageSizeDetail}
+            onChange={handleChangeDetail}
+            onSizeChanger={handleChangeDetail}
+            onSort={onSortDetail}
             tableScrolled={{ y: 525, x: 2000 }}
-            columns={columnsDetail(
-              searchDetail,
-              false,
-              "detail",
-              pageDetail,
-              pageSizeDetail,
-              searchInputDetail,
-              searchedColumnDetail,
-              searchTextDetail,
-              handleSearchDetail,
-              onFilter,
-              sorterDetail
-            )?.filter((item) => !(item.title === "ACTION"))}
+            columnDefinitions={columnDefinitionsDetail}
+            fixedColumns={fixedColumnsDetail}
+            setFixedColumns={setFixedColumnsDetail}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            showExport={false}
           />
         </div>
       ) : null}

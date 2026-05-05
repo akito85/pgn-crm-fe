@@ -29,9 +29,11 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
 const CalculationPage = () => {
-  const { data: data_calculation, loading, filters } = useSelector(
-    (state) => state.rbi_calculation
-  );
+  const {
+    data: data_calculation,
+    loading,
+    filters,
+  } = useSelector((state) => state.rbi_calculation);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -50,16 +52,18 @@ const CalculationPage = () => {
   const [sort, setSort] = useState(filters[currentTabKey]?.sort || "");
   const [search, setSearch] = useState(filters[currentTabKey]?.search || {});
   const [searchedColumn, setSearchedColumn] = useState(
-    filters[currentTabKey]?.searchedColumn || ""
+    filters[currentTabKey]?.searchedColumn || "",
   );
   const [searchText, setSearchText] = useState(
-    filters[currentTabKey]?.searchText || ""
+    filters[currentTabKey]?.searchText || "",
   );
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
       const saved = localStorage.getItem("calculationFixedColumns");
-      return saved ? JSON.parse(saved) : { left: ["no"], right: ["status", "action"] };
+      return saved
+        ? JSON.parse(saved)
+        : { left: ["no"], right: ["status", "action"] };
     } catch (e) {
       return { left: ["no"], right: ["status", "action"] };
     }
@@ -68,7 +72,10 @@ const CalculationPage = () => {
   // Save fixedColumns to localStorage when changed
   useEffect(() => {
     try {
-      localStorage.setItem("calculationFixedColumns", JSON.stringify(fixedColumns));
+      localStorage.setItem(
+        "calculationFixedColumns",
+        JSON.stringify(fixedColumns),
+      );
     } catch (e) {
       // ignore storage errors
     }
@@ -85,7 +92,7 @@ const CalculationPage = () => {
           searchedColumn,
           page,
         },
-      })
+      }),
     );
   }, [search, sort, searchText, searchedColumn, page, currentTabKey, dispatch]);
 
@@ -109,7 +116,7 @@ const CalculationPage = () => {
           pageSize: 100, // Initial load 100 data
           sort,
           isLoadMore: false, // Flag untuk initial load
-        })
+        }),
       );
     } else {
       dispatch(
@@ -119,7 +126,7 @@ const CalculationPage = () => {
           pageSize: 100, // Initial load 100 data
           sort,
           isLoadMore: false, // Flag untuk initial load
-        })
+        }),
       );
     }
     setPage(1);
@@ -174,7 +181,7 @@ const CalculationPage = () => {
           pageSize: loadMoreSize,
           sort,
           isLoadMore: true,
-        })
+        }),
       );
     } else {
       await dispatch(
@@ -184,7 +191,7 @@ const CalculationPage = () => {
           pageSize: loadMoreSize,
           sort,
           isLoadMore: true,
-        })
+        }),
       );
     }
     setPage(nextPage);
@@ -205,7 +212,7 @@ const CalculationPage = () => {
           pageSize: initialPageSize,
           sort,
           isLoadMore: false,
-        })
+        }),
       );
     } else {
       dispatch(
@@ -215,7 +222,7 @@ const CalculationPage = () => {
           pageSize: initialPageSize,
           sort,
           isLoadMore: false,
-        })
+        }),
       );
     }
     setPage(1);
@@ -245,7 +252,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -255,7 +262,119 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
+          ),
+      },
+      {
+        key: "customer",
+        title: "Σ CUSTOMER",
+        dataIndex: "customer",
+        width: 140,
+        isNumber: true,
+        sorter: true,
+        filteredValue: [search?.customer] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customer",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "customer",
+            hasValue(search["customer"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "succeed",
+        title: "Σ SUCCEED",
+        dataIndex: "succeed",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        filteredValue: [search?.succeed] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "succeed",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "succeed",
+            hasValue(search["succeed"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "progress",
+        title: "Σ PROGRESS",
+        dataIndex: "progress",
+        width: 140,
+        isNumber: true,
+        sorter: true,
+        filteredValue: [search?.progress] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "progress",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "progress",
+            hasValue(search["progress"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "failed",
+        title: "Σ FAILED",
+        dataIndex: "failed",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        filteredValue: [search?.failed] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "failed",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "failed",
+            hasValue(search["failed"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
           ),
       },
       {
@@ -273,7 +392,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -283,7 +402,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -302,7 +421,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "datePeriod"
+          "datePeriod",
         ),
         render: (text) =>
           renderDateColumn(
@@ -311,7 +430,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "datePeriod",
-            search
+            search,
           ),
       },
       {
@@ -329,7 +448,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -339,7 +458,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -357,7 +476,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -367,7 +486,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -388,7 +507,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -398,70 +517,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
-          ),
-      },
-
-      {
-        key: "customerSegment",
-        title: "ACCOUNT SEGMENT",
-        dataIndex: "customerSegment",
-        width: 190,
-        isClassification: true,
-        sorter: true,
-        filteredValue: [search?.customerSegment] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "customerSegment",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "customerSegment",
-            hasValue(search["customerSegment"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "accGroupType",
-        title: "ACCOUNT GROUP TYPE",
-        dataIndex: "accGroupType",
-        width: 200,
-        isClassification: true,
-        sorter: true,
-        filteredValue: [search?.accGroupType] || null,
-        ellipsis: {
-          showTitle: false,
-        },
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "accGroupType",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "accGroupType",
-            hasValue(search["accGroupType"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
+            search,
           ),
       },
       {
@@ -482,7 +538,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -492,7 +548,69 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
+          ),
+      },
+      {
+        key: "customerSegment",
+        title: "ACCOUNT SEGMENT",
+        dataIndex: "customerSegment",
+        width: 190,
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.customerSegment] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "customerSegment",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "customerSegment",
+            hasValue(search["customerSegment"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
+          ),
+      },
+      {
+        key: "accGroupType",
+        title: "ACCOUNT GROUP TYPE",
+        dataIndex: "accGroupType",
+        width: 200,
+        isClassification: true,
+        sorter: true,
+        filteredValue: [search?.accGroupType] || null,
+        ellipsis: {
+          showTitle: false,
+        },
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "accGroupType",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+        ),
+        render: (text) =>
+          renderColumn(
+            "accGroupType",
+            hasValue(search["accGroupType"]),
+            searchText,
+            text,
+            true,
+            "input",
+            search,
           ),
       },
       {
@@ -512,7 +630,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -522,7 +640,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -540,7 +658,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -550,119 +668,35 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
-        key: "progress",
-        title: "Σ PROGRESS",
-        dataIndex: "progress",
-        width: 140,
-        isNumber: true,
+        key: "generateDate",
+        title: "GENERATE DATE",
+        dataIndex: "generateDate",
+        width: 160,
+        isClassification: true,
         sorter: true,
-        filteredValue: [search?.progress] || null,
+        filteredValue: [search?.generateDate] || null,
         ...getColumnSearchPropsUseFilteredValue(
           search,
-          "progress",
+          "generateDate",
           searchInput,
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
+          "datetime",
         ),
         render: (text) =>
-          renderColumn(
-            "progress",
-            hasValue(search["progress"]),
+          renderDateColumn(
+            "generateDate",
+            hasValue(search["generateDate"]),
             searchText,
             text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "succeed",
-        title: "Σ SUCCEED",
-        dataIndex: "succeed",
-        width: 130,
-        isNumber: true,
-        sorter: true,
-        filteredValue: [search?.succeed] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "succeed",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "succeed",
-            hasValue(search["succeed"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "failed",
-        title: "Σ FAILED",
-        dataIndex: "failed",
-        width: 130,
-        isNumber: true,
-        sorter: true,
-        filteredValue: [search?.failed] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "failed",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "failed",
-            hasValue(search["failed"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "customer",
-        title: "Σ CUSTOMER",
-        dataIndex: "customer",
-        width: 140,
-        isNumber: true,
-        sorter: true,
-        filteredValue: [search?.customer] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "customer",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "customer",
-            hasValue(search["customer"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
+            "datetime",
+            search,
           ),
       },
       {
@@ -682,7 +716,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -692,35 +726,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
-          ),
-      },
-      {
-        key: "generateDate",
-        title: "GENERATE DATE",
-        dataIndex: "generateDate",
-        width: 160,
-        isClassification: true,
-        sorter: true,
-        filteredValue: [search?.generateDate] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "generateDate",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "datetime"
-        ),
-        render: (text) =>
-          renderDateColumn(
-            "generateDate",
-            hasValue(search["generateDate"]),
-            searchText,
-            text,
-            "datetime",
-            search
+            search,
           ),
       },
       {
@@ -739,7 +745,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "datetime"
+          "datetime",
         ),
         render: (text) =>
           renderDateColumn(
@@ -748,7 +754,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "datetime",
-            search
+            search,
           ),
       },
       {
@@ -768,7 +774,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -778,7 +784,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -796,7 +802,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -806,7 +812,7 @@ const CalculationPage = () => {
             text,
             false,
             "status",
-            search
+            search,
           ),
       },
       {
@@ -824,7 +830,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (index) => {
           let text;
@@ -849,13 +855,13 @@ const CalculationPage = () => {
                 text,
                 false,
                 "status",
-                search
+                search,
               )
             : text;
         },
       },
     ],
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   const baseColumnHistory = useMemo(
@@ -882,7 +888,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -892,7 +898,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -913,7 +919,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -923,7 +929,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -941,7 +947,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -951,7 +957,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -969,7 +975,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -979,7 +985,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -997,7 +1003,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1007,7 +1013,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1028,7 +1034,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1038,7 +1044,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1056,7 +1062,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1066,7 +1072,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1084,7 +1090,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1094,7 +1100,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1115,7 +1121,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1125,7 +1131,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1146,7 +1152,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1156,7 +1162,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1174,7 +1180,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1184,7 +1190,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1202,7 +1208,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1212,7 +1218,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1230,7 +1236,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1240,7 +1246,7 @@ const CalculationPage = () => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1259,7 +1265,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "datePeriod"
+          "datePeriod",
         ),
         render: (text) =>
           renderDateColumn(
@@ -1268,7 +1274,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "datePeriod",
-            search
+            search,
           ),
       },
       {
@@ -1289,7 +1295,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -1299,7 +1305,7 @@ const CalculationPage = () => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -1318,7 +1324,7 @@ const CalculationPage = () => {
           searchText,
           handleSearch,
           true,
-          "datetime"
+          "datetime",
         ),
         render: (text) =>
           renderDateColumn(
@@ -1327,7 +1333,7 @@ const CalculationPage = () => {
             searchText,
             text,
             "datetime",
-            search
+            search,
           ),
       },
       {
@@ -1345,7 +1351,7 @@ const CalculationPage = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) => {
           return renderColumn(
@@ -1355,7 +1361,7 @@ const CalculationPage = () => {
             text?.toString(),
             false,
             "status",
-            search
+            search,
           );
         },
       },
@@ -1384,12 +1390,12 @@ const CalculationPage = () => {
             toTitleCase(index),
             false,
             "status",
-            search
+            search,
           );
         },
       },
     ],
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   const onSort = (_, __, sorter) => {
@@ -1419,7 +1425,7 @@ const CalculationPage = () => {
           pageSize: loadMoreSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     } else {
       dispatch(
@@ -1428,7 +1434,7 @@ const CalculationPage = () => {
           pageSize: loadMoreSize,
           sort,
           search: encodeURIComponent(JSON.stringify(search)),
-        })
+        }),
       );
     }
   };
@@ -1519,7 +1525,7 @@ const CalculationPage = () => {
       ...col,
       width: 80,
       align: "center",
-    })
+    }),
   );
 
   const allColumns = useMemo(() => {
@@ -1532,7 +1538,7 @@ const CalculationPage = () => {
       (col) => ({
         ...col,
         key: col.key || col.dataIndex || col.title,
-      })
+      }),
     );
     return columnsWithKeys;
   }, [baseColumns, baseColumnHistory, actionCols, tabHeader]);

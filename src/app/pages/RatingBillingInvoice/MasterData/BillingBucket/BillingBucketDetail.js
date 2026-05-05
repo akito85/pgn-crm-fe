@@ -100,12 +100,11 @@ const BillingBucketDetail = () => {
         (item) => {
           return {
             billingItem: item.billingItem.value,
-            currency: item.currency.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
             startDate: item.startDate,
             endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
             id: item.id,
             createdDate: item.createdDate,
             createdBy: item.createdBy,
@@ -268,12 +267,11 @@ const BillingBucketDetail = () => {
         data_detail_draft?.billingBucketDetail?.map((item) => {
           return {
             billingItem: item.billingItem.value,
-            currency: item.currency.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
             startDate: item.startDate,
             endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
           };
         });
 
@@ -373,7 +371,6 @@ const BillingBucketDetail = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       description: res.remark,
@@ -391,11 +388,12 @@ const BillingBucketDetail = () => {
         : approveRejectBillingBucket({
           body: data,
         });
-    dispatch(
+    return dispatch(
       approvalAction
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftBillingBucket(id));
         dispatch(getDetailBillingBucket(id));

@@ -131,9 +131,16 @@ const GeneralTempalteCreateUpdateForm = ({
                 </span>
               </>
             }
-            // rules={[
-            //   { message: requiredMessage("Template File"), required: true },
-            // ]}
+            rules={[
+              {
+                validator: () => {
+                  if (fileList && fileList.length > 0) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error(requiredMessage("Template File")));
+                },
+              },
+            ]}
           >
             <UploadTemplate
               dispatch={dispatch}

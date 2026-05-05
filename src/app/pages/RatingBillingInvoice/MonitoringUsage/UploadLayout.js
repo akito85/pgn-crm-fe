@@ -1,15 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import DetailText from "../../../../components/DetailText";
 import { useState } from "react";
-import { Alert, Form, Progress, Select, message } from "antd";
+import { Alert, Form, Progress, Select, message, Tooltip } from "antd";
 import SelectComponent from "../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import SVGIcon from "../../../../assets/Icon/index";
+import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
-  CloseOutlined,
+  CloseCircleFilled,
   FileOutlined,
   UndoOutlined,
   WarningOutlined,
@@ -21,6 +22,8 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { useDispatch, useSelector } from "react-redux";
 import { useMonitoringList } from "./useMonirotingList";
+import { useNavigate } from "react-router-dom";
+import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   ModalAttention,
   ModalConfirm,
@@ -28,12 +31,12 @@ import {
 
 const UploadLayout = ({
   dataTable,
-  setDataTable = () => {},
+  setDataTable = () => { },
   tabHeader,
   id,
   dataHeader,
   type,
-  refreshData = () => {},
+  refreshData = () => { },
 }) => {
   const [format, setFormat] = useState();
   const [fileList, setFileList] = useState([]);
@@ -51,8 +54,9 @@ const UploadLayout = ({
   const { columns, page, setPage, pageSize, setPageSize, onSort } =
     useMonitoringList(tabHeader, id);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { list_usage_type } = useSelector((state) => state.monitoring_usage);
-  
+
   const filePreviewRef = useRef(null);
 
   useEffect(() => {
@@ -127,7 +131,7 @@ const UploadLayout = ({
     accept: ".xlsx, .xls",
     beforeUpload: (file, newFiles) => {
       if (!format) {
-        form.validateFields(['format_usage_type']).catch(() => {});
+        form.validateFields(['format_usage_type']).catch(() => { });
         return false;
       }
 
@@ -151,20 +155,20 @@ const UploadLayout = ({
       });
 
       setTimeout(() => {
-        filePreviewRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'nearest' 
+        filePreviewRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
         });
       }, 100);
 
       return false;
     },
-    onChange: ({ fileList: newList }) => {},
+    onChange: ({ fileList: newList }) => { },
   };
 
   const handleUploadButtonClick = () => {
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
     }
   };
 
@@ -176,7 +180,7 @@ const UploadLayout = ({
     }
 
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
       return;
     }
 
@@ -191,7 +195,7 @@ const UploadLayout = ({
       setLoadingUpload(true);
 
       const rawFiles = validFiles.map((f) => f.originFileObj || f);
-      await dispatch(
+      const result = await dispatch(
         uploadMonitoringUsage({
           documents: rawFiles,
           calculationType: format.value,
@@ -199,16 +203,42 @@ const UploadLayout = ({
         })
       ).unwrap();
 
-      setFileList((prev) =>
-        prev.map((f) =>
-          f.size <= MAX_FILE_SIZE ? { ...f, _status: 'done' } : f
-        )
-      );
+      const uploadSummary = result?.uploadSummary || {};
+      const failedFiles = uploadSummary?.failedFiles ?? 0;
+      const failedFileNames = new Set(uploadSummary?.failedFileNames || []);
+      const successfulFileNames = new Set(uploadSummary?.successfulFileNames || []);
+
+      if (failedFiles === 0) {
+        setFileList([]);
+        setFileProgress(0);
+      } else {
+        setFileList((prev) =>
+          prev
+            .filter((f) => {
+              if (f.size > MAX_FILE_SIZE) return true;
+              if (failedFileNames.has(f.name)) return true;
+              if (successfulFileNames.has(f.name)) return false;
+              return false;
+            })
+            .map((f) => {
+              if (f.size > MAX_FILE_SIZE) return f;
+              return {
+                ...f,
+                _status: failedFileNames.has(f.name) ? 'error' : f._status,
+              };
+            })
+        );
+      }
+
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
 
-      setFileList([]);
+      if (failedFiles === 0) {
+        navigate(RBI_ROUTES.MONITORING_USAGE_VIEW, {
+          state: { defaultTab: "Batch List" },
+        });
+      }
     } catch (error) {
       setFileList((prev) =>
         prev.map((f) =>
@@ -224,7 +254,7 @@ const UploadLayout = ({
     const file = fileList[index];
     if (!file || file.size > MAX_FILE_SIZE) return;
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
       return;
     }
 
@@ -236,7 +266,7 @@ const UploadLayout = ({
 
     try {
       const rawFile = file.originFileObj || file;
-      await dispatch(
+      const result = await dispatch(
         uploadMonitoringUsage({
           documents: [rawFile],
           calculationType: format.value,
@@ -244,11 +274,33 @@ const UploadLayout = ({
         })
       ).unwrap();
 
-      setFileList((prev) =>
-        prev.map((f, i) => (i === index ? { ...f, _status: 'done' } : f))
-      );
+      const uploadSummary = result?.uploadSummary || {};
+      const failedFiles = uploadSummary?.failedFiles ?? 0;
+      const failedFileNames = new Set(uploadSummary?.failedFileNames || []);
+      const successfulFileNames = new Set(uploadSummary?.successfulFileNames || []);
+
+      if (failedFiles === 0 || successfulFileNames.has(file.name)) {
+        setFileList((prev) => prev.filter((_, i) => i !== index));
+      } else {
+        setFileList((prev) =>
+          prev.map((f, i) => {
+            if (i !== index) return f;
+            return {
+              ...f,
+              _status: failedFileNames.has(file.name) ? 'error' : 'done',
+            };
+          })
+        );
+      }
+
       if (refreshData && typeof refreshData === "function") {
         refreshData();
+      }
+
+      if (failedFiles === 0) {
+        navigate(RBI_ROUTES.MONITORING_USAGE_VIEW, {
+          state: { defaultTab: "Batch List" },
+        });
       }
     } catch (error) {
       setFileList((prev) =>
@@ -275,7 +327,7 @@ const UploadLayout = ({
 
   const handleDraggerClick = (e) => {
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
     }
   };
 
@@ -342,7 +394,7 @@ const UploadLayout = ({
         <Form layout={"vertical"} form={form}>
           <div className={"w-full flex flex-col"}>
             <div className={"w-full flex no-margin-form"}>
-              <Form.Item 
+              <Form.Item
                 className="w-1/4"
                 name={"format_usage_type"}
                 label={"Format Usage Type"}
@@ -369,8 +421,8 @@ const UploadLayout = ({
                 </SelectComponent>
               </Form.Item>
             </div>
-            
-            <Form.Item 
+
+            <Form.Item
               name={"file"}
               rules={[{ validator: async () => Promise.resolve() }]}
               validateTrigger={['onChange', 'onBlur']}
@@ -396,91 +448,114 @@ const UploadLayout = ({
               </div>
             </Form.Item>
 
-            {/* Multi-file list — styled like reference */}
+            {/* Multi-file list — Collapsible */}
             {fileList.length > 0 && (
-              <div ref={filePreviewRef} className="border border-solid border-[#D9E8F5] rounded-lg overflow-hidden">
-                <div className="bg-[#EBF4FB] px-4 py-2 border-b border-solid border-[#D9E8F5]">
-                  <span className="text-[#0075BF] text-xs font-bold uppercase tracking-wide">
-                    Files Upload
-                  </span>
-                </div>
-                <div className="divide-y divide-solid divide-[#F0F0F0]">
-                  {fileList.map((file, index) => {
-                    const isError = file._status === "error";
-                    const isUploading = file._status === "uploading";
-                    const isTooBig = file.size > MAX_FILE_SIZE;
+              <div ref={filePreviewRef}>
+                <CollapsibleContainer
+                  header={"Files Upload"}
+                  border
+                  defaultOpen
+                >
+                  <div className="flex flex-col gap-3 pt-3 pb-2">
+                    {fileList.map((file, index) => {
+                      const isError = file._status === "error";
+                      const isUploading = file._status === "uploading";
+                      const isDone = file._status === "done";
+                      const isTooBig = file.size > MAX_FILE_SIZE;
 
-                    return (
-                      <div
-                        key={index}
-                        className={`flex items-start gap-3 px-4 py-3 ${isError ? "bg-red-50" : "bg-white"}`}
-                      >
-                        {/* File Icon */}
-                        <div className="mt-1">
-                          <FileOutlined style={{ fontSize: "18px", color: "#0075BF" }} />
-                        </div>
+                      return (
+                        <div
+                          key={index}
+                          className={`border border-solid rounded-lg px-4 py-3 ${isError
+                              ? "bg-[#FFF1F0] border-[#FFA39E]"
+                              : "bg-white border-[#E5E7EB]"
+                            }`}
+                        >
+                          {/* Row: icon + name + size + action */}
+                          <div className="flex items-center gap-3">
+                            {/* File Icon */}
+                            <div className="flex-shrink-0">
+                              <FileOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+                            </div>
 
-                        {/* File Info */}
-                        <div className="flex flex-col flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-gray-800 truncate">
-                              {file.name}
-                            </span>
+                            {/* Name + size inline */}
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-sm font-medium text-gray-800 truncate">
+                                {file.name}
+                              </span>
+                              <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
+                                {bytesConverter(file.size)}
+                              </span>
+                            </div>
+
+                            {/* Right-side action per status */}
                             <div className="flex items-center gap-2 flex-shrink-0">
+                              {isTooBig && (
+                                <span className="text-xs text-red-500">Exceeds 5 MB</span>
+                              )}
                               {isError && (
                                 <ButtonComponent
                                   size="small"
                                   border={false}
                                   onClick={() => handleRetryFile(index)}
                                   style={{
-                                    backgroundColor: "#0075BF",
+                                    backgroundColor: "#1E293B",
                                     color: "#fff",
-                                    borderRadius: "4px",
-                                    fontSize: "11px",
-                                    height: "24px",
-                                    padding: "0 8px",
+                                    borderRadius: "20px",
+                                    fontSize: "12px",
+                                    height: "28px",
+                                    padding: "0 14px",
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: "4px",
+                                    gap: "6px",
+                                    border: "none",
                                   }}
                                 >
-                                  <UndoOutlined style={{ fontSize: "11px" }} />
+                                  <UndoOutlined style={{ fontSize: "12px" }} />
                                   Try Again
                                 </ButtonComponent>
                               )}
-                              {!isUploading && (
-                                <CloseOutlined
-                                  onClick={() => handleRemove(index)}
-                                  style={{
-                                    fontSize: "12px",
-                                    color: isError ? "#BE3036" : "#8c8c8c",
-                                    cursor: "pointer",
-                                  }}
-                                />
+                              {isUploading && (
+                                <Tooltip title="Cancel upload">
+                                  <CloseCircleFilled
+                                    onClick={() => handleRemove(index)}
+                                    style={{
+                                      fontSize: "20px",
+                                      color: "#BE3036",
+                                      cursor: "pointer",
+                                    }}
+                                  />
+                                </Tooltip>
+                              )}
+                              {(isDone || (!isUploading && !isError)) && (
+                                <Tooltip title="Remove">
+                                  <SVGIcon
+                                    name="IconDelete"
+                                    width={20}
+                                    color="#BE3036"
+                                    onClick={() => handleRemove(index)}
+                                  />
+                                </Tooltip>
                               )}
                             </div>
                           </div>
-                          <span className="text-xs text-gray-400 mt-0.5">
-                            {bytesConverter(file.size)}
-                          </span>
-                          {isTooBig && (
-                            <span className="text-xs text-red-500 mt-1">
-                              File exceeds 5 MB limit
-                            </span>
-                          )}
+
+                          {/* Progress bar — full width, below filename row */}
                           {isUploading && (
-                            <Progress
-                              percent={fileProgress}
-                              size="small"
-                              className="mt-1"
-                              format={(p) => `${p}%`}
-                            />
+                            <div className="mt-2">
+                              <Progress
+                                percent={fileProgress}
+                                size="small"
+                                strokeColor="#0075BF"
+                                format={(p) => `${p}%`}
+                              />
+                            </div>
                           )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContainer>
               </div>
             )}
 
@@ -518,7 +593,7 @@ const UploadLayout = ({
   return (
     <>
       {renderLayout(type)}
-      
+
       <ModalAttention
         isOpen={isLinkModalVisible}
         handleCancel={() => setLinkModalVisible(false)}

@@ -66,7 +66,7 @@ export const UsageFormatting = ({ value }) => {
     <NumericFormat
       value={value || 0}
       displayType="text"
-      decimalScale={config.DECIMAL_SCALE_USAGE ?? 7}
+      decimalScale={config.DECIMAL_SCALE_USAGE ?? 2}
       fixedDecimalScale={config.FIXED_DECIMAL_SCALE_USAGE ?? true}
       thousandsGroupStyle={config.THOUSAND_GROUP_STYLE_USAGE ?? "thousand"}
       thousandSeparator={config.THOUSAND_SEPARATOR_USAGE ?? ","}
@@ -78,3 +78,89 @@ export const UsageFormatting = ({ value }) => {
 export const usageFormatting = (value) => {
   return <UsageFormatting value={value} />;
 };
+
+
+// Temperatur - 2 desimal
+export const TemperaturFormatting = ({ value }) => {
+  const config = useFormatConfig();
+  return (
+    <NumericFormat
+      value={value || 0}
+      displayType="text"
+      decimalScale={config.DECIMAL_SCALE_TEMPERATUR ?? 2}
+      fixedDecimalScale={config.FIXED_DECIMAL_SCALE_TEMPERATUR ?? true}
+      thousandsGroupStyle={config.THOUSAND_GROUP_STYLE_TEMPERATUR ?? "thousand"}
+      thousandSeparator={config.THOUSAND_SEPARATOR_TEMPERATUR ?? ","}
+      decimalSeparator={config.DECIMAL_SEPARATOR_TEMPERATUR ?? "."}
+    />
+  );
+};
+export const temperaturFormatting = (value) => <TemperaturFormatting value={value} />;
+
+// Tekanan - 2 desimal
+export const TekananFormatting = ({ value }) => {
+  const config = useFormatConfig();
+  return (
+    <NumericFormat
+      value={value || 0}
+      displayType="text"
+      decimalScale={config.DECIMAL_SCALE_TEKANAN ?? 2}
+      fixedDecimalScale={config.FIXED_DECIMAL_SCALE_TEKANAN ?? true}
+      thousandsGroupStyle={config.THOUSAND_GROUP_STYLE_TEKANAN ?? "thousand"}
+      thousandSeparator={config.THOUSAND_SEPARATOR_TEKANAN ?? ","}
+      decimalSeparator={config.DECIMAL_SEPARATOR_TEKANAN ?? "."}
+    />
+  );
+};
+export const tekananFormatting = (value) => <TekananFormatting value={value} />;
+
+// Volume - 2 desimal
+export const VolumeFormatting = ({ value }) => {
+  const config = useFormatConfig();
+  return (
+    <NumericFormat
+      value={value || 0}
+      displayType="text"
+      decimalScale={config.DECIMAL_SCALE_VOLUME ?? 2}
+      fixedDecimalScale={config.FIXED_DECIMAL_SCALE_VOLUME ?? true}
+      thousandsGroupStyle={config.THOUSAND_GROUP_STYLE_VOLUME ?? "thousand"}
+      thousandSeparator={config.THOUSAND_SEPARATOR_VOLUME ?? ","}
+      decimalSeparator={config.DECIMAL_SEPARATOR_VOLUME ?? "."}
+    />
+  );
+};
+export const volumeFormatting = (value) => <VolumeFormatting value={value} />;
+
+// GHV - 4 desimal
+export const GhvFormatting = ({ value }) => {
+  const config = useFormatConfig();
+  return (
+    <NumericFormat
+      value={value || 0}
+      displayType="text"
+      decimalScale={config.DECIMAL_SCALE_GHV ?? 4}
+      fixedDecimalScale={config.FIXED_DECIMAL_SCALE_GHV ?? true}
+      thousandsGroupStyle={config.THOUSAND_GROUP_STYLE_GHV ?? "thousand"}
+      thousandSeparator={config.THOUSAND_SEPARATOR_GHV ?? ","}
+      decimalSeparator={config.DECIMAL_SEPARATOR_GHV ?? "."}
+    />
+  );
+};
+export const ghvFormatting = (value) => <GhvFormatting value={value} />;
+
+// Energi - 4 desimal
+export const EnergiFormatting = ({ value }) => {
+  const config = useFormatConfig();
+  return (
+    <NumericFormat
+      value={value || 0}
+      displayType="text"
+      decimalScale={config.DECIMAL_SCALE_ENERGI ?? 4}
+      fixedDecimalScale={config.FIXED_DECIMAL_SCALE_ENERGI ?? true}
+      thousandsGroupStyle={config.THOUSAND_GROUP_STYLE_ENERGI ?? "thousand"}
+      thousandSeparator={config.THOUSAND_SEPARATOR_ENERGI ?? ","}
+      decimalSeparator={config.DECIMAL_SEPARATOR_ENERGI ?? "."}
+    />
+  );
+};
+export const energiFormatting = (value) => <EnergiFormatting value={value} />;

@@ -497,7 +497,7 @@ export const approveActivatedTOP = createAsyncThunk(
   "APPROVE_OR_REJECT_ACTIVATED_TOPS",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/rbi/top/approval-activated";
+      const url = "/v1/dbs/api/rbi/top/approval-activate";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
         body,
