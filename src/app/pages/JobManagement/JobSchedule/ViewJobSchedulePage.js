@@ -86,6 +86,15 @@ const ViewJobSchedulePage = () => {
     { path: "",                                             breadcrumbName: "View" },
   ];
 
+  if (!scheduleId) {
+    return (
+      <>
+        <BreadCrumb routes={breadcrumbRoutes} />
+        <div style={{ textAlign: "center", padding: 40 }}>No schedule selected.</div>
+      </>
+    );
+  }
+
   if (detailLoading || !schedule) {
     return (
       <>
@@ -172,7 +181,7 @@ const ViewJobSchedulePage = () => {
       {/* HISTORY LOG INFORMATION */}
       <NxCardContainer header="HISTORY LOG INFORMATION" className="mt-4">
         <div className="w-full p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: "16px 24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px 24px" }}>
             <div className="flex flex-col gap-1">
               <div className="text-xs font-semibold text-Semantic-Text-light-text-primary">Record ID</div>
               <div className="text-xs font-medium text-Semantic-Text-light-text-primary">{schedule.scheduleId ?? "—"}</div>
