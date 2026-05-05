@@ -410,9 +410,8 @@ export const approveRejectData = createAsyncThunk(
       );
       const successMessage = {
         title: "Successfull",
-        description: `Your data has been ${
-          data?.action === "APPROVE" ? "approved" : "rejected"
-        }`,
+        description: `Your data has been ${data?.action === "APPROVE" ? "approved" : "rejected"
+          }`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -427,9 +426,8 @@ export const approveRejectData = createAsyncThunk(
       const errorBody = {
         title: "Failed",
         data: response.response.data.data,
-        description: `Your data was not ${
-          data?.action === "APPROVE" ? "approved" : "rejected"
-        }. ${message}. Please try again.`,
+        description: `Your data was not ${data?.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}. Please try again.`,
         return: false,
       };
       thunkAPI.dispatch(showModalError(errorBody));
@@ -449,9 +447,8 @@ export const saveSubmitData = createAsyncThunk(
       );
       const successMessage = {
         title: "Successful",
-        description: `Your data has been ${
-          data?.isSubmit ? "submitted" : "updated"
-        }.`,
+        description: `Your data has been ${data?.isSubmit ? "submitted" : "updated"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -464,9 +461,8 @@ export const saveSubmitData = createAsyncThunk(
         response.toString();
 
       // Custom handling untuk apphierId null error
-      let errorDescription = `Your data was not ${
-        data?.isSubmit ? "submitted" : "updated"
-      }. ${message}. Please try again.`;
+      let errorDescription = `Your data was not ${data?.isSubmit ? "submitted" : "updated"
+        }. ${message}. Please try again.`;
 
       if (
         message.toLowerCase().includes("apphierid") ||
@@ -610,12 +606,68 @@ export const uploadMonitoringUsage = createAsyncThunk(
         formData,
         onProgress,
       );
+
+      const responseData = data?.data || {};
+      const successBatches = Array.isArray(responseData?.batches)
+        ? responseData.batches
+        : [];
+      const fileResult = Array.isArray(responseData?.fileResult)
+        ? responseData.fileResult
+        : [];
+      const failedFiles = responseData?.failedFiles ?? 0;
+      const successFiles = responseData?.successFiles ?? 0;
+      const totalFiles = responseData?.totalFiles ?? files.length;
+      const totalRecords = responseData?.totalRecords ?? 0;
+
+      const successfulFileNames = fileResult.length
+        ? fileResult
+          .filter((item) => item?.status?.toLowerCase() === "success")
+          .map((item) => item?.fileName)
+        : successBatches.map((item) => item?.fileName);
+
+      const failedFileNames = fileResult.length
+        ? fileResult
+          .filter((item) => item?.status?.toLowerCase() === "failed")
+          .map((item) => item?.fileName)
+        : [];
+
+      const successFilesText = successBatches.length
+        ? successBatches
+          .map((item) => {
+            const fileName = item?.fileName || "Unknown file";
+            const totalRecords = item?.totalRecords ?? 0;
+            const batchId = item?.batchId ?? "-";
+            return `${fileName} (records: ${totalRecords}, batchId: ${batchId})`;
+          })
+          .join("; ")
+        : "-";
+
+      const failedFilesText = failedFileNames.length
+        ? failedFileNames.join("; ")
+        : "-";
+
       const successMessage = {
-        title: "Successfull",
-        description: "Your data has been uploaded",
+        title: failedFiles > 0 ? "Completed" : "Successfull",
+        description:
+          data?.message ||
+          `${successFiles} file(s) successfully uploaded with ${totalRecords} total records.${failedFiles > 0 ? ` ${failedFiles} file(s) failed.` : ""}`,
+        icon: failedFiles > 0 ? "icon_warning_default" : undefined,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
-      return data;
+      return {
+        ...data,
+        uploadSummary: {
+          totalFiles,
+          successFiles,
+          failedFiles,
+          totalRecords,
+          batches: successBatches,
+          fileResult,
+          successfulFileNames,
+          failedFileNames,
+        },
+      };
     } catch (e) {
       let message = errorMessage(e);
       const errorBody = {

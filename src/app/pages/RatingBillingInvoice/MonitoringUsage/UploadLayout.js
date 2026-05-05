@@ -22,6 +22,8 @@ import {
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { useDispatch, useSelector } from "react-redux";
 import { useMonitoringList } from "./useMonirotingList";
+import { useNavigate } from "react-router-dom";
+import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   ModalAttention,
   ModalConfirm,
@@ -29,12 +31,12 @@ import {
 
 const UploadLayout = ({
   dataTable,
-  setDataTable = () => {},
+  setDataTable = () => { },
   tabHeader,
   id,
   dataHeader,
   type,
-  refreshData = () => {},
+  refreshData = () => { },
 }) => {
   const [format, setFormat] = useState();
   const [fileList, setFileList] = useState([]);
@@ -52,8 +54,9 @@ const UploadLayout = ({
   const { columns, page, setPage, pageSize, setPageSize, onSort } =
     useMonitoringList(tabHeader, id);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { list_usage_type } = useSelector((state) => state.monitoring_usage);
-  
+
   const filePreviewRef = useRef(null);
 
   useEffect(() => {
@@ -128,7 +131,7 @@ const UploadLayout = ({
     accept: ".xlsx, .xls",
     beforeUpload: (file, newFiles) => {
       if (!format) {
-        form.validateFields(['format_usage_type']).catch(() => {});
+        form.validateFields(['format_usage_type']).catch(() => { });
         return false;
       }
 
@@ -152,20 +155,20 @@ const UploadLayout = ({
       });
 
       setTimeout(() => {
-        filePreviewRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'nearest' 
+        filePreviewRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
         });
       }, 100);
 
       return false;
     },
-    onChange: ({ fileList: newList }) => {},
+    onChange: ({ fileList: newList }) => { },
   };
 
   const handleUploadButtonClick = () => {
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
     }
   };
 
@@ -177,7 +180,7 @@ const UploadLayout = ({
     }
 
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
       return;
     }
 
@@ -192,7 +195,7 @@ const UploadLayout = ({
       setLoadingUpload(true);
 
       const rawFiles = validFiles.map((f) => f.originFileObj || f);
-      await dispatch(
+      const result = await dispatch(
         uploadMonitoringUsage({
           documents: rawFiles,
           calculationType: format.value,
@@ -200,16 +203,42 @@ const UploadLayout = ({
         })
       ).unwrap();
 
-      setFileList((prev) =>
-        prev.map((f) =>
-          f.size <= MAX_FILE_SIZE ? { ...f, _status: 'done' } : f
-        )
-      );
+      const uploadSummary = result?.uploadSummary || {};
+      const failedFiles = uploadSummary?.failedFiles ?? 0;
+      const failedFileNames = new Set(uploadSummary?.failedFileNames || []);
+      const successfulFileNames = new Set(uploadSummary?.successfulFileNames || []);
+
+      if (failedFiles === 0) {
+        setFileList([]);
+        setFileProgress(0);
+      } else {
+        setFileList((prev) =>
+          prev
+            .filter((f) => {
+              if (f.size > MAX_FILE_SIZE) return true;
+              if (failedFileNames.has(f.name)) return true;
+              if (successfulFileNames.has(f.name)) return false;
+              return false;
+            })
+            .map((f) => {
+              if (f.size > MAX_FILE_SIZE) return f;
+              return {
+                ...f,
+                _status: failedFileNames.has(f.name) ? 'error' : f._status,
+              };
+            })
+        );
+      }
+
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
 
-      setFileList([]);
+      if (failedFiles === 0) {
+        navigate(RBI_ROUTES.MONITORING_USAGE_VIEW, {
+          state: { defaultTab: "Batch List" },
+        });
+      }
     } catch (error) {
       setFileList((prev) =>
         prev.map((f) =>
@@ -225,7 +254,7 @@ const UploadLayout = ({
     const file = fileList[index];
     if (!file || file.size > MAX_FILE_SIZE) return;
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
       return;
     }
 
@@ -237,7 +266,7 @@ const UploadLayout = ({
 
     try {
       const rawFile = file.originFileObj || file;
-      await dispatch(
+      const result = await dispatch(
         uploadMonitoringUsage({
           documents: [rawFile],
           calculationType: format.value,
@@ -245,11 +274,33 @@ const UploadLayout = ({
         })
       ).unwrap();
 
-      setFileList((prev) =>
-        prev.map((f, i) => (i === index ? { ...f, _status: 'done' } : f))
-      );
+      const uploadSummary = result?.uploadSummary || {};
+      const failedFiles = uploadSummary?.failedFiles ?? 0;
+      const failedFileNames = new Set(uploadSummary?.failedFileNames || []);
+      const successfulFileNames = new Set(uploadSummary?.successfulFileNames || []);
+
+      if (failedFiles === 0 || successfulFileNames.has(file.name)) {
+        setFileList((prev) => prev.filter((_, i) => i !== index));
+      } else {
+        setFileList((prev) =>
+          prev.map((f, i) => {
+            if (i !== index) return f;
+            return {
+              ...f,
+              _status: failedFileNames.has(file.name) ? 'error' : 'done',
+            };
+          })
+        );
+      }
+
       if (refreshData && typeof refreshData === "function") {
         refreshData();
+      }
+
+      if (failedFiles === 0) {
+        navigate(RBI_ROUTES.MONITORING_USAGE_VIEW, {
+          state: { defaultTab: "Batch List" },
+        });
       }
     } catch (error) {
       setFileList((prev) =>
@@ -276,7 +327,7 @@ const UploadLayout = ({
 
   const handleDraggerClick = (e) => {
     if (!format) {
-      form.validateFields(['format_usage_type']).catch(() => {});
+      form.validateFields(['format_usage_type']).catch(() => { });
     }
   };
 
@@ -343,7 +394,7 @@ const UploadLayout = ({
         <Form layout={"vertical"} form={form}>
           <div className={"w-full flex flex-col"}>
             <div className={"w-full flex no-margin-form"}>
-              <Form.Item 
+              <Form.Item
                 className="w-1/4"
                 name={"format_usage_type"}
                 label={"Format Usage Type"}
@@ -370,8 +421,8 @@ const UploadLayout = ({
                 </SelectComponent>
               </Form.Item>
             </div>
-            
-            <Form.Item 
+
+            <Form.Item
               name={"file"}
               rules={[{ validator: async () => Promise.resolve() }]}
               validateTrigger={['onChange', 'onBlur']}
@@ -415,11 +466,10 @@ const UploadLayout = ({
                       return (
                         <div
                           key={index}
-                          className={`border border-solid rounded-lg px-4 py-3 ${
-                            isError
+                          className={`border border-solid rounded-lg px-4 py-3 ${isError
                               ? "bg-[#FFF1F0] border-[#FFA39E]"
                               : "bg-white border-[#E5E7EB]"
-                          }`}
+                            }`}
                         >
                           {/* Row: icon + name + size + action */}
                           <div className="flex items-center gap-3">
@@ -543,7 +593,7 @@ const UploadLayout = ({
   return (
     <>
       {renderLayout(type)}
-      
+
       <ModalAttention
         isOpen={isLinkModalVisible}
         handleCancel={() => setLinkModalVisible(false)}

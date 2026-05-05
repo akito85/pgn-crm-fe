@@ -127,7 +127,7 @@ export const renderDateConverter = (data, type = "date") => {
     case "meas_date":
       return moment(data)?.format(dateFormatting?.meas_date);
     case "meas_date_input":
-      return moment(data)?.format(dateFormatting?.meas_date_input);
+      return moment(data)?.isValid() ? moment(data).format(dateFormatting?.dateTime) : "-";
     default:
       return moment(data)?.format(dateFormatting?.date);
   }
