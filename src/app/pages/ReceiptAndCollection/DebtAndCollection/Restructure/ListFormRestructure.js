@@ -226,6 +226,7 @@ const ListFormRestructure = (props) => {
         startPeriod: values.startPeriod ? moment(values.startPeriod).format("YYYY-MM-DD") : null,
         source: values.source || "SAP FSCD",
         description: values.description,
+        contactIds: contacts.map((c) => c.id || c.contactId).filter(Boolean),
         appHierId: selectedHierarchy,
         attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
         badDebtList: badDebtList.map((item) => ({
@@ -406,7 +407,7 @@ const ListFormRestructure = (props) => {
                     </div>
                 }
             >
-                <ContentModalConfirmRestructure 
+                <ContentModalConfirmRestructure
                     formValues={formValues}
                     contacts={contacts}
                     openItems={badDebtList}
