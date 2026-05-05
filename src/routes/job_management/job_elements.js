@@ -6,6 +6,8 @@ import ViewJobPage from "../../app/pages/JobManagement/Job/ViewJobPage";
 import ViewJobGroupDetailPage from "../../app/pages/JobManagement/JobGroup/ViewJobGroupDetailPage";
 import CreateJobGroupPage from "../../app/pages/JobManagement/JobGroup/CreateJobGroupPage";
 import ViewJobExecutionPage from "../../app/pages/JobManagement/JobExecution/ViewJobExecutionPage";
+import JobSchedulePage from "../../app/pages/JobManagement/JobSchedule/JobSchedulePage";
+import ViewJobSchedulePage from "../../app/pages/JobManagement/JobSchedule/ViewJobSchedulePage";
 
 export const JOB_MGMT_ELEMENTS = {
   VIEW_JOB_PAGE:                  <JobPage />,
@@ -18,4 +20,6 @@ export const JOB_MGMT_ELEMENTS = {
   UPDATE_JOB_GROUP_PAGE:          <CreateJobGroupPage />,
   VIEW_JOB_EXECUTION_PAGE:        <JobExecutionPage />,
   VIEW_JOB_EXECUTION_DETAIL_PAGE: <ViewJobExecutionPage />,
+  VIEW_JOB_SCHEDULE_PAGE:         <JobSchedulePage />,
+  VIEW_JOB_SCHEDULE_DETAIL_PAGE:  <ViewJobSchedulePage />,
 };
