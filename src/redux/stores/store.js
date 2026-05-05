@@ -152,6 +152,7 @@ import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
 import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlice";
+import jobScheduleReducer from "../slices/job_management/jobScheduleSlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 
@@ -162,6 +163,7 @@ const reducer = combineReducers({
   oracleMetadata: oracleMetadataReducer,
   taskQueue: taskQueueReducer,
   handlerRegistry: handlerRegistryReducer,
+  jobSchedule: jobScheduleReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
