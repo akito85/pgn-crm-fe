@@ -10,10 +10,13 @@ import { FormStepper, FormFooter } from "../../../../../components/FormStepNavig
 import {
     getListCustomerRestructure,
     getListAccountRestructure,
+    getBadDebtByAccount,
     getAllApprovalList,
     getListApprovalById,
     getListCategory,
     getDetailRestructure,
+    saveRestructure,
+    updateRestructure,
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import RestructureForm from "./RestructureForm";
@@ -27,12 +30,6 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import { configApp } from "../../../../../constants/configApp";
 import ContentModalConfirmRestructure from "./ContentModalConfirmRestructure";
 
-// TODO: Replace with actual API response
-const DUMMY_OPEN_ITEMS = [
-  { key: 1, currency: "IDR", invoiceNo: "INV/2023/001", invoicePeriod: "JAN 2023", allocation: "Principal", amount: "10,000,000" },
-  { key: 2, currency: "IDR", invoiceNo: "INV/2023/002", invoicePeriod: "FEB 2023", allocation: "Interest", amount: "5,000,000" },
-  { key: 3, currency: "USD", invoiceNo: "INV/2023/003", invoicePeriod: "MAR 2023", allocation: "Principal", amount: "1,000.00" },
-];
 
 const ListFormRestructure = (props) => {
     const { type } = props;
@@ -74,7 +71,6 @@ const ListFormRestructure = (props) => {
     // Validation states for step 0
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
     const [contacts, setContacts] = useState([]);
-    const [openItems] = useState(DUMMY_OPEN_ITEMS);
     const [installmentsByCurrency, setInstallmentsByCurrency] = useState({});
 
     const steps = [
@@ -133,29 +129,23 @@ const ListFormRestructure = (props) => {
     }, [dispatch, selectedHierarchy]);
 
     const handleAccountChange = (value) => {
-        form.setFieldsValue({
-            accountName: "PT MENCARI CINTA SEJATI",
-            customerNumber: "CUST-1002",
-            customerName: "JOHN DOE",
-            accountGroupType: "Group A",
-            sor: "SOR-1",
-            costCenter: "CC-99",
-            accountSegment: "Commercial",
-            meterReadingCode: "MR-001",
-            accountType: "Postpaid",
-            classificationType: "Standard",
-            sapCustId: "SAP-900",
-            accountStatus: "Active",
-
-            saNumber: "SA-2023-001",
-            saName: "SA Commercial",
-            saDate: moment("2023-01-01"),
-            startDate: moment("2023-01-01"),
-            endDate: moment("2024-01-01"),
-            minContract: "100",
-            maxContract: "1000",
-            uom: "MMBTU"
-        });
+        const selected = listAccount.find((acc) => acc.value === value);
+        if (selected) {
+            form.setFieldsValue({
+                accountName: selected.accountName,
+                customerNumber: selected.customerNumber,
+                customerName: selected.customerName,
+                accountGroupType: selected.accountGroupType,
+                sor: selected.sor,
+                costCenter: selected.costCenter,
+                accountSegment: selected.accountSegment,
+                meterReadingCode: selected.meterReadingCode,
+                accountType: selected.accountType,
+                classificationType: selected.classificationType,
+                accountStatus: selected.accountStatus,
+            });
+            dispatch(getBadDebtByAccount(value));
+        }
     };
 
     const next = () => {
@@ -216,9 +206,57 @@ const ListFormRestructure = (props) => {
         }
     };
 
+    const buildRequestBody = (values, isDraft) => ({
+        accountNumber: values.accountNumber,
+        accountName: values.accountName,
+        customerNumber: values.customerNumber,
+        customerName: values.customerName,
+        accountGroupType: values.accountGroupType,
+        sor: values.sor,
+        costCenter: values.costCenter,
+        accountSegment: values.accountSegment,
+        meterReadingCode: values.meterReadingCode,
+        accountType: values.accountType,
+        classificationType: values.classificationType,
+        sapCustId: values.sapCustId,
+        accountStatus: values.accountStatus,
+        saNumber: values.saNumber,
+        type: values.type,
+        tenor: values.tenor,
+        startPeriod: values.startPeriod ? moment(values.startPeriod).format("YYYY-MM-DD") : null,
+        source: values.source || "SAP FSCD",
+        description: values.description,
+        appHierId: selectedHierarchy,
+        attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
+        badDebtList: badDebtList.map((item) => ({
+            invoiceNumber: item.invoiceNo,
+            invoicePeriod: item.invoicePeriod,
+            currency: item.currency,
+            allocation: item.allocation,
+            totalAmount: item.totalAmount,
+        })),
+        calculationList: Object.values(installmentsByCurrency).flat().map((item) => ({
+            periode: item.periode,
+            currency: item.currency,
+            amount: parseFloat(String(item.amount).replace(/,/g, "")) || 0,
+        })),
+        isDraft,
+    });
+
     const handleSaveDraft = async () => {
-        message.success("Draft saved successfully!");
-        navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        const values = form.getFieldsValue(true);
+        if (!values.accountNumber) {
+            message.warning("Account Number wajib diisi untuk menyimpan draft");
+            return;
+        }
+        const body = buildRequestBody(values, true);
+        const action = type === "update" && id
+            ? await dispatch(updateRestructure({ id, body }))
+            : await dispatch(saveRestructure({ body }));
+        if (action.meta.requestStatus === "fulfilled") {
+            message.success("Draft berhasil disimpan!");
+            navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        }
     };
 
     const handleSubmit = async () => {
@@ -231,10 +269,16 @@ const ListFormRestructure = (props) => {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setIsModalSubmit(false);
-        message.success("Successfully submitted!");
-        navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        const body = buildRequestBody(formValues, false);
+        const action = type === "update" && id
+            ? await dispatch(updateRestructure({ id, body }))
+            : await dispatch(saveRestructure({ body }));
+        if (action.meta.requestStatus === "fulfilled") {
+            message.success("Payment Plan berhasil disubmit!");
+            navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        }
     };
 
     const routes = [
@@ -274,7 +318,7 @@ const ListFormRestructure = (props) => {
                             dataAccNumber={dataAccNumber}
                             handleAccountChange={handleAccountChange}
                             disabled={type === "update"}
-                            openItems={openItems}
+                            openItems={badDebtList}
                             onContactChange={handleContactChange}
                             onPlanDetailValidation={handlePlanDetailValidation}
                             onInstallmentsChange={handleInstallmentsChange}

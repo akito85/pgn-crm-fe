@@ -408,6 +408,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
             remark: res.remark,
             approvalId: data_detail?.tApprovalDto?.tAppId,
             action: approveOrReject.toUpperCase(),
+            category: "INSTALLMENT",
         };
 
         dispatch(approveOrRejectRestructure({ body })).then((action) => {

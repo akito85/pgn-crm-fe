@@ -10,10 +10,13 @@ import { FormStepper, FormFooter } from "../../../../../components/FormStepNavig
 import {
     getListCustomerRestructure,
     getListAccountRestructure,
+    getBadDebtByAccount,
     getAllApprovalList,
     getListApprovalById,
     getListCategory,
     getDetailRestructure,
+    saveEarlyRepayment,
+    updateEarlyRepayment,
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import EarlyRepaymentForm from "./EarlyRepaymentForm";
@@ -27,12 +30,6 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import { configApp } from "../../../../../constants/configApp";
 import ContentModalConfirmEarlyRepayment from "./ContentModalConfirmEarlyRepayment";
 
-// TODO: Replace with actual API response
-const DUMMY_OPEN_ITEMS = [
-  { key: 1, currency: "IDR", invoiceNo: "INV/2023/001", invoicePeriod: "JAN 2023", allocation: "Principal", amount: "10,000,000" },
-  { key: 2, currency: "IDR", invoiceNo: "INV/2023/002", invoicePeriod: "FEB 2023", allocation: "Interest", amount: "5,000,000" },
-  { key: 3, currency: "USD", invoiceNo: "INV/2023/003", invoicePeriod: "MAR 2023", allocation: "Principal", amount: "1,000.00" },
-];
 
 const ListFormEarlyRepayment = (props) => {
     const { type } = props;
@@ -74,7 +71,7 @@ const ListFormEarlyRepayment = (props) => {
     // Validation states for step 0
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
     const [contacts, setContacts] = useState([]);
-    const [openItems] = useState(DUMMY_OPEN_ITEMS);
+    const [selectedInstallmentDetailIds, setSelectedInstallmentDetailIds] = useState([]);
     const [installmentsByCurrency, setInstallmentsByCurrency] = useState({});
 
     const steps = [
@@ -133,29 +130,23 @@ const ListFormEarlyRepayment = (props) => {
     }, [dispatch, selectedHierarchy]);
 
     const handleAccountChange = (value) => {
-        form.setFieldsValue({
-            accountName: "PT MENCARI CINTA SEJATI",
-            customerNumber: "CUST-1002",
-            customerName: "JOHN DOE",
-            accountGroupType: "Group A",
-            sor: "SOR-1",
-            costCenter: "CC-99",
-            accountSegment: "Commercial",
-            meterReadingCode: "MR-001",
-            accountType: "Postpaid",
-            classificationType: "Standard",
-            sapCustId: "SAP-900",
-            accountStatus: "Active",
-
-            saNumber: "SA-2023-001",
-            saName: "SA Commercial",
-            saDate: moment("2023-01-01"),
-            startDate: moment("2023-01-01"),
-            endDate: moment("2024-01-01"),
-            minContract: "100",
-            maxContract: "1000",
-            uom: "MMBTU"
-        });
+        const selected = listAccount.find((acc) => acc.value === value);
+        if (selected) {
+            form.setFieldsValue({
+                accountName: selected.accountName,
+                customerNumber: selected.customerNumber,
+                customerName: selected.customerName,
+                accountGroupType: selected.accountGroupType,
+                sor: selected.sor,
+                costCenter: selected.costCenter,
+                accountSegment: selected.accountSegment,
+                meterReadingCode: selected.meterReadingCode,
+                accountType: selected.accountType,
+                classificationType: selected.classificationType,
+                accountStatus: selected.accountStatus,
+            });
+            dispatch(getBadDebtByAccount(value));
+        }
     };
 
     const next = () => {
@@ -216,9 +207,28 @@ const ListFormEarlyRepayment = (props) => {
         }
     };
 
+    const buildERRequestBody = (values, isDraft) => ({
+        installmentId: id,
+        earlyRepaymentDate: values.earlyRepaymentDate
+            ? moment(values.earlyRepaymentDate).format("YYYY-MM-DD")
+            : null,
+        earlyRepaymentReason: values.earlyRepaymentReason,
+        installmentDetailIds: selectedInstallmentDetailIds,
+        appHierId: selectedHierarchy,
+        attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
+        isDraft,
+    });
+
     const handleSaveDraft = async () => {
-        message.success("Draft saved successfully!");
-        navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        const values = form.getFieldsValue(true);
+        const body = buildERRequestBody(values, true);
+        const action = type === "update" && id
+            ? await dispatch(updateEarlyRepayment({ id, body }))
+            : await dispatch(saveEarlyRepayment({ body }));
+        if (action.meta.requestStatus === "fulfilled") {
+            message.success("Draft berhasil disimpan!");
+            navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        }
     };
 
     const handleSubmit = async () => {
@@ -231,10 +241,16 @@ const ListFormEarlyRepayment = (props) => {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setIsModalSubmit(false);
-        message.success("Successfully submitted!");
-        navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        const body = buildERRequestBody(formValues, false);
+        const action = type === "update" && id
+            ? await dispatch(updateEarlyRepayment({ id, body }))
+            : await dispatch(saveEarlyRepayment({ body }));
+        if (action.meta.requestStatus === "fulfilled") {
+            message.success("Early Repayment berhasil disubmit!");
+            navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
+        }
     };
 
     const routes = [
@@ -274,10 +290,11 @@ const ListFormEarlyRepayment = (props) => {
                             dataAccNumber={dataAccNumber}
                             handleAccountChange={handleAccountChange}
                             disabled={type === "update"}
-                            openItems={openItems}
+                            openItems={badDebtList}
                             onContactChange={handleContactChange}
                             onPlanDetailValidation={handlePlanDetailValidation}
                             onInstallmentsChange={handleInstallmentsChange}
+                            onInstallmentDetailIdsChange={setSelectedInstallmentDetailIds}
                         />
                     </div>
 

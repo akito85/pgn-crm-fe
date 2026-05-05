@@ -5,13 +5,6 @@ import {
     setBodyError,
 } from "../general_slice";
 
-// Hard Code
-import hc_restructure_list from "./temp_hardcoded_json/restructure/get-list-restructure.json";
-import hc_customer_list from "./temp_hardcoded_json/restructure/get-list-customer-restructure.json";
-import hc_account_list from "./temp_hardcoded_json/restructure/get-list-account-restructure.json";
-import hc_bad_debt_list from "./temp_hardcoded_json/restructure/get-bad-debt.json";
-import hc_restructure_detail from "./temp_hardcoded_json/restructure/get-detail-restructure.json";
-
 const initialState = {
     data: [],
     listCustomer: [],
@@ -31,11 +24,12 @@ const initialState = {
 
 export const getListCustomerRestructure = createAsyncThunk(
     "GET_LIST_CUSTOMER_RESTRUCTURE",
-    async (_, thunkAPI) => {
+    async (search, thunkAPI) => {
         try {
-            const response = hc_customer_list;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data.result;
+            const params = search ? `?search=${encodeURIComponent(search)}` : "";
+            const url = `/v1/dbs/api/restructure/get-list-customer${params}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data?.result || [];
         } catch (error) {
             return thunkAPI.rejectWithValue(error);
         }
@@ -46,10 +40,12 @@ export const getBadDebtByAccount = createAsyncThunk(
     "GET_BAD_DEBT_BY_ACCOUNT",
     async (accountNumber, thunkAPI) => {
         try {
-            const response = hc_bad_debt_list;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            const total = response.reduce((acc, curr) => acc + curr.totalAmount, 0);
-            return { list: response, total };
+            const params = accountNumber ? `?accountNumber=${encodeURIComponent(accountNumber)}` : "";
+            const url = `/v1/dbs/api/restructure/bad-debt${params}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            const list = response?.data || [];
+            const total = list.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
+            return { list, total };
         } catch (error) {
             return thunkAPI.rejectWithValue(error);
         }
@@ -58,11 +54,12 @@ export const getBadDebtByAccount = createAsyncThunk(
 
 export const getListAccountRestructure = createAsyncThunk(
     "GET_LIST_ACCOUNT_RESTRUCTURE",
-    async (_, thunkAPI) => {
+    async (customerNumber, thunkAPI) => {
         try {
-            const response = hc_account_list;
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            return response.data.result;
+            const params = customerNumber ? `?customerNumber=${encodeURIComponent(customerNumber)}` : "";
+            const url = `/v1/dbs/api/restructure/get-list-account${params}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data?.result || [];
         } catch (error) {
             return thunkAPI.rejectWithValue(error);
         }
@@ -73,9 +70,14 @@ export const getAllRestructureListPaginate = createAsyncThunk(
     "GET_ALL_RESTRUCTURE_LIST_PAGINATE",
     async ({ page, pageSize, search, sort }, thunkAPI) => {
         try {
-            const response = hc_restructure_list;
-            await new Promise(resolve => setTimeout(resolve, 500));
-            return response.data;
+            const params = new URLSearchParams();
+            if (page !== undefined) params.append("page", page);
+            if (pageSize !== undefined) params.append("pageSize", pageSize);
+            if (search) params.append("searchs", typeof search === "string" ? search : JSON.stringify(search));
+            if (sort) params.append("sort", sort);
+            const url = `/v1/dbs/api/restructure/get-list?${params.toString()}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data;
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
@@ -177,9 +179,9 @@ export const getDetailRestructure = createAsyncThunk(
     "GET_DETAIL_RESTRUCTURE",
     async (id, thunkAPI) => {
         try {
-            const response = hc_restructure_detail;
-            await new Promise((resolve) => setTimeout(resolve, 0));
-            return response.data;
+            const url = `/v1/dbs/api/restructure/detail-get/${id}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response?.data;
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
@@ -193,13 +195,82 @@ export const getDetailRestructure = createAsyncThunk(
     }
 );
 
+export const saveRestructure = createAsyncThunk(
+    "SAVE_RESTRUCTURE",
+    async ({ body }, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/save`;
+            const response = await receiptCollectionHttpService.createData(url, body);
+            return response?.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = { title: "Failed", description: `${message}` };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const updateRestructure = createAsyncThunk(
+    "UPDATE_RESTRUCTURE",
+    async ({ id, body }, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/update/${id}`;
+            const response = await receiptCollectionHttpService.updateData(url, body);
+            return response?.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = { title: "Failed", description: `${message}` };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const saveEarlyRepayment = createAsyncThunk(
+    "SAVE_EARLY_REPAYMENT",
+    async ({ body }, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/early-repayment/save`;
+            const response = await receiptCollectionHttpService.createData(url, body);
+            return response?.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = { title: "Failed", description: `${message}` };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const updateEarlyRepayment = createAsyncThunk(
+    "UPDATE_EARLY_REPAYMENT",
+    async ({ id, body }, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/early-repayment/update/${id}`;
+            const response = await receiptCollectionHttpService.updateData(url, body);
+            return response?.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = { title: "Failed", description: `${message}` };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
 export const approveOrRejectRestructure = createAsyncThunk(
     "APPROVE_OR_REJECT_RESTRUCTURE",
     async ({ body }, thunkAPI) => {
         try {
-            const url = `/v1/dbs/api/approval/approve-reject`;
-            const response = await receiptCollectionHttpService.post(url, body);
-            return response.data;
+            const category = body.category || "INSTALLMENT";
+            const url = `/v1/dbs/api/approval/approve-reject?category=${category}`;
+            const response = await receiptCollectionHttpService.createData(url, body);
+            return response?.data;
         } catch (error) {
             const message =
                 error?.response?.data?.message || error?.message || error?.toString();
@@ -219,7 +290,7 @@ export const deleteRestructure = createAsyncThunk(
         try {
             const url = `/v1/dbs/api/restructure/delete/${id}`;
             const response = await receiptCollectionHttpService.deleteData(url);
-            return response.data;
+            return response?.data;
         } catch (error) {
             const message = error?.response?.data?.message || error?.message || error?.toString();
             const errorBody = { title: "Failed", description: `${message}` };
@@ -237,6 +308,9 @@ const restructureSlice = createSlice({
             state.badDebtList = [];
             state.totalBadDebt = 0;
         },
+        resetDetail: (state) => {
+            state.data_detail = null;
+        },
     },
     extraReducers: {
         // Get Detail
@@ -247,11 +321,31 @@ const restructureSlice = createSlice({
             state.loading = false;
             state.data_detail = action.payload;
             state.badDebtList = action.payload?.badDebtList || [];
-            state.totalBadDebt = (action.payload?.badDebtList || []).reduce((acc, curr) => acc + curr.totalAmount, 0);
+            state.totalBadDebt = (action.payload?.badDebtList || []).reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
         },
         [getDetailRestructure.rejected]: (state) => {
             state.loading = false;
         },
+
+        // Save Restructure
+        [saveRestructure.pending]: (state) => { state.loading = true; },
+        [saveRestructure.fulfilled]: (state) => { state.loading = false; state.isSuccess = true; },
+        [saveRestructure.rejected]: (state) => { state.loading = false; state.isFailed = true; },
+
+        // Update Restructure
+        [updateRestructure.pending]: (state) => { state.loading = true; },
+        [updateRestructure.fulfilled]: (state) => { state.loading = false; state.isSuccess = true; },
+        [updateRestructure.rejected]: (state) => { state.loading = false; state.isFailed = true; },
+
+        // Save Early Repayment
+        [saveEarlyRepayment.pending]: (state) => { state.loading = true; },
+        [saveEarlyRepayment.fulfilled]: (state) => { state.loading = false; state.isSuccess = true; },
+        [saveEarlyRepayment.rejected]: (state) => { state.loading = false; state.isFailed = true; },
+
+        // Update Early Repayment
+        [updateEarlyRepayment.pending]: (state) => { state.loading = true; },
+        [updateEarlyRepayment.fulfilled]: (state) => { state.loading = false; state.isSuccess = true; },
+        [updateEarlyRepayment.rejected]: (state) => { state.loading = false; state.isFailed = true; },
 
         // Approve Or Reject
         [approveOrRejectRestructure.pending]: (state) => {
@@ -340,5 +434,5 @@ const restructureSlice = createSlice({
 });
 
 const { reducer, actions } = restructureSlice;
-export const { resetBadDebt } = actions;
+export const { resetBadDebt, resetDetail } = actions;
 export default reducer;
