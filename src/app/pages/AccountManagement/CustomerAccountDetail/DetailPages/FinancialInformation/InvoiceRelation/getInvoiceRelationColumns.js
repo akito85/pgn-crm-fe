@@ -29,7 +29,7 @@ const getInvoiceRelationColumns = ({
     title: "NO",
     align: "center",  
     dataIndex: "no",
-    width: 40,
+    width: 50,
     fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
@@ -37,7 +37,7 @@ const getInvoiceRelationColumns = ({
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
-    width: 200,
+    width: 260,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -52,7 +52,7 @@ const getInvoiceRelationColumns = ({
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
-    width: 200,
+    width: 260,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -68,6 +68,7 @@ const getInvoiceRelationColumns = ({
     title: "START DATE",
     dataIndex: "startDate",
     width: 140,
+    sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -86,6 +87,7 @@ const getInvoiceRelationColumns = ({
     title: "END DATE",
     dataIndex: "endDate",
     width: 140,
+    sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -99,25 +101,34 @@ const getInvoiceRelationColumns = ({
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 100,
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        "active": "Active",
+        "inactive": "Inactive",
+      };
+      
+      return (
+        <div className={" flex justify-center"}>
+          <NxStatusComponent colour={status}>
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </NxStatusComponent>
+        </div>
+      )
+    },
+  },
   !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 170,
-    sorter: true,
+    width: 140,
     align: "center",
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      false,
-      "select",
-      nxColumnOptions.statusApproval
-    ),
     render: (status) => {
       const displayText = {
         "approved": "Approved",
@@ -134,39 +145,6 @@ const getInvoiceRelationColumns = ({
           </NxStatusComponent>
         </div>
       );
-    },
-  },
-  {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 120,
-    sorter: true,
-    fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      false,
-      "select",
-      nxColumnOptions.status
-    ),
-    render: (status) => {
-      const displayText = {
-        "active": "Active",
-        "inactive": "Inactive",
-      };
-
-      return (
-        <div className={" flex justify-center"}>
-          <NxStatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </NxStatusComponent>
-        </div>
-      )
     },
   },
 ].filter(Boolean);

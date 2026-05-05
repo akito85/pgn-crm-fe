@@ -51,9 +51,9 @@ const InfoGasDeposit = ({ detail }) => {
             </NxStatusComponent>
           </NxDetailText>
           <NxDetailText label="Status Approval">
-            <StatusComponent colour={statusApproval} margin={false}>
+            <NxStatusComponent colour={statusApproval} margin={false}>
               {statusApproval}
-            </StatusComponent>
+            </NxStatusComponent>
           </NxDetailText>
         </div>
         <div className="w-full">
