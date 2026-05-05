@@ -5,8 +5,10 @@ import { Dropdown, Select, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
+import NxModal from "../../../../components/Nx/NxModal";
 import StatusComponent from "../../../../components/StatusComponent";
 import BreadCrumb from "../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../components/ButtonComponent";
 import {
   getAllSchedulesPaginate,
   activateSchedule,
@@ -66,6 +68,10 @@ const JobSchedulePage = () => {
   const [filterIsPaused, setFilterIsPaused] = useState(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
 
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [scheduleToDelete, setScheduleToDelete] = useState(null);
+
   const fetchList = useCallback(() => {
     dispatch(getAllSchedulesPaginate({
       status: filterStatus,
@@ -100,6 +106,19 @@ const JobSchedulePage = () => {
   const afterAction = useCallback(() => {
     fetchList();
   }, [fetchList]);
+
+  const handleDeleteConfirm = async () => {
+    if (!scheduleToDelete) return;
+    setDeleteModalOpen(false);
+    const res = await dispatch(deleteSchedule(scheduleToDelete.scheduleId));
+    if (!res.error) afterAction();
+    setScheduleToDelete(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setScheduleToDelete(null);
+  };
 
   const handleAction = useCallback((thunk, arg) => {
     dispatch(thunk(arg)).then((res) => {
@@ -144,9 +163,8 @@ const JobSchedulePage = () => {
           key: "delete",
           label: "Delete",
           onClick: () => {
-            if (window.confirm("Delete this schedule?")) {
-              handleAction(deleteSchedule, record.scheduleId);
-            }
+            setScheduleToDelete(record);
+            setDeleteModalOpen(true);
           },
         },
       ];
@@ -341,6 +359,44 @@ const JobSchedulePage = () => {
           showExport={false}
         />
       </NxCardContainer>
+
+      {/* Delete Confirmation Modal */}
+      <NxModal
+        isOpen={deleteModalOpen}
+        title="Delete Schedule"
+        loading={actionLoading}
+        handleCancel={handleDeleteCancel}
+        width={480}
+        footer={[
+          <div className="flex flex-row justify-between items-center">
+            <ButtonComponent size={"small"} key="cancel" onClick={handleDeleteCancel} disabled={actionLoading}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              size={"small"}
+              key="delete"
+              border={false}
+              className="!bg-[#d32f2f] !text-white !border-transparent"
+              onClick={handleDeleteConfirm}
+              loading={actionLoading}
+            >
+              Delete
+            </ButtonComponent>
+          </div>
+        ]}
+      >
+        <div style={{ padding: "20px 24px" }}>
+          <p style={{ margin: 0, marginBottom: 16, color: "#333" }}>
+            Are you sure you want to delete this schedule? This action cannot be undone.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: "8px 0", fontSize: 13 }}>
+            <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Name</span>
+            <span style={{ fontWeight: 500, color: "#222" }}>{scheduleToDelete?.scheduleName ?? "—"}</span>
+            <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Job Code</span>
+            <span style={{ fontWeight: 500, color: "#222" }}>{scheduleToDelete?.jobCode ?? "—"}</span>
+          </div>
+        </div>
+      </NxModal>
     </>
   );
 };
