@@ -215,6 +215,7 @@ const PaymentRelationDetail = ({
             idAccount={idAccount}
             idCustomer={idCustomer}
             type={accountType}
+            collapsible
           />
 
           {draftExist && (

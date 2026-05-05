@@ -19,12 +19,13 @@ import InputComponent from "../../../../../components/InputComponent";
 const GeneratePasswordPage = () => {
   const dispatch = useDispatch();
   const [disabled, setDisabled] = useState(true);
-  const { loading, data } = useSelector((state) => state.user);
+  const { loading, data_generate_link } = useSelector((state) => state.user);
   const [customValue, setCustomValue] = useState(1);
   const [modalSuccess, setModalSuccess] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const location = useLocation();
   const id = location?.state?.id;
+  const data = data_generate_link;
   const dataSplit = hasValue(data?.url) && data?.url?.split('/')
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);

@@ -1,7 +1,7 @@
 import moment from "moment";
 import { dateFormatting, toTitleCase } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../components/StatusComponent";
+import NxStatusComponent from "../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Relationship list table.
@@ -36,7 +36,7 @@ const getRelationshipColumns = ({
     key: "relationshipTypeName",
     title: "TYPE",
     dataIndex: "relationshipTypeName",
-    width: 150,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -52,7 +52,7 @@ const getRelationshipColumns = ({
     key: "relationshipCategoryName",
     title: "CATEGORY",
     dataIndex: "relationshipCategoryName",
-    width: 150,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -128,21 +128,32 @@ const getRelationshipColumns = ({
     ),
     render: (endDate) => endDate ? moment(endDate).format(dateFormatting.date) : "-",
   },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 100,
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive",
+      };
+      return (
+        <div className="flex justify-center">
+          <NxStatusComponent colour={status}>
+            {displayText[status?.toUpperCase()] || toTitleCase(String(status || "")) || "-"}
+          </NxStatusComponent>
+        </div>
+      );
+    },
+  },
   !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 180,
-    sorter: true,
+    width: 140,
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
     render: (status) => {
       const displayText = {
         "APPROVED": "Approved",
@@ -156,38 +167,9 @@ const getRelationshipColumns = ({
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status?.toUpperCase()] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      );
-    },
-  },
-  {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 120,
-    sorter: true,
-    fixed: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (status) => {
-      const displayText = {
-        "ACTIVE": "Active",
-        "INACTIVE": "Inactive",
-      };
-      return (
-        <div className="flex justify-center">
-          <StatusComponent colour={status}>
-            {displayText[status?.toUpperCase()] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
     },

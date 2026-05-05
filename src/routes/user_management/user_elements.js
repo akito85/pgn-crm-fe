@@ -52,13 +52,13 @@ export const USER_ELEMENTS = {
 
   // approval hierarchy
   VIEW_APPROVAL_PAGE: <ApprovalHierarchyPage />,
-  DETAIL_APPROVAL_PAGE: "",
+  DETAIL_APPROVAL_PAGE: <ApprovalHierarchyForm type="detail" />,
   CREATE_APPROVAL_PAGE: <ApprovalHierarchyForm type={"create"} />,
   UPDATE_APPROVAL_PAGE: <ApprovalHierarchyForm type={"update"} />,
 
   // profile
   VIEW_PROFILE: <ProfilePage />,
-  UPDATE_PROFILE: <></>,
+  UPDATE_PROFILE: <ProfilePage />,
 
   // data access
   VIEW_DATA_ACCESS_PAGE: <DataAccessHierarchyView />,

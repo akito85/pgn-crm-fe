@@ -764,9 +764,9 @@ const relationshipSlice = createSlice({
 
       if (Array.isArray(result)) {
         if (isLoadMore) {
-          const currentIds = new Set(state.list_relatedObject.map((item) => item.id || item.relatedObjectId));
+          const currentIds = new Set(state.list_relatedObject.map((item) => item.accountId || item.customerId));
           const filteredResult = result.filter(
-            (resultItem) => !currentIds.has(resultItem.id || resultItem.relatedObjectId)
+            (resultItem) => !currentIds.has(resultItem.accountId || resultItem.customerId)
           );
           state.list_relatedObject = [
             ...state.list_relatedObject,

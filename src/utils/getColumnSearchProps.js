@@ -5,7 +5,7 @@ import { dateFormatting, hasValue } from ".";
 import moment from "moment";
 // import InputComponent from "../components/InputComponent";
 // import { format } from "react-number-format/types/numeric_format";
-
+import SVGIcon from "../assets/Icon/index";
 
 // BE
 export const getColumnSearchPropsPaging = (
@@ -353,6 +353,9 @@ export const getColumnSearchPropsUseFilteredValue = (
           {typeFilter === "datetime" ? (
             <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
           ) : null}
+          {typeFilter === "dateFormal" ? (
+            <DatePicker onChange={onDataChange} format={dateFormatting.dateFormal} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+          ) : null}
           {typeFilter === "datePeriod" ? (
             <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
           ) : null}
@@ -455,10 +458,10 @@ export const getColumnSearchPropsUseFilteredValue = (
       );
     },
     filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
-        }}
+      <SVGIcon
+        name="IconFilter"
+        width={15}
+        className={filtered && hasValue(search[dataIndex]) === true ? "text-[#1890ff]" : "text-white"}
       />
     ),
     onFilterDropdownOpenChange: (visible) => {

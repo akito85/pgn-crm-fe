@@ -1,8 +1,21 @@
 import { Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../../../../../../assets/Icon/index";
+import { nxColumnOptions } from "../../../../../../../../../../utils/Nx/nxColumnsOptions";
 
-const getAccountStandardColumns = (
+/**
+ * Returns the column definitions for the account standard selection table.
+ *
+ * @param {Object}          search          - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} searchInput     - Ref to the search input element (used for focus).
+ * @param {string}          searchedColumn  - The dataIndex of the column currently being searched.
+ * @param {string}          searchText      - The current search text value.
+ * @param {Function}        handleSearch    - Callback invoked when a search/filter is confirmed.
+ * @param {Function}        [setAccount]    - Callback invoked with (accountId, accountNumber, accountName) when a row is selected.
+ * @param {Function}        [setIsOpen]     - Callback to close the account selection modal.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getAccountColumns = (
   search,
   searchInput,
   searchedColumn,
@@ -46,6 +59,9 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.identificationType
     ),
   },
   {
@@ -91,6 +107,9 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.customerType
     ),
   },
   {
@@ -136,6 +155,9 @@ const getAccountStandardColumns = (
       searchedColumn,
       searchText,
       handleSearch,
+      false,
+      "select",
+      nxColumnOptions.accountCategory
     ),
   },
   {
@@ -376,4 +398,4 @@ const getAccountStandardColumns = (
   },
 ];
 
-export { getAccountStandardColumns };
+export { getAccountColumns };

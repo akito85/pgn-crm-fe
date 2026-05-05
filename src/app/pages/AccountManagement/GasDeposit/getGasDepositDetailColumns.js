@@ -1,8 +1,8 @@
 import { toTitleCase } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../components/StatusComponent";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 import { sorterFunction } from "../../../../utils/sorterFunction";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Gas Deposit Detail table.
@@ -153,9 +153,9 @@ const getGasDepositDetailColumns = ({
 
       return (
         <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       )
     },

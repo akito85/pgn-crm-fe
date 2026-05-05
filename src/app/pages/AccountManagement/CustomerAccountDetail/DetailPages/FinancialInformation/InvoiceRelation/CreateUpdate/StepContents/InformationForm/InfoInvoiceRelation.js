@@ -7,7 +7,7 @@ import {
 } from "../../../../../../../../../../utils";
 import { getIrAccounts } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { getAccountStandardColumns } from "./getAccountStandardColumns";
+import { getAccountColumns } from "./getAccountColumns";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
@@ -15,6 +15,11 @@ import NxDetailText from "../../../../../../../../../../components/Nx/NxDetailTe
 import NxDate from "../../../../../../../../../../components/Nx/NxDatePicker";
 import moment from "moment";
 
+/**
+ * Information form for invoice relation create/update
+ * @param {{ setAccount: Function; accountId: number; isUpdate: boolean; isDraft: boolean; form: object; formView: boolean }} props
+ * @returns
+ */
 export default function InfoInvoiceRelation({
   setAccount,
   accountId,
@@ -23,6 +28,7 @@ export default function InfoInvoiceRelation({
   form,
   formView = true
 }) {
+  // --- Hooks ---
   const dispatch = useDispatch();
 
   const accountNumber = Form.useWatch("accountNumber", form);
@@ -31,6 +37,7 @@ export default function InfoInvoiceRelation({
   const endDate = Form.useWatch("endDate", form);
   const description = Form.useWatch("description", form);
 
+  // --- State ---
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
   const [search, setSearch] = useState({});
@@ -39,6 +46,8 @@ export default function InfoInvoiceRelation({
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
 
+  // --- Functions / handlers ---
+  /** @param {*} _ @param {*} __ @param {{ field: string; order: string }} sort */
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -62,6 +71,7 @@ export default function InfoInvoiceRelation({
     setIsOpen(false);
   };
 
+  /** @param {string[]} selectedKeys @param {() => void} confirm @param {string} dataIndex */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -77,6 +87,7 @@ export default function InfoInvoiceRelation({
     });
   };
 
+  /** Load next page of accounts into the table */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPage = pagination.totalPage || 0;
@@ -101,6 +112,7 @@ export default function InfoInvoiceRelation({
     }
   };
 
+  // --- Effects ---
   useEffect(() => {
     if (formView) {
       const body = {
@@ -122,7 +134,7 @@ export default function InfoInvoiceRelation({
 
   const columnDefinitions = useMemo(
     () =>
-      getAccountStandardColumns(
+      getAccountColumns(
         search,
         searchInput,
         searchedColumn,
@@ -136,6 +148,7 @@ export default function InfoInvoiceRelation({
 
   const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
 
+  // --- Derived values ---
   const totalElement = pagination.totalElement;
   const hasMore = accounts.length < totalElement;
 
@@ -261,6 +274,7 @@ export default function InfoInvoiceRelation({
           />
         </Form.Item>
       </div>
+      {/* Account Selection Modal */}
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}

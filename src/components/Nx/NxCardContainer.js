@@ -20,11 +20,11 @@ const NxCardContainer = ({
           <div className="p-4">{element}</div>
         </>
       ) : (
-        <div className="flex flex-col bg-[#F9F9F9] rounded-t-lg uppercase p-4 border-0 border-b border-solid border-[#C8CDD4]">
+        <div className="flex flex-col justify-center min-h-[50px] bg-[#F9F9F9] rounded-t-lg uppercase px-4 py-2 border-0 border-b border-solid border-[#C8CDD4]">
           <div className="flex justify-between items-center">
             {/* Left: header + subHeader */}
             <div className="flex flex-col">
-              <div className="text-[16px] text-primary">{header}</div>
+              <div className="text-[16px] text-primary leading-normal">{header}</div>
               <div className="text-primary text-sm">{subHeader}</div>
             </div>
 
