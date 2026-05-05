@@ -51,13 +51,8 @@ const ListFormRestructure = (props) => {
         data_detail
     } = useSelector((state) => state.restructure);
 
-    // Mocking dataAccNumber for the slicing purpose (since Warranty uses dataAccNumber)
-    const dataAccNumber = {
-        data: [
-            { id: 1, name: "ACC-001" },
-            { id: 2, name: "ACC-002" }
-        ]
-    };
+    // listAccount dari Redux store sudah berformat { value, label, accountName, ... }
+    // sesuai response backend GET /restructure/get-list-account
 
     const [current, setCurrent] = useState(0);
     const [modalBack, setModalBack] = useState(false);
@@ -316,7 +311,7 @@ const ListFormRestructure = (props) => {
                     <div style={{ display: current !== 0 ? "none" : "block" }}>
                         <RestructureForm
                             form={form}
-                            dataAccNumber={dataAccNumber}
+                            listAccount={listAccount}
                             handleAccountChange={handleAccountChange}
                             disabled={type === "update"}
                             openItems={badDebtList}

@@ -8,7 +8,7 @@ import PaymentPlanDetailSection from "./Form/PaymentPlanDetailSection";
 
 const RestructureForm = ({
     form,
-    dataAccNumber,
+    listAccount,
     handleAccountChange,
     disabled,
     openItems = [],
@@ -22,7 +22,7 @@ const RestructureForm = ({
         <div className="flex flex-col gap-1">
             <AccountInfoSection 
                 form={form}
-                dataAccNumber={dataAccNumber}
+                listAccount={listAccount}
                 handleAccountChange={handleAccountChange}
                 disabled={disabled}
             />
@@ -48,3 +48,4 @@ const RestructureForm = ({
 };
 
 export default RestructureForm;
+

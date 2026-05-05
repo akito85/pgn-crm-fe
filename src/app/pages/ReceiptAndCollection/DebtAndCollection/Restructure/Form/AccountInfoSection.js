@@ -4,7 +4,7 @@ import CardContainerNoBorder from "../../../../../../components/CardContainerNoB
 import InputComponent from "../../../../../../components/InputComponent";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
 
-const AccountInfoSection = ({ form, dataAccNumber, handleAccountChange, disabled }) => {
+const AccountInfoSection = ({ form, listAccount, handleAccountChange, disabled }) => {
   return (
     <CardContainerNoBorder header="ACCOUNT INFORMATION" collapsible={true}>
       <SubSectionCard>
@@ -15,8 +15,14 @@ const AccountInfoSection = ({ form, dataAccNumber, handleAccountChange, disabled
                   placeholder="Select Account Number"
                   onChange={handleAccountChange}
                   showSearch
-                  optionFilterProp="children"
-                  options={dataAccNumber?.data?.map((item) => ({ label: item.name, value: item.id })) || []}
+                  optionFilterProp="label"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={(listAccount || []).map((item) => ({
+                    label: item.label,
+                    value: item.value,
+                  }))}
                   disabled={disabled}
                 />
               </Form.Item>
@@ -33,7 +39,6 @@ const AccountInfoSection = ({ form, dataAccNumber, handleAccountChange, disabled
           <Col style={{ width: "20%" }}><Form.Item name="accountType" label="Account Type"><InputComponent disabled placeholder="-" /></Form.Item></Col>
 
           <Col style={{ width: "20%" }}><Form.Item name="classificationType" label="Classification Type"><InputComponent disabled placeholder="-" /></Form.Item></Col>
-          <Col style={{ width: "20%" }}><Form.Item name="sapCustId" label="SAP CUST ID"><InputComponent disabled placeholder="-" /></Form.Item></Col>
           <Col style={{ width: "20%" }}><Form.Item name="accountStatus" label="Account Status"><InputComponent disabled placeholder="-" /></Form.Item></Col>
         </Row>
       </SubSectionCard>
