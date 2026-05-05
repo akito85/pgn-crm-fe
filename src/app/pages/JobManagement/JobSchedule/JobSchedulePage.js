@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Dropdown, Select, Spin } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -18,6 +19,9 @@ import {
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
+import IconPower from "../../../../assets/Icon/Nx/IconPower";
+import IconSuspend from "../../../../assets/Icon/Nx/IconSuspend";
+import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
 
 const PAGE_SIZE = 20;
 
@@ -146,22 +150,38 @@ const JobSchedulePage = () => {
       const menuItems = [
         ...(showActivate ? [{
           key: "activate",
-          label: "Activate",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <IconPower width="16" height="16" /> Activate
+            </span>
+          ),
           onClick: () => handleAction(activateSchedule, record.scheduleId),
         }] : []),
         ...(showPause ? [{
           key: "pause",
-          label: "Pause",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <IconSuspend width="16" height="16" /> Pause
+            </span>
+          ),
           onClick: () => handleAction(pauseSchedule, record.scheduleId),
         }] : []),
         {
           key: "view",
-          label: "View",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <EyeOutlined /> View
+            </span>
+          ),
           onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULE_DETAIL, { state: { id: record.scheduleId } }),
         },
         {
           key: "delete",
-          label: "Delete",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <IconDeleteMenu width="16" height="16" /> Delete
+            </span>
+          ),
           onClick: () => {
             setScheduleToDelete(record);
             setDeleteModalOpen(true);
