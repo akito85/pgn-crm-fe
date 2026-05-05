@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { showModalError } from "../general_slice";
+import { setBodyError, showModalError } from "../general_slice";
 import { configApp } from "../../../constants/configApp";
 import { tokenHeader } from "../../../utils/tokenHeader";
 
@@ -27,10 +27,14 @@ export const getAllSchedulesPaginate = createAsyncThunk(
       const response = await axios.get(url, { headers: getHeaders() });
       return response?.data ?? { content: [], totalElements: 0, totalPages: 0 };
     } catch (error) {
-      thunkAPI.dispatch(showModalError({
-        title: "Failed to load schedules",
-        description: error?.response?.data?.message ?? error?.message ?? "Unknown error",
-      }));
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({
+          title: "Failed to load schedules",
+          description: error?.response?.data?.message ?? error?.message ?? "Unknown error",
+        }));
+      }
       return { content: [], totalElements: 0, totalPages: 0 };
     }
   }
