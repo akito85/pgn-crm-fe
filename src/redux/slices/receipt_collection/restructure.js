@@ -25,6 +25,10 @@ const initialState = {
     isApprover: false,
     loading_upload_validation: false,
     loading_download_template: false,
+    restructureTypes: [],
+    restructureSources: [],
+    restructureContacts: [],
+    allContacts: [],
 };
 
 export const getListCustomerRestructure = createAsyncThunk(
@@ -340,6 +344,104 @@ export const getDownloadTemplateRestructure = createAsyncThunk(
     }
 );
 
+export const getRestructureTypes = createAsyncThunk(
+    "GET_RESTRUCTURE_TYPES",
+    async (_, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/restructure/get-types";
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getRestructureSources = createAsyncThunk(
+    "GET_RESTRUCTURE_SOURCES",
+    async (_, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/restructure/get-sources";
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getContactsByAccount = createAsyncThunk(
+    "GET_CONTACTS_BY_ACCOUNT",
+    async (accountNumber, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/contacts/${accountNumber}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getAllContactsRestructure = createAsyncThunk(
+    "GET_ALL_CONTACTS_RESTRUCTURE",
+    async (_, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/restructure/all-contacts";
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const downloadListRestructure = createAsyncThunk(
+    "DOWNLOAD_LIST_RESTRUCTURE",
+    async ({ search, sort }, thunkAPI) => {
+        try {
+            const params = new URLSearchParams();
+            if (search) params.append("searchs", typeof search === "string" ? search : JSON.stringify(search));
+            if (sort) params.append("sort", sort);
+            const url = `/v1/dbs/api/restructure/download-list?${params.toString()}`;
+            const response = await receiptCollectionHttpService.downloadXlsx(
+                url,
+                "restructure_list",
+            );
+            return response;
+        } catch (error) {
+            thunkAPI.dispatch(setBodyError(error));
+            return error;
+        }
+    }
+);
+
+export const getSa = createAsyncThunk(
+    "GET_SA",
+    async (accountNumber, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/get-sa/${accountNumber}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response?.data || null;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getPrimaryContact = createAsyncThunk(
+    "GET_PRIMARY_CONTACT",
+    async (accountNumber, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/get-primary-contact/${accountNumber}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response?.data || null;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
 export const approveOrRejectRestructure = createAsyncThunk(
     "APPROVE_OR_REJECT_RESTRUCTURE",
     async ({ body }, thunkAPI) => {
@@ -560,6 +662,36 @@ const restructureSlice = createSlice({
         },
         [getDownloadTemplateRestructure.rejected]: (state) => {
             state.loading_download_template = false;
+        },
+        // Types
+        [getRestructureTypes.fulfilled]: (state, action) => {
+            state.restructureTypes = action.payload;
+        },
+        // Sources
+        [getRestructureSources.fulfilled]: (state, action) => {
+            state.restructureSources = action.payload;
+        },
+        // Contacts
+        [getContactsByAccount.pending]: (state) => {
+            state.loading = true;
+        },
+        [getContactsByAccount.fulfilled]: (state, action) => {
+            state.loading = false;
+            state.restructureContacts = action.payload;
+        },
+        [getContactsByAccount.rejected]: (state) => {
+            state.loading = false;
+        },
+        // All Contacts
+        [getAllContactsRestructure.pending]: (state) => {
+            state.loading = true;
+        },
+        [getAllContactsRestructure.fulfilled]: (state, action) => {
+            state.loading = false;
+            state.allContacts = action.payload;
+        },
+        [getAllContactsRestructure.rejected]: (state) => {
+            state.loading = false;
         },
     },
 });

@@ -8,7 +8,7 @@ const OpenItemInfoSection = ({ openItems = [] }) => {
     { title: "NO", dataIndex: "key", width: 50, render: (_, __, i) => i + 1 },
     { title: "INVOICE NO", dataIndex: "invoiceNo" },
     { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
-    { title: "ALLOCATION", dataIndex: "allocation" },
+    { title: "BILLING ITEM", dataIndex: "billingItem" },
     { 
       title: "AMOUNT", 
       dataIndex: "amount", 

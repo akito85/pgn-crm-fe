@@ -1,7 +1,7 @@
 import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin, message } from "antd";
 import moment from "moment";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -17,6 +17,8 @@ import {
     getDetailRestructure,
     saveRestructure,
     updateRestructure,
+    getSa,
+    getPrimaryContact,
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import RestructureForm from "./RestructureForm";
@@ -29,6 +31,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import ContentModalConfirmRestructure from "./ContentModalConfirmRestructure";
+import { RESTRUCTURE_MANDATORY_ATTACHMENTS } from "../../../../../constants/restructure";
 
 
 const ListFormRestructure = (props) => {
@@ -67,6 +70,7 @@ const ListFormRestructure = (props) => {
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
     const [contacts, setContacts] = useState([]);
     const [installmentsByCurrency, setInstallmentsByCurrency] = useState({});
+    const contactRef = useRef(null);
 
     const steps = [
         { title: "CREATE", value: "Create" },
@@ -108,7 +112,6 @@ const ListFormRestructure = (props) => {
 
         // Set default values for mandatory fields that might be disabled or need defaults
         form.setFieldsValue({
-            source: "SAP FSCD",
             requestDate: moment(),
         });
 
@@ -123,7 +126,7 @@ const ListFormRestructure = (props) => {
         }
     }, [dispatch, selectedHierarchy]);
 
-    const handleAccountChange = (value) => {
+    const handleAccountChange = async (value) => {
         const selected = listAccount.find((acc) => acc.value === value);
         if (selected) {
             form.setFieldsValue({
@@ -140,6 +143,40 @@ const ListFormRestructure = (props) => {
                 accountStatus: selected.accountStatus,
             });
             dispatch(getBadDebtByAccount(value));
+            
+            if (contactRef.current) {
+                contactRef.current.resetNonManualContacts();
+            }
+
+            // Automatically fetch SA
+            try {
+                const action = await dispatch(getSa(value));
+                if (action.meta.requestStatus === "fulfilled" && action.payload) {
+                    const data = action.payload;
+                    form.setFieldsValue({
+                        saNumber: data.saNumber,
+                        saName: data.saName,
+                        saDate: data.saDate ? moment(data.saDate) : null,
+                        startDate: data.startDate ? moment(data.startDate) : null,
+                        endDate: data.endDate ? moment(data.endDate) : null,
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch SA info", err);
+            }
+
+            // Automatically fetch Primary Contact
+            try {
+                const contactAction = await dispatch(getPrimaryContact(value));
+                if (contactAction.meta.requestStatus === "fulfilled" && contactAction.payload) {
+                    const primaryContact = contactAction.payload;
+                    if (primaryContact && contactRef.current) {
+                        contactRef.current.addContact(primaryContact);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch primary contact", err);
+            }
         }
     };
 
@@ -229,7 +266,7 @@ const ListFormRestructure = (props) => {
             invoicePeriod: item.invoicePeriod,
             currency: item.currency,
             allocation: item.allocation,
-            totalAmount: item.totalAmount,
+            amount: item.amount,
         })),
         calculationList: Object.values(installmentsByCurrency).flat().map((item) => ({
             periode: item.periode,
@@ -257,6 +294,14 @@ const ListFormRestructure = (props) => {
 
     const handleSubmit = async () => {
         try {
+            const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
+            const missing = RESTRUCTURE_MANDATORY_ATTACHMENTS.filter(cat => !uploadedCategories.includes(cat));
+            
+            if (missing.length > 0) {
+                message.warning(`Attachment mandatory kurang: ${missing.join(", ")}`);
+                return;
+            }
+
             const values = await form.validateFields();
             setFormValues(values);
             setIsModalSubmit(true);
@@ -318,6 +363,7 @@ const ListFormRestructure = (props) => {
                             onContactChange={handleContactChange}
                             onPlanDetailValidation={handlePlanDetailValidation}
                             onInstallmentsChange={handleInstallmentsChange}
+                            contactRef={contactRef}
                         />
                     </div>
 

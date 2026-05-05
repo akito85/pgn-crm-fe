@@ -342,7 +342,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
                             <DetailText label="Type">{dataHeader?.type || "-"}</DetailText>
                             <DetailText label="Tenor">{dataHeader?.tenor ? `${dataHeader.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{dataHeader?.startPeriod ? moment(dataHeader.startPeriod).format("MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{dataHeader?.source || "SAP FSCD"}</DetailText>
+                            <DetailText label="Source">{dataHeader?.source}</DetailText>
                             <DetailText label="Request Date">{dataHeader?.requestDate ? moment(dataHeader.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
                                 <DetailText label="Description">{DOMPurify.sanitize(dataHeader?.description) || "-"}</DetailText>

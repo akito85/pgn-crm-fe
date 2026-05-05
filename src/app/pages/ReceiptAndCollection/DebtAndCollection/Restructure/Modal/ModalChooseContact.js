@@ -1,13 +1,32 @@
-import React, { useState } from "react";
-import { Button } from "antd";
+import React, { useState, useEffect } from "react";
+import { Button, Spin } from "antd";
+import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import SectionCard from "../../../../../../components/SectionCard";
 import TableRBI from "../../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { getContactsByAccount, getAllContactsRestructure } from "../../../../../../redux/slices/receipt_collection/restructure";
 
-const ModalChooseContact = ({ isOpen, handleCancel, onSelect }) => {
+const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, selectedContactIds = [] }) => {
+  const dispatch = useDispatch();
+  const { restructureContacts, allContacts, loading } = useSelector((state) => state.restructure);
   const [selectedKeys, setSelectedKeys] = useState([]);
+
+  // Use account-specific contacts if available, otherwise show all
+  const rawData = accountNumber ? restructureContacts : allContacts;
+  const data = (rawData || []).filter(item => !selectedContactIds.includes(item.contactId));
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedKeys([]);
+      if (accountNumber) {
+        dispatch(getContactsByAccount(accountNumber));
+      } else {
+        dispatch(getAllContactsRestructure());
+      }
+    }
+  }, [isOpen, accountNumber, dispatch]);
 
   // Reset selection when modal opens
   React.useEffect(() => {
@@ -35,6 +54,7 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect }) => {
     { title: "FIRST NAME", dataIndex: "firstName", width: 180 },
     { title: "MIDDLE NAME", dataIndex: "middleName", width: 150 },
     { title: "LAST NAME", dataIndex: "lastName", width: 180 },
+    // { title: "CONTACT NAME", dataIndex: "contactName", width: 250 },
     { title: "JOB", dataIndex: "job", width: 150 },
     { title: "POSITION", dataIndex: "position", width: 150 },
     {
@@ -42,11 +62,11 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect }) => {
       align: "center",
       width: 80,
       render: (_, record) => {
-        const isSelected = selectedKeys.includes(record.key);
+        const isSelected = selectedKeys.includes(record.contactId);
         return (
           <div 
             className="cursor-pointer text-xl flex justify-center items-center"
-            onClick={() => toggleSelect(record.key)}
+            onClick={() => toggleSelect(record.contactId)}
           >
             {isSelected ? (
               <MinusCircleOutlined style={{ color: "#0075BF" }} />
@@ -59,53 +79,14 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect }) => {
     },
   ];
 
-  const data = [
-    {
-      key: 1,
-      firstName: "Rendy",
-      middleName: "Fatih",
-      lastName: "Setiawan",
-      job: "Finance",
-      position: "{value}",
-      criteria: [
-        { key: 1, type: "Whatsapp", value: "IDN - 628768789439" },
-        { key: 2, type: "Email", value: "rendyfath@gmail.com" },
-        { key: 3, type: "PGN Mobile", value: "IDN - 628768789439" },
-      ],
-    },
-    {
-      key: 2,
-      firstName: "-",
-      middleName: "Daniel Irza Kurniawan",
-      lastName: "Staff Engineer",
-      job: "Finance",
-      position: "JL. ANGKASA, AA NO. 12, Y, RT..",
-    },
-    {
-      key: 3,
-      firstName: "-",
-      middleName: "Supratman",
-      lastName: "Staff Engineer 2",
-      job: "Finance",
-      position: "JL. ANGKASA, AA NO. 12, Y, RT..",
-    },
-    {
-      key: 4,
-      firstName: "-",
-      middleName: "Donny Malaka",
-      lastName: "Staff Engineer 3",
-      job: "Finance",
-      position: "JL. ANGKASA, AA NO. 12, Y, RT..",
-    },
-  ];
 
   const expandable = {
     expandedRowRender: (record) => (
       <div style={{ paddingLeft: "3.5em" }}>
         <TableRBI
-          idTable={`sub-table-choose-${record.key}`}
+          idTable={`sub-table-choose-${record.contactId}`}
           columns={subColumns}
-          dataSource={record.criteria || []}
+          dataSource={record.contactDetails || []}
           usePagination={false}
           showSearchBar={false}
           showAdvanceSearch={false}
@@ -114,7 +95,7 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect }) => {
         />
       </div>
     ),
-    rowExpandable: (record) => !!record.criteria,
+    rowExpandable: (record) => !!record.contactDetails && record.contactDetails.length > 0,
   };
 
   return (
@@ -134,7 +115,7 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect }) => {
           <Button
             type="primary"
             onClick={() => {
-              const selectedData = data.filter((item) => selectedKeys.includes(item.key));
+              const selectedData = data.filter((item) => selectedKeys.includes(item.contactId));
               if (selectedData.length > 0) {
                 onSelect(selectedData);
                 handleCancel();
@@ -156,25 +137,28 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect }) => {
       }
     >
       <div className="p-4">
-        <SectionCard title="CONTACT INFORMATION">
-          <TableRBI
-            idTable="choose-contact-table"
-            columns={columns}
-            dataSource={data}
-            expandable={expandable}
-            showAdvanceSearch={true}
-            showSearchBar={true}
-            usePagination={false}
-            headerBg={true}
-          />
-          <div className="flex justify-end gap-4 mt-2 text-[11px] text-gray-400 font-normal">
-            <span>Showing {data.length} of {data.length} entries</span>
-            <span className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              All data showed
-            </span>
-          </div>
-        </SectionCard>
+        <Spin spinning={loading}>
+          <SectionCard title="CONTACT INFORMATION">
+            <TableRBI
+              idTable="choose-contact-table"
+              columns={columns}
+              dataSource={data || []}
+              expandable={expandable}
+              showAdvanceSearch={true}
+              showSearchBar={true}
+              usePagination={false}
+              headerBg={true}
+              rowKey="contactId"
+            />
+            <div className="flex justify-end gap-4 mt-2 text-[11px] text-gray-400 font-normal">
+              <span>Showing {data?.length || 0} of {data?.length || 0} entries</span>
+              <span className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                All data showed
+              </span>
+            </div>
+          </SectionCard>
+        </Spin>
       </div>
     </ModalCustom>
   );

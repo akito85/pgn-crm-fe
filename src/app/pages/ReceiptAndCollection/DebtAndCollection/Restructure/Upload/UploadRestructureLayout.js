@@ -6,7 +6,7 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../../components/TableRBI";
 import { bytesConverter } from "../../../../../../utils/bytesConverter";
-import { uploadRestructureValidation } from "../../../../../../redux/slices/receipt_collection/restructure";
+import { uploadRestructureValidation, getDownloadTemplateRestructure } from "../../../../../../redux/slices/receipt_collection/restructure";
 import DetailText from "../../../../../../components/DetailText";
 import moment from "moment";
 import { getColumnSearchProps } from "../../../../../../utils/getColumnSearchProps";
@@ -175,6 +175,16 @@ const UploadRestructureLayout = ({
 
     return (
       <div className="w-full">
+        <div className="flex justify-end mb-4">
+           <ButtonComponent 
+             type="secondary" 
+             border={true}
+             icon={<SVGIcon name="IconDownload" width={16} />}
+             onClick={() => dispatch(getDownloadTemplateRestructure())}
+           >
+             Download Template
+           </ButtonComponent>
+        </div>
         <Spin spinning={loadingUpload}>
           <Dragger {...property}>
             <p className="ant-upload-drag-icon">

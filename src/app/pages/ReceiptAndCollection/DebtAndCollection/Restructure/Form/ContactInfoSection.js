@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import CardContainerNoBorder from "../../../../../../components/CardContainerNoBorder";
 import TableRBI from "../../../../../../components/TableRBI";
@@ -8,9 +8,21 @@ import StatusComponent from "../../../../../../components/StatusComponent";
 import ModalCreateContact from "../Modal/ModalCreateContact";
 import ModalChooseContact from "../Modal/ModalChooseContact";
 
-const ContactInfoSection = ({ onContactsChange }) => {
+const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber }, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChooseModalOpen, setIsChooseModalOpen] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    addContact: (contact) => {
+      handleAddContacts([contact]);
+    },
+    setContacts: (newContacts) => {
+      setContacts(newContacts);
+    },
+    resetNonManualContacts: () => {
+      setContacts((prev) => prev.filter(c => c.isManual));
+    }
+  }));
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
@@ -50,16 +62,18 @@ const ContactInfoSection = ({ onContactsChange }) => {
   const handleAddContacts = (newContactsList) => {
     const formattedContacts = newContactsList.map(item => ({
       key: Date.now() + Math.random(),
+      contactId: item.contactId || item.id || item.key,
       isPrimary: item.isPrimary || false,
+      isManual: item.isManual || false,
       cpName: item.cpName
         ? item.cpName
         : [item.firstName, item.middleName, item.lastName].filter(Boolean).join(" "),
       job: item.job,
       position: item.position,
-      address: item.address || item.contactAddress || item.position || "-",
-      details: item.details || item.criteria || []
+      address: item.address || item.contactAddress || "-",
+      details: item.details || item.criteria || item.contactDetails || []
     }));
-    setContacts([...formattedContacts, ...contacts]);
+    setContacts(prev => [...formattedContacts, ...prev]);
   };
 
   const expandable = {
@@ -133,9 +147,11 @@ const ContactInfoSection = ({ onContactsChange }) => {
         isOpen={isChooseModalOpen}
         handleCancel={() => setIsChooseModalOpen(false)}
         onSelect={handleAddContacts}
+        accountNumber={accountNumber}
+        selectedContactIds={contacts.map(c => c.contactId || c.id).filter(Boolean)}
       />
     </CardContainerNoBorder>
   );
-};
+});
 
 export default ContactInfoSection;

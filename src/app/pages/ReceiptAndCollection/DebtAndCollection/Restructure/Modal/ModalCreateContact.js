@@ -270,6 +270,7 @@ const ModalCreateContact = ({ isOpen, handleCancel, onAddContacts, onOpenChooseM
                   const newContact = {
                     key: Date.now(),
                     isPrimary: values.isPrimary || false,
+                    isManual: true,
                     cpName: [values.firstName, values.middleName, values.lastName]
                       .filter(Boolean)
                       .join(" "),

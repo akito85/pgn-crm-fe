@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Tabs } from "antd";
-import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
+import { PlusOutlined, MinusOutlined, InfoCircleFilled } from "@ant-design/icons";
 import moment from "moment";
 import DetailText from "../../../../../components/DetailText";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -8,6 +8,7 @@ import TableRBI from "../../../../../components/TableRBI";
 import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
 import DOMPurify from "dompurify";
+import { RESTRUCTURE_MANDATORY_ATTACHMENTS } from "../../../../../constants/restructure";
 
 const ContentModalConfirmRestructure = ({
     formValues = {},
@@ -228,7 +229,7 @@ const ContentModalConfirmRestructure = ({
                             <DetailText label="Type">{formValues?.type || "-"}</DetailText>
                             <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{formValues?.source || "SAP FSCD"}</DetailText>
+                            <DetailText label="Source">{formValues?.source }</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
                                 <DetailText label="Description">{DOMPurify.sanitize(formValues?.description) || "-"}</DetailText>
@@ -270,19 +271,45 @@ const ContentModalConfirmRestructure = ({
         {
             key: "Attachment",
             label: "Attachment",
-            children: (
-                <div className="p-5 bg-[#f8f7fa] min-h-[400px]">
-                    <SectionCard title="ATTACHMENT INFORMATION">
-                        <TableRBI
-                            columns={attachmentColumns}
-                            dataSource={listDataAttachment}
-                            usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
-                        />
-                    </SectionCard>
-                </div>
-            )
+            children: (() => {
+                const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
+                const missingCategories = RESTRUCTURE_MANDATORY_ATTACHMENTS.filter(cat => !uploadedCategories.includes(cat));
+
+                return (
+                    <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
+                        {missingCategories.length > 0 && (
+                            <div 
+                                className="flex items-start gap-3 p-4 border" 
+                                style={{ 
+                                    backgroundColor: "#FFF3E6", 
+                                    borderColor: "#FFE0B2",
+                                    borderRadius: "8px",
+                                    color: "#B36214"
+                                }}
+                            >
+                                <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
+                                <div className="flex flex-col gap-1 text-[14px]">
+                                    <span style={{ color: "#B36214", fontWeight: "600" }}>
+                                        Please upload the required documents below to continue the process.
+                                    </span>
+                                    <span style={{ color: "#B36214", fontWeight: "500" }}>
+                                        {missingCategories.join(", ")}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                        <SectionCard title="ATTACHMENT INFORMATION">
+                            <TableRBI
+                                columns={attachmentColumns}
+                                dataSource={listDataAttachment}
+                                usePagination={false}
+                                showAdvanceSearch={false}
+                                showSearchBar={false}
+                            />
+                        </SectionCard>
+                    </div>
+                );
+            })()
         }
     ];
 

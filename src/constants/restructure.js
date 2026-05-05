@@ -60,3 +60,17 @@ export const CONTACT_ADDRESS_OPTIONS = [
   { label: "Branch", value: "Branch" },
   { label: "Warehouse", value: "Warehouse" },
 ];
+
+// ─── Customer / Account Status ────────────────────────────────────────────────
+
+export const CUSTOMER_STATUS = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+};
+
+// ─── Mandatory Attachments ───────────────────────────────────────────────────
+export const RESTRUCTURE_MANDATORY_ATTACHMENTS = [
+  "KTP",
+  "Surat Permohonan",
+  "Kartu Profil Pelanggan",
+];

@@ -24,7 +24,8 @@ import { columns as columnRestructure } from "./Columns";
 import {
     getAllRestructureListPaginate,
     deleteRestructure,
-    getApprovalHistory
+    getApprovalHistory,
+    downloadListRestructure
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
@@ -115,7 +116,12 @@ const ViewRestructure = () => {
     };
 
     const handleDownload = () => {
-        // Implement download logic
+        dispatch(
+            downloadListRestructure({
+                search: encodeURIComponent(JSON.stringify(search)),
+                sort,
+            })
+        );
     };
 
 

@@ -14,7 +14,8 @@ const RestructureForm = ({
     openItems = [],
     onContactChange,
     onPlanDetailValidation,
-    onInstallmentsChange
+    onInstallmentsChange,
+    contactRef
 }) => {
     const [planInfo, setPlanInfo] = useState({ type: null, tenor: null, startPeriod: null });
 
@@ -30,7 +31,11 @@ const RestructureForm = ({
                 form={form}
                 disabled={disabled}
             />
-            <ContactInfoSection onContactsChange={onContactChange} />
+            <ContactInfoSection 
+                onContactsChange={onContactChange} 
+                accountNumber={form.getFieldValue("accountNumber")}
+                ref={contactRef}
+            />
             <PaymentPlanInfoSection 
                 form={form}
                 disabled={disabled}
