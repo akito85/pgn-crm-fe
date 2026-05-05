@@ -1,0 +1,164 @@
+name: AI Code Review (alamaby)
+
+on:
+  pull_request:
+    types: [assigned]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    if: github.event.assignee.login == 'alamaby'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Get PR diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > pr.diff
+          DIFF_BYTES=$(wc -c < pr.diff)
+          echo "Total diff bytes: $DIFF_BYTES"
+          head -c 60000 pr.diff > pr.diff.trunc
+          if [ "$DIFF_BYTES" -gt 60000 ]; then
+            echo "" >> pr.diff.trunc
+            echo "[CATATAN: diff dipotong pada 60.000 karakter karena terlalu besar]" >> pr.diff.trunc
+          fi
+
+      - name: Build prompt
+        run: |
+          {
+            echo "Anda adalah senior React/TypeScript code reviewer untuk modul billing/payment di aplikasi CRM perusahaan distribusi gas alam (PGN)."
+            echo ""
+            echo "Tugas: review diff PR berikut. Fokus utama:"
+            echo "- Bug logika, undefined/null runtime errors, type safety (penggunaan tipe 'any' atau type casting yang tidak aman)"
+            echo "- Security: XSS (dangerouslySetInnerHTML), penyimpanan sensitive data di localStorage/state, token leakage di URL/UI"
+            echo "- Memory leak (missing cleanup function di useEffect, unclosed subscriptions, dangling event listeners)"
+            echo "- Performance issue (unnecessary re-renders, array/object mutations, improper useMemo/useCallback)"
+            echo "- React/Hooks pitfalls: stale closures, missing/incorrect dependency array, prop drilling berlebihan"
+            echo "- Error handling: unhandled promise rejections, API error yang tidak ditangani di UI, ketiadaan Error Boundary"
+            echo "- Hardcoded credential / secret API keys / environment variables yang bocor ke client"
+            echo ""
+            echo "Klasifikasi severity:"
+            echo "- critical: menyebabkan aplikasi crash (white screen of death), salah render data billing, security breach (XSS/token leak)"
+            echo "- high: bug fungsional yang terlihat user, state management error, memori leak yang membuat browser freeze"
+            echo "- medium: code smell, TypeScript type violations ('any'), berdampak ke maintainability atau load time"
+            echo "- low: style / nitpick / naming convention"
+            echo ""
+            echo "Output WAJIB berupa JSON valid (tanpa markdown fence, tanpa teks lain), schema:"
+            echo '{"issues":[{"severity":"critical|high|medium|low","title":"...","file":"path/File.java","line":123,"reason":"...","fix":"..."}]}'
+            echo ""
+            echo "Field title, reason, fix WAJIB Bahasa Indonesia."
+            echo "Field file harus path relatif dari root repo, line nomor baris di file BARU (bukan diff line)."
+            echo "Jika tidak menemukan issue, return: {\"issues\":[]}"
+            echo ""
+            echo "---DIFF PR---"
+            cat pr.diff.trunc
+          } > prompt.txt
+
+      - name: AI inference (OpenRouter)
+        id: ai
+        continue-on-error: true
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
+        run: |
+          # Build JSON payload via jq agar prompt aman di-escape (newline, quote, dll)
+          jq -n \
+            --arg model "$OPENROUTER_MODEL" \
+            --rawfile prompt prompt.txt \
+            '{
+              model: $model,
+              max_tokens: 4000,
+              temperature: 0.2,
+              messages: [
+                { role: "system", content: "Anda adalah senior Java/Spring Boot code reviewer. Selalu balas dengan JSON valid sesuai schema yang diminta user." },
+                { role: "user", content: $prompt }
+              ]
+            }' > payload.json
+
+          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST https://openrouter.ai/api/v1/chat/completions \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -H "HTTP-Referer: https://github.com/${{ github.repository }}" \
+            -H "X-Title: AI Code Review (alamaby)" \
+            --data @payload.json)
+
+          echo "HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "OpenRouter error response:"
+            cat response.json
+            exit 1
+          fi
+
+          # Ekstrak content dari choices[0].message.content
+          jq -r '.choices[0].message.content // ""' response.json > ai_content.txt
+          echo "--- AI content (first 500 chars) ---"
+          head -c 500 ai_content.txt
+          echo ""
+
+      - name: AI inference (Gemini fallback)
+        id: ai_fallback
+        if: steps.ai.outcome == 'failure'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+        run: |
+          echo "OpenRouter gagal, fallback ke Gemini API (model: $GEMINI_MODEL)"
+
+          # Build payload Gemini: contents[].parts[].text + generationConfig.
+          # System instruction dipisah lewat systemInstruction.
+          jq -n \
+            --rawfile prompt prompt.txt \
+            '{
+              systemInstruction: {
+                parts: [{ text: "Anda adalah senior Java/Spring Boot code reviewer. Selalu balas dengan JSON valid sesuai schema yang diminta user." }]
+              },
+              contents: [
+                { role: "user", parts: [{ text: $prompt }] }
+              ],
+              generationConfig: {
+                maxOutputTokens: 4000,
+                temperature: 0.2,
+                responseMimeType: "application/json"
+              }
+            }' > payload_gemini.json
+
+          HTTP_CODE=$(curl -sS -o response_gemini.json -w "%{http_code}" \
+            -X POST "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data @payload_gemini.json)
+
+          echo "HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Gemini error response:"
+            cat response_gemini.json
+            exit 1
+          fi
+
+          # Gabung semua parts[].text dari candidates[0].content.parts
+          jq -r '.candidates[0].content.parts | map(.text) | join("")' response_gemini.json > ai_content.txt
+          echo "--- AI content (first 500 chars) ---"
+          head -c 500 ai_content.txt
+          echo ""
+
+      - name: Format review comment
+        id: fmt
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          export AI_RESPONSE="$(cat ai_content.txt)"
+          node .github/scripts/format-review.js > review.md
+
+      - name: Post review comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr comment ${{ github.event.pull_request.number }} --body-file review.md
