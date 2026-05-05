@@ -510,7 +510,7 @@ const ContentManagementView = () => {
               }
               type={"action"}
               border={false}
-              onClick={() => handleApprovalHistory(record)}
+              onClick={() => handleApprovalHistory(record.id)}
             >
               <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
@@ -521,7 +521,7 @@ const ContentManagementView = () => {
                   name="IconLogHistory"
                   color={"#0075bf"}
                   width={20}
-                  onClick={() => handleApprovalHistory(record)}
+                  onClick={() => handleApprovalHistory(record.id)}
                 />
               </div>
             </Tooltip>
