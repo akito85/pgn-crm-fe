@@ -11,7 +11,7 @@ const formatMonth = (dayjsObj, offset) => {
 
 const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange, onInstallmentsChange }) => {
   const { type, tenor, startPeriod } = planInfo;
-  const isAutomatic = type === PAYMENT_PLAN_TYPES.AUTOMATIC;
+  const isAutomatic = type && (String(type).toUpperCase() === PAYMENT_PLAN_TYPES.AUTOMATIC_KEY || String(type) === PAYMENT_PLAN_TYPES.AUTOMATIC);
 
   // Derive unique currencies from open items
   const currencies = [...new Set(openItems.map((i) => i.currency || "IDR"))];

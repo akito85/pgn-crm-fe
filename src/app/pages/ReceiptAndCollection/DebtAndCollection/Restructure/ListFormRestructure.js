@@ -31,6 +31,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import ContentModalConfirmRestructure from "./ContentModalConfirmRestructure";
+import { uploadAttachments } from "../../../../../utils/uploadHelper";
 import { RESTRUCTURE_MANDATORY_ATTACHMENTS } from "../../../../../constants/restructure";
 
 
@@ -287,6 +288,13 @@ const ListFormRestructure = (props) => {
             ? await dispatch(updateRestructure({ id, body }))
             : await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
+            const restructureId = action.payload?.data?.restructureId || id;
+            const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+            if (newAttachments.length > 0 && restructureId) {
+                await uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                );
+            }
             message.success("Draft berhasil disimpan!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
         }
@@ -317,6 +325,13 @@ const ListFormRestructure = (props) => {
             ? await dispatch(updateRestructure({ id, body }))
             : await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
+            const restructureId = action.payload?.data?.restructureId || id;
+            const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+            if (newAttachments.length > 0 && restructureId) {
+                await uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                );
+            }
             message.success("Payment Plan berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
         }

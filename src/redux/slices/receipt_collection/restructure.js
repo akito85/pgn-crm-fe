@@ -19,6 +19,7 @@ const initialState = {
     data_approval_list: null,
     loading_approval_list: false,
     loading: false,
+    loadingHistory: false,
     isFailed: false,
     isSuccess: false,
     message: "",
@@ -79,12 +80,9 @@ export const getAllRestructureListPaginate = createAsyncThunk(
     "GET_ALL_RESTRUCTURE_LIST_PAGINATE",
     async ({ page, pageSize, search, sort }, thunkAPI) => {
         try {
-            const params = new URLSearchParams();
-            if (page !== undefined) params.append("page", page);
-            if (pageSize !== undefined) params.append("pageSize", pageSize);
-            if (search) params.append("searchs", typeof search === "string" ? search : JSON.stringify(search));
-            if (sort) params.append("sort", sort);
-            const url = `/v1/dbs/api/restructure/get-list?${params.toString()}`;
+            const searchParams = search === undefined ? "" : search;
+            const sortValue = sort === undefined || sort === "" ? "id~desc" : sort;
+            const url = `/v1/dbs/api/restructure/get-list?page=${page}&pageSize=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
             return response?.data;
         } catch (error) {
@@ -111,17 +109,10 @@ export const getListApprovalRestructure = createAsyncThunk(
     "GET_LIST_APPROVAL_RESTRUCTURE",
     async ({ page, pageSize, search, isLoadMore }, thunkAPI) => {
         try {
-            const params = new URLSearchParams();
-            params.append("page", page);
-            params.append("size", pageSize);
-            
-            // Filter for items waiting for approval
-            // According to backend logic, statusApproval = 'Pending' for submitted items
             const searchObj = search ? JSON.parse(decodeURIComponent(search)) : {};
             searchObj.statusApproval = "Pending";
-            params.append("searchs", JSON.stringify(searchObj));
-
-            const url = `/v1/dbs/api/restructure/get-list?${params.toString()}`;
+            const searchParams = encodeURIComponent(JSON.stringify(searchObj));
+            const url = `/v1/dbs/api/restructure/get-list?page=${page}&size=${pageSize}&searchs=${searchParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
             return { ...response?.data, isLoadMore };
         } catch (error) {
@@ -596,13 +587,17 @@ const restructureSlice = createSlice({
         // Get Approval History
         [getApprovalHistory.pending]: (state) => {
             state.loading = true;
+            state.loadingHistory = true;
+            state.dataApprovalHistory = null;
         },
         [getApprovalHistory.fulfilled]: (state, action) => {
             state.loading = false;
+            state.loadingHistory = false;
             state.dataApprovalHistory = action.payload;
         },
         [getApprovalHistory.rejected]: (state) => {
             state.loading = false;
+            state.loadingHistory = false;
         },
 
         // Get Approval List

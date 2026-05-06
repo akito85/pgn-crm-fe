@@ -34,9 +34,10 @@ import ListDetailRestructure from "./ListDetailRestructure";
 
 const ViewRestructure = () => {
     const navigate = useNavigate();
-    const { data, loading, dataApprovalHistory } = useSelector(
+    const { data, loading, loadingHistory, dataApprovalHistory } = useSelector(
         (state) => state.restructure
     );
+    const isApprover = data?.isApprover || false;
 
     const dispatch = useDispatch();
     const searchInput = useRef(null);
@@ -245,7 +246,7 @@ const ViewRestructure = () => {
                 </ButtonComponent>
             )
         },
-        {
+        isApprover && {
             action: "Approval",
             render: (
                 <ButtonComponent
@@ -321,7 +322,7 @@ const ViewRestructure = () => {
                                         </div>
                                     }
                                 >
-                                    <div className="cursor-pointer p-2 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                                    <div className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
                                         <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
                                     </div>
                                 </Popover>
@@ -385,18 +386,31 @@ const ViewRestructure = () => {
                 <ModalHistory
                     isOpen={modalHistory}
                     handleClose={() => setModalHistory(false)}
-                    header="APPROVAL HISTORY"
+                    header={
+                        <div className="flex items-center gap-2">
+                            <span>APPROVAL HISTORY</span>
+                            {loadingHistory && <Spin size="small" />}
+                        </div>
+                    }
                     tabOptions={[
                         { label: "Payment Plan", value: "payment_plan" },
                         { label: "Early Repayment", value: "early_repayment" },
                     ]}
                     dataApprover={{
-                        payment_plan: dataApprovalHistory?.payment_plan?.dataApprover || [],
-                        early_repayment: dataApprovalHistory?.early_repayment?.dataApprover || []
+                        payment_plan: Array.isArray(dataApprovalHistory?.payment_plan?.dataApprover) 
+                            ? dataApprovalHistory.payment_plan.dataApprover 
+                            : (dataApprovalHistory?.payment_plan?.dataApprover?.RESTRUCTURE || []),
+                        early_repayment: Array.isArray(dataApprovalHistory?.early_repayment?.dataApprover)
+                            ? dataApprovalHistory.early_repayment.dataApprover
+                            : (dataApprovalHistory?.early_repayment?.dataApprover?.EARLY_REPAYMENT || [])
                     }}
                     dataHistory={{
-                        payment_plan: dataApprovalHistory?.payment_plan?.dataHistory || [],
-                        early_repayment: dataApprovalHistory?.early_repayment?.dataHistory || []
+                        payment_plan: Array.isArray(dataApprovalHistory?.payment_plan?.dataHistory)
+                            ? dataApprovalHistory.payment_plan.dataHistory
+                            : (dataApprovalHistory?.payment_plan?.dataHistory?.RESTRUCTURE || []),
+                        early_repayment: Array.isArray(dataApprovalHistory?.early_repayment?.dataHistory)
+                            ? dataApprovalHistory.early_repayment.dataHistory
+                            : (dataApprovalHistory?.early_repayment?.dataHistory?.EARLY_REPAYMENT || [])
                     }}
                 />
 

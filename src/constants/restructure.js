@@ -3,6 +3,8 @@
 export const PAYMENT_PLAN_TYPES = {
   AUTOMATIC: "Automatic",
   MANUAL: "Manual",
+  AUTOMATIC_KEY: "AUTOMATIC",
+  MANUAL_KEY: "MANUAL",
 };
 
 export const PAYMENT_PLAN_TYPE_OPTIONS = [
