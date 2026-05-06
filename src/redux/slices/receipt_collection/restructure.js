@@ -220,6 +220,26 @@ export const getDetailRestructure = createAsyncThunk(
     }
 );
 
+export const getDetailEarlyRepayment = createAsyncThunk(
+    "GET_DETAIL_EARLY_REPAYMENT",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/early-repayment/detail-get/${id}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response?.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = {
+                title: "Failed",
+                description: `${message}`,
+            };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
 export const saveRestructure = createAsyncThunk(
     "SAVE_RESTRUCTURE",
     async ({ body }, thunkAPI) => {
@@ -494,6 +514,21 @@ const restructureSlice = createSlice({
             state.totalBadDebt = (action.payload?.badDebtList || []).reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
         },
         [getDetailRestructure.rejected]: (state) => {
+            state.loading = false;
+        },
+
+        [getDetailEarlyRepayment.pending]: (state) => {
+            state.loading = true;
+        },
+        [getDetailEarlyRepayment.fulfilled]: (state, action) => {
+            state.loading = false;
+            state.data_detail = {
+                ...state.data_detail,
+                ...action.payload,
+                earlyRepayment: action.payload?.earlyRepayment || action.payload
+            };
+        },
+        [getDetailEarlyRepayment.rejected]: (state) => {
             state.loading = false;
         },
 

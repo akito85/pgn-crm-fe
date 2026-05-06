@@ -158,7 +158,13 @@ const ViewRestructure = () => {
                             className="cursor-pointer"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedId(record?.id === selectedId ? null : record?.id);
+                                setSelectedId(record?.id);
+                                setTimeout(() => {
+                                    const element = document.getElementById("detail-section-container");
+                                    if (element) {
+                                        element.scrollIntoView({ behavior: "smooth" });
+                                    }
+                                }, 150);
                             }}
                         >
                             <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
@@ -365,7 +371,17 @@ const ViewRestructure = () => {
                         totalData={data?.page?.totalElements || 0}
                         onSort={onSort}
                         onRow={(record) => ({
-                            onClick: () => setSelectedId(record?.id === selectedId ? null : record?.id),
+                            onClick: () => {
+                                setSelectedId(record?.id === selectedId ? null : record?.id);
+                                if (record?.id !== selectedId) {
+                                    setTimeout(() => {
+                                        const element = document.getElementById("detail-section-container");
+                                        if (element) {
+                                            element.scrollIntoView({ behavior: "smooth" });
+                                        }
+                                    }, 150);
+                                }
+                            }
                         })}
                         tableScrolled={{
                             x: 6500,
@@ -375,10 +391,14 @@ const ViewRestructure = () => {
                 </CardContainer>
 
                 {selectedId && (
-                    <div className="mt-8">
+                    <div id="detail-section-container" className="mt-8">
                         <ListDetailRestructure 
                             selectedId={selectedId} 
+                            approvalType={dataSource.find(item => item.id === selectedId)?.approvalType}
+                            isApprover={isApprover}
+                            isEmbedded={true}
                             onClose={() => setSelectedId(null)} 
+                            onRefresh={handleRefresh}
                         />
                     </div>
                 )}

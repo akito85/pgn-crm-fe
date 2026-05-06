@@ -15,26 +15,18 @@ const EarlyRepaymentForm = ({
     openItems = [],
     onContactChange,
     onPlanDetailValidation,
-    onInstallmentsChange
+    onInstallmentsChange,
+    onInstallmentDetailIdsChange,
+    data_detail,
+    contacts = [],
+    installmentsByCurrency = {}
 }) => {
     const [planInfo, setPlanInfo] = useState({ type: null, tenor: null, startPeriod: null });
-    const [installmentsByCurrency, setInstallmentsByCurrency] = useState({});
-
-    // Mock an existing installment plan
-    useEffect(() => {
-        setInstallmentsByCurrency({
-            "IDR": [
-                { key: 1, periode: "Nov 2023", amount: "5000000" },
-                { key: 2, periode: "Dec 2023", amount: "5000000" },
-                { key: 3, periode: "Jan 2024", amount: "5000000" }
-            ]
-        });
-    }, []);
 
     return (
         <div className="flex flex-col gap-1">
             <CardContainerNoBorder header="INSTALLMENT DETAIL" collapsible={true}>
-                <ERAccountInfoSection data_detail={{}} />
+                <ERAccountInfoSection data_detail={data_detail} />
                 <div className="mt-4"></div>
                 <ERInstallmentInfoSection 
                     form={form}
@@ -42,8 +34,11 @@ const EarlyRepaymentForm = ({
                     onPlanInfoChange={setPlanInfo}
                 />
             </CardContainerNoBorder>
-            <ContactInfoSection onContactsChange={onContactChange} />
-            <EREarlyRepaymentDetailSection installmentsByCurrency={installmentsByCurrency} />
+            <ContactInfoSection initialContacts={contacts} onContactsChange={onContactChange} />
+            <EREarlyRepaymentDetailSection 
+                installmentsByCurrency={installmentsByCurrency} 
+                onInstallmentDetailIdsChange={onInstallmentDetailIdsChange}
+            />
             <EROpenItemInfoSection openItems={openItems} />
             <ERInstallmentCalculationDetailSection installmentsByCurrency={installmentsByCurrency} />
         </div>

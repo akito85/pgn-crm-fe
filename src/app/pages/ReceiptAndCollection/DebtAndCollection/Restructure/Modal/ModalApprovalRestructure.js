@@ -173,7 +173,7 @@ const ModalApprovalRestructure = ({
     };
 
     const handleDetail = (record) => {
-        navigate(DEBT_AND_COLLECTION_ROUTES.DETAIL_RESTRUCTURE, { state: { id: record.id } });
+        navigate(DEBT_AND_COLLECTION_ROUTES.DETAIL_RESTRUCTURE, { state: { id: record.id, approvalType: record.approvalType, isApprover: true } });
     };
 
     const handleRefresh = () => {
@@ -231,7 +231,7 @@ const ModalApprovalRestructure = ({
             try {
                 // Submit approval for each selected record
                 // Backend unified endpoint handles both INSTALLMENT and EARLY_REPAYMENT based on category param
-                const category = activeTab === "payment_plan" ? "INSTALLMENT" : "EARLY_REPAYMENT";
+                const category = activeTab === "payment_plan" ? "RESTRUCTURE" : "EARLY_REPAYMENT_RESTRUCTURE";
                 
                 // Assuming the backend expects multiple IDs or we loop
                 // The Redux action approveOrRejectRestructure takes { body }

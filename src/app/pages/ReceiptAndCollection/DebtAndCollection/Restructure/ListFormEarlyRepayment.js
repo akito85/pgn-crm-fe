@@ -29,6 +29,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import ContentModalConfirmEarlyRepayment from "./ContentModalConfirmEarlyRepayment";
+import { uploadAttachments } from "../../../../../utils/uploadHelper";
 
 
 const ListFormEarlyRepayment = (props) => {
@@ -118,10 +119,60 @@ const ListFormEarlyRepayment = (props) => {
             requestDate: moment(),
         });
 
-        if (type === "update" && id) {
+        if (id) {
             dispatch(getDetailRestructure(id));
         }
-    }, [dispatch, type, id, form]);
+    }, [dispatch, id, form]);
+
+    useEffect(() => {
+        if (data_detail && data_detail.restructure) {
+            const res = data_detail.restructure;
+            
+            // Pre-populate account and installment fields
+            form.setFieldsValue({
+                accountNumber: res.accountNumber,
+                accountName: res.accountName,
+                customerNumber: res.customerNumber,
+                customerName: res.customerName,
+                accountGroupType: res.accountGroupType,
+                sor: res.sor,
+                costCenter: res.costCenter,
+                accountSegment: res.accountSegment,
+                meterReadingCode: res.meterReadingCode,
+                accountType: res.accountType,
+                classificationType: res.classificationType,
+                accountStatus: res.accountStatus,
+                
+                type: res.type,
+                tenor: res.tenor,
+                startPeriod: res.startPeriod ? moment(res.startPeriod).format("MMMM YYYY") : "",
+                source: res.source || "Manual",
+                requestDate: res.createdDate ? moment(res.createdDate).format("DD MMMM YYYY") : moment().format("DD MMMM YYYY"),
+                remark: res.description,
+            });
+
+            // Populate contacts
+            setContacts(res.contactList || []);
+
+            // Map calculationList to installmentsByCurrency format
+            const calc = data_detail.calculationList || [];
+            const eligibleIds = calc.filter(curr => curr.status !== "Paid").map(curr => curr.key || curr.id || curr.keyId);
+            setSelectedInstallmentDetailIds(eligibleIds);
+
+            const groupedCalc = calc.reduce((acc, curr) => {
+                const cur = curr.currency || "IDR";
+                if (!acc[cur]) acc[cur] = [];
+                acc[cur].push({
+                    key: curr.key || curr.id,
+                    periode: curr.periode,
+                    amount: curr.amount,
+                    status: curr.status || "Open"
+                });
+                return acc;
+            }, {});
+            setInstallmentsByCurrency(groupedCalc);
+        }
+    }, [data_detail, form]);
 
     useEffect(() => {
         if (selectedHierarchy) {
@@ -226,6 +277,13 @@ const ListFormEarlyRepayment = (props) => {
             ? await dispatch(updateEarlyRepayment({ id, body }))
             : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
+            const repaymentId = action.payload?.data?.repaymentId || id;
+            const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+            if (newAttachments.length > 0 && repaymentId) {
+                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
+                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                );
+            }
             message.success("Draft berhasil disimpan!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
         }
@@ -248,6 +306,13 @@ const ListFormEarlyRepayment = (props) => {
             ? await dispatch(updateEarlyRepayment({ id, body }))
             : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
+            const repaymentId = action.payload?.data?.repaymentId || id;
+            const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+            if (newAttachments.length > 0 && repaymentId) {
+                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
+                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                );
+            }
             message.success("Early Repayment berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
         }
@@ -289,12 +354,15 @@ const ListFormEarlyRepayment = (props) => {
                             form={form}
                             dataAccNumber={dataAccNumber}
                             handleAccountChange={handleAccountChange}
-                            disabled={type === "update"}
+                            disabled={true}
                             openItems={badDebtList}
                             onContactChange={handleContactChange}
                             onPlanDetailValidation={handlePlanDetailValidation}
                             onInstallmentsChange={handleInstallmentsChange}
                             onInstallmentDetailIdsChange={setSelectedInstallmentDetailIds}
+                            data_detail={data_detail}
+                            contacts={contacts}
+                            installmentsByCurrency={installmentsByCurrency}
                         />
                     </div>
 
@@ -388,6 +456,7 @@ const ListFormEarlyRepayment = (props) => {
                     appHierOptions={appHierOptions}
                     appHierDataDetail={appHierDataDetail}
                     selectedHierarchy={selectedHierarchy}
+                    data_detail={data_detail}
                 />
             </ModalCustom>
         </>

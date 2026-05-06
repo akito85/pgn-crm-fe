@@ -3,12 +3,13 @@ import moment from "moment";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Form, message, Tabs } from "antd";
+import { Form, message, Tabs, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import {
     getDetailRestructure,
+    getDetailEarlyRepayment,
     approveOrRejectRestructure,
     getListCategory,
     getAllApprovalList,
@@ -29,8 +30,10 @@ import StatusComponent from "../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import DOMPurify from "dompurify";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
+import DetailPaymentPlan from "./DetailPaymentPlan";
+import DetailEarlyRepayment from "./DetailEarlyRepayment";
 
-const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
+const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approvalType: propApprovalType, isApprover: propIsApprover }) => {
     const dispatch = useDispatch();
     const location = useLocation();
     const navigate = useNavigate();
@@ -107,13 +110,32 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
 
     const approvalName = (dataListAppHierId || []).find(x => x.appHierId === data_detail?.restructure?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "-";
 
+    const isApprover = propIsApprover || location?.state?.isApprover || false;
+    const isEarlyRepayment = (propApprovalType || location?.state?.approvalType) === "EARLY_REPAYMENT_RESTRUCTURE" && isApprover;
+
     useEffect(() => {
         if (id) {
-            dispatch(getDetailRestructure(id));
+            if (isEarlyRepayment) {
+                const getEarlyRepaymentDetails = async () => {
+                    try {
+                        const response = await receiptCollectionHttpService.getDetail(`/v1/dbs/api/early-repayment/by-restructure/${id}`);
+                        if (response?.data?.success && response?.data?.data && response?.data?.data.length > 0) {
+                            const erId = response.data.data[0].id;
+                            dispatch(getDetailEarlyRepayment(erId));
+                        }
+                    } catch (e) {
+                        console.log("No early repayment found", e);
+                    }
+                };
+                getEarlyRepaymentDetails();
+            } else {
+                dispatch(getDetailRestructure(id));
+            }
+            
             dispatch(getAllApprovalList());
             dispatch(getListCategory());
         }
-    }, [dispatch, id]);
+    }, [dispatch, id, isEarlyRepayment]);
 
     useEffect(() => {
         if (dataListAppHierId && dataListAppHierId.length > 0) {
@@ -149,41 +171,60 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
     }, [dataListAppHierDetail]);
 
     useEffect(() => {
-        if (data_detail && data_detail.restructure) {
-            const res = data_detail.restructure;
-            setDataHeader(res);
-            setSelectedHierarchy(res.appHierId);
-            
-            // Map data to match the UI requirements
-            setOpenItems(data_detail.badDebtList || []);
-            setContacts(data_detail.restructure?.contactList || []);
-            
-            // Map calculationList to installmentsByCurrency format
-            const calc = data_detail.calculationList || [];
-            const groupedCalc = calc.reduce((acc, curr) => {
-                const cur = curr.currency || "IDR";
-                if (!acc[cur]) acc[cur] = [];
-                acc[cur].push({
-                    key: curr.key || curr.id,
-                    periode: curr.periode,
-                    amount: curr.amount
+        if (data_detail) {
+            if (data_detail.restructure) {
+                const res = data_detail.restructure;
+                setDataHeader(res);
+                setSelectedHierarchy(res.appHierId);
+                
+                // Map data to match the UI requirements
+                setOpenItems(data_detail.badDebtList || []);
+                setContacts(data_detail.restructure?.contactList || []);
+                
+                // Map calculationList to installmentsByCurrency format
+                const calc = data_detail.calculationList || [];
+                const groupedCalc = calc.reduce((acc, curr) => {
+                    const cur = curr.currency || "IDR";
+                    if (!acc[cur]) acc[cur] = [];
+                    acc[cur].push({
+                        key: curr.key || curr.id,
+                        periode: curr.periode,
+                        amount: curr.amount
+                    });
+                    return acc;
+                }, {});
+                setInstallmentsByCurrency(groupedCalc);
+
+                const dataAttachment = (data_detail?.attachmentDtoList || []).map(
+                    (item) => ({
+                        ...item,
+                        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
+                        dataType: "exist",
+                    })
+                );
+                setListDataAttachment(dataAttachment);
+
+                form.setFieldsValue({
+                    apphierId: res.appHierId
                 });
-                return acc;
-            }, {});
-            setInstallmentsByCurrency(groupedCalc);
+            }
+            if (data_detail.earlyRepayment) {
+                const er = data_detail.earlyRepayment;
+                setSelectedHierarchy(er.appHierId);
 
-            const dataAttachment = (data_detail?.attachmentDtoList || []).map(
-                (item) => ({
-                    ...item,
-                    createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
-                    dataType: "exist",
-                })
-            );
-            setListDataAttachment(dataAttachment);
+                const dataAttachment = (data_detail?.attachmentDtoList || []).map(
+                    (item) => ({
+                        ...item,
+                        createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
+                        dataType: "exist",
+                    })
+                );
+                setListDataAttachment(dataAttachment);
 
-            form.setFieldsValue({
-                apphierId: res.appHierId
-            });
+                form.setFieldsValue({
+                    apphierId: er.appHierId
+                });
+            }
         }
     }, [data_detail, form]);
 
@@ -213,7 +254,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
                 { title: "ALLOCATION", dataIndex: "allocation" },
                 { 
                     title: "AMOUNT", 
-                    dataIndex: "totalAmount", 
+                    dataIndex: "amount", 
                     align: "right",
                     render: (amount) => {
                         const num = parseFloat(String(amount).replace(/,/g, "")) || 0;
@@ -288,110 +329,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
         });
     };
 
-    const items = [
-        {
-            key: "Payment Plan",
-            label: "Payment Plan",
-            children: (
-                <div className="p-5 min-h-[400px] flex flex-col gap-4">
-                    <SectionCard title="ACCOUNT INFORMATION">
-                        <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Account Number">{dataHeader?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{dataHeader?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{dataHeader?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{dataHeader?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{dataHeader?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{dataHeader?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{dataHeader?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{dataHeader?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{dataHeader?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{dataHeader?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{dataHeader?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{dataHeader?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{dataHeader?.accountStatus || "-"}</DetailText>
-                        </div>
-                    </SectionCard>
-
-                    <SectionCard title="SERVICE AGREEMENT INFORMATION">
-                        <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Service Agreement Number">{dataHeader?.saNumber || "-"}</DetailText>
-                            <DetailText label="Service Agreement Name">{dataHeader?.saName || "-"}</DetailText>
-                            <DetailText label="Service Agreement Date">{dataHeader?.saDate ? moment(dataHeader.saDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Start Date">{dataHeader?.startDate ? moment(dataHeader.startDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="End Date">{dataHeader?.endDate ? moment(dataHeader.endDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Minimum Contract">{dataHeader?.minContract || "-"}</DetailText>
-                            <DetailText label="Maximum Contract">{dataHeader?.maxContract || "-"}</DetailText>
-                            <DetailText label="UOM">{dataHeader?.uom || "-"}</DetailText>
-                        </div>
-                    </SectionCard>
-
-                    <SectionCard title="CONTACT INFORMATION">
-                        <TableRBI
-                            idTable="table-contact-detail"
-                            dataSource={contacts}
-                            columns={contactColumns}
-                            expandable={expandable}
-                            usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
-                        />
-                    </SectionCard>
-
-                    <SectionCard title="PAYMENT PLAN INFORMATION">
-                        <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{dataHeader?.type || "-"}</DetailText>
-                            <DetailText label="Tenor">{dataHeader?.tenor ? `${dataHeader.tenor} Months` : "-"}</DetailText>
-                            <DetailText label="Start Period">{dataHeader?.startPeriod ? moment(dataHeader.startPeriod).format("MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{dataHeader?.source}</DetailText>
-                            <DetailText label="Request Date">{dataHeader?.requestDate ? moment(dataHeader.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <div className="col-span-5">
-                                <DetailText label="Description">{DOMPurify.sanitize(dataHeader?.description) || "-"}</DetailText>
-                            </div>
-                        </div>
-                    </SectionCard>
-                </div>
-            )
-        },
-        {
-            key: "Approval",
-            label: "Approval",
-            children: (
-                <div className="p-5 min-h-[400px]">
-                    <SectionCard title="PAYMENT PLAN APPROVAL INFORMATION">
-                        <ApprovalComponentGeneral
-                            dataTable={appHierDataDetail}
-                            dataOption={appHierOptions}
-                            selectedHierarchy={selectedHierarchy}
-                            updateSelectedHierarchy={setSelectedHierarchy}
-                            showSelect={false}
-                            disableSelect={true}
-                            approvalName={approvalName}
-                        />
-                    </SectionCard>
-                </div>
-            )
-        },
-        {
-            key: "Attachment",
-            label: "Attachment",
-            children: (
-                <div className="p-5 min-h-[400px]">
-                    <SectionCard title="ATTACHMENT INFORMATION">
-                        <AttachmentComponent
-                            type={"detail"}
-                            data={listDataAttachment}
-                            updateData={setListDataAttachment}
-                            typeSelector="restructure"
-                            dispatch={dispatch}
-                            getAPICategory={getListCategory}
-                            service={receiptCollectionHttpService}
-                            configApplication={configApp.PAYMENT_SERVICE}
-                        />
-                    </SectionCard>
-                </div>
-            )
-        }
-    ];
+    // Renderers are now imported from separate component files to keep the main file modular and highly readable.
 
     const isShowButton = data_detail?.tApprovalDto?.isApprover;
 
@@ -404,17 +342,22 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
 
     const handleConfirm = (res, handleClear) => {
         const body = {
-            id: id,
+            id: isEarlyRepayment ? (data_detail?.earlyRepayment?.id || id) : id,
             remark: res.remark,
             approvalId: data_detail?.tApprovalDto?.tAppId,
             action: approveOrReject.toUpperCase(),
-            category: "INSTALLMENT",
+            category: isEarlyRepayment ? "EARLY_REPAYMENT_RESTRUCTURE" : "RESTRUCTURE",
         };
 
         dispatch(approveOrRejectRestructure({ body })).then((action) => {
             if (action.meta.requestStatus === "fulfilled") {
                 message.success(`Successfully ${approveOrReject}ed!`);
-                navigate(-1);
+                if (onRefresh) onRefresh();
+                if (isEmbedded) {
+                    onClose();
+                } else {
+                    navigate(-1);
+                }
             }
         });
         handleClear();
@@ -422,67 +365,55 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
     };
 
     return (
-        <>
+        <Spin spinning={loading}>
             {!isEmbedded && <BreadCrumb routes={routes} />}
-            <div className={isEmbedded ? "" : "mt-5"}>
-                <CardContainerNoBorder 
-                    header="PAYMENT PLAN LIST"
-                    className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
-                    noPadding
-                    collapsible={true}
-                >
-                    <div className="full-width-tabs">
-                        <Tabs
-                            activeKey={segmentedPage}
-                            onChange={(key) => setSegmentedPage(key)}
-                            items={items}
-                            className="custom-confirm-tabs"
-                            tabBarStyle={{
-                                paddingLeft: "16px",
-                                paddingRight: "16px",
-                                marginBottom: 0,
-                            }}
-                        />
-                    </div>
-                </CardContainerNoBorder>
-            </div>
-
-            {segmentedPage === "Payment Plan" && (
-                <div className="flex flex-col gap-4 mt-4">
-                    <CardContainerNoBorder 
-                        header="OPEN ITEM INFORMATION"
-                        className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
-                        collapsible={true}
-                    >
-                        <div className="p-4">
-                            {renderOpenItems()}
-                        </div>
-                    </CardContainerNoBorder>
-
-                    <CardContainerNoBorder 
-                        header="PAYMENT PLAN DETAIL"
-                        className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
-                        collapsible={true}
-                    >
-                        <div className="p-4">
-                            {renderPaymentPlanDetail()}
-                        </div>
-                    </CardContainerNoBorder>
-                </div>
-            )}
-
-            {segmentedPage === "Payment Plan" && (
-                <div className="mt-5">
-                    <LogHistoryInfo
-                        data={{
-                            recordId: dataHeader?.id || "-",
-                            createdDate: dataHeader?.createdDate ? moment(dataHeader?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            createdBy: dataHeader?.createdBy || "-",
-                            updatedDate: dataHeader?.updatedDate ? moment(dataHeader?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            updatedBy: dataHeader?.updatedBy || "-"
-                        }} 
-                    />
-                </div>
+            
+            {isEarlyRepayment ? (
+                <DetailEarlyRepayment
+                    isEmbedded={isEmbedded}
+                    segmentedPage={segmentedPage}
+                    setSegmentedPage={setSegmentedPage}
+                    dataHeader={dataHeader}
+                    data_detail={data_detail}
+                    contacts={contacts}
+                    contactColumns={contactColumns}
+                    expandable={expandable}
+                    appHierDataDetail={appHierDataDetail}
+                    appHierOptions={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    setSelectedHierarchy={setSelectedHierarchy}
+                    approvalName={approvalName}
+                    listDataAttachment={listDataAttachment}
+                    setListDataAttachment={setListDataAttachment}
+                    dispatch={dispatch}
+                    renderOpenItems={renderOpenItems}
+                    getListCategory={getListCategory}
+                    receiptCollectionHttpService={receiptCollectionHttpService}
+                    configApp={configApp}
+                />
+            ) : (
+                <DetailPaymentPlan
+                    isEmbedded={isEmbedded}
+                    segmentedPage={segmentedPage}
+                    setSegmentedPage={setSegmentedPage}
+                    dataHeader={dataHeader}
+                    contacts={contacts}
+                    contactColumns={contactColumns}
+                    expandable={expandable}
+                    appHierDataDetail={appHierDataDetail}
+                    appHierOptions={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    setSelectedHierarchy={setSelectedHierarchy}
+                    approvalName={approvalName}
+                    listDataAttachment={listDataAttachment}
+                    setListDataAttachment={setListDataAttachment}
+                    renderOpenItems={renderOpenItems}
+                    renderPaymentPlanDetail={renderPaymentPlanDetail}
+                    dispatch={dispatch}
+                    getListCategory={getListCategory}
+                    receiptCollectionHttpService={receiptCollectionHttpService}
+                    configApp={configApp}
+                />
             )}
 
             <div className="flex justify-between items-center bg-white p-4 rounded-lg mt-5 drop-shadow-lg">
@@ -527,7 +458,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose }) => {
                 menu="Restructure"
                 named={dataHeader?.id}
             />
-        </>
+        </Spin>
     );
 };
 

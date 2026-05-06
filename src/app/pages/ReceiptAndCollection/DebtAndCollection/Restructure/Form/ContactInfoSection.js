@@ -8,7 +8,7 @@ import StatusComponent from "../../../../../../components/StatusComponent";
 import ModalCreateContact from "../Modal/ModalCreateContact";
 import ModalChooseContact from "../Modal/ModalChooseContact";
 
-const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber }, ref) => {
+const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber, initialContacts }, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isChooseModalOpen, setIsChooseModalOpen] = useState(false);
 
@@ -54,6 +54,23 @@ const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber }, ref)
   ];
 
   const [contacts, setContacts] = useState([]);
+
+  React.useEffect(() => {
+    if (initialContacts && initialContacts.length > 0) {
+      const formatted = initialContacts.map((item, index) => ({
+        key: item.key || item.id || index + 1,
+        contactId: item.contactId || item.id,
+        isPrimary: item.isPrimary || false,
+        isManual: item.isManual || false,
+        cpName: item.cpName || [item.firstName, item.middleName, item.lastName].filter(Boolean).join(" "),
+        job: item.job,
+        position: item.position,
+        address: item.address || item.contactAddress || "-",
+        details: item.details || item.criteria || item.contactDetails || []
+      }));
+      setContacts(formatted);
+    }
+  }, [initialContacts]);
 
   React.useEffect(() => {
     if (onContactsChange) onContactsChange(contacts);

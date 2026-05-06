@@ -3,8 +3,8 @@ import { Row, Col } from "antd";
 import SectionCard from "../../../../../../components/SectionCard";
 
 const ERAccountInfoSection = ({ data_detail }) => {
-  // Use data_detail or default mock values
-  const detail = data_detail || {};
+  // Use data_detail restructure or fallback to default mock values
+  const detail = data_detail?.restructure || data_detail || {};
 
   return (
     <SectionCard title="ACCOUNT INFORMATION">

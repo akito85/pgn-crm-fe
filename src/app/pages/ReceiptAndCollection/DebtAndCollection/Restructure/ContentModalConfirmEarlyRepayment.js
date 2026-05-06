@@ -18,8 +18,10 @@ const ContentModalConfirmEarlyRepayment = ({
     appHierOptions = [],
     appHierDataDetail = [],
     selectedHierarchy,
+    data_detail,
 }) => {
     const [valuePage, setValuePage] = useState("Early Repayment");
+    const detail = data_detail?.restructure || {};
 
     const contactColumns = [
         { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
@@ -192,49 +194,33 @@ const ContentModalConfirmEarlyRepayment = ({
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Customer Number">{formValues?.customerNumber || "CUS001"}</DetailText>
-                            <DetailText label="Customer Name">{formValues?.customerName || "PLN (PERSERO), PT"}</DetailText>
-                            <DetailText label="Account Number">{formValues?.accountNumber || "130252597"}</DetailText>
-                            <DetailText label="Account Name">{formValues?.accountName || "PLN (PERSERO), PT"}</DetailText>
-                            <DetailText label="Account Group Type">{formValues?.accountGroupType || "{value}"}</DetailText>
-                            <DetailText label="SOR">{formValues?.sor || "{value}"}</DetailText>
-                            <DetailText label="Cost Center">{formValues?.costCenter || "{value}"}</DetailText>
-                            <DetailText label="Account Segment">{formValues?.accountSegment || "{value}"}</DetailText>
-                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || "{value}"}</DetailText>
-                            <DetailText label="Account Type">{formValues?.accountType || "{value}"}</DetailText>
-                            <DetailText label="Classification Type">{formValues?.classificationType || "{value}"}</DetailText>
-                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || "{value}"}</DetailText>
-                            <DetailText label="Account Status">{formValues?.accountStatus || "{value}"}</DetailText>
+                            <DetailText label="Customer Number">{detail?.customerNumber || formValues?.customerNumber || "CUS001"}</DetailText>
+                            <DetailText label="Customer Name">{detail?.customerName || formValues?.customerName || "PLN (PERSERO), PT"}</DetailText>
+                            <DetailText label="Account Number">{detail?.accountNumber || formValues?.accountNumber || "130252597"}</DetailText>
+                            <DetailText label="Account Name">{detail?.accountName || formValues?.accountName || "PLN (PERSERO), PT"}</DetailText>
+                            <DetailText label="Account Group Type">{detail?.accountGroupType || formValues?.accountGroupType || "-"}</DetailText>
+                            <DetailText label="SOR">{detail?.sor || formValues?.sor || "-"}</DetailText>
+                            <DetailText label="Cost Center">{detail?.costCenter || formValues?.costCenter || "-"}</DetailText>
+                            <DetailText label="Account Segment">{detail?.accountSegment || formValues?.accountSegment || "-"}</DetailText>
+                            <DetailText label="Meter Reading Code">{detail?.meterReadingCode || formValues?.meterReadingCode || "-"}</DetailText>
+                            <DetailText label="Account Type">{detail?.accountType || formValues?.accountType || "-"}</DetailText>
+                            <DetailText label="Classification Type">{detail?.classificationType || formValues?.classificationType || "-"}</DetailText>
+                            <DetailText label="SAP Cust ID">{detail?.sapCustId || formValues?.sapCustId || "-"}</DetailText>
+                            <DetailText label="Account Status">{detail?.accountStatus || formValues?.accountStatus || "-"}</DetailText>
                         </div>
                     </SectionCard>
 
-                    <SectionCard title="INSTALLMENT INFORMATION">
+                    <SectionCard title="INSTALMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                             <DetailText label="Type">{formValues?.type || "{value}"}</DetailText>
                             <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "{value}"}</DetailText>
-                            <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "{value}"}</DetailText>
+                            <DetailText label="Star Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "{value}"}</DetailText>
                             <DetailText label="Source">{formValues?.source || "{value}"}</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "{value}"}</DetailText>
-                            <DetailText label="Early Repayment Date">{formValues?.earlyRepaymentDate ? moment(formValues.earlyRepaymentDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
                                 <DetailText label="Remark">{formValues?.remark || "{value}"}</DetailText>
                             </div>
-                            <div className="col-span-5">
-                                <DetailText label="Early Repayment Reason">{formValues?.earlyRepaymentReason || "-"}</DetailText>
-                            </div>
                         </div>
-                    </SectionCard>
-
-                    <SectionCard title="CONTACT INFORMATION">
-                        <TableRBI
-                            idTable="table-contact-confirm"
-                            dataSource={contacts}
-                            columns={contactColumns}
-                            expandable={expandable}
-                            usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
-                        />
                     </SectionCard>
 
                     <SectionCard title="OPEN ITEM INFORMATION">
