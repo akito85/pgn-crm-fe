@@ -37,6 +37,12 @@ export const RBI_ROUTES = {
   MONITORING_USAGE_DETAIL: "/rating-billing/monitoring-usage/view",
   MONITORING_USAGE_LIST_UPDATE: "/rating-billing/monitoring-usage/update",
 
+  // accounting routes
+  ACCOUNTING_VIEW: "/accounting/view",
+  ACCOUNTING_CREATE: "/accounting/create",
+  ACCOUNTING_UPDATE: "/accounting/update",
+  ACCOUNTING_DETAIL: "/accounting/detail",
+
   // adjustment billing
   ADJUSTMENT_BILLING_VIEW: "/rating-billing/adjustment-billing",
   ADJUSTMENT_BILLING_DETAIL: "/rating-billing/adjustment-billing/view",
@@ -107,6 +113,12 @@ export const RBI_ROUTES = {
     "/rating-billing/management-billing-installment",
   MANAGEMENT_BILLING_INSTALLMENT_CREATE:
     "/rating-billing/management-billing-installment/create",
+  MANAGEMENT_BILLING_INSTALLMENT_UPDATE:
+    "/rating-billing/management-billing-installment/update",
+  MANAGEMENT_BILLING_INSTALLMENT_DETAIL:
+    "/rating-billing/management-billing-installment/detail",
+  MANAGEMENT_BILLING_INSTALLMENT_EARLY_REPAYMENT:
+    "/rating-billing/management-billing-installment/early-repayment",
 
   EFAKTUR_CODE: "/system-setup/efaktur-code",
   EFAKTUR_CODE_CREATE: "/system-setup/efaktur-code/create",

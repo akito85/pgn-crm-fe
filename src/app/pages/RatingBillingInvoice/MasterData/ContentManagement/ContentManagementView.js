@@ -5,8 +5,8 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { PlusOutlined, MoreOutlined } from "@ant-design/icons";
-import { Checkbox, Spin, Tooltip, Dropdown, Menu } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -20,6 +20,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   inactiveContentManagement,
+  activateContentManagement,
   downloadContentManagementList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/contentManagement";
 import TableRBI from "../../../../../components/TableRBI";
@@ -50,11 +51,15 @@ const ContentManagementView = () => {
     content_list.length < (content_pagination?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
+  const [modalActivate, setModalActivate] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [modalError, setModalError] = useState(false);
+  const [modalActivateError, setModalActivateError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [bodyActivateError, setBodyActivateError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
+  const [chooseActivateId, setChooseActivateId] = useState();
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
@@ -102,11 +107,15 @@ const ContentManagementView = () => {
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_CONTENT_TEMPLATE ||
             [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVE_CONTENT_TEMPLATE || [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.CONTENT_TEMPLATE || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_CONTENT_TEMPLATE || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVE_CONTENT_TEMPLATE || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -249,6 +258,64 @@ const ContentManagementView = () => {
     setModalInactive(false);
   };
 
+  // Handle Modal Request Activate
+  const handleRequestActivate = (data) => {
+    setChooseActivateId(data);
+    setModalActivate(true);
+  };
+
+  // Handle Cancel Modal Request Activate
+  const handleCancelActivate = () => {
+    setChooseActivateId();
+    setModalActivate(false);
+  };
+
+  const handleOkActivate = (res, handleClear) => {
+    const dataValue = {
+      id: chooseActivateId.id,
+      apphierId: res.approvalHierarchy,
+      remark: res.remark,
+    };
+    dispatch(activateContentManagement(dataValue))
+      .unwrap()
+      .then(() => {
+        handleClear();
+        handleCancelActivate();
+        dispatch(
+          getAllContentManagementPaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: loadMoreSize,
+            sort,
+            isLoadMore: false,
+          }),
+        );
+      })
+      .catch((error) => {
+        if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
+          const message =
+            (error.response &&
+              error.response.data &&
+              error.response.data.message) ||
+            error.message ||
+            error.toString();
+          setBodyActivateError({ body: { ...res }, handleClear, message });
+          setModalActivateError(true);
+        }
+      });
+  };
+
+  const handleRetryActivate = () => {
+    handleOkActivate(bodyActivateError.body, bodyActivateError.handleClear);
+    setModalActivateError(false);
+    setBodyActivateError({});
+  };
+
+  const handleCloseModalActivateError = () => {
+    setModalActivateError(false);
+    setBodyActivateError({});
+  };
+
   // Handle Download
   const handleDownload = () => {
     let tempSearch = "";
@@ -327,18 +394,40 @@ const ContentManagementView = () => {
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
 
-        const linkContent = (
-          <div className="flex items-center gap-2">
-            <SVGIcon
-              name="IconEdit"
-              color={isEditable ? "#0075bf" : "#8D91A0"}
-              width={20}
-            />
-            <span className={isEditable ? "text-black" : "text-[#8D91A0]"}>
-              Update
-            </span>
-          </div>
-        );
+        const linkContent =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={20}
+                />
+              }
+              border={false}
+              disabled={!isEditable}
+              type={"action"}
+            >
+              <span
+                className={`ml-0 ${isEditable ? "text-black" : "text-[#8D91A0]"
+                  }`}
+              >
+                {" "}
+                Update
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Update">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconEdit"
+                  width={20}
+                  color={!isEditable ? "#8D91A0" : "#ACC424"}
+                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                />
+              </div>
+            </Tooltip>
+          );
 
         return isEditable ? (
           <Link
@@ -352,7 +441,7 @@ const ContentManagementView = () => {
             {linkContent}
           </Link>
         ) : (
-          <div className={!isEditable ? "cursor-not-allowed" : ""}>
+          <div>
             {linkContent}
           </div>
         );
@@ -362,14 +451,16 @@ const ContentManagementView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const isWaiting =
+          record.statusApproval === "WAITING_APPROVAL" ||
+          record.statusApproval === "WAITING APPROVAL";
+        const isEnabled = !isWaiting;
+        const isActive = record.status === "ACTIVE";
+        const label = isActive ? "Inactivate" : "Activate";
+        const handleClick = () =>
+          isActive
+            ? handleInactive(record)
+            : handleRequestActivate(record);
 
         const Content =
           data > 3 ? (
@@ -377,30 +468,28 @@ const ContentManagementView = () => {
               icon={
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  onClick={isEnabled ? handleClick : undefined}
+                  disabled={!isEnabled || !isActive}
+                  checked={!isActive}
                 />
               }
               type={"action"}
               border={false}
-              disabled={!isActivateOrInactivate}
-              onClick={() => handleInactive(record)}
+              disabled={!isEnabled}
+              onClick={isEnabled ? handleClick : undefined}
             >
-              <span className="text-black ml-1">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className={isEnabled ? "text-black ml-1" : "text-[#8D91A0] ml-1"}>
+                {label}
               </span>
             </ButtonComponent>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title={label}>
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  onClick={isEnabled ? handleClick : undefined}
+                  disabled={!isEnabled || !isActive}
+                  checked={!isActive}
                 />
               </div>
             </Tooltip>
@@ -413,18 +502,40 @@ const ContentManagementView = () => {
       action: "History",
       type: "table",
       render: (record, data) => {
-        return (
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => handleApprovalHistory(record.id)}
-          >
-            <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
-            <span className="text-black">Approval History</span>
-          </div>
-        );
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
+              }
+              type={"action"}
+              border={false}
+              onClick={() => handleApprovalHistory(record)}
+            >
+              <span className={"text-black ml-0"}>Approval History</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Approval History">
+              <div className="pt-1">
+                <SVGIcon
+                  name="IconLogHistory"
+                  color={"#0075bf"}
+                  width={20}
+                  onClick={() => handleApprovalHistory(record)}
+                />
+              </div>
+            </Tooltip>
+          );
+
+        return Content;
       },
     },
   ];
+
+  const actionCols = useColumnActionPermission(
+    ["view", "activate", "update", "history"],
+    itemGrantAccess,
+  );
 
   const baseColumns = useMemo(() => {
     const contentManagementCols = [
@@ -437,53 +548,7 @@ const ContentManagementView = () => {
         searchText,
         handleSearch,
       ),
-      // ✅ Definisikan manual action column dengan Detail icon + Dropdown Menu
-      {
-        title: "ACTION",
-        key: "action",
-        dataIndex: "action",
-        fixed: "right",
-        width: 100,
-        align: "center",
-        render: (_, record) => {
-          // Filter action table selain "View" untuk dropdown
-          const dropdownActions = itemGrantAccess.filter(
-            (item) => item.type === "table" && item.action !== "View",
-          );
-
-          // Ambil action "View" untuk icon detail
-          const viewAction = itemGrantAccess.find(
-            (item) => item.type === "table" && item.action === "View",
-          );
-
-          // Buat menu items untuk dropdown
-          const menuItems = dropdownActions.map((item, idx) => ({
-            key: idx,
-            label: item.render(record, 5),
-          }));
-
-          const menu = <Menu items={menuItems} />;
-
-          return (
-            <div className="flex items-center justify-center gap-2">
-              <Dropdown
-                overlay={menu}
-                trigger={["click"]}
-                placement="bottomRight"
-              >
-                <MoreOutlined
-                  style={{
-                    fontSize: "20px",
-                    cursor: "pointer",
-                    color: "#0075bf",
-                  }}
-                />
-              </Dropdown>
-              {viewAction && viewAction.render(record)}
-            </div>
-          );
-        },
-      },
+      ...actionCols,
     ];
 
     // Add 'key' property to columns that don't have it
@@ -493,7 +558,7 @@ const ContentManagementView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, searchedColumn, searchText]);
+  }, [search, searchedColumn, searchText, actionCols]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -594,13 +659,43 @@ const ContentManagementView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Content Management with name ${
-            chooseId?.templateName || ""
-          }?`}
+          alertMessage={`Are you sure you want to inactivate this Content Management with name ${chooseId?.templateName || ""
+            }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
         />
+
+        {/* Modal Request Activate */}
+        <ModalInactivateWithHierarchy
+          selector={"contentManagement"}
+          dispatch={dispatch}
+          getAPIOption={getListApprovalHierarchy}
+          getAPIDetail={getListApprovalHierarchyDetail}
+          header="Request Activate Information"
+          alertMessage={`Are you sure you want to request activate this Content Management with name ${chooseActivateId?.templateName || ""
+            }?`}
+          openModalInactivate={modalActivate}
+          handleCloseModalInactivate={handleCancelActivate}
+          onFinish={handleOkActivate}
+        />
+
+        {/* Modal Error Request Activate */}
+        <ModalError
+          isOpen={modalActivateError}
+          handleOk={handleRetryActivate}
+          handleCancel={handleCloseModalActivateError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your request activate was not submitted. ${bodyActivateError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
 
         {/* Modal Modal Error Inactive */}
         <ModalError

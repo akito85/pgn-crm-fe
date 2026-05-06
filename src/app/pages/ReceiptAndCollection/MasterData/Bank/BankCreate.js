@@ -40,8 +40,12 @@ const BankCreate = ({
   };
 
   const validateNPWP = (_, value) => {
-    if (!value || value.length <= 16) {
-      return Promise.reject("Input number must be 16 digits!");
+    if (!value) {
+      return Promise.reject("NPWP wajib diisi!");
+    }
+    const digitsOnly = value.replace(/\D/g, "");
+    if (digitsOnly.length !== 16) {
+      return Promise.reject("NPWP harus terdiri dari 16 digit!");
     }
     return Promise.resolve();
   };

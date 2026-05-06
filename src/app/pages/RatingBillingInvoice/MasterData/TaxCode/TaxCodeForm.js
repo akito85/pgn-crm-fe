@@ -95,7 +95,7 @@ const TaxCodeForm = ({ type }) => {
         "taxCodeName",
         "taxRate",
         "category",
-        // "glAccount",
+        "glAccount",
         "startDate",
         "criteria",
       ],
@@ -904,8 +904,6 @@ const TaxCodeForm = ({ type }) => {
   };
 
   const handleConfirm = () => {
-    setModalConfirm(false);
-
     const body = processData({
       listDataCriteria,
       listDataDetail,
@@ -941,6 +939,7 @@ const TaxCodeForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -982,6 +981,7 @@ const TaxCodeForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -1076,7 +1076,7 @@ const TaxCodeForm = ({ type }) => {
             "taxCodeName",
             "taxRate",
             "category",
-            // "glAccount",
+            "glAccount",
             "startDate",
             "criteria",
           ],
@@ -1209,6 +1209,7 @@ const TaxCodeForm = ({ type }) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             type={type}
+            isLoading={isLoading}
           />
         </Form>
 
@@ -1229,6 +1230,7 @@ const TaxCodeForm = ({ type }) => {
           criteriaValues={criteriaValues}
           dataCategory={data_category}
           apiCriteria={data_criteria}
+          isLoading={isLoading}
         />
 
         {/* Modal Back */}

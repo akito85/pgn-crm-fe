@@ -626,6 +626,7 @@ const CreateUpdateRelationship = ({
             idAccount={accountId}
             idCustomer={customerId}
             type={accountType}
+            collapsible
           />
           <Spin spinning={loading}>
             <Form

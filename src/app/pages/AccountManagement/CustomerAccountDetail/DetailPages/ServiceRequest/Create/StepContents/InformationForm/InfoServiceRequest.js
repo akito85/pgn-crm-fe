@@ -196,7 +196,6 @@ export default function InfoServiceRequest({
           <div className="w-full grid grid-cols-3 gap-4">
             <Form.Item
               label={"Service Request Reference"}
-              required
               className="no-margin-form w-full"
             >
               <div className="flex gap-x-1">

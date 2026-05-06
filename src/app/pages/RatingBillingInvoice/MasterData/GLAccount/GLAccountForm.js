@@ -1,5 +1,5 @@
 import { Form, Spin } from "antd";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -52,8 +52,7 @@ const GLAccountForm = ({ type }) => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
-
-  const [flag, setFlag] = useState(false);
+  const flagRef = useRef(false);
   const [modalIncomplete, setModalIncomplete] = useState({
     isOpen: false,
     stepName: "",
@@ -227,7 +226,7 @@ const GLAccountForm = ({ type }) => {
       remark: formValue.remark,
       glAccountDesc: formValue.glAccountDesc,
       apphierId: formValue.apphierId,
-      isSubmit: flag,
+      isSubmit: flagRef.current,
     };
 
     try {
@@ -272,7 +271,9 @@ const GLAccountForm = ({ type }) => {
   };
 
   const handleSave = async (formValue) => {
-    if (listDataAttachment.length === 0) {
+    const isDraft = !flagRef.current;
+
+    if (!isDraft && listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
       setModalIncomplete({
         isOpen: true,
@@ -298,15 +299,13 @@ const GLAccountForm = ({ type }) => {
   };
 
   const handleConfirm = () => {
-    setModalConfirm(false);
-
     const jsonData = {
       ...(type === "update" && { glAccountId: id }),
       glAccount: bodyData.glAccount,
       remark: bodyData.remark,
       glAccountDesc: bodyData.glAccountDesc,
       apphierId: bodyData.apphierId,
-      isSubmit: flag,
+      isSubmit: flagRef.current,
     };
 
     if (type === "create") {
@@ -322,13 +321,15 @@ const GLAccountForm = ({ type }) => {
             }));
           }
           setLoadingForm(false);
+          setModalConfirm(false);
           dispatch(showModalSuccess({
             title: "Successful",
-            description: `Your data has been ${flag ? "submitted" : "created"}.`,
+            description: `Your data has been ${flagRef.current ? "submitted" : "created"}.`,
           }));
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               error.response?.data?.message || error.message || error.toString();
@@ -356,13 +357,15 @@ const GLAccountForm = ({ type }) => {
             }));
           }
           setLoadingForm(false);
+          setModalConfirm(false);
           dispatch(showModalSuccess({
             title: "Successful",
-            description: `Your data has been ${flag ? "submitted" : "updated"}.`,
+            description: `Your data has been ${flagRef.current ? "submitted" : "updated"}.`,
           }));
           handleClear();
         })
         .catch((error) => {
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               error.response?.data?.message || error.message || error.toString();
@@ -414,13 +417,14 @@ const GLAccountForm = ({ type }) => {
   };
 
   const handleSubmit = () => {
-    setFlag(true);
-    setTimeout(() => form.submit(), 0);
+    flagRef.current = true;
+    form.submit();
   };
 
   const handleSaveDraft = () => {
-    setFlag(false);
-    setTimeout(() => form.submit(), 0);
+    flagRef.current = false;
+    const formValue = form.getFieldsValue();
+    handleSave(formValue);
   };
 
   const handleCloseModalError = () => {
@@ -499,6 +503,7 @@ const GLAccountForm = ({ type }) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             type={type}
+            isLoading={isLoading}
           />
         </Form>
 
@@ -511,6 +516,7 @@ const GLAccountForm = ({ type }) => {
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}
+          isLoading={isLoading}
         />
 
         <ModalError
@@ -524,7 +530,7 @@ const GLAccountForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "created"}. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${flagRef.current ? "submitted" : "created"}. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

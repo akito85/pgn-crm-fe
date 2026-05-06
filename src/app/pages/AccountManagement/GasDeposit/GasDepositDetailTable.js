@@ -4,6 +4,8 @@ import { getGasDepositDetailColumns } from "./getGasDepositDetailColumns";
 import { useDispatch, useSelector } from "react-redux";
 import { getGasDepositDetails } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import GasDepositDetailMutationTable from "./GasDepositDetailMutationTable";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 
 /**
  * Level-1 nested detail table rendered inside `GasDepositTable`'s expanded row.
@@ -42,6 +44,7 @@ const GasDepositDetailTable = ({
   const [search, setSearch] = useState({});
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
 
   // --- Handlers ---
   /**
@@ -133,6 +136,26 @@ const GasDepositDetailTable = ({
     setPage(nextPage);
   };
 
+  const handleExpandableRow = (toggledKey) => {
+    const index = expandedRowKeys.findIndex(key => key === toggledKey);
+
+    // If detail row is opened
+    if (index !== -1) {
+      setExpandedRowKeys(prev => {
+        const tmpPrev = [...prev];
+        tmpPrev.splice(index, 1);
+        return tmpPrev;
+      });
+    }
+    // If detail row is closed
+    else {
+      setExpandedRowKeys(prev => [
+        ...prev,
+        toggledKey
+      ])
+    }
+  }
+
   // --- Effects ---
   // Re-fetch page 0 whenever sort, search, filters, or filterRules change.
   // Abort the in-flight request on cleanup so StrictMode double-mounts and
@@ -153,7 +176,19 @@ const GasDepositDetailTable = ({
   }, [sort, search, filters, filterRules, parentKey]);
 
   // --- Column configuration ---
-  const columns = useMemo(() =>
+  const itemActions = nxGetAccountActions({
+    handleView: ({ id }) => handleExpandableRow(id),
+  });
+
+  const actionCols = useColumnActionPermission(["View"], itemActions, "View", "table").map(
+    (col) => ({
+      ...col,
+      width: 70,
+      align: "center",
+    })
+  );
+
+  const baseColumns = useMemo(() =>
     getGasDepositDetailColumns({
       search,
       searchInput,
@@ -163,24 +198,32 @@ const GasDepositDetailTable = ({
     }),
   [search, searchInput, searchText, searchedColumn]);
 
+  const columns = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
+
   /**
    * Renders the expanded child row for a gas deposit detail record.
    * @param {object} record - The detail row record
    */
   const expandedRowRender = (record, detailIndex) => (
-    <GasDepositDetailMutationTable
-      id={id}
-      index={index}
-      detailId={record.id}
-      detailIndex={detailIndex}
-      listKey={listKey}
-      parentKey={parentKey}
-    />
+    <div className="flex flex-col gap-y-4 p-4">
+      <span className="text-primary text-base uppercase leading-6">
+        GAS DEPOSIT DETAIL MUTATION LIST
+      </span>
+      <GasDepositDetailMutationTable
+        id={id}
+        index={index}
+        detailId={record.id}
+        detailIndex={detailIndex}
+        listKey={listKey}
+        parentKey={parentKey}
+      />
+    </div>
   );
 
   return (
     <NxTable
-      idTable="gas-deposit-detail-table"
+      idTable={`gas-deposit-detail-table-${index}`}
+      className="[&_.ant-table-expanded-row-fixed]:!pl-2"
       dataSource={dataSource}
       totalData={totalElement}
       tableScrolled={{ x: dataSource.length ? "max-content" : 1500 }}
@@ -192,11 +235,14 @@ const GasDepositDetailTable = ({
       loadMoreThreshold={20}
       onLoadMore={handleLoadMore}
       loading={loading}
-      expandable={{ expandedRowRender }}
+      expandable={{ expandedRowRender, showExpandColumn: false, expandedRowKeys }}
       onRefresh={handleRefresh}
       showAdvanceSearch={false}
       showSearchBar={false}
       useSelect={false}
+      showBorder={!!parentKey}
+      showFooter={!!parentKey}
+      rounded={!!parentKey}
     />
   );
 };

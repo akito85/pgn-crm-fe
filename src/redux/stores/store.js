@@ -48,6 +48,7 @@ import itemReducer from "../slices/receipt_collection/paymentItem";
 import billingReducer from "../slices/rating_billing_invoice/billing";
 import adjustmentBillingReducer from "../slices/rating_billing_invoice/adjustmentBilling";
 import adjustmentInvoiceReducer from "../slices/rating_billing_invoice/adjustmentInvoice";
+import rbiAccountingReducer from "../slices/rating_billing_invoice/accounting";
 import accountReducer from "../slices/account_management/Account/accountSlice";
 import cycleReducer from "../slices/receipt_collection/transactionCalender";
 import financialInformationReducer from "../slices/account_management/detailAccount/FinancialInformationSlice";
@@ -118,6 +119,7 @@ import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData
 import settingReducer from "../slices/receipt_collection/setting";
 import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
+import installmentReducer from "../slices/rating_billing_invoice/installment";
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
@@ -149,6 +151,7 @@ import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
+import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 
@@ -158,6 +161,7 @@ const reducer = combineReducers({
   jobExecution: jobExecutionReducer,
   oracleMetadata: oracleMetadataReducer,
   taskQueue: taskQueueReducer,
+  handlerRegistry: handlerRegistryReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -249,6 +253,7 @@ const reducer = combineReducers({
   billing: billingReducer,
   adjustmentBilling: adjustmentBillingReducer,
   adjustmentInvoice: adjustmentInvoiceReducer,
+  rbiAccounting: rbiAccountingReducer,
   rating: ratingReducer,
   pointOfSales: postOfSalesReducer,
   invoice: invoiceReducer,
@@ -270,6 +275,7 @@ const reducer = combineReducers({
   digitalSignature: digitalSignatureReducer,
   glAccount: glAccountReducer,
   contentManagement: contentManagementReducer,
+  installment: installmentReducer,
 
   //receipt and collection
   receipt: receiptReducer,

@@ -30,6 +30,8 @@ import {
   getAttachmentCategory,
   getDetailBillingBucket,
   getDetailDraftBillingBucket,
+  getBillingBucketCurrency,
+  getBillingBucketCategory,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -86,6 +88,8 @@ const BillingBucketForm = ({ type }) => {
         "billingBucketCode",
         "name",
         "priorityPeriod",
+        "currency",
+        "category",
         "criteria",
         "startDate",
       ],
@@ -206,6 +210,8 @@ const BillingBucketForm = ({ type }) => {
     dispatch(getAvailableApproval());
     dispatch(getSelectedApproval());
     dispatch(getListPriorityPeriod());
+    dispatch(getBillingBucketCurrency());
+    dispatch(getBillingBucketCategory());
   }, [dispatch]);
 
   useEffect(() => {
@@ -239,14 +245,13 @@ const BillingBucketForm = ({ type }) => {
           id: item.id,
           key: index + 1,
           billingItem: item.billingItem?.value,
-          currency: item.currency?.value,
+          groups: item.groups,
+          groupSequence: item.groupSequence,
           sequence: item.sequence,
           startDate: moment(item.startDate).format(dateFormatting.date),
           endDate: item.endDate
             ? moment(item.endDate).format(dateFormatting.date)
             : null,
-          priority: item.priority,
-          description: item.description,
           type: "exist",
         };
       });
@@ -318,6 +323,8 @@ const BillingBucketForm = ({ type }) => {
         billingBucketCode: data_detail_draft?.information?.billingBucketCode,
         name: data_detail_draft?.information?.name,
         priorityPeriod: data_detail_draft?.information?.priorityPeriod?.value,
+        currency: data_detail_draft?.information?.currency,
+        category: data_detail_draft?.information?.category,
         startDate: moment(data_detail_draft?.information?.startDate),
         endDate: data_detail_draft?.information?.endDate
           ? moment(data_detail_draft?.information?.endDate)
@@ -350,14 +357,13 @@ const BillingBucketForm = ({ type }) => {
             id: item.id,
             key: index + 1,
             billingItem: item.billingItem?.value,
-            currency: item.currency?.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
             startDate: moment(item.startDate).format(dateFormatting.date),
             endDate: item.endDate
               ? moment(item.endDate).format(dateFormatting.date)
               : null,
-            priority: item.priority,
-            description: item.description,
             type: "exist",
           };
         },
@@ -431,6 +437,8 @@ const BillingBucketForm = ({ type }) => {
         billingBucketCode: data_detail?.information?.billingBucketCode,
         name: data_detail?.information?.name,
         priorityPeriod: data_detail?.information?.priorityPeriod?.value,
+        currency: data_detail?.information?.currency,
+        category: data_detail?.information?.category,
         startDate: moment(data_detail?.information?.startDate),
         endDate: data_detail?.information?.endDate
           ? moment(data_detail?.information?.endDate)
@@ -527,10 +535,10 @@ const BillingBucketForm = ({ type }) => {
       return listDataCriteria?.map((item) => ({
         id: item?.id || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.date)
+          ? moment(item.startDate).format("DD MMM YYYY")
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.date)
+          ? moment(item.endDate).format("DD MMM YYYY")
           : null,
         customer: item.customer?.value || null,
         budget: item.budget?.value || null,
@@ -550,15 +558,18 @@ const BillingBucketForm = ({ type }) => {
     };
 
     // Helper function to map listDataBI
-    const mapListDataBI = (listDataBI, dateFormatting) => {
+    const mapListDataBI = (listDataBI) => {
       return listDataBI?.map((item) => ({
-        ...item,
-        priority: item.priority === undefined ? false : item.priority,
+        id: item.id || null,
+        billingItem: item.billingItem,
+        sequence: item.sequence,
+        groups: item.groups || item.group || null,
+        groupSequence: item.groupSequence || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.date)
+          ? moment(item.startDate).format("DD MMM YYYY")
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.date)
+          ? moment(item.endDate).format("DD MMM YYYY")
           : null,
       }));
     };
@@ -611,7 +622,7 @@ const BillingBucketForm = ({ type }) => {
       dateFormatting,
     );
 
-    const dataListBI = mapListDataBI(listDataBI, dateFormatting);
+    const dataListBI = mapListDataBI(listDataBI);
 
     const criteriaArrayObject = mapCriteriaArrayObject(
       bodyData,
@@ -632,23 +643,20 @@ const BillingBucketForm = ({ type }) => {
 
     const includesAll = bodyData.criteria.includes(24);
 
-    dataListBI.map((a) => {
-      return {
-        type: delete a.type,
-        key: delete a.key,
-      };
-    });
+    // listDetail already mapped with correct fields in mapListDataBI
 
     const body = {
       id: type === "create" ? undefined : id,
       billingBucketCode: bodyData.billingBucketCode,
       name: bodyData.name,
       priorityPeriod: bodyData.priorityPeriod,
+      currency: bodyData.currency,
+      category: bodyData.category,
       startDate: bodyData.startDate
-        ? moment(bodyData?.startDate).format(dateFormatting.date)
+        ? moment(bodyData?.startDate).format("DD MMM YYYY")
         : null,
       endDate: bodyData.endDate
-        ? moment(bodyData?.endDate).format(dateFormatting.date)
+        ? moment(bodyData?.endDate).format("DD MMM YYYY")
         : null,
       description: bodyData.description ? bodyData.description : null,
       apphierId: bodyData.apphierId,
@@ -922,6 +930,8 @@ const BillingBucketForm = ({ type }) => {
                 "billingBucketCode",
                 "name",
                 "priorityPeriod",
+                "currency",
+                "category",
                 "criteria",
                 "startDate",
               ],
@@ -1108,6 +1118,8 @@ const BillingBucketForm = ({ type }) => {
             "billingBucketCode",
             "name",
             "priorityPeriod",
+            "currency",
+            "category",
             "criteria",
             "startDate",
           ],
@@ -1218,6 +1230,7 @@ const BillingBucketForm = ({ type }) => {
           current={current}
           onPrev={prev}
           onNext={next}
+          disabled={storedDataInline}
         />
 
         <Form
@@ -1308,6 +1321,7 @@ const BillingBucketForm = ({ type }) => {
             onSubmit={handleSubmit}
             type={type}
             disabled={storedDataInline}
+            isLoading={loadingForm}
           />
         </Form>
 
@@ -1326,6 +1340,7 @@ const BillingBucketForm = ({ type }) => {
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}
+          isLoading={loadingForm}
         />
 
         {/* Modal Back */}

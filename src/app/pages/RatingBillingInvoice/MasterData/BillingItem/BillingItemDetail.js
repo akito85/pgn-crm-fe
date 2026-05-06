@@ -13,6 +13,7 @@ import {
   getBillingItemDetail,
   getBillingItemTypeList,
   getBillingItemCriteriaList,
+  getAttachmentDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -51,6 +52,23 @@ const BillingItemDetail = () => {
   useEffect(() => {
     if (dataRecord) {
       dispatch(getBillingItemDetail({ id: dataRecord }));
+      dispatch(getAttachmentDetail(dataRecord))
+        .unwrap()
+        .then((res) => {
+          setListDataAttachment(
+            (res?.result || []).map((item) => ({
+              ...item,
+              createdDate: item.createdDate
+                ? moment(item.createdDate).format("DD MMM YYYY")
+                : "",
+              urlFile1: `/v1/dbs/api/billingitem/attachment-download/${item.id}`,
+              dataType: "exist",
+            })),
+          );
+        })
+        .catch(() => {
+           // Handle error if needed or silently ignore
+        });
     }
     dispatch(getBillingItemTypeList());
     dispatch(getBillingItemCriteriaList());
@@ -60,7 +78,8 @@ const BillingItemDetail = () => {
     if (
       dataRecord &&
       data_BillingItemDetail &&
-      data_BillingItemDetail?.billingItemCode === dataRecord
+      (data_BillingItemDetail?.billingItemCode === dataRecord ||
+        data_BillingItemDetail?.id == dataRecord)
     ) {
       // Tombol Approve/Reject
       setShowButtonApproval(
@@ -76,17 +95,6 @@ const BillingItemDetail = () => {
           categoryName: item.category,
           startDate: item.startDate ? moment(item.startDate) : "",
           endDate: item.endDate ? moment(item.endDate) : "",
-          dataType: "exist",
-        })),
-      );
-
-      // Attachment Information
-      setListDataAttachment(
-        (data_BillingItemDetail?.attachmentDtoList || []).map((item) => ({
-          ...item,
-          createdDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
           dataType: "exist",
         })),
       );

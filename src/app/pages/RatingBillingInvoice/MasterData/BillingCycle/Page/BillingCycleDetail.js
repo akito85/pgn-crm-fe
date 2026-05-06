@@ -178,7 +178,6 @@ const BillingCycleDetail = ({ type }) => {
   ];
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       remark: res.remark,
@@ -198,9 +197,10 @@ const BillingCycleDetail = ({ type }) => {
           body: data,
         });
 
-    dispatch(approvalAction)
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getInfoDetail(id));
         dispatch(getInfoDetailDraft(id));

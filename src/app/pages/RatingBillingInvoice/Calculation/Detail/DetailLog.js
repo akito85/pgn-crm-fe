@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import CardContainer from "../../../../../components/CardContainer";
 import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 import {
-  dateFormatting,
   hasValue,
   renderColumn,
   renderDateColumn,
@@ -13,8 +12,8 @@ import TableRBI from "../../../../../components/TableRBI";
 import TableCalculateLog from "./Table/TableCalculateLog";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const DetailLog = ({ data, tabHeader }) => {
-  const { list_calculation_log, loading } = useSelector(
+const DetailLog = ({ data, tabHeader, showCard = true }) => {
+  const { list_calculation_log, loadingLog } = useSelector(
     (state) => state.rbi_calculation
   );
   const dispatch = useDispatch();
@@ -275,6 +274,35 @@ const DetailLog = ({ data, tabHeader }) => {
   // Calculate if there's more data
   const hasMore = resultData.length < (pageInfo?.totalElements || 0);
 
+  const tableContent = (
+    <>
+      <TableRBI
+        idTable="calculation-log-table"
+        columns={processedColumns}
+        dataSource={resultData}
+        totalData={pageInfo?.totalElements || 0}
+        tableScrolled={{ x: 2000, y: 600 }}
+        onSort={onSort}
+        showExport={false}
+        columnDefinitions={columnDefinitions}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        loading={loadingLog}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        loadMoreThreshold={20}
+      />
+
+      <TableCalculateLog calculationCode={calculationCode} />
+    </>
+  );
+
+  if (!showCard) {
+    return tableContent;
+  }
+
   return (
     <>
       <div className="-mt-6">
@@ -285,26 +313,7 @@ const DetailLog = ({ data, tabHeader }) => {
             </div>
           }
         >
-          <TableRBI
-            idTable="calculation-log-table"
-            columns={processedColumns}
-            dataSource={resultData}
-            totalData={pageInfo?.totalElements || 0}
-            tableScrolled={{ x: 2000, y: 600 }}
-            onSort={onSort}
-            showExport={false}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
-            usePagination={false}
-            useInfiniteScroll={true}
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            loadMoreThreshold={20}
-          />
-
-          <TableCalculateLog calculationCode={calculationCode} />
+          {tableContent}
         </CardContainer>
       </div>
     </>

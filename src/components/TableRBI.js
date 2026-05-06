@@ -146,6 +146,7 @@ const TableRBI = ({
   selectedRowKey = null,
   onRowClick = () => {},
   onSearch = () => {},
+  tableSize = "default",
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -161,6 +162,7 @@ const TableRBI = ({
   const [columnWidths, setColumnWidths] = useState({});
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState([]);
+  const lastScrollTopRef = React.useRef(0);
 
   const tableRef = React.useRef(null);
 
@@ -199,6 +201,11 @@ const TableRBI = ({
       if (!target) return;
 
       const scrollTop = target.scrollTop;
+      
+      // Prevent horizontal scroll from triggering fetch
+      if (scrollTop === lastScrollTopRef.current) return;
+      lastScrollTopRef.current = scrollTop;
+
       const scrollHeight = target.scrollHeight;
       const clientHeight = target.clientHeight;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
@@ -360,6 +367,7 @@ const TableRBI = ({
           const baseStyle = {
             textTransform: "uppercase",
             fontSize: "10px",
+            padding: tableSize === "small" ? "2px 4px" : "4px 8px",
             cursor: isDraggable ? "move" : "default",
           };
 
@@ -381,15 +389,20 @@ const TableRBI = ({
             onDragEnd: isDraggable ? handleDragEnd : undefined,
           };
         },
-        onCell: () => ({
-          style: {
-            textAlign: textAlign,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontSize: "11px",
-          },
-        }),
+        onCell: (record, rowIndex) => {
+          const original = col.onCell ? col.onCell(record, rowIndex) : {};
+          return {
+            ...original,
+            style: {
+              ...original.style,
+              textAlign: textAlign,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontSize: "11px",
+            },
+          };
+        },
       };
 
       if (fixedPos) {
@@ -408,6 +421,7 @@ const TableRBI = ({
       handleDrop,
       handleDragEnd,
       draggedColumnKey,
+      tableSize,
     ],
   );
 
@@ -822,6 +836,7 @@ const TableRBI = ({
         rowSelection={rowSelection}
         onRow={customOnRow}
         rowClassName={customRowClassName}
+        size={tableSize}
       />
 
       {useInfiniteScroll ? (

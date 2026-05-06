@@ -6,16 +6,19 @@ import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActio
 import { useDispatch, useSelector } from "react-redux";
 import { downloadGasDeposit, getGasDepositHistories } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { getGasDepositHistoryColumns } from "./getGasDepositHistoryColumns";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 
 const GasDepositHistoryTable = ({
-  moduleType,
   handleApprovalHistoryModal,
-  handleDetailModal,
   accountId,
+  customerId,
   refreshSignal = 0,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
     list_gasDepositHistory: dataSource,
     pagination_listGdHistory: pagination,
@@ -23,7 +26,8 @@ const GasDepositHistoryTable = ({
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
-  const isUnderAccount = moduleType === "ua";
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
   const totalElement = pagination.totalElement;
   const hasMore = dataSource.length < totalElement;
@@ -55,7 +59,7 @@ const GasDepositHistoryTable = ({
 
     dispatch(
       getGasDepositHistories({
-        accountId: isUnderAccount ? accountId : undefined,
+        accountId,
         body,
         isLoadMore: false,
       })
@@ -114,7 +118,7 @@ const GasDepositHistoryTable = ({
 
       await dispatch(
         getGasDepositHistories({
-          accountId: isUnderAccount ? accountId : undefined,
+          accountId,
           body,
           isLoadMore: true,
         })
@@ -154,7 +158,7 @@ const GasDepositHistoryTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDepositHistories({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDepositHistories({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
@@ -165,7 +169,20 @@ const GasDepositHistoryTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ gasDepositId }) => handleDetailModal({ show: true, historyId: gasDepositId }),
+    handleView: ({ gasDepositId }) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_ONETIME :
+        "",
+      {
+        state: {
+          accountId,
+          customerId,
+          id: gasDepositId,
+        }
+      }
+    ),
     handleApprovalHistory: ({ gasDepositId }) => handleApprovalHistoryModal({ show: true, historyId: gasDepositId }),
     handleDownload,
   });

@@ -1267,9 +1267,9 @@ export const getListFakturType = createAsyncThunk(
 // faktur code
 export const getListFakturCode = createAsyncThunk(
   "EFAKTUR/GET_LIST_FAKTUR_CODE",
-  async (_, thunkAPI) => {
+  async (search = "", thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/rbi/e-invoice/create/get-faktur-codes";
+      const url = `/v1/dbs/api/rbi/e-invoice/create/get-faktur-codes?search=${encodeURIComponent(search)}`;
       const response = await ratingBillingHttpService.getAll(url);
 
       return response.data || [];

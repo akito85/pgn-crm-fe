@@ -724,7 +724,6 @@ const ContentManagementForm = ({ type }) => {
 
   const handleConfirm = () => {
     setLoadingSave(true);
-    setModalConfirm(false);
 
     const body = processData({
       listDataCriteria,
@@ -747,6 +746,7 @@ const ContentManagementForm = ({ type }) => {
             setModalError(true);
             setBodyError({ message: "Failed to get template ID from response" });
             setLoadingSave(false);
+            setModalConfirm(false);
             return;
           }
 
@@ -765,10 +765,12 @@ const ContentManagementForm = ({ type }) => {
           }
           setLoadingForm(false);
           setLoadingSave(false);
+          setModalConfirm(false);
           handleClear();
         })
         .catch((error) => {
           setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
             setBodyError({ message: error.response?.data?.message || error.message || error.toString() });
             setModalError(true);
@@ -800,10 +802,12 @@ const ContentManagementForm = ({ type }) => {
           }
           setLoadingForm(false);
           setLoadingSave(false);
+          setModalConfirm(false);
           handleClear();
         })
         .catch((error) => {
           setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
             setBodyError({ message: error.response?.data?.message || error.message || error.toString() });
             setModalError(true);
@@ -983,6 +987,7 @@ const ContentManagementForm = ({ type }) => {
             onSubmit={handleSubmit}
             type={type}
             disabled={storedDataInline}
+            isLoading={loadingSave || loadingForm}
           />
         </Form>
 

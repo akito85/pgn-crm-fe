@@ -1,8 +1,8 @@
 import { toTitleCase } from "../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../components/StatusComponent";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 import { sorterFunction } from "../../../../utils/sorterFunction";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Gas Deposit Detail table.
@@ -37,6 +37,7 @@ const getGasDepositDetailColumns = ({
     title: "PERIOD",
     dataIndex: "period",
     width: 180,
+    sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -55,6 +56,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE (M3)",
     dataIndex: "balanceM3",
     width: 150,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -71,6 +73,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE (MSCF)",
     dataIndex: "balanceMscf",
     width: 160,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -87,6 +90,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE (MMBTU)",
     dataIndex: "balanceMmbtu",
     width: 170,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -103,6 +107,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE AMOUNT",
     dataIndex: "balanceAmount",
     width: 170,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -119,6 +124,7 @@ const getGasDepositDetailColumns = ({
     title: "AVAILABLE AMOUNT",
     dataIndex: "availableAmount",
     width: 180,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -136,15 +142,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "status",
     width: 120,
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
     render: (status) => {
       const displayText = {
         "active": "Active",
@@ -153,9 +150,9 @@ const getGasDepositDetailColumns = ({
 
       return (
         <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       )
     },

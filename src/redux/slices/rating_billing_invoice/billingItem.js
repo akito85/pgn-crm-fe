@@ -18,6 +18,8 @@ const initialState = {
   data_glAccountBankList: [],
   data_classificationTypeList: [],
   data_accountTypeList: [],
+  data_mappingItemTypeList: [],
+  data_mappingItemTransactionMappingCode: [],
   data_itemMappingCategory: [],
   dataListAppHierId: [],
   dataListAppHierDetail: [],
@@ -226,10 +228,10 @@ export const getBillingItemDetail = createAsyncThunk(
 
 export const getAttachmentDetail = createAsyncThunk(
   "GET_ATTACHMENT_DETAIL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
-      const url = `v1/dbs/api/billingitem/attachment-list/1?page=${page}&size=${pageSize}&search=${search}&sort=${sort}`;
-      const response = await ratingBillingHttpService.getPagination(url);
+      const url = `/v1/dbs/api/billingitem/attachment-list/${id}?page=0&size=1000`;
+      const response = await ratingBillingHttpService.getDetail(url);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
@@ -392,8 +394,9 @@ export const createBillingItem = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${body.isSubmit ? "created" : "submitted"
-              }. ${message}.`,
+            description: `Your data was not ${
+              body.isSubmit ? "created" : "submitted"
+            }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -426,8 +429,9 @@ export const updateBillingItem = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${body.isSubmit ? "updated" : "submitted"
-              }. ${message}.`,
+            description: `Your data was not ${
+              body.isSubmit ? "updated" : "submitted"
+            }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -449,8 +453,9 @@ export const approvalRejectBillingItem = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
-          }.`,
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -526,8 +531,9 @@ export const approvalActivatedBillingItem = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
-          }.`,
+        description: `Your data has been ${
+          body.action === "APPROVE" ? "approved" : "rejected"
+        }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -556,8 +562,6 @@ export const approvalActivatedBillingItem = createAsyncThunk(
     }
   },
 );
-
-
 
 export const getConfigFileRBIBillingItem = createAsyncThunk(
   "GET_CONFIG_FILE_RBI_BILLING_ITEM",
@@ -705,10 +709,7 @@ export const getBankList = createAsyncThunk(
   "GET_BANK_LIST",
   async (_, thunkAPI) => {
     try {
-      const urls = [
-        "/v1/dbs/api/billingitem/bank-list",
-        "/bank-list",
-      ];
+      const urls = ["/v1/dbs/api/billingitem/bank-list", "/bank-list"];
 
       let response;
       for (const url of urls) {
@@ -858,6 +859,57 @@ export const getAccountTypeList = createAsyncThunk(
       );
       return thunkAPI.rejectWithValue(
         error.response.data.code === 419 ? null : error.response.data,
+      );
+    }
+  },
+);
+
+export const getMappingItemTypeList = createAsyncThunk(
+  "GET_MAPPING_ITEM_TYPE_LIST",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/billingitem/mapping-item/type";
+      const response = await ratingBillingHttpService.getAll(url);
+      return (response.data || []).map((item) => ({
+        id: item?.id ?? item?.Id ?? item?.value ?? item?.code,
+        name: item?.name ?? item?.text ?? item?.label ?? item?.code,
+        code: item?.code ?? item?.value ?? item?.name ?? item?.text,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_MAPPING_ITEM_TYPE_LIST" }),
+      );
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.code === 419 ? null : error?.response?.data,
+      );
+    }
+  },
+);
+
+export const getMappingItemTransactionMappingCode = createAsyncThunk(
+  "GET_MAPPING_ITEM_TRANSACTION_MAPPING_CODE",
+  async ({ type }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/billingitem/mapping-item/transaction-mapping-code?type=${type}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return (response.data || []).map((item) => ({
+        id: item?.id ?? item?.Id ?? item?.value ?? item?.code,
+        type: item?.type ?? item?.mappingType ?? item?.transMappingType,
+        transactionMappingCode:
+          item?.transactionMappingCode ?? item?.billingItemCode ?? item?.code,
+        name:
+          item?.name ?? item?.billingItemName ?? item?.transactionMappingName,
+        description: item?.description ?? item?.desc ?? item?.remark,
+      }));
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error,
+          action: "GET_MAPPING_ITEM_TRANSACTION_MAPPING_CODE",
+        }),
+      );
+      return thunkAPI.rejectWithValue(
+        error?.response?.data?.code === 419 ? null : error?.response?.data,
       );
     }
   },
@@ -1101,8 +1153,6 @@ const billingItemSlice = createSlice({
       state.loading = false;
     },
 
-
-
     [getConfigFileRBIBillingItem.pending]: (state) => {
       state.loading = true;
     },
@@ -1225,6 +1275,31 @@ const billingItemSlice = createSlice({
     },
     [getAccountTypeList.rejected]: (state) => {
       state.loading = false;
+    },
+
+    [getMappingItemTypeList.pending]: (state) => {
+      state.loading = true;
+    },
+    [getMappingItemTypeList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_mappingItemTypeList = action.payload;
+    },
+    [getMappingItemTypeList.rejected]: (state) => {
+      state.loading = false;
+      state.data_mappingItemTypeList = [];
+    },
+
+    [getMappingItemTransactionMappingCode.pending]: (state) => {
+      state.loading = true;
+      state.data_mappingItemTransactionMappingCode = [];
+    },
+    [getMappingItemTransactionMappingCode.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_mappingItemTransactionMappingCode = action.payload;
+    },
+    [getMappingItemTransactionMappingCode.rejected]: (state) => {
+      state.loading = false;
+      state.data_mappingItemTransactionMappingCode = [];
     },
   },
 });

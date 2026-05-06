@@ -212,6 +212,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
             idAccount={accountId}
             idCustomer={customerId}
             type={accountType}
+            collapsible
           />
 
           {draftExist && (
