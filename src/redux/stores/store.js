@@ -119,6 +119,7 @@ import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData
 import settingReducer from "../slices/receipt_collection/setting";
 import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
+import installmentReducer from "../slices/rating_billing_invoice/installment";
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
@@ -150,6 +151,7 @@ import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
+import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 
@@ -159,6 +161,7 @@ const reducer = combineReducers({
   jobExecution: jobExecutionReducer,
   oracleMetadata: oracleMetadataReducer,
   taskQueue: taskQueueReducer,
+  handlerRegistry: handlerRegistryReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -272,6 +275,7 @@ const reducer = combineReducers({
   digitalSignature: digitalSignatureReducer,
   glAccount: glAccountReducer,
   contentManagement: contentManagementReducer,
+  installment: installmentReducer,
 
   //receipt and collection
   receipt: receiptReducer,

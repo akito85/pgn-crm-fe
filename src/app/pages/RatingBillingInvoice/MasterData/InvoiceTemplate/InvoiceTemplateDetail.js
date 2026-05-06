@@ -260,9 +260,7 @@ const InvoiceTemplateDetail = () => {
     setModalConfirm(false);
   };
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       remark: res.remark,
@@ -283,9 +281,10 @@ const InvoiceTemplateDetail = () => {
               body: data,
             });
 
-    dispatch(approvalAction)
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftInvoiceTemplate(id));
         dispatch(getDetailInvoiceTemplate(id));

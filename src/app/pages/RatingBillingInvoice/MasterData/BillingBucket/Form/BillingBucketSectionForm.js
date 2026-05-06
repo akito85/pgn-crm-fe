@@ -322,6 +322,7 @@ const BillingBucketSectionForm = ({
             statusApproval={statusApproval}
             validStartDate={startDate}
             validEndDate={endDate}
+            setStoredData={setStoredDataInline}
           />
         ) : (
           <FunctionalCriteriaBillingBucket

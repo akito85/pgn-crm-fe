@@ -4,7 +4,7 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
 
-export const FormStepper = ({ steps, current, onPrev, onNext }) => {
+export const FormStepper = ({ steps, current, onPrev, onNext, disabled = false }) => {
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -29,19 +29,20 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
             width: "28px",
             height: "28px",
             borderRadius: "50%",
-            backgroundColor: current > 0 ? "transparent" : "#E0E0E0",
-            border: current > 0 ? "1px solid #0075BF" : "none",
+            backgroundColor: current > 0 && !disabled ? "transparent" : "#E0E0E0",
+            border: current > 0 && !disabled ? "1px solid #0075BF" : "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            cursor: current > 0 ? "pointer" : "not-allowed",
+            cursor: current > 0 && !disabled ? "pointer" : "not-allowed",
+            opacity: disabled ? 0.6 : 1,
           }}
-          onClick={() => current > 0 && onPrev && onPrev()}
+          onClick={() => current > 0 && !disabled && onPrev && onPrev()}
         >
           <LeftOutlined
             style={{
               fontSize: "12px",
-              color: current > 0 ? "#0075BF" : "#BDBDBD",
+              color: current > 0 && !disabled ? "#0075BF" : "#BDBDBD",
             }}
           />
         </div>
@@ -102,19 +103,27 @@ export const FormStepper = ({ steps, current, onPrev, onNext }) => {
             height: "28px",
             borderRadius: "50%",
             backgroundColor:
-              current < steps.length - 1 ? "transparent" : "#E0E0E0",
-            border: current < steps.length - 1 ? "1px solid #0075BF" : "none",
+              current < steps.length - 1 && !disabled ? "transparent" : "#E0E0E0",
+            border:
+              current < steps.length - 1 && !disabled
+                ? "1px solid #0075BF"
+                : "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            cursor: current < steps.length - 1 ? "pointer" : "not-allowed",
+            cursor:
+              current < steps.length - 1 && !disabled ? "pointer" : "not-allowed",
+            opacity: disabled ? 0.6 : 1,
           }}
-          onClick={() => current < steps.length - 1 && onNext && onNext()}
+          onClick={() =>
+            current < steps.length - 1 && !disabled && onNext && onNext()
+          }
         >
           <RightOutlined
             style={{
               fontSize: "12px",
-              color: current < steps.length - 1 ? "#0075BF" : "#BDBDBD",
+              color:
+                current < steps.length - 1 && !disabled ? "#0075BF" : "#BDBDBD",
             }}
           />
         </div>
@@ -144,6 +153,7 @@ export const FormFooter = ({
   disableSaveDraft = false,
   usePrevious = true,
   noBorder = false,
+  disabled = false,
 }) => {
   const containerClasses = noBorder
     ? "p-4 w-full"
@@ -153,7 +163,8 @@ export const FormFooter = ({
     <div className={containerClasses}>
       <div className="flex w-full justify-between items-center">
         <ButtonComponent
-          onClick={onCancel}
+          onClick={!disabled ? onCancel : undefined}
+          disabled={disabled}
           className="!border-[#0075BF] !text-[#0075BF]"
         >
           Cancel
@@ -169,7 +180,8 @@ export const FormFooter = ({
                   width={18}
                 />
               }
-              onClick={onClear}
+              onClick={!disabled ? onClear : undefined}
+              disabled={disabled}
               style={{
                 backgroundColor: "#BE3036",
                 borderColor: "#BE3036",
@@ -186,7 +198,8 @@ export const FormFooter = ({
           )}
           {!isApprover && useSaveDraft && (
             <Button
-              onClick={onSaveDraft}
+              onClick={!disabled ? onSaveDraft : undefined}
+              disabled={disabled || disableSaveDraft}
               style={{
                 backgroundColor: "#E6F1F9",
                 borderColor: "#E6F1F9",
@@ -200,12 +213,12 @@ export const FormFooter = ({
               {saveDraftLabel}
             </Button>
           )}
-          
+
           {useNavigation && (
             <>
               <Button
-                disabled={current === 0}
-                onClick={onPrev}
+                disabled={disabled || current === 0}
+                onClick={!disabled ? onPrev : undefined}
                 style={{
                   backgroundColor: current === 0 ? "#E0E3E9" : "#fff",
                   borderColor: current === 0 ? "#E0E3E9" : "#DADDE5",
@@ -223,7 +236,8 @@ export const FormFooter = ({
                   <Button
                     key="btn-next"
                     htmlType="button"
-                    onClick={onNext}
+                    onClick={!disabled ? onNext : undefined}
+                    disabled={disabled}
                     type="primary"
                     style={{
                       backgroundColor: "#0075BF",
@@ -240,10 +254,10 @@ export const FormFooter = ({
                   <Button
                     key="btn-submit"
                     htmlType="button"
-                    onClick={onSubmit}
+                    onClick={!disabled ? onSubmit : undefined}
                     type="primary"
                     loading={isLoading}
-                    disabled={isLoading}
+                    disabled={disabled || isLoading || disableSubmit}
                     style={{
                       backgroundColor: "#388E3C",
                       borderColor: "#388E3C",
