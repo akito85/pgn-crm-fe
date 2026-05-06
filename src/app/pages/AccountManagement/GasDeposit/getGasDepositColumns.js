@@ -34,7 +34,7 @@ const getGasDepositColumns = ({
     title: "NO",
     align: "center",
     dataIndex: "no",
-    width: 40,
+    width: 50,
     fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
@@ -73,7 +73,7 @@ const getGasDepositColumns = ({
     key: "earnPeriodStart",
     title: "EARN PERIOD START",
     dataIndex: "earnPeriodStart",
-    width: 180,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -84,7 +84,7 @@ const getGasDepositColumns = ({
       searchText,
       handleSearch,
       true,
-      "date"
+      "dateFormal"
     ),
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
   },
@@ -92,7 +92,7 @@ const getGasDepositColumns = ({
     key: "earnPeriodEnd",
     title: "EARN PERIOD END",
     dataIndex: "earnPeriodEnd",
-    width: 180,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -103,7 +103,7 @@ const getGasDepositColumns = ({
       searchText,
       handleSearch,
       true,
-      "date"
+      "dateFormal"
     ),
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
   },
@@ -111,7 +111,7 @@ const getGasDepositColumns = ({
     key: "redeemPeriodStart",
     title: "REDEEM PERIOD START",
     dataIndex: "redeemPeriodStart",
-    width: 200,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -122,7 +122,7 @@ const getGasDepositColumns = ({
       searchText,
       handleSearch,
       true,
-      "date"
+      "dateFormal"
     ),
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
   },
@@ -130,7 +130,7 @@ const getGasDepositColumns = ({
     key: "redeemPeriodEnd",
     title: "REDEEM PERIOD END",
     dataIndex: "redeemPeriodEnd",
-    width: 200,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -141,7 +141,7 @@ const getGasDepositColumns = ({
       searchText,
       handleSearch,
       true,
-      "date"
+      "dateFormal"
     ),
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
   },
@@ -149,7 +149,7 @@ const getGasDepositColumns = ({
     key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
-    width: 120,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -181,7 +181,7 @@ const getGasDepositColumns = ({
     key: "balanceMscf",
     title: "BALANCE (MSCF)",
     dataIndex: "balanceMscf",
-    width: 160,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -197,7 +197,7 @@ const getGasDepositColumns = ({
     key: "balanceMmbtu",
     title: "BALANCE (MMBTU)",
     dataIndex: "balanceMmbtu",
-    width: 170,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -213,7 +213,7 @@ const getGasDepositColumns = ({
     key: "balanceAmount",
     title: "BALANCE AMOUNT",
     dataIndex: "balanceAmount",
-    width: 170,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -229,7 +229,7 @@ const getGasDepositColumns = ({
     key: "availableAmount",
     title: "AVAILABLE AMOUNT",
     dataIndex: "availableAmount",
-    width: 180,
+    width: 150,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -245,7 +245,7 @@ const getGasDepositColumns = ({
     key: "remark",
     title: "REMARK",
     dataIndex: "remark",
-    width: 200,
+    width: 160,
     sorter: true,
     align: "center",
     ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
@@ -257,23 +257,34 @@ const getGasDepositColumns = ({
       handleSearch,
     ),
   },
+  includeStatus && {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 150,
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        "active": "Active",
+        "inactive": "Inactive",
+      };
+
+      return (
+        <div className={" flex justify-center"}>
+          <NxStatusComponent colour={status}>
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </NxStatusComponent>
+        </div>
+      )
+    },
+  },
   !isApproval && includeStatus && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 170,
-    sorter: true,
+    width: 140,
     align: "center",
     fixed: "right",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
     render: (status) => {
       const displayText = {
         "approved": "Approved",
@@ -290,37 +301,6 @@ const getGasDepositColumns = ({
           </NxStatusComponent>
         </div>
       );
-    },
-  },
-  includeStatus && {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 120,
-    sorter: true,
-    fixed: "right",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (status) => {
-      const displayText = {
-        "active": "Active",
-        "inactive": "Inactive",
-      };
-
-      return (
-        <div className={" flex justify-center"}>
-          <NxStatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </NxStatusComponent>
-        </div>
-      )
     },
   },
 ].filter(Boolean);
