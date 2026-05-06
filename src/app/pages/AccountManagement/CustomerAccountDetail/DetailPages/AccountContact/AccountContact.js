@@ -17,7 +17,7 @@ import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalDetail from "./ModalDetail";
 import ModalUpdate from "./ModalUpdate";
-import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
+import NxActivateInactivateModal from "../../../../../../components/Nx/NxActivateInactivateModal";
 import {
   getListDetailAccountContact,
   activationAccountContact,
@@ -51,6 +51,7 @@ import { useLocation } from "react-router-dom";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
 import ContactDetailTable from "./ContactDetailTable";
+import NxStatusComponent from "../../../../../../components/Nx/NxStatusComponent";
 
 const AccountContact = ({ id, idCustomer, type }) => {
   
@@ -453,39 +454,6 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchText,
           handleSearch
         ),
-        // render: (v, r, i) => (
-        //   <div className={" flex justify-center"}>
-        //     {r.primaryFlagValue ? (
-        //       <StatusComponent colour={"active"}>{r.primaryFlag}</StatusComponent>
-        //     ) : (
-        //       ""
-        //     )}
-        //   </div>
-        // ),
-        render: (data, record, index) => {
-          let text;
-          switch (record?.primaryFlagValue) {
-            case true:
-              text = "Primary";
-              break;
-            case false:
-              text = "Non Primary";
-              break;
-            default:
-              text = index
-                ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-                : index;
-              break;
-          }
-          return text ? (
-            <div className={"flex justify-center"}>
-              <StatusComponent colour={text}>{text}</StatusComponent>
-            </div>
-          ) : (
-            text
-          );
-        },
-
       },
       {
         title: "CONTACT NAME",
@@ -565,7 +533,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "Contact Address Additional Note"?.toUpperCase(),
         dataIndex: "additionalNote",
-        width: 340,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "additionalNote",
@@ -578,7 +546,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "DESCRIPTION",
         dataIndex: "description",
-        width: 350,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "description",
@@ -614,23 +582,15 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "STATUS",
         dataIndex: "status",
-        width: 140,
+        width: 100,
         fixed: "right",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
         render: (index) => {
           const text = index
             ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
             : index;
           return text ? (
             <div className={" flex justify-center"}>
-              <StatusComponent colour={index}>{text}</StatusComponent>
+              <NxStatusComponent colour={index}>{text}</NxStatusComponent>
             </div>
           ) : (
             text
@@ -922,13 +882,12 @@ const AccountContact = ({ id, idCustomer, type }) => {
       <ModalUpdate isOpen={modalUpdate} closeModal={setModalUpdate} />
 
       {/* Modal Activate */}
-      <ModalApproveOrReject
+      <NxActivateInactivateModal
         isOpen={modalActivate}
         handleCloseModal={handleCancel}
         onFinish={handleConfirmActivation}
-        header={titleActiveOrInactive}
-        approveOrReject={titleActiveOrInactive}
-        menu={"Contact"}
+        action={titleActiveOrInactive === "Inactivate" ? "inactivate" : "activate"}
+        menu="Contact"
         named={contactName}
       />
 
