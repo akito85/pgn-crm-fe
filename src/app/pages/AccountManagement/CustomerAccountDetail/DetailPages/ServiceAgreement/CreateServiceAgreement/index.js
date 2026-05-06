@@ -2100,7 +2100,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 ? saDetailObj?.serviceAgreementChildType
                 : null,
           }),
-          isCustom: saDetailObj.createFrom === 1 ? "Y" : "N",
+          isCustom: saDetailObj.createFrom === 1 ? "N" : "Y",
           productDetail: tempArrayProduct.map((item) => {
             return {
               name: item.name !== null ? item.name.value : null,
