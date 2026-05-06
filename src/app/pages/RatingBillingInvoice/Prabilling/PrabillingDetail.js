@@ -129,6 +129,7 @@ const PrabillingDetail = () => {
         inSor: record?.sor || prabillData?.sor,
         accNumber: record?.accountNumber,
         saNumber: record?.saNumber,
+        id: initId,
       },
     });
   };
@@ -364,7 +365,7 @@ const PrabillingDetail = () => {
   const routes = [
     { path: "", breadcrumbName: "Rating Billing" },
     { path: RBI_ROUTES.PRABILLING_VIEW, breadcrumbName: "Prabilling" },
-    { path: RBI_ROUTES.PRABILLING_DETAIL, breadcrumbName: "Detail Prabilling" },
+    { path: "", breadcrumbName: "Detail Prabilling" },
   ];
 
   const tabItems = [
