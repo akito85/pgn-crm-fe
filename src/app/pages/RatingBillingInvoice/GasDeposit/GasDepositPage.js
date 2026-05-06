@@ -20,7 +20,6 @@ import { columnsSummaryBalance } from "./Table/TableSummaryBalance";
 import GasDepositDetail from "./GasDepositDetail";
 import ModalApprovalExpired from "./Modal/ModalApprovalExpired";
 import TableRBI from "../../../../components/TableRBI";
-import Toolbar from "../../../../components/Toolbar";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 
@@ -91,7 +90,6 @@ const GasDepositPage = () => {
   const { data, loading, loading_history, loading_mutation_summary, loading_history_list, data_history, data_approval_history, data_mutation_summary, filters } = useSelector(
     (state) => state.gasDepositRbi,
   );
-  const { currentPosition, token } = useSelector((state) => state.auth || {});
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -129,6 +127,60 @@ const GasDepositPage = () => {
     left: ["no"],
     right: ["status", "statusApproval"],
   }));
+
+  useEffect(() => {
+    if (
+      !pageDetail
+      || activeTab !== "gasDeposit"
+      || !selectedGasDepositData
+      || !Array.isArray(dataSource)
+      || !dataSource.length
+    ) {
+      return;
+    }
+
+    const currentIds = [
+      selectedGasDepositData?.stgSumId,
+      selectedGasDepositData?.pendingStgSumId,
+      selectedGasDepositData?.referenceId,
+      selectedGasDepositData?.recordId,
+      selectedGasDepositData?.masterGasDepositId,
+      selectedGasDepositData?.gasDepositId,
+      selectedGasDepositData?.id,
+    ]
+      .filter((value) => value !== undefined && value !== null)
+      .map((value) => String(value));
+
+    const matchedRow = dataSource.find((item) => {
+      const candidateIds = [
+        item?.stgSumId,
+        item?.pendingStgSumId,
+        item?.referenceId,
+        item?.recordId,
+        item?.masterGasDepositId,
+        item?.gasDepositId,
+        item?.id,
+      ]
+        .filter((value) => value !== undefined && value !== null)
+        .map((value) => String(value));
+
+      return candidateIds.some((value) => currentIds.includes(value));
+    });
+
+    if (!matchedRow) return;
+
+    const nextRowKey =
+      matchedRow.key
+      ?? matchedRow.stgSumId
+      ?? matchedRow.pendingStgSumId
+      ?? matchedRow.gasDepositId;
+
+    setSelectedGasDepositData((prev) => {
+      if (prev === matchedRow) return prev;
+      return matchedRow;
+    });
+    setActiveRowKey((prev) => (prev === nextRowKey ? prev : nextRowKey));
+  }, [activeTab, dataSource, pageDetail, selectedGasDepositData]);
 
   // Simpan filters ke Redux
   useEffect(() => {
@@ -201,6 +253,14 @@ const GasDepositPage = () => {
       setDataApprovalHistoryFix({});
     }
   }, [data_approval_history]);
+
+  useEffect(() => {
+    if (activeTab !== "gasDeposit") {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setSelectedGasDepositData(null);
+    }
+  }, [activeTab]);
 
   const routes = [
     { path: "", breadcrumbName: "Rating & Billing" },
@@ -646,45 +706,11 @@ const GasDepositPage = () => {
     [historyColumns],
   );
 
-  const authToken = useMemo(() => {
-    try {
-      return token ? JSON.parse(token) : null;
-    } catch (error) {
-      return null;
-    }
-  }, [token]);
-
-  const positionRoleHints = useMemo(
-    () =>
-      [
-        currentPosition,
-        currentPosition?.currentPosition,
-        currentPosition?.approvalRole,
-        currentPosition?.roleName,
-        currentPosition?.positionName,
-        authToken?.currentPosition,
-        authToken?.approvalRole,
-        authToken?.roleName,
-        authToken?.positionName,
-        authToken?.position,
-        authToken?.primaryPosition?.positionName,
-      ]
-        .filter(Boolean)
-        .map((item) => String(item).toLowerCase()),
-    [authToken, currentPosition],
-  );
-
   const tabItems = [
     { key: "gasDeposit", label: "Gas Deposit", children: null },
     { key: "summaryBalance", label: "Summary Balance", children: null },
     { key: "history", label: "History", children: null },
   ];
-
-  const canShowApprovalExpiredButton = useMemo(() => {
-    const isSubmitterPosition = positionRoleHints.some((item) => item.includes("submitter"));
-    if (isSubmitterPosition) return false;
-    return true;
-  }, [positionRoleHints]);
 
   return (
     <>
@@ -695,16 +721,14 @@ const GasDepositPage = () => {
           <div className="flex -my-4 justify-between items-center">
             <p className="w-full mt-[15px] text-primary">GAS DEPOSIT LIST</p>
             <div className="flex items-center gap-2">
-              {canShowApprovalExpiredButton && (
-                <ButtonComponent
-                  icon={<SVGIcon name="IconRequestApproval" width={16} color="#FFF" />}
-                  type="submit"
-                  border={false}
-                  onClick={() => setModalApprovalExpired(true)}
-                >
-                  Approval Expired
-                </ButtonComponent>
-              )}
+              <ButtonComponent
+                icon={<SVGIcon name="IconRequestApproval" width={16} color="#FFF" />}
+                type="submit"
+                border={false}
+                onClick={() => setModalApprovalExpired(true)}
+              >
+                Approval Expired
+              </ButtonComponent>
               <ButtonComponent
                 icon={<SVGIcon name="IconCalendarEvent" width={16} />}
                 type="submit"
@@ -729,7 +753,6 @@ const GasDepositPage = () => {
               >
                 Create
               </ButtonComponent>
-              <Toolbar items={itemGrantAccess} />
             </div>
           </div>
         }
@@ -737,7 +760,7 @@ const GasDepositPage = () => {
         <Tabs
           items={tabItems}
           activeKey={activeTab}
-          onChange={setActiveTab}
+          onChange={(key) => setActiveTab(key)}
           className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:my-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
         />
 

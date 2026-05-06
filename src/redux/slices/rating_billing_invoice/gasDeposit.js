@@ -589,11 +589,14 @@ export const getMutationSummaryPaginate = createAsyncThunk(
 
 export const getMutationDetailPaginate = createAsyncThunk(
   "GET_MUTATION_DETAIL_PAGINATE",
-  async ({ gasDepositId, page, pageSize, search, sort } = {}, thunkAPI) => {
+  async ({ gasDepositId, summaryRefId, page, pageSize, search, sort } = {}, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "mutationId~desc" : sort;
-      const url = `/v1/dbs/api/gas-deposit/mutation-detail?gasDepositId=${gasDepositId}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const summaryParam = summaryRefId !== undefined && summaryRefId !== null
+        ? `&summaryRefId=${summaryRefId}`
+        : "";
+      const url = `/v1/dbs/api/gas-deposit/mutation-detail?gasDepositId=${gasDepositId}${summaryParam}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response?.data ?? response;
     } catch (error) {

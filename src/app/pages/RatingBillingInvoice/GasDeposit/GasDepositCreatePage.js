@@ -22,7 +22,7 @@ import {
   getAllApprovalList,
   getListApprovalById,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
-import { showModalError } from "../../../../redux/slices/general_slice";
+import { showModalError, showModalSuccess } from "../../../../redux/slices/general_slice";
 import {
   getAccountOptions,
   getPeriodOptions,
@@ -511,6 +511,7 @@ const GasDepositCreatePage = () => {
         source: values.type || values.source,
         actionType: isUpdateMode ? "UPDATE" : "CREATE",
         isDraft,
+        silentSuccess: true,
         description: values.description,
         sapCustId: account?.sapCustId == null ? undefined : String(account.sapCustId),
         attachments: [],
@@ -542,27 +543,37 @@ const GasDepositCreatePage = () => {
       );
 
       if (pendingAttachments.length > 0 && idGasDeposit) {
-        for (const element of pendingAttachments) {
-          const uploadBody = {
-            files: element.file,
-            fileCategoryId: element.fileCategoryId,
-            referenceId: idGasDeposit,
-            referensiId: idGasDeposit,
-            category: "GAS_DEPOSIT_SUMMARY",
-          };
+        await Promise.all(
+          pendingAttachments.map((element) => {
+            const uploadBody = {
+              files: element.file,
+              fileCategoryId: element.fileCategoryId,
+              referenceId: idGasDeposit,
+              referensiId: idGasDeposit,
+              category: "GAS_DEPOSIT_SUMMARY",
+            };
 
-          await ratingBillingHttpService.uploadAttachment(
-            `/v1/dbs/api/gas-deposit/upload-attachment`,
-            uploadBody,
-            () => {},
-          );
-        }
+            return ratingBillingHttpService.uploadAttachment(
+              `/v1/dbs/api/gas-deposit/upload-attachment`,
+              uploadBody,
+              () => {},
+            );
+          }),
+        );
       }
 
-      // Navigate after a short delay to show success message
-      setTimeout(() => {
-        navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
-      }, 1500);
+      dispatch(
+        showModalSuccess({
+          title: "Success",
+          description: isDraft
+            ? "Gas Deposit draft saved successfully"
+            : isUpdateMode
+              ? "Gas Deposit updated successfully"
+              : "Gas Deposit created successfully",
+          return: false,
+        }),
+      );
+      navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
     } catch {
       // Validation or request errors are already surfaced by existing handlers.
     } finally {

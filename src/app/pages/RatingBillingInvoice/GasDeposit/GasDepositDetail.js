@@ -25,6 +25,7 @@ import {
 import ModalCreateMutationDetail from "./Modal/ModalCreateMutationDetail";
 import ModalViewMutationDetail from "./Modal/ModalViewMutationDetail";
 import { numberFormatting } from "../../../../utils/formatCurrency";
+import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
 
 const formatApprovalHistoryLabel = (key) => {
   const normalizedKey = key.toUpperCase();
@@ -88,6 +89,125 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
       label: formatApprovalHistoryLabel(key),
     })),
   };
+};
+
+const pickFirstValue = (...values) => values.find((value) => value !== undefined && value !== null && value !== "");
+
+const extractApprovalRows = (payload) => {
+  const approverSource = payload?.dataApprover;
+
+  const sourceGroups = Array.isArray(approverSource)
+    ? [approverSource]
+    : approverSource && typeof approverSource === "object"
+      ? Object.values(approverSource).filter((item) => Array.isArray(item))
+      : [];
+
+  const rows = [];
+
+  sourceGroups.forEach((group) => {
+    group.forEach((item) => {
+      if (Array.isArray(item?.employeeDetail) && item.employeeDetail.length > 0) {
+        item.employeeDetail.forEach((employee) => {
+          rows.push({
+            approver: pickFirstValue(
+              employee?.approver,
+              employee?.employeeName,
+              employee?.employeeFullname,
+              employee?.name,
+              employee?.username,
+              employee?.employeeNo,
+            ),
+            role: pickFirstValue(
+              employee?.role,
+              employee?.roleName,
+              employee?.positionName,
+              item?.approvalName,
+              item?.role,
+            ),
+            status: pickFirstValue(employee?.status, employee?.approvalStatus, item?.status, "Waiting Approval"),
+          });
+        });
+        return;
+      }
+
+      rows.push({
+        approver: pickFirstValue(
+          item?.approver,
+          item?.employeeName,
+          item?.employeeFullname,
+          item?.name,
+          item?.username,
+          item?.employeeNo,
+        ),
+        role: pickFirstValue(item?.role, item?.roleName, item?.positionName, item?.approvalName),
+        status: pickFirstValue(item?.status, item?.approvalStatus, "Waiting Approval"),
+      });
+    });
+  });
+
+  return rows
+    .filter((item) => item.approver || item.role || item.status)
+    .map((item, idx) => ({
+      key: idx,
+      no: idx + 1,
+      approver: item.approver || "-",
+      role: item.role || "-",
+      status: item.status || "-",
+    }));
+};
+
+const extractHierarchyApprovalRows = (payload) => {
+  const hierarchyRows = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
+  const rows = [];
+
+  hierarchyRows.forEach((item) => {
+    if (Array.isArray(item?.employeeDetail) && item.employeeDetail.length > 0) {
+      item.employeeDetail.forEach((employee) => {
+        rows.push({
+          approver: pickFirstValue(
+            employee?.approver,
+            employee?.employeeName,
+            employee?.employeeFullname,
+            employee?.name,
+            employee?.username,
+            employee?.employeeNo,
+          ),
+          role: pickFirstValue(
+            employee?.role,
+            employee?.roleName,
+            employee?.positionName,
+            item?.approvalName,
+            item?.role,
+          ),
+          status: pickFirstValue(employee?.status, employee?.approvalStatus, item?.status, "Waiting Approval"),
+        });
+      });
+      return;
+    }
+
+    rows.push({
+      approver: pickFirstValue(
+        item?.approver,
+        item?.employeeName,
+        item?.employeeFullname,
+        item?.name,
+        item?.username,
+        item?.employeeNo,
+      ),
+      role: pickFirstValue(item?.role, item?.roleName, item?.positionName, item?.approvalName),
+      status: pickFirstValue(item?.status, item?.approvalStatus, "Waiting Approval"),
+    });
+  });
+
+  return rows
+    .filter((item) => item.approver || item.role || item.status)
+    .map((item, idx) => ({
+      key: idx,
+      no: idx + 1,
+      approver: item.approver || "-",
+      role: item.role || "-",
+      status: item.status || "-",
+    }));
 };
 
 const normalizeGasDepositDetailData = (item) => {
@@ -204,6 +324,8 @@ const GasDepositDetail = (props) => {
   const [approveOrRejectMD, setApproveOrRejectMD] = useState("");
   const [selectedMutationDetail, setSelectedMutationDetail] = useState(null);
   const [dataApprovalHistoryFixMD, setDataApprovalHistoryFixMD] = useState({});
+  const [approvalHierarchyRows, setApprovalHierarchyRows] = useState([]);
+  const [loadingApprovalHierarchy, setLoadingApprovalHierarchy] = useState(false);
 
   const {
     data,
@@ -215,7 +337,6 @@ const GasDepositDetail = (props) => {
     loading_attachment,
     filters,
   } = useSelector((state) => state.gasDepositRbi);
-  const { currentPosition, token } = useSelector((state) => state.auth || {});
 
   useEffect(() => {
     setCurrentSelectedData(normalizeGasDepositDetailData(selectedData));
@@ -224,23 +345,6 @@ const GasDepositDetail = (props) => {
   useEffect(() => {
     const refreshedRows = data?.result;
     if (!Array.isArray(refreshedRows) || !refreshedRows.length) return;
-
-    const sameAccountRows = refreshedRows.filter((item) => (
-      item?.accountNumber && currentSelectedData?.accountNumber && item.accountNumber === currentSelectedData.accountNumber
-    ));
-
-    const approvedActiveRow = sameAccountRows.find((item) => (
-      String(item?.statusApproval || "").toLowerCase() === "approved"
-      && String(item?.status || item?.statusMaster || "").toLowerCase() === "active"
-    ));
-
-    if (approvedActiveRow && (
-      currentSelectedData?.statusApproval === "Approved"
-      || currentSelectedData?.status === "Active"
-    )) {
-      setCurrentSelectedData(normalizeGasDepositDetailData(approvedActiveRow));
-      return;
-    }
 
     const currentIds = [
       currentSelectedData?.stgSumId,
@@ -272,19 +376,20 @@ const GasDepositDetail = (props) => {
 
     if (matchedRow) {
       setCurrentSelectedData(normalizeGasDepositDetailData(matchedRow));
-      return;
     }
-
-    if (
-      sameAccountRows[0]
-      && (
-        currentSelectedData?.statusApproval === "Approved"
-        || currentSelectedData?.status === "Active"
-      )
-    ) {
-      setCurrentSelectedData(normalizeGasDepositDetailData(sameAccountRows[0]));
-    }
-  }, [currentSelectedData?.accountNumber, currentSelectedData?.gasDepositId, currentSelectedData?.id, currentSelectedData?.masterGasDepositId, currentSelectedData?.pendingStgSumId, currentSelectedData?.stgSumId, data]);
+  }, [
+    currentSelectedData?.accountNumber,
+    currentSelectedData?.gasDepositId,
+    currentSelectedData?.id,
+    currentSelectedData?.masterGasDepositId,
+    currentSelectedData?.pendingStgSumId,
+    currentSelectedData?.recordId,
+    currentSelectedData?.referenceId,
+    currentSelectedData?.status,
+    currentSelectedData?.statusApproval,
+    currentSelectedData?.stgSumId,
+    data,
+  ]);
 
   const dataSourceMutationDetail = useMemo(() => {
     return data_mutation_detail?.result || [];
@@ -306,6 +411,7 @@ const GasDepositDetail = (props) => {
       dispatch(
         getMutationDetailPaginate({
           gasDepositId: selectedGasDepositId,
+          summaryRefId: selectedSummaryReferenceId,
           page: 1,
           pageSize: 100,
           search: "",
@@ -400,33 +506,19 @@ const GasDepositDetail = (props) => {
   const handleConfirmApprovalMutation = async (res, handleClear) => {
     if (!approvalTarget?.referenceId || !approvalTarget?.referenceType) return;
 
-    const actionUpper = approveOrRejectMD.toUpperCase();
     const isSummaryApproval = approvalTarget.referenceType === "SUMMARY";
 
     await dispatch(
       processGasDepositApproval({
         referenceId: approvalTarget.referenceId,
         referenceType: approvalTarget.referenceType,
-        action: actionUpper,
+        action: approveOrRejectMD.toUpperCase(),
         note: res?.remark || "",
       }),
     ).unwrap();
 
     if (isSummaryApproval) {
-      setCurrentSelectedData((prev) => ({
-        ...prev,
-        statusApproval: actionUpper === "APPROVE" ? "Approved" : "Rejected",
-        status: actionUpper === "APPROVE" ? "Active" : prev?.status,
-      }));
       setSelectedMutationDetail(null);
-    }
-
-    if (approvalTarget.referenceType === "MUTATION") {
-      setSelectedMutationDetail((prev) => prev ? ({
-        ...prev,
-        statusApproval: actionUpper === "APPROVE" ? "Approved" : "Rejected",
-        status: actionUpper === "APPROVE" ? "Active" : prev?.status,
-      }) : prev);
     }
 
     handleClear();
@@ -447,6 +539,7 @@ const GasDepositDetail = (props) => {
       await dispatch(
         getMutationDetailPaginate({
           gasDepositId: selectedGasDepositId,
+          summaryRefId: selectedSummaryReferenceId,
           page: 1,
           pageSize: 100,
           search: "",
@@ -601,30 +694,6 @@ const GasDepositDetail = (props) => {
     [dataSourceMD],
   );
 
-  const authToken = useMemo(() => {
-    try {
-      return token ? JSON.parse(token) : null;
-    } catch {
-      return null;
-    }
-  }, [token]);
-
-  const positionRoleHints = useMemo(
-    () =>
-      [
-        currentPosition?.approvalRole,
-        currentPosition?.roleName,
-        currentPosition?.positionName,
-        authToken?.approvalRole,
-        authToken?.roleName,
-        authToken?.positionName,
-        authToken?.position,
-      ]
-        .filter(Boolean)
-        .map((item) => String(item).toLowerCase()),
-    [authToken, currentPosition],
-  );
-
   const approvalTarget = useMemo(() => {
     const hasPendingSummaryContext = Boolean(
       currentSelectedData?.pendingStgSumId
@@ -656,28 +725,73 @@ const GasDepositDetail = (props) => {
     return null;
   }, [currentSelectedData, selectedMutationDetail, waitingMutationDetail]);
 
+  const approvalHierarchyId = useMemo(() => {
+    if (currentSelectedData?.apphierId) return currentSelectedData.apphierId;
+    if (approvalTarget?.referenceType === "MUTATION") {
+      return selectedMutationDetail?.apphierId || waitingMutationDetail?.apphierId || null;
+    }
+    return null;
+  }, [
+    approvalTarget?.referenceType,
+    currentSelectedData?.apphierId,
+    selectedMutationDetail?.apphierId,
+    waitingMutationDetail?.apphierId,
+  ]);
+
   useEffect(() => {
     if (approvalTarget?.referenceId) {
       dispatch(getApprovalHistory(approvalTarget.referenceId));
     }
   }, [approvalTarget?.referenceId, dispatch]);
 
+  useEffect(() => {
+    if (!approvalHierarchyId) {
+      setApprovalHierarchyRows([]);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingApprovalHierarchy(true);
+
+    ratingBillingHttpService
+      .getDetail(`/v1/dbs/api/billing/approval-hierarchy-detail/${approvalHierarchyId}`)
+      .then((res) => {
+        if (!cancelled) {
+          setApprovalHierarchyRows(extractHierarchyApprovalRows(res));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setApprovalHierarchyRows([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingApprovalHierarchy(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [approvalHierarchyId]);
+
   const canProcessApproval = useMemo(() => {
-    const isSubmitterPosition = positionRoleHints.some((item) => item.includes("submitter"));
     const headerWaitingApproval = currentSelectedData?.statusApproval === "Waiting Approval";
     const mutationWaitingApproval = Boolean(
       selectedMutationDetail?.statusApproval === "Waiting Approval" || waitingMutationDetail,
     );
+    const isApprover = data_approval_history?.isApprover === true;
 
     return Boolean(
-      !isSubmitterPosition
+      isApprover
       && (headerWaitingApproval || mutationWaitingApproval)
       && approvalTarget,
     );
   }, [
     approvalTarget,
     currentSelectedData?.statusApproval,
-    positionRoleHints,
+    data_approval_history?.isApprover,
     selectedMutationDetail?.statusApproval,
     waitingMutationDetail,
   ]);
@@ -685,9 +799,9 @@ const GasDepositDetail = (props) => {
   // ===================== Approval / Attachment Columns (Gas Deposit Detail tab) =====================
   const approvalColumnsGD = useMemo(() => [
     { key: "no", title: "NO", width: 50, align: "center", render: (_, __, idx) => idx + 1 },
-    { key: "approver", title: "APPROVER", dataIndex: "approver", width: 150 },
-    { key: "role", title: "ROLE", dataIndex: "role", width: 120 },
-    { key: "status", title: "STATUS", dataIndex: "status", width: 150 },
+    { key: "approver", title: "APPROVER", dataIndex: "approver", width: 260 },
+    { key: "role", title: "ROLE / POSITION", dataIndex: "role", width: 280 },
+    { key: "status", title: "STATUS", dataIndex: "status", width: 180 },
   ], []);
 
   const attachmentColumnsGD = useMemo(() => [
@@ -699,27 +813,15 @@ const GasDepositDetail = (props) => {
     { key: "fileSize", title: "FILE SIZE", dataIndex: "fileSize", width: 100 },
   ], []);
 
-  const approvalDataSource = useMemo(() => {
-    const approverData = dataApprovalHistoryFixMD?.dataApprover;
+  const approvalHistoryDataSource = useMemo(
+    () => extractApprovalRows(dataApprovalHistoryFixMD),
+    [dataApprovalHistoryFixMD],
+  );
 
-    if (Array.isArray(approverData)) {
-      return approverData
-        .filter(Boolean)
-        .map((item, idx) => ({ ...item, key: item.id ?? idx }));
-    }
-
-    if (approverData && typeof approverData === "object") {
-      const firstRows = Object.values(approverData).find(
-        (item) => Array.isArray(item) && item.length > 0,
-      );
-      return (firstRows || []).filter(Boolean).map((item, idx) => ({
-        ...item,
-        key: item.id ?? idx,
-      }));
-    }
-
-    return [];
-  }, [dataApprovalHistoryFixMD]);
+  const approvalDataSource = useMemo(
+    () => (approvalHistoryDataSource.length > 0 ? approvalHistoryDataSource : approvalHierarchyRows),
+    [approvalHierarchyRows, approvalHistoryDataSource],
+  );
 
   const attachmentDataSource = useMemo(() =>
     (Array.isArray(data_attachment) ? data_attachment : []).filter(Boolean).map((item, idx) => ({ ...item, key: item.id ?? idx })),
@@ -788,7 +890,7 @@ const GasDepositDetail = (props) => {
           useInfiniteScroll={true}
           hasMore={false}
           showRefresh={false}
-          loading={loading_history}
+          loading={loading_history || loadingApprovalHierarchy}
         />
       </CollapsibleContainer>
     </div>
