@@ -8,6 +8,7 @@ const nxGetAccountActions = ({
   handleView = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
+  handleActivate = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
   handleRecalculate = () => {},
@@ -135,6 +136,49 @@ const nxGetAccountActions = ({
             >
               <SVGIcon name="IconEdit" width={20} />
             </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Activate",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const isInactive = record.status === "INACTIVE";
+      const isActive = record.status === "ACTIVE";
+
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <Checkbox
+                checked={isActive}
+                style={{ transform: "scale(0.9)" }}
+                className="action-checkbox"
+              />
+            }
+            onClick={() =>
+              handleActivate(record)
+            }
+            type={"action"}
+          >
+            Inactivate
+          </Button>
+        ) : (
+          <Tooltip
+            title={isInactive ? "Activate" : ""}
+            key={`table-action-${index}`}
+          >
+            <Checkbox
+              className="action-checkbox"
+              checked={isActive}
+              onClick={() =>
+                handleActivate(record)
+              }
+              style={{ transform: "scale(0.9)" }}
+            />
           </Tooltip>
         );
 

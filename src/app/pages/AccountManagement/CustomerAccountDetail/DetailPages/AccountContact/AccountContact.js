@@ -654,7 +654,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       dispatch(getDetailAccountContact(record.accountContactId));
       setTypeContact('update')
     },
-    handleInactivate: (record) => {
+    handleActivate: (record) => {
       handleActiveOrInactive(record);
     }
   })
