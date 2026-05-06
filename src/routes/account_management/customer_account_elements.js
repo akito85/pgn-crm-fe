@@ -140,10 +140,6 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_GAS_SOURCE: <GasSourceForm type={"update"} />,
   VIEW_GAS_SOURCE: <ViewGasSource />,
   UPLOAD_GAS_SOURCE: <UploadGasSource />,
-
-  // Gas Deposit Stand Alone
-  VIEW_GAS_DEPOSIT_SA_PAGE: <GasDeposit moduleType="sa" />,
-  VIEW_DETAIL_GAS_DEPOSIT_SA_PAGE: <GasDepositDetail moduleType="sa" />,
   
   // Gas Deposit Account Standard
   VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail moduleType="ua" accountType="standard" />,

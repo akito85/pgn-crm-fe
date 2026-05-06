@@ -187,8 +187,6 @@ const GasDepositTable = ({
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
     handleView: ({ id }) => navigate(
-      isStandAlone ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_SA :
       isStandard ?
         ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT :
       isOneTime ?

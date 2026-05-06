@@ -96,9 +96,7 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       breadcrumbName: "Account"
     },
     {
-      path: isStandAlone
-        ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_GAS_DEPOSIT_SA
-        : isStandard
+      path: isStandard
           ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
           : isOneTime
             ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME

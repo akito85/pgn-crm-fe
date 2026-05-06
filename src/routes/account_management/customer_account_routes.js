@@ -90,10 +90,6 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPDATE_GAS_SOURCE: "/system-setup/gas-sources/update",
   VIEW_GAS_SOURCE: "/system-setup/gas-sources",
   UPLOAD_GAS_SOURCE: "/system-setup/gas-sources/upload",
-
-  // Gas Deposit Stand Alone
-  VIEW_GAS_DEPOSIT_SA: "/account-management/gas-deposit",
-  VIEW_DETAIL_GAS_DEPOSIT_SA: "/account-management/gas-deposit/view",
   
   // Gas Deposit Account Standard
   VIEW_DETAIL_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/view",
