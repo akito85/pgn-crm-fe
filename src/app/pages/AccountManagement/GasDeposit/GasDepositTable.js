@@ -275,19 +275,18 @@ const GasDepositTable = ({
    * Renders the expanded child row for a gas deposit record.
    * @param {object} record - The parent gas deposit row record
    */
-  const expandedRowRender = (record, index) => (
+  const expandedRowRender = dataSource.length ? (record, index) => (
     <GasDepositDetailTable
       id={record.id}
       index={index}
     />
-  );
+  ) : undefined;
 
   return (
     <div className="flex flex-col gap-y-4">
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="gas-deposit-table"
-        className="[&_.ant-table-expanded-row-fixed]:!pl-2"
         dataSource={dataSource}
         totalData={totalElement}
         current={page}
