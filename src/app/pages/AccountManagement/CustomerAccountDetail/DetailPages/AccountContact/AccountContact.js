@@ -48,42 +48,9 @@ import DetailText from "../../../../../../components/DetailText";
 import TableContact from "../../../../../../components/Table/Contact/TableContact";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 import { useLocation } from "react-router-dom";
-
-const expandedRowRender = (record) => {
-  const dataExpand = record?.contactDetails;
-
-  const columns = [
-    {
-      title: "NO",
-      align: "center",
-      width: 60,
-      render: (text, object, index) => index + 1,
-    },
-    {
-      title: "TYPE",
-      dataIndex: "typeName",
-    },
-    {
-      title: "VALUE",
-      dataIndex: "contactValue",
-    },
-  ];
-  return (
-    <div>
-      <p className="text-primary text-xs font-bold uppercase">CONTACT DETAIL</p>
-      <NxTable
-        useSelect={false}
-        usePagination={false}
-        // className="table-expand-custom"
-        dataSource={dataExpand}
-        columns={columns}
-        tableScrolled={{
-          x: 1300,
-        }}
-      />
-    </div>
-  );
-};
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
+import ContactDetailTable from "./ContactDetailTable";
 
 const AccountContact = ({ id, idCustomer, type }) => {
   
@@ -470,14 +437,14 @@ const AccountContact = ({ id, idCustomer, type }) => {
     return [
       {
         title: "NO",
-        width: 60,
+        width: 50,
         align: "center",
         render: (text, object, index) => index + 1,
       },
       {
         title: "PRIMARY",
         dataIndex: "primaryFlag",
-        width: 150,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "primaryFlag",
@@ -523,7 +490,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "CONTACT NAME",
         dataIndex: "contactName",
-        width: 250,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "contactName",
@@ -536,7 +503,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "JOB",
         dataIndex: "jobName",
-        width: 150,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "jobName",
@@ -549,7 +516,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "POSITION",
         dataIndex: "positionName",
-        width: 150,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "positionName",
@@ -562,7 +529,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "CONTACT ADDRESS",
         dataIndex: "contactAddress",
-        width: 350,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "contactAddress",
@@ -673,107 +640,24 @@ const AccountContact = ({ id, idCustomer, type }) => {
     ];
   }
 
-  const itemActions = [
-    //action toolbar
-    {
-      action: 'Create',
-      render: (
-        <ButtonComponent
-          onClick={() => {
-            setOpenModalContact(true)
-            setTypeContact('default')
-          }}
-          icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-          type="submit"
-        >
-          Create Contact
-        </ButtonComponent>
-
-      )
+  const itemActions = nxGetAccountActions({
+    handleCreate: () => {
+      setOpenModalContact(true)
+      setTypeContact('default')
     },
-
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => {
-                  setModalDetail(true);
-                  dispatch(getDetailAccountContact(record.accountContactId));
-                }}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
+    handleView: (record) => {
+      setModalDetail(true);
+      dispatch(getDetailAccountContact(record.accountContactId));
     },
-
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip title="Update">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconEdit"
-                color={record?.status === 'INACTIVE' ? "#8D91A0" : "#ACC424"}
-                className={record?.status === 'INACTIVE' ? "cursor-not-allowed" : undefined}
-                width={24}
-                onClick={record?.status === 'INACTIVE' ? null : () => {
-                  setOpenModalContact(true)
-                  dispatch(getDetailAccountContact(record.accountContactId));
-                  setTypeContact('update')
-                }}
-              />
-            </div>
-          </Tooltip>
-          // <ButtonComponent
-          //   onClick={() => {
-          //     setOpenModalContact(true)
-          //     dispatch(getDetailAccountContact(record.accountContactId));
-          //     setTypeContact('update')
-          //   }}
-          //   icon={<SVGIcon name="IconEdit" width={24}
-          //     color={record?.status === 'INACTIVE' ? "#8D91A0" : "#ACC424"}
-          //   />}
-          //   border={false}
-          //   disabled={record?.status === 'INACTIVE'}
-          // />
-
-        )
-      }
+    handleUpdate: (record) => {
+      setOpenModalContact(true)
+      dispatch(getDetailAccountContact(record.accountContactId));
+      setTypeContact('update')
     },
-
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div className="pt-1">
-              <Checkbox
-                onClick={() => {
-                  handleActiveOrInactive(record);
-                }}
-                checked={record.status === "ACTIVE" ? false : true}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
+    handleInactivate: (record) => {
+      handleActiveOrInactive(record);
     }
-  ]
-
+  })
 
   const handleSaveContact = useCallback(async (formValue, tableData) => {
     try {
@@ -990,7 +874,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
   return (
     <>
       <Spin spinning={loading}>
-        <BaseContainer header={"ACCOUNT CONTACT LIST"}>
+        <NxCardContainer header={"ACCOUNT CONTACT LIST"}>
           <div className="flex w-full justify-end gap-3 mb-5">
             <ToolbarAccount items={itemActions} advancedAccess={access_account} />
           </div>
@@ -1013,7 +897,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
                   access_account
                 ),
               ]}
-              expandable={{ expandedRowRender }}
+              expandable={{ expandedRowRender: dataTable?.length ? (record) => <ContactDetailTable contactDetails={record?.contactDetails} /> : undefined } }
               totalData={data?.page?.totalElements}
               usePagination={false}
               useInfiniteScroll={true}
@@ -1024,7 +908,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
               tableScrolled={{ y: 400, x: "max-content" }}
             />
           </div>
-        </BaseContainer>
+        </NxCardContainer>
       </Spin>
 
       {/* Modal Update */}
