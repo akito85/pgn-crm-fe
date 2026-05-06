@@ -145,24 +145,12 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Gas Deposit Stand Alone
   VIEW_GAS_DEPOSIT_SA_PAGE: <GasDeposit moduleType="sa" />,
   VIEW_DETAIL_GAS_DEPOSIT_SA_PAGE: <GasDepositDetail moduleType="sa" />,
-  RECALCULATE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="recalculate" />,
-  EXPIRE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="expire" />,
-  BULK_RECALCULATE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="recalculate" isBulk />,
-  BULK_EXPIRE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="expire" isBulk />,
   
   // Gas Deposit Account Standard
   VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail moduleType="ua" accountType="standard" />,
-  RECALCULATE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="standard" />,
-  EXPIRE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="standard" />,
-  BULK_RECALCULATE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="standard" isBulk />,
-  BULK_EXPIRE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="standard" isBulk />,
 
   // Gas Deposit Account One Time
   VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail moduleType="ua" accountType="oneTime" />,
-  RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="oneTime" />,
-  EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="oneTime" />,
-  BULK_RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="oneTime" isBulk />,
-  BULK_EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="oneTime" isBulk />,
 
   // Multi Destination Account Standard
   VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetail accountType="standard" />,

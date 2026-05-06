@@ -202,55 +202,11 @@ const GasDepositTable = ({
         }
       }
     ),
-    handleRecalculate: ({ id, objectAccountId: recordAccountId, customerId: recordCustomerId }) => navigate(
-      isStandAlone ?
-        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_SA :
-      isStandard ?
-        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT :
-      isOneTime ?
-        ACCOUNT_MANAGEMENT_ROUTES.RECALCULATE_GAS_DEPOSIT_ONETIME :
-        "",
-      {
-        state: {
-          accountId: isUnderAccount ? accountId : isUnderAccount ? recordAccountId : undefined,
-          customerId: isUnderAccount ? customerId : isUnderAccount ? recordCustomerId : undefined,
-          id,
-        }
-      }
-    ),
-    handleExpire: ({ id, objectAccountId: recordAccountId, customerId: recordCustomerId }) => navigate(
-      isStandAlone ?
-        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_SA :
-      isStandard ?
-        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT :
-      isOneTime ?
-        ACCOUNT_MANAGEMENT_ROUTES.EXPIRE_GAS_DEPOSIT_ONETIME :
-        "",
-      {
-        state: {
-          accountId: isUnderAccount ? accountId : isUnderAccount ? recordAccountId : undefined,
-          customerId: isUnderAccount ? customerId : isUnderAccount ? recordCustomerId : undefined,
-          id,
-        }
-      }
-    ),
-    handleBulkRecalculate: () => navigate(
-      isStandAlone ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT_SA :
-      isStandard   ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT :
-      isOneTime    ? ACCOUNT_MANAGEMENT_ROUTES.BULK_RECALCULATE_GAS_DEPOSIT_ONETIME : "",
-      { state: { accountId, customerId } }
-    ),
-    handleBulkExpire: () => navigate(
-      isStandAlone ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT_SA :
-      isStandard   ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT :
-      isOneTime    ? ACCOUNT_MANAGEMENT_ROUTES.BULK_EXPIRE_GAS_DEPOSIT_ONETIME : "",
-      { state: { accountId, customerId } }
-    ),
     handleApproval,
     handleDownload,
   });
 
-  const actionCols = useColumnActionPermission(["View", "Recalculate", "Expire"], itemActions, "View", "table").map(
+  const actionCols = useColumnActionPermission(["View"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
@@ -290,7 +246,7 @@ const GasDepositTable = ({
         dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 3000 }}
+        tableScrolled={{ x: "max-content" }}
         onSort={onSort}
         columns={columns}
         usePagination={false}
