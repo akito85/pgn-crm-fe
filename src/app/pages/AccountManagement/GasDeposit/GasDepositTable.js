@@ -275,12 +275,12 @@ const GasDepositTable = ({
    * Renders the expanded child row for a gas deposit record.
    * @param {object} record - The parent gas deposit row record
    */
-  const expandedRowRender = dataSource.length ? (record, index) => (
+  const expandedRowRender = (record, index) => (
     <GasDepositDetailTable
       id={record.id}
       index={index}
     />
-  ) : undefined;
+  );
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -299,7 +299,7 @@ const GasDepositTable = ({
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
         loading={loading}
-        expandable={{ expandedRowRender }}
+        expandable={{ expandedRowRender: dataSource.length ? expandedRowRender : undefined }}
       />
     </div>
   );
