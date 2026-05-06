@@ -8,7 +8,7 @@ import {
   getRelationshipApprovalHierarchies,
   getRelationshipApprovalHierarchy,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
+import NxActivateInactivateModal from "../../../../../../components/Nx/NxActivateInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
@@ -158,7 +158,7 @@ const Relationship = ({
         />
 
         {/* Inactivate Modal */}
-        <NxInactivateModal
+        <NxActivateInactivateModal
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
