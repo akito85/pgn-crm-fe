@@ -14,7 +14,6 @@ import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
  * @param {Function}        params.handleSearch           - Callback invoked when a search/filter is confirmed.
  * @param {boolean}         [params.isApproval=false]     - When true, fixes the NO column left and shows the statusApproval column.
  * @param {boolean}         [params.includeStatus=true]   - When false, hide the status and statusApproval columns.
- * @param {boolean}         [params.isUnderAccount=false] - When true, omits the accountNumber and accountName columns.
  * @param {boolean}         [params.isFrontEnd=false]     - When true, uses client-side search/filter props.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
@@ -26,7 +25,6 @@ const getGasDepositColumns = ({
   handleSearch,
   isApproval = false,
   includeStatus = true,
-  isUnderAccount = false,
   isFrontEnd = false,
 }) => [
   {
@@ -37,37 +35,6 @@ const getGasDepositColumns = ({
     width: 50,
     fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
-  },
-  !isUnderAccount && {
-    key: "accountNumber",
-    title: "ACCOUNT NUMBER",
-    dataIndex: "accountNumber",
-    width: 200,
-    sorter: true,
-    align: "right ",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "accountNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  !isUnderAccount && {
-    key: "accountName",
-    title: "ACCOUNT NAME",
-    dataIndex: "accountName",
-    width: 200,
-    sorter: true,
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "accountName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
   },
   {
     key: "earnPeriodStart",

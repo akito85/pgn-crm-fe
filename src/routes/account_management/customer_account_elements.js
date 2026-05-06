@@ -142,10 +142,10 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPLOAD_GAS_SOURCE: <UploadGasSource />,
   
   // Gas Deposit Account Standard
-  VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail moduleType="ua" accountType="standard" />,
+  VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail accountType="standard" />,
 
   // Gas Deposit Account One Time
-  VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail moduleType="ua" accountType="oneTime" />,
+  VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail accountType="oneTime" />,
 
   // Multi Destination Account Standard
   VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetail accountType="standard" />,

@@ -15,7 +15,6 @@ import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/acc
  * Tracks expand state in `openedMemo` to skip redundant detail fetches on re-expand.
  *
  * @param {{
- *   moduleType: "sa" | "ua";
  *   handleApproval?: (show: boolean) => void;
  *   accountId?: number;
  *   customerId?: number;
@@ -23,7 +22,6 @@ import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/acc
  * }} props
  */
 const GasDepositTable = ({
-  moduleType,
   handleApproval = () => {},
   accountId,
   customerId,
@@ -40,9 +38,6 @@ const GasDepositTable = ({
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
-  const isStandAlone = moduleType === "sa";
-  const isUnderAccount = moduleType === "ua";
-
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
@@ -76,7 +71,7 @@ const GasDepositTable = ({
 
     dispatch(
       getGasDeposits({
-        accountId: isUnderAccount ? accountId : undefined,
+        accountId,
         body,
         isLoadMore: false,
       })
@@ -135,7 +130,7 @@ const GasDepositTable = ({
 
       await dispatch(
         getGasDeposits({
-          accountId: isUnderAccount ? accountId : undefined,
+          accountId,
           body,
           isLoadMore: true,
         })
@@ -175,7 +170,7 @@ const GasDepositTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDeposits({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDeposits({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
@@ -219,7 +214,6 @@ const GasDepositTable = ({
       searchedColumn,
       searchText,
       handleSearch,
-      isUnderAccount,
     }),
   [search, searchInput, searchText, searchedColumn]);
 

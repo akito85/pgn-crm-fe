@@ -23,9 +23,9 @@ import NxDate from "../../../../components/Nx/NxDatePicker";
  * Recalculate/Expire History tab. Supports standalone ("sa") and under-account
  * ("ua") contexts; account sub-type is inferred from the URL. Wrapped with `React.memo`.
  *
- * @param {{ moduleType: "sa" | "ua"; accountId?: number; customerId?: number }} props
+ * @param {{ accountId?: number; customerId?: number }} props
  */
-const GasDeposit = ({ moduleType, accountId, customerId }) => {
+const GasDeposit = ({ accountId, customerId }) => {
   // --- Hooks ---
   const location = useLocation();
   const dispatch = useDispatch();
@@ -43,10 +43,8 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
   // --- Derived values ---
-  const isStandAlone = moduleType === "sa";
-  const isUnderAccount = moduleType === "ua";
-  const isStandard = isUnderAccount && location.pathname.includes("account-standard");
-  const isOneTime = isUnderAccount && location.pathname.includes("account-onetime");
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
   const {
     period,
@@ -85,9 +83,7 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
   // Resolve the route-based path and fetch the user's granted access permissions.
   useEffect(() => {
     let path;
-    if (isStandAlone)
-      path = "/account-management/gas-deposit";
-    else if (isStandard)
+    if (isStandard)
       path = "/account-management/account-standard/gas-deposit";
     else if (isOneTime)
       path = "/account-management/account-onetime/gas-deposit";
@@ -104,7 +100,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
         <>
           <NxBaseContainer border>
             <GasDepositTable
-              moduleType={moduleType}
               accountId={accountId}
               customerId={customerId}
               handleApproval={setShowApprovalModal}
@@ -115,7 +110,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
           <GasDepositApprovalModal
             accountId={accountId}
             isOpen={showApprovalModal}
-            isUnderAccount={isUnderAccount}
             handleCancel={() => setShowApprovalModal(false)}
             afterFinish={triggerRefresh}
           />
@@ -133,7 +127,6 @@ const GasDeposit = ({ moduleType, accountId, customerId }) => {
               customerId={customerId}
               handleApprovalHistoryModal={handleApprovalHistoryModal}
               refreshSignal={refreshSignal}
-              moduleType={moduleType}
             />
           </NxBaseContainer>
 

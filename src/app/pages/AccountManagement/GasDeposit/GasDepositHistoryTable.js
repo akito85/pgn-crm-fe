@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 
 const GasDepositHistoryTable = ({
-  moduleType,
   handleApprovalHistoryModal,
   accountId,
   customerId,
@@ -27,9 +26,6 @@ const GasDepositHistoryTable = ({
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
-  const isStandAlone = moduleType === "sa";
-  const isUnderAccount = moduleType === "ua";
-
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
@@ -63,7 +59,7 @@ const GasDepositHistoryTable = ({
 
     dispatch(
       getGasDepositHistories({
-        accountId: isUnderAccount ? accountId : undefined,
+        accountId,
         body,
         isLoadMore: false,
       })
@@ -122,7 +118,7 @@ const GasDepositHistoryTable = ({
 
       await dispatch(
         getGasDepositHistories({
-          accountId: isUnderAccount ? accountId : undefined,
+          accountId,
           body,
           isLoadMore: true,
         })
@@ -162,7 +158,7 @@ const GasDepositHistoryTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDepositHistories({ accountId: isUnderAccount ? accountId : undefined, body, isLoadMore: false }));
+    const promise = dispatch(getGasDepositHistories({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 

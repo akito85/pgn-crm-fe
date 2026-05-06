@@ -34,10 +34,9 @@ import SVGIcon from "../../../../../assets/Icon/index";
  * Fetches original and draft records, supports approve/reject workflow.
  *
  * @param {object}                    props
- * @param {"sa"|"ua"}                 props.moduleType   - Module context: standalone ("sa") or under-account ("ua")
  * @param {"standard"|"oneTime"}      [props.accountType] - Account type (only relevant when moduleType is "ua")
  */
-const GasDepositDetail = ({ moduleType, accountType }) => {
+const GasDepositDetail = ({ accountType }) => {
   // --- Hooks ---
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,10 +45,8 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
   const { loading, loadingAccount } = useSelector((state) => state.customerAccount);
 
   // --- Derived values ---
-  const isStandAlone = moduleType === "sa";
-  const isUnderAccount = moduleType === "ua";
-  const isStandard = isUnderAccount && accountType === "standard";
-  const isOneTime = isUnderAccount && accountType === "oneTime";
+  const isStandard = accountType === "standard";
+  const isOneTime = accountType === "oneTime";
   const isLoading = loading || loadingAccount;
   const accountId = location.state?.accountId;
   const customerId = location.state?.customerId;
@@ -101,15 +98,13 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
           : isOneTime
             ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
             : "",
-      breadcrumbName: isStandAlone
-        ? "Gas Deposit"
-        : isStandard
+      breadcrumbName: isStandard
           ? "Account - Standard"
           : isOneTime
             ? "Account - One Time"
             : ""
     },
-    isUnderAccount && {
+    {
       path: isStandard
         ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
         : isOneTime
@@ -214,22 +209,18 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
 
   // --- Effects ---
   useEffect(() => {
-    if (isStandAlone)
-      dispatch(getGrantedAccessAccount("/account-management/gas-deposit"));
-    else if (isUnderAccount) {
-      if (isStandard)
-        dispatch(
-          getGrantedAccessAccount(
-            "/account-management/account-standard/gas-deposit"
-          )
-        );
-      else if (isOneTime)
-        dispatch(
-          getGrantedAccessAccount(
-            "/account-management/account-onetime/gas-deposit"
-          )
-        );
-    }
+    if (isStandard)
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-standard/gas-deposit"
+        )
+      );
+    else if (isOneTime)
+      dispatch(
+        getGrantedAccessAccount(
+          "/account-management/account-onetime/gas-deposit"
+        )
+      );
   }, [dispatch]);
 
   useEffect(() => {
@@ -247,15 +238,13 @@ const GasDepositDetail = ({ moduleType, accountType }) => {
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
-          {isUnderAccount && (
-            <HeaderDetail
-              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-              dispatch={dispatch}
-              idAccount={accountId}
-              idCustomer={customerId}
-              type={accountType}
-            />
-          )}
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            idAccount={accountId}
+            idCustomer={customerId}
+            type={accountType}
+          />
           {draftExist && (
             <NxBaseContainer border padding={false}>
               <NxTabs
