@@ -4,6 +4,7 @@ import { Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import { getSrAttachments } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
@@ -72,21 +73,23 @@ const CustomerServiceRequestDetailAttch = ({
   const items = Array.isArray(list_srAttachments) ? list_srAttachments : [];
 
   return (
-    <NxTable
-      idTable="sr-attachment-table"
-      dataSource={items.map((item, i) => ({ ...item, key: item.id ?? i }))}
-      columns={COLUMNS}
-      usePagination={false}
-      useInfiniteScroll={true}
-      hasMore={false}
-      showAdvanceSearch={false}
-      showSearchBar={false}
-      fontSize="small"
-      tablePadding="small"
-      tableScrolled={{ x: "max-content" }}
-      loading={loading_listSrAttachments}
-      onSort={onSort}
-    />
+    <NxBaseContainer border>
+      <NxTable
+        idTable="sr-attachment-table"
+        dataSource={items.map((item, i) => ({ ...item, key: item.id ?? i }))}
+        columns={COLUMNS}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        fontSize="small"
+        tablePadding="small"
+        tableScrolled={{ x: "max-content" }}
+        loading={loading_listSrAttachments}
+        onSort={onSort}
+      />
+    </NxBaseContainer>
   );
 };
 
