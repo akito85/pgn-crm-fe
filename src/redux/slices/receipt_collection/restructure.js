@@ -5,6 +5,11 @@ import {
     setBodyError,
 } from "../general_slice";
 
+const sanitizeSearchInput = (input) => {
+    if (typeof input !== 'string') return '';
+    return input.replace(/[<>"'&;]/g, '').replace(/--/g, '');
+};
+
 const initialState = {
     data: [],
     listCustomer: [],
@@ -30,17 +35,25 @@ const initialState = {
     restructureSources: [],
     restructureContacts: [],
     allContacts: [],
+    rePlanReasons: [],
 };
 
 export const getListCustomerRestructure = createAsyncThunk(
     "GET_LIST_CUSTOMER_RESTRUCTURE",
     async (search, thunkAPI) => {
         try {
-            const params = search ? `?search=${encodeURIComponent(search)}` : "";
+            const sanitizedSearch = sanitizeSearchInput(search);
+            const params = sanitizedSearch ? `?search=${encodeURIComponent(sanitizedSearch)}` : "";
             const url = `/v1/dbs/api/restructure/get-list-customer${params}`;
             const response = await receiptCollectionHttpService.getAll(url);
             return response?.data?.result || [];
         } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+            }
             return thunkAPI.rejectWithValue(error);
         }
     }
@@ -57,6 +70,12 @@ export const getBadDebtByAccount = createAsyncThunk(
             const total = list.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
             return { list, total };
         } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+            }
             return thunkAPI.rejectWithValue(error);
         }
     }
@@ -71,6 +90,12 @@ export const getListAccountRestructure = createAsyncThunk(
             const response = await receiptCollectionHttpService.getAll(url);
             return response?.data?.result || [];
         } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+            }
             return thunkAPI.rejectWithValue(error);
         }
     }
@@ -80,7 +105,7 @@ export const getAllRestructureListPaginate = createAsyncThunk(
     "GET_ALL_RESTRUCTURE_LIST_PAGINATE",
     async ({ page, pageSize, search, sort }, thunkAPI) => {
         try {
-            const searchParams = search === undefined ? "" : search;
+            const searchParams = sanitizeSearchInput(search === undefined ? "" : search);
             const sortValue = sort === undefined || sort === "" ? "id~desc" : sort;
             const url = `/v1/dbs/api/restructure/get-list?page=${page}&pageSize=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
@@ -381,6 +406,19 @@ export const getRestructureSources = createAsyncThunk(
     }
 );
 
+export const getRePlanReasons = createAsyncThunk(
+    "GET_REPLAN_REASONS",
+    async (_, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/restructure/get-reasons";
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
 export const getContactsByAccount = createAsyncThunk(
     "GET_CONTACTS_BY_ACCOUNT",
     async (accountNumber, thunkAPI) => {
@@ -411,18 +449,22 @@ export const downloadListRestructure = createAsyncThunk(
     "DOWNLOAD_LIST_RESTRUCTURE",
     async ({ search, sort }, thunkAPI) => {
         try {
-            const params = new URLSearchParams();
-            if (search) params.append("searchs", typeof search === "string" ? search : JSON.stringify(search));
-            if (sort) params.append("sort", sort);
-            const url = `/v1/dbs/api/restructure/download-list?${params.toString()}`;
+            const searchParams = sanitizeSearchInput(search === undefined ? "" : search);
+            const sortValue = sort === undefined || sort === "" ? "id~desc" : sort;
+            const url = `/v1/dbs/api/restructure/download-list?searchs=${searchParams}&sort=${sortValue}`;
             const response = await receiptCollectionHttpService.downloadXlsx(
                 url,
                 "restructure_list",
             );
             return response;
         } catch (error) {
-            thunkAPI.dispatch(setBodyError(error));
-            return error;
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+                thunkAPI.dispatch(setBodyError(error));
+            } else {
+                thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+            }
+            return thunkAPI.rejectWithValue(error);
         }
     }
 );
@@ -490,6 +532,22 @@ export const deleteRestructure = createAsyncThunk(
     }
 );
 
+export const cancelRestructure = createAsyncThunk(
+    "CANCEL_RESTRUCTURE",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/cancel/${id}`;
+            const response = await receiptCollectionHttpService.updateData(url);
+            return response?.data;
+        } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = { title: "Failed", description: `${message}` };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
 const restructureSlice = createSlice({
     name: "restructure",
     initialState,
@@ -510,8 +568,8 @@ const restructureSlice = createSlice({
         [getDetailRestructure.fulfilled]: (state, action) => {
             state.loading = false;
             state.data_detail = action.payload;
-            state.badDebtList = action.payload?.badDebtList || [];
-            state.totalBadDebt = (action.payload?.badDebtList || []).reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
+            state.badDebtList = action.payload?.data?.badDebtList || action.payload?.badDebtList || [];
+            state.totalBadDebt = (state.badDebtList).reduce((acc, curr) => acc + (curr.totalAmount || curr.amount || 0), 0);
         },
         [getDetailRestructure.rejected]: (state) => {
             state.loading = false;
@@ -700,6 +758,10 @@ const restructureSlice = createSlice({
         // Sources
         [getRestructureSources.fulfilled]: (state, action) => {
             state.restructureSources = action.payload;
+        },
+        // Reasons
+        [getRePlanReasons.fulfilled]: (state, action) => {
+            state.rePlanReasons = action.payload;
         },
         // Contacts
         [getContactsByAccount.pending]: (state) => {

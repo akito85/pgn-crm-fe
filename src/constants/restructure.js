@@ -70,9 +70,36 @@ export const CUSTOMER_STATUS = {
   INACTIVE: "INACTIVE",
 };
 
+// ─── Status Types ────────────────────────────────────────────────────────────
+export const STATUS_TYPES = {
+  DRAFT: "DRAFT",
+  REJECTED: "REJECTED",
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+};
+
+// ─── Sort Order ──────────────────────────────────────────────────────────────
+export const SORT_ORDER = {
+  ASCEND: "ascend",
+  ASC: "asc",
+  DESC: "desc",
+};
+
 // ─── Mandatory Attachments ───────────────────────────────────────────────────
-export const RESTRUCTURE_MANDATORY_ATTACHMENTS = [
-  "KTP",
-  "Surat Permohonan",
-  "Kartu Profil Pelanggan",
-];
+export const getMandatoryAttachments = (segment) => {
+  if (segment === "KI") {
+    return [
+      "KTP",
+      "Surat Permohonan",
+      "Akta Penunjukan",
+      "Surat Kuasa (Optional)",
+      "Surat Tugas (Optional)",
+      "Kartu Profil Pelanggan",
+    ];
+  }
+  return [
+    "KTP",
+    "Surat Permohonan",
+    "Kartu Profil Pelanggan",
+  ];
+};

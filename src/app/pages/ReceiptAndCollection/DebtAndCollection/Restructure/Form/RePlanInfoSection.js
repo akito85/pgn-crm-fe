@@ -5,19 +5,20 @@ import CardContainerNoBorder from "../../../../../../components/CardContainerNoB
 import InputComponent from "../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../components/DateComponent";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
-import { getRestructureTypes, getRestructureSources } from "../../../../../../redux/slices/receipt_collection/restructure";
+import { getRestructureTypes, getRestructureSources, getRePlanReasons } from "../../../../../../redux/slices/receipt_collection/restructure";
 import { CUSTOMER_STATUS } from "../../../../../../constants/restructure";
 
 const { TextArea } = Input;
 
-const PaymentPlanInfoSection = ({ form, onPlanInfoChange }) => {
+const RePlanInfoSection = ({ form, onPlanInfoChange }) => {
   const dispatch = useDispatch();
-  const { restructureTypes, restructureSources } = useSelector((state) => state.restructure);
+  const { restructureTypes, restructureSources, rePlanReasons } = useSelector((state) => state.restructure);
   const [localPlan, setLocalPlan] = React.useState({ type: null, tenor: null, startPeriod: null });
 
   useEffect(() => {
     dispatch(getRestructureTypes());
     dispatch(getRestructureSources());
+    dispatch(getRePlanReasons());
   }, [dispatch]);
 
   useEffect(() => {
@@ -73,11 +74,18 @@ const PaymentPlanInfoSection = ({ form, onPlanInfoChange }) => {
 
   const typeOptions = restructureTypes?.map(t => ({ label: t.value, value: t.key })) || [];
   const sourceOptions = restructureSources?.map(s => ({ label: s.value, value: s.key })) || [];
+  
+  const reasonOptions = rePlanReasons?.map(r => ({ label: r.value, value: r.key })) || [];
 
   return (
-    <CardContainerNoBorder header="PAYMENT PLAN INFORMATION" collapsible={true}>
+    <CardContainerNoBorder header="RE-PLAN INFORMATION" collapsible={true}>
       <SubSectionCard>
         <Row gutter={[16, 16]}>
+          <Col style={{ width: "20%" }}>
+              <Form.Item name="saNumber" label="Reference Number" rules={[{ required: true }]}>
+                  <Input placeholder="Reference Number" disabled={true} />
+              </Form.Item>
+          </Col>
           <Col style={{ width: "20%" }}>
               <Form.Item name="type" label="Type" rules={[{ required: true }]}>
                   <Select
@@ -117,7 +125,7 @@ const PaymentPlanInfoSection = ({ form, onPlanInfoChange }) => {
               </Form.Item>
           </Col>
           <Col style={{ width: "20%" }}>
-              <Form.Item name="source" label="Source">
+              <Form.Item name="source" label="Source" rules={[{ required: true }]}>
                   <Select
                     placeholder="Select Source"
                     options={sourceOptions}
@@ -125,8 +133,16 @@ const PaymentPlanInfoSection = ({ form, onPlanInfoChange }) => {
               </Form.Item>
           </Col>
           <Col style={{ width: "20%" }}>
-              <Form.Item name="requestDate" label="Request Date">
+              <Form.Item name="requestDate" label="Request Date" rules={[{ required: true }]}>
                   <DateComponent placeholder="Select Date" />
+              </Form.Item>
+          </Col>
+          <Col style={{ width: "20%" }}>
+              <Form.Item name="reason" label="Reason" rules={[{ required: true }]}>
+                  <Select
+                    placeholder="Select Reason"
+                    options={reasonOptions}
+                  />
               </Form.Item>
           </Col>
 
@@ -141,4 +157,4 @@ const PaymentPlanInfoSection = ({ form, onPlanInfoChange }) => {
   );
 };
 
-export default PaymentPlanInfoSection;
+export default RePlanInfoSection;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { InputNumber, message } from "antd";
+import { InputNumber } from "antd";
 import CardContainerNoBorder from "../../../../../../components/CardContainerNoBorder";
 import TableRBI from "../../../../../../components/TableRBI";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
@@ -10,7 +10,11 @@ const formatMonth = (dayjsObj, offset) => {
   return dayjsObj.add(offset, "month").format("MMM YYYY");
 };
 
-const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange, onInstallmentsChange }) => {
+const formatDueDate = (dayjsObj, offset) => {
+  return dayjsObj.add(offset, "month").date(25).format("DD/MM/YYYY");
+};
+
+const RePlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange, onInstallmentsChange }) => {
   const { data_detail } = useSelector((state) => state.restructure);
   const { type, tenor, startPeriod } = planInfo;
   const isAutomatic = type && (String(type).toUpperCase() === PAYMENT_PLAN_TYPES.AUTOMATIC_KEY || String(type) === PAYMENT_PLAN_TYPES.AUTOMATIC);
@@ -78,6 +82,7 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
           key: generated[cur].length + 1,
           periode: c.periode || c.period,
           amount: String(c.amount || 0),
+          dueDate: c.dueDate || c.due_date || "",
           currency: cur,
         });
       });
@@ -117,6 +122,7 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
           key: i + 1,
           periode: formatMonth(startPeriod, i),
           amount: isIdr ? amount.toString() : amount.toFixed(2),
+          dueDate: formatDueDate(startPeriod, i),
           currency,
         };
       });
@@ -145,7 +151,7 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
       align: "center",
       render: (_, __, i) => i + 1,
     },
-    { title: "PERIODE", dataIndex: "periode" },
+    { title: "PERIOD", dataIndex: "periode" },
     {
       title: "TOTAL AMOUNT",
       dataIndex: "amount",
@@ -197,14 +203,15 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
         );
       },
     },
+    { title: "DUE DATE", dataIndex: "dueDate" },
   ];
 
   if (!tenor || !startPeriod) {
     return (
-      <CardContainerNoBorder header="PAYMENT PLAN DETAIL" collapsible={true}>
+      <CardContainerNoBorder header="RE-PLAN DETAIL" collapsible={true}>
         <SubSectionCard>
           <p className="text-gray-400 text-sm text-center py-4">
-            Silakan isi Type, Tenor, dan Start Period pada Payment Plan Information.
+            Silakan isi Type, Tenor, dan Start Period pada Re-Plan Information.
           </p>
         </SubSectionCard>
       </CardContainerNoBorder>
@@ -212,7 +219,7 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
   }
 
   return (
-    <CardContainerNoBorder header="PAYMENT PLAN DETAIL" collapsible={true}>
+    <CardContainerNoBorder header="RE-PLAN DETAIL" collapsible={true}>
       {currencies.map((currency) => {
         const rows = installmentsByCurrency[currency] || [];
         const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
@@ -226,7 +233,7 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
         return (
           <SubSectionCard key={currency} title={`CURRENCY ${currency}`} className="mb-4">
             <TableRBI
-              idTable={`plan-detail-${currency}`}
+              idTable={`replan-detail-${currency}`}
               columns={buildColumns(currency)}
               dataSource={rows}
               usePagination={false}
@@ -254,4 +261,4 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
   );
 };
 
-export default PaymentPlanDetailSection;
+export default RePlanDetailSection;

@@ -13,7 +13,8 @@ import {
     approveOrRejectRestructure,
     getListCategory,
     getAllApprovalList,
-    getListApprovalById
+    getListApprovalById,
+    resetDetail
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -101,6 +102,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const [appHierOptions, setAppHierOptions] = useState([]);
     const [selectedHierarchy, setSelectedHierarchy] = useState(null);
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+    const [localLoading, setLocalLoading] = useState(false);
 
     const [dataHeader, setDataHeader] = useState({});
     const [contacts, setContacts] = useState([]);
@@ -115,25 +117,28 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
 
     useEffect(() => {
         if (id) {
-            if (isEarlyRepayment) {
-                const getEarlyRepaymentDetails = async () => {
-                    try {
+            setLocalLoading(true);
+            dispatch(resetDetail());
+            const fetchData = async () => {
+                try {
+                    if (isEarlyRepayment) {
                         const response = await receiptCollectionHttpService.getDetail(`/v1/dbs/api/early-repayment/by-restructure/${id}`);
                         if (response?.data?.success && response?.data?.data && response?.data?.data.length > 0) {
                             const erId = response.data.data[0].id;
-                            dispatch(getDetailEarlyRepayment(erId));
+                            await dispatch(getDetailEarlyRepayment(erId));
                         }
-                    } catch (e) {
-                        console.log("No early repayment found", e);
+                    } else {
+                        await dispatch(getDetailRestructure(id));
                     }
-                };
-                getEarlyRepaymentDetails();
-            } else {
-                dispatch(getDetailRestructure(id));
-            }
-            
-            dispatch(getAllApprovalList());
-            dispatch(getListCategory());
+                    await dispatch(getAllApprovalList());
+                    await dispatch(getListCategory());
+                } catch (e) {
+                    console.error(e);
+                } finally {
+                    setLocalLoading(false);
+                }
+            };
+            fetchData();
         }
     }, [dispatch, id, isEarlyRepayment]);
 
@@ -365,7 +370,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     };
 
     return (
-        <Spin spinning={loading}>
+        <Spin spinning={localLoading || loading}>
             {!isEmbedded && <BreadCrumb routes={routes} />}
             
             {isEarlyRepayment ? (

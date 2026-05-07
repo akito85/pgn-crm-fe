@@ -75,6 +75,7 @@ import IconSquareCheck from "./IconSquareCheck";
 import IconTripleDot from "./IconTripleDot";
 import IconChevronLeft from "./IconChevronLeft";
 import IconAddTable from "./IconAddTable";
+import IconRePlan from "./IconRePlan";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
@@ -238,6 +239,8 @@ const Icon = (props) => {
       return <IconAddTable {...props} />;
     case "IconEarlyRepayment":
       return <IconEarlyRepayment {...iconProps} />;
+    case "IconRePlan":
+      return <IconRePlan {...iconProps} />;
     default:
       return;
   }

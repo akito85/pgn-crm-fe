@@ -1,11 +1,15 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { EyeOutlined, UnorderedListOutlined, DownloadOutlined } from "@ant-design/icons";
-import { Spin, Tooltip, Alert, message, Input, Popover } from "antd";
+import { EyeOutlined, UnorderedListOutlined, DownloadOutlined, UndoOutlined, CloseOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Spin, Tooltip, Alert, message, Input, Popover, Modal } from "antd";
 import { Link, useNavigate } from "react-router-dom";
+import { debounce } from "lodash";
 
 // Routes
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
+
+// Constants
+import { STATUS_TYPES, SORT_ORDER } from "../../../../../constants/restructure";
 
 // Global Custom Components
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -24,6 +28,7 @@ import { columns as columnRestructure } from "./Columns";
 import {
     getAllRestructureListPaginate,
     deleteRestructure,
+    cancelRestructure,
     getApprovalHistory,
     downloadListRestructure
 } from "../../../../../redux/slices/receipt_collection/restructure";
@@ -111,9 +116,58 @@ const ViewRestructure = () => {
     const onSort = (_, __, sorter) => {
         const dataSort =
             sorter.order !== undefined
-                ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+                ? `${sorter.field}~${sorter.order === SORT_ORDER.ASCEND ? SORT_ORDER.ASC : SORT_ORDER.DESC}`
                 : "";
         setSort(dataSort);
+    };
+
+    const handleGlobalSearch = useCallback(
+        debounce((value) => {
+            setSearchText(value);
+            setSearchedColumn(value ? "all" : "");
+            setSearch((prevState) => {
+                const nextState = { ...prevState };
+                if (value) {
+                    nextState.all = value;
+                } else {
+                    delete nextState.all;
+                }
+                return nextState;
+            });
+            setPage(1);
+        }, 500),
+        []
+    );
+
+    useEffect(() => {
+        return () => {
+            handleGlobalSearch.cancel();
+        };
+    }, [handleGlobalSearch]);
+
+    const handleAdvanceSearch = (searchData) => {
+        const simpleSearch = {};
+        if (searchData?.filters && Array.isArray(searchData.filters)) {
+            searchData.filters.forEach((rule) => {
+                if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+                    simpleSearch[rule.column] = rule.value;
+                }
+            });
+        }
+        if (searchData?.filterRules && Array.isArray(searchData.filterRules)) {
+            searchData.filterRules.forEach((ruleGroup) => {
+                if (Array.isArray(ruleGroup)) {
+                    ruleGroup.forEach((rule) => {
+                        if (rule?.column && rule?.value !== undefined && rule?.value !== null && rule?.value !== "" && rule?.condition) {
+                            const conditionKey = rule.condition === "Equal to" ? "" : rule.condition;
+                            simpleSearch[`${rule.column}${conditionKey}`] = rule.value;
+                        }
+                    });
+                }
+            });
+        }
+        setSearch(simpleSearch);
+        setPage(1);
     };
 
     const handleDownload = () => {
@@ -123,6 +177,27 @@ const ViewRestructure = () => {
                 sort,
             })
         );
+    };
+
+    const handleCancel = (record) => {
+        Modal.confirm({
+            title: "Cancel Payment Plan",
+            icon: <ExclamationCircleOutlined style={{ color: "#BE3036" }} />,
+            content: "Apakah Anda yakin ingin membatalkan (Cancel) Payment Plan ini?",
+            okText: "Ya, Batalkan",
+            okType: "danger",
+            cancelText: "Tidak",
+            onOk() {
+                return dispatch(cancelRestructure(record?.id)).then(() => {
+                    message.success("Payment Plan berhasil dicancel!");
+                    dispatch(getAllRestructureListPaginate({ page: 1, limit: 10 }));
+                });
+            }
+        });
+    };
+
+    const handleRePlan = (record) => {
+        navigate(DEBT_AND_COLLECTION_ROUTES.CREATE_RE_PLAN, { state: { id: record?.id } });
     };
 
 
@@ -178,7 +253,7 @@ const ViewRestructure = () => {
             type: "table",
             render: (record) => {
                 const status = record?.status?.toUpperCase();
-                const disabled = (status !== "DRAFT" && status !== "REJECTED");
+                const disabled = (status !== STATUS_TYPES.DRAFT && status !== STATUS_TYPES.REJECTED);
                 
                 return (
                     <ButtonComponent
@@ -220,6 +295,31 @@ const ViewRestructure = () => {
             },
         },
         {
+            action: "re-plan",
+            type: "table",
+            render: (record) => {
+                const status = record?.status?.toUpperCase();
+                const disabled = (status !== STATUS_TYPES.APPROVED && status !== "ACTIVE");
+                return (
+                    <ButtonComponent
+                        border={false}
+                        className="gap-2 !justify-start hover:bg-gray-100"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!disabled) {
+                                handleRePlan(record);
+                            }
+                        }}
+                        type="text"
+                        disabled={disabled}
+                        icon={<SVGIcon name="IconRePlan" width={16} color={disabled ? "#D3D3D3" : "#000"} />}
+                    >
+                        <span className={disabled ? "text-gray-400" : "text-black"}>Re-Plan</span>
+                    </ButtonComponent>
+                );
+            },
+        },
+        {
             action: "History",
             type: "table",
             render: (record) => {
@@ -236,6 +336,31 @@ const ViewRestructure = () => {
                         icon={<SVGIcon name="IconLogHistory" width={16} color={"#000"} />}
                     >
                         <span className="text-black">Approval History</span>
+                    </ButtonComponent>
+                );
+            },
+        },
+        {
+            action: "Cancel",
+            type: "table",
+            render: (record) => {
+                const status = record?.status?.toUpperCase();
+                const disabled = (status === "CANCELLED" || status === "REJECTED");
+                return (
+                    <ButtonComponent
+                        border={false}
+                        className="gap-2 !justify-start hover:bg-gray-100"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!disabled) {
+                                handleCancel(record);
+                            }
+                        }}
+                        type="text"
+                        disabled={disabled}
+                        icon={<CloseOutlined style={{ fontSize: "16px", color: disabled ? "#D3D3D3" : "#BE3036" }} />}
+                    >
+                        <span className={disabled ? "text-gray-400" : "text-red-500"}>Cancel</span>
                     </ButtonComponent>
                 );
             },
@@ -296,7 +421,11 @@ const ViewRestructure = () => {
     const permissions = accessList?.map(a => a.toLowerCase()) || [];
 
     const actionCols = useMemo(() => {
-        const tableActions = itemActions.filter(item => item.type === "table" && permissions.includes(item.action.toLowerCase()));
+        const tableActions = itemActions.filter(item => item.type === "table" && (
+            permissions.includes(item.action.toLowerCase()) ||
+            item.action.toLowerCase() === "re-plan" ||
+            item.action.toLowerCase() === "cancel"
+        ));
 
         if (tableActions.length === 0) return [];
 
@@ -345,6 +474,17 @@ const ViewRestructure = () => {
         ];
     }, [accessList, itemActions, permissions]);
 
+    const allColumns = useMemo(() => {
+        return [...baseColumns, ...actionCols];
+    }, [baseColumns, actionCols]);
+
+    const columnDefinitions = useMemo(() => {
+        return allColumns.map((col) => ({
+            key: col.key || col.dataIndex || col.title,
+            title: col.title,
+        }));
+    }, [allColumns]);
+
     return (
         <>
             <Spin spinning={loading}>
@@ -363,7 +503,11 @@ const ViewRestructure = () => {
                         dataSource={dataSource}
                         showExport={true}
                         handleDownload={handleDownload}
-                        columns={[...baseColumns, ...actionCols]}
+                        columns={allColumns}
+                        columnDefinitions={columnDefinitions}
+                        showSearchBar={true}
+                        onAdvanceSearch={handleAdvanceSearch}
+                        onSearch={(e) => handleGlobalSearch(e.target.value)}
                         current={page}
                         pageSize={pageSize}
                         onChange={handleChangePage}

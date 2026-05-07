@@ -175,16 +175,6 @@ const UploadRestructureLayout = ({
 
     return (
       <div className="w-full">
-        <div className="flex justify-end mb-4">
-           <ButtonComponent 
-             type="secondary" 
-             border={true}
-             icon={<SVGIcon name="IconDownload" width={16} />}
-             onClick={() => dispatch(getDownloadTemplateRestructure())}
-           >
-             Download Template
-           </ButtonComponent>
-        </div>
         <Spin spinning={loadingUpload}>
           <Dragger {...property}>
             <p className="ant-upload-drag-icon">
