@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import { getSrContacts } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 // ── Expand sub-table (CONTACT DETAIL) ────────────────────────────────────────
 const EXPAND_COLUMNS = [
@@ -93,35 +94,37 @@ const CustomerServiceRequestContact = ({
   const contacts = Array.isArray(list_srContacts) ? list_srContacts : [];
 
   return (
-    <NxTable
-      idTable="sr-contact-table"
-      dataSource={contacts.map((item, i) => ({ ...item, key: item.id ?? i }))}
-      columns={MAIN_COLUMNS}
-      usePagination={false}
-      useInfiniteScroll={true}
-      hasMore={false}
-      showAdvanceSearch={false}
-      showSearchBar={false}
-      fontSize="small"
-      tablePadding="small"
-      tableScrolled={{ x: "max-content" }}
-      loading={loading_listSrContacts}
-      onSort={onSort}
-      expandable={{
-        expandedRowKeys: expandedKeys,
-        onExpand: (isExpanded, record) => {
-          setExpandedKeys(
-            isExpanded
-              ? [...expandedKeys, record.key]
-              : expandedKeys.filter((k) => k !== record.key)
-          );
-        },
-        expandedRowRender: (record) => (
-          <ExpandSubTable details={record.details || []} />
-        ),
-        rowExpandable: () => true,
-      }}
-    />
+    <NxBaseContainer border>
+      <NxTable
+        idTable="sr-contact-table"
+        dataSource={contacts.map((item, i) => ({ ...item, key: item.id ?? i }))}
+        columns={MAIN_COLUMNS}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        fontSize="small"
+        tablePadding="small"
+        tableScrolled={{ x: "max-content" }}
+        loading={loading_listSrContacts}
+        onSort={onSort}
+        expandable={{
+          expandedRowKeys: expandedKeys,
+          onExpand: (isExpanded, record) => {
+            setExpandedKeys(
+              isExpanded
+                ? [...expandedKeys, record.key]
+                : expandedKeys.filter((k) => k !== record.key)
+            );
+          },
+          expandedRowRender: (record) => (
+            <ExpandSubTable details={record.details || []} />
+          ),
+          rowExpandable: () => true,
+        }}
+      />
+    </NxBaseContainer>
   );
 };
 
