@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Spin } from "antd";
+import { Button, Spin } from "antd";
 import {
   CloseOutlined,
   PauseCircleOutlined,
@@ -27,6 +27,8 @@ import {
 
 import HeaderDetail from "../../../HeaderDetail";
 import CustomerServiceRequestDetailTabs from "./CustomerServiceRequestDetailTabs";
+import SVGIcon from "../../../../../../../assets/Icon/index";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 
 // ── Action Log columns ────────────────────────────────────────────────────────
 const LOG_COLUMNS = [
@@ -108,11 +110,11 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   };
 
   const BUTTON_DEF = {
-    CANCELLED:   { label: "Cancel Request",      icon: <CloseOutlined /> },
-    ON_HOLD:     { label: "Mark as On Hold",      icon: <PauseCircleOutlined /> },
-    CLOSED:      { label: "Mark as Closed",       icon: <LockOutlined /> },
-    RESOLVED:    { label: "Mark as Resolved",     icon: <CheckCircleOutlined /> },
-    IN_PROGRESS: { label: "Mark as In Progress",  icon: <PlayCircleOutlined /> },
+    CANCELLED:   "Cancel Request",
+    ON_HOLD:     "Mark as On Hold",
+    CLOSED:      "Mark as Closed",
+    RESOLVED:    "Mark as Resolved",
+    IN_PROGRESS: "Mark as In Progress",
   };
 
   const currentActions = STATUS_ACTIONS[srStatus] || { buttons: [], primary: null };
@@ -120,9 +122,9 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   return (
     <>
       <Spin spinning={isLoading} className="w-full top-20">
-        <BreadCrumb routes={routes} />
+        <div className="flex flex-col gap-4">
+          <NxBreadCrumb routes={routes} />
 
-        <div className="my-5 flex flex-col gap-4">
           {/* Customer & Account Info */}
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
@@ -183,39 +185,35 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
               </div>
             </NxBaseContainer>
           </NxCardContainer>
+
+          <NxBaseContainer border className="mb-5">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                Back
+              </Button>
+
+              {currentActions.buttons.length > 0 && (
+                <div className="flex items-center gap-3 flex-wrap">
+                  {currentActions.buttons.map((key) => {
+                    const def = BUTTON_DEF[key];
+                    const isPrimary = key === currentActions.primary;
+
+                    return (
+                      <Button
+                        key={key}
+                        loading={loading_statusUpdateSr}
+                        onClick={() => handleStatusUpdate(key)}
+                        type={isPrimary ? "submit" : "menu"}
+                      >
+                        {def}
+                      </Button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </NxBaseContainer>
         </div>
-
-        {/* Footer */}
-        <NxBaseContainer border className="mb-5">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <ButtonComponent
-              onClick={() => navigate(-1)}
-              icon={<LeftOutlined />}
-            >
-              Back
-            </ButtonComponent>
-
-            {currentActions.buttons.length > 0 && (
-              <div className="flex items-center gap-3 flex-wrap">
-                {currentActions.buttons.map((key) => {
-                  const def = BUTTON_DEF[key];
-                  const isPrimary = key === currentActions.primary;
-                  return (
-                    <ButtonComponent
-                      key={key}
-                      loading={loading_statusUpdateSr}
-                      onClick={() => handleStatusUpdate(key)}
-                      icon={def.icon}
-                      isPrimary={isPrimary}
-                    >
-                      {def.label}
-                    </ButtonComponent>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </NxBaseContainer>
       </Spin>
     </>
   );
