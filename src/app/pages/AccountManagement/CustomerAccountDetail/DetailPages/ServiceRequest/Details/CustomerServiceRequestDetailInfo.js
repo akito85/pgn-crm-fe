@@ -72,8 +72,6 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
           dataSource={drs.map((item, i) => ({ ...item, key: item.id || i }))}
           columns={DR_COLUMNS}
           usePagination={false}
-          showAdvanceSearch={false}
-          showSearchBar={false}
           fontSize="small"
           tablePadding="small"
           tableScrolled={{ x: "max-content" }}
