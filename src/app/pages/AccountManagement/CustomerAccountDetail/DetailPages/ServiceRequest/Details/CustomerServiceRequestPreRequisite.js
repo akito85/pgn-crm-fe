@@ -4,6 +4,7 @@ import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import { getSrPrerequisites } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 
 const COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
@@ -88,21 +89,23 @@ const CustomerServiceRequestPreRequisite = ({
     : [];
 
   return (
-    <NxTable
-      idTable="sr-prerequisite-table"
-      dataSource={items.map((item, i) => ({ ...item, key: item.id ?? i }))}
-      columns={COLUMNS}
-      usePagination={false}
-      useInfiniteScroll={true}
-      hasMore={false}
-      showAdvanceSearch={false}
-      showSearchBar={false}
-      fontSize="small"
-      tablePadding="small"
-      tableScrolled={{ x: "max-content" }}
-      loading={loading_listSrPrerequisites}
-      onSort={onSort}
-    />
+    <NxBaseContainer border>
+      <NxTable
+        idTable="sr-prerequisite-table"
+        dataSource={items.map((item, i) => ({ ...item, key: item.id ?? i }))}
+        columns={COLUMNS}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        fontSize="small"
+        tablePadding="small"
+        tableScrolled={{ x: "max-content" }}
+        loading={loading_listSrPrerequisites}
+        onSort={onSort}
+      />
+    </NxBaseContainer>
   );
 };
 
