@@ -488,6 +488,13 @@ span.anticon anticon-delete {
   width: 100%;
 }
 
+.ant-popconfirm .ant-popover-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .ant-pagination-item:not(.ant-pagination-item-active),
 .ant-pagination-item-link {
   background: rgb(29.4, 27.5, 36.1, 8%) !important;

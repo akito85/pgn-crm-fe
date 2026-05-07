@@ -30,7 +30,6 @@ import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
 import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
-import FunctionalTableGLAccountInformation from "./Table/FunctionalTableGLAccountInformation";
 import FunctionalTableVAAccount from "./Table/FunctionalTableVAAccount";
 import FunctionalTableVATransaction from "./Table/FunctionalTableVATransaction";
 import FunctionalTableOPAccount from "./Table/FunctionalTableOPAccount";
@@ -60,18 +59,12 @@ const DetailBank = ({
   setSelectedLocationType,
   selectedLocationType,
   navigateToCreatePage = () => {},
-  
-  // --- PROPS BARU UNTUK GL ACCOUNT ---
-  data_glAccount = [] 
-  // -----------------------------------
 }) => {
   const {
     data_modal,
     dataAccountInfoPaging,
     loading,
     dataApprovalHistoryBankAccount,
-    dataGLType,
-    dataGLAccount,
     data_va_category,
     data_nomenklatur1,
     data_nomenklatur2,
@@ -117,11 +110,9 @@ const DetailBank = ({
   const [statusBank, setStatusBank] = useState();
 
   const [listDataCategoryInfoModal, setListDataCategoryInfoModal] = useState([]);
-  const [listDataGLAccountInfoModal, setListDataGLAccountInfoModal] = useState([]);
   const [modalAccountInfoCollapsed, setModalAccountInfoCollapsed] = useState(false);
   const [modalCategoryCollapsed, setModalCategoryCollapsed] = useState(false);
   const [categoryInfoTab, setCategoryInfoTab] = useState("Nomenklatur");
-  const [modalGLAccountCollapsed, setModalGLAccountCollapsed] = useState(false);
   const [modalCriteriaCollapsed, setModalCriteriaCollapsed] = useState(false);
 
   useEffect(() => {
@@ -165,29 +156,6 @@ const DetailBank = ({
       setListDataCriteria(dataCriteriaList);
       setCriteriaValues(mappingCriteria);
 
-      const glTypeOpts = (dataGLType || []).map((t) => ({ value: t.id, label: t.name }));
-      const glAccountOpts = (dataGLAccount || []).map((a) => ({
-        value: a.id,
-        label: a.accountNumber ?? a.name ?? "",
-        description: a.description ?? a.accountDescription ?? a.desc ?? "",
-      }));
-
-      const dataGLList = (
-        data_modal?.accountBankDto?.glAccountDataDtoList || []
-      ).map((item, index) => {
-        const typeLabel = glTypeOpts.find((o) => String(o.value) === String(item.typeId))?.label ?? null;
-        const glAcc = glAccountOpts.find((o) => String(o.value) === String(item.glAccountId));
-        return {
-          id: item.id,
-          key: index + 1,
-          type: item.typeId ? { value: item.typeId, label: typeLabel } : null,
-          glAccountNumber: item.glAccountId ? { value: item.glAccountId, label: glAcc?.label ?? null } : null,
-          glAccountDescription: item.glAccountDescription ?? glAcc?.description ?? "",
-          description: item.description || "",
-        };
-      });
-      setListDataGLAccountInfoModal(dataGLList);
-
       const vaCatOpts = (data_va_category || []).map((c) => ({ value: c.id ?? c.Id, label: c.name ?? c.text ?? "" }));
 
       const billingOpts = (data_billing_item || []).map((b) => ({ value: b.id ?? b.Id, label: b.name ?? b.text ?? "" }));
@@ -224,7 +192,7 @@ const DetailBank = ({
         setCategoryInfoTab("Nomenklatur");
       }
     }
-  }, [id, data_modal, dataGLType, dataGLAccount, data_va_category, data_nomenklatur1, data_nomenklatur2, data_display, data_billing_item]);
+  }, [id, data_modal, data_va_category, data_nomenklatur1, data_nomenklatur2, data_display, data_billing_item]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -355,7 +323,6 @@ const DetailBank = ({
     setIdVA(record);
     setModalAccountInfoCollapsed(false);
     setModalCategoryCollapsed(false);
-    setModalGLAccountCollapsed(false);
     setModalCriteriaCollapsed(false);
     // initial tab is set after data loads via useEffect watching data_modal
     dispatch(getDetailAccountInformation(record));
@@ -417,37 +384,6 @@ const DetailBank = ({
       ),
     },
   ];
-
-  // --- KOLOM UNTUK TABEL GL ACCOUNT ---
-  const columnsGLAccount = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => index + 1,
-    },
-    {
-      title: "GL TYPE",
-      dataIndex: "glType",
-      align: "center",
-      render: (text) => {
-        // Translate ID GL Type jadi Nama
-        const typeName = dataGLType?.find((item) => String(item.id) === String(text))?.name;
-        return typeName || text; 
-      }
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      align: "center",
-    },
-    {
-      title: "ACCOUNT DESCRIPTION",
-      dataIndex: "accountDes",
-      align: "left",
-    }
-  ];
-  // ------------------------------------
 
   const expandedRowRender = (record) => {
     const dataExpanded = record?.contactDetails;
@@ -1181,20 +1117,6 @@ const DetailBank = ({
           </div>
         </BaseContainer>
 
-        {/* --- TAMBAHAN SECTION GL ACCOUNT DI SINI --- */}
-        <BaseContainer header={"GL ACCOUNT INFORMATION"}>
-          <div className="rc-bank-small">
-            <TablePagination
-              useSelect={false}
-              usePagination={false}
-              dataSource={data_glAccount}
-              columns={columnsGLAccount}
-              tableScrolled={{ x: "max-content" }}
-            />
-          </div>
-        </BaseContainer>
-        {/* ------------------------------------------- */}
-
         <BaseContainer header={"BANK ACCOUNT INFORMATION"}>
             <div className="w-full flex justify-end gap-5">
               <NavLink
@@ -1416,28 +1338,6 @@ const DetailBank = ({
                       />
                     )}
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* GL Account Information */}
-            <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
-              <div
-                className="flex justify-between items-center cursor-pointer"
-                onClick={() => setModalGLAccountCollapsed(!modalGLAccountCollapsed)}
-              >
-                <div className="text-primary text-xs font-bold uppercase">GL ACCOUNT INFORMATION</div>
-                <div className="text-primary">
-                  {modalGLAccountCollapsed ? <DownOutlined /> : <UpOutlined />}
-                </div>
-              </div>
-              {!modalGLAccountCollapsed && (
-                <div className="mt-4 rc-bank-small">
-                  <FunctionalTableGLAccountInformation
-                    type="detail"
-                    data={listDataGLAccountInfoModal}
-                    updateData={() => {}}
-                  />
                 </div>
               )}
             </div>
