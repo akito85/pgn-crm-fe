@@ -145,41 +145,43 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
 
           {/* Action Log */}
           <NxCardContainer header="ACTION LOG">
-            <NxTable
-              idTable="action-log-table"
-              dataSource={(Array.isArray(detail_serviceRequest?.actionLog) ? detail_serviceRequest.actionLog : [])
-                .map((item, i) => ({ ...item, key: item.id || i }))}
-              columns={LOG_COLUMNS}
-              usePagination={false}
-              useInfiniteScroll={true}
-              hasMore={false}
-              showAdvanceSearch={false}
-              showSearchBar={false}
-              fontSize="small"
-              tablePadding="small"
-              tableScrolled={{ x: "max-content", y: 300 }}
-            />
+            <NxBaseContainer border>
+              <NxTable
+                idTable="action-log-table"
+                dataSource={(Array.isArray(detail_serviceRequest?.actionLog) ? detail_serviceRequest.actionLog : [])
+                  .map((item, i) => ({ ...item, key: item.id || i }))}
+                columns={LOG_COLUMNS}
+                usePagination={false}
+                useInfiniteScroll={true}
+                hasMore={false}
+                fontSize="small"
+                tablePadding="small"
+                tableScrolled={{ x: "max-content", y: 300 }}
+              />
+            </NxBaseContainer>
           </NxCardContainer>
 
           {/* History Log Information */}
           <NxCardContainer header="HISTORY LOG INFORMATION">
-            <div className="w-full grid grid-cols-5 gap-4">
-              <NxDetailText label="Record ID">
-                {detail_serviceRequest?.historyLog?.recordId || detail_serviceRequest?.id || "-"}
-              </NxDetailText>
-              <NxDetailText label="Created Date">
-                {NxDate.formatDate(detail_serviceRequest?.historyLog?.createdDate || detail_serviceRequest?.createdDate, "DD MMM YYYY HH:mm:ss")}
-              </NxDetailText>
-              <NxDetailText label="Created By">
-                {detail_serviceRequest?.historyLog?.createdBy || detail_serviceRequest?.createdBy || "-"}
-              </NxDetailText>
-              <NxDetailText label="Updated Date">
-                {NxDate.formatDate(detail_serviceRequest?.historyLog?.updatedDate || detail_serviceRequest?.updatedDate, "DD MMM YYYY HH:mm:ss")}
-              </NxDetailText>
-              <NxDetailText label="Updated By">
-                {detail_serviceRequest?.historyLog?.updatedBy || detail_serviceRequest?.updatedBy || "-"}
-              </NxDetailText>
-            </div>
+            <NxBaseContainer border>
+              <div className="w-full grid grid-cols-5 gap-4">
+                <NxDetailText label="Record ID">
+                  {detail_serviceRequest?.historyLog?.recordId || detail_serviceRequest?.id || "-"}
+                </NxDetailText>
+                <NxDetailText label="Created Date">
+                  {NxDate.formatDate(detail_serviceRequest?.historyLog?.createdDate || detail_serviceRequest?.createdDate, "DD MMM YYYY HH:mm:ss")}
+                </NxDetailText>
+                <NxDetailText label="Created By">
+                  {detail_serviceRequest?.historyLog?.createdBy || detail_serviceRequest?.createdBy || "-"}
+                </NxDetailText>
+                <NxDetailText label="Updated Date">
+                  {NxDate.formatDate(detail_serviceRequest?.historyLog?.updatedDate || detail_serviceRequest?.updatedDate, "DD MMM YYYY HH:mm:ss")}
+                </NxDetailText>
+                <NxDetailText label="Updated By">
+                  {detail_serviceRequest?.historyLog?.updatedBy || detail_serviceRequest?.updatedBy || "-"}
+                </NxDetailText>
+              </div>
+            </NxBaseContainer>
           </NxCardContainer>
         </div>
 
